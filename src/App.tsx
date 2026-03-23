@@ -1,0 +1,68 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
+import { OnboardingProvider } from "@/contexts/OnboardingProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PageLoader } from "@/components/PageLoader";
+import { AuthListener } from "@/components/AuthListener";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+const Landing = lazy(() => import("./pages/Landing"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const ProjectView = lazy(() => import("./pages/ProjectView"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+
+export default function App() {
+  return (
+    <HelmetProvider>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AuthListener />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route
+                path="/onboarding/*"
+                element={
+                  <OnboardingProvider>
+                    <Onboarding />
+                  </OnboardingProvider>
+                }
+              />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard/*"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/project/:token" element={<ProjectView />} />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ErrorBoundary>
+    </HelmetProvider>
+  );
+}

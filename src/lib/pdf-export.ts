@@ -1,0 +1,322 @@
+/**
+ * Client-side PDF export for the property ledger / seller packet.
+ * Generates a printable record of home improvements for buyers and agents.
+ */
+
+import { jsPDF } from "jspdf";
+
+type ScopeItem = {
+  category: string;
+  description: string;
+  total_cost_min: number | null;
+  total_cost_max: number | null;
+};
+
+type InvoiceItem = {
+  vendor_name: string | null;
+  total: number | null;
+  created_at: string;
+  document_type?: string | null;
+};
+
+type ProjectInfo = {
+  name: string;
+  estimated_min_total: number | null;
+  estimated_max_total: number | null;
+};
+
+const FONT_SIZE = 10;
+const HEADING_SIZE = 14;
+const TITLE_SIZE = 18;
+const MARGIN = 20;
+const LINE_HEIGHT = 6;
+
+function money(n: number | null): string {
+  if (n == null) return "—";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
+function moneyRange(min: number | null, max: number | null): string {
+  if (min != null && max != null) return `${money(min)} – ${money(max)}`;
+  if (min != null) return money(min);
+  return "—";
+}
+
+function formatDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+export function generateSellerPacketPDF(
+  project: ProjectInfo,
+  scopeItems: ScopeItem[],
+  invoices: InvoiceItem[]
+): void {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  let y = MARGIN;
+
+  const capitalTotal = invoices
+    .filter((i) => {
+      const t = (i.document_type ?? "invoice").toLowerCase();
+      return t === "invoice" || t === "quote";
+    })
+    .reduce((s, i) => s + (i.total ?? 0), 0);
+
+  const maintenanceTotal = invoices
+    .filter((i) => {
+      const t = (i.document_type ?? "").toLowerCase();
+      return t === "warranty" || t === "permit";
+    })
+    .reduce((s, i) => s + (i.total ?? 0), 0);
+
+  const addPageIfNeeded = (needed: number) => {
+    if (y + needed > doc.internal.pageSize.height - MARGIN) {
+      doc.addPage();
+      y = MARGIN;
+    }
+  };
+
+  // Title
+  doc.setFontSize(TITLE_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Property Improvement Ledger", MARGIN, y);
+  y += LINE_HEIGHT * 2;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Project: ${project.name}`, MARGIN, y);
+  y += LINE_HEIGHT;
+  doc.text(`Generated: ${formatDate(new Date().toISOString())}`, MARGIN, y);
+  y += LINE_HEIGHT * 2;
+
+  // Estimate summary
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Estimated Scope", MARGIN, y);
+  y += LINE_HEIGHT * 1.5;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `Total estimate: ${moneyRange(project.estimated_min_total, project.estimated_max_total)}`,
+    MARGIN,
+    y
+  );
+  y += LINE_HEIGHT * 1.5;
+
+  if (scopeItems.length > 0) {
+    scopeItems.forEach((s) => {
+      addPageIfNeeded(LINE_HEIGHT * 2);
+      doc.text(
+        `• ${s.category}: ${s.description} — ${moneyRange(s.total_cost_min, s.total_cost_max)}`,
+        MARGIN + 2,
+        y,
+        { maxWidth: 170 }
+      );
+      y += LINE_HEIGHT * 1.2;
+    });
+    y += LINE_HEIGHT;
+  }
+
+  addPageIfNeeded(LINE_HEIGHT * 4);
+
+  // Invoices / actual costs
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Recorded Costs", MARGIN, y);
+  y += LINE_HEIGHT * 1.5;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+
+  if (invoices.length === 0) {
+    doc.text("No invoices or documents recorded yet.", MARGIN, y);
+    y += LINE_HEIGHT * 2;
+  } else {
+    invoices.forEach((inv) => {
+      addPageIfNeeded(LINE_HEIGHT * 2);
+      const type = (inv.document_type ?? "invoice").toString();
+      const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+      doc.text(
+        `${formatDate(inv.created_at)} — ${inv.vendor_name ?? "Vendor"} (${typeLabel}): ${money(inv.total)}`,
+        MARGIN + 2,
+        y,
+        { maxWidth: 170 }
+      );
+      y += LINE_HEIGHT * 1.2;
+    });
+    y += LINE_HEIGHT;
+  }
+
+  addPageIfNeeded(LINE_HEIGHT * 6);
+
+  // Totals
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Summary", MARGIN, y);
+  y += LINE_HEIGHT * 1.5;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Capital improvements (invoices, quotes): ${money(capitalTotal)}`, MARGIN + 2, y);
+  y += LINE_HEIGHT;
+  doc.text(`Maintenance (warranties, permits): ${money(maintenanceTotal)}`, MARGIN + 2, y);
+  y += LINE_HEIGHT * 1.5;
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total recorded: ${money(capitalTotal + maintenanceTotal)}`, MARGIN + 2, y);
+
+  // Footer
+  y = doc.internal.pageSize.height - MARGIN;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(128, 128, 128);
+  doc.text(
+    "Generated by BlueprintAI — Your home's improvement history from plan to sale.",
+    MARGIN,
+    y
+  );
+
+  doc.save(`property-ledger-${project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`);
+}
+
+/**
+ * Generate PDF as Blob for upload to storage.
+ */
+export function generateSellerPacketBlob(
+  project: ProjectInfo,
+  scopeItems: ScopeItem[],
+  invoices: InvoiceItem[]
+): Blob {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  let y = MARGIN;
+
+  const capitalTotal = invoices
+    .filter((i) => {
+      const t = (i.document_type ?? "invoice").toLowerCase();
+      return t === "invoice" || t === "quote";
+    })
+    .reduce((s, i) => s + (i.total ?? 0), 0);
+
+  const maintenanceTotal = invoices
+    .filter((i) => {
+      const t = (i.document_type ?? "").toLowerCase();
+      return t === "warranty" || t === "permit";
+    })
+    .reduce((s, i) => s + (i.total ?? 0), 0);
+
+  const addPageIfNeeded = (needed: number) => {
+    if (y + needed > doc.internal.pageSize.height - MARGIN) {
+      doc.addPage();
+      y = MARGIN;
+    }
+  };
+
+  doc.setFontSize(TITLE_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Property Improvement Ledger", MARGIN, y);
+  y += LINE_HEIGHT * 2;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Project: ${project.name}`, MARGIN, y);
+  y += LINE_HEIGHT;
+  doc.text(`Generated: ${formatDate(new Date().toISOString())}`, MARGIN, y);
+  y += LINE_HEIGHT * 2;
+
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Estimated Scope", MARGIN, y);
+  y += LINE_HEIGHT * 1.5;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `Total estimate: ${moneyRange(project.estimated_min_total, project.estimated_max_total)}`,
+    MARGIN,
+    y
+  );
+  y += LINE_HEIGHT * 1.5;
+
+  if (scopeItems.length > 0) {
+    scopeItems.forEach((s) => {
+      addPageIfNeeded(LINE_HEIGHT * 2);
+      doc.text(
+        `• ${s.category}: ${s.description} — ${moneyRange(s.total_cost_min, s.total_cost_max)}`,
+        MARGIN + 2,
+        y,
+        { maxWidth: 170 }
+      );
+      y += LINE_HEIGHT * 1.2;
+    });
+    y += LINE_HEIGHT;
+  }
+
+  addPageIfNeeded(LINE_HEIGHT * 4);
+
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Recorded Costs", MARGIN, y);
+  y += LINE_HEIGHT * 1.5;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+
+  if (invoices.length === 0) {
+    doc.text("No invoices or documents recorded yet.", MARGIN, y);
+    y += LINE_HEIGHT * 2;
+  } else {
+    invoices.forEach((inv) => {
+      addPageIfNeeded(LINE_HEIGHT * 2);
+      const type = (inv.document_type ?? "invoice").toString();
+      const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+      doc.text(
+        `${formatDate(inv.created_at)} — ${inv.vendor_name ?? "Vendor"} (${typeLabel}): ${money(inv.total)}`,
+        MARGIN + 2,
+        y,
+        { maxWidth: 170 }
+      );
+      y += LINE_HEIGHT * 1.2;
+    });
+    y += LINE_HEIGHT;
+  }
+
+  addPageIfNeeded(LINE_HEIGHT * 6);
+
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Summary", MARGIN, y);
+  y += LINE_HEIGHT * 1.5;
+
+  doc.setFontSize(FONT_SIZE);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Capital improvements (invoices, quotes): ${money(capitalTotal)}`, MARGIN + 2, y);
+  y += LINE_HEIGHT;
+  doc.text(`Maintenance (warranties, permits): ${money(maintenanceTotal)}`, MARGIN + 2, y);
+  y += LINE_HEIGHT * 1.5;
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total recorded: ${money(capitalTotal + maintenanceTotal)}`, MARGIN + 2, y);
+
+  y = doc.internal.pageSize.height - MARGIN;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(128, 128, 128);
+  doc.text(
+    "Generated by BlueprintAI — Your home's improvement history from plan to sale.",
+    MARGIN,
+    y
+  );
+
+  return doc.output("blob");
+}

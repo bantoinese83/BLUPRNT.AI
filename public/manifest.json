@@ -1,0 +1,17 @@
+{
+  "name": "BLUPRNT — Home Renovation Financial OS",
+  "short_name": "BLUPRNT",
+  "description": "Turn your renovation into a financial plan.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/images/pwa_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# Local Supabase (optional). Deploy functions with:
+# npx supabase functions deploy <name> --project-ref YOUR_REF
+
+[functions.photo-to-scope]
+verify_jwt = false
+
+[functions.upload-invoice]
+verify_jwt = true
+
+[functions.get-invoice]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
