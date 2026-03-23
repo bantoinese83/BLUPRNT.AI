@@ -100,7 +100,8 @@ export default function ProjectView() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 p-6">
-        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" aria-hidden />
+        <Loader2 className="w-10 h-10 text-slate-900 animate-spin" aria-hidden />
+
         <p className="text-slate-600">Loading project…</p>
       </div>
     );

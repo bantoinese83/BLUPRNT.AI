@@ -143,52 +143,59 @@ export function PropertyLedger({
     >
       <Card id="property-ledger-anchor" className="glass-card border-white/60 shadow-xl shadow-slate-200/40 rounded-[2.5rem] overflow-hidden group">
         <div className="absolute top-0 right-0 p-6 pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity">
-          <ShieldCheck className="w-24 h-24 text-indigo-600 rotate-12" />
+          <ShieldCheck className="w-24 h-24 text-slate-400 rotate-12" />
         </div>
+
         
         <CardHeader className="pb-5 pt-7 px-8 relative">
           <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 p-3 text-white shadow-2xl shadow-indigo-200 ring-4 ring-white/50 flex items-center justify-center shrink-0 animate-float">
+            <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-900 to-slate-800 p-3 text-white shadow-2xl shadow-slate-200 ring-4 ring-white/50 flex items-center justify-center shrink-0 animate-float">
               <BookOpen className="w-7 h-7" strokeWidth={2} aria-hidden />
             </div>
+
             <div className="space-y-1">
               <CardTitle className="text-2xl font-black tracking-tight text-slate-900 leading-none">Property Ledger</CardTitle>
-              <p className="text-[12px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block">
+              <p className="text-[12px] font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block">
                 Verified Record
               </p>
+
             </div>
           </div>
         </CardHeader>
         <CardContent className="px-8 pb-8 space-y-8 relative">
           <p className="text-base text-slate-500 leading-relaxed font-medium max-w-sm">
-            Detailed history of home improvements. Export this <span className="text-slate-900 font-bold underline decoration-indigo-300">Seller Packet</span> to prove value to buyers and agents.
+            Detailed history of home improvements. Export this <span className="text-slate-900 font-bold underline decoration-slate-300">Seller Packet</span> to prove value to buyers and agents.
           </p>
 
+
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-emerald-50/30 hover:border-emerald-100">
+          <div className="flex items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-slate-100/50 hover:border-slate-200">
             <span className="text-sm font-bold text-slate-600 flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-100/50 text-emerald-600 flex items-center justify-center transition-colors group-hover:bg-emerald-100">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center transition-colors">
                 <Wrench className="w-4 h-4" strokeWidth={2.5} aria-hidden />
               </div>
               Capital Improvements
             </span>
             <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight">{money(capitalTotal)}</span>
           </div>
+
           
-          <div className="flex items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-indigo-50/30 hover:border-indigo-100">
+          <div className="flex items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-slate-100/50 hover:border-slate-200">
             <span className="text-sm font-bold text-slate-600 flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-100/50 text-indigo-600 flex items-center justify-center transition-colors group-hover:bg-indigo-100">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center transition-colors">
                 <BookOpen className="w-4 h-4" strokeWidth={2.5} aria-hidden />
               </div>
               Maintenance Log
             </span>
             <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight">{money(maintenanceTotal)}</span>
           </div>
+
         </div>
 
         <div className="pt-2">
           <Button
-            className="w-full h-auto gap-2.5 rounded-2xl py-5 px-4 font-bold text-base shadow-xl shadow-indigo-100/50 transition-all hover:scale-[1.02] active:scale-[0.98] premium-gradient border-0 text-white flex items-center justify-center leading-tight overflow-visible flex-nowrap"
+            className="w-full h-auto gap-2.5 rounded-2xl py-5 px-4 font-bold text-base shadow-xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98] premium-gradient border-0 text-white flex items-center justify-center leading-tight overflow-visible flex-nowrap"
+
             onClick={handleExportPDF}
             disabled={exporting || !project}
             type="button"

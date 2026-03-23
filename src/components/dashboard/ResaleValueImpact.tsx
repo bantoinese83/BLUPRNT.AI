@@ -13,16 +13,17 @@ export function ResaleValueImpact({
   const estimatedValueAdd = investment * valueAddScale;
 
   return (
-    <Card className="overflow-hidden border-indigo-100 shadow-xl shadow-indigo-50/50 group">
+    <Card className="overflow-hidden border-slate-100 shadow-xl shadow-slate-50/50 group">
+
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-indigo-600" />
+          <TrendingUp className="w-4 h-4 text-slate-900" />
           Resale Value Impact
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-baseline gap-2">
-          <h3 className="text-4xl font-black text-indigo-600">
+          <h3 className="text-4xl font-black text-slate-900">
             {new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
@@ -37,7 +38,7 @@ export function ResaleValueImpact({
             <defs>
               <linearGradient id="growthGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="transparent" />
-                <stop offset="100%" stopColor="#4f46e5" />
+                <stop offset="100%" stopColor="#0f172a" />
               </linearGradient>
             </defs>
             <motion.path
@@ -58,11 +59,13 @@ export function ResaleValueImpact({
               cx="300"
               cy="10"
               r="6"
-              fill="#4f46e5"
-              className="drop-shadow-[0_0_8px_rgba(79,70,229,0.5)]"
+              fill="#0f172a"
+              className="drop-shadow-[0_0_8px_rgba(15,23,42,0.5)]"
             />
+
           </svg>
-          <div className="absolute top-0 right-0 py-1 px-2 rounded-lg bg-indigo-50 text-[10px] font-black text-indigo-600 uppercase tracking-wider animate-pulse">
+          <div className="absolute top-0 right-0 py-1 px-2 rounded-lg bg-slate-900 text-[10px] font-black text-white uppercase tracking-wider animate-pulse">
+
             Peak ROI
           </div>
         </div>

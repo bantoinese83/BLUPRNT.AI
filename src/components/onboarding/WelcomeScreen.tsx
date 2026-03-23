@@ -61,9 +61,10 @@ export function WelcomeScreen() {
   return (
     <PageTransition>
       <div className="flex flex-col items-center text-center space-y-8 py-12">
-        <div className="relative w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-2xl shadow-indigo-200/50 border border-slate-100 ring-8 ring-white">
+        <div className="relative w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-2xl shadow-slate-200/50 border border-slate-100 ring-8 ring-white">
           <img src="/logo.png" alt="BLUPRNT.AI Logo" className="w-14 h-14 object-contain" />
         </div>
+
         <div className="space-y-4">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Turn your renovation into a financial plan
@@ -125,11 +126,12 @@ export function WelcomeScreen() {
             </Button>
             <Link
               to="/register"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium h-12 px-8 w-full border border-indigo-200 bg-white text-indigo-900 hover:bg-indigo-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-bold h-12 px-8 w-full border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2"
             >
               <UserPlus className="w-5 h-5 shrink-0" aria-hidden />
               Create free account
             </Link>
+
             <Button
               size="lg"
               variant="ghost"

@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
+
 import { useNavigate } from "react-router-dom";
 import { PageLoader } from "@/components/PageLoader";
-import { ArrowLeft, User, Shield, LogOut, Download, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, User, Shield, LogOut, Download, Trash2, Loader2, CreditCard, Sparkles } from "lucide-react";
+import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +24,9 @@ export default function Settings() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [userLoading, setUserLoading] = useState(true);
+  const [isArchitect, setIsArchitect] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -29,7 +36,18 @@ export default function Settings() {
       if (cancelled) return;
       setUser(u ?? null);
       setDisplayName((u?.user_metadata?.full_name as string) ?? "");
+
+      if (u) {
+        const { data: sub } = await supabase
+          .from("user_subscriptions")
+          .select("status")
+          .eq("user_id", u.id)
+          .maybeSingle();
+        setIsArchitect(sub?.status === "active");
+      }
+
       setUserLoading(false);
+
     };
     load();
     return () => {
@@ -154,6 +172,10 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Helmet>
+        <title>Settings — BLUPRNT.AI</title>
+      </Helmet>
+
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
           <Button
@@ -207,7 +229,8 @@ export default function Settings() {
               />
             </div>
             {profileMessage && (
-              <p className={`text-sm ${profileMessage === "Saved." ? "text-emerald-600" : "text-amber-700"}`}>
+              <p className={`text-sm ${profileMessage === "Saved." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
+
                 {profileMessage}
               </p>
             )}
@@ -227,6 +250,54 @@ export default function Settings() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Plan & Billing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isArchitect ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                  {isArchitect ? <Sparkles className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                </div>
+
+                <div>
+                  <p className="text-sm font-bold text-slate-900 leading-none mb-1">
+                    {isArchitect ? "Architect Plan" : "Free Plan"}
+                  </p>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {isArchitect ? "Active Monthly Subscription" : "Limited features"}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={isArchitect ? "outline" : "primary"} 
+                size="sm" 
+                className="rounded-xl shadow-sm"
+                onClick={() => setShowUpgrade(true)}
+                type="button"
+              >
+                {isArchitect ? "View Plan Options" : "Upgrade"}
+              </Button>
+            </div>
+
+            {!isArchitect && (
+              <p className="text-xs text-slate-500 leading-relaxed px-1">
+                Upgrade to Architect for unlimited estimates, more projects, and priority support.
+              </p>
+            )}
+            {isArchitect && (
+              <p className="text-xs text-slate-500 leading-relaxed px-1">
+                You have active professional features. Billing is handled through Stripe.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
               <Shield className="w-5 h-5" />
               Privacy & security
             </CardTitle>
@@ -238,7 +309,8 @@ export default function Settings() {
                 Download a copy of your properties, projects, invoices, and documents in JSON format.
               </p>
               {exportMessage && (
-                <p className={`text-sm ${exportMessage === "Download started." ? "text-emerald-600" : "text-amber-700"}`}>
+                <p className={`text-sm ${exportMessage === "Download started." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
+
                   {exportMessage}
                 </p>
               )}
@@ -304,6 +376,13 @@ export default function Settings() {
           </CardContent>
         </Card>
       </main>
+
+      <UpgradeModal 
+        isOpen={showUpgrade} 
+        onClose={() => setShowUpgrade(false)}
+        openReason="general"
+      />
     </div>
+
   );
 }

@@ -47,26 +47,31 @@ export function LoadingScreen() {
         <div className="relative mb-12">
           {/* Animated Background Rings */}
           <div className="absolute inset-0 -m-8">
-            <div className="absolute inset-0 border-2 border-indigo-100/50 rounded-full animate-[ping_3s_ease-in-out_infinite]" />
-            <div className="absolute inset-0 border border-indigo-50 rounded-full animate-[ping_4s_ease-in-out_infinite_1s]" />
+            <div className="absolute inset-0 border-2 border-slate-100/50 rounded-full animate-[ping_3s_ease-in-out_infinite]" />
+            <div className="absolute inset-0 border border-slate-50 rounded-full animate-[ping_4s_ease-in-out_infinite_1s]" />
           </div>
+
           
           {/* Central Logo/Icon Animation */}
           <div className="relative w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center glass border-white">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-3xl" />
-            <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" strokeWidth={1.5} />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/10 to-slate-400/10 rounded-3xl" />
+            <Loader2 className="w-10 h-10 text-slate-900 animate-spin" strokeWidth={1.5} />
+
             
             {/* Pulsing Dot */}
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-slate-400 rounded-full border-2 border-white animate-pulse" />
+
           </div>
 
           {/* Floating Accents */}
           <div className="absolute -top-4 -left-4 p-2 glass rounded-xl animate-float">
-            <div className="w-3 h-3 bg-indigo-400 rounded-full" />
+            <div className="w-3 h-3 bg-slate-900 rounded-full" />
           </div>
+
           <div className="absolute -bottom-2 -right-6 p-2 glass rounded-xl animate-float [animation-delay:1s]">
-            <div className="w-4 h-4 bg-violet-400 rounded-full opacity-50" />
+            <div className="w-4 h-4 bg-slate-400 rounded-full opacity-50" />
           </div>
+
         </div>
 
         <div className="space-y-4 max-w-xs mx-auto">
@@ -75,10 +80,11 @@ export function LoadingScreen() {
               Building your Blueprint
             </h2>
             <div className="flex justify-center gap-1.5 pt-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-200 animate-bounce" />
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.4s]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce" />
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-bounce [animation-delay:0.4s]" />
             </div>
+
           </div>
           
           <div className="relative h-12 flex items-center justify-center overflow-hidden">
@@ -91,7 +97,8 @@ export function LoadingScreen() {
         {/* Progress Tracker (Subtle) */}
         <div className="mt-12 w-full max-w-[240px] h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
           <div 
-            className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-1000 ease-out"
+            className="h-full premium-gradient transition-all duration-1000 ease-out"
+
             style={{ width: `${((messageIdx + 1) / messages.length) * 100}%` }}
           />
         </div>

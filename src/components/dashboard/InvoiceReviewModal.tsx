@@ -118,7 +118,8 @@ export function InvoiceReviewModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
         <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+          <Loader2 className="w-10 h-10 text-slate-900 animate-spin" />
+
           <p className="text-slate-600">Loading invoice…</p>
         </div>
       </div>

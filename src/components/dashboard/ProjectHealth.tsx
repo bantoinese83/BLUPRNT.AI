@@ -35,24 +35,28 @@ export function ProjectHealth({
   const variance = estimatedMid > 0 ? invoiceTotal - estimatedMid : 0;
   const { grade, label } = getHealthGrade(estimatedMid, invoiceTotal, overBudget);
 
-  const statusColor = overBudget ? "text-amber-400" : "text-emerald-400";
+  const statusColor = overBudget ? "text-amber-400" : "text-white";
+
 
   return (
     <Card className="glass-dark text-white border-slate-800/50 shadow-2xl rounded-3xl overflow-hidden relative">
-      <div className={`absolute -top-12 -right-12 w-32 h-32 ${overBudget ? "bg-amber-500/10" : "bg-emerald-500/10"} blur-3xl rounded-full`} />
+      <div className={`absolute -top-12 -right-12 w-32 h-32 ${overBudget ? "bg-amber-500/10" : "bg-white/10"} blur-3xl rounded-full`} />
+
       
       <CardHeader className="pb-4 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-            <Shield className={`w-4 h-4 ${overBudget ? "text-amber-400" : "text-emerald-400"}`} strokeWidth={2.5} />
+            <Shield className={`w-4 h-4 ${overBudget ? "text-amber-400" : "text-slate-300"}`} strokeWidth={2.5} />
             <span>Health Score</span>
           </CardTitle>
+
           <div className="relative flex items-center justify-center w-12 h-12">
             <motion.div
-              className={`absolute inset-0 rounded-full border-2 ${overBudget ? "border-amber-500/30" : "border-emerald-500/30"}`}
+              className={`absolute inset-0 rounded-full border-2 ${overBudget ? "border-amber-500/30" : "border-slate-500/30"}`}
               animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             />
+
             <span className={`text-4xl font-black tabular-nums ${statusColor}`}>
               {grade}
             </span>
@@ -70,9 +74,10 @@ export function ProjectHealth({
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(100, pct)}%` }}
               transition={{ duration: 1.5, ease: "easeOut" }}
-              className={`absolute top-0 left-0 h-full rounded-full shadow-[0_0_12px_rgba(16,185,129,0.3)] ${
-                overBudget ? "bg-gradient-to-r from-amber-500 to-orange-500" : "bg-gradient-to-r from-emerald-500 to-teal-400"
+              className={`absolute top-0 left-0 h-full rounded-full shadow-[0_0_12px_rgba(255,255,255,0.1)] ${
+                overBudget ? "bg-gradient-to-r from-amber-500 to-orange-500" : "bg-gradient-to-r from-slate-400 to-slate-200"
               }`}
+
             />
           </div>
           <div className="flex justify-between px-1">
@@ -96,7 +101,8 @@ export function ProjectHealth({
               </span>
             </div>
             
-            <div className={`flex justify-between items-center pt-2 border-t border-slate-800/50 ${variance > 0 ? "text-amber-400" : "text-emerald-400"}`}>
+            <div className={`flex justify-between items-center pt-2 border-t border-slate-800/50 ${variance > 0 ? "text-amber-400" : "text-slate-300"}`}>
+
               <div className="flex items-center gap-2">
                 {variance > 0 ? <AlertTriangle className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5 opacity-50" />}
                 <span className="text-[11px] font-extrabold uppercase tracking-widest">
@@ -110,11 +116,12 @@ export function ProjectHealth({
             </div>
           </motion.div>
         ) : (
-          <div className="p-4 bg-indigo-500/10 rounded-2xl text-xs text-indigo-300 flex gap-3 border border-indigo-500/20 leading-relaxed font-medium">
-            <Receipt className="w-5 h-5 text-indigo-400 shrink-0 opacity-80" aria-hidden />
+          <div className="p-4 bg-slate-500/10 rounded-2xl text-xs text-slate-300 flex gap-3 border border-slate-500/20 leading-relaxed font-medium">
+            <Receipt className="w-5 h-5 text-slate-400 shrink-0 opacity-80" aria-hidden />
             <span>Upload invoices to see real-time health and budget performance.</span>
           </div>
         )}
+
       </CardContent>
     </Card>
   );

@@ -110,7 +110,8 @@ export function LocationScreen() {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 justify-center gap-2 border-indigo-200 bg-indigo-50/50 text-indigo-900 hover:bg-indigo-50"
+              className="w-full h-12 justify-center gap-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+
               onClick={usePreciseLocation}
               disabled={gpsLoading}
             >
@@ -132,7 +133,8 @@ export function LocationScreen() {
             </label>
             <div className="relative">
               {ipLoading && !locationInput.trim() ? (
-                <Loader2 className="absolute left-3 top-3.5 h-4 w-4 text-indigo-500 animate-spin" aria-hidden />
+                <Loader2 className="absolute left-3 top-3.5 h-4 w-4 text-slate-900 animate-spin" aria-hidden />
+
               ) : (
                 <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden />
               )}
@@ -149,7 +151,8 @@ export function LocationScreen() {
               You can skip the exact house number.
             </p>
             {autoSource && (
-              <p className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 flex items-start gap-2">
+              <p className="text-xs text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 flex items-start gap-2">
+
                 {autoSource === "ip" ? (
                   <Radar className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
                 ) : (
@@ -167,7 +170,8 @@ export function LocationScreen() {
           <div className="relative">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 text-sm text-indigo-600 font-medium hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-900 font-bold hover:underline"
+
               onClick={() => setShowWhy((v) => !v)}
               aria-expanded={showWhy}
             >

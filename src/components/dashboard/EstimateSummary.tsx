@@ -41,16 +41,19 @@ export function EstimateSummary({
   const isEmpty = scopeItems.length === 0;
 
   return (
-    <Card className="overflow-hidden border-slate-200/60 shadow-md shadow-indigo-100/20 rounded-3xl">
-      <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
+    <Card className="overflow-hidden border-slate-200/60 shadow-md shadow-slate-100/20 rounded-3xl">
+
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
         {/* Abstract background highlight */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
+
         
         <div className="space-y-3 relative z-10">
-          <p className="text-indigo-300 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
+          <p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
             <Wallet className="w-3.5 h-3.5 shrink-0" aria-hidden />
             Projected Investment
           </p>
+
           <div className="text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums text-white">
             {money(project.estimated_min_total, project.estimated_max_total)}
           </div>
@@ -58,9 +61,10 @@ export function EstimateSummary({
         </div>
         
         <div className="flex flex-col items-start md:items-end gap-3 relative z-10">
-          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold px-3 py-1 rounded-lg" title="How well our estimate matches similar projects in your area">
+          <Badge className="bg-slate-800 text-slate-300 border-slate-700 font-bold px-3 py-1 rounded-lg" title="How well our estimate matches similar projects in your area">
             {conf * 20}% Confidence
           </Badge>
+
           <div className="flex flex-col md:items-end">
             <div className="flex gap-0.5 mb-1.5">{stars(conf)}</div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest text-shadow-sm">Regional Match</p>
@@ -82,7 +86,8 @@ export function EstimateSummary({
               type="button"
               variant="primary"
               size="lg"
-              className="gap-2.5 rounded-2xl px-8 shadow-lg shadow-indigo-100"
+              className="gap-2.5 rounded-2xl px-8 shadow-lg shadow-slate-100"
+
               onClick={() => navigate("/dashboard/scope")}
             >
               <ListTree className="w-5 h-5 shrink-0" aria-hidden />
@@ -98,7 +103,8 @@ export function EstimateSummary({
               >
                 <div className="space-y-2 min-w-0 flex-1">
                   <div className="flex items-center flex-wrap gap-2.5">
-                    <h4 className="font-bold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">{item.category}</h4>
+                    <h4 className="font-bold text-slate-900 tracking-tight group-hover:text-slate-950 transition-colors uppercase">{item.category}</h4>
+
                     {item.finish_tier && (
                       <Badge variant="secondary" className="text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-600 border-none px-2 py-0.5">
                         {item.finish_tier}
@@ -128,8 +134,9 @@ export function EstimateSummary({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-indigo-600 font-bold tracking-tight hover:bg-indigo-50"
+                  className="text-slate-900 font-bold tracking-tight hover:bg-slate-100"
                   onClick={() => navigate("/dashboard/scope")}
+
                 >
                   View {scopeItems.length - 10} more line items
                   <ListTree className="w-4 h-4 ml-2" />

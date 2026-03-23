@@ -43,11 +43,13 @@ export function PhotoScreen() {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="w-full border-2 border-dashed border-slate-300 rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-4 bg-white hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors"
+          className="w-full border-2 border-dashed border-slate-300 rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-4 bg-white hover:border-slate-400 hover:bg-slate-50 transition-colors"
         >
+
           <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
             {photos.length ? (
-              <ImagePlus className="w-8 h-8 text-indigo-500" aria-hidden />
+              <ImagePlus className="w-8 h-8 text-slate-900" aria-hidden />
+
             ) : (
               <Camera className="w-8 h-8 text-slate-400" aria-hidden />
             )}

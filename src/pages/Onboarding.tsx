@@ -1,4 +1,6 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+
 import { AnimatePresence } from "motion/react";
 import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
 import { ProjectTypeScreen } from "@/components/onboarding/ProjectTypeScreen";
@@ -15,6 +17,11 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center p-4 sm:p-6">
+      <Helmet>
+        <title>Get Started — BLUPRNT.AI</title>
+        <meta name="description" content="Get a real-world renovation cost estimate in minutes. Start your home project with the right financial baseline." />
+      </Helmet>
+
       <div className="w-full max-w-md relative">
         <AnimatePresence mode="wait">
           <Routes location={location}>

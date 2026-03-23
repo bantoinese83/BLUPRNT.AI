@@ -60,25 +60,27 @@ export function EstimateScreen() {
               {!estimate && (
                 <button
                   type="button"
-                  className="text-indigo-600 font-medium hover:underline"
+                  className="text-slate-900 font-bold hover:underline"
                   onClick={() => navigate("/onboarding/loading", { replace: true })}
                 >
                   Try again
                 </button>
+
               )}
             </div>
           )}
         </div>
 
-        <Card className="border-emerald-200 shadow-md shadow-emerald-100/50 overflow-hidden">
-          <div className="bg-emerald-50/50 p-6 border-b border-emerald-100 flex flex-col items-center text-center space-y-2">
+        <Card className="border-slate-200 shadow-md shadow-slate-100/50 overflow-hidden">
+          <div className="bg-slate-50/50 p-6 border-b border-slate-100 flex flex-col items-center text-center space-y-2">
             <Badge
               variant="secondary"
-              className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 mb-2 gap-1.5"
+              className="bg-slate-900 text-white hover:bg-slate-800 mb-2 gap-1.5"
             >
               <BadgeCheck className="w-3.5 h-3.5" aria-hidden />
               Confidence: {conf} / 5
             </Badge>
+
             <p className="text-sm text-slate-600 font-medium">Estimated total</p>
             <div className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
               {formatMoney(min)} – {formatMoney(max)}
@@ -98,9 +100,10 @@ export function EstimateScreen() {
                   key={`${item}-${i}`}
                   className="flex items-start space-x-3 text-sm text-slate-600"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                   <span>{item}</span>
                 </li>
+
               ))}
             </ul>
           </CardContent>

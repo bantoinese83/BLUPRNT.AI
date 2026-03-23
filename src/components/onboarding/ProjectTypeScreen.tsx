@@ -46,24 +46,27 @@ export function ProjectTypeScreen() {
                 }}
                 className={`cursor-pointer card-hover border-2 transition-all duration-300 ${
                   selected
-                    ? "border-indigo-600 ring-4 ring-indigo-50 shadow-md bg-indigo-50/10 scale-[1.02]"
-                    : "border-slate-100 hover:border-indigo-200"
+                    ? "border-slate-900 ring-4 ring-slate-100 shadow-md bg-slate-50/10 scale-[1.02]"
+                    : "border-slate-100 hover:border-slate-200"
                 }`}
+
                 onClick={() => setProjectType(opt)}
               >
                 <CardContent className="p-4 flex flex-col items-center justify-center gap-3 min-h-[6.5rem] text-center">
                   <div
                     className={`rounded-2xl p-3 transition-colors duration-300 ${
                       selected
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                        ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
                         : "bg-slate-50 text-slate-500"
                     }`}
                   >
+
                     <Icon className="w-6 h-6" strokeWidth={2} aria-hidden />
                   </div>
                   <span className={`font-semibold text-sm leading-tight transition-colors ${
-                    selected ? "text-indigo-900" : "text-slate-600"
+                    selected ? "text-slate-950" : "text-slate-600"
                   }`}>
+
                     {opt}
                   </span>
                 </CardContent>

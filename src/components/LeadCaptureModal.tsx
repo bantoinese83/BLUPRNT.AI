@@ -81,7 +81,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
             </button>
 
             {/* Left side: The Hook / visual */}
-            <div className="md:w-5/12 bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 p-8 text-white relative flex flex-col justify-center overflow-hidden">
+            <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 text-white relative flex flex-col justify-center overflow-hidden">
                {/* Decorative background elements */}
               <div className="absolute top-0 left-0 w-full h-full opacity-10">
                 <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white animate-pulse" />
@@ -96,25 +96,26 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                 
                 <div className="space-y-1">
                   <h3 className="text-4xl font-black tracking-tighter leading-none">35% OFF</h3>
-                  <p className="text-indigo-200 font-bold uppercase tracking-widest text-[11px]">Your Project Protections</p>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[11px]">Your Project Protections</p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                      <TrendingDown className="w-4 h-4 text-emerald-300" />
+                      <TrendingDown className="w-4 h-4 text-slate-300" />
                     </div>
-                    <p className="text-xs font-medium text-indigo-50">Cut renovation drift by 20%</p>
+                    <p className="text-xs font-medium text-slate-50">Cut renovation drift by 20%</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                      <ShieldCheck className="w-4 h-4 text-indigo-300" />
+                      <ShieldCheck className="w-4 h-4 text-slate-300" />
                     </div>
-                    <p className="text-xs font-medium text-indigo-50">Legal-grade invoice verifying</p>
+                    <p className="text-xs font-medium text-slate-50">Legal-grade invoice verifying</p>
                   </div>
                 </div>
               </div>
             </div>
+
 
             {/* Right side: Lead Capture / Upsell */}
             <div className="md:w-7/12 p-8 sm:p-12 flex flex-col justify-center bg-white">
@@ -135,7 +136,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                       <Input
                         type="email"
                         placeholder="you@email.com"
-                        className="pl-11 py-6 rounded-2xl border-slate-200 focus:ring-2 focus:ring-indigo-500/20"
+                        className="pl-11 py-6 rounded-2xl border-slate-200 focus:ring-2 focus:ring-slate-900/20"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -143,7 +144,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                     </div>
                     <Button 
                       type="submit" 
-                      className="w-full py-6 rounded-2xl font-bold gap-2 shadow-lg shadow-indigo-100"
+                      className="w-full py-6 rounded-2xl font-bold gap-2 shadow-lg shadow-slate-100 premium-gradient text-white"
                       disabled={loading}
                     >
                       {loading ? (
@@ -167,10 +168,11 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                   className="space-y-8"
                 >
                   <div className="space-y-3 text-center md:text-left">
-                    <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto md:mx-0">
+                    <div className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto md:mx-0 shadow-lg">
                       <Sparkles className="w-8 h-8" />
                     </div>
                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">Code: BLUEPRINT35</h2>
+
                     <p className="text-slate-500 text-sm leading-relaxed">
                       Your discount is locked in. Ready to start your project with professional-grade protections?
                     </p>
@@ -179,7 +181,8 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                   <div className="space-y-3">
                     <Button 
                       variant="primary" 
-                      className="w-full py-6 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700"
+                      className="w-full py-6 rounded-2xl font-bold bg-slate-900 hover:bg-slate-800 text-white"
+
                       onClick={() => onPlanSelect?.('architect')}
                     >
                       Use discount for Architect Plan

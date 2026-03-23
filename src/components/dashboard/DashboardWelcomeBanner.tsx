@@ -19,8 +19,9 @@ export function DashboardWelcomeBanner() {
     <div
       role="region"
       aria-label="Getting started"
-      className="rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 to-teal-50/80 p-5 sm:p-6 shadow-sm"
+      className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50 to-slate-100/80 p-5 sm:p-6 shadow-sm"
     >
+
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-3 min-w-0">
           <h2 className="text-lg font-bold text-slate-900">Your estimate is saved</h2>

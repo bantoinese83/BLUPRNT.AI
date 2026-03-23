@@ -8,7 +8,8 @@ export function PageLoader() {
       aria-label="Loading page"
     >
       <Loader2
-        className="w-10 h-10 text-indigo-600 animate-spin"
+        className="w-10 h-10 text-slate-900 animate-spin"
+
         aria-hidden
       />
       <p className="text-sm font-medium">Loading…</p>

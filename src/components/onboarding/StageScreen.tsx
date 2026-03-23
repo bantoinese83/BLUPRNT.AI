@@ -36,9 +36,10 @@ export function StageScreen() {
                 tabIndex={0}
                 className={`cursor-pointer transition-all ${
                   selected
-                    ? "border-indigo-600 ring-2 ring-indigo-100"
-                    : "hover:border-indigo-300 hover:shadow-md"
+                    ? "border-slate-900 ring-2 ring-slate-100"
+                    : "hover:border-slate-300 hover:shadow-md"
                 }`}
+
                 onClick={() => setStage(opt)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -51,10 +52,11 @@ export function StageScreen() {
                   <div
                     className={`rounded-xl p-3 shrink-0 ${
                       selected
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-slate-900 text-white"
                         : "bg-slate-100 text-slate-600"
                     }`}
                   >
+
                     <Icon className="w-5 h-5" strokeWidth={1.75} aria-hidden />
                   </div>
                   <span className="font-medium text-slate-700 flex-1 text-left">

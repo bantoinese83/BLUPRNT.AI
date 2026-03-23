@@ -55,9 +55,10 @@ export function SignupScreen() {
     <PageTransition>
       <div className="space-y-8">
         <div className="flex flex-col items-center text-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
+          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-slate-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
             <img src="/logo.png" alt="BlueprintAI Logo" className="w-10 h-10 object-contain" />
           </div>
+
           <div className="space-y-2">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               Save this project and track quotes
@@ -173,22 +174,24 @@ export function SignupScreen() {
               Already have an account?{" "}
               <button
                 type="button"
-                className="text-indigo-600 font-medium hover:underline"
+                className="text-slate-900 font-bold hover:underline"
                 onClick={() => setMode("signin")}
               >
                 Sign in to save your project
               </button>
+
             </p>
           ) : (
             <p className="text-center text-sm text-slate-500">
               New to BlueprintAI?{" "}
               <button
                 type="button"
-                className="text-indigo-600 font-medium hover:underline"
+                className="text-slate-900 font-bold hover:underline"
                 onClick={() => setMode("signup")}
               >
                 Create an account
               </button>
+
             </p>
           )}
         </div>

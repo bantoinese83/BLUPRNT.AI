@@ -148,24 +148,26 @@ export function InvoicesSection({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="absolute -left-36 top-1/2 -translate-y-1/2 flex items-center gap-2 text-indigo-600 text-xs font-bold overflow-hidden whitespace-nowrap"
+                className="absolute -left-36 top-1/2 -translate-y-1/2 flex items-center gap-2 text-slate-900 text-xs font-bold overflow-hidden whitespace-nowrap"
               >
                 <div className="relative">
                   <ScanLine className="w-4 h-4 animate-pulse" />
                   <motion.div 
                     animate={{ y: [0, 8, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
-                    className="absolute inset-x-0 top-0 h-0.5 bg-indigo-500 shadow-[0_0_8px_indigo]"
+                    className="absolute inset-x-0 top-0 h-0.5 bg-slate-950 shadow-[0_0_8px_black]"
                   />
                 </div>
                 <span>AI SCANNING...</span>
               </motion.div>
+
             )}
           </AnimatePresence>
           <select
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value as "invoice" | "quote" | "warranty" | "permit")}
-            className="text-sm rounded-xl border border-slate-200 px-3 py-2 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="text-sm rounded-xl border border-slate-200 px-3 py-2 bg-white shadow-sm focus:ring-2 focus:ring-slate-950/20 focus:border-slate-950"
+
             aria-label="Document type"
           >
             <option value="invoice">Invoice</option>
@@ -179,11 +181,13 @@ export function InvoicesSection({
             onClick={openUpload}
             disabled={uploading}
             type="button"
-            className={`transition-all duration-300 ${uploading ? 'bg-indigo-50 border-indigo-200' : ''}`}
+            className={`transition-all duration-300 ${uploading ? 'bg-slate-50 border-slate-200' : ''}`}
+
           >
             {uploading ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin text-indigo-600" />
+              <Loader2 className="w-4 h-4 mr-2 animate-spin text-slate-900" />
             ) : (
+
               <Upload className="w-4 h-4 mr-2" />
             )}
             {uploading ? 'Processing' : 'Upload'}
@@ -192,21 +196,22 @@ export function InvoicesSection({
       </div>
 
       {invoices.length === 0 && !guideDismissed && (
-        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 sm:p-5 space-y-3">
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-5 space-y-3">
           <button
             type="button"
             onClick={() => setGuideExpanded((e) => !e)}
-            className="flex items-center justify-between w-full text-left font-semibold text-indigo-950 gap-2"
+            className="flex items-center justify-between w-full text-left font-semibold text-slate-950 gap-2"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-600 shrink-0" aria-hidden />
+              <Sparkles className="w-5 h-5 text-slate-900 shrink-0" aria-hidden />
               First upload? Quick guide
             </span>
             {guideExpanded ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
           </button>
+
           {guideExpanded && (
             <>
-              <ol className="text-sm text-indigo-900/90 space-y-2 list-decimal list-inside pl-1">
+              <ol className="text-sm text-slate-900/90 space-y-2 list-decimal list-inside pl-1">
                 <li>
                   <strong>Pick a type</strong> above (invoice, quote, warranty, or permit).
                 </li>
@@ -214,13 +219,15 @@ export function InvoicesSection({
                   <strong>Upload</strong> a PDF or photo—we&apos;ll open it next so you can match lines to your estimate.
                 </li>
               </ol>
+
               <div className="flex flex-wrap gap-2 pt-1">
                 <Button type="button" size="sm" variant="primary" className="rounded-xl" onClick={openUpload} disabled={uploading || atLimit}>
                   Choose file
                 </Button>
-                <Button type="button" size="sm" variant="ghost" className="text-indigo-800" onClick={dismissGuide}>
+                <Button type="button" size="sm" variant="ghost" className="text-slate-800" onClick={dismissGuide}>
                   Got it, hide this
                 </Button>
+
               </div>
             </>
           )}
@@ -235,10 +242,11 @@ export function InvoicesSection({
       {documentType === "invoice" && invoiceCount > 0 && invoiceCount < FREE_LIMIT && (
         <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
           <span className="font-medium text-slate-700">{invoiceCount} of {FREE_LIMIT} free invoices used on this project.</span>{" "}
-          <button type="button" className="text-indigo-600 font-medium hover:underline" onClick={() => onUpgradeClick()}>
+          <button type="button" className="text-slate-900 font-bold hover:underline" onClick={() => onUpgradeClick()}>
             See plans
           </button>
         </p>
+
       )}
       {atLimit && (
         <div className="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-2 leading-relaxed">
@@ -277,18 +285,21 @@ export function InvoicesSection({
             transition={{ delay: idx * 0.05 }}
           >
             <Card
-              className="border-slate-200/80 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all cursor-pointer overflow-hidden group relative"
+              className="border-slate-200/80 shadow-sm hover:shadow-lg hover:border-slate-400 transition-all cursor-pointer overflow-hidden group relative"
               onClick={() => setReviewInvoiceId(inv.id)}
             >
-              <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+              <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-slate-900 to-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+
               <CardContent className="p-4 flex items-start space-x-4">
                 <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
                   <FileText className="w-5 h-5 text-red-500" />
                 </div>
                 <div className="space-y-1 min-w-0">
-                  <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-indigo-600 transition-colors">
+                  <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
                     {inv.vendor_name ?? "Invoice"}
                   </h4>
+
                   <p className="text-xs text-slate-500">
                     {new Date(inv.created_at).toLocaleDateString(undefined, {
                       month: "short",
@@ -307,8 +318,9 @@ export function InvoicesSection({
                   <div className="pt-2 flex flex-wrap gap-1.5">
                     <Badge
                       variant="secondary"
-                      className={`capitalize text-xs ${(inv.document_type ?? "invoice") !== "invoice" ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-700"}`}
+                      className={`capitalize text-xs ${(inv.document_type ?? "invoice") !== "invoice" ? "bg-slate-200 text-slate-950 font-bold" : "bg-slate-100 text-slate-700"}`}
                     >
+
                       {inv.document_type ?? "invoice"}
                     </Badge>
                     {(inv.document_type ?? "invoice") === "invoice" && (

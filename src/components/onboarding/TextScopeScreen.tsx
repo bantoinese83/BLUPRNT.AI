@@ -65,10 +65,11 @@ export function TextScopeScreen() {
                 key={label}
                 type="button"
                 onClick={() => addChip(label)}
-                className="px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-600 text-sm hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors"
+                className="px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-600 text-sm hover:border-slate-400 hover:bg-slate-50 transition-colors"
               >
                 + {label}
               </button>
+
             ))}
           </div>
         </div>
@@ -85,8 +86,9 @@ export function TextScopeScreen() {
             placeholder="e.g. Replace cabinets, new quartz countertops, and update the backsplash"
             rows={4}
             maxLength={2000}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:border-transparent resize-none"
           />
+
           <p className="text-xs text-slate-500">
             {scopeDescription.length}/2000 characters
           </p>

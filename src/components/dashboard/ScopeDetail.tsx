@@ -203,9 +203,10 @@ export function ScopeDetail({
               {money(project.estimated_min_total, project.estimated_max_total)}
             </div>
           </div>
-          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+          <Badge className="bg-slate-800 text-slate-300 border-slate-700">
             Confidence: {conf}/5
           </Badge>
+
         </div>
         <CardContent className="p-0">
           {scopeItems.length === 0 ? (
@@ -316,11 +317,12 @@ export function ScopeDetail({
                               <button
                                 type="button"
                                 onClick={() => startEdit(item)}
-                                className="p-1.5 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-indigo-50"
+                                className="p-1.5 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100"
                                 aria-label="Edit"
                               >
                                 <Pencil className="w-4 h-4" />
                               </button>
+
                               <button
                                 type="button"
                                 onClick={() => handleDelete(item)}

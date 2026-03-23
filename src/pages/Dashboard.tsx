@@ -1,4 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useCallback, type ReactNode } from "react";
+import { Helmet } from "react-helmet-async";
+
 import { useNavigate, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
@@ -198,7 +200,8 @@ export default function Dashboard() {
           particleCount: 150,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#4f46e5", "#7c3aed", "#10b981"]
+          colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"]
+
         });
         setTimeout(() => setHasCelebrated(true), 100);
       }
@@ -345,7 +348,19 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen dashboard-bg">
-      <DashboardHeader onSignOut={handleSignOut} projectName={project.name} isArchitect={isArchitect} />
+      <Helmet>
+        <title>{project?.name ? `${project.name} — BLUPRNT.AI` : "Dashboard — BLUPRNT.AI"}</title>
+      </Helmet>
+
+      <DashboardHeader 
+        onSignOut={handleSignOut} 
+        projectName={project.name} 
+        isArchitect={isArchitect} 
+        onUpgradeClick={() => {
+          setUpgradeReason("general");
+          setShowUpgrade(true);
+        }}
+      />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

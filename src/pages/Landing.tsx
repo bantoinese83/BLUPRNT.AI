@@ -77,7 +77,10 @@ export default function Landing() {
           name="twitter:description"
           content="Get real-world renovation costs, track invoices, and build a home improvement record you can hand to buyers."
         />
+        <meta property="og:image" content={`${SITE_URL}/og-image.png`} />
+        <meta property="twitter:image" content={`${SITE_URL}/og-image.png`} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -96,7 +99,8 @@ export default function Landing() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md border border-slate-100 overflow-hidden shrink-0">
                   <img src="/logo.png" alt="BlueprintAI Logo" className="h-7 w-7 object-contain" />
                 </div>
-                <span className="text-xl font-black italic tracking-tighter">BLUPRNT<span className="text-indigo-600">.AI</span></span>
+                <span className="text-xl font-black italic tracking-tighter">BLUPRNT<span className="text-slate-900">.AI</span></span>
+
               </Link>
             </motion.div>
             <motion.div 
@@ -104,18 +108,26 @@ export default function Landing() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-3"
             >
+              <button 
+                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors hidden md:block px-4"
+              >
+                Pricing
+              </button>
               <Link to="/login">
                 <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
                   <LogIn className="mr-2 h-4 w-4" aria-hidden />
                   Sign in
                 </Button>
               </Link>
+
               <Link to="/onboarding">
-                <Button size="sm" variant="primary" className="shadow-lg shadow-indigo-200">
+                <Button size="sm" variant="primary" className="shadow-lg shadow-slate-200">
                   Get started
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
                 </Button>
               </Link>
+
             </motion.div>
           </nav>
         </header>
@@ -126,7 +138,8 @@ export default function Landing() {
             className="relative overflow-hidden px-4 pt-32 pb-24 sm:px-6 sm:pt-40 sm:pb-32 mesh-bg"
             aria-labelledby="hero-heading"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 via-transparent to-transparent opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-100/50 via-transparent to-transparent opacity-60" />
+
             <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
                 <motion.div
@@ -135,14 +148,16 @@ export default function Landing() {
                   transition={{ delay: 0.2 }}
                   className="space-y-4"
                 >
-                  <span className="text-[12px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-[0.2em] inline-block mb-2">
+                  <span className="text-[12px] font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-[0.2em] inline-block mb-2">
+
                     Home Renovation Financial OS
                   </span>
                   <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.1]">
                     Turn your renovation into a{" "}
-                    <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 via-violet-600 to-indigo-600 animate-gradient-x">
+                    <span className="text-gradient">
                       financial plan
                     </span>
+
                   </h1>
                 </motion.div>
 
@@ -165,7 +180,8 @@ export default function Landing() {
                 >
                   <Button
                     size="lg"
-                    className="h-16 px-8 text-lg font-black rounded-2xl premium-gradient shadow-2xl shadow-indigo-200 hover:scale-105 active:scale-95 transition-all text-white border-0"
+                    className="h-16 px-8 text-lg font-black rounded-2xl premium-gradient shadow-2xl shadow-slate-200 hover:scale-105 active:scale-95 transition-all text-white border-0"
+
                     onClick={() => navigate("/onboarding")}
                   >
                     Get my first estimate <ArrowRight className="ml-2 w-6 h-6" />
@@ -187,7 +203,7 @@ export default function Landing() {
                 transition={{ delay: 0.5, duration: 0.8 }}
                 className="relative"
               >
-                <div className="absolute -inset-4 bg-linear-to-r from-indigo-500/20 to-violet-500/20 rounded-[2.5rem] blur-3xl" />
+                <div className="absolute -inset-4 bg-linear-to-r from-slate-500/20 to-slate-400/20 rounded-[2.5rem] blur-3xl" />
                 <div className="relative glass-card p-2 rounded-[2.5rem] overflow-hidden shadow-2xl">
                   <img
                     src="/images/renovation_hero.png"
@@ -196,9 +212,10 @@ export default function Landing() {
                   />
                   <div className="absolute bottom-8 left-8 right-8 glass-card p-6 rounded-2xl animate-float">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg">
                         <Sparkles className="w-6 h-6" />
                       </div>
+
                       <div>
                         <p className="text-sm font-black text-slate-900 leading-none mb-1">AI Cost Analysis</p>
                         <p className="text-xs text-slate-500 font-bold">Regionally grounded pricing</p>
@@ -225,18 +242,19 @@ export default function Landing() {
               <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
                 <motion.article
                   initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-indigo-100"
+                  className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-slate-100"
                 >
                   <div className="w-full h-48 mb-8 rounded-2xl overflow-hidden shadow-inner relative">
                     <img src="/images/modern_home_exterior.png" alt="Modern Home" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-linear-to-t from-indigo-900/40 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-slate-900/40 to-transparent" />
                   </div>
-                  <div className="w-20 h-20 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-8 shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
+                  <div className="w-20 h-20 rounded-3xl bg-slate-50 text-slate-900 flex items-center justify-center mb-8 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
                     <Camera className="w-10 h-10" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-indigo-600 transition-colors">Plan</h3>
+                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">Plan</h3>
+
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
                     Turn fuzzy ideas and photos into a realistic, regionally grounded budget.
                   </p>
@@ -244,19 +262,20 @@ export default function Landing() {
 
                 <motion.article
                   initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 }}
-                  className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-emerald-100"
+                  className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-slate-100"
                 >
                   <div className="w-full h-48 mb-8 rounded-2xl overflow-hidden shadow-inner relative">
                     <img src="/images/property_ledger_mockup.png" alt="Invoice Tracking" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-linear-to-t from-emerald-900/40 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-slate-900/40 to-transparent" />
                   </div>
-                  <div className="w-20 h-20 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-8 shadow-inner group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
+                  <div className="w-20 h-20 rounded-3xl bg-slate-50 text-slate-900 flex items-center justify-center mb-8 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
                     <Receipt className="w-10 h-10" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-emerald-600 transition-colors">Execute</h3>
+                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">Execute</h3>
+
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
                     Track quotes, actuals, and invoices against that budget with minimal manual work.
                   </p>
@@ -264,22 +283,23 @@ export default function Landing() {
 
                 <motion.article
                   initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
-                  className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-violet-100"
+                  className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-slate-100"
                 >
                   <div className="w-full h-48 mb-8 rounded-2xl overflow-hidden shadow-inner relative">
-                    <div className="absolute inset-0 bg-linear-to-br from-violet-600 to-indigo-700 p-8 flex flex-col justify-end">
+                    <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900 p-8 flex flex-col justify-end">
                       <div className="w-16 h-1 bg-white/30 rounded-full mb-4" />
                       <div className="w-32 h-1 bg-white/30 rounded-full mb-4" />
                       <div className="w-24 h-1 bg-white/30 rounded-full" />
                     </div>
                   </div>
-                  <div className="w-20 h-20 rounded-3xl bg-violet-50 text-violet-600 flex items-center justify-center mb-8 shadow-inner group-hover:bg-violet-600 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
+                  <div className="w-20 h-20 rounded-3xl bg-slate-50 text-slate-900 flex items-center justify-center mb-8 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
                     <FileCheck className="w-10 h-10" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-violet-600 transition-colors">Transfer</h3>
+                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">Transfer</h3>
+
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
                     Export that history into formats optimized for buyers, agents, and lenders.
                   </p>
@@ -302,7 +322,7 @@ export default function Landing() {
               </p>
               <ul className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4" role="list">
                 <li className="flex items-start gap-4">
-                  <BarChart3 className="h-6 w-6 shrink-0 text-indigo-600" aria-hidden />
+                  <BarChart3 className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
                   <div>
                     <h3 className="font-semibold text-slate-900">Photo-to-estimate</h3>
                     <p className="mt-1 text-sm text-slate-600">
@@ -311,7 +331,7 @@ export default function Landing() {
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <Receipt className="h-6 w-6 shrink-0 text-indigo-600" aria-hidden />
+                  <Receipt className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
                   <div>
                     <h3 className="font-semibold text-slate-900">Invoice tracking</h3>
                     <p className="mt-1 text-sm text-slate-600">
@@ -320,7 +340,7 @@ export default function Landing() {
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <Shield className="h-6 w-6 shrink-0 text-indigo-600" aria-hidden />
+                  <Shield className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
                   <div>
                     <h3 className="font-semibold text-slate-900">Seller packet</h3>
                     <p className="mt-1 text-sm text-slate-600">
@@ -329,7 +349,7 @@ export default function Landing() {
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <Home className="h-6 w-6 shrink-0 text-indigo-600" aria-hidden />
+                  <Home className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
                   <div>
                     <h3 className="font-semibold text-slate-900">Property ledger</h3>
                     <p className="mt-1 text-sm text-slate-600">
@@ -338,8 +358,117 @@ export default function Landing() {
                   </div>
                 </li>
               </ul>
+
             </div>
           </section>
+
+          {/* Pricing Section */}
+          <section
+            id="pricing"
+            className="border-t border-slate-200/80 bg-white px-4 py-24 sm:px-6"
+            aria-labelledby="pricing-heading"
+          >
+            <div className="mx-auto max-w-6xl">
+              <div className="text-center space-y-4 mb-16">
+                <h2 id="pricing-heading" className="text-3xl font-black text-slate-900 sm:text-4xl italic uppercase tracking-tighter">
+                  Simple, <span className="text-slate-900">transparent</span> pricing
+                </h2>
+
+                <p className="mx-auto max-w-xl text-slate-600 text-lg">
+                  Protect your renovation investment with the right plan for your project.
+                </p>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-2 max-w-4xl mx-auto">
+                {/* Architect Plan */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="relative group p-8 rounded-3xl bg-white border border-slate-200 shadow-xl shadow-slate-100/50 flex flex-col"
+                >
+
+                  <div className="absolute top-0 inset-x-0 h-1.5 bg-slate-900 rounded-t-3xl" />
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-black text-slate-900 mb-2">Architect</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-5xl font-black tracking-tight text-slate-900">$12</span>
+                      <span className="text-slate-500 font-bold">/mo</span>
+                    </div>
+                    <p className="mt-4 text-slate-600 font-medium">Professional grade project tracking for active renovators.</p>
+                  </div>
+                  <ul className="space-y-4 mb-10 flex-1">
+                    {[
+                      "Unlimited estimates & photo analysis",
+                      "Track up to 2 active projects",
+                      "Invoice OCR (10 uploads/month)",
+                      "Full property ledger & seller packet",
+                      "Priority AI model access"
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
+                        <Sparkles className="w-5 h-5 text-slate-400 shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button 
+                    variant="primary" 
+                    size="lg" 
+                    className="w-full h-14 rounded-2xl text-lg font-black premium-gradient border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
+                    onClick={() => navigate("/onboarding")}
+                  >
+                    Start Architect free
+                  </Button>
+
+                </motion.div>
+
+                {/* Project Pass */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="relative group p-8 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col"
+                >
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-black text-slate-900 mb-2">Project Pass</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-5xl font-black tracking-tight text-slate-900">$49</span>
+                      <span className="text-slate-500 font-bold">/project</span>
+                    </div>
+                    <p className="mt-4 text-slate-600 font-medium">One-time purchase for a single major remodel.</p>
+                  </div>
+                  <ul className="space-y-4 mb-10 flex-1">
+                    {[
+                      "6 months of Architect features",
+                      "Locked to one specific project",
+                      "No recurring subscription",
+                      "Lifetime read-access to the ledger",
+                      "Perfect for one-off renovations"
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
+                        <FileCheck className="w-5 h-5 text-slate-400 shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full h-14 rounded-2xl text-lg font-black bg-white border-slate-200 hover:bg-white hover:shadow-lg group-hover:scale-[1.02] transition-transform"
+                    onClick={() => navigate("/onboarding")}
+                  >
+                    Get a project pass
+                  </Button>
+                </motion.div>
+              </div>
+
+              <p className="mt-12 text-center text-slate-500 font-medium italic">
+                All plans include a 3-invoice free trial per project. No credit card required to start.
+              </p>
+            </div>
+          </section>
+
 
           {/* Final CTA */}
           <section
@@ -377,7 +506,8 @@ export default function Landing() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden">
                 <img src="/logo.png" alt="BlueprintAI Logo" className="h-5 w-5 object-contain" />
               </div>
-              <span className="font-black italic tracking-tighter text-slate-900">BLUPRNT<span className="text-indigo-600">.AI</span></span>
+              <span className="font-black italic tracking-tighter text-slate-900">BLUPRNT<span className="text-slate-900">.AI</span></span>
+
             </div>
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600">
               <Link to="/onboarding" className="hover:text-slate-900">Get started</Link>

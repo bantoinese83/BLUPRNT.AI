@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
+
 import { Link, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
@@ -143,10 +145,17 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center p-4 py-12">
+    <>
+      <Helmet>
+        <title>Create Free Account — BLUPRNT.AI</title>
+        <meta name="description" content="Start your renovation financial plan. Track costs, manage invoices, and build a property ledger for your home." />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center p-4 py-12">
+
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
+          <div className="mx-auto w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-slate-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
+
             <img src="/logo.png" alt="BLUPRNT.AI Logo" className="w-10 h-10 object-contain" />
           </div>
           <div className="space-y-2">
@@ -292,8 +301,8 @@ export default function Register() {
             </Button>
           </form>
         ) : magicSent ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-900 space-y-2">
-            <p className="font-semibold flex items-center gap-2">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-900 space-y-2">
+            <p className="font-semibold flex items-center gap-2 text-slate-950">
               <Mail className="w-5 h-5 shrink-0" aria-hidden />
               Check your inbox
             </p>
@@ -302,12 +311,13 @@ export default function Register() {
             </p>
             <button
               type="button"
-              className="text-indigo-600 font-medium hover:underline text-sm"
+              className="text-slate-900 font-bold hover:underline text-sm"
               onClick={() => setMagicSent(false)}
             >
               Use a different email
             </button>
           </div>
+
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -372,11 +382,14 @@ export default function Register() {
 
         <p className="text-center text-sm text-slate-500">
           Want an estimate first?{" "}
-          <Link to="/onboarding" className="text-indigo-600 font-medium hover:underline">
+          <Link to="/onboarding" className="text-slate-900 font-bold hover:underline">
             Start onboarding
           </Link>
+
         </p>
       </div>
     </div>
+    </>
   );
 }
+

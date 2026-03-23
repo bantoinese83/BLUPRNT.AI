@@ -98,7 +98,8 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
               <X className="w-4 h-4" />
             </button>
             
-            <div className={`p-6 sm:p-10 text-center space-y-4 border-b border-slate-100 ${showDiscount ? 'bg-indigo-50/50' : ''}`}>
+            <div className={`p-6 sm:p-10 text-center space-y-4 border-b border-slate-100 ${showDiscount ? 'bg-slate-50/50' : ''}`}>
+
               {checkoutError && (
                 <p
                   className="text-sm text-red-800 bg-red-50 border border-red-100 rounded-xl px-4 py-3 max-w-xl mx-auto text-left"
@@ -108,10 +109,11 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                 </p>
               )}
               {showDiscount && (
-                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 shadow-sm shadow-indigo-100">
+                <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 shadow-sm shadow-slate-200">
                   <span className="animate-pulse">✨</span> Promo Active: BLUEPRINT35
                 </div>
               )}
+
               {openReason === "invoice_limit" && (
                 <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
                   You&apos;ve used all <strong>3 free invoices</strong> on this project. Upgrade to add more invoices anytime.{" "}
@@ -143,15 +145,19 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
             <div className="p-6 sm:p-10 bg-slate-50 flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Door A */}
-                <Card className="border-indigo-200 shadow-md shadow-indigo-100/50 relative overflow-hidden flex flex-col">
+                <Card className="border-slate-200 shadow-md shadow-slate-100/50 relative overflow-hidden flex flex-col">
+
                   {showDiscount && (
-                    <div className="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded animate-bounce">
+                    <div className="absolute top-3 right-3 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded animate-bounce">
                       -35%
                     </div>
                   )}
-                  <div className="absolute top-0 inset-x-0 h-1 bg-indigo-600"></div>
+
+                  <div className="absolute top-0 inset-x-0 h-1 bg-slate-900"></div>
+
                   <CardHeader>
-                    <CardTitle className="text-xl text-indigo-900">Architect</CardTitle>
+                    <CardTitle className="text-xl text-slate-900">Architect</CardTitle>
+
                     <div className="mt-2 flex items-baseline text-slate-900">
                       {showDiscount ? (
                         <>
@@ -168,17 +174,19 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                     <ul className="space-y-3">
                       {["Unlimited estimates & photo analysis", "Track up to 2 active projects", "Invoice OCR (10 uploads/month)", "Seller Packet PDF for your property"].map((item, i) => (
                         <li key={i} className="flex items-start space-x-3 text-sm text-slate-700">
-                          <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
+
                     </ul>
                   </CardContent>
                   <div className="p-6 pt-0 mt-auto">
                     <Button
                       variant="primary"
-                      className="w-full"
+                      className="w-full premium-gradient"
                       size="lg"
+
                       disabled={loadingPlan !== null || !ARCHITECT_PRICE_ID}
                       onClick={() => handleUpgrade('architect')}
                     >
@@ -197,10 +205,11 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                 {/* Door B */}
                 <Card className="border-slate-200 shadow-sm flex flex-col">
                   {showDiscount && (
-                    <div className="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded animate-bounce">
+                    <div className="absolute top-3 right-3 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded animate-bounce">
                       -35%
                     </div>
                   )}
+
                   <CardHeader>
                     <CardTitle className="text-xl text-slate-900">Project Pass</CardTitle>
                     <div className="mt-2 flex items-baseline text-slate-900">

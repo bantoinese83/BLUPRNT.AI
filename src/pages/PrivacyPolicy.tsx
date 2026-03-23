@@ -1,15 +1,24 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>Privacy Policy — BLUPRNT.AI</title>
+        <meta name="description" content="Learn how BLUPRNT.AI protects your data and manages your personal and project information." />
+      </Helmet>
+
       <nav className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-slate-900 transition-colors" />
+
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+
               BLUPRNT.AI
             </span>
           </Link>

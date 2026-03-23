@@ -56,14 +56,15 @@ export function ProjectHeader({ project }: { project: ProjectRow }) {
         <div className="flex items-center gap-2 flex-wrap">
           <Badge
             variant="secondary"
-            className="bg-emerald-500/10 text-emerald-700 border-emerald-200/50 gap-1.5 font-medium"
+            className="bg-slate-900 text-white border-slate-800 gap-1.5 font-medium"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
             </span>
             Active project
           </Badge>
+
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
           {project.name}
@@ -97,7 +98,8 @@ export function ProjectHeader({ project }: { project: ProjectRow }) {
               </div>
               {shareLoading ? (
                 <div className="flex items-center gap-2 text-slate-500 py-4">
-                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
+                  <Loader2 className="w-5 h-5 text-slate-900 animate-spin" aria-hidden />
+
                   <span>Creating link…</span>
                 </div>
               ) : shareError ? (
