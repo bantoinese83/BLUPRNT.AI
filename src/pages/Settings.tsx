@@ -27,6 +27,12 @@ export default function Settings() {
   const [isArchitect, setIsArchitect] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
 
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+
+
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +145,34 @@ export default function Settings() {
     }
   }
 
+  async function handleChangePassword() {
+    setPasswordMessage(null);
+    if (newPassword.length < 8) {
+      setPasswordMessage("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage("Passwords do not match.");
+      return;
+    }
+
+    setPasswordSaving(true);
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    setPasswordSaving(false);
+
+    if (error) {
+      setPasswordMessage(error.message || "Couldn't update password.");
+      return;
+    }
+
+    setPasswordMessage("Success! Your password has been updated.");
+    setNewPassword("");
+    setConfirmPassword("");
+    setTimeout(() => setPasswordMessage(null), 3000);
+  }
+
   async function handleDeleteAccount() {
     if (!deleteConfirm) return;
     setDeleteMessage(null);
@@ -148,7 +182,7 @@ export default function Settings() {
         method: "POST",
       });
       if (error) throw new Error(error.message);
-      if (data && "error" in data && data.error) throw new Error(data.error);
+      if (data && "error" in data && (data as any).error) throw new Error((data as any).error);
       await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch (e) {
@@ -159,6 +193,8 @@ export default function Settings() {
   }
 
   if (!isSupabaseConfigured()) {
+
+
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <p className="text-slate-600">Connect your account to manage settings.</p>
@@ -246,6 +282,73 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+
+        {user?.email && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Security
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-slate-900">Change password</h4>
+                <p className="text-xs text-slate-500">
+                  Update your account password.
+                </p>
+              </div>
+              
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="new-password">
+                    New Password
+                  </label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Min. 8 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="confirm-password">
+                    Confirm Password
+                  </label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Repeat password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+              </div>
+
+              {passwordMessage && (
+                <p className={`text-sm ${passwordMessage.includes("Success") ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
+                  {passwordMessage}
+                </p>
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleChangePassword}
+                disabled={passwordSaving || !newPassword}
+                type="button"
+                className="w-full sm:w-auto"
+              >
+                {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Update password
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
 
         <Card>
           <CardHeader>
