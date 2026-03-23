@@ -1,4 +1,5 @@
-import { useState, useEffect, useLayoutEffect, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, type ReactNode } from "react";
+
 import { Helmet } from "react-helmet-async";
 
 import { useNavigate, Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -72,6 +73,7 @@ export default function Dashboard() {
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [isArchitect, setIsArchitect] = useState(false);
+  const lastFetchedProjectId = useRef<string | null>(null);
 
   const load = useCallback(async () => {
     if (!isSupabaseConfigured()) {
@@ -169,8 +171,16 @@ export default function Dashboard() {
       setIsArchitect(sub?.status === "active");
     }
 
+    if (projectId === lastFetchedProjectId.current && project !== null) {
+      setLoading(false);
+      return;
+    }
+    lastFetchedProjectId.current = projectId;
+
     setLoading(false);
-  }, [navigate]);
+  }, [navigate, project]);
+
+
 
   useLayoutEffect(() => {
     const fixed = normalizeRepeatedPlanPath(location.pathname);

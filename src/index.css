@@ -105,7 +105,20 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(0.98); }
   }
+
+  .dashboard-grid {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+  }
+
+  .dashboard-main {
+    @apply lg:col-span-2 space-y-8;
+  }
+
+  .dashboard-side {
+    @apply space-y-6;
+  }
 }
+
 
 /* Dashboard Enhancement */
 .dashboard-bg {

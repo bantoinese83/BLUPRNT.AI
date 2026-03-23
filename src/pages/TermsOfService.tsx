@@ -76,6 +76,20 @@ export default function TermsOfService() {
               BLUPRNT.AI provides AI-generated estimates and summaries for informational purposes. Construction costs and resale values are subject to market conditions and local variations. We are not responsible for architectural or financial decisions made based on AI output.
             </p>
           </section>
+          
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">7. Data Rights (GDPR & CCPA)</h2>
+            <p className="text-slate-600 leading-relaxed">
+              Under various global privacy regulations, including GDPR and CCPA, users have specific rights regarding their personal data. BLUPRNT.AI provides tools in the account settings to:
+            </p>
+            <ul className="list-disc ml-6 mt-4 text-slate-600 space-y-2">
+              <li>Access and export your project and financial data.</li>
+              <li>Correct any inaccuracies in your profile information.</li>
+              <li>Request technical deletion of your account and all associated document data.</li>
+              <li>Opt-out of specific data processing activities.</li>
+            </ul>
+          </section>
+
         </div>
       </main>
 
