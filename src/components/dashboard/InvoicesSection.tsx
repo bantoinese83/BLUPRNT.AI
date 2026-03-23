@@ -179,21 +179,23 @@ export function InvoicesSection({
           </select>
           <Button
             variant="outline"
-            size="sm"
+            size="default"
+
             onClick={openUpload}
             disabled={uploading}
             type="button"
-            className={`transition-all duration-300 ${uploading ? 'bg-slate-50 border-slate-200' : ''}`}
+            className={`transition-all duration-300 rounded-xl px-5 ${uploading ? 'bg-slate-50 border-slate-200' : ''}`}
 
           >
             {uploading ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin text-slate-900" />
+              <Loader2 className="w-5 h-5 mr-2 animate-spin text-slate-900" />
             ) : (
 
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="w-5 h-5 mr-2" />
             )}
             {uploading ? 'Processing' : 'Upload'}
           </Button>
+
         </div>
       </div>
 

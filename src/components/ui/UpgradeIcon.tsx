@@ -13,5 +13,6 @@ export function UpgradeIcon({ className, ...props }: UpgradeIconProps) {
       {...props}
     />
 
+
   );
 }

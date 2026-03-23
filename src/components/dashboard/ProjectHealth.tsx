@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Receipt, Shield, AlertTriangle } from "lucide-react";
+import { Shield, AlertTriangle, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 
 type ProjectHealthProps = {
@@ -8,20 +8,67 @@ type ProjectHealthProps = {
   invoiceTotal?: number;
 };
 
-function getHealthGrade(
-  estimatedMid: number,
+function calculateHealthScore(
   invoiceTotal: number,
-  overBudget: boolean
-): { grade: string; label: string } {
-  if (estimatedMid === 0 || invoiceTotal === 0) {
-    return { grade: "—", label: "Start tracking" };
+  min: number,
+  max: number
+): { score: number; status: string; color: string; message: string; stop1: string; stop2: string } {
+  if (min === 0 || invoiceTotal === 0) {
+    return { 
+      score: 0, 
+      status: "Analyzing", 
+      color: "from-slate-400 to-slate-500",
+      stop1: "#94a3b8",
+      stop2: "#64748b",
+      message: "Processing your initial project data..." 
+    };
   }
-  const pct = (invoiceTotal / estimatedMid) * 100;
-  if (overBudget) return { grade: "C", label: "Over budget" };
-  if (pct >= 90) return { grade: "B", label: "Nearly complete" };
-  if (pct >= 50) return { grade: "A", label: "On track" };
-  if (pct >= 25) return { grade: "A+", label: "Early stage" };
-  return { grade: "A+", label: "Just started" };
+
+  const progressPct = (invoiceTotal / min) * 100;
+  const budgetUtilization = (invoiceTotal / max) * 100;
+  
+  if (budgetUtilization > 100) {
+    const overPct = budgetUtilization - 100;
+    return {
+      score: Math.max(0, Math.round(70 - overPct)),
+      status: "Over Budget",
+      color: "from-rose-500 to-orange-600",
+      stop1: "#f43f5e",
+      stop2: "#ea580c",
+      message: "Careful! You've exceeded your lifecycle estimate."
+    };
+  } 
+  
+  if (budgetUtilization > 85) {
+    return {
+      score: 75,
+      status: "At Limit",
+      color: "from-amber-400 to-orange-500",
+      stop1: "#fbbf24",
+      stop2: "#f59e0b",
+      message: "You're approaching the upper limit of your budget."
+    };
+  } 
+
+  if (progressPct > 90) {
+    return {
+      score: 95,
+      status: "Verified",
+      color: "from-blue-400 to-indigo-500",
+      stop1: "#60a5fa",
+      stop2: "#6366f1",
+      message: "Phase verified. Documentation is at peak efficiency."
+    };
+  } 
+
+  return {
+    score: 100,
+    status: "Optimum",
+    color: "from-emerald-400 to-cyan-500",
+    stop1: "#34d399",
+    stop2: "#06b6d4",
+    message: "Your ledger is perfectly aligned with regional averages."
+  };
 }
 
 export function ProjectHealth({
@@ -29,99 +76,104 @@ export function ProjectHealth({
   estimatedMax = 0,
   invoiceTotal = 0,
 }: ProjectHealthProps) {
-  const estimatedMid = (estimatedMin ?? 0) + (estimatedMax ?? 0) ? ((estimatedMin ?? 0) + (estimatedMax ?? 0)) / 2 : 0;
-  const pct = estimatedMid > 0 ? Math.min(100, Math.round((invoiceTotal / estimatedMid) * 100)) : 0;
-  const overBudget = estimatedMid > 0 && invoiceTotal > (estimatedMax ?? estimatedMid);
-  const variance = estimatedMid > 0 ? invoiceTotal - estimatedMid : 0;
-  const { grade, label } = getHealthGrade(estimatedMid, invoiceTotal, overBudget);
+  const min = estimatedMin ?? 0;
+  const max = estimatedMax ?? 0;
+  const progressPct = min > 0 ? Math.min(100, Math.round((invoiceTotal / min) * 100)) : 0;
+  const { score, status, color, message, stop1, stop2 } = calculateHealthScore(invoiceTotal, min, max);
 
-  const statusColor = overBudget ? "text-amber-400" : "text-white";
-
+  const isWarning = status === "Over Budget" || status === "At Limit";
 
   return (
-    <Card className="glass-dark text-white border-slate-800/50 shadow-2xl rounded-3xl overflow-hidden relative">
-      <div className={`absolute -top-12 -right-12 w-32 h-32 ${overBudget ? "bg-amber-500/10" : "bg-white/10"} blur-3xl rounded-full`} />
-
+    <Card className="glass-dark text-white border-slate-800/50 shadow-2xl rounded-3xl overflow-hidden relative group">
+      <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${color} opacity-[0.08] blur-3xl rounded-full transition-all duration-700 group-hover:opacity-15`} />
       
-      <CardHeader className="pb-4 relative z-10">
+      <CardHeader className="pb-2 relative z-10">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-            <Shield className={`w-4 h-4 ${overBudget ? "text-amber-400" : "text-slate-300"}`} strokeWidth={2.5} />
+          <CardTitle className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+            <Shield className={`w-4 h-4 ${isWarning ? "text-amber-400" : "text-emerald-400"}`} strokeWidth={2.5} />
             <span>Health Score</span>
           </CardTitle>
-
-          <div className="relative flex items-center justify-center w-12 h-12">
-            <motion.div
-              className={`absolute inset-0 rounded-full border-2 ${overBudget ? "border-amber-500/30" : "border-slate-500/30"}`}
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-
-            <span className={`text-4xl font-black tabular-nums ${statusColor}`}>
-              {grade}
-            </span>
-          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 relative z-10">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</span>
-            <span className="text-sm font-black tabular-nums">{pct}% Tracked</span>
-          </div>
-          <div className="relative w-full h-3 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700/30">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(100, pct)}%` }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className={`absolute top-0 left-0 h-full rounded-full shadow-[0_0_12px_rgba(255,255,255,0.1)] ${
-                overBudget ? "bg-gradient-to-r from-amber-500 to-orange-500" : "bg-gradient-to-r from-slate-400 to-slate-200"
-              }`}
 
-            />
+      <CardContent className="space-y-6 relative z-10">
+        <div className="flex items-end justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-baseline gap-2">
+              <span className={`text-6xl font-black tracking-tighter tabular-nums bg-gradient-to-br ${color} bg-clip-text text-transparent`}>
+                {score}
+              </span>
+              <span className="text-slate-500 text-lg font-bold">/100</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`px-2 py-0.5 rounded-full bg-gradient-to-br ${color} text-[10px] font-black uppercase tracking-widest text-white`}>
+                {status}
+              </div>
+              {invoiceTotal > 0 && (
+                 <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
+                   <TrendingUp className="w-3 h-3" />
+                   Live
+                 </div>
+              )}
+            </div>
           </div>
-          <div className="flex justify-between px-1">
-             <div className="h-1.5 w-[2px] bg-slate-700 rounded-full" />
-             <div className="h-1.5 w-[2px] bg-slate-700 rounded-full" />
-             <div className="h-1.5 w-[2px] bg-slate-700 rounded-full" />
-             <div className="h-1.5 w-[2px] bg-slate-800 rounded-full" />
+
+          <div className="relative w-24 h-24 mb-1">
+            <svg className="w-full h-full transform -rotate-90">
+              <circle
+                cx="48"
+                cy="48"
+                r="38"
+                fill="transparent"
+                stroke="currentColor"
+                strokeWidth="8"
+                className="text-slate-800/40"
+              />
+              <motion.circle
+                cx="48"
+                cy="48"
+                r="38"
+                fill="transparent"
+                stroke="currentColor"
+                strokeWidth="8"
+                strokeDasharray={2 * Math.PI * 38}
+                initial={{ strokeDashoffset: 2 * Math.PI * 38 }}
+                animate={{ strokeDashoffset: 2 * Math.PI * 38 * (1 - score / 100) }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                style={{ stroke: 'url(#gradient-health)' }}
+              />
+              <defs>
+                <linearGradient id="gradient-health" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={stop1} />
+                  <stop offset="100%" stopColor={stop2} />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+               <Shield className={`w-8 h-8 opacity-10 ${isWarning ? "text-amber-400" : "text-emerald-400"}`} />
+            </div>
           </div>
         </div>
 
-        {invoiceTotal > 0 ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-3 bg-slate-950/40 p-4 rounded-2xl border border-slate-800/50"
-          >
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Utilized</span>
-              <span className="text-sm font-bold text-white tabular-nums">
-                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(invoiceTotal)}
-              </span>
-            </div>
-            
-            <div className={`flex justify-between items-center pt-2 border-t border-slate-800/50 ${variance > 0 ? "text-amber-400" : "text-slate-300"}`}>
-
-              <div className="flex items-center gap-2">
-                {variance > 0 ? <AlertTriangle className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5 opacity-50" />}
-                <span className="text-[11px] font-extrabold uppercase tracking-widest">
-                   {variance > 0 ? "Drift" : "Margin"}
-                </span>
-              </div>
-              <span className="text-sm font-black tabular-nums">
-                {variance > 0 ? "+" : ""}
-                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(variance)}
-              </span>
-            </div>
-          </motion.div>
-        ) : (
-          <div className="p-4 bg-slate-500/10 rounded-2xl text-xs text-slate-300 flex gap-3 border border-slate-500/20 leading-relaxed font-medium">
-            <Receipt className="w-5 h-5 text-slate-400 shrink-0 opacity-80" aria-hidden />
-            <span>Upload invoices to see real-time health and budget performance.</span>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Project Tracked</span>
+            <span className="text-xs font-bold tabular-nums text-slate-300">{progressPct}%</span>
           </div>
-        )}
+          <div className="relative h-2 bg-slate-800/60 rounded-full overflow-hidden border border-slate-700/20">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              className={`absolute inset-y-0 left-0 bg-gradient-to-r ${color} rounded-full`}
+            />
+          </div>
+        </div>
 
+        <div className={`p-4 rounded-2xl border transition-colors duration-500 ${isWarning ? "bg-amber-500/5 border-amber-500/20" : "bg-white/5 border-white/10"}`}>
+          <p className="text-xs leading-relaxed text-slate-300 font-medium">
+            {message}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
