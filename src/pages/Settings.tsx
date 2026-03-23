@@ -238,52 +238,62 @@ export default function Settings() {
               Account
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700" htmlFor="email">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={user?.email ?? ""}
-                disabled
-                className="bg-slate-50"
-              />
-              <p className="text-xs text-slate-500">
-                Email is managed by your sign-in provider. Contact support to change it.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700" htmlFor="displayName">
-                Display name
-              </label>
-              <Input
-                id="displayName"
-                type="text"
-                placeholder="Your name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
-            </div>
-            {profileMessage && (
-              <p className={`text-sm ${profileMessage === "Saved." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
-
-                {profileMessage}
-              </p>
-            )}
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleSaveProfile}
-              disabled={profileSaving}
-              type="button"
+          <CardContent>
+            <form 
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSaveProfile();
+              }}
             >
-              {profileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Save profile
-            </Button>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700" htmlFor="email">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email ?? ""}
+                  disabled
+                  className="bg-slate-50"
+                  autoComplete="email"
+                />
+                <p className="text-xs text-slate-500">
+                  Email is managed by your sign-in provider. Contact support to change it.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700" htmlFor="displayName">
+                  Display name
+                </label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="Your name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  autoComplete="name"
+                />
+              </div>
+              {profileMessage && (
+                <p className={`text-sm ${profileMessage === "Saved." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
+
+                  {profileMessage}
+                </p>
+              )}
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={profileSaving}
+                type="submit"
+              >
+                {profileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Save profile
+              </Button>
+            </form>
           </CardContent>
         </Card>
+
 
         {user?.email && (
           <Card>
@@ -293,63 +303,76 @@ export default function Settings() {
                 Security
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-slate-900">Change password</h4>
-                <p className="text-xs text-slate-500">
-                  Update your account password.
-                </p>
-              </div>
-              
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="new-password">
-                    New Password
-                  </label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    placeholder="Min. 8 characters"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="h-10"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="confirm-password">
-                    Confirm Password
-                  </label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="Repeat password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="h-10"
-                  />
-                </div>
-              </div>
-
-              {passwordMessage && (
-                <p className={`text-sm ${passwordMessage.includes("Success") ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
-                  {passwordMessage}
-                </p>
-              )}
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleChangePassword}
-                disabled={passwordSaving || !newPassword}
-                type="button"
-                className="w-full sm:w-auto"
+            <CardContent>
+              <form 
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleChangePassword();
+                }}
               >
-                {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Update password
-              </Button>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-slate-900">Change password</h4>
+                  <p className="text-xs text-slate-500">
+                    Update your account password.
+                  </p>
+                </div>
+                
+                {/* Hidden username field for accessibility/password managers */}
+                <input type="text" name="username" autoComplete="email" value={user.email} readOnly className="hidden" />
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="new-password">
+                      New Password
+                    </label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      placeholder="Min. 8 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="h-10"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="confirm-password">
+                      Confirm Password
+                    </label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="Repeat password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="h-10"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                </div>
+
+                {passwordMessage && (
+                  <p className={`text-sm ${passwordMessage.includes("Success") ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
+                    {passwordMessage}
+                  </p>
+                )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={passwordSaving || !newPassword}
+                  type="submit"
+                  className="w-full sm:w-auto"
+                >
+                  {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Update password
+                </Button>
+              </form>
             </CardContent>
           </Card>
         )}
+
 
 
         <Card>
