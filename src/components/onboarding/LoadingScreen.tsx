@@ -46,7 +46,10 @@ export function LoadingScreen() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await runPhotoToScope();
+      // Ensure the user sees the animations for at least 4 seconds
+      const minDelay = new Promise(resolve => setTimeout(resolve, 4000));
+      await Promise.all([runPhotoToScope(), minDelay]);
+      
       if (cancelled) return;
       navigate("/onboarding/estimate", { replace: true });
     })();
@@ -54,6 +57,7 @@ export function LoadingScreen() {
       cancelled = true;
     };
   }, [navigate, runPhotoToScope]);
+
 
   return (
     <PageTransition>

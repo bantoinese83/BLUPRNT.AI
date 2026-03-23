@@ -80,7 +80,15 @@ export default function Dashboard() {
       setLoading(false);
       return;
     }
-    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Ensure the skeleton is visible for at least 1.2s
+    const minDelay = new Promise(resolve => setTimeout(resolve, 1200));
+    
+    const [{ data: { session } }] = await Promise.all([
+      supabase.auth.getSession(),
+      minDelay
+    ]);
+    
     if (!session) {
       const returnTo = getSafeRedirect(
         `${window.location.pathname}${window.location.search}`,
@@ -91,6 +99,7 @@ export default function Dashboard() {
     }
     let projectId: string | null = null;
     try {
+
       projectId = localStorage.getItem("bluprnt_project_id");
     } catch {
       /* ignore */
