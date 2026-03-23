@@ -19,7 +19,7 @@ import {
   userFacingLocationError,
 } from "@/lib/location";
 
-const SESSION_IP_KEY = "blueprintai_location_ip_attempted";
+const SESSION_IP_KEY = "bluprnt_location_ip_attempted";
 
 export function LocationScreen() {
   const navigate = useNavigate();

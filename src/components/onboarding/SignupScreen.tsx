@@ -34,9 +34,9 @@ export function SignupScreen() {
     if (result.ok) {
       let redirect = "/dashboard";
       try {
-        const stored = sessionStorage.getItem("blueprintai_redirect");
+        const stored = sessionStorage.getItem("bluprnt_redirect");
         if (stored) {
-          sessionStorage.removeItem("blueprintai_redirect");
+          sessionStorage.removeItem("bluprnt_redirect");
           redirect = getSafeRedirect(stored);
         }
       } catch {

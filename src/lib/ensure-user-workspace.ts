@@ -20,7 +20,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     const pid = projects?.[0]?.id;
     if (pid) {
       try {
-        localStorage.setItem("blueprintai_project_id", pid);
+        localStorage.setItem("bluprnt_project_id", pid);
       } catch {
         /* ignore */
       }
@@ -56,7 +56,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
 
   if (!jErr && proj?.id) {
     try {
-      localStorage.setItem("blueprintai_project_id", proj.id);
+      localStorage.setItem("bluprnt_project_id", proj.id);
     } catch {
       /* ignore */
     }

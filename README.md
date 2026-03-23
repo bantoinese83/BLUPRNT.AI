@@ -29,10 +29,10 @@ The location step **auto-fills** an approximate area from your network (IP → r
 
    In **Supabase Dashboard → Authentication → URL Configuration**:
 
-   - **Site URL**: your app origin (e.g. `http://localhost:3000` or production URL).
+   - **Site URL**: `https://bluprntai.com`
    - **Redirect URLs**: add  
      `http://localhost:3000/auth/callback`  
-     and your production `https://your-domain.com/auth/callback`.
+     `https://bluprntai.com/auth/callback`
 
    **Google**: Authentication → **Providers** → **Google** → enable and paste **Client ID** and **Client Secret** from [Google Cloud Console](https://console.cloud.google.com/) (OAuth 2.0 Web client). Authorized redirect URI in Google must be:  
    `https://<YOUR_SUPABASE_REF>.supabase.co/auth/v1/callback`  
@@ -55,35 +55,27 @@ The location step **auto-fills** an approximate area from your network (IP → r
 
 ## Stripe (paid plans)
 
-When ready to offer paid plans, add Stripe Checkout payment links:
+BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
 
-1. **Create a Stripe account** at [stripe.com](https://stripe.com) and complete setup.
-
-2. **Create products** in [Stripe Dashboard → Products](https://dashboard.stripe.com/products):
-   - **Architect plan** — e.g. one-time or subscription for full invoice tracking
-   - **Project Pass** — e.g. per-project unlock
-
-3. **Create payment links** for each product:
-   - Products → select product → Add payment link
-   - Set price, optional success/cancel URLs (e.g. `https://your-domain.com/dashboard`)
-   - Copy the payment link URL (starts with `https://buy.stripe.com/...`)
-
-4. **Add to `.env`**:
+1. **Create Products** in Stripe (Architect Monthly & Project Pass).
+2. **Add to `.env`**:
    ```env
-   VITE_STRIPE_ARCHITECT_URL=https://buy.stripe.com/your-architect-link
-   VITE_STRIPE_PROJECT_PASS_URL=https://buy.stripe.com/your-project-pass-link
+   VITE_STRIPE_ARCHITECT_PRICE_ID=price_1...
+   VITE_STRIPE_PROJECT_PASS_PRICE_ID=price_1...
    ```
-
-5. **Behavior**: When set, the Upgrade modal shows "Start Architect plan" and "Get Project Pass" buttons that open the Stripe checkout. When unset, buttons show "Coming soon".
+3. **Set Secrets**: In Supabase, set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+4. **Deploy**: `supabase functions deploy create-checkout stripe-webhook`.
 
 ## Edge Functions (backend)
 
 | Function           | JWT   | Purpose |
 |--------------------|-------|---------|
-| `photo-to-scope`   | Off*  | Build estimate from ZIP, room type, optional photos; optional save when `project_id` + user JWT |
+| `create-checkout`  | On    | Generate secure Stripe Checkout session |
+| `stripe-webhook`   | Off   | Receive Stripe events (provisioning) |
+| `photo-to-scope`   | Off*  | Build estimate from ZIP, room type, optional photos |
 | `upload-invoice`   | On    | Upload PDF/image → Storage + `documents` + `invoices` |
-| `get-invoice`      | On    | Load invoice + line items (POST JSON `{ "invoice_id" }` or GET `?invoice_id=`) |
-| `get-project-view` | Off   | Public: fetch project + scope by share token (GET `?token=`) |
+| `get-invoice`      | On    | Load invoice + line items |
+| `get-project-view` | Off   | Public: fetch project + scope by share token |
 
 \*Gateway JWT off so guests can run the first estimate; saving to a project still requires a valid user token.
 

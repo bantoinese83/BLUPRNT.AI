@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, X } from "lucide-react";
+import { CheckCircle2, X, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export type UpgradeOpenReason = "general" | "invoice_limit";
 
@@ -24,15 +26,37 @@ function formatEstimate(n: number | null | undefined): string {
 }
 
 export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, openReason = "general", showDiscount = false }: UpgradeModalProps) {
+  const [loadingPlan, setLoadingPlan] = useState<'architect' | 'pass' | null>(null);
+
   const mid = estimatedAmount != null && Number.isFinite(estimatedAmount)
     ? estimatedAmount
     : 28000;
-  const architectUrl = import.meta.env.VITE_STRIPE_ARCHITECT_URL;
-  const baseProjectPassUrl = import.meta.env.VITE_STRIPE_PROJECT_PASS_URL;
-  const projectPassUrl = baseProjectPassUrl && projectId
-    ? `${baseProjectPassUrl}${baseProjectPassUrl.includes("?") ? "&" : "?"}project_id=${projectId}`
-    : baseProjectPassUrl;
-  const hasStripe = Boolean(architectUrl || baseProjectPassUrl);
+
+  const handleUpgrade = async (plan: 'architect' | 'pass') => {
+    setLoadingPlan(plan);
+    try {
+      const priceId = plan === 'architect' 
+        ? import.meta.env.VITE_STRIPE_ARCHITECT_PRICE_ID 
+        : import.meta.env.VITE_STRIPE_PROJECT_PASS_PRICE_ID;
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { 
+          priceId,
+          projectId: plan === 'pass' ? projectId : undefined
+        }
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Stripe Checkout error:", err);
+      alert("Something went wrong with the checkout. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -131,12 +155,17 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                       variant="primary"
                       className="w-full"
                       size="lg"
-                      onClick={() => {
-                        if (architectUrl) window.location.href = architectUrl;
-                        else if (!hasStripe) onClose();
-                      }}
+                      disabled={loadingPlan !== null}
+                      onClick={() => handleUpgrade('architect')}
                     >
-                      {architectUrl ? "Start Architect plan" : "Coming soon"}
+                      {loadingPlan === 'architect' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Redirecting...
+                        </>
+                      ) : (
+                        "Start Architect plan"
+                      )}
                     </Button>
                   </div>
                 </Card>
@@ -177,12 +206,17 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                       className="w-full"
                       variant="outline"
                       size="lg"
-                      onClick={() => {
-                        if (projectPassUrl) window.location.href = projectPassUrl;
-                        else if (!hasStripe) onClose();
-                      }}
+                      disabled={loadingPlan !== null}
+                      onClick={() => handleUpgrade('pass')}
                     >
-                      {projectPassUrl ? "Get Project Pass" : "Coming soon"}
+                      {loadingPlan === 'pass' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Redirecting...
+                        </>
+                      ) : (
+                        "Get Project Pass"
+                      )}
                     </Button>
                   </div>
                 </Card>

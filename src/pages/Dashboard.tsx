@@ -61,6 +61,7 @@ export default function Dashboard() {
   const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
+  const [isArchitect, setIsArchitect] = useState(false);
 
   const load = useCallback(async () => {
     if (!isSupabaseConfigured()) {
@@ -74,7 +75,7 @@ export default function Dashboard() {
     }
     let projectId: string | null = null;
     try {
-      projectId = localStorage.getItem("blueprintai_project_id");
+      projectId = localStorage.getItem("bluprnt_project_id");
     } catch {
       /* ignore */
     }
@@ -96,7 +97,7 @@ export default function Dashboard() {
       if (!projectId && rows.length) {
         projectId = rows[0].id;
         try {
-          localStorage.setItem("blueprintai_project_id", projectId);
+          localStorage.setItem("bluprnt_project_id", projectId);
         } catch {
           /* ignore */
         }
@@ -117,7 +118,7 @@ export default function Dashboard() {
             projectId = rows[0].id;
             setProject(rows[0]);
             try {
-              localStorage.setItem("blueprintai_project_id", projectId);
+              localStorage.setItem("bluprnt_project_id", projectId);
             } catch {
               /* ignore */
             }
@@ -143,6 +144,15 @@ export default function Dashboard() {
         .eq("project_id", projectId)
         .order("created_at", { ascending: false });
       setInvoices((inv ?? []) as InvoiceRow[]);
+
+      // Check subscription status
+      const { data: sub } = await supabase
+        .from("user_subscriptions")
+        .select("status")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      
+      setIsArchitect(sub?.status === "active");
     }
 
     setLoading(false);
@@ -183,7 +193,7 @@ export default function Dashboard() {
 
   function handleProjectSelect(id: string) {
     try {
-      localStorage.setItem("blueprintai_project_id", id);
+      localStorage.setItem("bluprnt_project_id", id);
     } catch {
       /* ignore */
     }
@@ -205,7 +215,7 @@ export default function Dashboard() {
     }
     
     if (id === project?.id) {
-      localStorage.removeItem("blueprintai_project_id");
+      localStorage.removeItem("bluprnt_project_id");
     }
     
     load();
@@ -316,7 +326,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen dashboard-bg">
-      <DashboardHeader onSignOut={handleSignOut} projectName={project.name} />
+      <DashboardHeader onSignOut={handleSignOut} projectName={project.name} isArchitect={isArchitect} />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

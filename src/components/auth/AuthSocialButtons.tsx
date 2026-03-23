@@ -26,7 +26,7 @@ export function AuthSocialButtons({
     }
     if (redirect) {
       try {
-        sessionStorage.setItem("blueprintai_auth_redirect", redirect);
+        sessionStorage.setItem("bluprnt_auth_redirect", redirect);
       } catch {
         /* ignore */
       }

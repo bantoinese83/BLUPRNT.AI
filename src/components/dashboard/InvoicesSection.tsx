@@ -19,7 +19,7 @@ type InvoicesSectionProps = {
 };
 
 const FREE_LIMIT = 3;
-const GUIDE_KEY = "blueprintai_invoice_guide_collapsed";
+const GUIDE_KEY = "bluprnt_invoice_guide_collapsed";
 
 function friendlyUploadError(err: unknown, body?: { error?: string }): string {
   const msg = body?.error ?? (typeof err === "object" && err && "message" in err ? String((err as { message?: string }).message) : "");

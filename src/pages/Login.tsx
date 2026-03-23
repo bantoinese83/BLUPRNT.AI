@@ -68,7 +68,7 @@ export default function Login() {
     const redirectTo = searchParams.get("redirect");
     if (redirectTo) {
       try {
-        sessionStorage.setItem("blueprintai_auth_redirect", redirectTo);
+        sessionStorage.setItem("bluprnt_auth_redirect", redirectTo);
       } catch {
         /* ignore */
       }

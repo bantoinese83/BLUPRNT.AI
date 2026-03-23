@@ -147,7 +147,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         });
 
         setSavedProjectId(projectId);
-        localStorage.setItem("blueprintai_project_id", projectId);
+        localStorage.setItem("bluprnt_project_id", projectId);
         return { ok: true, message: "Project saved." };
       } catch (err) {
         return {
@@ -210,7 +210,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         });
 
         setSavedProjectId(projectId);
-        localStorage.setItem("blueprintai_project_id", projectId);
+        localStorage.setItem("bluprnt_project_id", projectId);
         return { ok: true, message: "You’re all set." };
       } catch (err) {
         return {

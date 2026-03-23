@@ -113,7 +113,7 @@ export function EstimateScreen() {
             className="w-full"
             onClick={() => {
               try {
-                sessionStorage.setItem("blueprintai_redirect", "/dashboard/scope");
+                sessionStorage.setItem("bluprnt_redirect", "/dashboard/scope");
               } catch {
                 /* ignore */
               }
@@ -130,7 +130,7 @@ export function EstimateScreen() {
             className="w-full gap-2"
             onClick={() => {
               try {
-                sessionStorage.setItem("blueprintai_redirect", "/dashboard/plan");
+                sessionStorage.setItem("bluprnt_redirect", "/dashboard/plan");
               } catch {
                 /* ignore */
               }

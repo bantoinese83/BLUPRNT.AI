@@ -1,4 +1,4 @@
-const STORAGE_KEY = "blueprintai_dashboard_welcome";
+const STORAGE_KEY = "bluprnt_dashboard_welcome";
 
 /** Call after first signup so dashboard can show next-step banner. */
 export function setDashboardWelcomeFlag() {

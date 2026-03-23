@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 type DashboardHeaderProps = {
   onSignOut: () => void;
   projectName?: string;
+  isArchitect?: boolean;
 };
 
-export function DashboardHeader({ onSignOut, projectName }: DashboardHeaderProps) {
+export function DashboardHeader({ onSignOut, projectName, isArchitect }: DashboardHeaderProps) {
   return (
     <header className="glass sticky top-0 z-50 border-white/40">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -19,11 +20,18 @@ export function DashboardHeader({ onSignOut, projectName }: DashboardHeaderProps
             <h1 className="font-black text-slate-950 tracking-tighter block truncate text-xl leading-none mb-0.5 uppercase italic">
               BLUPRNT<span className="text-indigo-600">.AI</span>
             </h1>
-            {projectName && (
-              <span className="text-[11px] text-slate-500 truncate block font-semibold uppercase tracking-wider opacity-80 leading-none">
-                {projectName}
-              </span>
-            )}
+            <div className="flex items-center gap-2 leading-none">
+              {projectName && (
+                <span className="text-[11px] text-slate-500 truncate block font-semibold uppercase tracking-wider opacity-80">
+                  {projectName}
+                </span>
+              )}
+              {isArchitect && (
+                <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded shadow-sm shadow-indigo-200">
+                  Architect
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">

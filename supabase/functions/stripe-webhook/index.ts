@@ -42,6 +42,7 @@ Deno.serve(async (req: Request) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.userId;
         const customerEmail = session.customer_email ?? session.customer_details?.email;
 
         if (session.mode === "subscription" && session.subscription) {
@@ -53,30 +54,33 @@ Deno.serve(async (req: Request) => {
             ? new Date(subscription.current_period_end * 1000).toISOString()
             : null;
 
-          if (customerEmail) {
-            const { data: userId, error: rpcErr } = await admin.rpc("get_user_id_by_email", {
+          let targetUserId = userId;
+          if (!targetUserId && customerEmail) {
+            const { data: rpcUserId, error: rpcErr } = await admin.rpc("get_user_id_by_email", {
               user_email: customerEmail,
             });
             if (rpcErr) console.error("RPC get_user_id_by_email:", rpcErr);
-            if (userId) {
-              await admin.from("user_subscriptions").upsert(
-                {
-                  user_id: userId,
-                  stripe_subscription_id: subId,
-                  stripe_customer_id:
-                    typeof session.customer === "string"
-                      ? session.customer
-                      : session.customer?.id ?? null,
-                  plan: "architect",
-                  status: "active",
-                  current_period_end: periodEnd,
-                  invoice_uploads_count: 0,
-                  invoice_uploads_reset_at: periodEnd,
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: "user_id" }
-              );
-            }
+            targetUserId = rpcUserId;
+          }
+
+          if (targetUserId) {
+            await admin.from("user_subscriptions").upsert(
+              {
+                user_id: targetUserId,
+                stripe_subscription_id: subId,
+                stripe_customer_id:
+                  typeof session.customer === "string"
+                    ? session.customer
+                    : session.customer?.id ?? null,
+                plan: "architect",
+                status: "active",
+                current_period_end: periodEnd,
+                invoice_uploads_count: 0,
+                invoice_uploads_reset_at: periodEnd,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id" }
+            );
           }
         } else if (session.mode === "payment" && session.metadata?.project_id) {
           const projectId = session.metadata.project_id;

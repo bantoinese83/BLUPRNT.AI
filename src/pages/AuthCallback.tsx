@@ -63,9 +63,9 @@ export default function AuthCallback() {
       await ensureUserHasWorkspace(session.user.id);
       let redirectTo = "/dashboard";
       try {
-        const stored = sessionStorage.getItem("blueprintai_auth_redirect");
+        const stored = sessionStorage.getItem("bluprnt_auth_redirect");
         if (stored) {
-          sessionStorage.removeItem("blueprintai_auth_redirect");
+          sessionStorage.removeItem("bluprnt_auth_redirect");
           redirectTo = getSafeRedirect(stored);
         }
       } catch {
