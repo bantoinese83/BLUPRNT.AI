@@ -67,8 +67,9 @@ export function WelcomeScreen() {
 
         <div className="space-y-4">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Turn your renovation into a financial plan
+            <span className="liquid-metal-text">Turn your renovation into a financial plan</span>
           </h1>
+
           <p className="text-lg text-slate-500 max-w-sm mx-auto">
             Get real-world costs, track invoices, and build a home improvement record you can hand to buyers.
           </p>

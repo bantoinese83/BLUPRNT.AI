@@ -18,8 +18,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {
             "bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98]":
               variant === "default",
-            "bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98] shadow-sm shadow-slate-950/20":
+            "liquid-metal-button text-white":
               variant === "primary",
+
 
             "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]":
               variant === "destructive",

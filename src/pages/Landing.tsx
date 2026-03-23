@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { LiquidMetalShader } from "@/components/ui/LiquidMetalShader";
+
 
 
 const SITE_URL = getAuthCallbackUrl().replace(/\/auth\/callback$/, "") ||
@@ -156,9 +156,10 @@ export default function Landing() {
                   </span>
                   <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.1]">
                     Turn your renovation into a{" "}
-                    <span className="text-gradient">
+                    <span className="liquid-metal-text">
                       financial plan
                     </span>
+
 
                   </h1>
                 </motion.div>
@@ -182,7 +183,8 @@ export default function Landing() {
                 >
                   <Button
                     size="lg"
-                    className="h-16 px-8 text-lg font-black rounded-2xl premium-gradient shadow-2xl shadow-slate-200 hover:scale-105 active:scale-95 transition-all text-white border-0"
+                    className="h-16 px-8 text-lg font-black rounded-2xl liquid-metal-button hover:scale-105 active:scale-95 transition-all text-white border-0"
+
 
                     onClick={() => navigate("/onboarding")}
                   >
@@ -206,26 +208,13 @@ export default function Landing() {
                 className="relative"
               >
                 <div className="absolute -inset-4 bg-linear-to-r from-slate-500/20 to-slate-400/20 rounded-[2.5rem] blur-3xl" />
-                <div className="relative glass-card p-12 rounded-[2.5rem] overflow-hidden shadow-2xl flex items-center justify-center min-h-[500px]">
-                  <div className="liquid-metal-container">
-                    <div className="liquid-outline" />
-                    <LiquidMetalShader 
-                      className="liquid-metal-host"
-                      repetition={1.5}
-                      softness={0.5}
-                      shiftRed={0.3}
-                      shiftBlue={0.3}
-                      distortion={0}
-                      contour={0}
-                      angle={100}
-                      scale={1.5}
-                      shape={1}
-                      offsetX={0.1}
-                      offsetY={-0.1}
-                      playState={0.6}
-                    />
-                    <Home className="svg-icon w-12 h-12 text-white" />
-                  </div>
+                <div className="relative glass-card p-2 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                  <img
+                    src="/images/renovation_hero.png"
+                    alt="Modern Home Renovation"
+                    className="rounded-[2rem] w-full h-auto object-cover shadow-inner"
+                  />
+
 
                   <div className="absolute bottom-8 left-8 right-8 glass-card p-6 rounded-2xl animate-float">
                     <div className="flex items-center gap-4">
@@ -431,7 +420,8 @@ export default function Landing() {
                   <Button 
                     variant="primary" 
                     size="lg" 
-                    className="w-full h-14 rounded-2xl text-lg font-black premium-gradient border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
+                    className="w-full h-14 rounded-2xl text-lg font-black liquid-metal-button border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
+
                     onClick={() => navigate("/onboarding")}
                   >
                     Start Architect free
