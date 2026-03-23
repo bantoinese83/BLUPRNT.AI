@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, type ReactNode } from "react";
 import { useNavigate, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
@@ -48,6 +48,13 @@ function DashboardSubPage({
       </div>
     </div>
   );
+}
+
+/** Collapse /dashboard/plan/plan/... (relative Navigate bug) to /dashboard/plan */
+function normalizeRepeatedPlanPath(pathname: string): string | null {
+  if (!/^\/dashboard(\/plan)+$/.test(pathname)) return null;
+  if (pathname === "/dashboard/plan") return null;
+  return "/dashboard/plan";
 }
 
 export default function Dashboard() {
@@ -162,6 +169,13 @@ export default function Dashboard() {
 
     setLoading(false);
   }, [navigate]);
+
+  useLayoutEffect(() => {
+    const fixed = normalizeRepeatedPlanPath(location.pathname);
+    if (fixed) {
+      navigate(`${fixed}${location.search}${location.hash}`, { replace: true });
+    }
+  }, [location.pathname, location.search, location.hash, navigate]);
 
   useEffect(() => {
     let active = true;
@@ -364,7 +378,10 @@ export default function Dashboard() {
             transition={{ duration: 0.2 }}
           >
             <Routes location={location}>
-              <Route path="" element={<Navigate to="plan" replace />} />
+              <Route
+                path=""
+                element={<Navigate to="/dashboard/plan" replace />}
+              />
               <Route
                 path="plan"
                 element={
