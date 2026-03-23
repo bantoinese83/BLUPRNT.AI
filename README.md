@@ -13,7 +13,7 @@ The location step **auto-fills** an approximate area from your network (IP → r
 *   **Invoice OCR & Ledger**: Upload receipts to automatically map actual costs against your budget.
 *   **Resale Value Impact**: Visualize the financial impact and ROI of your home improvements.
 *   **Seller Packet**: Export a professional PDF of your renovation history to hand to agents and buyers.
-*   **PWA Support**: Full "Add to Home Screen" experience with offline caching.
+*   **Web app**: Standard SPA deployment; service worker / web app manifest are disabled to avoid stale caches and install prompts.
 *   **Project Lifecycle**: Archive and manage multiple properties or renovation phases with ease.
 
 ## Quick start
