@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import Lottie from "lottie-react";
+
 import { PageTransition } from "./PageTransition";
 import { useOnboarding } from "@/hooks/use-onboarding";
 
@@ -15,8 +15,28 @@ export function LoadingScreen() {
   const navigate = useNavigate();
   const { runPhotoToScope, projectType, estimateError } = useOnboarding();
   const [messageIdx, setMessageIdx] = useState(0);
+  const [animationData, setAnimationData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch animations from public folder directly to ensure they are loaded correctly
+    const fetchAnimations = async () => {
+      try {
+        const paths = [
+          "/investment-animated-icon.json",
+          "/dream-house-aimated-icon.json",
+          "/loading-paint-animated-icon.json"
+        ];
+        const data = await Promise.all(paths.map(path => fetch(path).then(res => res.json())));
+        setAnimationData(data);
+      } catch (err) {
+        console.error("Failed to load Lottie animations:", err);
+      }
+    };
+    fetchAnimations();
+  }, []);
 
   const kind =
+
     projectType === "Kitchen"
       ? "kitchen"
       : projectType === "Bathroom"
@@ -29,14 +49,8 @@ export function LoadingScreen() {
     `Comparing similar ${kind} projects…`,
   ];
 
-  const animations = [
-    investment,
-    dreamHouse,
-    paintLoading
-  ];
-
-
   useEffect(() => {
+
     const interval = setInterval(() => {
       setMessageIdx((prev) => (prev + 1) % messages.length);
     }, 1800);
@@ -71,13 +85,15 @@ export function LoadingScreen() {
 
           
           {/* Central Logo/Icon Animation */}
-          <div className="relative w-32 h-32 bg-white rounded-3xl shadow-xl flex items-center justify-center glass border-white overflow-hidden p-2">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/10 to-slate-400/10 rounded-3xl" />
-            <Lottie 
-              animationData={animations[messageIdx]} 
-              loop={true}
-              className="w-full h-full"
-            />
+          <div className="relative w-32 h-32 bg-white rounded-3xl shadow-2xl flex items-center justify-center p-2 border-2 border-slate-50">
+            {animationData[messageIdx] && (
+              <Lottie 
+                animationData={animationData[messageIdx]} 
+                loop={true}
+                className="w-full h-full"
+              />
+            )}
+
 
 
             

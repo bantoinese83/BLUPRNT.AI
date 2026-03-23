@@ -1,9 +1,19 @@
+import { useState, useEffect } from "react";
+import Lottie from "lottie-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import Lottie from "lottie-react";
-import investment from "../../../public/investment-animated-icon.json";
 
 export function DashboardSkeleton() {
+
+  const [animationData, setAnimationData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/investment-animated-icon.json")
+      .then(res => res.json())
+      .then(data => setAnimationData(data))
+      .catch(err => console.error("Failed to load Lottie:", err));
+  }, []);
+
   return (
     <div className="min-h-screen dashboard-bg">
       {/* Header skeleton */}
@@ -11,10 +21,11 @@ export function DashboardSkeleton() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10">
-               <Lottie animationData={investment} loop={true} />
+               {animationData && <Lottie animationData={animationData} loop={true} />}
              </div>
              <Skeleton className="h-9 w-24 rounded-xl" />
           </div>
+
           <Skeleton className="h-9 w-24 rounded-xl" />
         </div>
       </header>
