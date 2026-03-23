@@ -136,9 +136,10 @@ export default function Dashboard() {
             .from("projects")
             .select("id, name, property_id, estimated_min_total, estimated_max_total, confidence_score")
             .eq("id", projectId)
-            .single();
+            .maybeSingle();
           const resolved = (single ?? null) as ProjectRow | null;
           setProject(resolved);
+
           if (!resolved && rows.length) {
             projectId = rows[0].id;
             setProject(rows[0]);
