@@ -383,6 +383,8 @@ export default function Landing() {
               <Link to="/onboarding" className="hover:text-slate-900">Get started</Link>
               <Link to="/login" className="hover:text-slate-900">Sign in</Link>
               <Link to="/register" className="hover:text-slate-900">Create account</Link>
+              <Link to="/privacy" className="hover:text-slate-900">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-slate-900">Terms of Service</Link>
             </div>
           </div>
           <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-slate-500">

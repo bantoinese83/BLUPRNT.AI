@@ -20,6 +20,8 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 export default function App() {
   return (
@@ -58,6 +60,8 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
