@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
@@ -9,12 +9,14 @@ import {
   BarChart3,
   Home,
   LogIn,
+  Menu,
   Receipt,
   Shield,
   UserPlus,
   Camera,
   FileCheck,
   MessageCircleQuestion,
+  X,
 } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 import { Highlighter } from "@/components/ui/Highlighter";
@@ -34,8 +36,18 @@ const FALLBACK_SITE_URL = "https://bluprntai.com";
 export default function Landing() {
   const navigate = useNavigate();
   const { hash } = useLocation();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
   const metaBase = SITE_URL || FALLBACK_SITE_URL;
   const jsonLd = buildLandingJsonLd(metaBase);
+
+  const scrollToSection = useCallback((sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+    setMobileNavOpen(false);
+  }, []);
 
   useEffect(() => {
     if (hash !== "#faq") return;
@@ -46,6 +58,28 @@ export default function Landing() {
     }, 0);
     return () => window.clearTimeout(t);
   }, [hash]);
+
+  useEffect(() => {
+    const onScroll = () => setHeaderScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setMobileNavOpen(false);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   return (
     <>
@@ -93,51 +127,169 @@ export default function Landing() {
 
       <div className="min-h-screen bg-slate-50 text-slate-900">
         {/* Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl transition-all duration-300">
-          <nav
-            className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6"
-            aria-label="Main navigation"
-          >
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3 font-bold text-slate-900 tracking-tight"
+        <header
+          className={`fixed top-0 left-0 right-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl transition-shadow duration-300 ${
+            headerScrolled ? "shadow-sm shadow-slate-200/50" : ""
+          }`}
+        >
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+            <nav
+              className="flex h-16 items-center justify-between gap-3 sm:h-[4.25rem]"
+              aria-label="Main navigation"
             >
-              <Link to="/" className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-slate-100 sm:h-14 sm:w-14 sm:rounded-2xl sm:p-2">
-                  <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
-                </div>
-                <span className="text-xl font-black italic tracking-tighter">BLUPRNT<span className="text-slate-900">.AI</span></span>
-
-              </Link>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3"
-            >
-              <button 
-                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors hidden md:block px-4"
+              <motion.div
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="min-w-0 shrink"
               >
-                Pricing
-              </button>
-              <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <LogIn className="mr-2 h-4 w-4" aria-hidden />
-                  Sign in
-                </Button>
-              </Link>
+                <Link
+                  to="/"
+                  className="flex min-w-0 items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 sm:gap-3"
+                  aria-label="BLUPRNT — Home"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/40 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-1.5">
+                    <img
+                      src="/bluprnt_logo.svg"
+                      alt=""
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <span className="truncate text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
+                    BLUPRNT<span className="text-indigo-600">.AI</span>
+                  </span>
+                </Link>
+              </motion.div>
 
-              <Link to="/onboarding">
-                <Button size="sm" variant="primary" className="shadow-lg shadow-slate-200">
-                  Get started
-                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                </Button>
-              </Link>
+              {/* Desktop in-page links */}
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute left-1/2 hidden -translate-x-1/2 lg:flex lg:items-center lg:gap-0.5"
+              >
+                {(
+                  [
+                    ["how", "How it works"],
+                    ["features", "Features"],
+                    ["pricing", "Pricing"],
+                    ["faq", "Questions"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => scrollToSection(id)}
+                    className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100/80 hover:text-slate-900"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </motion.div>
 
-            </motion.div>
-          </nav>
+              <motion.div
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex shrink-0 items-center gap-1.5 sm:gap-2"
+              >
+                <Link to="/login" className="hidden lg:block">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  >
+                    <LogIn className="mr-1.5 h-4 w-4" aria-hidden />
+                    Sign in
+                  </Button>
+                </Link>
+
+                <Link to="/onboarding" className="flex lg:hidden">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    className="rounded-xl px-3.5 text-xs font-bold shadow-md shadow-indigo-500/15"
+                  >
+                    Start
+                  </Button>
+                </Link>
+
+                <Link to="/onboarding" className="hidden lg:block">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    className="rounded-xl shadow-md shadow-indigo-500/20"
+                  >
+                    Get started
+                    <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden />
+                  </Button>
+                </Link>
+
+                <button
+                  type="button"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 lg:hidden"
+                  aria-expanded={mobileNavOpen}
+                  aria-controls="landing-mobile-nav"
+                  aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+                  onClick={() => setMobileNavOpen((o) => !o)}
+                >
+                  {mobileNavOpen ? (
+                    <X className="h-5 w-5" aria-hidden />
+                  ) : (
+                    <Menu className="h-5 w-5" aria-hidden />
+                  )}
+                </button>
+              </motion.div>
+            </nav>
+
+            {/* Mobile panel */}
+            {mobileNavOpen ? (
+              <div
+                id="landing-mobile-nav"
+                className="border-t border-slate-200/80 bg-white/95 py-4 backdrop-blur-xl lg:hidden"
+              >
+                <div className="flex flex-col gap-1">
+                  {(
+                    [
+                      ["how", "How it works"],
+                      ["features", "Features"],
+                      ["pricing", "Pricing"],
+                      ["faq", "Questions"],
+                    ] as const
+                  ).map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => scrollToSection(id)}
+                      className="rounded-xl px-3 py-3 text-left text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                  <div className="my-2 border-t border-slate-100" />
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                    onClick={() => setMobileNavOpen(false)}
+                  >
+                    <LogIn className="h-4 w-4 text-slate-500" aria-hidden />
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                    onClick={() => setMobileNavOpen(false)}
+                  >
+                    <UserPlus className="h-4 w-4 text-slate-500" aria-hidden />
+                    Create account
+                  </Link>
+                  <Link to="/onboarding" onClick={() => setMobileNavOpen(false)} className="mt-2 px-1">
+                    <Button variant="primary" className="h-11 w-full rounded-xl font-bold shadow-md shadow-indigo-500/20">
+                      Get started
+                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </header>
 
         <main>
@@ -245,7 +397,8 @@ export default function Landing() {
 
           {/* How it works */}
           <section
-            className="border-t border-slate-200/80 bg-white px-4 py-20 sm:px-6"
+            id="how"
+            className="border-t border-slate-200/80 bg-white px-4 py-20 sm:px-6 scroll-mt-24 sm:scroll-mt-28"
             aria-labelledby="how-heading"
           >
             <div className="mx-auto max-w-6xl">
@@ -348,7 +501,8 @@ export default function Landing() {
 
           {/* Features */}
           <section
-            className="border-t border-slate-200/80 bg-slate-50/50 px-4 py-20 sm:px-6"
+            id="features"
+            className="border-t border-slate-200/80 bg-slate-50/50 px-4 py-20 sm:px-6 scroll-mt-24 sm:scroll-mt-28"
             aria-labelledby="features-heading"
           >
             <div className="mx-auto max-w-6xl">
@@ -403,7 +557,7 @@ export default function Landing() {
           {/* Pricing Section */}
           <section
             id="pricing"
-            className="border-t border-slate-200/80 bg-white px-4 py-24 sm:px-6"
+            className="border-t border-slate-200/80 bg-white px-4 py-24 sm:px-6 scroll-mt-24 sm:scroll-mt-28"
             aria-labelledby="pricing-heading"
           >
             <div className="mx-auto max-w-6xl">
@@ -512,7 +666,7 @@ export default function Landing() {
           {/* FAQ — visible Q&A for users + FAQPage structured data */}
           <section
             id="faq"
-            className="border-t border-slate-200/80 bg-slate-50/80 px-4 py-16 sm:px-6 sm:py-20"
+            className="scroll-mt-24 border-t border-slate-200/80 bg-slate-50/80 px-4 py-16 sm:scroll-mt-28 sm:px-6 sm:py-20"
             aria-labelledby="faq-heading"
             itemScope
             itemType="https://schema.org/FAQPage"
@@ -708,9 +862,22 @@ export default function Landing() {
               </nav>
             </div>
 
-            <p className="mx-auto mt-10 border-t border-slate-200/80 pt-8 text-center text-xs text-slate-500 sm:text-left">
-              © {new Date().getFullYear()} BLUPRNT. All rights reserved.
-            </p>
+            <div className="mx-auto mt-10 border-t border-slate-200/80 pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-center text-xs text-slate-500 sm:text-left">
+                © {new Date().getFullYear()} BLUPRNT. All rights reserved.
+              </p>
+              <p className="text-center text-xs text-slate-500 sm:text-right">
+                Built by{" "}
+                <a 
+                  href="https://www.monarch-labs.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-slate-900 hover:text-indigo-600 transition-colors"
+                >
+                  Monarch Labs
+                </a>
+              </p>
+            </div>
           </div>
         </footer>
       </div>
