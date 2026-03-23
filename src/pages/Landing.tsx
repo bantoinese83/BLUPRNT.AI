@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { LiquidMetalShader } from "@/components/ui/LiquidMetalShader";
+
 
 const SITE_URL = getAuthCallbackUrl().replace(/\/auth\/callback$/, "") ||
   (typeof window !== "undefined" ? window.location.origin : "");
@@ -204,12 +206,27 @@ export default function Landing() {
                 className="relative"
               >
                 <div className="absolute -inset-4 bg-linear-to-r from-slate-500/20 to-slate-400/20 rounded-[2.5rem] blur-3xl" />
-                <div className="relative glass-card p-2 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                  <img
-                    src="/images/renovation_hero.png"
-                    alt="Modern Home Renovation"
-                    className="rounded-[2rem] w-full h-auto object-cover shadow-inner"
-                  />
+                <div className="relative glass-card p-12 rounded-[2.5rem] overflow-hidden shadow-2xl flex items-center justify-center min-h-[500px]">
+                  <div className="liquid-metal-container">
+                    <div className="liquid-outline" />
+                    <LiquidMetalShader 
+                      className="liquid-metal-host"
+                      repetition={1.5}
+                      softness={0.5}
+                      shiftRed={0.3}
+                      shiftBlue={0.3}
+                      distortion={0}
+                      contour={0}
+                      angle={100}
+                      scale={1.5}
+                      shape={1}
+                      offsetX={0.1}
+                      offsetY={-0.1}
+                      playState={0.6}
+                    />
+                    <Home className="svg-icon w-12 h-12 text-white" />
+                  </div>
+
                   <div className="absolute bottom-8 left-8 right-8 glass-card p-6 rounded-2xl animate-float">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg">

@@ -142,3 +142,91 @@
 .card-hover {
   @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1;
 }
+
+/* Liquid Metal Aesthetic */
+:root {
+  --liquid-bg: #f8fafc;
+  --liquid-light: #ffffff;
+  --liquid-dark: #cbd5e1;
+  --liquid-icon: #64748b;
+}
+
+.liquid-metal-container {
+  position: relative;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.liquid-metal-container::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30rem;
+  height: 30rem;
+  background: linear-gradient(var(--liquid-light), var(--liquid-dark));
+  border-radius: 50%;
+  box-shadow: inset 0 0.2rem 1rem rgba(255, 255, 255, 0.8),
+              0 1rem 3rem rgba(15, 23, 42, 0.1);
+  z-index: 0;
+}
+
+.liquid-metal-host {
+  position: relative;
+  width: 28rem;
+  height: 28rem;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 2;
+  box-shadow: inset 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+.liquid-outline {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 33rem;
+  height: 33rem;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.liquid-outline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 0.25rem;
+  border-radius: inherit;
+  background: conic-gradient(from 180deg, #334155, #94a3b8, #f1f5f9, #94a3b8, #334155);
+  filter: grayscale(1);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.liquid-metal-container:hover .liquid-outline::before {
+  filter: grayscale(0);
+  padding: 0.4rem;
+  background: conic-gradient(from 180deg, #0ea5e9, #8b5cf6, #ec4899, #8b5cf6, #0ea5e9);
+}
+
+.liquid-metal-container .svg-icon {
+  position: absolute;
+  z-index: 3;
+  width: 6rem;
+  fill: white;
+  filter: drop-shadow(0 0.2rem 0.5rem rgba(0,0,0,0.2));
+  pointer-events: none;
+}
+
