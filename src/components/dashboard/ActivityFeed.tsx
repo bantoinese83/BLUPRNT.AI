@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { Highlighter } from "@/components/ui/Highlighter";
 
 // For now we'll use a mocked structure that could be easily wired to a DB table
 export type ActivityEvent = {
@@ -46,7 +47,9 @@ export function ActivityFeed({ events, className }: ActivityFeedProps) {
     <div className={cn("space-y-6", className)}>
       <div className="flex items-center justify-between px-2">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-          Latest Activity
+          <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0}>
+            Latest Activity
+          </Highlighter>
         </h3>
         <div className="h-px flex-1 bg-slate-200/50 mx-4" />
       </div>

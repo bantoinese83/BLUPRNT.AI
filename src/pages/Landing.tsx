@@ -17,6 +17,7 @@ import {
   MessageCircleQuestion,
 } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+import { Highlighter } from "@/components/ui/Highlighter";
 
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -163,7 +164,9 @@ export default function Landing() {
                     className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
                   >
                     Turn your renovation into a{" "}
-                    <span className="liquid-metal-text">financial plan</span>
+                    <Highlighter action="highlight" color="rgba(99, 102, 241, 0.15)" strokeWidth={3}>
+                      <span className="liquid-metal-text">financial plan</span>
+                    </Highlighter>
                   </h1>
                 </motion.div>
 
@@ -173,9 +176,11 @@ export default function Landing() {
                   transition={{ delay: 0.3 }}
                   className="max-w-xl text-base text-slate-600 leading-relaxed font-medium sm:text-lg"
                 >
-                  Turn renovations into a trackable financial asset for your home.
-                  Get real-world costs, track invoices, and build a record you can
-                  hand to buyers.
+                  Turn renovations into a{" "}
+                  <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0}>
+                    trackable financial asset
+                  </Highlighter>{" "}
+                  for your home. Get real-world costs, track invoices, and build a record you can hand to buyers.
                 </motion.p>
 
                 <motion.div
