@@ -32,7 +32,8 @@ export function UpgradeBanner({ invoiceCount, onUpgradeClick }: UpgradeBannerPro
         onClick={onUpgradeClick}
         type="button"
       >
-        <UpgradeIcon className="w-4 h-4 shrink-0 mr-2" aria-hidden />
+        <UpgradeIcon className="shrink-0 mr-2" aria-hidden />
+
         See upgrade options
       </Button>
     </div>

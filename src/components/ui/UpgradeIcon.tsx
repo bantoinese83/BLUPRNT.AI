@@ -9,8 +9,9 @@ export function UpgradeIcon({ className, ...props }: UpgradeIconProps) {
     <img
       src="/upgrade-icon.svg"
       alt="Upgrade"
-      className={cn("w-4 h-4", className)}
+      className={cn("w-5 h-5", className)}
       {...props}
     />
+
   );
 }

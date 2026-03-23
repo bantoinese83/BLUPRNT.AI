@@ -41,7 +41,8 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
               onClick={onUpgradeClick}
               type="button"
             >
-              <UpgradeIcon className="w-3.5 h-3.5 mr-1.5 hidden sm:inline" />
+              <UpgradeIcon className="w-4 h-4 mr-1.5 hidden sm:inline" />
+
               <span className="tracking-tight text-xs sm:text-sm">Upgrade</span>
 
             </Button>
