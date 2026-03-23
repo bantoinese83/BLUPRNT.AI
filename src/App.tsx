@@ -12,6 +12,10 @@ import { PageLoader } from "@/components/PageLoader";
 import { AuthListener } from "@/components/AuthListener";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { Toaster } from "sonner";
+import { CommandPalette } from "@/components/CommandPalette";
+
+
 
 
 const Landing = lazy(() => import("./pages/Landing"));
@@ -73,8 +77,12 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
+          <Toaster position="top-right" expand={false} richColors />
+          <CommandPalette />
           <CookieConsent />
+
         </BrowserRouter>
+
       </ErrorBoundary>
     </HelmetProvider>
   );

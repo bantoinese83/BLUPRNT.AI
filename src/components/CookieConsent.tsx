@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ShieldCheck, X, Shield, Settings2, Check, TrendingUp } from "lucide-react";
 
@@ -11,7 +11,6 @@ const CONSENT_KEY = "bluprnt_cookie_consent_v1";
 type ConsentStatus = "accepted" | "declined" | "custom" | null;
 
 export function CookieConsent() {
-  const [status, setStatus] = useState<ConsentStatus>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
   
@@ -23,93 +22,97 @@ export function CookieConsent() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem(CONSENT_KEY);
-    if (!saved) {
-      const timer = setTimeout(() => setIsVisible(true), 1500);
-      return () => clearTimeout(timer);
-    }
+    const checkConsent = () => {
+      const stored = localStorage.getItem(CONSENT_KEY);
+      if (!stored) {
+        // Delay appearance for better UX
+        const timer = setTimeout(() => setIsVisible(true), 1500);
+        return () => clearTimeout(timer);
+      }
+    };
+    checkConsent();
   }, []);
 
   const handleAcceptAll = () => {
     localStorage.setItem(CONSENT_KEY, JSON.stringify({
-      status: "accepted",
-      timestamp: new Date().toISOString(),
-      settings: { essential: true, analytics: true, marketing: true }
+      essential: true,
+      analytics: true,
+      marketing: true,
+      timestamp: new Date().toISOString()
     }));
     setIsVisible(false);
   };
 
   const handleDeclineAll = () => {
-     localStorage.setItem(CONSENT_KEY, JSON.stringify({
-      status: "declined",
-      timestamp: new Date().toISOString(),
-      settings: { essential: true, analytics: false, marketing: false }
+    localStorage.setItem(CONSENT_KEY, JSON.stringify({
+      essential: true,
+      analytics: false,
+      marketing: false,
+      timestamp: new Date().toISOString()
     }));
     setIsVisible(false);
   };
 
   const handleSaveCustom = () => {
     localStorage.setItem(CONSENT_KEY, JSON.stringify({
-      status: "custom",
-      timestamp: new Date().toISOString(),
-      settings
+      ...settings,
+      timestamp: new Date().toISOString()
     }));
     setShowModal(false);
     setIsVisible(false);
   };
 
-  if (status === "accepted" || status === "declined") return null;
-
   return (
     <>
       <AnimatePresence>
-        {isVisible && (
+        {isVisible && !showModal && (
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none"
+            className="fixed bottom-6 left-6 right-6 z-50 pointer-events-none flex justify-center lg:justify-start"
           >
-            <Card className="max-w-4xl w-full glass-dark border-slate-800/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] overflow-hidden pointer-events-auto">
-              <CardContent className="p-6 sm:p-8">
-                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 flex items-center justify-center shrink-0 shadow-inner">
-                    <ShieldCheck className="w-8 h-8 text-emerald-400" />
+            <Card className="w-full max-w-lg glass-panel pointer-events-auto border-slate-200/50 shadow-2xl overflow-hidden rounded-3xl">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-6 h-6 text-white" />
                   </div>
-                  
-                  <div className="flex-1 text-center md:text-left space-y-2">
-                    <h3 className="text-xl font-bold text-white tracking-tight">Your privacy, our blueprint.</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed max-w-2xl">
-                      We use cookies to enhance your project tracking experience, analyze site traffic, and help us improve BLUPRNT. By clicking "Accept All", you consent to our use of cookies.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-slate-400 hover:text-white hover:bg-white/5 rounded-xl h-11 px-6 font-semibold"
-                      onClick={() => setShowModal(true)}
-                    >
-                      Customize
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-slate-700 text-slate-200 hover:bg-slate-800 rounded-xl h-11 px-6 font-semibold"
-                      onClick={handleDeclineAll}
-                    >
-                      Reject All
-                    </Button>
-                    <Button 
-                      variant="primary" 
-                      size="sm" 
-                      className="bg-white text-slate-950 hover:bg-slate-100 rounded-xl h-11 px-8 font-black shadow-[0_0_20px_rgba(255,255,255,0.15)]"
-                      onClick={handleAcceptAll}
-                    >
-                      Accept All
-                    </Button>
+                  <div className="space-y-4 flex-1">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-slate-900 tracking-tight">Privacy Preferences</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed">
+                        We use cookies to personalize your experience and analyze our traffic. 
+                        By clicking "Accept All", you consent to our use of cookies.
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        className="rounded-xl px-6 h-10 font-bold"
+                        onClick={handleAcceptAll}
+                      >
+                        Accept All
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="rounded-xl px-5 h-10 font-bold bg-white/50"
+                        onClick={() => setShowModal(true)}
+                      >
+                        Settings
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="rounded-xl h-10 text-slate-500 hover:text-slate-900 underline underline-offset-4"
+                        onClick={handleDeclineAll}
+                      >
+                        Reject Optional
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -120,75 +123,118 @@ export function CookieConsent() {
 
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowModal(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-            />
-            
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-lg glass-dark border-slate-800/50 rounded-[2.5rem] shadow-2xl overflow-hidden"
+              className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden"
             >
-              <div className="p-8 space-y-8">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                      <Settings2 className="w-5 h-5 text-slate-400" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white uppercase tracking-wider">Cookie Settings</h3>
-                  </div>
-                  <button 
-                    onClick={() => setShowModal(false)}
-                    className="p-2 rounded-full hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+              <div className="px-8 pt-8 pb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Cookie Settings</h2>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full hover:bg-slate-100"
+                  onClick={() => setShowModal(false)}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
 
+              <div className="px-8 pb-8 space-y-6">
                 <div className="space-y-4">
-                  <CookieOption 
-                    icon={<Shield className="w-5 h-5 text-emerald-400" />}
-                    title="Essential Cookies"
-                    desc="Required for core app functionality. Cannot be disabled."
-                    checked={true}
-                    disabled={true}
-                  />
-                  <CookieOption 
-                    icon={<TrendingUp className="w-5 h-5 text-blue-400" />}
-                    title="Analytics Cookies"
-                    desc="Help us understand how you use BLUPRNT to improve features."
-                    checked={settings.analytics}
-                    onChange={(checked) => setSettings(s => ({ ...s, analytics: checked }))}
-                  />
-                  <CookieOption 
-                    icon={<Settings2 className="w-5 h-5 text-amber-400" />}
-                    title="Marketing Cookies"
-                    desc="Used to share project updates and renovation insights with you."
-                    checked={settings.marketing}
-                    onChange={(checked) => setSettings(s => ({ ...s, marketing: checked }))}
-                  />
+                  {/* Essential */}
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 opacity-60">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Essential</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Required</p>
+                      </div>
+                    </div>
+                    <Check className="w-5 h-5 text-emerald-500 shrink-0" />
+                  </div>
+
+                  {/* Analytics */}
+                  <button 
+                    onClick={() => setSettings(s => ({ ...s, analytics: !s.analytics }))}
+                    className={cn(
+                      "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
+                      settings.analytics ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                        settings.analytics ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-400"
+                      )}>
+                        <TrendingUp className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Analytics</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Usage & performance</p>
+                      </div>
+                    </div>
+                    <div className={cn(
+                      "w-10 h-5 rounded-full relative transition-colors duration-300",
+                      settings.analytics ? "bg-slate-900" : "bg-slate-200"
+                    )}>
+                      <div className={cn(
+                        "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300",
+                        settings.analytics ? "left-6" : "left-1"
+                      )} />
+                    </div>
+                  </button>
+
+                  {/* Marketing */}
+                  <button 
+                    onClick={() => setSettings(s => ({ ...s, marketing: !s.marketing }))}
+                    className={cn(
+                      "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
+                      settings.marketing ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                        settings.marketing ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-400"
+                      )}>
+                        <Settings2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Marketing</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Recommendations</p>
+                      </div>
+                    </div>
+                    <div className={cn(
+                      "w-10 h-5 rounded-full relative transition-colors duration-300",
+                      settings.marketing ? "bg-slate-900" : "bg-slate-200"
+                    )}>
+                      <div className={cn(
+                        "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300",
+                        settings.marketing ? "left-6" : "left-1"
+                      )} />
+                    </div>
+                  </button>
                 </div>
 
                 <div className="flex flex-col gap-3 pt-4">
                   <Button 
                     variant="primary" 
-                    className="w-full h-12 bg-white text-slate-950 hover:bg-slate-100 rounded-2xl font-black text-base transition-transform active:scale-95"
+                    className="w-full h-12 rounded-2xl font-bold"
                     onClick={handleSaveCustom}
                   >
                     Save Preferences
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className="w-full text-slate-500 hover:text-white hover:bg-white/5 rounded-2xl"
-                    onClick={handleAcceptAll}
+                    className="w-full text-slate-500 font-bold"
+                    onClick={() => setShowModal(false)}
                   >
-                    Accept All Cookies
+                    Go Back
                   </Button>
                 </div>
               </div>
@@ -199,45 +245,3 @@ export function CookieConsent() {
     </>
   );
 }
-
-function CookieOption({ 
-  icon, 
-  title, 
-  desc, 
-  checked, 
-  disabled = false,
-  onChange 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  desc: string; 
-  checked: boolean;
-  disabled?: boolean;
-  onChange?: (checked: boolean) => void;
-}) {
-  return (
-    <div 
-      className={cn(
-        "flex items-start gap-4 p-5 rounded-3xl border transition-all duration-300",
-        checked ? "bg-white/5 border-white/10" : "bg-transparent border-slate-800/50 opacity-60"
-      )}
-      onClick={() => !disabled && onChange?.(!checked)}
-    >
-      <div className="mt-1">{icon}</div>
-      <div className="flex-1 space-y-1 cursor-pointer">
-        <h4 className="font-bold text-white text-sm tracking-tight">{title}</h4>
-        <p className="text-xs text-slate-500 leading-relaxed font-medium">{desc}</p>
-      </div>
-      <div 
-        className={cn(
-          "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300",
-          checked ? "bg-white border-white" : "border-slate-700",
-          disabled && "opacity-50 cursor-not-allowed"
-        )}
-      >
-        {checked && <Check className="w-4 h-4 text-slate-950 stroke-[3]" />}
-      </div>
-    </div>
-  );
-}
-

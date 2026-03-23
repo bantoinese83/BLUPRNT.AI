@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, AlertTriangle, TrendingUp } from "lucide-react";
+import { Shield, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 
 type ProjectHealthProps = {

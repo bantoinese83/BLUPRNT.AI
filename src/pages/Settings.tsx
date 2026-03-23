@@ -184,7 +184,7 @@ export default function Settings() {
         method: "POST",
       });
       if (error) throw new Error(error.message);
-      if (data && "error" in data && (data as any).error) throw new Error((data as any).error);
+      if (data?.error) throw new Error(data.error);
       await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch (e) {

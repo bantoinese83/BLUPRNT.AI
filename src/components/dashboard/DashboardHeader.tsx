@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Settings2 } from "lucide-react";
+import { LogOut, Settings2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
@@ -11,9 +11,11 @@ type DashboardHeaderProps = {
   projectName?: string;
   isArchitect?: boolean;
   onUpgradeClick?: () => void;
+  onExportPDF?: () => void;
 };
 
-export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgradeClick }: DashboardHeaderProps) {
+
+export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgradeClick, onExportPDF }: DashboardHeaderProps) {
   return (
     <header className="glass sticky top-0 z-50 border-white/40">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -33,7 +35,21 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
+          {projectName && onExportPDF && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-slate-600 hover:bg-white hover:shadow-sm rounded-xl transition-all h-8 sm:h-9 px-2 sm:px-3"
+              onClick={onExportPDF}
+              type="button"
+            >
+              <FileDown className="w-4 h-4 sm:mr-2 text-slate-400" />
+              <span className="hidden sm:inline font-semibold tracking-tight">Export Report</span>
+            </Button>
+          )}
+
           {!isArchitect && onUpgradeClick && (
+
             <Button 
               variant="primary" 
               size="sm" 

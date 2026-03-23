@@ -309,3 +309,33 @@
   pointer-events: none;
 }
 
+
+/* Global Transitions */
+.page-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.slide-up-fade {
+  animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpFade {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glass Enhancement */
+.glass-panel {
+  @apply bg-white/40 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04)];
+}

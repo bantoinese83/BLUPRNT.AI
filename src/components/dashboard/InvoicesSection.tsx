@@ -2,9 +2,10 @@ import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { Upload, FileText, Loader2, ChevronDown, ChevronUp, ScanLine } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+import { Badge } from "@/components/ui/badge";
 
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
@@ -114,8 +115,10 @@ export function InvoicesSection({
       if (newId && documentType === "invoice") {
         setTimeout(() => setReviewInvoiceId(newId), 100);
       }
+      toast.success(`${documentType === 'invoice' ? 'Invoice' : 'Document'} uploaded successfully`);
     } catch {
       setError(friendlyUploadError(null));
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -162,14 +165,12 @@ export function InvoicesSection({
                 </div>
                 <span>AI SCANNING...</span>
               </motion.div>
-
             )}
           </AnimatePresence>
           <select
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value as "invoice" | "quote" | "warranty" | "permit")}
             className="text-sm rounded-xl border border-slate-200 px-3 py-2 bg-white shadow-sm focus:ring-2 focus:ring-slate-950/20 focus:border-slate-950"
-
             aria-label="Document type"
           >
             <option value="invoice">Invoice</option>
@@ -180,22 +181,18 @@ export function InvoicesSection({
           <Button
             variant="outline"
             size="default"
-
             onClick={openUpload}
             disabled={uploading}
             type="button"
-            className={`transition-all duration-300 rounded-xl px-5 ${uploading ? 'bg-slate-50 border-slate-200' : ''}`}
-
+            className={uploading ? 'bg-slate-50 border-slate-200' : ''}
           >
             {uploading ? (
               <Loader2 className="w-5 h-5 mr-2 animate-spin text-slate-900" />
             ) : (
-
               <Upload className="w-5 h-5 mr-2" />
             )}
             {uploading ? 'Processing' : 'Upload'}
           </Button>
-
         </div>
       </div>
 
@@ -210,7 +207,6 @@ export function InvoicesSection({
               <UpgradeIcon className="w-5 h-5 opacity-70 shrink-0" aria-hidden />
               First upload? Quick guide
             </span>
-
             {guideExpanded ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
           </button>
 
@@ -232,7 +228,6 @@ export function InvoicesSection({
                 <Button type="button" size="sm" variant="ghost" className="text-slate-800" onClick={dismissGuide}>
                   Got it, hide this
                 </Button>
-
               </div>
             </>
           )}
@@ -251,7 +246,6 @@ export function InvoicesSection({
             See plans
           </button>
         </p>
-
       )}
       {atLimit && (
         <div className="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-2 leading-relaxed">
@@ -293,9 +287,7 @@ export function InvoicesSection({
               className="border-slate-200/80 shadow-sm hover:shadow-lg hover:border-slate-400 transition-all cursor-pointer overflow-hidden group relative"
               onClick={() => setReviewInvoiceId(inv.id)}
             >
-
-              <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-slate-900 to-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-
+              <div className="absolute top-0 left-0 w-1 h-full bg-slate-900 opacity-0 group-hover:opacity-100 transition-opacity" />
               <CardContent className="p-4 flex items-start space-x-4">
                 <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
                   <FileText className="w-5 h-5 text-red-500" />
@@ -304,7 +296,6 @@ export function InvoicesSection({
                   <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
                     {inv.vendor_name ?? "Invoice"}
                   </h4>
-
                   <p className="text-xs text-slate-500">
                     {new Date(inv.created_at).toLocaleDateString(undefined, {
                       month: "short",
@@ -325,7 +316,6 @@ export function InvoicesSection({
                       variant="secondary"
                       className={`capitalize text-xs ${(inv.document_type ?? "invoice") !== "invoice" ? "bg-slate-200 text-slate-950 font-bold" : "bg-slate-100 text-slate-700"}`}
                     >
-
                       {inv.document_type ?? "invoice"}
                     </Badge>
                     {(inv.document_type ?? "invoice") === "invoice" && (
