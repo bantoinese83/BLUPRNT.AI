@@ -1,7 +1,8 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { LogOut, Settings2, Sparkles } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 type DashboardHeaderProps = {
   onSignOut: () => void;
@@ -11,35 +12,25 @@ type DashboardHeaderProps = {
 };
 
 export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgradeClick }: DashboardHeaderProps) {
-
   return (
     <header className="glass sticky top-0 z-50 border-white/40">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white p-1 shadow-xl shadow-slate-100/50 ring-4 ring-white border border-slate-100 overflow-hidden sm:h-14 sm:w-14 sm:p-1.5">
+          <Link to="/dashboard" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white p-1 shadow-xl shadow-slate-100/50 ring-2 ring-white border border-slate-100 overflow-hidden sm:h-12 sm:w-12 sm:p-1.5 transition-transform hover:scale-105">
             <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
-          </div>
+          </Link>
           <div className="min-w-0">
-            <h1 className="font-black text-slate-950 tracking-tighter block truncate text-xl leading-none mb-0.5 uppercase italic">
-              BLUPRNT<span className="text-slate-900">.AI</span>
-            </h1>
+            <Link to="/dashboard">
+              <h1 className="font-black text-slate-950 tracking-tighter block truncate text-lg leading-none mb-1 uppercase italic">
+                BLUPRNT<span className="text-slate-900">.AI</span>
+              </h1>
+            </Link>
 
-            <div className="flex items-center gap-2 leading-none">
-              {projectName && (
-                <span className="text-[11px] text-slate-500 truncate block font-semibold uppercase tracking-wider opacity-80">
-                  {projectName}
-                </span>
-              )}
-              {isArchitect && (
-                <span className="bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded shadow-sm shadow-slate-200">
-                  Architect
-                </span>
-              )}
-
-            </div>
+            <Breadcrumbs projectName={projectName} className="-mt-1" />
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 flex-shrink-0">
           {!isArchitect && onUpgradeClick && (
             <Button 
               variant="primary" 
@@ -48,7 +39,7 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
               onClick={onUpgradeClick}
               type="button"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              <Sparkles className="w-3.5 h-3.5 mr-1.5 hidden sm:inline" />
               <span className="tracking-tight text-xs sm:text-sm">Upgrade</span>
             </Button>
           )}
@@ -77,12 +68,12 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:shadow-sm rounded-xl transition-all"
+            className="text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:shadow-sm rounded-xl transition-all font-semibold"
             onClick={onSignOut}
             type="button"
           >
             <LogOut className="w-4 h-4 sm:mr-2 opacity-70" />
-            <span className="hidden sm:inline font-semibold tracking-tight">Sign out</span>
+            <span className="hidden sm:inline tracking-tight">Sign out</span>
           </Button>
         </div>
       </div>

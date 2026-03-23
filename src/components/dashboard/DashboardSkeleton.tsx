@@ -1,34 +1,22 @@
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "motion/react";
+import { Loader } from "@/components/ui/Loader";
 
 export function DashboardSkeleton() {
   return (
     <div className="min-h-screen dashboard-bg">
       {/* Header skeleton */}
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-             {/* Small Liquid Orb Loading */}
-             <div className="relative w-8 h-8 flex items-center justify-center">
-               <motion.div 
-                 animate={{ rotate: 360 }}
-                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                 className="absolute inset-0 border-2 border-slate-200 border-t-slate-900 rounded-full"
-               />
-               <motion.div 
-                 animate={{ scale: [0.8, 1.1, 0.8] }}
-                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                 className="w-4 h-4 bg-slate-900 rounded-full"
-               />
-             </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+             <Loader size="sm" title="" subtitle="" className="p-0 gap-0" />
              <Skeleton className="h-4 w-32 rounded-lg" />
           </div>
           <Skeleton className="h-9 w-24 rounded-xl" />
         </div>
       </header>
+
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Project header skeleton */}

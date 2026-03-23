@@ -1,6 +1,5 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-
 import { AnimatePresence } from "motion/react";
 import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
 import { ProjectTypeScreen } from "@/components/onboarding/ProjectTypeScreen";
@@ -11,6 +10,7 @@ import { TextScopeScreen } from "@/components/onboarding/TextScopeScreen";
 import { LoadingScreen } from "@/components/onboarding/LoadingScreen";
 import { EstimateScreen } from "@/components/onboarding/EstimateScreen";
 import { SignupScreen } from "@/components/onboarding/SignupScreen";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export default function Onboarding() {
   const location = useLocation();
@@ -23,6 +23,11 @@ export default function Onboarding() {
       </Helmet>
 
       <div className="w-full max-w-md relative">
+        {location.pathname !== "/onboarding" && location.pathname !== "/onboarding/" && (
+          <div className="flex justify-center mb-6">
+            <Breadcrumbs className="bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-100 shadow-sm" />
+          </div>
+        )}
         <AnimatePresence mode="wait">
           <Routes location={location}>
             <Route path="/" element={<WelcomeScreen />} />
