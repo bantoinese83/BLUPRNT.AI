@@ -55,8 +55,8 @@ export function SignupScreen() {
     <PageTransition>
       <div className="space-y-8">
         <div className="flex flex-col items-center text-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-slate-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
-            <img src="/logo.png" alt="BlueprintAI Logo" className="w-10 h-10 object-contain" />
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-white p-2 shadow-xl shadow-slate-100/50 ring-8 ring-white border border-slate-100 overflow-hidden sm:h-28 sm:w-28 sm:rounded-3xl sm:p-2.5">
+            <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
           </div>
 
           <div className="space-y-2">

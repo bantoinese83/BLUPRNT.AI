@@ -37,14 +37,15 @@ export function LiquidMetalShader({
   const shaderMountRef = useRef<ShaderMount | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     // Create a wrapper div to ensure the canvas sizing is correct
     const wrapper = document.createElement("div");
     wrapper.style.width = "100%";
     wrapper.style.height = "100%";
     wrapper.style.position = "relative";
-    containerRef.current.appendChild(wrapper);
+    container.appendChild(wrapper);
 
     const shaderMount = new ShaderMount(
       wrapper,
@@ -69,12 +70,9 @@ export function LiquidMetalShader({
     shaderMountRef.current = shaderMount;
 
     return () => {
-      if (shaderMountRef.current) {
-        // ShaderMount doesn't have an explicit destroy, but clearing refs and DOM helps
-        shaderMountRef.current = null;
-      }
-      if (containerRef.current && wrapper) {
-        containerRef.current.removeChild(wrapper);
+      shaderMountRef.current = null;
+      if (wrapper.parentNode === container) {
+        container.removeChild(wrapper);
       }
     };
   }, [

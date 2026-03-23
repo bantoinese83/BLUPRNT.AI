@@ -1,8 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import Lottie from "lottie-react";
 import { PageTransition } from "./PageTransition";
 import { useOnboarding } from "@/hooks/use-onboarding";
+
+// Import animations
+import paintLoading from "../../../public/loading-paint-animated-icon.json";
+import dreamHouse from "../../../public/dream-house-aimated-icon.json";
+import investment from "../../../public/investment-animated-icon.json";
+
 
 export function LoadingScreen() {
   const navigate = useNavigate();
@@ -21,6 +28,13 @@ export function LoadingScreen() {
     "Sizing your room from the photos…",
     `Comparing similar ${kind} projects…`,
   ];
+
+  const animations = [
+    investment,
+    dreamHouse,
+    paintLoading
+  ];
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -53,9 +67,14 @@ export function LoadingScreen() {
 
           
           {/* Central Logo/Icon Animation */}
-          <div className="relative w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center glass border-white">
+          <div className="relative w-32 h-32 bg-white rounded-3xl shadow-xl flex items-center justify-center glass border-white overflow-hidden p-2">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900/10 to-slate-400/10 rounded-3xl" />
-            <Loader2 className="w-10 h-10 text-slate-900 animate-spin" strokeWidth={1.5} />
+            <Lottie 
+              animationData={animations[messageIdx]} 
+              loop={true}
+              className="w-full h-full"
+            />
+
 
             
             {/* Pulsing Dot */}

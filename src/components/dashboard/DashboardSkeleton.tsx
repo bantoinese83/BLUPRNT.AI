@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import Lottie from "lottie-react";
+import investment from "../../../public/investment-animated-icon.json";
 
 export function DashboardSkeleton() {
   return (
@@ -7,10 +9,16 @@ export function DashboardSkeleton() {
       {/* Header skeleton */}
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Skeleton className="h-9 w-36 rounded-xl" />
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10">
+               <Lottie animationData={investment} loop={true} />
+             </div>
+             <Skeleton className="h-9 w-24 rounded-xl" />
+          </div>
           <Skeleton className="h-9 w-24 rounded-xl" />
         </div>
       </header>
+
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Project header skeleton */}

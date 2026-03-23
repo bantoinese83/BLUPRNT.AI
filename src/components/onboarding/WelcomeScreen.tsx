@@ -61,8 +61,8 @@ export function WelcomeScreen() {
   return (
     <PageTransition>
       <div className="flex flex-col items-center text-center space-y-8 py-12">
-        <div className="relative w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-2xl shadow-slate-200/50 border border-slate-100 ring-8 ring-white">
-          <img src="/logo.png" alt="BLUPRNT.AI Logo" className="w-14 h-14 object-contain" />
+        <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl bg-white p-2 shadow-2xl shadow-slate-200/50 ring-8 ring-white border border-slate-100 sm:h-32 sm:w-32 sm:p-2.5">
+          <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
         </div>
 
         <div className="space-y-4">

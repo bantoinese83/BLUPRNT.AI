@@ -119,8 +119,8 @@ export default function ProjectView() {
         </p>
         <Link to="/">
           <Button variant="primary" className="gap-2" type="button">
-            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white shadow-sm border border-slate-200 overflow-hidden shrink-0">
-              <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden shrink-0">
+              <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
             </div>
             Go to BLUPRNT.AI
           </Button>
@@ -139,8 +139,8 @@ export default function ProjectView() {
             <h1 className="text-2xl font-bold text-slate-900">{project.name}</h1>
             <Link to="/">
               <Button variant="ghost" size="sm" className="gap-2 text-slate-700 hover:bg-slate-50 font-bold tracking-tight">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden shrink-0">
-                  <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-sm border border-slate-100 overflow-hidden shrink-0">
+                  <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
                 </div>
                 BLUPRNT.AI
               </Button>

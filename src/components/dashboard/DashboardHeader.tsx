@@ -16,9 +16,8 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
     <header className="glass sticky top-0 z-50 border-white/40">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center shrink-0 shadow-xl shadow-slate-100/50 ring-4 ring-white border border-slate-100 overflow-hidden">
-
-            <img src="/logo.png" alt="BLUPRNT.AI Logo" className="w-8 h-8 object-contain" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white p-1 shadow-xl shadow-slate-100/50 ring-4 ring-white border border-slate-100 overflow-hidden sm:h-14 sm:w-14 sm:p-1.5">
+            <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
           </div>
           <div className="min-w-0">
             <h1 className="font-black text-slate-950 tracking-tighter block truncate text-xl leading-none mb-0.5 uppercase italic">

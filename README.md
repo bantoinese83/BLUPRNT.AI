@@ -30,17 +30,19 @@ The location step **auto-fills** an approximate area from your network (IP → r
    In **Supabase Dashboard → Authentication → URL Configuration**:
 
    - **Site URL**: `https://bluprntai.com`
-   - **Redirect URLs**: add  
-     `http://localhost:3000/auth/callback`  
-     `https://bluprntai.com/auth/callback`
+   - **Redirect URLs**: add (adjust host to your canonical domain)  
+     `http://localhost:3000/**`  
+     `https://bluprntai.com/**`  
+     If you serve **`www`**, also add `https://www.bluprntai.com/**` **or** redirect `www` → apex in your host so only one hostname is used everywhere.
 
    **Google**: Authentication → **Providers** → **Google** → enable and paste **Client ID** and **Client Secret** from [Google Cloud Console](https://console.cloud.google.com/) (OAuth 2.0 Web client). Authorized redirect URI in Google must be:  
    `https://<YOUR_SUPABASE_REF>.supabase.co/auth/v1/callback`  
-   (Supabase shows this in the Google provider settings.)
+   (Supabase shows this in the Google provider settings.)  
+   **Authorized JavaScript origins** must include the exact origin users load the app from (e.g. `https://bluprntai.com` and `https://www.bluprntai.com` if both exist).
 
    **Magic links**: Email provider must be on. The app sends OTP sign-in (login) and signup (register) links to **`/auth/callback`**.
 
-   Optional in `.env`: **`VITE_SITE_URL`** = production origin so redirects stay correct behind proxies.
+   **`VITE_SITE_URL`**: In production `.env`, set this to your **canonical** origin (no trailing slash), matching **Site URL** and Google JS origins — avoids wrong callback URLs behind proxies or alternate hostnames.
 
 3. **Auth (password / onboarding)**
 

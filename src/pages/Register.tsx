@@ -154,9 +154,8 @@ export default function Register() {
 
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-slate-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
-
-            <img src="/logo.png" alt="BLUPRNT.AI Logo" className="w-10 h-10 object-contain" />
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-white p-2 shadow-xl shadow-slate-100/50 ring-8 ring-white border border-slate-100 overflow-hidden sm:h-28 sm:w-28 sm:rounded-3xl sm:p-2.5">
+            <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-slate-900">Create your free account</h1>
@@ -374,8 +373,8 @@ export default function Register() {
           className="w-full gap-2 border-slate-200"
           onClick={() => navigate("/login")}
         >
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden shrink-0">
-            <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-100 overflow-hidden shrink-0">
+            <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
           </div>
           Sign in instead
         </Button>

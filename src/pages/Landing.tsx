@@ -98,8 +98,8 @@ export default function Landing() {
               className="flex items-center gap-3 font-bold text-slate-900 tracking-tight"
             >
               <Link to="/" className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md border border-slate-100 overflow-hidden shrink-0">
-                  <img src="/logo.png" alt="BlueprintAI Logo" className="h-7 w-7 object-contain" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-slate-100 sm:h-14 sm:w-14 sm:rounded-2xl sm:p-2">
+                  <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
                 </div>
                 <span className="text-xl font-black italic tracking-tighter">BLUPRNT<span className="text-slate-900">.AI</span></span>
 
@@ -137,30 +137,28 @@ export default function Landing() {
         <main>
           {/* Hero */}
           <section
-            className="relative overflow-hidden px-4 pt-32 pb-24 sm:px-6 sm:pt-40 sm:pb-32 mesh-bg"
+            className="relative overflow-hidden px-4 pt-24 pb-14 sm:px-6 sm:pt-28 sm:pb-16 mesh-bg"
             aria-labelledby="hero-heading"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-slate-100/50 via-transparent to-transparent opacity-60" />
 
-            <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-8">
+            <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-10">
+              <div className="space-y-5">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
-                  <span className="text-[12px] font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-[0.2em] inline-block mb-2">
-
+                  <span className="text-[11px] font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-[0.18em] inline-block">
                     Home Renovation Financial OS
                   </span>
-                  <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.1]">
+                  <h1
+                    id="hero-heading"
+                    className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
+                  >
                     Turn your renovation into a{" "}
-                    <span className="liquid-metal-text">
-                      financial plan
-                    </span>
-
-
+                    <span className="liquid-metal-text">financial plan</span>
                   </h1>
                 </motion.div>
 
@@ -168,7 +166,7 @@ export default function Landing() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-xl text-slate-600 leading-relaxed max-w-xl font-medium"
+                  className="max-w-xl text-base text-slate-600 leading-relaxed font-medium sm:text-lg"
                 >
                   Turn renovations into a trackable financial asset for your home.
                   Get real-world costs, track invoices, and build a record you can
@@ -179,52 +177,53 @@ export default function Landing() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="flex flex-wrap gap-4 pt-4"
+                  className="flex flex-wrap gap-3 pt-1"
                 >
                   <Button
                     size="lg"
-                    className="h-16 px-8 text-lg font-black rounded-2xl liquid-metal-button hover:scale-105 active:scale-95 transition-all text-white border-0"
-
-
+                    className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
                     onClick={() => navigate("/onboarding")}
                   >
-                    Get my first estimate <ArrowRight className="ml-2 w-6 h-6" />
+                    Get my first estimate <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
                   </Button>
                   <Button
                     variant="outline"
                     size="lg"
-                    className="h-16 px-8 text-lg font-black rounded-2xl glass border-slate-200 hover:bg-white hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
+                    className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
                     onClick={() => navigate("/register")}
                   >
-                    <UserPlus className="mr-2 w-6 h-6" /> Create free account
+                    <UserPlus className="mr-2 h-5 w-5" aria-hidden /> Create free account
                   </Button>
                 </motion.div>
               </div>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-                className="relative"
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="relative mx-auto w-full max-w-lg lg:max-w-none"
               >
-                <div className="absolute -inset-4 bg-linear-to-r from-slate-500/20 to-slate-400/20 rounded-[2.5rem] blur-3xl" />
-                <div className="relative glass-card p-2 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                <div className="absolute -inset-3 rounded-[1.75rem] bg-linear-to-r from-slate-500/15 to-slate-400/15 blur-2xl lg:-inset-2" />
+                <div className="relative glass-card overflow-hidden rounded-[1.75rem] p-1.5 shadow-xl sm:rounded-[2rem] sm:p-2">
                   <img
                     src="/images/renovation_hero.png"
                     alt="Modern Home Renovation"
-                    className="rounded-[2rem] w-full h-auto object-cover shadow-inner"
+                    className="max-h-[min(38vh,340px)] w-full rounded-[1.25rem] object-cover object-center shadow-inner sm:max-h-[min(42vh,380px)] sm:rounded-[1.75rem] lg:max-h-[min(48vh,420px)]"
                   />
 
-
-                  <div className="absolute bottom-8 left-8 right-8 glass-card p-6 rounded-2xl animate-float">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg">
-                        <Sparkles className="w-6 h-6" />
+                  <div className="absolute bottom-3 left-3 right-3 glass-card animate-float rounded-xl p-3 sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white shadow-md sm:h-11 sm:w-11 sm:rounded-xl">
+                        <Sparkles className="h-5 w-5" aria-hidden />
                       </div>
 
-                      <div>
-                        <p className="text-sm font-black text-slate-900 leading-none mb-1">AI Cost Analysis</p>
-                        <p className="text-xs text-slate-500 font-bold">Regionally grounded pricing</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-slate-900 leading-tight sm:text-sm">
+                          AI Cost Analysis
+                        </p>
+                        <p className="text-[11px] font-bold text-slate-500 sm:text-xs">
+                          Regionally grounded pricing
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -532,8 +531,8 @@ export default function Landing() {
         <footer className="border-t border-slate-200/80 bg-slate-100/50 px-4 py-12 sm:px-6">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden">
-                <img src="/logo.png" alt="BlueprintAI Logo" className="h-5 w-5 object-contain" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1 shadow-sm border border-slate-100 overflow-hidden">
+                <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
               </div>
               <span className="font-black italic tracking-tighter text-slate-900">BLUPRNT<span className="text-slate-900">.AI</span></span>
 
