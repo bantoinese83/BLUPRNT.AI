@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Mail, ArrowRight, Sparkles, TrendingDown, ShieldCheck, Loader2 } from "lucide-react";
+import { X, Mail, ArrowRight, TrendingDown, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 
@@ -89,10 +91,11 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
               </div>
 
               <div className="relative z-10 space-y-6">
-                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                  <Sparkles className="w-3 h-3 text-amber-300" />
+                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white">
+                  <UpgradeIcon className="w-3 h-3 text-amber-300" />
                   Limited Time Offer
                 </div>
+
                 
                 <div className="space-y-1">
                   <h3 className="text-4xl font-black tracking-tighter leading-none">35% OFF</h3>
@@ -169,8 +172,9 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                 >
                   <div className="space-y-3 text-center md:text-left">
                     <div className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto md:mx-0 shadow-lg">
-                      <Sparkles className="w-8 h-8" />
+                      <UpgradeIcon className="w-8 h-8 brightness-0 invert" />
                     </div>
+
                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">Code: BLUEPRINT35</h2>
 
                     <p className="text-slate-500 text-sm leading-relaxed">

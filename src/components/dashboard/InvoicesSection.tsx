@@ -3,7 +3,9 @@ import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, Loader2, ChevronDown, ChevronUp, Sparkles, ScanLine } from "lucide-react";
+import { Upload, FileText, Loader2, ChevronDown, ChevronUp, ScanLine } from "lucide-react";
+import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
 import { InvoiceReviewModal } from "./InvoiceReviewModal";
@@ -203,9 +205,10 @@ export function InvoicesSection({
             className="flex items-center justify-between w-full text-left font-semibold text-slate-950 gap-2"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-slate-900 shrink-0" aria-hidden />
+              <UpgradeIcon className="w-5 h-5 opacity-70 shrink-0" aria-hidden />
               First upload? Quick guide
             </span>
+
             {guideExpanded ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
           </button>
 

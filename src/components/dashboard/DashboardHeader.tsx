@@ -1,8 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Settings2, Sparkles } from "lucide-react";
+import { LogOut, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+
 
 type DashboardHeaderProps = {
   onSignOut: () => void;
@@ -39,8 +41,9 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
               onClick={onUpgradeClick}
               type="button"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5 hidden sm:inline" />
+              <UpgradeIcon className="w-3.5 h-3.5 mr-1.5 hidden sm:inline" />
               <span className="tracking-tight text-xs sm:text-sm">Upgrade</span>
+
             </Button>
           )}
 

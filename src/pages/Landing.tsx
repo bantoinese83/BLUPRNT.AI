@@ -8,11 +8,12 @@ import {
   LogIn,
   Receipt,
   Shield,
-  Sparkles,
   UserPlus,
   Camera,
   FileCheck,
 } from "lucide-react";
+import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
@@ -214,8 +215,9 @@ export default function Landing() {
                   <div className="absolute bottom-3 left-3 right-3 glass-card animate-float rounded-xl p-3 sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white shadow-md sm:h-11 sm:w-11 sm:rounded-xl">
-                        <Sparkles className="h-5 w-5" aria-hidden />
+                        <UpgradeIcon className="h-5 w-5 brightness-0 invert" aria-hidden />
                       </div>
+
 
                       <div className="min-w-0">
                         <p className="text-xs font-black text-slate-900 leading-tight sm:text-sm">
@@ -433,9 +435,10 @@ export default function Landing() {
                       "Priority AI model access"
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
-                        <Sparkles className="w-5 h-5 text-slate-400 shrink-0" />
+                        <UpgradeIcon className="w-5 h-5 opacity-40 shrink-0 grayscale" />
                         {feature}
                       </li>
+
                     ))}
                   </ul>
                   <Button 

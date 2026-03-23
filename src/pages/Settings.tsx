@@ -3,7 +3,9 @@ import { Helmet } from "react-helmet-async";
 
 import { useNavigate } from "react-router-dom";
 import { PageLoader } from "@/components/PageLoader";
-import { ArrowLeft, User, Shield, LogOut, Download, Trash2, Loader2, CreditCard, Sparkles } from "lucide-react";
+import { ArrowLeft, User, Shield, LogOut, Download, Trash2, Loader2, CreditCard } from "lucide-react";
+import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+
 import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
 
 import { Button } from "@/components/ui/button";
@@ -361,8 +363,9 @@ export default function Settings() {
             <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isArchitect ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                  {isArchitect ? <Sparkles className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                  {isArchitect ? <UpgradeIcon className="w-5 h-5 brightness-0 invert" /> : <User className="w-5 h-5" />}
                 </div>
+
 
                 <div>
                   <p className="text-sm font-bold text-slate-900 leading-none mb-1">
