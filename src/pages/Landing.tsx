@@ -1,6 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
+import { openCookieSettings } from "@/lib/cookie-consent";
+import { buildLandingJsonLd, getPublicSiteUrl, LANDING_FAQ } from "@/lib/site-url";
 import {
   ArrowRight,
   BarChart3,
@@ -11,6 +14,7 @@ import {
   UserPlus,
   Camera,
   FileCheck,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 
@@ -19,71 +23,71 @@ import { Button } from "@/components/ui/button";
 
 
 
-const SITE_URL = getAuthCallbackUrl().replace(/\/auth\/callback$/, "") ||
+const SITE_URL =
+  getPublicSiteUrl() ||
+  getAuthCallbackUrl().replace(/\/auth\/callback$/, "") ||
   (typeof window !== "undefined" ? window.location.origin : "");
+
+const FALLBACK_SITE_URL = "https://bluprntai.com";
 
 export default function Landing() {
   const navigate = useNavigate();
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": `${SITE_URL}/#website`,
-        url: SITE_URL,
-        name: "BLUPRNT",
-        description:
-          "Turn your renovation into a financial plan. Get real-world costs, track invoices, and build a home improvement record you can hand to buyers.",
-        publisher: { "@id": `${SITE_URL}/#organization` },
-      },
-      {
-        "@type": "Organization",
-        "@id": `${SITE_URL}/#organization`,
-        name: "BLUPRNT",
-        url: SITE_URL,
-      },
-      {
-        "@type": "WebPage",
-        "@id": `${SITE_URL}/#webpage`,
-        url: SITE_URL,
-        name: "BLUPRNT — Home Renovation Financial OS",
-        isPartOf: { "@id": `${SITE_URL}/#website` },
-        about: {
-          "@type": "Thing",
-          name: "Home renovation cost estimation and budgeting",
-        },
-      },
-    ],
-  };
+  const { hash } = useLocation();
+  const metaBase = SITE_URL || FALLBACK_SITE_URL;
+  const jsonLd = buildLandingJsonLd(metaBase);
+
+  useEffect(() => {
+    if (hash !== "#faq") return;
+    const el = document.getElementById("faq");
+    if (!el) return;
+    const t = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [hash]);
 
   return (
     <>
-      <Helmet>
-        <title>BLUPRNT — Turn Your Renovation Into a Financial Plan</title>
+      <Helmet htmlAttributes={{ lang: "en" }}>
+        <title>BLUPRNT — Renovation Cost Estimates, Invoice Tracking &amp; Seller Records</title>
         <meta
           name="description"
-          content="Get real-world renovation costs, track invoices, and build a home improvement record you can hand to buyers. The homeowner-first financial OS for your next project."
+          content="BLUPRNT helps homeowners plan remodels with grounded cost estimates from photos and ZIP, track invoices against budget, and export a renovation record for resale. Start free."
         />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={SITE_URL} />
+        <meta
+          name="keywords"
+          content="renovation cost estimator, home remodel budget, kitchen remodel cost, bathroom remodel cost, invoice tracking, home improvement records, seller packet, property ledger, homeowner renovation app"
+        />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={metaBase} />
+        <link rel="alternate" hrefLang="en-US" href={metaBase} />
+        <link rel="alternate" hrefLang="x-default" href={metaBase} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={SITE_URL} />
-        <meta property="og:title" content="BLUPRNT — Turn Your Renovation Into a Financial Plan" />
+        <meta property="og:url" content={metaBase} />
+        <meta property="og:locale" content="en_US" />
+        <meta
+          property="og:title"
+          content="BLUPRNT — Renovation cost estimates &amp; financial records for homeowners"
+        />
         <meta
           property="og:description"
-          content="Get real-world renovation costs, track invoices, and build a home improvement record you can hand to buyers."
+          content="Grounded remodel cost ranges, invoice tracking, and a clear improvement history for buyers and agents. Built for homeowners—not contractors."
         />
         <meta property="og:site_name" content="BLUPRNT" />
+        <meta property="og:image" content={`${metaBase}/og-image.png`} />
+        <meta property="og:image:alt" content="BLUPRNT — home renovation financial planning for homeowners" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="BLUPRNT — Turn Your Renovation Into a Financial Plan" />
+        <meta
+          name="twitter:title"
+          content="BLUPRNT — Renovation cost estimates &amp; financial records"
+        />
         <meta
           name="twitter:description"
-          content="Get real-world renovation costs, track invoices, and build a home improvement record you can hand to buyers."
+          content="Plan remodels with grounded estimates, track spending, and keep a resale-ready renovation record."
         />
-        <meta property="og:image" content={`${SITE_URL}/og-image.png`} />
-        <meta property="twitter:image" content={`${SITE_URL}/og-image.png`} />
+        <meta name="twitter:image" content={`${metaBase}/og-image.png`} />
+        <meta name="twitter:image:alt" content="BLUPRNT — home renovation financial planning" />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -500,6 +504,69 @@ export default function Landing() {
             </div>
           </section>
 
+          {/* FAQ — visible Q&A for users + FAQPage structured data */}
+          <section
+            id="faq"
+            className="border-t border-slate-200/80 bg-slate-50/80 px-4 py-16 sm:px-6 sm:py-20"
+            aria-labelledby="faq-heading"
+            itemScope
+            itemType="https://schema.org/FAQPage"
+          >
+            <div className="mx-auto max-w-3xl">
+              <div className="mb-10 text-center">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
+                  Questions
+                </p>
+                <h2
+                  id="faq-heading"
+                  className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl"
+                >
+                  Common questions
+                </h2>
+                <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600 sm:text-base">
+                  Straight answers about estimates, tracking, and who BLUPRNT is for.
+                </p>
+              </div>
+              <div className="space-y-3 sm:space-y-4">
+                {LANDING_FAQ.map((item) => (
+                  <div
+                    key={item.question}
+                    className="rounded-2xl border border-slate-200/90 bg-white/95 p-5 shadow-sm shadow-slate-200/40 sm:p-6"
+                    itemScope
+                    itemProp="mainEntity"
+                    itemType="https://schema.org/Question"
+                  >
+                    <div className="flex gap-3">
+                      <MessageCircleQuestion
+                        className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500"
+                        aria-hidden
+                      />
+                      <div className="min-w-0 space-y-2">
+                        <h3
+                          className="text-base font-bold text-slate-900 sm:text-lg"
+                          itemProp="name"
+                        >
+                          {item.question}
+                        </h3>
+                        <div
+                          itemScope
+                          itemProp="acceptedAnswer"
+                          itemType="https://schema.org/Answer"
+                        >
+                          <p
+                            className="text-sm leading-relaxed text-slate-600 sm:text-[15px]"
+                            itemProp="text"
+                          >
+                            {item.answer}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
           {/* Final CTA */}
           <section
@@ -531,26 +598,115 @@ export default function Landing() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-200/80 bg-slate-100/50 px-4 py-12 sm:px-6">
-          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1 shadow-sm border border-slate-100 overflow-hidden">
-                <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
+        <footer
+          className="border-t border-slate-200/80 bg-slate-100/50 px-4 py-12 sm:px-6"
+          role="contentinfo"
+        >
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col items-center gap-3 sm:items-start">
+                <Link
+                  to="/"
+                  className="flex items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-sm">
+                    <img
+                      src="/bluprnt_logo.svg"
+                      alt=""
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <span className="font-black italic tracking-tighter text-slate-900">
+                    BLUPRNT<span className="text-indigo-600">.AI</span>
+                  </span>
+                </Link>
+                <p className="max-w-xs text-center text-sm text-slate-600 sm:text-left">
+                  Home renovation financial OS — estimates, spending, and records in one place.
+                </p>
               </div>
-              <span className="font-black italic tracking-tighter text-slate-900">BLUPRNT<span className="text-slate-900">.AI</span></span>
 
+              <nav
+                className="flex flex-col gap-8 sm:flex-row sm:gap-12 lg:gap-16"
+                aria-label="Footer"
+              >
+                <div className="text-center sm:text-left">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    Product
+                  </p>
+                  <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+                    <li>
+                      <Link to="/onboarding" className="font-medium hover:text-slate-900">
+                        Get started
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/login" className="font-medium hover:text-slate-900">
+                        Sign in
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/register" className="font-medium hover:text-slate-900">
+                        Create account
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div className="text-center sm:text-left">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    Help
+                  </p>
+                  <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+                    <li>
+                      <Link
+                        to={{ pathname: "/", hash: "faq" }}
+                        className="font-medium hover:text-slate-900"
+                      >
+                        Questions
+                      </Link>
+                    </li>
+                    <li>
+                      <a
+                        href="mailto:privacy@bluprntai.com"
+                        className="font-medium hover:text-slate-900"
+                      >
+                        Contact us
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div className="text-center sm:text-left">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    Legal
+                  </p>
+                  <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+                    <li>
+                      <Link to="/privacy" className="font-medium hover:text-slate-900">
+                        Privacy Policy
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/terms" className="font-medium hover:text-slate-900">
+                        Terms of Service
+                      </Link>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => openCookieSettings()}
+                        className="font-medium text-slate-600 hover:text-slate-900"
+                      >
+                        Cookie settings
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600">
-              <Link to="/onboarding" className="hover:text-slate-900">Get started</Link>
-              <Link to="/login" className="hover:text-slate-900">Sign in</Link>
-              <Link to="/register" className="hover:text-slate-900">Create account</Link>
-              <a href="/privacy" className="hover:text-slate-900">Privacy Policy</a>
-              <a href="/terms" className="hover:text-slate-900">Terms of Service</a>
-            </div>
+
+            <p className="mx-auto mt-10 border-t border-slate-200/80 pt-8 text-center text-xs text-slate-500 sm:text-left">
+              © {new Date().getFullYear()} BLUPRNT. All rights reserved.
+            </p>
           </div>
-          <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-slate-500">
-            © {new Date().getFullYear()} BLUPRNT. Home renovation financial OS for homeowners.
-          </p>
         </footer>
       </div>
     </>

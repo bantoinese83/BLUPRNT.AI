@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bluprnt.ai/sitemap.xml
+Sitemap: https://bluprntai.com/sitemap.xml

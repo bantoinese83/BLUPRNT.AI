@@ -9,6 +9,7 @@ export default function PrivacyPolicy() {
     <LegalPageShell
       title="Privacy Policy"
       metaDescription="Learn how BLUPRNT protects your data and manages your personal and project information."
+      canonicalPath="/privacy"
     >
       <section>
         <LegalSectionTitle>1. Information we collect</LegalSectionTitle>

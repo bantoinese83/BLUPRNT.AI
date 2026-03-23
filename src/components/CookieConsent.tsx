@@ -5,10 +5,9 @@ import { ShieldCheck, X, Shield, Settings2, Check, TrendingUp } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { OPEN_COOKIE_SETTINGS_EVENT } from "@/lib/cookie-consent";
 
 const CONSENT_KEY = "bluprnt_cookie_consent_v1";
-
-type ConsentStatus = "accepted" | "declined" | "custom" | null;
 
 export function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,6 +30,30 @@ export function CookieConsent() {
       }
     };
     checkConsent();
+  }, []);
+
+  useEffect(() => {
+    const onOpenSettings = () => {
+      const stored = localStorage.getItem(CONSENT_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as {
+            analytics?: boolean;
+            marketing?: boolean;
+          };
+          setSettings((s) => ({
+            ...s,
+            analytics: parsed.analytics !== false,
+            marketing: Boolean(parsed.marketing),
+          }));
+        } catch {
+          /* keep defaults */
+        }
+      }
+      setShowModal(true);
+    };
+    window.addEventListener(OPEN_COOKIE_SETTINGS_EVENT, onOpenSettings);
+    return () => window.removeEventListener(OPEN_COOKIE_SETTINGS_EVENT, onOpenSettings);
   }, []);
 
   const handleAcceptAll = () => {

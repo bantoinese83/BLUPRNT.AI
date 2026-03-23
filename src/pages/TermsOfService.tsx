@@ -11,6 +11,7 @@ export default function TermsOfService() {
     <LegalPageShell
       title="Terms of Service"
       metaDescription="Read the terms and conditions for using BLUPRNT, the home renovation financial OS."
+      canonicalPath="/terms"
     >
       <section>
         <LegalSectionTitle>1. Agreement to terms</LegalSectionTitle>

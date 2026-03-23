@@ -3,10 +3,16 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { openCookieSettings } from "@/lib/cookie-consent";
+import { getPublicSiteUrl } from "@/lib/site-url";
+
+const FALLBACK_ORIGIN = "https://bluprntai.com";
 
 type LegalPageShellProps = {
   title: string;
   metaDescription: string;
+  /** Path only, e.g. `/privacy` — used for canonical and Open Graph URLs */
+  canonicalPath: string;
   lastUpdated?: string;
   children: ReactNode;
 };
@@ -17,14 +23,32 @@ type LegalPageShellProps = {
 export function LegalPageShell({
   title,
   metaDescription,
+  canonicalPath,
   lastUpdated = "March 23, 2026",
   children,
 }: LegalPageShellProps) {
+  const base =
+    getPublicSiteUrl() ||
+    (typeof window !== "undefined" ? window.location.origin : FALLBACK_ORIGIN);
+  const path = canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`;
+  const canonicalUrl = `${base.replace(/\/$/, "")}${path}`;
+
   return (
     <div className="min-h-screen mesh-bg text-slate-900">
-      <Helmet>
+      <Helmet htmlAttributes={{ lang: "en" }}>
         <title>{title} — BLUPRNT</title>
         <meta name="description" content={metaDescription} />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${title} — BLUPRNT`} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:site_name" content="BLUPRNT" />
+        <meta property="og:locale" content="en_US" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={`${title} — BLUPRNT`} />
+        <meta name="twitter:description" content={metaDescription} />
       </Helmet>
 
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
@@ -91,7 +115,7 @@ export function LegalPageShell({
         </article>
       </main>
 
-      <footer className="border-t border-slate-200/80 bg-slate-50/80 px-4 py-10 sm:px-6">
+      <footer className="border-t border-slate-200/80 bg-slate-50/80 px-4 py-10 sm:px-6" role="contentinfo">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
             <span className="font-black italic tracking-tighter text-slate-900">
@@ -104,9 +128,18 @@ export function LegalPageShell({
               Home renovation financial OS
             </span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-600">
+          <nav
+            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-600"
+            aria-label="Footer"
+          >
             <Link to="/" className="font-medium hover:text-slate-900">
               Home
+            </Link>
+            <Link to={{ pathname: "/", hash: "faq" }} className="font-medium hover:text-slate-900">
+              Questions
+            </Link>
+            <Link to="/onboarding" className="font-medium hover:text-slate-900">
+              Get started
             </Link>
             <Link to="/privacy" className="font-medium hover:text-slate-900">
               Privacy
@@ -114,10 +147,17 @@ export function LegalPageShell({
             <Link to="/terms" className="font-medium hover:text-slate-900">
               Terms
             </Link>
-            <Link to="/onboarding" className="font-medium hover:text-slate-900">
-              Get started
-            </Link>
-          </div>
+            <a href="mailto:privacy@bluprntai.com" className="font-medium hover:text-slate-900">
+              Contact
+            </a>
+            <button
+              type="button"
+              onClick={() => openCookieSettings()}
+              className="font-medium hover:text-slate-900"
+            >
+              Cookie settings
+            </button>
+          </nav>
         </div>
         <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-slate-400">
           © {new Date().getFullYear()} BLUPRNT. All rights reserved.
