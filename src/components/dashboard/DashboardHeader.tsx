@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, LogOut, Settings2 } from "lucide-react";
+import { LogOut, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type DashboardHeaderProps = {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BookOpen, FileDown, Loader2, Wrench, ShieldCheck } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { motion } from "motion/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { generateSellerPacketBlob } from "@/lib/pdf-export";

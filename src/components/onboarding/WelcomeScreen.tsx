@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowRight, Home, LogIn, Sparkles, UserPlus, LayoutDashboard, PlusCircle } from "lucide-react";
+import { ArrowRight, LogIn, UserPlus, LayoutDashboard, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";

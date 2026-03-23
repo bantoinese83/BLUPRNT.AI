@@ -4,7 +4,6 @@ import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import {
   ArrowRight,
   BarChart3,
-  FileText,
   Home,
   LogIn,
   Receipt,

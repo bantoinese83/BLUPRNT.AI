@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   AlertCircle,
-  Home,
   Loader2,
   Lock,
   LogIn,
@@ -95,7 +94,7 @@ export default function Login() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden ring-8 ring-white">
-            <img src="/logo.png" alt="BlueprintAI Logo" className="w-10 h-10 object-contain" />
+            <img src="/logo.png" alt="BLUPRNT.AI Logo" className="w-10 h-10 object-contain" />
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
@@ -286,7 +285,7 @@ export default function Login() {
             <span className="w-full border-t border-slate-200" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-slate-50 px-3 text-slate-500">New to BlueprintAI?</span>
+            <span className="bg-slate-50 px-3 text-slate-500">New to BLUPRNT?</span>
           </div>
         </div>
 

@@ -18,7 +18,8 @@
     "functions:deploy:invoices": "supabase functions deploy upload-invoice get-invoice --project-ref elucgaegaihkklnfoasm",
     "functions:deploy:project-view": "supabase functions deploy get-project-view --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:delete-account": "supabase functions deploy delete-account --project-ref elucgaegaihkklnfoasm",
-    "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref elucgaegaihkklnfoasm --no-verify-jwt"
+    "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
+    "prepare": "husky"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -53,6 +54,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "husky": "^9.1.7",
     "jsdom": "^29.0.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.1.14",

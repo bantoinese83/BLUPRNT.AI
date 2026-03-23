@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Home, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -121,7 +121,7 @@ export default function ProjectView() {
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white shadow-sm border border-slate-200 overflow-hidden shrink-0">
               <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />
             </div>
-            Go to BlueprintAI
+            Go to BLUPRNT.AI
           </Button>
         </Link>
       </div>
@@ -141,7 +141,7 @@ export default function ProjectView() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden shrink-0">
                   <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain" />
                 </div>
-                BlueprintAI
+                BLUPRNT.AI
               </Button>
             </Link>
           </div>

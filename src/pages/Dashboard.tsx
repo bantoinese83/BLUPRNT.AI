@@ -171,7 +171,7 @@ export default function Dashboard() {
           origin: { y: 0.6 },
           colors: ["#4f46e5", "#7c3aed", "#10b981"]
         });
-        setHasCelebrated(true);
+        setTimeout(() => setHasCelebrated(true), 100);
       }
     }
   }, [project, invoices, hasCelebrated]);
@@ -425,7 +425,7 @@ export default function Dashboard() {
       />
 
       <LeadCaptureModal 
-        onPlanSelect={(plan) => {
+        onPlanSelect={(_plan) => {
           setUseDiscount(true);
           setUpgradeReason("general");
           setShowUpgrade(true);

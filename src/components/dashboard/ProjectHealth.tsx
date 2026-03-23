@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Receipt, Shield, TrendingUp, AlertTriangle } from "lucide-react";
+import { Receipt, Shield, AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
 
 type ProjectHealthProps = {
@@ -36,7 +36,6 @@ export function ProjectHealth({
   const { grade, label } = getHealthGrade(estimatedMid, invoiceTotal, overBudget);
 
   const statusColor = overBudget ? "text-amber-400" : "text-emerald-400";
-  const statusBg = overBudget ? "bg-amber-500" : "bg-emerald-500";
 
   return (
     <Card className="glass-dark text-white border-slate-800/50 shadow-2xl rounded-3xl overflow-hidden relative">
