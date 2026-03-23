@@ -79,6 +79,7 @@ export function InvoiceReviewModal({
           .from("scope_items")
           .select("id, category, description")
           .eq("project_id", projectId);
+        if (cancelled) return;
         setScopeItems((scope ?? []) as { id: string; category: string; description: string }[]);
 
         const initial: Record<string, string> = {};

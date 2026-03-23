@@ -59,8 +59,10 @@ export default function AuthCallback() {
         return;
       }
 
+      if (cancelled) return;
       setMessage("Setting up your workspace…");
       await ensureUserHasWorkspace(session.user.id);
+      if (cancelled) return;
       let redirectTo = "/dashboard";
       try {
         const stored = sessionStorage.getItem("bluprnt_auth_redirect");
@@ -71,6 +73,7 @@ export default function AuthCallback() {
       } catch {
         /* ignore */
       }
+      if (cancelled) return;
       navigate(redirectTo, { replace: true });
     }
 

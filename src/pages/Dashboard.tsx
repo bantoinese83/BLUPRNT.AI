@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
 
 function DashboardSubPage({
@@ -70,7 +71,11 @@ export default function Dashboard() {
     }
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      navigate("/login?redirect=/dashboard", { replace: true });
+      const returnTo = getSafeRedirect(
+        `${window.location.pathname}${window.location.search}`,
+        "/dashboard",
+      );
+      navigate(`/login?redirect=${encodeURIComponent(returnTo)}`, { replace: true });
       return;
     }
     let projectId: string | null = null;

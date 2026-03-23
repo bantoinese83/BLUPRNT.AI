@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 
 const PROTECTED_PATHS = ["/dashboard", "/settings"];
 
@@ -14,22 +15,29 @@ function isProtected(pathname: string): boolean {
 export function AuthListener() {
   const navigate = useNavigate();
   const location = useLocation();
+  const pathnameRef = useRef(location.pathname);
+  const searchRef = useRef(location.search);
+
+  useEffect(() => {
+    pathnameRef.current = location.pathname;
+    searchRef.current = location.search;
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, _session) => {
-      if (event === "SIGNED_OUT" && isProtected(location.pathname)) {
-        navigate("/login?redirect=" + encodeURIComponent(location.pathname), {
-          replace: true,
-        });
-      }
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_OUT") return;
+      const path = `${pathnameRef.current}${searchRef.current || ""}`;
+      if (!isProtected(pathnameRef.current)) return;
+      const redirect = getSafeRedirect(path, "/dashboard");
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`, { replace: true });
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, location.pathname]);
+  }, [navigate]);
 
   return null;
 }

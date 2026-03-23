@@ -26,7 +26,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { priceId, projectId, promoCode } = await req.json();
+    const { priceId, projectId } = await req.json();
 
     if (!priceId) {
       return new Response(JSON.stringify({ error: "Missing priceId" }), {
@@ -35,12 +35,13 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Determine mode based on price type or naming (if needed)
-    // For our specific use case, we know Architect is a subscription
-    const ARCHITECT_PRICE_ID = "price_1TEDh3DScOjm3APoyO5zBb73";
-    const mode = priceId === ARCHITECT_PRICE_ID ? "subscription" : "payment";
+    const architectPriceId =
+      Deno.env.get("STRIPE_ARCHITECT_PRICE_ID") ?? "price_1TEDh3DScOjm3APoyO5zBb73";
+    const mode = priceId === architectPriceId ? "subscription" : "payment";
 
-    const sessionParam: any = {
+    const origin = req.headers.get("origin") ?? "";
+
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
@@ -49,26 +50,14 @@ Deno.serve(async (req: Request) => {
         },
       ],
       mode,
-      success_url: `${req.headers.get("origin")}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/dashboard`,
+      success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/dashboard`,
       metadata: {
         userId,
         project_id: projectId ?? "",
       },
-    };
-
-    // If it's a project pass, we need to make sure we don't apply subscription logic
-    if (mode === "payment") {
-       sessionParam.allow_promotion_codes = true;
-    } else {
-       // For subscriptions, we can also allow promo codes
-       sessionParam.allow_promotion_codes = true;
-    }
-
-    // Note: If the user explicitly passed a promoCode we wanted to auto-apply, 
-    // we'd use discounts: [{ coupon: '...' }] but allow_promotion_codes is more flexible for the UI.
-
-    const session = await stripe.checkout.sessions.create(sessionParam);
+      allow_promotion_codes: true,
+    });
 
     return new Response(JSON.stringify({ url: session.url }), {
       status: 200,

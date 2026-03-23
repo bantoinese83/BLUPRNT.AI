@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 export type UpgradeOpenReason = "general" | "invoice_limit";
@@ -25,34 +25,50 @@ function formatEstimate(n: number | null | undefined): string {
   }).format(n);
 }
 
+const ARCHITECT_PRICE_ID = import.meta.env.VITE_STRIPE_ARCHITECT_PRICE_ID as string | undefined;
+const PASS_PRICE_ID = import.meta.env.VITE_STRIPE_PROJECT_PASS_PRICE_ID as string | undefined;
+
 export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, openReason = "general", showDiscount = false }: UpgradeModalProps) {
   const [loadingPlan, setLoadingPlan] = useState<'architect' | 'pass' | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) setCheckoutError(null);
+  }, [isOpen]);
 
   const mid = estimatedAmount != null && Number.isFinite(estimatedAmount)
     ? estimatedAmount
     : 28000;
 
   const handleUpgrade = async (plan: 'architect' | 'pass') => {
+    setCheckoutError(null);
+    const priceId = plan === "architect" ? ARCHITECT_PRICE_ID : PASS_PRICE_ID;
+    if (!priceId?.trim()) {
+      setCheckoutError("Checkout isn’t set up yet. Add Stripe price IDs in your environment and try again.");
+      return;
+    }
+    if (plan === "pass" && !projectId) {
+      setCheckoutError("Open a project first, then try the Project Pass again.");
+      return;
+    }
     setLoadingPlan(plan);
     try {
-      const priceId = plan === 'architect' 
-        ? import.meta.env.VITE_STRIPE_ARCHITECT_PRICE_ID 
-        : import.meta.env.VITE_STRIPE_PROJECT_PASS_PRICE_ID;
-
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { 
-          priceId,
-          projectId: plan === 'pass' ? projectId : undefined
-        }
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          priceId: priceId.trim(),
+          projectId: plan === "pass" ? projectId : undefined,
+        },
       });
 
       if (error) throw error;
       if (data?.url) {
         window.location.href = data.url;
+        return;
       }
+      setCheckoutError("We couldn’t start checkout. Please try again.");
     } catch (err) {
       console.error("Stripe Checkout error:", err);
-      alert("Something went wrong with the checkout. Please try again.");
+      setCheckoutError("Something went wrong with checkout. Please try again.");
     } finally {
       setLoadingPlan(null);
     }
@@ -83,6 +99,14 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
             </button>
             
             <div className={`p-6 sm:p-10 text-center space-y-4 border-b border-slate-100 ${showDiscount ? 'bg-indigo-50/50' : ''}`}>
+              {checkoutError && (
+                <p
+                  className="text-sm text-red-800 bg-red-50 border border-red-100 rounded-xl px-4 py-3 max-w-xl mx-auto text-left"
+                  role="alert"
+                >
+                  {checkoutError}
+                </p>
+              )}
               {showDiscount && (
                 <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 shadow-sm shadow-indigo-100">
                   <span className="animate-pulse">✨</span> Promo Active: BLUEPRINT35
@@ -155,7 +179,7 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                       variant="primary"
                       className="w-full"
                       size="lg"
-                      disabled={loadingPlan !== null}
+                      disabled={loadingPlan !== null || !ARCHITECT_PRICE_ID}
                       onClick={() => handleUpgrade('architect')}
                     >
                       {loadingPlan === 'architect' ? (
@@ -206,7 +230,7 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                       className="w-full"
                       variant="outline"
                       size="lg"
-                      disabled={loadingPlan !== null}
+                      disabled={loadingPlan !== null || !PASS_PRICE_ID || !projectId}
                       onClick={() => handleUpgrade('pass')}
                     >
                       {loadingPlan === 'pass' ? (

@@ -106,7 +106,8 @@ Set via Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 | `RATE_LIMIT_WINDOW_MS` | Window in ms (default: 60000) |
 | `STRIPE_SECRET_KEY` | Stripe secret key for webhook (stripe-webhook function) |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signing secret from Stripe Dashboard |
-| `GEMINI_API_KEY` | Google AI API key for invoice OCR (optional; when set, extracts vendor, line items, totals from PDFs) |
+| `STRIPE_ARCHITECT_PRICE_ID` | Optional. Stripe Price ID for the Architect plan; `create-checkout` uses it to choose subscription vs one-time mode (falls back to a built-in default if unset). |
+| `GEMINI_API_KEY` | Google AI API key for invoice OCR (Edge secret only; do not put in Vite `.env` for the browser) |
 
 ## Database
 

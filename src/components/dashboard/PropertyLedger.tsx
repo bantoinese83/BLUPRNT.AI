@@ -58,7 +58,13 @@ export function PropertyLedger({
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!cancelled) setUserId(user?.id ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const capitalTotal = invoices

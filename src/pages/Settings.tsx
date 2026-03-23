@@ -22,14 +22,19 @@ export default function Settings() {
   const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       setUserLoading(true);
       const { data: { user: u } } = await supabase.auth.getUser();
+      if (cancelled) return;
       setUser(u ?? null);
       setDisplayName((u?.user_metadata?.full_name as string) ?? "");
       setUserLoading(false);
     };
     load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleSignOut() {

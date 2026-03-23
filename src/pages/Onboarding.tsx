@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "motion/react";
 import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
 import { ProjectTypeScreen } from "@/components/onboarding/ProjectTypeScreen";
@@ -27,6 +27,7 @@ export default function Onboarding() {
             <Route path="/loading" element={<LoadingScreen />} />
             <Route path="/estimate" element={<EstimateScreen />} />
             <Route path="/signup" element={<SignupScreen />} />
+            <Route path="*" element={<Navigate to="/onboarding" replace />} />
           </Routes>
         </AnimatePresence>
       </div>
