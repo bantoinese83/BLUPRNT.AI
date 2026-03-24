@@ -91,8 +91,18 @@ export function EmptyState({
         </Button>
       )}
 
+      {/* Help Link */}
+      <div className="mt-8">
+        <a 
+          href="mailto:support@bluprntai.com" 
+          className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1.5"
+        >
+          Need help? Contact support
+        </a>
+      </div>
+
       {/* Branded watermark */}
-      <div className="mt-12 opacity-[0.03] pointer-events-none select-none">
+      <div className="mt-8 opacity-[0.03] pointer-events-none select-none">
         <svg width="120" height="40" viewBox="0 0 120 40" fill="currentColor">
           <text x="0" y="30" fontSize="24" fontWeight="900" letterSpacing="0.2em">BLUPRNT</text>
         </svg>

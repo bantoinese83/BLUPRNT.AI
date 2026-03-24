@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, useEffect, type ReactNode } from "react";
 import type { PhotoToScopeResult } from "@/types/estimate";
 import type {
   ProjectTypeOption,
@@ -18,18 +18,51 @@ import {
 import { OnboardingContext } from "./onboarding-context";
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
-  const [projectType, setProjectType] = useState<ProjectTypeOption | null>(
-    null,
+  const [projectType, setProjectType] = useState<ProjectTypeOption | null>(() => {
+    const saved = localStorage.getItem("bluprnt_onboarding_type");
+    return saved ? (saved as ProjectTypeOption) : null;
+  });
+  const [locationInput, setLocationInput] = useState(() => 
+    localStorage.getItem("bluprnt_onboarding_location") || ""
   );
-  const [locationInput, setLocationInput] = useState("");
-  const [locationUnset, setLocationUnset] = useState(false);
-  const [scopeDescription, setScopeDescription] = useState("");
-  const [stage, setStage] = useState<StageOption | null>(null);
+  const [locationUnset, setLocationUnset] = useState(() => 
+    localStorage.getItem("bluprnt_onboarding_location_unset") === "true"
+  );
+  const [scopeDescription, setScopeDescription] = useState(() => 
+    localStorage.getItem("bluprnt_onboarding_scope") || ""
+  );
+  const [stage, setStage] = useState<StageOption | null>(() => {
+    const saved = localStorage.getItem("bluprnt_onboarding_stage");
+    return saved ? (saved as StageOption) : null;
+  });
   const [photos, setPhotos] = useState<File[]>([]);
   const [estimate, setEstimate] = useState<PhotoToScopeResult | null>(null);
   const [estimateError, setEstimateError] = useState<string | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
+
+  // Sync to localStorage
+  useEffect(() => {
+    if (projectType) localStorage.setItem("bluprnt_onboarding_type", projectType);
+    else localStorage.removeItem("bluprnt_onboarding_type");
+  }, [projectType]);
+
+  useEffect(() => {
+    localStorage.setItem("bluprnt_onboarding_location", locationInput);
+  }, [locationInput]);
+
+  useEffect(() => {
+    localStorage.setItem("bluprnt_onboarding_location_unset", String(locationUnset));
+  }, [locationUnset]);
+
+  useEffect(() => {
+    localStorage.setItem("bluprnt_onboarding_scope", scopeDescription);
+  }, [scopeDescription]);
+
+  useEffect(() => {
+    if (stage) localStorage.setItem("bluprnt_onboarding_stage", stage);
+    else localStorage.removeItem("bluprnt_onboarding_stage");
+  }, [stage]);
 
   const zipFromLocation = useCallback(() => {
     const digits = locationInput.replace(/\D/g, "").slice(0, 5);
@@ -233,6 +266,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setEstimate(null);
     setEstimateError(null);
     setSavedProjectId(null);
+    
+    // Clear localStorage
+    localStorage.removeItem("bluprnt_onboarding_type");
+    localStorage.removeItem("bluprnt_onboarding_location");
+    localStorage.removeItem("bluprnt_onboarding_location_unset");
+    localStorage.removeItem("bluprnt_onboarding_scope");
+    localStorage.removeItem("bluprnt_onboarding_stage");
   }, []);
 
   const value = useMemo(

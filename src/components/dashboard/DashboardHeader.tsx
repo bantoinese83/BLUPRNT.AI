@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Settings2, FileDown } from "lucide-react";
+import { LogOut, Settings2, FileDown, LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
@@ -25,7 +25,7 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
           </Link>
           <div className="min-w-0">
             <Link to="/dashboard">
-              <h1 className="font-black pr-1 text-slate-950 tracking-tighter block truncate text-lg leading-none mb-1 uppercase italic">
+              <h1 className="font-black pr-2 text-slate-950 tracking-tight block truncate text-lg leading-none mb-1 uppercase italic">
                 BLUPRNT<span className="text-slate-900">.AI</span>
               </h1>
             </Link>
@@ -84,6 +84,14 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
               <span className="font-semibold tracking-tight">Settings</span>
             </Button>
           </Link>
+
+          <a href="mailto:support@bluprntai.com" className="hidden sm:block">
+            <Button variant="ghost" size="sm" className="text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-xl transition-all" type="button">
+              <LifeBuoy className="w-4 h-4 mr-2" />
+              <span className="font-semibold tracking-tight">Support</span>
+            </Button>
+          </a>
+          
           <div className="h-4 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
           <Button
             variant="ghost"

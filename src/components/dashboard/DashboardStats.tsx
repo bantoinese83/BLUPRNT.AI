@@ -30,7 +30,7 @@ export function DashboardStats({
     estimatedMid > 0 ? Math.min(100, Math.round((invoiceTotal / estimatedMid) * 100)) : 0;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

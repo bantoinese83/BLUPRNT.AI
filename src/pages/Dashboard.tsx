@@ -1,8 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, type ReactNode } from "react";
 import { EmptyState } from "@/components/EmptyState";
-import { ActivityFeed, type ActivityEvent } from "@/components/dashboard/ActivityFeed";
-
-
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Helmet } from "react-helmet-async";
 
 import { useNavigate, Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -16,6 +14,7 @@ import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { EstimateSummary } from "@/components/dashboard/EstimateSummary";
+import { generateActivityEvents } from "@/lib/activity";
 import { ScopeDetail } from "@/components/dashboard/ScopeDetail";
 import { InvoicesSection } from "@/components/dashboard/InvoicesSection";
 import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
@@ -38,6 +37,30 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100,
+      damping: 20,
+    },
+  },
+} as const;
+
 function DashboardSubPage({
   children,
   side,
@@ -46,14 +69,23 @@ function DashboardSubPage({
   side: ReactNode;
 }) {
   return (
-    <div className="space-y-8">
-      <DashboardTabs />
-      <DashboardTabIntro />
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-8"
+    >
+      <motion.div variants={itemVariants}>
+        <DashboardTabs />
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <DashboardTabIntro />
+      </motion.div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-        <div className="lg:col-span-2 space-y-8">{children}</div>
-        <div className="space-y-6">{side}</div>
+        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">{children}</motion.div>
+        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 content-start">{side}</motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -332,23 +364,7 @@ export default function Dashboard() {
 
 
   // Generate dynamic activity events
-  const activityEvents: ActivityEvent[] = [
-    ...invoices.slice(0, 5).map(inv => ({
-      id: `inv-${inv.id}`,
-      type: "upload" as const,
-      title: "Invoice Uploaded",
-      description: `${inv.vendor_name || 'Vendor'} invoice for $${inv.total?.toLocaleString()} was added.`,
-      timestamp: inv.created_at,
-    })),
-    // Base achievement for project creation
-    {
-       id: `init-${project.id}`,
-       type: "project_created" as const,
-       title: "Project Initialized",
-       description: `Blueprint for '${project.name}' was created with a $${project.estimated_min_total?.toLocaleString()} baseline.`,
-       timestamp: project.created_at || new Date().toISOString(),
-    }
-  ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const activityEvents = generateActivityEvents(project, invoices);
 
   const stats = (
 
@@ -420,27 +436,41 @@ export default function Dashboard() {
       />
 
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.main 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8"
+      >
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <ProjectSwitcher
             projects={projects.map((p) => ({ id: p.id, name: p.name }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
             onDelete={handleProjectDelete}
           />
-        </div>
-        <ProjectHeader project={project} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <ProjectHeader project={project} />
+        </motion.div>
 
-        <DashboardWelcomeBanner />
-        {stats}
+        <motion.div variants={itemVariants}>
+          <DashboardWelcomeBanner />
+        </motion.div>
+        
+        <motion.div variants={itemVariants}>
+          {stats}
+        </motion.div>
 
-        <UpgradeBanner
-          invoiceCount={invoices.filter((i) => (i.document_type ?? "invoice") === "invoice").length}
-          onUpgradeClick={() => {
-            setUpgradeReason("invoice_limit");
-            setShowUpgrade(true);
-          }}
-        />
+        <motion.div variants={itemVariants}>
+          <UpgradeBanner
+            invoiceCount={invoices.filter((i) => (i.document_type ?? "invoice") === "invoice").length}
+            onUpgradeClick={() => {
+              setUpgradeReason("invoice_limit");
+              setShowUpgrade(true);
+            }}
+          />
+        </motion.div>
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -513,7 +543,7 @@ export default function Dashboard() {
             </Routes>
           </motion.div>
         </AnimatePresence>
-      </main>
+      </motion.main>
 
       <UpgradeModal
         isOpen={showUpgrade}

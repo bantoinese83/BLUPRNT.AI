@@ -3,7 +3,17 @@ import { Helmet } from "react-helmet-async";
 
 import { useNavigate } from "react-router-dom";
 import { PageLoader } from "@/components/PageLoader";
-import { ArrowLeft, User, Shield, LogOut, Download, Trash2, Loader2, CreditCard } from "lucide-react";
+import {
+  ArrowLeft,
+  User,
+  Shield,
+  LogOut,
+  Download,
+  Trash2,
+  Loader2,
+  CreditCard,
+  HelpCircle,
+} from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 
 import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
@@ -487,6 +497,29 @@ export default function Settings() {
                 Delete account
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <HelpCircle className="w-5 h-5" />
+              Help & Support
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Got a question, need help with an estimate, or have an idea for a new feature? We're here to help you get the most out of BLUPRNT.AI.
+            </p>
+            <a href="mailto:support@bluprntai.com" className="inline-block">
+              <Button
+                variant="outline"
+                className="gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                type="button"
+              >
+                Message our support team
+              </Button>
+            </a>
           </CardContent>
         </Card>
 

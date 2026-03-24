@@ -1,8 +1,33 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { motion } from "motion/react";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100,
+      damping: 20,
+    },
+  },
+} as const;
 
 import { ProjectRow, ScopeRow } from "@/types/database";
 import { money } from "@/lib/formatters";
@@ -13,6 +38,7 @@ export default function ProjectView() {
   const [error, setError] = useState<string | null>(null);
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!token) {
@@ -67,7 +93,7 @@ export default function ProjectView() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, retryCount]);
 
   if (loading) {
     return (
@@ -89,14 +115,36 @@ export default function ProjectView() {
         <p className="text-sm text-slate-500">
           If you were sent this link, ask them to create a new share link from their dashboard.
         </p>
-        <Link to="/">
-          <Button variant="primary" className="gap-2" type="button">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden shrink-0">
-              <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
-            </div>
-            Go to BLUPRNT.AI
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button 
+            variant="outline" 
+            className="gap-2 w-full sm:w-auto" 
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              setRetryCount(prev => prev + 1);
+            }}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try again
           </Button>
-        </Link>
+          <Link to="/" className="w-full sm:w-auto">
+            <Button variant="primary" className="gap-2 w-full" type="button">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden shrink-0">
+                <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
+              </div>
+              Go to BLUPRNT.AI
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-4">
+          <a 
+            href="mailto:support@bluprntai.com" 
+            className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors"
+          >
+            Still have issues? Contact support
+          </a>
+        </div>
       </div>
     );
   }
@@ -121,54 +169,80 @@ export default function ProjectView() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        <Card className="overflow-hidden">
-          <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <p className="text-slate-400 text-sm font-medium">Estimated total</p>
-              <div className="text-3xl font-bold tracking-tight">
-                {money(project.estimated_min_total, project.estimated_max_total)}
+      <motion.main 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="max-w-3xl mx-auto px-4 py-8 space-y-6"
+      >
+        <motion.div variants={itemVariants}>
+          <Card className="overflow-hidden shadow-lg border-slate-200/60">
+            <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">Estimated total</p>
+                <div className="text-4xl font-black tracking-tight">
+                  {money(project.estimated_min_total, project.estimated_max_total)}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-3 h-3 rounded-full ${i < Math.floor(conf) ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'bg-slate-700'}`} 
+                    />
+                  ))}
+                </div>
+                <span className="text-xs font-bold text-slate-300">
+                  {conf}/5 Confidence
+                </span>
               </div>
             </div>
-            <div className="text-sm text-slate-400">
-              Confidence: {conf}/5
-            </div>
-          </div>
-          <CardContent className="p-0">
-            <div className="divide-y divide-slate-100">
-              {scopeItems.length > 0 ? (
-                scopeItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  >
-                    <div className="space-y-1 min-w-0">
-                      <h4 className="font-semibold text-slate-900">{item.category}</h4>
-                      <p className="text-sm text-slate-500">{item.description}</p>
-                      {item.quantity != null && item.unit && (
-                        <p className="text-xs text-slate-500">
-                          {item.quantity} {item.unit}
-                        </p>
-                      )}
+            <CardContent className="p-0">
+              <div className="divide-y divide-slate-100">
+                {scopeItems.length > 0 ? (
+                  scopeItems.map((item, idx) => (
+                    <motion.div
+                      key={item.id}
+                      variants={itemVariants}
+                      className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-25 transition-colors"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                          <span className="w-5 h-5 flex items-center justify-center rounded bg-slate-100 text-[10px] text-slate-500 font-black">
+                            {idx + 1}
+                          </span>
+                          {item.category}
+                        </h4>
+                        <p className="text-sm text-slate-500 leading-relaxed">{item.description}</p>
+                        {item.quantity != null && item.unit && (
+                          <p className="inline-block mt-1 px-2 py-0.5 rounded bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            {item.quantity} {item.unit}
+                          </p>
+                        )}
+                      </div>
+                      <div className="font-black text-slate-900 shrink-0 text-lg">
+                        {money(item.total_cost_min, item.total_cost_max)}
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="p-12 text-slate-500 text-sm text-center max-w-sm mx-auto space-y-3">
+                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
+                       <Loader2 className="w-6 h-6 text-slate-300" />
                     </div>
-                    <div className="font-semibold text-slate-900 shrink-0">
-                      {money(item.total_cost_min, item.total_cost_max)}
-                    </div>
+                    <p>No detailed line items in this shared view. The owner may still be building their scope.</p>
                   </div>
-                ))
-              ) : (
-                <div className="p-6 text-slate-500 text-sm text-center max-w-sm mx-auto">
-                  No detailed line items in this shared view. The owner may still be building their scope.
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <p className="text-center text-xs text-slate-500">
-          Shared project view · Sign in to create your own estimate
-        </p>
-      </main>
+        <motion.p variants={itemVariants} className="text-center text-xs text-slate-500 font-medium">
+          Shared project view · Securely generated by BLUPRNT.AI
+        </motion.p>
+      </motion.main>
     </div>
   );
 }

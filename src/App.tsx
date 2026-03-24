@@ -14,6 +14,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Toaster } from "sonner";
 import { CommandPalette } from "@/components/CommandPalette";
+import { HelpWidget } from "@/components/HelpWidget";
 
 
 
@@ -74,7 +75,7 @@ export default function App() {
           <Toaster position="top-right" expand={false} richColors />
           <CommandPalette />
           <CookieConsent />
-
+          <HelpWidget />
         </BrowserRouter>
 
       </ErrorBoundary>
