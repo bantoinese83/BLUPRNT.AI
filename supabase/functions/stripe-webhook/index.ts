@@ -7,7 +7,7 @@ import { getServiceClient } from "../_shared/auth.ts";
  * Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Supabase Edge Function secrets.
  */
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
-  apiVersion: "2024-11-20",
+  apiVersion: "2023-10-16",
 });
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
