@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { invokeFunction } from "@/lib/supabase";
 
 export type UpgradeOpenReason = "general" | "invoice_limit";
 
@@ -71,15 +71,15 @@ export function UpgradeModal({
     }
     setLoadingPlan(plan);
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "create-checkout",
-        {
-          body: {
-            priceId: priceId.trim(),
-            projectId: plan === "pass" ? projectId : undefined,
-          },
+      const { data, error } = await invokeFunction<{
+        url?: string;
+        error?: string;
+      }>("create-checkout", {
+        body: {
+          priceId: priceId.trim(),
+          projectId: plan === "pass" ? projectId : undefined,
         },
-      );
+      });
 
       if (error) throw error;
       if (data?.url) {

@@ -18,10 +18,11 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "functions:deploy": "supabase functions deploy --project-ref elucgaegaihkklnfoasm",
     "functions:deploy:photo": "supabase functions deploy photo-to-scope --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
-    "functions:deploy:invoices": "supabase functions deploy upload-invoice get-invoice --project-ref elucgaegaihkklnfoasm",
+    "functions:deploy:invoices": "supabase functions deploy upload-invoice get-invoice --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:project-view": "supabase functions deploy get-project-view --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:delete-account": "supabase functions deploy delete-account --project-ref elucgaegaihkklnfoasm",
     "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
+    "functions:deploy:checkout": "supabase functions deploy create-checkout --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:send-email": "supabase functions deploy send-email --project-ref elucgaegaihkklnfoasm",
     "prepare": "husky"
   },

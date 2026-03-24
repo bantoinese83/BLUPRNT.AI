@@ -33,15 +33,21 @@ Deno.serve(async (req: Request) => {
 
   const userId = await getUserIdFromRequest(req);
   if (!userId) {
-    return jsonResponse({ error: "Please sign in to upload invoices." }, 401, req);
+    return jsonResponse(
+      { error: "Please sign in to upload invoices." },
+      401,
+      req,
+    );
   }
 
   try {
     const formData = await req.formData();
     const projectId = String(formData.get("project_id") ?? "").trim();
     const file = formData.get("file");
-    const documentType = String(formData.get("document_type") ?? "invoice").trim() || "invoice";
-    const vendor_hint = String(formData.get("vendor_hint") ?? "").trim() || null;
+    const documentType =
+      String(formData.get("document_type") ?? "invoice").trim() || "invoice";
+    const vendor_hint =
+      String(formData.get("vendor_hint") ?? "").trim() || null;
     const amount_hint = formData.get("amount_hint");
 
     const parsed = uploadInvoiceSchema.safeParse({
@@ -49,7 +55,8 @@ Deno.serve(async (req: Request) => {
       file,
       document_type: documentType,
       vendor_hint: vendor_hint || undefined,
-      amount_hint: amount_hint != null && amount_hint !== "" ? amount_hint : undefined,
+      amount_hint:
+        amount_hint != null && amount_hint !== "" ? amount_hint : undefined,
     });
 
     if (!parsed.success) {
@@ -57,14 +64,20 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: msg }, 400, req);
     }
 
-    const { project_id, file: validatedFile, document_type: docType, amount_hint: amountNum } = parsed.data;
+    const {
+      project_id,
+      file: validatedFile,
+      document_type: docType,
+      amount_hint: amountNum,
+    } = parsed.data;
 
     const admin = getServiceClient();
     try {
       await assertProjectOwner(admin, project_id, userId);
     } catch (e) {
       const m = e instanceof Error ? e.message : "";
-      if (m === "not_found") return jsonResponse({ error: "Project not found" }, 404, req);
+      if (m === "not_found")
+        return jsonResponse({ error: "Project not found" }, 404, req);
       return jsonResponse({ error: "Access denied" }, 403, req);
     }
 
@@ -72,13 +85,16 @@ Deno.serve(async (req: Request) => {
       admin,
       userId,
       project_id,
-      docType
+      docType,
     );
     if (!entitlement.allowed) {
       return jsonResponse(
-        { error: entitlement.reason ?? "Upload limit reached. Upgrade for more." },
+        {
+          error:
+            entitlement.reason ?? "Upload limit reached. Upgrade for more.",
+        },
         403,
-        req
+        req,
       );
     }
 
@@ -159,16 +175,20 @@ Deno.serve(async (req: Request) => {
         const pdfBase64 = btoa(binary);
         const ocrResult = await extractInvoiceFromPdf(
           pdfBase64,
-          validatedFile.type || "application/pdf"
+          validatedFile.type || "application/pdf",
         );
 
         if (ocrResult) {
           if (ocrResult.vendor_name) vendorLabel = ocrResult.vendor_name;
-          if (ocrResult.invoice_number) invoiceNumber = ocrResult.invoice_number;
+          if (ocrResult.invoice_number)
+            invoiceNumber = ocrResult.invoice_number;
           if (ocrResult.issue_date) issueDate = ocrResult.issue_date;
-          if (ocrResult.total != null) total = Math.round(ocrResult.total * 100) / 100;
-          if (ocrResult.subtotal != null) subtotal = Math.round(ocrResult.subtotal * 100) / 100;
-          if (ocrResult.tax_total != null) tax = Math.round(ocrResult.tax_total * 100) / 100;
+          if (ocrResult.total != null)
+            total = Math.round(ocrResult.total * 100) / 100;
+          if (ocrResult.subtotal != null)
+            subtotal = Math.round(ocrResult.subtotal * 100) / 100;
+          if (ocrResult.tax_total != null)
+            tax = Math.round(ocrResult.tax_total * 100) / 100;
 
           if (ocrResult.line_items.length > 0) {
             lineItemsToInsert = ocrResult.line_items.map((li) => ({
@@ -204,6 +224,28 @@ Deno.serve(async (req: Request) => {
         }
       }
 
+      // DB often enforces NOT NULL on total and CHECK on payment_status; permits/warranties
+      // must still insert valid rows (UI hides amount/payment badges for non-invoices).
+      const defaultInvoiceSubtotal = amountNum ?? 1850;
+      const safeSubtotal =
+        type === "invoice"
+          ? Number.isFinite(subtotal)
+            ? subtotal
+            : defaultInvoiceSubtotal
+          : 0;
+      const safeTax =
+        type === "invoice"
+          ? Number.isFinite(tax)
+            ? tax
+            : Math.round(safeSubtotal * 0.08)
+          : 0;
+      const safeTotal =
+        type === "invoice"
+          ? Number.isFinite(total)
+            ? total
+            : safeSubtotal + safeTax
+          : 0;
+
       const { error: invErr } = await admin.from("invoices").insert({
         id: invoiceId,
         document_id: doc.id,
@@ -214,10 +256,10 @@ Deno.serve(async (req: Request) => {
         issue_date: issueDate,
         due_date: null,
         currency: "USD",
-        subtotal,
-        tax_total: tax,
-        total: type === "invoice" ? total : null,
-        payment_status: type === "invoice" ? "unpaid" : "n/a",
+        subtotal: safeSubtotal,
+        tax_total: safeTax,
+        total: safeTotal,
+        payment_status: "unpaid",
       });
 
       if (invErr) {
@@ -227,7 +269,10 @@ Deno.serve(async (req: Request) => {
 
       if (type === "invoice") {
         await admin.from("invoice_line_items").insert(lineItemsToInsert);
-        await admin.from("documents").update({ ocr_status: "success" }).eq("id", doc.id);
+        await admin
+          .from("documents")
+          .update({ ocr_status: "success" })
+          .eq("id", doc.id);
       }
 
       if (type === "invoice") {
@@ -250,10 +295,6 @@ Deno.serve(async (req: Request) => {
       : await createInvoiceRecord(docType);
   } catch (e) {
     console.error(e);
-    return jsonResponse(
-      { error: "Upload failed. Try again." },
-      500,
-      req,
-    );
+    return jsonResponse({ error: "Upload failed. Try again." }, 500, req);
   }
 });

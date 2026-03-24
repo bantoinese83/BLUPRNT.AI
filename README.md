@@ -1,4 +1,5 @@
 # BLUPRNT.AI (v3) 🏆
+
 **The Homeowner-First Financial OS for Renovations.**
 
 Vite + React + **Supabase** (Postgres, Auth, Storage) + **Edge Functions** for detailed cost estimates, invoice OCR, and resale value analytics.
@@ -9,26 +10,24 @@ The location step **auto-fills** an approximate area from your network (IP → r
 
 ## 🚀 Features (reaching 100/100 completeness)
 
-*   **Regional AI Estimates**: Snap photos or enter a postal code to get locally grounded renovation budgets.
-*   **Invoice OCR & Ledger**: Upload receipts to automatically map actual costs against your budget.
-*   **Resale Value Impact**: Visualize the financial impact and ROI of your home improvements.
-*   **Seller Packet**: Export a professional PDF of your renovation history to hand to agents and buyers.
-*   **Web app**: Standard SPA deployment; service worker / web app manifest are disabled to avoid stale caches and install prompts.
-*   **Project Lifecycle**: Archive and manage multiple properties or renovation phases with ease.
+- **Regional AI Estimates**: Snap photos or enter a postal code to get locally grounded renovation budgets.
+- **Invoice OCR & Ledger**: Upload receipts to automatically map actual costs against your budget.
+- **Resale Value Impact**: Visualize the financial impact and ROI of your home improvements.
+- **Seller Packet**: Export a professional PDF of your renovation history to hand to agents and buyers.
+- **Web app**: Standard SPA deployment; service worker / web app manifest are disabled to avoid stale caches and install prompts.
+- **Project Lifecycle**: Archive and manage multiple properties or renovation phases with ease.
 
 ## Quick start
 
 1. **Environment**
 
    Copy `.env.example` to `.env` and set:
-
    - `VITE_SUPABASE_URL` — Project URL (Settings → API)
    - `VITE_SUPABASE_ANON_KEY` — anon public key
 
 2. **Auth — Google & magic links**
 
    In **Supabase Dashboard → Authentication → URL Configuration**:
-
    - **Site URL**: `https://bluprntai.com`
    - **Redirect URLs**: add (adjust host to your canonical domain)  
      `http://localhost:3000/**`  
@@ -66,21 +65,28 @@ BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
    VITE_STRIPE_PROJECT_PASS_PRICE_ID=price_1...
    ```
 3. **Set Secrets**: In Supabase, set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and **`STRIPE_ARCHITECT_PRICE_ID`** (must match the Architect price used in checkout so the function can choose subscription vs one-time mode).
-4. **Deploy**: `supabase functions deploy create-checkout stripe-webhook`.
+4. **Deploy**: Deploy `create-checkout` with gateway JWT off (matches [`supabase/config.toml`](supabase/config.toml)) so the client is not blocked by edge `Invalid JWT` before your code runs; auth is still enforced inside the function.
+
+   ```bash
+   npx supabase functions deploy create-checkout --project-ref YOUR_PROJECT_REF --no-verify-jwt
+   npx supabase functions deploy stripe-webhook --project-ref YOUR_PROJECT_REF --no-verify-jwt
+   ```
+
+   Or: `npm run functions:deploy:checkout` then `npm run functions:deploy:stripe-webhook` (uses the repo’s project ref).
 
 ## Edge Functions (backend)
 
-| Function           | JWT   | Purpose |
-|--------------------|-------|---------|
-| `create-checkout`  | On    | Generate secure Stripe Checkout session |
-| `stripe-webhook`   | Off   | Receive Stripe events (provisioning) |
-| `photo-to-scope`   | Off*  | Build estimate from ZIP, room type, optional photos (Gemini + optional Google Search grounding) |
-| `upload-invoice`   | On    | Upload PDF/image → Storage + `documents` + `invoices` (Gemini vision OCR when `GEMINI_API_KEY` is set) |
-| `get-invoice`      | On    | Load invoice + line items |
-| `get-project-view` | Off   | Public: fetch project + scope by share token |
+| Function           | JWT   | Purpose                                                                                                                                     |
+| ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create-checkout`  | Off\* | Generate secure Stripe Checkout session (user validated in-function via `getUserIdFromRequest`)                                             |
+| `stripe-webhook`   | Off   | Receive Stripe events (provisioning)                                                                                                        |
+| `photo-to-scope`   | Off\* | Build estimate from ZIP, room type, optional photos (Gemini + optional Google Search grounding)                                             |
+| `upload-invoice`   | Off\* | Upload PDF/image → Storage + `documents` + `invoices` (Gemini vision OCR when `GEMINI_API_KEY` is set)                                      |
+| `get-invoice`      | Off\* | Load invoice + line items                                                                                                                   |
+| `get-project-view` | Off   | Public: fetch project + scope by share token                                                                                                |
 | `delete-account`   | On    | Delete user data, Storage files in `project-documents`, Stripe subscription/customer when `STRIPE_SECRET_KEY` is set, then remove auth user |
 
-\*Gateway JWT off so guests can run the first estimate; saving to a project still requires a valid user token.
+\*Gateway JWT verification is off in [`supabase/config.toml`](supabase/config.toml) for these functions so requests reach Deno without spurious edge `Invalid JWT`. `photo-to-scope` still allows guest estimates; saving to a project uses a user token. `create-checkout`, `upload-invoice`, and `get-invoice` require a valid `Authorization` bearer token and validate the user inside the handler.
 
 ### Deploy
 
@@ -89,8 +95,11 @@ BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
 npx supabase login
 npx supabase functions deploy photo-to-scope --project-ref YOUR_PROJECT_REF --no-verify-jwt
 
-# Invoice APIs (require signed-in user)
-npx supabase functions deploy upload-invoice get-invoice --project-ref YOUR_PROJECT_REF
+# Stripe checkout (signed-in user; JWT verified in function)
+npx supabase functions deploy create-checkout --project-ref YOUR_PROJECT_REF --no-verify-jwt
+
+# Invoice APIs (signed-in user; JWT verified in function)
+npx supabase functions deploy upload-invoice get-invoice --project-ref YOUR_PROJECT_REF --no-verify-jwt
 
 # Share project view (public)
 npx supabase functions deploy get-project-view --project-ref YOUR_PROJECT_REF --no-verify-jwt
@@ -102,16 +111,16 @@ Edge runtime already has `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERV
 
 Set via Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 
-| Secret | Description |
-|--------|-------------|
-| `ALLOWED_ORIGINS` | Comma-separated origins for CORS. If unset, allows `*`. |
-| `RATE_LIMIT_REQUESTS` | Max requests per window (default: 60) |
-| `RATE_LIMIT_WINDOW_MS` | Window in ms (default: 60000) |
-| `STRIPE_SECRET_KEY` | Stripe secret key: `stripe-webhook`, `create-checkout`, and `delete-account` (billing cleanup) |
-| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret from Stripe Dashboard |
+| Secret                      | Description                                                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_ORIGINS`           | Comma-separated origins for CORS. If unset, allows `*`.                                                                                                    |
+| `RATE_LIMIT_REQUESTS`       | Max requests per window (default: 60)                                                                                                                      |
+| `RATE_LIMIT_WINDOW_MS`      | Window in ms (default: 60000)                                                                                                                              |
+| `STRIPE_SECRET_KEY`         | Stripe secret key: `stripe-webhook`, `create-checkout`, and `delete-account` (billing cleanup)                                                             |
+| `STRIPE_WEBHOOK_SECRET`     | Webhook signing secret from Stripe Dashboard                                                                                                               |
 | `STRIPE_ARCHITECT_PRICE_ID` | **Required** for `create-checkout`. Architect Price ID from Stripe; used to distinguish subscription (Architect) vs one-time (Project Pass) checkout mode. |
-| `GEMINI_API_KEY` | Google Gemini API key for **invoice OCR** and **photo-to-scope** estimates (Edge only; never expose in Vite). |
-| `GEMINI_MODEL` | Optional. Gemini model id (default `gemini-2.5-flash`). Override per [Gemini models](https://ai.google.dev/gemini-api/docs/models). |
+| `GEMINI_API_KEY`            | Google Gemini API key for **invoice OCR** and **photo-to-scope** estimates (Edge only; never expose in Vite).                                              |
+| `GEMINI_MODEL`              | Optional. Gemini model id (default `gemini-2.5-flash`). Override per [Gemini models](https://ai.google.dev/gemini-api/docs/models).                        |
 
 #### Gemini API (Edge)
 
@@ -119,9 +128,9 @@ Renovation estimates and invoice parsing use the **Gemini REST** `generateConten
 
 **Google documentation:**
 
-- [Models](https://ai.google.dev/gemini-api/docs/models) — model names, tiers, deprecations  
-- [Text generation](https://ai.google.dev/gemini-api/docs/text-generation) — REST `contents` / `parts`  
-- [Tools](https://ai.google.dev/gemini-api/docs/tools) — built-in tools vs function calling  
+- [Models](https://ai.google.dev/gemini-api/docs/models) — model names, tiers, deprecations
+- [Text generation](https://ai.google.dev/gemini-api/docs/text-generation) — REST `contents` / `parts`
+- [Tools](https://ai.google.dev/gemini-api/docs/tools) — built-in tools vs function calling
 - [Grounding with Google Search](https://ai.google.dev/gemini-api/docs/google-search) — `google_search` tool used for **local market–aware** estimates in `photo-to-scope`
 
 Shared client: `supabase/functions/_shared/gemini.ts` (`callGemini`). Estimates pass **`google_search`** grounding; OCR uses structured JSON only (no search tool).
@@ -131,6 +140,7 @@ Shared client: `supabase/functions/_shared/gemini.ts` (`callGemini`). Estimates 
 Core tables: `properties`, `projects`, `scope_items`, `documents`, `invoices`, `invoice_line_items`, `project_view_tokens`, `seller_packets`, plus Storage bucket `project-documents`.
 
 Apply migrations from the Supabase SQL editor or CLI to match your project schema. Run migrations in order:
+
 1. `20250318000000_project_view_tokens.sql`
 2. `20250318100000_full_schema.sql`
 3. `20250318110000_invoices_document_type.sql` (adds `document_type`)
@@ -145,30 +155,30 @@ Apply migrations from the Supabase SQL editor or CLI to match your project schem
 
 ### Schema overview
 
-| Table | Purpose |
-|-------|---------|
-| `properties` | Address, postal_code, city, state, country, approximate_location; `owner_user_id` links to auth |
-| `projects` | `property_id`, name, room_type, stage, finish_preference, estimated_min_total, estimated_max_total, confidence_score |
-| `scope_items` | `project_id`, category, description, finish_tier, quantity, unit, unit_cost_min/max, total_cost_min/max |
-| `documents` | `project_id`, type (invoice/quote/warranty/permit), storage path, original_filename |
-| `invoices` | `project_id`, vendor_name, total, payment_status, OCR status |
-| `invoice_line_items` | `invoice_id`, description, amount, quantity; optional `scope_item_id` for mapping to scope |
-| `project_view_tokens` | `project_id`, token, expires_at — for share links |
-| `seller_packets` | `project_id`, `property_id`, `storage_path`, `generated_at` |
-| `user_subscriptions` | Architect plan: stripe_subscription_id, status, invoice_uploads_count |
-| `project_passes` | One-time $49: project_id, expires_at (6 months) |
+| Table                 | Purpose                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `properties`          | Address, postal_code, city, state, country, approximate_location; `owner_user_id` links to auth                      |
+| `projects`            | `property_id`, name, room_type, stage, finish_preference, estimated_min_total, estimated_max_total, confidence_score |
+| `scope_items`         | `project_id`, category, description, finish_tier, quantity, unit, unit_cost_min/max, total_cost_min/max              |
+| `documents`           | `project_id`, type (invoice/quote/warranty/permit), storage path, original_filename                                  |
+| `invoices`            | `project_id`, vendor_name, total, payment_status, OCR status                                                         |
+| `invoice_line_items`  | `invoice_id`, description, amount, quantity; optional `scope_item_id` for mapping to scope                           |
+| `project_view_tokens` | `project_id`, token, expires_at — for share links                                                                    |
+| `seller_packets`      | `project_id`, `property_id`, `storage_path`, `generated_at`                                                          |
+| `user_subscriptions`  | Architect plan: stripe_subscription_id, status, invoice_uploads_count                                                |
+| `project_passes`      | One-time $49: project_id, expires_at (6 months)                                                                      |
 
 ## Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Vite dev server |
-| `npm run build` | Production build |
-| `npm run test` | Run tests (watch mode) |
-| `npm run test:run` | Run tests once |
-| `npm run lint` | ESLint + TypeScript check |
-| `npm run functions:deploy:photo` | Deploy `photo-to-scope` |
-| `npm run functions:deploy:invoices` | Deploy invoice functions |
+| Script                                  | Description               |
+| --------------------------------------- | ------------------------- |
+| `npm run dev`                           | Vite dev server           |
+| `npm run build`                         | Production build          |
+| `npm run test`                          | Run tests (watch mode)    |
+| `npm run test:run`                      | Run tests once            |
+| `npm run lint`                          | ESLint + TypeScript check |
+| `npm run functions:deploy:photo`        | Deploy `photo-to-scope`   |
+| `npm run functions:deploy:invoices`     | Deploy invoice functions  |
 | `npm run functions:deploy:project-view` | Deploy `get-project-view` |
 
 ---
