@@ -7,7 +7,7 @@ export function money(a: number | null, b?: number | null): string {
       currency: "USD",
       maximumFractionDigits: 0,
     }).format(n);
-    
+
   if (a != null && b != null) return `${fmt(a)} – ${fmt(b)}`;
   if (a != null) return fmt(a);
   return "—";

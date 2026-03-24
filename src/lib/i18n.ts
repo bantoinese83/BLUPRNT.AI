@@ -7,7 +7,11 @@ export function getAppLocale(): string {
 
 export function formatCurrency(
   amount: number,
-  options?: { locale?: string; currency?: string; maximumFractionDigits?: number },
+  options?: {
+    locale?: string;
+    currency?: string;
+    maximumFractionDigits?: number;
+  },
 ): string {
   const locale = options?.locale ?? getAppLocale();
   const currency = options?.currency ?? "USD";

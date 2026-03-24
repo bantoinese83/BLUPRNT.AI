@@ -14,22 +14,21 @@ export function DashboardSkeleton() {
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-             <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md">
-               <div className="h-10 w-10 sm:h-11 sm:w-11 bg-slate-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-                 <Shimmer />
-                 <div className="w-6 h-6 bg-slate-200 rounded animate-pulse" />
-               </div>
-             </div>
-             <div className="relative overflow-hidden h-4 w-32 bg-slate-100 rounded-lg">
-               <Shimmer />
-             </div>
+            <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md">
+              <div className="h-10 w-10 sm:h-11 sm:w-11 bg-slate-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                <Shimmer />
+                <div className="w-6 h-6 bg-slate-200 rounded animate-pulse" />
+              </div>
+            </div>
+            <div className="relative overflow-hidden h-4 w-32 bg-slate-100 rounded-lg">
+              <Shimmer />
+            </div>
           </div>
           <div className="relative overflow-hidden h-9 w-24 bg-slate-100 rounded-xl">
             <Shimmer />
           </div>
         </div>
       </header>
-
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Project header skeleton */}
@@ -45,7 +44,10 @@ export function DashboardSkeleton() {
         {/* Stats strip skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="relative overflow-hidden h-20 bg-slate-100 rounded-xl">
+            <div
+              key={i}
+              className="relative overflow-hidden h-20 bg-slate-100 rounded-xl"
+            >
               <Shimmer />
             </div>
           ))}

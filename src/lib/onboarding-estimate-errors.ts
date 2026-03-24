@@ -10,9 +10,20 @@ export function classifyEstimateError(message: string): EstimateRecoveryKind {
   const m = message.toLowerCase();
   if (m.includes("429") || m.includes("too many requests")) return "rate_limit";
   if (m.includes("400") || m.includes("invalid")) return "input";
-  if (m.includes("network") || m.includes("failed to fetch") || m.includes("connection")) return "network";
-  if (m.includes("unsafe") || m.includes("safety") || m.includes("policy")) return "safety";
-  if (m.includes("500") || m.includes("timed out") || m.includes("ai estimation failed")) return "server";
+  if (
+    m.includes("network") ||
+    m.includes("failed to fetch") ||
+    m.includes("connection")
+  )
+    return "network";
+  if (m.includes("unsafe") || m.includes("safety") || m.includes("policy"))
+    return "safety";
+  if (
+    m.includes("500") ||
+    m.includes("timed out") ||
+    m.includes("ai estimation failed")
+  )
+    return "server";
   return "unknown";
 }
 

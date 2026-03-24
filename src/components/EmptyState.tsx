@@ -21,13 +21,12 @@ export function EmptyState({
   description,
   action,
   variant = "projects",
-  className
+  className,
 }: EmptyStateProps) {
-  
   const DefaultIcon = {
     projects: FolderPlus,
     invoices: FilePlus,
-    error: AlertCircle
+    error: AlertCircle,
   }[variant];
 
   const FinalIcon = Icon || DefaultIcon;
@@ -38,25 +37,25 @@ export function EmptyState({
       animate={{ opacity: 1, y: 0 }}
       className={cn(
         "flex flex-col items-center justify-center p-12 text-center rounded-[3rem] border border-slate-200/50 bg-white/40 backdrop-blur-sm",
-        className
+        className,
       )}
     >
       <div className="relative mb-8">
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.1, 1],
-            rotate: [0, 5, -5, 0]
+            rotate: [0, 5, -5, 0],
           }}
-          transition={{ 
-            duration: 6, 
+          transition={{
+            duration: 6,
             repeat: Infinity,
-            ease: "easeInOut" 
+            ease: "easeInOut",
           }}
           className="w-24 h-24 rounded-[2rem] bg-slate-900 flex items-center justify-center text-white shadow-2xl relative z-10"
         >
           <FinalIcon className="w-10 h-10" strokeWidth={1.5} />
         </motion.div>
-        
+
         {/* Decorative elements */}
         <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rounded-2xl -rotate-12 opacity-20 blur-xl" />
         <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-10 blur-xl" />
@@ -93,8 +92,8 @@ export function EmptyState({
 
       {/* Help Link */}
       <div className="mt-8">
-        <a 
-          href="mailto:connect@monarch-labs.com" 
+        <a
+          href="mailto:connect@monarch-labs.com"
           className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1.5"
         >
           Need help? Contact support
@@ -104,7 +103,15 @@ export function EmptyState({
       {/* Branded watermark */}
       <div className="mt-8 opacity-[0.03] pointer-events-none select-none">
         <svg width="120" height="40" viewBox="0 0 120 40" fill="currentColor">
-          <text x="0" y="30" fontSize="24" fontWeight="900" letterSpacing="0.2em">BLUPRNT</text>
+          <text
+            x="0"
+            y="30"
+            fontSize="24"
+            fontWeight="900"
+            letterSpacing="0.2em"
+          >
+            BLUPRNT
+          </text>
         </svg>
       </div>
     </motion.div>

@@ -10,10 +10,7 @@ import {
   Paintbrush,
   Home,
 } from "lucide-react";
-import type {
-  ProjectTypeOption,
-  StageOption,
-} from "@/types/onboarding";
+import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
 
 export const PROJECT_TYPE_ICON: Record<ProjectTypeOption, LucideIcon> = {
   Kitchen: ChefHat,

@@ -179,6 +179,8 @@ export function ProjectHealth({
             color={stop1}
             strokeWidth={2}
             padding={0}
+            isView={true}
+            delay={0.6}
           >
             Health Index
           </Highlighter>

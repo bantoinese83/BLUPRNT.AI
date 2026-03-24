@@ -30,7 +30,10 @@ function labelFromPhotonProperties(p: PhotonProps): string | null {
   if (zip && /^\d{5}(-\d{4})?$/.test(zip)) return zip;
   if (zip) return zip;
   const place =
-    p.city || p.town || p.village || (p.name && p.name !== p.street ? p.name : null);
+    p.city ||
+    p.town ||
+    p.village ||
+    (p.name && p.name !== p.street ? p.name : null);
   const region = p.state || p.county;
   if (place && region) return `${place}, ${region}`;
   if (place) return place;

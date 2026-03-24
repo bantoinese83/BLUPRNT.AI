@@ -49,10 +49,35 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
     if (email.trim()) {
       setLoading(true);
       try {
+        // 1. Save lead to DB
         await supabase.from("marketing_leads").insert({
           email: email.trim().toLowerCase(),
           source: "exit_intent_modal",
         });
+
+        // 2. Send the actual email (async)
+        supabase.functions.invoke("send-email", {
+          body: {
+            to: email.trim().toLowerCase(),
+            subject: "Your 35% Discount Code for BLUPRNT.AI",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; line-height: 1.6;">
+                <h1 style="color: #6366f1; text-transform: uppercase; tracking: tight;">35% OFF LOCKED IN</h1>
+                <p>Hello!</p>
+                <p>You recently asked for a discount on BLUPRNT.AI. Your code is below:</p>
+                <div style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; margin: 24px 0;">
+                  <span style="font-size: 24px; font-weight: 900; letter-spacing: 2px;">BLUEPRINT35</span>
+                </div>
+                <p>This code gives you <strong>35% off</strong> the Architect Plan or a single Project Pass.</p>
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
+                <p style="font-size: 14px; color: #64748b;">
+                  P.S. Attached to this lead capture should be our "Budget Guard" checklist, but since we are in a pro-version of the app, you can already access these features in your <a href="https://bluprnt.ai/dashboard" style="color: #6366f1; text-decoration: none; font-weight: bold;">Dashboard</a>.
+                </p>
+              </div>
+            `,
+          },
+        });
+
         setSubmitted(true);
       } catch (err) {
         console.error("Failed to capture lead:", err);

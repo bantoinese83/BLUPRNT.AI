@@ -15,7 +15,10 @@ export function projectTypeToRoomType(t: ProjectTypeOption | null): string {
 export function projectTypeToDb(
   t: ProjectTypeOption | null,
 ): "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other" {
-  const m: Record<string, "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other"> = {
+  const m: Record<
+    string,
+    "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other"
+  > = {
     Kitchen: "kitchen",
     Bathroom: "bath",
     Painting: "paint",
@@ -23,7 +26,7 @@ export function projectTypeToDb(
     Flooring: "flooring",
     "Something else": "other",
   };
-  return t ? m[t] ?? "other" : "other";
+  return t ? (m[t] ?? "other") : "other";
 }
 
 export function stageToDb(
@@ -79,7 +82,8 @@ export async function saveOnboardingProject(params: {
         city: "",
         state: "",
         country: "US",
-        approximate_location: locationInput.length > 5 ? locationInput.trim() : null,
+        approximate_location:
+          locationInput.length > 5 ? locationInput.trim() : null,
       })
       .select("id")
       .single();

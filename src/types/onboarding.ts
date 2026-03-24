@@ -44,7 +44,11 @@ export type OnboardingContextValue = {
   }) => Promise<{ ok: boolean; message: string }>;
   savedProjectId: string | null;
   clearOnboarding: () => void;
-  projectTypeToDb: (t: ProjectTypeOption | null) => "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other";
-  stageToDb: (s: StageOption | null) => "planning" | "collecting_quotes" | "in_progress" | "completed";
+  projectTypeToDb: (
+    t: ProjectTypeOption | null,
+  ) => "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other";
+  stageToDb: (
+    s: StageOption | null,
+  ) => "planning" | "collecting_quotes" | "in_progress" | "completed";
   projectDisplayName: (t: ProjectTypeOption | null) => string;
 };

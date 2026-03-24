@@ -67,16 +67,21 @@ export function StageScreen() {
                     <Icon className="w-5 h-5" strokeWidth={1.75} aria-hidden />
                   </div>
                   <div className="flex-1 text-left space-y-1">
-                    <p className={`font-bold transition-colors ${
-                      selected ? "text-slate-900" : "text-slate-800"
-                    }`}>
+                    <p
+                      className={`font-bold transition-colors ${
+                        selected ? "text-slate-900" : "text-slate-800"
+                      }`}
+                    >
                       {opt.id}
                     </p>
                     <p className="text-xs text-slate-500 leading-relaxed font-medium">
                       {opt.description}
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" aria-hidden />
+                  <ChevronRight
+                    className="w-5 h-5 text-slate-400 shrink-0"
+                    aria-hidden
+                  />
                 </CardContent>
               </Card>
             );

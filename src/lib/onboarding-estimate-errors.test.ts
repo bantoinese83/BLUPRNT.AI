@@ -10,10 +10,14 @@ describe("onboarding estimate errors", () => {
   });
 
   it("classifies safety errors", () => {
-    expect(classifyEstimateError("image blocked by safety policy")).toBe("safety");
+    expect(classifyEstimateError("image blocked by safety policy")).toBe(
+      "safety",
+    );
   });
 
   it("returns user-friendly copy", () => {
-    expect(userFriendlyEstimateError("failed to fetch")).toContain("connection");
+    expect(userFriendlyEstimateError("failed to fetch")).toContain(
+      "connection",
+    );
   });
 });

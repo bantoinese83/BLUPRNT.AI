@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ShieldCheck, X, Shield, Settings2, Check, TrendingUp } from "lucide-react";
+import {
+  ShieldCheck,
+  X,
+  Shield,
+  Settings2,
+  Check,
+  TrendingUp,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +19,7 @@ const CONSENT_KEY = "bluprnt_cookie_consent_v1";
 export function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  
+
   // Custom settings state
   const [settings, setSettings] = useState({
     essential: true, // Always true
@@ -53,34 +60,44 @@ export function CookieConsent() {
       setShowModal(true);
     };
     window.addEventListener(OPEN_COOKIE_SETTINGS_EVENT, onOpenSettings);
-    return () => window.removeEventListener(OPEN_COOKIE_SETTINGS_EVENT, onOpenSettings);
+    return () =>
+      window.removeEventListener(OPEN_COOKIE_SETTINGS_EVENT, onOpenSettings);
   }, []);
 
   const handleAcceptAll = () => {
-    localStorage.setItem(CONSENT_KEY, JSON.stringify({
-      essential: true,
-      analytics: true,
-      marketing: true,
-      timestamp: new Date().toISOString()
-    }));
+    localStorage.setItem(
+      CONSENT_KEY,
+      JSON.stringify({
+        essential: true,
+        analytics: true,
+        marketing: true,
+        timestamp: new Date().toISOString(),
+      }),
+    );
     setIsVisible(false);
   };
 
   const handleDeclineAll = () => {
-    localStorage.setItem(CONSENT_KEY, JSON.stringify({
-      essential: true,
-      analytics: false,
-      marketing: false,
-      timestamp: new Date().toISOString()
-    }));
+    localStorage.setItem(
+      CONSENT_KEY,
+      JSON.stringify({
+        essential: true,
+        analytics: false,
+        marketing: false,
+        timestamp: new Date().toISOString(),
+      }),
+    );
     setIsVisible(false);
   };
 
   const handleSaveCustom = () => {
-    localStorage.setItem(CONSENT_KEY, JSON.stringify({
-      ...settings,
-      timestamp: new Date().toISOString()
-    }));
+    localStorage.setItem(
+      CONSENT_KEY,
+      JSON.stringify({
+        ...settings,
+        timestamp: new Date().toISOString(),
+      }),
+    );
     setShowModal(false);
     setIsVisible(false);
   };
@@ -103,33 +120,36 @@ export function CookieConsent() {
                   </div>
                   <div className="space-y-4 flex-1">
                     <div className="space-y-1">
-                      <h3 className="text-lg font-bold text-slate-900 tracking-tight">Privacy Preferences</h3>
+                      <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                        Privacy Preferences
+                      </h3>
                       <p className="text-sm text-slate-600 leading-relaxed">
-                        We use cookies to personalize your experience and analyze our traffic. 
-                        By clicking "Accept All", you consent to our use of cookies.
+                        We use cookies to personalize your experience and
+                        analyze our traffic. By clicking "Accept All", you
+                        consent to our use of cookies.
                       </p>
                     </div>
-                    
+
                     <div className="flex flex-wrap items-center gap-3 pt-2">
-                      <Button 
-                        variant="primary" 
-                        size="sm" 
+                      <Button
+                        variant="primary"
+                        size="sm"
                         className="rounded-xl px-6 h-10 font-bold"
                         onClick={handleAcceptAll}
                       >
                         Accept All
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="rounded-xl px-5 h-10 font-bold bg-white/50"
                         onClick={() => setShowModal(true)}
                       >
                         Settings
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="rounded-xl h-10 text-slate-500 hover:text-slate-900 underline underline-offset-4"
                         onClick={handleDeclineAll}
                       >
@@ -154,10 +174,12 @@ export function CookieConsent() {
               className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden"
             >
               <div className="px-8 pt-8 pb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Cookie Settings</h2>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                  Cookie Settings
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="rounded-full hover:bg-slate-100"
                   onClick={() => setShowModal(false)}
                 >
@@ -174,86 +196,122 @@ export function CookieConsent() {
                         <Shield className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900">Essential</p>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Required</p>
+                        <p className="text-sm font-bold text-slate-900">
+                          Essential
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                          Required
+                        </p>
                       </div>
                     </div>
                     <Check className="w-5 h-5 text-emerald-500 shrink-0" />
                   </div>
 
                   {/* Analytics */}
-                  <button 
-                    onClick={() => setSettings(s => ({ ...s, analytics: !s.analytics }))}
+                  <button
+                    onClick={() =>
+                      setSettings((s) => ({ ...s, analytics: !s.analytics }))
+                    }
                     className={cn(
                       "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
-                      settings.analytics ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"
+                      settings.analytics
+                        ? "bg-slate-50 border-slate-200"
+                        : "bg-white border-slate-100",
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                        settings.analytics ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-400"
-                      )}>
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                          settings.analytics
+                            ? "bg-slate-900 text-white"
+                            : "bg-slate-100 text-slate-400",
+                        )}
+                      >
                         <TrendingUp className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900">Analytics</p>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Usage & performance</p>
+                        <p className="text-sm font-bold text-slate-900">
+                          Analytics
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                          Usage & performance
+                        </p>
                       </div>
                     </div>
-                    <div className={cn(
-                      "w-10 h-5 rounded-full relative transition-colors duration-300",
-                      settings.analytics ? "bg-slate-900" : "bg-slate-200"
-                    )}>
-                      <div className={cn(
-                        "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300",
-                        settings.analytics ? "left-6" : "left-1"
-                      )} />
+                    <div
+                      className={cn(
+                        "w-10 h-5 rounded-full relative transition-colors duration-300",
+                        settings.analytics ? "bg-slate-900" : "bg-slate-200",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300",
+                          settings.analytics ? "left-6" : "left-1",
+                        )}
+                      />
                     </div>
                   </button>
 
                   {/* Marketing */}
-                  <button 
-                    onClick={() => setSettings(s => ({ ...s, marketing: !s.marketing }))}
+                  <button
+                    onClick={() =>
+                      setSettings((s) => ({ ...s, marketing: !s.marketing }))
+                    }
                     className={cn(
                       "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
-                      settings.marketing ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100"
+                      settings.marketing
+                        ? "bg-slate-50 border-slate-200"
+                        : "bg-white border-slate-100",
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                        settings.marketing ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-400"
-                      )}>
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                          settings.marketing
+                            ? "bg-slate-900 text-white"
+                            : "bg-slate-100 text-slate-400",
+                        )}
+                      >
                         <Settings2 className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900">Marketing</p>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Recommendations</p>
+                        <p className="text-sm font-bold text-slate-900">
+                          Marketing
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                          Recommendations
+                        </p>
                       </div>
                     </div>
-                    <div className={cn(
-                      "w-10 h-5 rounded-full relative transition-colors duration-300",
-                      settings.marketing ? "bg-slate-900" : "bg-slate-200"
-                    )}>
-                      <div className={cn(
-                        "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300",
-                        settings.marketing ? "left-6" : "left-1"
-                      )} />
+                    <div
+                      className={cn(
+                        "w-10 h-5 rounded-full relative transition-colors duration-300",
+                        settings.marketing ? "bg-slate-900" : "bg-slate-200",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-300",
+                          settings.marketing ? "left-6" : "left-1",
+                        )}
+                      />
                     </div>
                   </button>
                 </div>
 
                 <div className="flex flex-col gap-3 pt-4">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     className="w-full h-12 rounded-2xl font-bold"
                     onClick={handleSaveCustom}
                   >
                     Save Preferences
                   </Button>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     className="w-full text-slate-500 font-bold"
                     onClick={() => setShowModal(false)}
                   >

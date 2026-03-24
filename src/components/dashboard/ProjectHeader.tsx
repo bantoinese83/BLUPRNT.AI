@@ -64,7 +64,6 @@ export function ProjectHeader({ project }: { project: ProjectRow }) {
             </span>
             Active project
           </Badge>
-
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
           {project.name}
@@ -98,7 +97,10 @@ export function ProjectHeader({ project }: { project: ProjectRow }) {
               </div>
               {shareLoading ? (
                 <div className="flex items-center gap-2 text-slate-500 py-4">
-                  <Loader2 className="w-5 h-5 text-slate-900 animate-spin" aria-hidden />
+                  <Loader2
+                    className="w-5 h-5 text-slate-900 animate-spin"
+                    aria-hidden
+                  />
 
                   <span>Creating link…</span>
                 </div>
@@ -109,10 +111,13 @@ export function ProjectHeader({ project }: { project: ProjectRow }) {
               ) : shareUrl ? (
                 <div className="space-y-3">
                   <p className="text-sm text-amber-900/90 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 leading-relaxed">
-                    <strong className="font-semibold">Privacy:</strong> They only see your estimate and scope—not invoices, uploads, or personal details.
+                    <strong className="font-semibold">Privacy:</strong> They
+                    only see your estimate and scope—not invoices, uploads, or
+                    personal details.
                   </p>
                   <p className="text-sm text-slate-600">
-                    The link expires in 30 days. Anyone with it can view that read-only page.
+                    The link expires in 30 days. Anyone with it can view that
+                    read-only page.
                   </p>
                   <div className="flex gap-2">
                     <input

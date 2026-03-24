@@ -61,7 +61,7 @@ export function DashboardHeader({
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
               <Link
                 to="/dashboard"
-                className="truncate text-base font-black italic tracking-tighter text-slate-900 sm:text-lg"
+                className="text-base font-black italic tracking-tight text-slate-900 sm:text-lg"
               >
                 BLUPRNT<span className="text-indigo-600">.AI</span>
               </Link>

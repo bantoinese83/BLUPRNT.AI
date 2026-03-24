@@ -41,7 +41,9 @@ describe("ProtectedRoute", () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.getByRole("status", { name: /loading page/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: /loading page/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders children when session exists", async () => {

@@ -31,11 +31,8 @@ const QUICK_CHIPS: Record<string, string[]> = {
 
 export function TextScopeScreen() {
   const navigate = useNavigate();
-  const {
-    scopeDescription,
-    setScopeDescription,
-    projectType,
-  } = useOnboarding();
+  const { scopeDescription, setScopeDescription, projectType } =
+    useOnboarding();
 
   const chips = QUICK_CHIPS[projectType ?? "Other"] ?? QUICK_CHIPS.Other;
 
@@ -69,13 +66,15 @@ export function TextScopeScreen() {
               >
                 + {label}
               </button>
-
             ))}
           </div>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="scope-desc" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+          <label
+            htmlFor="scope-desc"
+            className="text-sm font-medium text-slate-700 flex items-center gap-2"
+          >
             <PenLine className="w-4 h-4" aria-hidden />
             Your description
           </label>

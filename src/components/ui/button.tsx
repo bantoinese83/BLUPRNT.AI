@@ -1,9 +1,15 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "primary" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?:
+    | "default"
+    | "primary"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
   size?: "default" | "sm" | "lg" | "icon";
 }
 
@@ -18,9 +24,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {
             "bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98]":
               variant === "default",
-            "liquid-metal-button text-white":
-              variant === "primary",
-
+            "liquid-metal-button text-white": variant === "primary",
 
             "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]":
               variant === "destructive",
@@ -37,12 +41,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "h-12 rounded-xl px-6 text-base": size === "lg",
             "h-10 w-10 shrink-0": size === "icon",
           },
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 Button.displayName = "Button";
 

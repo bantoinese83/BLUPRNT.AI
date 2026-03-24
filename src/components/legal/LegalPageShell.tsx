@@ -30,7 +30,9 @@ export function LegalPageShell({
   const base =
     getPublicSiteUrl() ||
     (typeof window !== "undefined" ? window.location.origin : FALLBACK_ORIGIN);
-  const path = canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`;
+  const path = canonicalPath.startsWith("/")
+    ? canonicalPath
+    : `/${canonicalPath}`;
   const canonicalUrl = `${base.replace(/\/$/, "")}${path}`;
 
   return (
@@ -56,10 +58,7 @@ export function LegalPageShell({
           className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[4.25rem] sm:px-6"
           aria-label="Legal page"
         >
-          <Link
-            to="/"
-            className="flex min-w-0 items-center gap-2.5 sm:gap-3"
-          >
+          <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md ring-1 ring-slate-200/60 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-2">
               <img
                 src="/bluprnt_logo.svg"
@@ -107,15 +106,17 @@ export function LegalPageShell({
               {title}
             </h1>
             <p className="mt-3 text-sm font-medium text-slate-500">
-              Last updated{" "}
-              <time dateTime="2026-03-23">{lastUpdated}</time>
+              Last updated <time dateTime="2026-03-23">{lastUpdated}</time>
             </p>
           </div>
           <div className="px-6 py-8 sm:px-10 sm:py-10">{children}</div>
         </article>
       </main>
 
-      <footer className="border-t border-slate-200/80 bg-slate-50/80 px-4 py-10 sm:px-6" role="contentinfo">
+      <footer
+        className="border-t border-slate-200/80 bg-slate-50/80 px-4 py-10 sm:px-6"
+        role="contentinfo"
+      >
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
             <span className="font-black italic tracking-tighter text-slate-900">
@@ -135,7 +136,10 @@ export function LegalPageShell({
             <Link to="/" className="font-medium hover:text-slate-900">
               Home
             </Link>
-            <Link to={{ pathname: "/", hash: "faq" }} className="font-medium hover:text-slate-900">
+            <Link
+              to={{ pathname: "/", hash: "faq" }}
+              className="font-medium hover:text-slate-900"
+            >
               Questions
             </Link>
             <Link to="/onboarding" className="font-medium hover:text-slate-900">
@@ -147,7 +151,10 @@ export function LegalPageShell({
             <Link to="/terms" className="font-medium hover:text-slate-900">
               Terms
             </Link>
-            <a href="mailto:connect@monarch-labs.com" className="font-medium hover:text-slate-900">
+            <a
+              href="mailto:connect@monarch-labs.com"
+              className="font-medium hover:text-slate-900"
+            >
               Contact
             </a>
             <button

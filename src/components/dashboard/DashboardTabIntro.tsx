@@ -34,7 +34,9 @@ const TAB_CONFIG = {
 export function DashboardTabIntro() {
   const navigate = useNavigate();
   const location = useLocation();
-  const base = location.pathname.replace(/\/$/, "").split("/").slice(0, 3).join("/") || "/dashboard/plan";
+  const base =
+    location.pathname.replace(/\/$/, "").split("/").slice(0, 3).join("/") ||
+    "/dashboard/plan";
   const key =
     base === "/dashboard/plan" || base === "/dashboard"
       ? "/dashboard/plan"
@@ -57,7 +59,9 @@ export function DashboardTabIntro() {
           </div>
           <div className="min-w-0 space-y-1">
             <h2 className="font-semibold text-slate-900">{cfg.title}</h2>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-xl">{cfg.why}</p>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-xl">
+              {cfg.why}
+            </p>
           </div>
         </div>
         <Button
@@ -66,11 +70,15 @@ export function DashboardTabIntro() {
           className="shrink-0 gap-2 rounded-xl w-full sm:w-auto"
           onClick={() => {
             if ("scrollToUpload" in cfg && cfg.scrollToUpload) {
-              document.getElementById("invoice-upload-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              document
+                .getElementById("invoice-upload-anchor")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
               return;
             }
             if ("scrollToLedger" in cfg && cfg.scrollToLedger) {
-              document.getElementById("property-ledger-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              document
+                .getElementById("property-ledger-anchor")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
               return;
             }
             navigate(cfg.path);

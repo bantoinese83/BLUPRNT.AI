@@ -29,10 +29,9 @@ export default function AuthCallback() {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (cancelled) return;
         if (error) {
-          navigate(
-            `/login?error=${encodeURIComponent(error.message)}`,
-            { replace: true },
-          );
+          navigate(`/login?error=${encodeURIComponent(error.message)}`, {
+            replace: true,
+          });
           return;
         }
         window.history.replaceState({}, "", `${url.pathname}${url.hash}`);
@@ -96,7 +95,10 @@ export default function AuthCallback() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-slate-600">
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-slate-900" aria-hidden />
+        <Loader2
+          className="h-10 w-10 animate-spin text-slate-900"
+          aria-hidden
+        />
         <p className="text-center text-sm font-medium">{message}</p>
       </div>
       <AppSlimFooter className="shrink-0 bg-slate-100/70" />

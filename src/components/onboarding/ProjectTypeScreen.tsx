@@ -23,19 +23,19 @@ const containerVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.05,
-      delayChildren: 0.1
-    }
-  }
+      delayChildren: 0.1,
+    },
+  },
 } as const;
 
 const itemVariants = {
   hidden: { opacity: 0, y: 15, scale: 0.95 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
+  show: {
+    opacity: 1,
+    y: 0,
     scale: 1,
-    transition: { type: "spring", stiffness: 300, damping: 30 } as const
-  }
+    transition: { type: "spring", stiffness: 300, damping: 30 } as const,
+  },
 } as const;
 
 export function ProjectTypeScreen() {
@@ -46,14 +46,14 @@ export function ProjectTypeScreen() {
     <PageTransition>
       <div className="space-y-8">
         <div className="space-y-2">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl font-bold tracking-tight text-slate-900"
           >
             What are you working on first?
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -63,7 +63,7 @@ export function ProjectTypeScreen() {
           </motion.p>
         </div>
 
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -100,15 +100,17 @@ export function ProjectTypeScreen() {
                     >
                       <Icon className="w-6 h-6" strokeWidth={2.5} aria-hidden />
                     </div>
-                    <span className={`font-bold text-sm leading-tight transition-colors ${
-                      selected ? "text-indigo-950" : "text-slate-600"
-                    }`}>
+                    <span
+                      className={`font-bold text-sm leading-tight transition-colors ${
+                        selected ? "text-indigo-950" : "text-slate-600"
+                      }`}
+                    >
                       {opt}
                     </span>
                   </CardContent>
-                  
+
                   {selected && (
-                    <motion.div 
+                    <motion.div
                       layoutId="active-bg"
                       className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none"
                     />
@@ -120,9 +122,9 @@ export function ProjectTypeScreen() {
         </motion.div>
 
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
         >
           <Button
             size="lg"
@@ -132,11 +134,13 @@ export function ProjectTypeScreen() {
             onClick={() => navigate("/onboarding/location")}
           >
             Continue
-            <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" aria-hidden />
+            <ArrowRight
+              className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1"
+              aria-hidden
+            />
           </Button>
         </motion.div>
       </div>
     </PageTransition>
   );
 }
-

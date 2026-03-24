@@ -20,6 +20,9 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
     return { data, error: null };
   } catch (err) {
     console.error("Error sending email via Supabase Edge Function:", err);
-    return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error(String(err)),
+    };
   }
 }

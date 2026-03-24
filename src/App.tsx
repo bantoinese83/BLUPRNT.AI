@@ -16,9 +16,6 @@ import { Toaster } from "sonner";
 import { CommandPalette } from "@/components/CommandPalette";
 import { HelpWidget } from "@/components/HelpWidget";
 
-
-
-
 const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -66,7 +63,14 @@ export default function App() {
                 }
               />
               <Route path="/project/:token" element={<ProjectView />} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="*" element={<NotFound />} />
@@ -77,9 +81,7 @@ export default function App() {
           <CookieConsent />
           <HelpWidget />
         </BrowserRouter>
-
       </ErrorBoundary>
     </HelmetProvider>
   );
 }
-

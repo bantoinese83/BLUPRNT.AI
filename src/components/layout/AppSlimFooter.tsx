@@ -11,7 +11,10 @@ type AppSlimFooterProps = {
 /**
  * Compact legal / help strip for auth, app shell, and shared views — matches landing link set without marketing bulk.
  */
-export function AppSlimFooter({ className, showHome = true }: AppSlimFooterProps) {
+export function AppSlimFooter({
+  className,
+  showHome = true,
+}: AppSlimFooterProps) {
   return (
     <footer
       role="contentinfo"
@@ -30,7 +33,10 @@ export function AppSlimFooter({ className, showHome = true }: AppSlimFooterProps
               Home
             </Link>
           ) : null}
-          <Link to="/privacy" className="transition-colors hover:text-slate-900">
+          <Link
+            to="/privacy"
+            className="transition-colors hover:text-slate-900"
+          >
             Privacy
           </Link>
           <Link to="/terms" className="transition-colors hover:text-slate-900">

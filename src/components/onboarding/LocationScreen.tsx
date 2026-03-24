@@ -83,7 +83,9 @@ export function LocationScreen() {
         manualEditRef.current = false;
         setLocationInput(label);
         setAutoSource("gps");
-        setHint("Updated using your device location. You can still edit the field.");
+        setHint(
+          "Updated using your device location. You can still edit the field.",
+        );
       } else {
         setHint("We couldn’t resolve an address. Try a ZIP or intersection.");
       }
@@ -112,12 +114,14 @@ export function LocationScreen() {
               type="button"
               variant="outline"
               className="w-full h-12 justify-center gap-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-
               onClick={usePreciseLocation}
               disabled={gpsLoading}
             >
               {gpsLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
+                <Loader2
+                  className="w-5 h-5 animate-spin shrink-0"
+                  aria-hidden
+                />
               ) : (
                 <LocateFixed className="w-5 h-5 shrink-0" aria-hidden />
               )}
@@ -134,10 +138,15 @@ export function LocationScreen() {
             </label>
             <div className="relative">
               {ipLoading && !locationInput.trim() ? (
-                <Loader2 className="absolute left-3 top-3.5 h-4 w-4 text-slate-900 animate-spin" aria-hidden />
-
+                <Loader2
+                  className="absolute left-3 top-3.5 h-4 w-4 text-slate-900 animate-spin"
+                  aria-hidden
+                />
               ) : (
-                <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden />
+                <MapPin
+                  className="absolute left-3 top-3.5 h-4 w-4 text-slate-400"
+                  aria-hidden
+                />
               )}
               <Input
                 className="pl-9 h-12"
@@ -153,11 +162,13 @@ export function LocationScreen() {
             </p>
             {autoSource && (
               <p className="text-xs text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 flex items-start gap-2">
-
                 {autoSource === "ip" ? (
                   <Radar className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
                 ) : (
-                  <LocateFixed className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
+                  <LocateFixed
+                    className="w-4 h-4 shrink-0 mt-0.5"
+                    aria-hidden
+                  />
                 )}
                 <span>{hint}</span>
               </p>
@@ -172,7 +183,6 @@ export function LocationScreen() {
             <button
               type="button"
               className="inline-flex items-center gap-1.5 text-sm text-slate-900 font-bold hover:underline"
-
               onClick={() => setShowWhy((v) => !v)}
               aria-expanded={showWhy}
             >
@@ -184,7 +194,8 @@ export function LocationScreen() {
                 className="mt-2 p-3 bg-slate-900 text-white text-sm rounded-xl shadow-lg"
                 role="tooltip"
               >
-                Labor and material costs change a lot by location. This helps us stay within about 15% of real quotes.
+                Labor and material costs change a lot by location. This helps us
+                stay within about 15% of real quotes.
               </div>
             )}
           </div>
@@ -196,7 +207,9 @@ export function LocationScreen() {
             className="w-full"
             onClick={() => {
               if (!locationInput.trim()) {
-                toast.error("Please enter a ZIP code, or click 'Skip for now'.");
+                toast.error(
+                  "Please enter a ZIP code, or click 'Skip for now'.",
+                );
                 return;
               }
               setLocationUnset(false);

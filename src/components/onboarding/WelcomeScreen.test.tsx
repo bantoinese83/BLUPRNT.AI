@@ -8,24 +8,32 @@ describe("WelcomeScreen", () => {
     render(
       <MemoryRouter>
         <WelcomeScreen />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: /transform your renovation/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /transform your renovation/i }),
+      ).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: /get my first estimate/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /get my first estimate/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /register/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
   });
 
   it("register link goes to register", async () => {
     render(
       <MemoryRouter>
         <WelcomeScreen />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: /register/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /register/i }),
+      ).toBeInTheDocument();
     });
     const createAccount = screen.getByRole("link", { name: /register/i });
     expect(createAccount).toHaveAttribute("href", "/register");

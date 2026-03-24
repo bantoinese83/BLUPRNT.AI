@@ -84,7 +84,9 @@ export default function ProjectView() {
         setScopeItems(json.scope_items ?? []);
       } catch {
         if (!cancelled) {
-          setError("We couldn’t reach the server. Check your connection and try again.");
+          setError(
+            "We couldn’t reach the server. Check your connection and try again.",
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -100,7 +102,10 @@ export default function ProjectView() {
     return (
       <div className="flex min-h-screen flex-col bg-slate-50">
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <Loader2 className="h-10 w-10 animate-spin text-slate-900" aria-hidden />
+          <Loader2
+            className="h-10 w-10 animate-spin text-slate-900"
+            aria-hidden
+          />
           <p className="text-slate-600">Loading project…</p>
         </div>
         <AppSlimFooter className="bg-white/70" />
@@ -115,9 +120,12 @@ export default function ProjectView() {
           <div className="rounded-2xl bg-amber-100 p-5 text-amber-800">
             <AlertCircle className="mx-auto h-12 w-12" aria-hidden />
           </div>
-          <p className="font-medium leading-relaxed text-slate-700">{error ?? "Something went wrong"}</p>
+          <p className="font-medium leading-relaxed text-slate-700">
+            {error ?? "Something went wrong"}
+          </p>
           <p className="text-sm text-slate-500">
-            If you were sent this link, ask them to create a new share link from their dashboard.
+            If you were sent this link, ask them to create a new share link from
+            their dashboard.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row">
             <Button
@@ -135,7 +143,11 @@ export default function ProjectView() {
             <Link to="/" className="w-full sm:w-auto">
               <Button variant="primary" className="w-full gap-2" type="button">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
-                  <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
+                  <img
+                    src="/bluprnt_logo.svg"
+                    alt="BLUPRNT logo"
+                    className="h-full w-full object-contain"
+                  />
                 </div>
                 Go to BLUPRNT.AI
               </Button>
@@ -162,11 +174,21 @@ export default function ProjectView() {
       <header className="border-b border-slate-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-slate-900">{project.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {project.name}
+            </h1>
             <Link to="/">
-              <Button variant="ghost" size="sm" className="gap-2 text-slate-700 hover:bg-slate-50 font-bold tracking-tight">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-slate-700 hover:bg-slate-50 font-bold tracking-tight"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-sm border border-slate-100 overflow-hidden shrink-0">
-                  <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
+                  <img
+                    src="/bluprnt_logo.svg"
+                    alt="BLUPRNT logo"
+                    className="h-full w-full object-contain"
+                  />
                 </div>
                 BLUPRNT.AI
               </Button>
@@ -185,17 +207,22 @@ export default function ProjectView() {
           <Card className="overflow-hidden shadow-lg border-slate-200/60">
             <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">Estimated total</p>
+                <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">
+                  Estimated total
+                </p>
                 <div className="text-4xl font-black tracking-tight">
-                  {money(project.estimated_min_total, project.estimated_max_total)}
+                  {money(
+                    project.estimated_min_total,
+                    project.estimated_max_total,
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`w-3 h-3 rounded-full ${i < Math.floor(conf) ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'bg-slate-700'}`} 
+                    <div
+                      key={i}
+                      className={`w-3 h-3 rounded-full ${i < Math.floor(conf) ? "bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]" : "bg-slate-700"}`}
                     />
                   ))}
                 </div>
@@ -220,7 +247,9 @@ export default function ProjectView() {
                           </span>
                           {item.category}
                         </h4>
-                        <p className="text-sm text-slate-500 leading-relaxed">{item.description}</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">
+                          {item.description}
+                        </p>
                         {item.quantity != null && item.unit && (
                           <p className="inline-block mt-1 px-2 py-0.5 rounded bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                             {item.quantity} {item.unit}
@@ -235,9 +264,12 @@ export default function ProjectView() {
                 ) : (
                   <div className="p-12 text-slate-500 text-sm text-center max-w-sm mx-auto space-y-3">
                     <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
-                       <Loader2 className="w-6 h-6 text-slate-300" />
+                      <Loader2 className="w-6 h-6 text-slate-300" />
                     </div>
-                    <p>No detailed line items in this shared view. The owner may still be building their scope.</p>
+                    <p>
+                      No detailed line items in this shared view. The owner may
+                      still be building their scope.
+                    </p>
                   </div>
                 )}
               </div>
@@ -245,7 +277,10 @@ export default function ProjectView() {
           </Card>
         </motion.div>
 
-        <motion.p variants={itemVariants} className="text-center text-xs font-medium text-slate-500">
+        <motion.p
+          variants={itemVariants}
+          className="text-center text-xs font-medium text-slate-500"
+        >
           Shared project view · Securely generated by BLUPRNT.AI
         </motion.p>
       </motion.main>

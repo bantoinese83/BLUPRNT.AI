@@ -10,16 +10,22 @@ interface CacheOptions<T> {
   revalidateOnMount?: boolean;
 }
 
-export function useCachedData<T>({ key, fetcher, revalidateOnMount = true }: CacheOptions<T>) {
+export function useCachedData<T>({
+  key,
+  fetcher,
+  revalidateOnMount = true,
+}: CacheOptions<T>) {
   const [data, setData] = useState<T | null>(() => {
     if (key && dataCache.has(key)) {
       return dataCache.get(key) as T;
     }
     return null;
   });
-  
+
   const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(!key || !dataCache.has(key));
+  const [isLoading, setIsLoading] = useState<boolean>(
+    !key || !dataCache.has(key),
+  );
 
   useEffect(() => {
     if (!key) {

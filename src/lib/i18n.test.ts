@@ -3,7 +3,9 @@ import { formatCompactNumber, formatCurrency } from "@/lib/i18n";
 
 describe("i18n helpers", () => {
   it("formats currency deterministically with explicit locale", () => {
-    expect(formatCurrency(1200, { locale: "en-US", currency: "USD" })).toBe("$1,200");
+    expect(formatCurrency(1200, { locale: "en-US", currency: "USD" })).toBe(
+      "$1,200",
+    );
   });
 
   it("formats compact numbers", () => {

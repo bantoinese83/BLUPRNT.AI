@@ -1,11 +1,11 @@
 import { motion } from "motion/react";
-import { 
-  Upload, 
-  CheckCircle2, 
-  History, 
+import {
+  Upload,
+  CheckCircle2,
+  History,
   ArrowUpRight,
   PlusCircle,
-  LucideIcon
+  LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -47,7 +47,14 @@ export function ActivityFeed({ events, className }: ActivityFeedProps) {
     <div className={cn("space-y-6", className)}>
       <div className="flex items-center justify-between px-2">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-          <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0}>
+          <Highlighter
+            action="underline"
+            color="#6366f1"
+            strokeWidth={2}
+            padding={0}
+            isView={true}
+            delay={0.6}
+          >
             Latest Activity
           </Highlighter>
         </h3>
@@ -68,10 +75,12 @@ export function ActivityFeed({ events, className }: ActivityFeedProps) {
               transition={{ delay: idx * 0.1 }}
               className="relative flex gap-4 group"
             >
-              <div className={cn(
-                "relative z-10 w-11 h-11 rounded-2xl border flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
-                COLOR_MAP[event.type]
-              )}>
+              <div
+                className={cn(
+                  "relative z-10 w-11 h-11 rounded-2xl border flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
+                  COLOR_MAP[event.type],
+                )}
+              >
                 <Icon className="w-5 h-5" />
               </div>
 
@@ -81,21 +90,23 @@ export function ActivityFeed({ events, className }: ActivityFeedProps) {
                     {event.title}
                   </h4>
                   <span className="text-[10px] font-bold text-slate-400 tabular-nums uppercase tracking-wider">
-                    {formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(event.timestamp), {
+                      addSuffix: true,
+                    })}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-sm">
                   {event.description}
                 </p>
-                
+
                 {event.link && (
-                   <a 
+                  <a
                     href={event.link}
                     className="inline-flex items-center gap-1 text-[10px] font-black text-slate-900 uppercase tracking-widest hover:gap-2 transition-all group/link mt-2"
-                   >
-                     View Details
-                     <ArrowUpRight className="w-3 h-3 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
-                   </a>
+                  >
+                    View Details
+                    <ArrowUpRight className="w-3 h-3 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
+                  </a>
                 )}
               </div>
             </motion.div>

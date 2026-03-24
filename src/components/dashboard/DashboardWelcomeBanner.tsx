@@ -33,6 +33,8 @@ export function DashboardWelcomeBanner() {
               color="#ffd1dc"
               padding={2}
               iterations={1}
+              isView={true}
+              delay={0.6}
             >
               Your estimate is saved
             </Highlighter>

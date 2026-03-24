@@ -9,8 +9,17 @@ export function HelpWidget() {
 
   // Hide the widget on Landing, Login, Register, Onboarding flows where it might distract
   // Show it primarily in the Dashboard and Settings.
-  const hiddenPaths = ["/", "/login", "/register", "/forgot-password", "/auth/reset-password"];
-  if (hiddenPaths.includes(location.pathname) || location.pathname.startsWith("/onboarding")) {
+  const hiddenPaths = [
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/auth/reset-password",
+  ];
+  if (
+    hiddenPaths.includes(location.pathname) ||
+    location.pathname.startsWith("/onboarding")
+  ) {
     return null;
   }
 
@@ -27,8 +36,10 @@ export function HelpWidget() {
           >
             <div className="bg-slate-900 p-4 text-white relative">
               <h4 className="font-bold text-lg mb-1">Hello there! 👋</h4>
-              <p className="text-sm text-slate-300">How can we help you today?</p>
-              <button 
+              <p className="text-sm text-slate-300">
+                How can we help you today?
+              </p>
+              <button
                 onClick={() => setIsOpen(false)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1"
                 aria-label="Close help"
@@ -38,7 +49,9 @@ export function HelpWidget() {
             </div>
             <div className="p-4 space-y-3">
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                <h5 className="text-sm font-semibold text-slate-900">Command bar</h5>
+                <h5 className="text-sm font-semibold text-slate-900">
+                  Command bar
+                </h5>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
                   Press{" "}
                   <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-800 shadow-sm">
@@ -49,30 +62,41 @@ export function HelpWidget() {
                     Ctrl+K
                   </kbd>{" "}
                   on Windows to open quick actions. Choose{" "}
-                  <span className="font-semibold text-slate-800">Create New Project</span> to run the estimate flow for another remodel.
+                  <span className="font-semibold text-slate-800">
+                    Create New Project
+                  </span>{" "}
+                  to run the estimate flow for another remodel.
                 </p>
               </div>
 
-              <a 
+              <a
                 href="mailto:connect@monarch-labs.com?subject=Need%20Help%20with%20BLUPRNT"
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 transition-colors group"
                 onClick={() => setIsOpen(false)}
               >
                 <div>
-                  <h5 className="font-semibold text-slate-900 group-hover:text-indigo-900 text-sm">Contact Support</h5>
-                  <p className="text-xs text-slate-500 mt-0.5">Email our friendly team</p>
+                  <h5 className="font-semibold text-slate-900 group-hover:text-indigo-900 text-sm">
+                    Contact Support
+                  </h5>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Email our friendly team
+                  </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors group-hover:translate-x-0.5" />
               </a>
-              
-              <a 
+
+              <a
                 href="mailto:connect@monarch-labs.com?subject=BLUPRNT%20Feedback"
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 transition-colors group"
                 onClick={() => setIsOpen(false)}
               >
                 <div>
-                  <h5 className="font-semibold text-slate-900 text-sm">Share Feedback</h5>
-                  <p className="text-xs text-slate-500 mt-0.5">Got an idea? Let us know!</p>
+                  <h5 className="font-semibold text-slate-900 text-sm">
+                    Share Feedback
+                  </h5>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Got an idea? Let us know!
+                  </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors group-hover:translate-x-0.5" />
               </a>

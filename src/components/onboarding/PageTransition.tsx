@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "motion/react";
 
-export function PageTransition({ 
-  children, 
-  duration = 0.3 
-}: { 
+export function PageTransition({
+  children,
+  duration = 0.3,
+}: {
   children: React.ReactNode;
   duration?: number;
 }) {

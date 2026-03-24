@@ -6,7 +6,9 @@ import { getSafeRedirect } from "@/lib/safe-redirect";
 const PROTECTED_PATHS = ["/dashboard", "/settings"];
 
 function isProtected(pathname: string): boolean {
-  return PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return PROTECTED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 }
 
 /**
@@ -33,7 +35,9 @@ export function AuthListener() {
       const path = `${pathnameRef.current}${searchRef.current || ""}`;
       if (!isProtected(pathnameRef.current)) return;
       const redirect = getSafeRedirect(path, "/dashboard");
-      navigate(`/login?redirect=${encodeURIComponent(redirect)}`, { replace: true });
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`, {
+        replace: true,
+      });
     });
 
     return () => subscription.unsubscribe();

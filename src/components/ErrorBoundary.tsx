@@ -53,7 +53,8 @@ export class ErrorBoundary extends Component<Props, State> {
                 Something went wrong
               </h1>
               <p className="text-sm text-slate-600 mb-6">
-                We ran into an unexpected issue. Please try again or refresh the page.
+                We ran into an unexpected issue. Please try again or refresh the
+                page.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button

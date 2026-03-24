@@ -28,9 +28,12 @@ export function Breadcrumbs({ className, projectName }: BreadcrumbsProps) {
   if (pathnames.length === 0) return null;
 
   return (
-    <nav 
-      aria-label="Breadcrumb" 
-      className={cn("flex items-center space-x-1.5 text-sm font-medium text-slate-500", className)}
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(
+        "flex items-center space-x-1.5 text-sm font-medium text-slate-500",
+        className,
+      )}
     >
       <Link
         to="/"
@@ -42,15 +45,15 @@ export function Breadcrumbs({ className, projectName }: BreadcrumbsProps) {
       {pathnames.map((value, index) => {
         const last = index === pathnames.length - 1;
         const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-        
-        // Use project name for specific dashboard subpaths if available
-        const label = routeLabels[value] || value.charAt(0).toUpperCase() + value.slice(1);
 
-        
-        // Special case: if we're in a dashboard and it's the first segment after dashboard, 
+        // Use project name for specific dashboard subpaths if available
+        const label =
+          routeLabels[value] || value.charAt(0).toUpperCase() + value.slice(1);
+
+        // Special case: if we're in a dashboard and it's the first segment after dashboard,
         // and we have a project name, show it
         if (value === "dashboard" && projectName && pathnames.length > 1) {
-           // We might want to keep "Dashboard" and then the project name
+          // We might want to keep "Dashboard" and then the project name
         }
 
         return (

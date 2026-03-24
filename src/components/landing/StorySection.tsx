@@ -10,7 +10,13 @@ export function StorySection() {
           <Shield className="w-8 h-8 text-indigo-600" />
         </div>
         <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">
-          <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={4} iterations={1} isView>
+          <Highlighter
+            action="highlight"
+            color={LANDING_HIGHLIGHT_COLOR}
+            padding={4}
+            iterations={1}
+            isView
+          >
             {LANDING_STORY_COPY.heading}
           </Highlighter>
         </h2>
