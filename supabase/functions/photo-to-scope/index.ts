@@ -9,6 +9,7 @@ import {
 } from "../_shared/auth.ts";
 import {
   cityFromZip,
+  cityFromZipUniversal,
   extractScopeWithGemini,
   type RoomType,
 } from "./_shared/estimate.ts";
@@ -195,13 +196,14 @@ Deno.serve(async (req: Request) => {
       ...s,
     }));
 
+    const areaLabel = await cityFromZipUniversal(zip_code);
     return jsonResponse(
       {
         project_id: null,
         summary: payload.summary,
         scope_items,
         explanations: payload.explanations,
-        area_label: cityFromZip(zip_code),
+        area_label: areaLabel || cityFromZip(zip_code),
       },
       200,
       req,

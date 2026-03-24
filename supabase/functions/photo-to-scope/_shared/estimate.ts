@@ -23,11 +23,47 @@ export function cityFromZip(zip: string): string {
   if (prefix >= 900 && prefix <= 916) return "Los Angeles area";
   if (prefix >= 430 && prefix <= 459) return "Columbus area";
   if (prefix >= 100 && prefix <= 119) return "New York City area";
+  if (prefix >= 200 && prefix <= 219) return "Chicago area";
+  if (prefix >= 700 && prefix <= 719) return "Houston area";
+  if (prefix >= 300 && prefix <= 319) return "Atlanta area";
+  if (prefix >= 800 && prefix <= 819) return "Seattle area";
+  if (prefix >= 600 && prefix <= 619) return "Miami area";
+  if (prefix >= 500 && prefix <= 519) return "Phoenix area";
 
   const region = ZIP_REGION_RANGES.find((r) => prefix >= r.min && prefix <= r.max);
   if (region) return region.label;
 
   return "your area";
+}
+
+/**
+ * Resolve a human-friendly city label for any US ZIP code.
+ * Falls back to `cityFromZip` when the lookup API is unavailable.
+ */
+export async function cityFromZipUniversal(zip: string): Promise<string> {
+  const z = zip.replace(/\D/g, "").slice(0, 5);
+  if (z.length !== 5) return "your area";
+
+  try {
+    const res = await fetch(`https://api.zippopotam.us/us/${z}`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return cityFromZip(z);
+    const data = await res.json() as {
+      places?: Array<{
+        "place name"?: string;
+        "state abbreviation"?: string;
+      }>;
+    };
+    const place = data.places?.[0];
+    const city = place?.["place name"]?.trim();
+    const state = place?.["state abbreviation"]?.trim();
+    if (city && state) return `${city}, ${state} area`;
+    if (city) return `${city} area`;
+    return cityFromZip(z);
+  } catch {
+    return cityFromZip(z);
+  }
 }
 
 export interface EstimatePayload {
@@ -67,7 +103,7 @@ export async function extractScopeWithGemini(input: {
   photoParts?: GeminiPart[];
 }): Promise<EstimatePayload | null> {
   const { room_type, zip_code, finish_preference, scopeDescription, photoParts = [] } = input;
-  const area = cityFromZip(zip_code);
+  const area = await cityFromZipUniversal(zip_code);
   const dateStr = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long' });
 
   const systemInstruction = `You are a Senior Residential Construction Estimator with 20+ years of experience in the ${area}.
