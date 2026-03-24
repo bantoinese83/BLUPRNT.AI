@@ -25,6 +25,7 @@ interface HighlighterProps {
   padding?: number
   multiline?: boolean
   isView?: boolean
+  delay?: number
 }
 
 export function Highlighter({
@@ -37,6 +38,7 @@ export function Highlighter({
   padding = 2,
   multiline = true,
   isView = false,
+  delay = 0,
 }: HighlighterProps) {
   const elementRef = useRef<HTMLSpanElement>(null)
 
@@ -54,33 +56,36 @@ export function Highlighter({
     let resizeObserver: ResizeObserver | null = null
 
     if (shouldShow && element) {
-      const annotationConfig = {
-        type: action,
-        color,
-        strokeWidth,
-        animationDuration,
-        iterations,
-        padding,
-        multiline,
-      }
+      const timeout = setTimeout(() => {
+        const annotationConfig = {
+          type: action,
+          color,
+          strokeWidth,
+          animationDuration,
+          iterations,
+          padding,
+          multiline,
+        }
 
-      const currentAnnotation = annotate(element, annotationConfig)
-      annotation = currentAnnotation
-      currentAnnotation.show()
-
-      resizeObserver = new ResizeObserver(() => {
-        currentAnnotation.hide()
+        const currentAnnotation = annotate(element, annotationConfig)
+        annotation = currentAnnotation
         currentAnnotation.show()
-      })
 
-      resizeObserver.observe(element)
-      resizeObserver.observe(document.body)
-    }
+        resizeObserver = new ResizeObserver(() => {
+          currentAnnotation.hide()
+          currentAnnotation.show()
+        })
 
-    return () => {
-      annotation?.remove()
-      if (resizeObserver) {
-        resizeObserver.disconnect()
+        resizeObserver.observe(element)
+        resizeObserver.observe(document.body)
+      }, delay * 1000)
+
+      return () => {
+        clearTimeout(timeout)
+        annotation?.remove()
+        if (resizeObserver) {
+          resizeObserver.disconnect()
+        }
       }
     }
   }, [
@@ -92,6 +97,7 @@ export function Highlighter({
     iterations,
     padding,
     multiline,
+    delay,
   ])
 
   return (

@@ -7,13 +7,15 @@ import { cn } from "@/lib/utils";
 interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
     title?: string;
     subtitle?: string;
-    size?: "sm" | "md" | "lg";
+    size?: "sm" | "md" | "lg" | "xl";
+    showLogo?: boolean;
 }
 
 export function Loader({
     title = "Configuring your account...",
     subtitle = "Please wait while we prepare everything for you",
     size = "md",
+    showLogo = false,
     className,
     ...props
 }: LoaderProps) {
@@ -24,6 +26,7 @@ export function Loader({
             subtitleClass: "text-xs/relaxed",
             spacing: "space-y-2",
             maxWidth: "max-w-48",
+            logoSize: "w-8 h-8",
         },
         md: {
             container: "w-32 h-32",
@@ -31,17 +34,27 @@ export function Loader({
             subtitleClass: "text-sm/relaxed",
             spacing: "space-y-3",
             maxWidth: "max-w-56",
+            logoSize: "w-12 h-12",
         },
         lg: {
-            container: "w-40 h-40",
-            titleClass: "text-lg/tight font-semibold",
+            container: "w-56 h-56",
+            titleClass: "text-xl font-bold",
             subtitleClass: "text-base/relaxed",
             spacing: "space-y-4",
-            maxWidth: "max-w-64",
+            maxWidth: "max-w-xs",
+            logoSize: "w-20 h-20",
+        },
+        xl: {
+            container: "w-72 h-72",
+            titleClass: "text-2xl font-bold",
+            subtitleClass: "text-lg/relaxed",
+            spacing: "space-y-6",
+            maxWidth: "max-w-sm",
+            logoSize: "w-28 h-28",
         },
     };
 
-    const config = sizeConfig[size];
+    const config = sizeConfig[size as keyof typeof sizeConfig] || sizeConfig.md;
 
     return (
         <div
@@ -211,6 +224,24 @@ export function Loader({
                         ease: "linear",
                     }}
                 />
+
+                {/* Centered Logo */}
+                {showLogo && (
+                    <motion.div 
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        <div className={cn("relative flex items-center justify-center p-4", config.logoSize)}>
+                            <img 
+                                src="/bluprnt_logo.svg" 
+                                alt="BLUPRNT" 
+                                className="w-full h-full object-contain"
+                            />
+                        </div>
+                    </motion.div>
+                )}
             </motion.div>
 
             {/* Enhanced Typography with Breathing Animation */}
@@ -231,7 +262,7 @@ export function Loader({
                 <motion.h1
                     className={cn(
                         config.titleClass,
-                        "text-black/90 dark:text-white/90 font-medium tracking-[-0.02em] leading-[1.15] antialiased"
+                        "text-slate-900 font-bold tracking-tight leading-[1.15] antialiased"
                     )}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{
@@ -246,7 +277,7 @@ export function Loader({
                 >
                     <motion.span
                         animate={{
-                            opacity: [0.9, 0.7, 0.9],
+                            opacity: [0.95, 0.8, 0.95],
                         }}
                         transition={{
                             duration: 3,
@@ -263,7 +294,7 @@ export function Loader({
                     <motion.p
                         className={cn(
                             config.subtitleClass,
-                            "text-black/60 dark:text-white/60 font-normal tracking-[-0.01em] leading-[1.45] antialiased"
+                            "text-slate-400 font-medium tracking-tight leading-[1.45] antialiased"
                         )}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{

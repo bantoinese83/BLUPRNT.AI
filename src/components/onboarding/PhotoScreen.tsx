@@ -34,17 +34,19 @@ export function PhotoScreen() {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            Show us the space
+        <div className="space-y-2 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            Vision-Match Your Room
           </h2>
-          <p className="text-slate-500">
-            Snap 1–3 photos so we can auto-detect fixtures and size the job.
+          <p className="text-slate-500 text-lg">
+            Snap a photo or upload from gallery for a high-fidelity estimate.
           </p>
         </div>
 
+        {/* Hidden inputs for two different experiences */}
         <input
           ref={inputRef}
+          id="gallery-upload"
           type="file"
           accept="image/jpeg,image/png,image/webp"
           multiple
@@ -55,51 +57,97 @@ export function PhotoScreen() {
           }}
         />
 
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="w-full border-2 border-dashed border-slate-300 rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-4 bg-white hover:border-slate-400 hover:bg-slate-50 transition-colors"
-        >
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-indigo-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+              <ImagePlus className="w-8 h-8 text-indigo-600" />
+            </div>
+            <span className="text-slate-900 font-bold">Gallery</span>
+            <span className="text-slate-400 text-xs mt-1 font-medium">Upload photos</span>
+          </button>
 
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-            {photos.length ? (
-              <ImagePlus className="w-8 h-8 text-slate-900" aria-hidden />
+          <button
+            type="button"
+            onClick={() => {
+              // Creating a temporary camera-only input
+              const camInput = document.createElement("input");
+              camInput.type = "file";
+              camInput.accept = "image/*";
+              camInput.capture = "environment";
+              camInput.onchange = (e: any) => onFiles(e.target.files);
+              camInput.click();
+            }}
+            className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-purple-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+              <Camera className="w-8 h-8 text-purple-600" />
+            </div>
+            <span className="text-slate-900 font-bold">Camera</span>
+            <span className="text-slate-400 text-xs mt-1 font-medium">Snap space</span>
+          </button>
+        </div>
 
-            ) : (
-              <Camera className="w-8 h-8 text-slate-400" aria-hidden />
-            )}
+        {/* Selected Photos Grid */}
+        {photos.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center py-2">
+            {photos.map((p, i) => (
+              <div 
+                key={i} 
+                className="w-16 h-16 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden relative group animate-in fade-in zoom-in duration-300"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <img 
+                  src={URL.createObjectURL(p)} 
+                  className="w-full h-full object-cover" 
+                  alt="" 
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPhotos(photos.filter((_, idx) => idx !== i));
+                  }}
+                  className="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-[10px] font-bold uppercase tracking-wider"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
           </div>
-          <div className="text-sm text-slate-600">
-            {photos.length
-              ? `${photos.length} photo${photos.length === 1 ? "" : "s"} selected — tap to add more`
-              : "Tap to upload photos of your space"}
-          </div>
-        </button>
+        )}
 
-        <div className="space-y-3">
+        <div className="space-y-4 pt-4">
           <Button
             size="lg"
             variant="primary"
-            className="w-full"
+            className="w-full h-16 text-lg font-bold shadow-xl shadow-indigo-500/10"
             onClick={() => navigate("/onboarding/loading")}
             type="button"
           >
-            {photos.length ? "Continue with photos" : "Add photos"}
-            <ArrowRight className="w-5 h-5 shrink-0" aria-hidden />
+            {photos.length ? `Analyze ${photos.length} Vision Assets` : "Proceed without vision"}
+            <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
-          <p className="text-xs text-center text-slate-500">
-            Photos make estimates about 30% more accurate in your area.
+          
+          <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest">
+            Vision precision: +35% accuracy
           </p>
+
           <Button
             size="lg"
             variant="ghost"
-            className="w-full text-slate-500"
+            className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
             onClick={() => {
               setPhotos([]);
               navigate("/onboarding/text-scope");
             }}
           >
-            Skip for now (text only)
+            Skip for now (text focus)
           </Button>
         </div>
       </div>

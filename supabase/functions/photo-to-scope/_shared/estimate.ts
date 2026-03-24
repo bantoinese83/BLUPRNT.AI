@@ -1,4 +1,4 @@
-/** Region-grounded mock scope; swap for Gemini when GEMINI_API_KEY is set. */
+import { callGemini, type GeminiPart } from "../../_shared/gemini.ts";
 
 export type RoomType = "kitchen" | "bathroom" | "other";
 
@@ -13,14 +13,7 @@ export function cityFromZip(zip: string): string {
   return "your area";
 }
 
-export function buildScopePayload(input: {
-  room_type: RoomType;
-  zip_code: string;
-  finish_preference: "economy" | "mid" | "premium";
-  photoCount: number;
-  locationUnset?: boolean;
-  scopeDescription?: string | null;
-}): {
+export interface EstimatePayload {
   summary: {
     estimated_min_total: number;
     estimated_max_total: number;
@@ -40,167 +33,117 @@ export function buildScopePayload(input: {
     source: "photo";
   }>;
   explanations: string[];
-} {
-  const tier = input.finish_preference;
-  const mult = tier === "economy" ? 0.85 : tier === "premium" ? 1.2 : 1;
-  const zip = input.zip_code.replace(/\D/g, "").slice(0, 5) || "00000";
-  const photoBoost = input.photoCount > 0 ? 1 : input.scopeDescription ? 0.9 : 0.92;
-  const locationPenalty = input.locationUnset ? 0.85 : 1;
+}
 
-  if (input.room_type === "kitchen") {
-    const items = [
-      {
-        category: "Cabinets",
-        description:
-          "Replace base and wall cabinets with mid-range shaker style",
-        finish_tier: tier,
-        quantity: 18,
-        unit: "linear_ft",
-        unit_cost_min: Math.round(250 * mult),
-        unit_cost_max: Math.round(350 * mult),
-        total_cost_min: Math.round(4500 * mult * photoBoost * locationPenalty),
-        total_cost_max: Math.round(6300 * mult * photoBoost * locationPenalty),
-        confidence_score: 4.7,
-        source: "photo" as const,
-      },
-      {
-        category: "Countertops",
-        description: "Install new quartz countertops",
-        finish_tier: tier,
-        quantity: 45,
-        unit: "sqft",
-        unit_cost_min: Math.round(70 * mult),
-        unit_cost_max: Math.round(95 * mult),
-        total_cost_min: Math.round(3150 * mult * photoBoost),
-        total_cost_max: Math.round(4275 * mult * photoBoost),
-        confidence_score: 4.3,
-        source: "photo" as const,
-      },
-      {
-        category: "Flooring",
-        description: "New LVP or tile throughout work area",
-        finish_tier: tier,
-        quantity: 180,
-        unit: "sqft",
-        unit_cost_min: 4,
-        unit_cost_max: 9,
-        total_cost_min: 720,
-        total_cost_max: 1620,
-        confidence_score: 4.0,
-        source: "photo" as const,
-      },
-      {
-        category: "Electrical & plumbing",
-        description: "Adjustments for layout and fixtures",
-        finish_tier: tier,
-        quantity: 1,
-        unit: "job",
-        unit_cost_min: 3500,
-        unit_cost_max: 5200,
-        confidence_score: 3.9,
-        source: "photo" as const,
-      },
-    ];
-    const minSum = items.reduce((s, i) => s + i.total_cost_min, 0);
-    const maxSum = items.reduce((s, i) => s + i.total_cost_max, 0);
-    return {
+
+export async function extractScopeWithGemini(input: {
+  room_type: RoomType;
+  zip_code: string;
+  finish_preference: "economy" | "mid" | "premium";
+  scopeDescription?: string | null;
+  photoParts?: GeminiPart[];
+}): Promise<EstimatePayload | null> {
+  const { room_type, zip_code, finish_preference, scopeDescription, photoParts = [] } = input;
+
+  const systemInstruction = `You are an expert residential construction estimator. 
+Analyze the project details and photos to generate a detailed, line-by-line cost estimate.
+Guidelines:
+1. Provide 6-12 detailed line items.
+2. If photos are provided, explicitly mention visible features.
+3. Ensure totals match (quantity * unit_cost).
+4. Summary total must be the sum of all line items.`;
+
+  const prompt = `Project: ${room_type} in ${zip_code} (adjust for region).
+Finish: ${finish_preference}.
+Description: ${scopeDescription || "Analyze photos"}.`;
+
+  const responseSchema = {
+    type: "object",
+    properties: {
       summary: {
-        estimated_min_total: Math.round(minSum * 0.95 * locationPenalty),
-        estimated_max_total: Math.round(maxSum * 1.05 * locationPenalty),
-        confidence_score: input.locationUnset ? 3.5 : 4.5,
+        type: "object",
+        properties: {
+          estimated_min_total: { type: "number" },
+          estimated_max_total: { type: "number" },
+          confidence_score: { type: "number", description: "1 to 5" }
+        },
+        required: ["estimated_min_total", "estimated_max_total", "confidence_score"]
       },
-      scope_items: items,
-      explanations: [
-        `Cabinet costs based on ${tier}-range finishes${input.locationUnset ? " (location unknown — add ZIP for better accuracy)" : ` near ${zip}`}.`,
-        input.photoCount > 0
-          ? "Scope sized using your photos and typical kitchen footprints."
-          : "Scope uses typical kitchen footprints; add photos anytime to tighten accuracy.",
-      ],
-    };
-  }
-
-  if (input.room_type === "bathroom") {
-    const items = [
-      {
-        category: "Vanity & fixtures",
-        description: "Replace vanity, faucet, and toilet",
-        finish_tier: tier,
-        quantity: 1,
-        unit: "room",
-        unit_cost_min: 2200,
-        unit_cost_max: 4800,
-        total_cost_min: 2200,
-        total_cost_max: 4800,
-        confidence_score: 4.4,
-        source: "photo" as const,
+      scope_items: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            category: { type: "string" },
+            description: { type: "string" },
+            finish_tier: { type: "string", enum: ["economy", "mid", "premium"] },
+            quantity: { type: "number" },
+            unit: { type: "string" },
+            unit_cost_min: { type: "number" },
+            unit_cost_max: { type: "number" },
+            total_cost_min: { type: "number" },
+            total_cost_max: { type: "number" },
+            confidence_score: { type: "number" }
+          },
+          required: ["category", "description", "finish_tier", "quantity", "unit", "unit_cost_min", "unit_cost_max", "total_cost_min", "total_cost_max"]
+        }
       },
-      {
-        category: "Tile & shower",
-        description: "Shower surround and floor tile",
-        finish_tier: tier,
-        quantity: 120,
-        unit: "sqft",
-        unit_cost_min: 12,
-        unit_cost_max: 28,
-        total_cost_min: 1440,
-        total_cost_max: 3360,
-        confidence_score: 4.1,
-        source: "photo" as const,
-      },
-      {
-        category: "Plumbing rough-in",
-        description: "Rough-in updates for layout",
-        finish_tier: tier,
-        quantity: 1,
-        unit: "job",
-        unit_cost_min: 1800,
-        unit_cost_max: 3200,
-        confidence_score: 3.8,
-        source: "photo" as const,
-      },
-    ];
-    const minSum = items.reduce((s, i) => s + i.total_cost_min, 0);
-    const maxSum = items.reduce((s, i) => s + i.total_cost_max, 0);
-    return {
-      summary: {
-        estimated_min_total: Math.round(minSum * 0.95),
-        estimated_max_total: Math.round(maxSum * 1.05),
-        confidence_score: 4.3,
-      },
-      scope_items: items,
-      explanations: [
-        `Bath remodel costs for ${tier}-range finishes in your ZIP area.`,
-        input.photoCount > 0
-          ? "Tub/shower footprint informed by your photos."
-          : "Typical full bath footprint assumed until you add photos.",
-      ],
-    };
-  }
-
-  const items = [
-    {
-      category: "Labor & materials",
-      description: "General remodel scope for this project type",
-      finish_tier: tier,
-      quantity: 1,
-      unit: "job",
-      unit_cost_min: 8000,
-      unit_cost_max: 22000,
-      total_cost_min: 8000,
-      total_cost_max: 22000,
-      confidence_score: 3.5,
-      source: "photo" as const,
+      explanations: {
+        type: "array",
+        items: { type: "string" }
+      }
     },
-  ];
-  return {
-    summary: {
-      estimated_min_total: 7500,
-      estimated_max_total: 24000,
-      confidence_score: 3.8,
-    },
-    scope_items: items,
-    explanations: [
-      `Broad estimate for your area (${zip}). Pick kitchen or bath for a tighter range.`,
-    ],
+    required: ["summary", "scope_items", "explanations"]
   };
+
+  const parts: GeminiPart[] = [{ text: prompt }, ...photoParts];
+
+  try {
+    const text = await callGemini({
+      parts,
+      systemInstruction,
+      responseSchema,
+      temperature: 0.1,
+    });
+
+    if (!text) return null;
+
+    if (text.startsWith("ERROR:")) {
+      console.error("Gemini API reported error:", text);
+      return null;
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      console.error("Failed to parse Gemini JSON:", e, "Original text:", text);
+      return null;
+    }
+
+    return {
+      summary: {
+        estimated_min_total: Math.round(Number(parsed.summary.estimated_min_total)),
+        estimated_max_total: Math.round(Number(parsed.summary.estimated_max_total)),
+        confidence_score: Number(parsed.summary.confidence_score),
+      },
+      scope_items: parsed.scope_items.map((s: any) => ({
+        category: String(s.category),
+        description: String(s.description),
+        finish_tier: finish_preference,
+        quantity: Number(s.quantity),
+        unit: String(s.unit),
+        unit_cost_min: Math.round(Number(s.unit_cost_min)),
+        unit_cost_max: Math.round(Number(s.unit_cost_max)),
+        total_cost_min: Math.round(Number(s.total_cost_min)),
+        total_cost_max: Math.round(Number(s.total_cost_max)),
+        confidence_score: Number(s.confidence_score || 3),
+        source: "photo" as const,
+      })),
+      explanations: Array.isArray(parsed.explanations) ? parsed.explanations.map(String) : [],
+    };
+  } catch (e) {
+    console.error("Gemini scope extraction failed:", e);
+    return null;
+  }
 }

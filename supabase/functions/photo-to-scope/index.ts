@@ -8,10 +8,11 @@ import {
   getUserIdFromRequest,
 } from "../_shared/auth.ts";
 import {
-  buildScopePayload,
   cityFromZip,
+  extractScopeWithGemini,
   type RoomType,
 } from "./_shared/estimate.ts";
+import { type GeminiPart } from "../_shared/gemini.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -39,6 +40,7 @@ Deno.serve(async (req: Request) => {
     const photoCount = Array.from(photos).filter(
       (p) => p instanceof File && p.size > 0,
     ).length;
+    console.log(`[photo-to-scope] Received ${photoCount} photos, zip: ${formData.get("zip_code")}, room: ${formData.get("room_type")}`);
 
     const parsed = photoToScopeSchema.safeParse({
       zip_code: String(formData.get("zip_code") ?? "").trim() || "00000",
@@ -57,14 +59,43 @@ Deno.serve(async (req: Request) => {
     const { zip_code, room_type, finish_preference, project_id, location_unset, scope_description } = parsed.data;
     const projectId = project_id ?? null;
 
-    const payload = buildScopePayload({
+    let payload = null;
+
+    // 1. Try Gemini if photos or description provided
+    const photoParts: GeminiPart[] = [];
+    for (const p of photos) {
+      if (p instanceof File && p.size > 0) {
+        const buf = await p.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        }
+        const base64 = btoa(binary);
+        photoParts.push({
+          inline_data: {
+            mime_type: p.type || "image/jpeg",
+            data: base64,
+          },
+        });
+      }
+    }
+
+    // 1. Call Gemini for estimation (Mocks removed per user request)
+    payload = await extractScopeWithGemini({
       room_type: room_type as RoomType,
       zip_code,
       finish_preference,
-      photoCount,
-      locationUnset: location_unset,
       scopeDescription: scope_description,
+      photoParts,
     });
+    
+    if (!payload) {
+      return jsonResponse({ 
+        error: "AI estimation failed. Please try adding a description or better photos." 
+      }, 500, req);
+    }
 
     if (projectId) {
       const userId = await getUserIdFromRequest(req);
@@ -117,7 +148,20 @@ Deno.serve(async (req: Request) => {
         })
         .eq("id", projectId);
 
-      const scope_items = (inserted ?? []).map((r) => ({
+      const scope_items = (inserted ?? []).map((r: {
+        id: string;
+        category: string;
+        description: string;
+        finish_tier: string;
+        quantity: number;
+        unit: string;
+        unit_cost_min: number;
+        unit_cost_max: number;
+        total_cost_min: number;
+        total_cost_max: number;
+        confidence_score: number;
+        source: string;
+      }) => ({
         id: r.id,
         category: r.category,
         description: r.description,

@@ -139,6 +139,47 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
   }, [photos, projectType, zipFromLocation, locationUnset, scopeDescription]);
 
+  const persistProject = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      return {
+        ok: false,
+        message: "We're having trouble connecting. Please try again later.",
+      };
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user) {
+      return {
+        ok: false,
+        message: "No active session found. Please sign in.",
+      };
+    }
+
+    try {
+      const projectId = await saveOnboardingProject({
+        supabase,
+        userId: session.user.id,
+        projectType,
+        stage,
+        locationInput,
+        zipCode: zipFromLocation(),
+        estimate,
+        photos,
+      });
+
+      setSavedProjectId(projectId);
+      localStorage.setItem("bluprnt_project_id", projectId);
+      return { ok: true, message: "Project saved to your account." };
+    } catch (err) {
+      return {
+        ok: false,
+        message: err instanceof Error ? err.message : "Couldn't save project.",
+      };
+    }
+  }, [estimate, locationInput, photos, projectType, stage, zipFromLocation]);
+
   const persistProjectAfterSignIn = useCallback(
     async (params: { email: string; password: string }) => {
       if (!isSupabaseConfigured()) {
@@ -293,6 +334,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       estimateError,
       estimateLoading,
       runPhotoToScope,
+      persistProject,
       persistProjectAfterSignup,
       persistProjectAfterSignIn,
       savedProjectId,
@@ -312,6 +354,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       estimateError,
       estimateLoading,
       runPhotoToScope,
+      persistProject,
       persistProjectAfterSignup,
       persistProjectAfterSignIn,
       savedProjectId,

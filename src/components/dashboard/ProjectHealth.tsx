@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import { Highlighter } from "@/components/ui/Highlighter";
+import { cn } from "@/lib/utils";
 
 type ProjectHealthProps = {
   estimatedMin?: number | null;
@@ -72,6 +73,81 @@ function calculateHealthScore(
   };
 }
 
+interface CircleProgressProps {
+    value: number;
+    color: string;
+    secondaryColor: string;
+    size: number;
+    strokeWidth: number;
+}
+
+const CircleProgress = ({ value, color, secondaryColor, size, strokeWidth }: CircleProgressProps) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const progress = ((100 - value) / 100) * circumference;
+
+    const gradientId = "health-gradient";
+    const gradientUrl = `url(#${gradientId})`;
+
+    return (
+        <div className="relative">
+            <svg
+                width={size}
+                height={size}
+                viewBox={`0 0 ${size} ${size}`}
+                className="transform -rotate-90"
+                aria-label={`Health Progress - ${value}%`}
+            >
+                <defs>
+                    <linearGradient
+                        id={gradientId}
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                    >
+                        <stop offset="0%" style={{ stopColor: color, stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: secondaryColor, stopOpacity: 1 }} />
+                    </linearGradient>
+                </defs>
+
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={strokeWidth}
+                    className="text-slate-100 dark:text-slate-800"
+                />
+
+                <motion.circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke={gradientUrl}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={circumference}
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset: progress }}
+                    transition={{
+                        duration: 1.8,
+                        ease: "easeInOut",
+                    }}
+                    strokeLinecap="round"
+                    style={{
+                        filter: "drop-shadow(0 0 4px rgba(0,0,0,0.1))",
+                    }}
+                />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-900 shadow-lg shadow-black/20" />
+            </div>
+        </div>
+    );
+};
+
 export function ProjectHealth({ estimatedMin = 0, estimatedMax = 0, invoiceTotal = 0 }: ProjectHealthProps) {
   const min = estimatedMin || 0;
   const max = estimatedMax || 0;
@@ -88,18 +164,28 @@ export function ProjectHealth({ estimatedMin = 0, estimatedMax = 0, invoiceTotal
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 pt-2">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-baseline gap-2">
+            <motion.div 
+              className="flex items-baseline gap-2"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
               <span className={`text-6xl font-black tracking-tighter tabular-nums bg-gradient-to-br ${color} bg-clip-text text-transparent`}>
                 {score}
               </span>
               <span className="text-slate-500 text-lg font-bold">/100</span>
-            </div>
+            </motion.div>
             <div className="flex items-center gap-2">
-              <div className={`px-2 py-0.5 rounded-full bg-gradient-to-br ${color} text-[10px] font-black uppercase tracking-widest text-white`}>
+              <motion.div 
+                className={`px-2 py-0.5 rounded-full bg-gradient-to-br ${color} text-[10px] font-black uppercase tracking-widest text-white`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
                 {status}
-              </div>
+              </motion.div>
               {invoiceTotal > 0 && (
                  <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
                    <TrendingUp className="w-3 h-3" />
@@ -109,51 +195,35 @@ export function ProjectHealth({ estimatedMin = 0, estimatedMax = 0, invoiceTotal
             </div>
           </div>
 
-          <div className="relative w-24 h-24 mb-1">
-            <svg className="w-full h-full transform -rotate-90">
-              <circle
-                cx="48"
-                cy="48"
-                r="38"
-                fill="transparent"
-                stroke="currentColor"
-                strokeWidth="8"
-                className="text-slate-800/40"
-              />
-              <motion.circle
-                cx="48"
-                cy="48"
-                r="38"
-                fill="transparent"
-                stroke="currentColor"
-                strokeWidth="8"
-                strokeDasharray={2 * Math.PI * 38}
-                initial={{ strokeDashoffset: 2 * Math.PI * 38 }}
-                animate={{ strokeDashoffset: (2 * Math.PI * 38) * (1 - score / 100) }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                strokeLinecap="round"
-                style={{ color: stop1 }}
-              />
-              <defs>
-                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor={stop1} />
-                  <stop offset="100%" stopColor={stop2} />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-slate-900 shadow-lg shadow-black/20" />
-            </div>
-          </div>
+          <motion.div 
+             className="relative mb-1"
+             initial={{ opacity: 0, scale: 0.8 }}
+             animate={{ opacity: 1, scale: 1 }}
+             transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <CircleProgress 
+              value={score} 
+              color={stop1} 
+              secondaryColor={stop2} 
+              size={110} 
+              strokeWidth={14} 
+            />
+          </motion.div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-start gap-3 group hover:bg-white transition-colors duration-300">
-          <div className={`mt-1 w-1.5 h-1.5 rounded-full bg-gradient-to-br ${color} shrink-0 animate-pulse`} />
+        <motion.div 
+          className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-start gap-3 group hover:bg-white transition-colors duration-300"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <div className={`mt-1.5 w-2 h-2 rounded-full bg-gradient-to-br ${color} shrink-0 animate-pulse`} />
           <p className="text-sm font-medium text-slate-600 leading-relaxed italic group-hover:text-slate-900 transition-colors">
             "{message}"
           </p>
-        </div>
+        </motion.div>
       </CardContent>
     </Card>
   );
 }
+

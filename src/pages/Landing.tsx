@@ -24,6 +24,7 @@ import { Highlighter } from "@/components/ui/Highlighter";
 
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
 
 
@@ -84,6 +85,16 @@ export default function Landing() {
   const { hash } = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [dbCount, setDbCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+      .then(({ count }) => {
+        if (typeof count === "number") setDbCount(count);
+      });
+  }, []);
   const metaBase = SITE_URL || FALLBACK_SITE_URL;
   const jsonLd = buildLandingJsonLd(metaBase);
 
@@ -450,7 +461,7 @@ export default function Landing() {
                     Trusted by homeowners
                   </p>
                   <p className="text-2xl font-black text-slate-900">
-                    1,200+ <span className="text-slate-500 font-bold">blueprints managed</span>
+                    {dbCount !== null ? dbCount.toLocaleString() : "..."} <span className="text-slate-500 font-bold">blueprints managed</span>
                   </p>
                 </div>
                 
