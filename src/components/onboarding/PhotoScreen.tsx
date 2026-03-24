@@ -5,11 +5,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
 import { useOnboarding } from "@/hooks/use-onboarding";
+import { Textarea } from "@/components/ui/textarea";
+import { FileText } from "lucide-react";
 
 export function PhotoScreen() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { photos, setPhotos } = useOnboarding();
+  const { photos, setPhotos, scopeDescription, setScopeDescription } =
+    useOnboarding();
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -127,6 +130,27 @@ export function PhotoScreen() {
           </div>
         </div>
 
+        <div className="space-y-3">
+          <label
+            htmlFor="scope-text"
+            className="flex items-center gap-2 text-sm font-black text-slate-900 uppercase tracking-wider ml-1"
+          >
+            <FileText className="w-4 h-4 text-indigo-500" />
+            Add project details (optional)
+          </label>
+          <Textarea
+            id="scope-text"
+            placeholder="e.g. Total gut renovation, move sink to island, install high-end appliances..."
+            className="min-h-[120px] rounded-2xl border-slate-200 bg-white/50 focus:bg-white transition-all text-base px-4 py-3 placeholder:text-slate-400"
+            value={scopeDescription}
+            onChange={(e) => setScopeDescription(e.target.value)}
+          />
+          <p className="text-[11px] text-slate-400 font-medium px-1">
+            More detail = more accurate pricing. Tell us about materials or
+            specific changes.
+          </p>
+        </div>
+
         {/* Selected Photos Grid */}
         {photos.length > 0 && (
           <div className="flex flex-wrap gap-2 justify-center py-2">
@@ -143,7 +167,7 @@ export function PhotoScreen() {
                 />
                 <button
                   type="button"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setPhotos(photos.filter((_, idx) => idx !== i));
                   }}
@@ -162,19 +186,29 @@ export function PhotoScreen() {
             variant="primary"
             className="w-full h-16 text-lg font-bold shadow-xl shadow-indigo-500/10 group"
             onClick={() => {
-              if (photos.length > 0) {
-                navigate("/onboarding/loading");
-              } else {
-                navigate("/onboarding/text-scope");
-              }
+              navigate("/onboarding/loading");
             }}
             type="button"
+            disabled={!photos.length && !scopeDescription.trim()}
           >
-            {photos.length
+            {photos.length > 0
               ? `Analyze ${photos.length} Vision Assets`
-              : "Skip for now (text focus)"}
+              : "Analyze Project Details"}
             <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
+
+          {photos.length === 0 && !scopeDescription.trim() && (
+            <Button
+              size="lg"
+              variant="ghost"
+              className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
+              onClick={() => {
+                navigate("/onboarding/text-scope");
+              }}
+            >
+              Skip to detailed text focus
+            </Button>
+          )}
 
           {photos.length > 0 && (
             <Button
@@ -183,10 +217,9 @@ export function PhotoScreen() {
               className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
               onClick={() => {
                 setPhotos([]);
-                navigate("/onboarding/text-scope");
               }}
             >
-              Clear and use text focus instead
+              Clear photos
             </Button>
           )}
 
