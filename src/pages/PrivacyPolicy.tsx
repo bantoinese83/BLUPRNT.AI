@@ -53,10 +53,10 @@ export default function PrivacyPolicy() {
           You can access, update, or delete your account information through your dashboard settings
           where available. If you have questions about your data, contact us at{" "}
           <a
-            href="mailto:privacy@bluprntai.com"
-            className="font-semibold text-indigo-600 underline decoration-indigo-200 underline-offset-2 hover:text-indigo-700"
+            href="mailto:connect@monarch-labs.com"
+            className="text-indigo-600 hover:text-indigo-500 font-medium"
           >
-            privacy@bluprntai.com
+            connect@monarch-labs.com
           </a>
           .
         </LegalParagraph>

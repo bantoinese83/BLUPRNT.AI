@@ -147,7 +147,7 @@ export function LegalPageShell({
             <Link to="/terms" className="font-medium hover:text-slate-900">
               Terms
             </Link>
-            <a href="mailto:privacy@bluprntai.com" className="font-medium hover:text-slate-900">
+            <a href="mailto:connect@monarch-labs.com" className="font-medium hover:text-slate-900">
               Contact
             </a>
             <button

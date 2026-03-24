@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
 
     // Attempt to send email via Resend
     const { data, error } = await resend.emails.send({
-      from: "BLUPRNT.AI Notifications <notifications@bluprntai.com>",
+      from: "BLUPRNT.AI Notifications <connect@monarch-labs.com>",
       to,
       subject,
       html,

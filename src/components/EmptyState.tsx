@@ -94,7 +94,7 @@ export function EmptyState({
       {/* Help Link */}
       <div className="mt-8">
         <a 
-          href="mailto:support@bluprntai.com" 
+          href="mailto:connect@monarch-labs.com" 
           className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1.5"
         >
           Need help? Contact support

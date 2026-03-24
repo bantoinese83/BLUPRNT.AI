@@ -143,7 +143,7 @@ export default function ProjectView() {
           </div>
           <div className="mt-2">
             <a
-              href="mailto:privacy@bluprntai.com"
+              href="mailto:connect@monarch-labs.com"
               className="text-xs font-semibold text-slate-400 transition-colors hover:text-indigo-600"
             >
               Still have issues? Contact us

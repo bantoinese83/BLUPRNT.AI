@@ -38,7 +38,7 @@ export function HelpWidget() {
             </div>
             <div className="p-4 space-y-3">
               <a 
-                href="mailto:support@bluprntai.com?subject=Need%20Help%20with%20BLUPRNT"
+                href="mailto:connect@monarch-labs.com?subject=Need%20Help%20with%20BLUPRNT"
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 transition-colors group"
                 onClick={() => setIsOpen(false)}
               >
@@ -50,7 +50,7 @@ export function HelpWidget() {
               </a>
               
               <a 
-                href="mailto:feedback@bluprntai.com?subject=BLUPRNT%20Feedback"
+                href="mailto:connect@monarch-labs.com?subject=BLUPRNT%20Feedback"
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 transition-colors group"
                 onClick={() => setIsOpen(false)}
               >

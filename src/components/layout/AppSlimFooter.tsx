@@ -43,7 +43,7 @@ export function AppSlimFooter({ className, showHome = true }: AppSlimFooterProps
             Questions
           </Link>
           <a
-            href="mailto:privacy@bluprntai.com"
+            href="mailto:connect@monarch-labs.com"
             className="transition-colors hover:text-slate-900"
           >
             Contact

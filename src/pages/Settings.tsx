@@ -515,7 +515,7 @@ export default function Settings() {
             <p className="text-sm text-slate-600">
               Got a question, need help with an estimate, or have an idea for a new feature? We're here to help you get the most out of BLUPRNT.AI.
             </p>
-            <a href="mailto:support@bluprntai.com" className="inline-block">
+            <a href="mailto:connect@monarch-labs.com" className="inline-block">
               <Button
                 variant="outline"
                 className="gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"

@@ -1085,7 +1085,7 @@ export default function Landing() {
                     </li>
                     <li>
                       <a
-                        href="mailto:privacy@bluprntai.com"
+                        href="mailto:connect@monarch-labs.com"
                         className="font-medium hover:text-slate-900"
                       >
                         Contact us

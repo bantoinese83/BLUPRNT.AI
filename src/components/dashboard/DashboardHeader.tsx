@@ -128,7 +128,7 @@ export function DashboardHeader({
               <Settings2 className="h-4 w-4" aria-hidden />
             </Button>
           </Link>
-          <a href="mailto:privacy@bluprntai.com" className="sm:hidden">
+          <a href="mailto:connect@monarch-labs.com" className="sm:hidden">
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-slate-600" type="button" aria-label="Contact support">
               <LifeBuoy className="h-4 w-4" aria-hidden />
             </Button>
@@ -146,7 +146,7 @@ export function DashboardHeader({
             </Button>
           </Link>
 
-          <a href="mailto:privacy@bluprntai.com" className="hidden sm:block">
+          <a href="mailto:connect@monarch-labs.com" className="hidden sm:block">
             <Button
               variant="ghost"
               size="sm"
