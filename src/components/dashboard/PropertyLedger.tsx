@@ -179,26 +179,26 @@ export function PropertyLedger({
           </p>
 
           <div className="space-y-3">
-            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-slate-100/50 hover:border-slate-200 gap-2">
-              <span className="text-sm font-bold text-slate-600 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center transition-colors">
+            <div className="flex items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-slate-100/50 hover:border-slate-200 gap-3">
+              <div className="text-sm font-bold text-slate-600 flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center shrink-0">
                   <Wrench className="w-4 h-4" strokeWidth={2.5} aria-hidden />
                 </div>
-                Capital Improvements
-              </span>
-              <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight ml-10 xs:ml-0">
+                <span className="truncate">Capital Improvements</span>
+              </div>
+              <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight shrink-0">
                 {money(capitalTotal)}
               </span>
             </div>
 
-            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-slate-100/50 hover:border-slate-200 gap-2">
-              <span className="text-sm font-bold text-slate-600 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center transition-colors">
+            <div className="flex items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 group transition-all duration-300 hover:bg-slate-100/50 hover:border-slate-200 gap-3">
+              <div className="text-sm font-bold text-slate-600 flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center shrink-0">
                   <BookOpen className="w-4 h-4" strokeWidth={2.5} aria-hidden />
                 </div>
-                Maintenance Log
-              </span>
-              <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight ml-10 xs:ml-0">
+                <span className="truncate">Maintenance Log</span>
+              </div>
+              <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight shrink-0">
                 {money(maintenanceTotal)}
               </span>
             </div>

@@ -5,6 +5,9 @@ import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/supabase";
 
+const FREE_INVOICE_LIMIT = 3;
+const ARCHITECT_INVOICE_LIMIT = 10;
+
 export type UpgradeOpenReason = "general" | "invoice_limit";
 
 interface UpgradeModalProps {
@@ -143,7 +146,8 @@ export function UpgradeModal({
 
               {openReason === "invoice_limit" && isArchitect && (
                 <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-                  You&apos;ve used your <strong>10 invoice uploads</strong> for
+                  You&apos;ve used your{" "}
+                  <strong>{ARCHITECT_INVOICE_LIMIT} invoice uploads</strong> for
                   this billing period. Your limit will reset when your
                   subscription renews.{" "}
                   <span className="text-slate-600">
@@ -156,8 +160,9 @@ export function UpgradeModal({
                 !isArchitect &&
                 !hasProjectPass && (
                   <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-                    You&apos;ve used all <strong>3 free invoices</strong> on
-                    this project. Upgrade to add more invoices anytime.{" "}
+                    You&apos;ve used all{" "}
+                    <strong>{FREE_INVOICE_LIMIT} free invoices</strong> on this
+                    project. Upgrade to add more invoices anytime.{" "}
                     <span className="text-slate-600">
                       Quotes, warranties, and permits don&apos;t count toward
                       that limit—you can still upload those for free.
@@ -234,7 +239,7 @@ export function UpgradeModal({
                     <ul className="space-y-3">
                       {[
                         "Expert AI Insights & Project Strategy",
-                        "Up to 10 smart invoice uploads per billing period",
+                        `Up to ${ARCHITECT_INVOICE_LIMIT} smart invoice uploads per billing period`,
                         "Track up to 2 active projects",
                         "Cloud-backed Seller Packet PDF",
                       ].map((item, i) => (

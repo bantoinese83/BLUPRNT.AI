@@ -13,11 +13,13 @@ export function EstimateSummary({
   project,
   scopeItems,
   isArchitect,
+  hasProjectPass,
   onUpgradeClick,
 }: {
   project: ProjectRow;
   scopeItems: ScopeRow[];
   isArchitect?: boolean;
+  hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
 }) {
   const navigate = useNavigate();
@@ -52,7 +54,7 @@ export function EstimateSummary({
             Full renovation lifecycle estimate
           </p>
 
-          {!isArchitect && (
+          {!isArchitect && !hasProjectPass && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

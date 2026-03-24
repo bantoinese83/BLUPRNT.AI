@@ -16,6 +16,7 @@ type DashboardHeaderProps = {
   onSignOut: () => void;
   projectName?: string;
   isArchitect?: boolean;
+  hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
   onExportPDF?: () => void;
 };
@@ -24,6 +25,7 @@ export function DashboardHeader({
   onSignOut,
   projectName,
   isArchitect,
+  hasProjectPass,
   onUpgradeClick,
   onExportPDF,
 }: DashboardHeaderProps) {
@@ -68,6 +70,10 @@ export function DashboardHeader({
               {isArchitect ? (
                 <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-700 ring-1 ring-indigo-100">
                   Architect
+                </span>
+              ) : hasProjectPass ? (
+                <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-100">
+                  Project Pass
                 </span>
               ) : null}
             </div>

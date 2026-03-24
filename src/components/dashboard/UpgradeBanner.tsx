@@ -28,7 +28,8 @@ export function UpgradeBanner({
 
         <div>
           <h4 className="font-semibold text-slate-900">
-            You&apos;ve used all 3 free invoices on this project.
+            You&apos;ve used all {FREE_INVOICE_LIMIT} free invoices on this
+            project.
           </h4>
           <p className="text-sm text-slate-600 mt-0.5">
             Quotes, warranties, and permits still upload free. Upgrade for more

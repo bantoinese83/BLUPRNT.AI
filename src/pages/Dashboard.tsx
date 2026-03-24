@@ -560,6 +560,7 @@ export default function Dashboard() {
         onSignOut={handleSignOut}
         projectName={project.name}
         isArchitect={isArchitect}
+        hasProjectPass={hasProjectPass}
         onUpgradeClick={() => {
           setUpgradeReason("general");
           setShowUpgrade(true);
@@ -682,6 +683,7 @@ export default function Dashboard() {
                       project={project}
                       scopeItems={scopeItems}
                       isArchitect={isArchitect}
+                      hasProjectPass={hasProjectPass}
                       onUpgradeClick={() => {
                         setUpgradeReason("general");
                         setShowUpgrade(true);
@@ -708,6 +710,8 @@ export default function Dashboard() {
                     scopeItems={scopeItems}
                     projectId={project.id}
                     onRefresh={load}
+                    isArchitect={isArchitect}
+                    hasProjectPass={hasProjectPass}
                   />
                 }
               />
