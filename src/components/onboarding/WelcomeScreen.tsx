@@ -97,39 +97,62 @@ export function WelcomeScreen() {
           </motion.p>
         </div>
 
-        {loggedIn && hasProjects ? (
+        {loggedIn ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="w-full space-y-3 pt-4"
+            className="w-full space-y-3 pt-4 px-2"
           >
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-              Saved progress detected
-            </p>
-            <Button
-              size="lg"
-              variant="primary"
-              className="w-full gap-2 group h-14 text-base"
-              onClick={() => navigate("/dashboard")}
-              type="button"
-            >
-              <LayoutDashboard
-                className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
-                aria-hidden
-              />
-              Continue to Dashboard
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full gap-2 border-slate-200 h-14 text-base bg-white/50 backdrop-blur-sm"
-              onClick={() => navigate("/onboarding/type")}
-              type="button"
-            >
-              <PlusCircle className="w-5 h-5 shrink-0" aria-hidden />
-              Start another estimate
-            </Button>
+            {hasProjects ? (
+              <>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+                  Saved progress detected
+                </p>
+                <Button
+                  size="lg"
+                  variant="primary"
+                  className="w-full gap-2 group h-14 text-base shadow-xl shadow-indigo-500/20"
+                  onClick={() => navigate("/dashboard")}
+                  type="button"
+                >
+                  <LayoutDashboard
+                    className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                    aria-hidden
+                  />
+                  Continue to Dashboard
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full gap-2 border-slate-200 h-14 text-base bg-white/50 backdrop-blur-sm"
+                  onClick={() => navigate("/onboarding/type")}
+                  type="button"
+                >
+                  <PlusCircle className="w-5 h-5 shrink-0" aria-hidden />
+                  Start another estimate
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  size="lg"
+                  variant="primary"
+                  className="w-full h-14 text-base shadow-xl shadow-indigo-500/20 group"
+                  onClick={() => navigate("/onboarding/type")}
+                  type="button"
+                >
+                  Get my first estimate
+                  <ArrowRight
+                    className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1"
+                    aria-hidden
+                  />
+                </Button>
+                <p className="text-xs text-slate-400 font-medium">
+                  Signed in as {user.email}
+                </p>
+              </>
+            )}
             <Button
               size="lg"
               variant="ghost"
@@ -141,7 +164,7 @@ export function WelcomeScreen() {
               }}
               type="button"
             >
-              Sign in to a different account
+              Sign out
             </Button>
           </motion.div>
         ) : (
@@ -164,7 +187,6 @@ export function WelcomeScreen() {
                 aria-hidden
               />
             </Button>
-
             <div className="relative py-2">
               <div
                 className="absolute inset-0 flex items-center"
@@ -176,7 +198,6 @@ export function WelcomeScreen() {
                 <span className="bg-white px-4 text-slate-300">Or</span>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <Link
                 to="/register"

@@ -22,6 +22,8 @@ import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 type Mode = "password" | "magic";
 
@@ -41,6 +43,17 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      const redirectTo = getSafeRedirect(
+        searchParams.get("redirect"),
+        "/dashboard",
+      );
+      navigate(redirectTo, { replace: true });
+    }
+  }, [user, authLoading, navigate, searchParams]);
 
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
