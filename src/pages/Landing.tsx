@@ -395,6 +395,37 @@ export default function Landing() {
             </div>
           </section>
 
+          {/* Social Proof / Stats */}
+          <section className="bg-white border-y border-slate-100 py-10">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+              <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
+                <div className="flex flex-col items-center gap-2 lg:items-start">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    Trusted by homeowners
+                  </p>
+                  <p className="text-2xl font-black text-slate-900">
+                    1,200+ <span className="text-slate-500 font-bold">blueprints managed</span>
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:gap-12 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+                  <div className="flex items-center justify-center font-black italic tracking-tighter text-slate-900 text-xl">
+                    RE/MAX
+                  </div>
+                  <div className="flex items-center justify-center font-black italic tracking-tighter text-slate-900 text-xl">
+                    Zillow
+                  </div>
+                  <div className="flex items-center justify-center font-black italic tracking-tighter text-slate-900 text-xl">
+                    Better
+                  </div>
+                  <div className="flex items-center justify-center font-black italic tracking-tighter text-slate-900 text-xl">
+                    Houzz
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* How it works */}
           <section
             id="how"
@@ -499,6 +530,30 @@ export default function Landing() {
                   </div>
 
                 </motion.article>
+              </div>
+            </div>
+          </section>
+
+          {/* Our Story / Trust Section */}
+          <section className="bg-slate-50 py-24 px-4 sm:px-6">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="inline-block p-3 rounded-2xl bg-white shadow-sm border border-slate-100 mb-6">
+                <Shield className="w-8 h-8 text-indigo-600" />
+              </div>
+              <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">Built by homeowners, for homeowners.</h2>
+              <div className="space-y-4 text-lg text-slate-600 leading-relaxed font-medium">
+                <p>
+                  We started BLUPRNT because we were tired of "cost estimates" that were actually lead-gen traps for contractors. Renovations are stressful enough—the financial planning shouldn't be.
+                </p>
+                <p>
+                  Our mission is to turn every renovation into a trackable, transparent financial asset. We believe homeowners deserve a clear, regional-grounded path from their first photo to their final sale.
+                </p>
+              </div>
+              <div className="mt-10 flex flex-col items-center gap-2">
+                <div className="h-12 w-12 rounded-full border-2 border-white shadow-md overflow-hidden bg-slate-200">
+                  <div className="w-full h-full bg-slate-400" /> {/* Placeholder for founder photo */}
+                </div>
+                <p className="text-sm font-bold text-slate-900">The BLUPRNT Team</p>
               </div>
             </div>
           </section>
@@ -668,6 +723,41 @@ export default function Landing() {
               <p className="mt-12 text-center text-slate-500 font-medium italic">
                 All plans include a 3-invoice free trial per project. No credit card required to start.
               </p>
+
+              {/* Detailed Comparison Table */}
+              <div className="mt-24 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-100/50">
+                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                  <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-900">Feature Comparison</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="px-6 py-4 text-sm font-black text-slate-900 bg-slate-50/50 w-1/2">Features</th>
+                        <th className="px-6 py-4 text-sm font-black text-slate-900 text-center">Architect</th>
+                        <th className="px-6 py-4 text-sm font-black text-slate-900 text-center">Project Pass</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {[
+                        ["Active Projects", "Up to 2", "Single Project"],
+                        ["Photo-to-Estimate", "Unlimited", "Unlimited"],
+                        ["Invoice OCR", "10 / month", "Unlimited (6mo)"],
+                        ["Property Ledger", "Full Access", "Full Access"],
+                        ["Export Records", "Unlimited", "Unlimited"],
+                        ["Support", "Priority", "Standard"],
+                        ["Subscription", "Monthly", "One-time"],
+                      ].map(([feature, architect, pass], i) => (
+                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4 text-sm font-semibold text-slate-700">{feature}</td>
+                          <td className="px-6 py-4 text-sm text-center font-bold text-slate-900">{architect}</td>
+                          <td className="px-6 py-4 text-sm text-center font-bold text-slate-900">{pass}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </section>
 
