@@ -93,16 +93,27 @@ export function TextScopeScreen() {
           </p>
         </div>
 
-        <Button
-          size="lg"
-          variant="primary"
-          className="w-full"
-          onClick={() => navigate("/onboarding/loading")}
-          type="button"
-        >
-          Get estimate
-          <ArrowRight className="w-5 h-5 shrink-0" aria-hidden />
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            size="lg"
+            variant="outline"
+            className="flex-1 h-14 border-slate-200 text-slate-600 font-bold"
+            onClick={() => navigate("/onboarding/photo")}
+            type="button"
+          >
+            Back
+          </Button>
+          <Button
+            size="lg"
+            variant="primary"
+            className="flex-[2] h-14 font-bold shadow-lg shadow-indigo-500/10"
+            onClick={() => navigate("/onboarding/loading")}
+            type="button"
+          >
+            Get estimate
+            <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </div>
       </div>
     </PageTransition>
   );

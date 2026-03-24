@@ -26,6 +26,7 @@ const ONBOARDING_STEPS = [
   { path: "/onboarding/location", label: "Location" },
   { path: "/onboarding/stage", label: "Stage" },
   { path: "/onboarding/photo", label: "Photos" },
+  { path: "/onboarding/text-scope", label: "Scope" },
   { path: "/onboarding/loading", label: "Analysis" },
   { path: "/onboarding/estimate", label: "Estimate" },
   { path: "/onboarding/signup", label: "Account" },

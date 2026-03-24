@@ -133,31 +133,39 @@ export function PhotoScreen() {
           <Button
             size="lg"
             variant="primary"
-            className="w-full h-16 text-lg font-bold shadow-xl shadow-indigo-500/10"
-            onClick={() => navigate("/onboarding/loading")}
+            className="w-full h-16 text-lg font-bold shadow-xl shadow-indigo-500/10 group"
+            onClick={() => {
+              if (photos.length > 0) {
+                navigate("/onboarding/loading");
+              } else {
+                navigate("/onboarding/text-scope");
+              }
+            }}
             type="button"
           >
             {photos.length
               ? `Analyze ${photos.length} Vision Assets`
-              : "Proceed without vision"}
+              : "Skip for now (text focus)"}
             <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
 
-          <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest">
+          {photos.length > 0 && (
+            <Button
+              size="lg"
+              variant="ghost"
+              className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
+              onClick={() => {
+                setPhotos([]);
+                navigate("/onboarding/text-scope");
+              }}
+            >
+              Clear and use text focus instead
+            </Button>
+          )}
+
+          <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest pt-2">
             Vision precision: +35% accuracy
           </p>
-
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
-            onClick={() => {
-              setPhotos([]);
-              navigate("/onboarding/text-scope");
-            }}
-          >
-            Skip for now (text focus)
-          </Button>
         </div>
       </div>
     </PageTransition>
