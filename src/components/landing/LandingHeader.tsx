@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { LogIn, Menu, X, ArrowRight, UserPlus } from "lucide-react";
+import {
+  LogIn,
+  Menu,
+  X,
+  ArrowRight,
+  UserPlus,
+  LayoutDashboard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
+import { useAuth } from "@/hooks/use-auth";
 
 interface LandingHeaderProps {
   scrollToSection: (id: string) => void;
@@ -12,6 +20,7 @@ interface LandingHeaderProps {
 export function LandingHeader({ scrollToSection }: LandingHeaderProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const headerScrolled = useScrollPosition(8);
+  const { user } = useAuth();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -92,16 +101,29 @@ export function LandingHeader({ scrollToSection }: LandingHeaderProps) {
             animate={{ opacity: 1, x: 0 }}
             className="flex shrink-0 items-center gap-1.5 sm:gap-2"
           >
-            <Link to="/login" className="hidden lg:block">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              >
-                <LogIn className="mr-1.5 h-4 w-4" aria-hidden />
-                Sign in
-              </Button>
-            </Link>
+            {user ? (
+              <Link to="/dashboard" className="hidden lg:block">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl gap-2 font-bold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition-all shadow-sm"
+                >
+                  <LayoutDashboard className="h-4 w-4" aria-hidden />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/login" className="hidden lg:block">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                >
+                  <LogIn className="mr-1.5 h-4 w-4" aria-hidden />
+                  Sign in
+                </Button>
+              </Link>
+            )}
 
             <Link to="/onboarding" className="flex lg:hidden">
               <Button
@@ -166,22 +188,38 @@ export function LandingHeader({ scrollToSection }: LandingHeaderProps) {
                   </button>
                 ))}
                 <div className="my-2 border-t border-slate-100" />
-                <Link
-                  to="/login"
-                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-                  onClick={() => setMobileNavOpen(false)}
-                >
-                  <LogIn className="h-4 w-4 text-slate-500" aria-hidden />
-                  Sign in
-                </Link>
-                <Link
-                  to="/register"
-                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-                  onClick={() => setMobileNavOpen(false)}
-                >
-                  <UserPlus className="h-4 w-4 text-slate-500" aria-hidden />
-                  Create account
-                </Link>
+                {user ? (
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold text-indigo-600 hover:bg-indigo-50"
+                    onClick={() => setMobileNavOpen(false)}
+                  >
+                    <LayoutDashboard className="h-4 w-4" aria-hidden />
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                      onClick={() => setMobileNavOpen(false)}
+                    >
+                      <LogIn className="h-4 w-4 text-slate-500" aria-hidden />
+                      Sign in
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                      onClick={() => setMobileNavOpen(false)}
+                    >
+                      <UserPlus
+                        className="h-4 w-4 text-slate-500"
+                        aria-hidden
+                      />
+                      Create account
+                    </Link>
+                  </>
+                )}
                 <Link
                   to="/onboarding"
                   onClick={() => setMobileNavOpen(false)}

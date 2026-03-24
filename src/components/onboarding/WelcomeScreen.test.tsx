@@ -2,12 +2,15 @@ import { describe, it, expect } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { WelcomeScreen } from "./WelcomeScreen";
+import { AuthProvider } from "@/contexts/AuthProvider";
 
 describe("WelcomeScreen", () => {
   it("renders heading and CTAs after load", async () => {
     render(
       <MemoryRouter>
-        <WelcomeScreen />
+        <AuthProvider>
+          <WelcomeScreen />
+        </AuthProvider>
       </MemoryRouter>,
     );
     await waitFor(() => {
@@ -27,7 +30,9 @@ describe("WelcomeScreen", () => {
   it("register link goes to register", async () => {
     render(
       <MemoryRouter>
-        <WelcomeScreen />
+        <AuthProvider>
+          <WelcomeScreen />
+        </AuthProvider>
       </MemoryRouter>,
     );
     await waitFor(() => {

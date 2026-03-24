@@ -11,36 +11,30 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
 
 export function WelcomeScreen() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [checking, setChecking] = useState(true);
   const [hasProjects, setHasProjects] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const loggedIn = !!user;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!isSupabaseConfigured()) {
-        setChecking(false);
+      if (!isSupabaseConfigured() || !user) {
+        queueMicrotask(() => setChecking(false));
         return;
       }
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.user || cancelled) {
-        setChecking(false);
-        return;
-      }
-      setLoggedIn(true);
       const { data: props } = await supabase
         .from("properties")
         .select("id")
-        .eq("owner_user_id", session.user.id)
+        .eq("owner_user_id", user.id)
         .limit(1);
       const pid = props?.[0]?.id;
       if (!pid) {
-        if (!cancelled) setChecking(false);
+        if (!cancelled) queueMicrotask(() => setChecking(false));
         return;
       }
       const { count } = await supabase
@@ -48,14 +42,16 @@ export function WelcomeScreen() {
         .select("id", { count: "exact", head: true })
         .eq("property_id", pid);
       if (!cancelled) {
-        setHasProjects((count ?? 0) > 0);
-        setChecking(false);
+        queueMicrotask(() => {
+          setHasProjects((count ?? 0) > 0);
+          setChecking(false);
+        });
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user]);
 
   if (checking) {
     return (

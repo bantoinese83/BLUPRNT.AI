@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { Home } from "lucide-react";
+import { Home, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 interface AppSimpleHeaderProps {
   className?: string;
@@ -14,6 +15,7 @@ export function AppSimpleHeader({
   showHome = true,
   showSignIn = false,
 }: AppSimpleHeaderProps) {
+  const { user } = useAuth();
   return (
     <header
       className={cn(
@@ -40,15 +42,30 @@ export function AppSimpleHeader({
 
         <nav className="flex items-center gap-2">
           {showSignIn && (
-            <Link to="/login" className="hidden sm:block">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-bold text-slate-600 hover:text-slate-900"
-              >
-                Sign in
-              </Button>
-            </Link>
+            <>
+              {user ? (
+                <Link to="/dashboard" className="hidden sm:block">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 font-bold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                  >
+                    <LayoutDashboard className="h-4 w-4" aria-hidden />
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/login" className="hidden sm:block">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="font-bold text-slate-600 hover:text-slate-900"
+                  >
+                    Sign in
+                  </Button>
+                </Link>
+              )}
+            </>
           )}
 
           {showHome && (

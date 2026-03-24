@@ -5,6 +5,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 import { PageLoader } from "./PageLoader";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -16,53 +17,26 @@ type ProtectedRouteProps = {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, loading } = useAuth();
   const [checking, setChecking] = useState(true);
-  const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
-      queueMicrotask(() => {
-        setChecking(false);
-        setAllowed(false);
-      });
+      queueMicrotask(() => setChecking(false));
       return;
     }
 
-    let cancelled = false;
-    const returnPath = `${location.pathname}${location.search || ""}`;
-
-    supabase.auth
-      .getSession()
-      .then(({ data: { session }, error }) => {
-        if (cancelled) return;
-        setChecking(false);
-        if (error) {
-          setAllowed(false);
-          const redirect = getSafeRedirect(returnPath, "/dashboard");
-          navigate(`/login?redirect=${encodeURIComponent(redirect)}`, {
-            replace: true,
-          });
-          return;
-        }
-        if (session?.user) {
-          setAllowed(true);
-        } else {
-          const redirect = getSafeRedirect(returnPath, "/dashboard");
-          navigate(`/login?redirect=${encodeURIComponent(redirect)}`, {
-            replace: true,
-          });
-        }
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setChecking(false);
-        setAllowed(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate, location.pathname, location.search]);
+    if (!loading) {
+      if (!user) {
+        const returnPath = `${location.pathname}${location.search || ""}`;
+        const redirect = getSafeRedirect(returnPath, "/dashboard");
+        navigate(`/login?redirect=${encodeURIComponent(redirect)}`, {
+          replace: true,
+        });
+      }
+      queueMicrotask(() => setChecking(false));
+    }
+  }, [user, loading, navigate, location.pathname, location.search]);
 
   if (checking) return <PageLoader />;
 
@@ -100,6 +74,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!allowed) return null;
+  if (!user) return null;
   return <>{children}</>;
 }

@@ -2,11 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { AuthProvider } from "@/contexts/AuthProvider";
 
-const { getSession, mockConfigured } = vi.hoisted(() => {
+const { getSession, mockConfigured, onAuthStateChange } = vi.hoisted(() => {
   return {
     getSession: vi.fn(),
     mockConfigured: vi.fn(() => true),
+    onAuthStateChange: vi.fn(() => ({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    })),
   };
 });
 
@@ -14,6 +18,7 @@ vi.mock("@/lib/supabase", () => ({
   supabase: {
     auth: {
       getSession: () => getSession(),
+      onAuthStateChange: () => onAuthStateChange(),
     },
   },
   isSupabaseConfigured: () => mockConfigured(),
@@ -29,16 +34,18 @@ describe("ProtectedRoute", () => {
     getSession.mockReturnValue(new Promise(() => {}));
     render(
       <MemoryRouter initialEntries={["/app"]}>
-        <Routes>
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <div>Protected content</div>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <div>Protected content</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(
@@ -53,16 +60,18 @@ describe("ProtectedRoute", () => {
     });
     render(
       <MemoryRouter initialEntries={["/app"]}>
-        <Routes>
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <div>Protected content</div>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <div>Protected content</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </MemoryRouter>,
     );
     await waitFor(() => {
@@ -77,17 +86,19 @@ describe("ProtectedRoute", () => {
     });
     render(
       <MemoryRouter initialEntries={["/dashboard/secret"]}>
-        <Routes>
-          <Route path="/login" element={<div>Login page</div>} />
-          <Route
-            path="/dashboard/secret"
-            element={
-              <ProtectedRoute>
-                <div>Protected content</div>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<div>Login page</div>} />
+            <Route
+              path="/dashboard/secret"
+              element={
+                <ProtectedRoute>
+                  <div>Protected content</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </MemoryRouter>,
     );
     await waitFor(() => {
@@ -104,16 +115,18 @@ describe("ProtectedRoute", () => {
     });
     render(
       <MemoryRouter initialEntries={["/app"]}>
-        <Routes>
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <div>Protected content</div>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <div>Protected content</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </MemoryRouter>,
     );
     await waitFor(() => {
