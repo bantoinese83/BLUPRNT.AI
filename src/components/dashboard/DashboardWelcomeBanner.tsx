@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X, Upload, FileDown, Share2, ListTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { clearDashboardWelcomeFlag, readDashboardWelcomeFlag } from "@/lib/dashboard-welcome";
+import { Highlighter } from "@/components/ui/Highlighter";
 
 export function DashboardWelcomeBanner() {
   const navigate = useNavigate();
@@ -24,7 +25,11 @@ export function DashboardWelcomeBanner() {
 
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-3 min-w-0">
-          <h2 className="text-lg font-bold text-slate-900">Your estimate is saved</h2>
+          <h2 className="text-lg font-bold text-slate-900">
+            <Highlighter action="highlight" color="#ffd1dc" padding={2} iterations={1}>
+              Your estimate is saved
+            </Highlighter>
+          </h2>
           <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
             Here&apos;s what to do next—pick one to get the most from BlueprintAI.
           </p>

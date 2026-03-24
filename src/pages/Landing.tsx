@@ -316,7 +316,7 @@ export default function Landing() {
                     className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
                   >
                     Turn your renovation into a{" "}
-                    <Highlighter action="highlight" color="rgba(99, 102, 241, 0.15)" strokeWidth={3}>
+                    <Highlighter action="highlight" color="rgba(99, 102, 241, 0.15)" strokeWidth={3} isView={true}>
                       <span className="liquid-metal-text">financial plan</span>
                     </Highlighter>
                   </h1>
@@ -329,7 +329,7 @@ export default function Landing() {
                   className="max-w-xl text-base text-slate-600 leading-relaxed font-medium sm:text-lg"
                 >
                   Turn renovations into a{" "}
-                  <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0}>
+                  <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} isView={true}>
                     trackable financial asset
                   </Highlighter>{" "}
                   for your home. Get real-world costs, track invoices, and build a record you can hand to buyers.
@@ -451,7 +451,11 @@ export default function Landing() {
                   <div className="w-20 h-20 rounded-3xl bg-slate-50 text-slate-900 flex items-center justify-center mb-8 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
                     <Receipt className="w-10 h-10" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">Execute</h3>
+                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
+                    <Highlighter action="circle" color="#6366f1" strokeWidth={2} padding={10} isView={true}>
+                      Execute
+                    </Highlighter>
+                  </h3>
 
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
                     Track quotes, actuals, and invoices against that budget with minimal manual work.
@@ -534,7 +538,11 @@ export default function Landing() {
                 <li className="flex items-start gap-4">
                   <Shield className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
                   <div>
-                    <h3 className="font-semibold text-slate-900">Seller packet</h3>
+                    <h3 className="font-semibold text-slate-900">
+                      <Highlighter action="highlight" color="#ffd1dc" padding={2} isView={true}>
+                        Seller packet
+                      </Highlighter>
+                    </h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Document your improvements for buyers and agents.
                     </p>
