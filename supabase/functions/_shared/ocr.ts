@@ -62,21 +62,26 @@ For line_items, ensure each entry has description, quantity, unit_price, and lin
   ];
 
   try {
-    const text = await callGemini({
+    const result = await callGemini({
       parts,
       systemInstruction,
       responseSchema,
       temperature: 0.1,
     });
 
-    if (!text) return null;
+    if (!result) return null;
 
-    if (text.startsWith("ERROR:")) {
-      console.error("Gemini API reported error in OCR:", text);
+    if (result.text.startsWith("ERROR:")) {
+      console.error("Gemini API reported error in OCR:", result.text);
       return null;
     }
 
-    const parsed = JSON.parse(text) as OcrInvoiceResult;
+    let parsed: OcrInvoiceResult;
+    if (result.data && typeof result.data === "object") {
+      parsed = result.data as OcrInvoiceResult;
+    } else {
+      parsed = JSON.parse(result.text) as OcrInvoiceResult;
+    }
     if (!parsed || typeof parsed !== "object") return null;
 
     return {

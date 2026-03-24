@@ -99,25 +99,25 @@ Description: ${scopeDescription || "Analyze photos"}.`;
   const parts: GeminiPart[] = [{ text: prompt }, ...photoParts];
 
   try {
-    const text = await callGemini({
+    const result = await callGemini({
       parts,
       systemInstruction,
       responseSchema,
       temperature: 0.1,
     });
 
-    if (!text) return null;
+    if (!result) return null;
 
-    if (text.startsWith("ERROR:")) {
-      console.error("Gemini API reported error:", text);
+    if (result.text.startsWith("ERROR:")) {
+      console.error("Gemini API reported error:", result.text);
       return null;
     }
 
     let parsed: any;
     try {
-      parsed = JSON.parse(text);
+      parsed = result.data || JSON.parse(result.text);
     } catch (e) {
-      console.error("Failed to parse Gemini JSON:", e, "Original text:", text);
+      console.error("Failed to parse Gemini JSON:", e, "Original text:", result.text);
       return null;
     }
 

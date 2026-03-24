@@ -9,13 +9,18 @@ export type GeminiPart =
   | { text: string }
   | { inline_data: { mime_type: string; data: string } };
 
+export interface GeminiResponse {
+  text: string;
+  data?: any;
+}
+
 export async function callGemini(params: {
   parts: GeminiPart[];
   systemInstruction?: string;
   responseMimeType?: "application/json" | "text/plain";
   responseSchema?: any;
   temperature?: number;
-}): Promise<string | null> {
+}): Promise<GeminiResponse | null> {
   // @ts-ignore: Deno global
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey?.trim()) {
@@ -42,7 +47,7 @@ export async function callGemini(params: {
       return { text: p.text };
     });
 
-    console.log(`[callGemini] Calling New SDK (Model: gemini-2.5-flash, Schema: ${!!responseSchema})`);
+    console.log(`[callGemini] Calling New SDK (Model: gemini-2.5-flash)`);
 
     // 3. Execute request using the centralized config pattern
     const response = await ai.models.generateContent({
@@ -62,9 +67,12 @@ export async function callGemini(params: {
       return null;
     }
 
-    return response.text.trim();
+    return {
+      text: response.text.trim(),
+      data: response.data // The new SDK often parses the data automatically if schema is provided
+    };
   } catch (e: any) {
-    console.error("[callGemini] New SDK Error:", e.message);
-    return `ERROR: ${e.message}`;
+    console.error("[callGemini] New SDK Error:", e.name, e.message);
+    return { text: `ERROR: ${e.message}` };
   }
 }
