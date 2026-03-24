@@ -42,7 +42,9 @@ Deno.serve(async (req: Request) => {
     const photoCount = Array.from(photos).filter(
       (p) => p instanceof File && p.size > 0,
     ).length;
-    console.log(`[photo-to-scope] Received ${photoCount} photos, zip: ${formData.get("zip_code")}, room: ${formData.get("room_type")}`);
+    console.log(
+      `[photo-to-scope] Received ${photoCount} photos, zip: ${formData.get("zip_code")}, room: ${formData.get("room_type")}`,
+    );
 
     const parsed = photoToScopeSchema.safeParse({
       zip_code: String(formData.get("zip_code") ?? "").trim() || "00000",
@@ -50,7 +52,8 @@ Deno.serve(async (req: Request) => {
       finish_preference: String(formData.get("finish_preference") ?? "mid"),
       project_id: (formData.get("project_id") as string | null)?.trim() || null,
       location_unset: String(formData.get("location_unset") ?? ""),
-      scope_description: (formData.get("scope_description") as string | null)?.trim() || null,
+      scope_description:
+        (formData.get("scope_description") as string | null)?.trim() || null,
     });
 
     if (!parsed.success) {
@@ -58,7 +61,14 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: msg }, 400, req);
     }
 
-    const { zip_code, room_type, finish_preference, project_id, location_unset, scope_description } = parsed.data;
+    const {
+      zip_code,
+      room_type,
+      finish_preference,
+      project_id,
+      location_unset,
+      scope_description,
+    } = parsed.data;
     const projectId = project_id ?? null;
 
     let payload = null;
@@ -92,28 +102,49 @@ Deno.serve(async (req: Request) => {
       scopeDescription: scope_description,
       photoParts,
     });
-    
+
     if (!payload) {
-      return jsonResponse({ 
-        error: "AI estimation failed. Please try adding a description or better photos." 
-      }, 500, req);
+      return jsonResponse(
+        {
+          error:
+            "AI estimation failed. Please try adding a description or better photos.",
+        },
+        500,
+        req,
+      );
     }
 
     if (projectId) {
       const userId = await getUserIdFromRequest(req);
       if (!userId) {
-        return jsonResponse({ error: "Sign in to save this to a project." }, 401, req);
+        return jsonResponse(
+          { error: "Sign in to save this to a project." },
+          401,
+          req,
+        );
       }
       const admin = getServiceClient();
       try {
         await assertProjectOwner(admin, projectId, userId);
       } catch (e) {
         const m = e instanceof Error ? e.message : "";
-        if (m === "not_found") return jsonResponse({ error: "Project not found" }, 404, req);
+        if (m === "not_found")
+          return jsonResponse({ error: "Project not found" }, 404, req);
         return jsonResponse({ error: "Access denied" }, 403, req);
       }
 
-      await admin.from("scope_items").delete().eq("project_id", projectId);
+      const { error: delErr } = await admin
+        .from("scope_items")
+        .delete()
+        .eq("project_id", projectId);
+      if (delErr) {
+        console.error("Scope items delete failed:", delErr);
+        return jsonResponse(
+          { error: "Could not reset existing scope" },
+          500,
+          req,
+        );
+      }
 
       const rows = payload.scope_items.map((s) => ({
         project_id: projectId,
@@ -139,14 +170,16 @@ Deno.serve(async (req: Request) => {
       const { data: inserted, error: insErr } = await admin
         .from("scope_items")
         .insert(rows)
-        .select("id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata");
+        .select(
+          "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata",
+        );
 
       if (insErr) {
         console.error(insErr);
         return jsonResponse({ error: "Could not save scope" }, 500, req);
       }
 
-      await admin
+      const { error: projUpErr } = await admin
         .from("projects")
         .update({
           estimated_min_total: payload.summary.estimated_min_total,
@@ -159,6 +192,11 @@ Deno.serve(async (req: Request) => {
           updated_at: new Date().toISOString(),
         })
         .eq("id", projectId);
+
+      if (projUpErr) {
+        console.error("Project update failed:", projUpErr);
+        // We don't return 500 here since the scope items are already saved, but we log it.
+      }
 
       const scope_items = (inserted ?? []).map((r: any) => ({
         id: r.id,

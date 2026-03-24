@@ -35,7 +35,8 @@ Deno.serve(async (req: Request) => {
   if (req.method === "POST") {
     try {
       const body = await req.json();
-      invoice_id = typeof body?.invoice_id === "string" ? body.invoice_id : null;
+      invoice_id =
+        typeof body?.invoice_id === "string" ? body.invoice_id : null;
     } catch {
       /* ignore */
     }
@@ -66,27 +67,41 @@ Deno.serve(async (req: Request) => {
 
     await assertProjectOwner(admin, inv.project_id, userId);
 
-    const { data: lines } = await admin
+    const { data: lines, error: linesErr } = await admin
       .from("invoice_line_items")
       .select("*")
       .eq("invoice_id", parsed.data.invoice_id);
 
-    const { data: scopeSample } = await admin
+    if (linesErr) {
+      console.error("Invoice line items fetch failed:", linesErr);
+      return jsonResponse(
+        { error: "Could not load invoice details" },
+        500,
+        req,
+      );
+    }
+
+    const { data: scopeSample, error: scopeErr } = await admin
       .from("scope_items")
       .select("id, category, description")
       .eq("project_id", inv.project_id)
       .limit(3);
 
+    if (scopeErr) {
+      console.error("Scope items sample fetch failed:", scopeErr);
+      // We don't return 500 here as suggestions are non-critical
+    }
+
     const budget_mapping_suggestions = (scopeSample ?? [])
-      .filter((s) =>
-        inv.vendor_name &&
-        String(s.description).toLowerCase().includes("plumb")
+      .filter(
+        (s) =>
+          inv.vendor_name &&
+          String(s.description).toLowerCase().includes("plumb"),
       )
       .map((s) => ({
         scope_item_id: s.id,
         confidence_score: 0.86,
-        reason:
-          "Description may align with plumbing scope on this project.",
+        reason: "Description may align with plumbing scope on this project.",
       }));
 
     return jsonResponse(
@@ -128,7 +143,8 @@ Deno.serve(async (req: Request) => {
     );
   } catch (e) {
     const m = e instanceof Error ? e.message : "";
-    if (m === "forbidden") return jsonResponse({ error: "Access denied" }, 403, req);
+    if (m === "forbidden")
+      return jsonResponse({ error: "Access denied" }, 403, req);
     console.error(e);
     return jsonResponse({ error: "Could not load invoice" }, 500, req);
   }

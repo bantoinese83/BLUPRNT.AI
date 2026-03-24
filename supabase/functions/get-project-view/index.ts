@@ -50,7 +50,9 @@ Deno.serve(async (req: Request) => {
 
     const { data: project, error: projErr } = await admin
       .from("projects")
-      .select("id, name, estimated_min_total, estimated_max_total, confidence_score")
+      .select(
+        "id, name, estimated_min_total, estimated_max_total, confidence_score",
+      )
       .eq("id", row.project_id)
       .single();
 
@@ -58,11 +60,22 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Project not found" }, 404, req);
     }
 
-    const { data: scopeItems } = await admin
+    const { data: scopeItems, error: scopeErr } = await admin
       .from("scope_items")
-      .select("id, category, description, finish_tier, quantity, unit, total_cost_min, total_cost_max")
+      .select(
+        "id, category, description, finish_tier, quantity, unit, total_cost_min, total_cost_max",
+      )
       .eq("project_id", row.project_id)
       .order("created_at", { ascending: true });
+
+    if (scopeErr) {
+      console.error("Scope items fetch failed:", scopeErr);
+      return jsonResponse(
+        { error: "Could not fetch project details" },
+        500,
+        req,
+      );
+    }
 
     return jsonResponse(
       {

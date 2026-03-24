@@ -131,6 +131,7 @@ export default function Dashboard() {
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [isArchitect, setIsArchitect] = useState(false);
+  const [hasProjectPass, setHasProjectPass] = useState(false);
   const lastFetchedProjectId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -182,6 +183,7 @@ export default function Dashboard() {
         if (c.scopeItems) setScopeItems(c.scopeItems);
         if (c.invoices) setInvoices(c.invoices);
         if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
+        if (c.hasProjectPass !== undefined) setHasProjectPass(c.hasProjectPass);
         setLoading(false); // Render instantly (stale-while-revalidate)
       } catch {
         // ignore cache decode errors
@@ -237,7 +239,7 @@ export default function Dashboard() {
 
     if (projectId) {
       // 2. Fetch all required sub-data for the selected project in parallel
-      const [scopesRes, invRes, subRes] = await Promise.all([
+      const [scopesRes, invRes, subRes, subRes2] = await Promise.all([
         supabase
           .from("scope_items")
           .select(
@@ -257,15 +259,22 @@ export default function Dashboard() {
           .select("status")
           .eq("user_id", session.user.id)
           .maybeSingle(),
+        supabase
+          .from("project_passes")
+          .select("id")
+          .eq("project_id", projectId)
+          .maybeSingle(),
       ]);
 
       const newScopes = (scopesRes.data ?? []) as ScopeRow[];
       const newInvoices = (invRes.data ?? []) as InvoiceRow[];
       const newIsArchitect = subRes.data?.status === "active";
+      const newHasProjectPass = !!subRes2.data;
 
       setScopeItems(newScopes);
       setInvoices(newInvoices);
       setIsArchitect(newIsArchitect);
+      setHasProjectPass(newHasProjectPass);
 
       sessionStorage.setItem(
         cacheKey,
@@ -275,6 +284,7 @@ export default function Dashboard() {
           scopeItems: newScopes,
           invoices: newInvoices,
           isArchitect: newIsArchitect,
+          hasProjectPass: newHasProjectPass,
         }),
       );
     } else {
@@ -734,6 +744,8 @@ export default function Dashboard() {
             : (project.estimated_min_total ?? project.estimated_max_total)
         }
         projectId={project.id}
+        isArchitect={isArchitect}
+        hasProjectPass={hasProjectPass}
       />
 
       <LeadCaptureModal

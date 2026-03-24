@@ -268,11 +268,26 @@ Deno.serve(async (req: Request) => {
       }
 
       if (type === "invoice") {
-        await admin.from("invoice_line_items").insert(lineItemsToInsert);
-        await admin
+        const { error: lineErr } = await admin
+          .from("invoice_line_items")
+          .insert(lineItemsToInsert);
+        if (lineErr) {
+          console.error("Line items insert failed:", lineErr);
+          return jsonResponse(
+            { error: "Could not save invoice details." },
+            500,
+            req,
+          );
+        }
+
+        const { error: docUpdateErr } = await admin
           .from("documents")
           .update({ ocr_status: "success" })
           .eq("id", doc.id);
+        if (docUpdateErr) {
+          console.error("Document status update failed:", docUpdateErr);
+          // We don't return 500 here since the invoice is already saved, but we log it.
+        }
       }
 
       if (type === "invoice") {

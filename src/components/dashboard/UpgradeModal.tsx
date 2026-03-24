@@ -14,6 +14,8 @@ interface UpgradeModalProps {
   projectId?: string | null;
   openReason?: UpgradeOpenReason;
   showDiscount?: boolean;
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
 }
 
 function formatEstimate(n: number | null | undefined): string {
@@ -39,6 +41,8 @@ export function UpgradeModal({
   projectId,
   openReason = "general",
   showDiscount = false,
+  isArchitect = false,
+  hasProjectPass = false,
 }: UpgradeModalProps) {
   const [loadingPlan, setLoadingPlan] = useState<"architect" | "pass" | null>(
     null,
@@ -236,7 +240,11 @@ export function UpgradeModal({
                       variant="primary"
                       className="w-full premium-gradient"
                       size="lg"
-                      disabled={loadingPlan !== null || !ARCHITECT_PRICE_ID}
+                      disabled={
+                        loadingPlan !== null ||
+                        !ARCHITECT_PRICE_ID ||
+                        isArchitect
+                      }
                       onClick={() => handleUpgrade("architect")}
                     >
                       {loadingPlan === "architect" ? (
@@ -244,6 +252,8 @@ export function UpgradeModal({
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Redirecting...
                         </>
+                      ) : isArchitect ? (
+                        "Current Plan"
                       ) : (
                         "Start Architect plan"
                       )}
@@ -304,7 +314,9 @@ export function UpgradeModal({
                       className="w-full"
                       variant="outline"
                       size="lg"
-                      disabled={loadingPlan !== null || !PASS_PRICE_ID}
+                      disabled={
+                        loadingPlan !== null || !PASS_PRICE_ID || hasProjectPass
+                      }
                       onClick={() => handleUpgrade("pass")}
                     >
                       {loadingPlan === "pass" ? (
@@ -312,6 +324,8 @@ export function UpgradeModal({
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Redirecting...
                         </>
+                      ) : hasProjectPass ? (
+                        "Current Plan"
                       ) : (
                         "Get Project Pass"
                       )}
