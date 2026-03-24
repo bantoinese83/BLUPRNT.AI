@@ -1,9 +1,22 @@
-import { useState, useEffect, useLayoutEffect, useCallback, useRef, type ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Helmet } from "react-helmet-async";
 
-import { useNavigate, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  useNavigate,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import confetti from "canvas-confetti";
 import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -19,15 +32,14 @@ import { ScopeDetail } from "@/components/dashboard/ScopeDetail";
 import { InvoicesSection } from "@/components/dashboard/InvoicesSection";
 import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
 import { PropertyLedger } from "@/components/dashboard/PropertyLedger";
-import { UpgradeModal, type UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
+import {
+  UpgradeModal,
+  type UpgradeOpenReason,
+} from "@/components/dashboard/UpgradeModal";
 import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { DashboardTabIntro } from "@/components/dashboard/DashboardTabIntro";
-import {
-  Settings2,
-  LogOut,
-  ListTree,
-} from "lucide-react";
+import { Settings2, LogOut, ListTree } from "lucide-react";
 import { toast } from "sonner";
 
 import { motion, AnimatePresence } from "motion/react";
@@ -70,7 +82,7 @@ function DashboardSubPage({
   side: ReactNode;
 }) {
   return (
-    <motion.div 
+    <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -83,8 +95,15 @@ function DashboardSubPage({
         <DashboardTabIntro />
       </motion.div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">{children}</motion.div>
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 content-start">{side}</motion.div>
+        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
+          {children}
+        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 content-start"
+        >
+          {side}
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -102,10 +121,11 @@ export default function Dashboard() {
   const location = useLocation();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [useDiscount, setUseDiscount] = useState(false);
-  const [upgradeReason, setUpgradeReason] = useState<UpgradeOpenReason>("general");
+  const [upgradeReason, setUpgradeReason] =
+    useState<UpgradeOpenReason>("general");
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<ProjectRow[]>([]);
-  const [project, setProject] = useState<ProjectRow|null>(null);
+  const [project, setProject] = useState<ProjectRow | null>(null);
   const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
@@ -117,21 +137,24 @@ export default function Dashboard() {
       setLoading(false);
       return;
     }
-    
+
     // Ensure the skeleton is visible for at least 1.2s
-    const minDelay = new Promise(resolve => setTimeout(resolve, 1200));
-    
-    const [{ data: { session } }] = await Promise.all([
-      supabase.auth.getSession(),
-      minDelay
-    ]);
-    
+    const minDelay = new Promise((resolve) => setTimeout(resolve, 1200));
+
+    const [
+      {
+        data: { session },
+      },
+    ] = await Promise.all([supabase.auth.getSession(), minDelay]);
+
     if (!session) {
       const returnTo = getSafeRedirect(
         `${window.location.pathname}${window.location.search}`,
         "/dashboard",
       );
-      navigate(`/login?redirect=${encodeURIComponent(returnTo)}`, { replace: true });
+      navigate(`/login?redirect=${encodeURIComponent(returnTo)}`, {
+        replace: true,
+      });
       return;
     }
 
@@ -146,14 +169,13 @@ export default function Dashboard() {
         if (c.invoices) setInvoices(c.invoices);
         if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
         setLoading(false); // Render instantly (stale-while-revalidate)
-      } catch (e) {
+      } catch {
         // ignore cache decode errors
       }
     }
 
     let projectId: string | null = null;
     try {
-
       projectId = localStorage.getItem("bluprnt_project_id");
     } catch {
       /* ignore */
@@ -161,7 +183,9 @@ export default function Dashboard() {
     // 1. Fetch all projects securely by joining properties
     const { data: allProjects } = await supabase
       .from("projects")
-      .select("id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, properties!inner(owner_user_id)")
+      .select(
+        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, properties!inner(owner_user_id)",
+      )
       .eq("properties.owner_user_id", session.user.id)
       .order("created_at", { ascending: false });
 
@@ -177,7 +201,7 @@ export default function Dashboard() {
           /* ignore */
         }
       }
-      
+
       const proj = rows.find((p) => p.id === projectId) ?? null;
       if (proj) {
         setProject(proj);
@@ -202,19 +226,23 @@ export default function Dashboard() {
       const [scopesRes, invRes, subRes] = await Promise.all([
         supabase
           .from("scope_items")
-          .select("id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score")
+          .select(
+            "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score",
+          )
           .eq("project_id", projectId)
           .order("created_at", { ascending: true }),
         supabase
           .from("invoices")
-          .select("id, vendor_name, total, created_at, payment_status, document_type")
+          .select(
+            "id, vendor_name, total, created_at, payment_status, document_type",
+          )
           .eq("project_id", projectId)
           .order("created_at", { ascending: false }),
         supabase
           .from("user_subscriptions")
           .select("status")
           .eq("user_id", session.user.id)
-          .maybeSingle()
+          .maybeSingle(),
       ]);
 
       const newScopes = (scopesRes.data ?? []) as ScopeRow[];
@@ -225,13 +253,16 @@ export default function Dashboard() {
       setInvoices(newInvoices);
       setIsArchitect(newIsArchitect);
 
-      sessionStorage.setItem(cacheKey, JSON.stringify({
-        projects: rows,
-        project: rows.find(p => p.id === projectId) ?? rows[0] ?? null,
-        scopeItems: newScopes,
-        invoices: newInvoices,
-        isArchitect: newIsArchitect
-      }));
+      sessionStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          projects: rows,
+          project: rows.find((p) => p.id === projectId) ?? rows[0] ?? null,
+          scopeItems: newScopes,
+          invoices: newInvoices,
+          isArchitect: newIsArchitect,
+        }),
+      );
     } else {
       // Clear cache if no projects
       sessionStorage.removeItem(cacheKey);
@@ -245,8 +276,6 @@ export default function Dashboard() {
 
     setLoading(false);
   }, [navigate]);
-
-
 
   useLayoutEffect(() => {
     const fixed = normalizeRepeatedPlanPath(location.pathname);
@@ -275,7 +304,8 @@ export default function Dashboard() {
       window.history.replaceState({}, "", newUrl);
 
       toast.success("Welcome to Architect!", {
-        description: "Your professional features and higher limits are now active.",
+        description:
+          "Your professional features and higher limits are now active.",
         duration: 8000,
       });
 
@@ -283,7 +313,7 @@ export default function Dashboard() {
         particleCount: 200,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#6366f1", "#020617", "#94a3b8"]
+        colors: ["#6366f1", "#020617", "#94a3b8"],
       });
     }
   }, [location.search]);
@@ -296,7 +326,7 @@ export default function Dashboard() {
           particleCount: 150,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"]
+          colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"],
         });
         setTimeout(() => setHasCelebrated(true), 100);
       }
@@ -319,39 +349,33 @@ export default function Dashboard() {
 
   const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
 
-  const handleExportPDF = useCallback(() => {
+  const handleExportPDF = useCallback(async () => {
     if (!project) return;
-    generateDashboardSummaryPDF(project, invoices, invoiceTotal);
+    await generateDashboardSummaryPDF(project, invoices, invoiceTotal);
     toast.success("Project summary exported to PDF");
   }, [project, invoices, invoiceTotal]);
 
   async function handleProjectDelete(id: string) {
     if (!isSupabaseConfigured()) return;
-    
+
     const deleteAction = async () => {
-      const { error } = await supabase
-        .from("projects")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("projects").delete().eq("id", id);
       if (error) throw error;
       return true;
     };
 
     toast.promise(deleteAction(), {
-      loading: 'Deleting project...',
+      loading: "Deleting project...",
       success: () => {
         if (id === project?.id) {
           localStorage.removeItem("bluprnt_project_id");
         }
         load();
-        return 'Project permanently removed';
+        return "Project permanently removed";
       },
-      error: 'Failed to delete project'
+      error: "Failed to delete project",
     });
   }
-
-
-
 
   if (loading) {
     return (
@@ -369,14 +393,22 @@ export default function Dashboard() {
           <div className="rounded-2xl bg-amber-100 p-4 text-amber-800">
             <Settings2 className="mx-auto h-10 w-10" aria-hidden />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">BLUPRNT isn&apos;t connected yet</h2>
+          <h2 className="text-lg font-semibold text-slate-900">
+            BLUPRNT isn&apos;t connected yet
+          </h2>
           <p className="text-sm leading-relaxed text-slate-600">
-            This copy of the app needs your project keys to load. Ask whoever set up the app, or check the README in the project folder for step-by-step setup.
+            This copy of the app needs your project keys to load. Ask whoever
+            set up the app, or check the README in the project folder for
+            step-by-step setup.
           </p>
           <p className="text-xs text-slate-500">
-            Developers: add <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_URL</code> and{" "}
-            <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_ANON_KEY</code> in{" "}
-            <code className="rounded bg-slate-200 px-1">.env</code>.
+            Developers: add{" "}
+            <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_URL</code>{" "}
+            and{" "}
+            <code className="rounded bg-slate-200 px-1">
+              VITE_SUPABASE_ANON_KEY
+            </code>{" "}
+            in <code className="rounded bg-slate-200 px-1">.env</code>.
           </p>
         </div>
         <AppSlimFooter className="bg-white/60" />
@@ -412,13 +444,10 @@ export default function Dashboard() {
     );
   }
 
-
-
   // Generate dynamic activity events
   const activityEvents = generateActivityEvents(project, invoices);
 
   const stats = (
-
     <DashboardStats
       estimatedMin={project.estimated_min_total}
       estimatedMax={project.estimated_max_total}
@@ -462,7 +491,9 @@ export default function Dashboard() {
       invoices={invoices}
       onUploaded={load}
       onUpgradeClick={(reason) => {
-        setUpgradeReason(reason === "invoice_limit" ? "invoice_limit" : "general");
+        setUpgradeReason(
+          reason === "invoice_limit" ? "invoice_limit" : "general",
+        );
         setShowUpgrade(true);
       }}
     />
@@ -470,15 +501,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen dashboard-bg page-fade-in">
-
       <Helmet>
-        <title>{project?.name ? `${project.name} — BLUPRNT.AI` : "Dashboard — BLUPRNT.AI"}</title>
+        <title>
+          {project?.name
+            ? `${project.name} — BLUPRNT.AI`
+            : "Dashboard — BLUPRNT.AI"}
+        </title>
       </Helmet>
 
-      <DashboardHeader 
-        onSignOut={handleSignOut} 
-        projectName={project.name} 
-        isArchitect={isArchitect} 
+      <DashboardHeader
+        onSignOut={handleSignOut}
+        projectName={project.name}
+        isArchitect={isArchitect}
         onUpgradeClick={() => {
           setUpgradeReason("general");
           setShowUpgrade(true);
@@ -486,14 +520,16 @@ export default function Dashboard() {
         onExportPDF={handleExportPDF}
       />
 
-
-      <motion.main 
+      <motion.main
         variants={containerVariants}
         initial="hidden"
         animate="show"
         className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8"
       >
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
           <ProjectSwitcher
             projects={projects.map((p) => ({ id: p.id, name: p.name }))}
             currentId={project?.id ?? null}
@@ -508,14 +544,16 @@ export default function Dashboard() {
         <motion.div variants={itemVariants}>
           <DashboardWelcomeBanner />
         </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          {stats}
-        </motion.div>
+
+        <motion.div variants={itemVariants}>{stats}</motion.div>
 
         <motion.div variants={itemVariants}>
           <UpgradeBanner
-            invoiceCount={invoices.filter((i) => (i.document_type ?? "invoice") === "invoice").length}
+            invoiceCount={
+              invoices.filter(
+                (i) => (i.document_type ?? "invoice") === "invoice",
+              ).length
+            }
             onUpgradeClick={() => {
               setUpgradeReason("invoice_limit");
               setShowUpgrade(true);
@@ -543,16 +581,19 @@ export default function Dashboard() {
                     side={
                       <>
                         {health}
-                        {location.pathname.endsWith("/plan") && <ActivityFeed events={activityEvents} className="mt-8" />}
+                        {location.pathname.endsWith("/plan") && (
+                          <ActivityFeed
+                            events={activityEvents}
+                            className="mt-8"
+                          />
+                        )}
                         {ledger}
-
-
                       </>
                     }
                   >
-                    <EstimateSummary 
-                      project={project} 
-                      scopeItems={scopeItems} 
+                    <EstimateSummary
+                      project={project}
+                      scopeItems={scopeItems}
                       isArchitect={isArchitect}
                       onUpgradeClick={() => {
                         setUpgradeReason("general");
@@ -594,9 +635,7 @@ export default function Dashboard() {
               <Route
                 path="record"
                 element={
-                  <DashboardSubPage side={health}>
-                    {ledger}
-                  </DashboardSubPage>
+                  <DashboardSubPage side={health}>{ledger}</DashboardSubPage>
                 }
               />
             </Routes>
@@ -616,14 +655,15 @@ export default function Dashboard() {
         showDiscount={useDiscount}
         openReason={upgradeReason}
         estimatedAmount={
-          project.estimated_min_total != null && project.estimated_max_total != null
+          project.estimated_min_total != null &&
+          project.estimated_max_total != null
             ? (project.estimated_min_total + project.estimated_max_total) / 2
-            : project.estimated_min_total ?? project.estimated_max_total
+            : (project.estimated_min_total ?? project.estimated_max_total)
         }
         projectId={project.id}
       />
 
-      <LeadCaptureModal 
+      <LeadCaptureModal
         onPlanSelect={(_plan) => {
           setUseDiscount(true);
           setUpgradeReason("general");

@@ -7,8 +7,8 @@ export function PageLoader() {
       role="status"
       aria-label="Loading page"
     >
-      <Loader 
-        title="Loading Blueprint..." 
+      <Loader
+        title="Loading BLUPRNT..."
         subtitle="Preparing your renovation dashboard"
         size="lg"
       />

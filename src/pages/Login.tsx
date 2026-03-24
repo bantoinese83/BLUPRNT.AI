@@ -17,6 +17,7 @@ import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 type Mode = "password" | "magic";
@@ -93,28 +94,30 @@ export default function Login() {
   }
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white">
       <Helmet>
         <title>Sign in — BLUPRNT.AI</title>
-        <meta name="description" content="Access your renovation financial plan, track invoices, and manage your property improvements." />
+        <meta
+          name="description"
+          content="Access your renovation financial plan, track invoices, and manage your property improvements."
+        />
       </Helmet>
-      <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white p-4">
-        <div className="flex flex-1 flex-col items-center justify-center">
+
+      <AppSimpleHeader showHome />
+
+      <div className="flex flex-1 flex-col items-center p-4 sm:p-6">
+        <div className="w-full max-w-4xl py-2 mb-6">
+          <Breadcrumbs className="px-2" />
+        </div>
+
         <div className="w-full max-w-md space-y-6">
-          <div className="flex justify-center mb-4">
-            <Breadcrumbs className="bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-100 shadow-sm" />
-          </div>
-          
-          <div className="text-center space-y-4">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-white p-2 shadow-xl shadow-slate-100/50 ring-8 ring-white border border-slate-100 overflow-hidden sm:h-28 sm:w-28 sm:rounded-3xl sm:p-2.5">
-              <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-              <p className="text-slate-500 text-sm">
-                Sign in with Google, a magic link, or password.
-              </p>
-            </div>
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">
+              Welcome back
+            </h1>
+            <p className="text-slate-500 font-medium">
+              Sign in to manage your renovation BLUPRNTs.
+            </p>
           </div>
 
           <AuthSocialButtons
@@ -128,14 +131,16 @@ export default function Login() {
               <span className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-slate-50 px-3 text-slate-500">Or use email</span>
+              <span className="bg-slate-50 px-3 font-bold uppercase tracking-widest text-slate-400">
+                Or use email
+              </span>
             </div>
           </div>
 
           <div className="flex rounded-xl border border-slate-200 p-1 bg-slate-100/80">
             <button
               type="button"
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg transition-colors ${
                 mode === "password"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
@@ -151,7 +156,7 @@ export default function Login() {
             </button>
             <button
               type="button"
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-lg transition-colors ${
                 mode === "magic"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
@@ -168,57 +173,69 @@ export default function Login() {
           </div>
 
           {displayError && (
-            <p
-              className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 flex items-start gap-2"
+            <div
+              className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-3 flex items-start gap-2"
               role="alert"
             >
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" aria-hidden />
-              <span>{displayError}</span>
-            </p>
+              <span className="font-medium">{displayError}</span>
+            </div>
           )}
 
           {mode === "password" ? (
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700" htmlFor="login-email">
+                <label
+                  className="text-sm font-bold text-slate-700 ml-1"
+                  htmlFor="login-email"
+                >
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden />
+                  <Mail
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
+                    aria-hidden
+                  />
                   <Input
                     id="login-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 pl-10"
+                    className="h-12 pl-11 rounded-xl"
                     required
                     autoComplete="email"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700" htmlFor="login-password">
-                  Password
-                </label>
+                <div className="flex justify-between items-center ml-1">
+                  <label
+                    className="text-sm font-bold text-slate-700"
+                    htmlFor="login-password"
+                  >
+                    Password
+                  </label>
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-500 transition-colors"
+                  >
+                    Forgot?
+                  </Link>
+                </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden />
+                  <Lock
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
+                    aria-hidden
+                  />
                   <Input
                     id="login-password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 pl-10"
+                    className="h-12 pl-11 rounded-xl"
                     required
                     autoComplete="current-password"
                   />
-                </div>
-                <div className="flex justify-end">
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
-                  >
-                    Forgot password?
-                  </Link>
                 </div>
               </div>
 
@@ -226,7 +243,7 @@ export default function Login() {
                 type="submit"
                 size="lg"
                 variant="primary"
-                className="w-full"
+                className="w-full h-14 font-black text-base shadow-xl shadow-indigo-500/10"
                 disabled={loading}
               >
                 {loading ? (
@@ -240,53 +257,64 @@ export default function Login() {
           ) : (
             <div className="space-y-4">
               {magicSent ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-900 space-y-2">
-                  <p className="font-semibold flex items-center gap-2 text-slate-950">
-                    <Mail className="w-5 h-5 shrink-0" aria-hidden />
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 px-5 py-5 text-sm text-slate-900 space-y-3">
+                  <p className="font-black flex items-center gap-2 text-indigo-900 uppercase tracking-wider text-xs">
+                    <Mail className="w-4 h-4 shrink-0" aria-hidden />
                     Check your inbox
                   </p>
-                  <p>
-                    We sent a sign-in link to <strong>{email.trim()}</strong>. Open it on this device to continue.
+                  <p className="font-medium text-slate-600">
+                    We sent a sign-in link to{" "}
+                    <strong className="text-slate-900">{email.trim()}</strong>.
+                    Open it on this device to continue.
                   </p>
                   <button
                     type="button"
-                    className="text-slate-900 font-bold hover:underline text-sm"
+                    className="text-indigo-600 font-bold hover:text-indigo-500 text-sm transition-colors"
                     onClick={() => setMagicSent(false)}
                   >
-                    Use a different email
+                    ← Use a different email
                   </button>
                 </div>
               ) : (
                 <>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700" htmlFor="magic-email">
-                      Email
+                    <label
+                      className="text-sm font-bold text-slate-700 ml-1"
+                      htmlFor="magic-email"
+                    >
+                      Email address
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden />
+                      <Mail
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
+                        aria-hidden
+                      />
                       <Input
                         id="magic-email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 pl-10"
+                        className="h-12 pl-11 rounded-xl"
                         autoComplete="email"
                         placeholder="you@example.com"
                       />
                     </div>
-                    <p className="text-xs text-slate-500">
-                      We’ll email you a one-tap link. For new accounts, use{" "}
-                      <Link to="/register" className="text-slate-900 font-bold hover:underline">
+                    <p className="text-[11px] text-slate-400 font-medium px-1">
+                      New here? Use{" "}
+                      <Link
+                        to="/register"
+                        className="text-indigo-600 font-bold hover:underline"
+                      >
                         Create account
-                      </Link>
-                      .
+                      </Link>{" "}
+                      instead.
                     </p>
                   </div>
                   <Button
                     type="button"
                     size="lg"
                     variant="primary"
-                    className="w-full"
+                    className="w-full h-14 font-black text-base shadow-xl shadow-indigo-500/10"
                     disabled={loading}
                     onClick={sendMagicLink}
                   >
@@ -302,12 +330,14 @@ export default function Login() {
             </div>
           )}
 
-          <div className="relative">
+          <div className="relative pt-4">
             <div className="absolute inset-0 flex items-center" aria-hidden>
-              <span className="w-full border-t border-slate-200" />
+              <span className="w-full border-t border-slate-100" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-slate-50 px-3 text-slate-500">New to BLUPRNT?</span>
+              <span className="bg-white px-4 font-bold uppercase tracking-widest text-slate-300">
+                New to BLUPRNT?
+              </span>
             </div>
           </div>
 
@@ -316,23 +346,25 @@ export default function Login() {
               type="button"
               variant="outline"
               size="lg"
-              className="w-full gap-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+              className="w-full h-14 gap-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 font-bold rounded-xl"
               onClick={() => navigate("/register")}
             >
               <UserPlus className="w-5 h-5 shrink-0" aria-hidden />
               Create free account
             </Button>
-            <p className="text-center text-sm text-slate-500">
-              Or{" "}
-              <Link to="/onboarding" className="text-slate-900 font-bold hover:underline">
-                get an estimate first
+            <p className="text-center text-sm font-medium text-slate-400">
+              Just need a cost range?{" "}
+              <Link
+                to="/onboarding"
+                className="text-indigo-600 font-bold hover:underline"
+              >
+                Get an estimate
               </Link>
             </p>
           </div>
         </div>
-        </div>
-        <AppSlimFooter className="mt-auto shrink-0 bg-white/50" />
       </div>
-    </>
+      <AppSlimFooter className="mt-auto shrink-0 bg-white/50" />
+    </div>
   );
 }

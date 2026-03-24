@@ -3,7 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { openCookieSettings } from "@/lib/cookie-consent";
-import { buildLandingJsonLd, getPublicSiteUrl, LANDING_FAQ } from "@/lib/site-url";
+import {
+  buildLandingJsonLd,
+  getPublicSiteUrl,
+  LANDING_FAQ,
+} from "@/lib/site-url";
 import {
   ArrowRight,
   BarChart3,
@@ -13,23 +17,24 @@ import {
   Receipt,
   Shield,
   UserPlus,
+  Hammer as HammerIcon,
   Camera,
   FileCheck,
   MessageCircleQuestion,
-  Sparkles,
+  Hammer,
   X,
   CheckCircle2,
 } from "lucide-react";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { LANDING_HIGHLIGHT_COLOR, LANDING_STORY_COPY } from "@/components/landing/landing-content";
+import {
+  LANDING_HIGHLIGHT_COLOR,
+  LANDING_STORY_COPY,
+} from "@/components/landing/landing-content";
 
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
-
-
 
 const SITE_URL =
   getPublicSiteUrl() ||
@@ -144,7 +149,10 @@ export default function Landing() {
   return (
     <>
       <Helmet htmlAttributes={{ lang: "en" }}>
-        <title>Home Renovation Cost Estimator &amp; Remodel Budget Tracker | BLUPRNT.AI</title>
+        <title>
+          Home Renovation Cost Estimator &amp; Remodel Budget Tracker |
+          BLUPRNT.AI
+        </title>
         <meta
           name="description"
           content="Get professional renovation cost estimates from photos and ZIP, track your remodel budget, and export a property ledger for resale. The financial home for homeowners."
@@ -153,7 +161,10 @@ export default function Landing() {
           name="keywords"
           content="home renovation cost estimator, remodel budget tracker, kitchen remodel cost, bathroom remodel cost, home improvement record, property ledger, AI renovation planner, renovation cost estimator, home remodel budget, invoice tracking, seller packet"
         />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta
+          name="robots"
+          content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        />
         <link rel="canonical" href={metaBase} />
         <link rel="alternate" hrefLang="en-US" href={metaBase} />
         <link rel="alternate" hrefLang="x-default" href={metaBase} />
@@ -170,7 +181,10 @@ export default function Landing() {
         />
         <meta property="og:site_name" content="BLUPRNT" />
         <meta property="og:image" content={`${metaBase}/og-image.png`} />
-        <meta property="og:image:alt" content="BLUPRNT — home renovation financial planning for homeowners" />
+        <meta
+          property="og:image:alt"
+          content="BLUPRNT — home renovation financial planning for homeowners"
+        />
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
@@ -181,7 +195,10 @@ export default function Landing() {
           content="Plan remodels with grounded estimates, track spending, and keep a resale-ready renovation record."
         />
         <meta name="twitter:image" content={`${metaBase}/og-image.png`} />
-        <meta name="twitter:image:alt" content="BLUPRNT — home renovation financial planning" />
+        <meta
+          name="twitter:image:alt"
+          content="BLUPRNT — home renovation financial planning"
+        />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
@@ -340,8 +357,15 @@ export default function Landing() {
                     <UserPlus className="h-4 w-4 text-slate-500" aria-hidden />
                     Create account
                   </Link>
-                  <Link to="/onboarding" onClick={() => setMobileNavOpen(false)} className="mt-2 px-1">
-                    <Button variant="primary" className="h-11 w-full rounded-xl font-bold shadow-md shadow-indigo-500/20">
+                  <Link
+                    to="/onboarding"
+                    onClick={() => setMobileNavOpen(false)}
+                    className="mt-2 px-1"
+                  >
+                    <Button
+                      variant="primary"
+                      className="h-11 w-full rounded-xl font-bold shadow-md shadow-indigo-500/20"
+                    >
                       Get started
                       <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
                     </Button>
@@ -353,7 +377,10 @@ export default function Landing() {
         </header>
 
         <main>
-          <HeroSection onStart={() => navigate("/onboarding")} onCreateAccount={() => navigate("/register")} />
+          <HeroSection
+            onStart={() => navigate("/onboarding")}
+            onCreateAccount={() => navigate("/register")}
+          />
 
           {/* Social Proof / Stats */}
           <section className="bg-white border-y border-slate-100 py-10">
@@ -361,15 +388,24 @@ export default function Landing() {
               <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
                 <div className="flex flex-col items-center gap-2 lg:items-start">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                    <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={2} iterations={1} isView={true}>
+                    <Highlighter
+                      action="highlight"
+                      color={LANDING_HIGHLIGHT_COLOR}
+                      padding={2}
+                      iterations={1}
+                      isView={true}
+                    >
                       Trusted by homeowners
                     </Highlighter>
                   </p>
                   <p className="text-2xl font-black text-slate-900">
-                    {dbCount !== null ? dbCount.toLocaleString() : "..."} <span className="text-slate-500 font-bold">blueprints managed</span>
+                    {dbCount !== null ? dbCount.toLocaleString() : "..."}{" "}
+                    <span className="text-slate-500 font-bold">
+                      BLUPRNTs managed
+                    </span>
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:gap-12 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
                   <div className="flex items-center justify-center font-black italic tracking-tighter text-slate-900 text-xl">
                     RE/MAX
@@ -395,12 +431,22 @@ export default function Landing() {
             aria-labelledby="how-heading"
           >
             <div className="mx-auto max-w-6xl">
-              <h2 id="how-heading" className="text-center text-2xl font-bold text-slate-900 sm:text-3xl">
+              <h2
+                id="how-heading"
+                className="text-center text-2xl font-bold text-slate-900 sm:text-3xl"
+              >
                 How it works
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
                 From idea to resale in{" "}
-                <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} iterations={1} isView={true}>
+                <Highlighter
+                  action="underline"
+                  color="#6366f1"
+                  strokeWidth={2}
+                  padding={0}
+                  iterations={1}
+                  isView={true}
+                >
                   three steps
                 </Highlighter>
                 .
@@ -408,12 +454,16 @@ export default function Landing() {
               <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
                 <motion.article
                   initial={{ opacity: 0, scale: 0.95 }}
-                   whileInView={{ opacity: 1, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-slate-100"
                 >
                   <div className="w-full h-56 mb-8 rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200">
-                    <img src="/images/modern_transformation_hero.png" alt="Modern Home Exterior" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img
+                      src="/images/modern_transformation_hero.png"
+                      alt="Modern Home Exterior"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
                     <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent to-transparent" />
                   </div>
 
@@ -421,30 +471,45 @@ export default function Landing() {
                     <Camera className="w-10 h-10" strokeWidth={2.5} />
                   </div>
                   <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
-                    <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={3} iterations={1} isView={true}>
+                    <Highlighter
+                      action="highlight"
+                      color={LANDING_HIGHLIGHT_COLOR}
+                      padding={3}
+                      iterations={1}
+                      isView={true}
+                    >
                       Plan
                     </Highlighter>
                   </h3>
 
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
-                    Turn fuzzy ideas and photos into a realistic, regionally grounded budget.
+                    Turn fuzzy ideas and photos into a realistic, regionally
+                    grounded budget.
                   </p>
                 </motion.article>
 
                 <motion.article
                   initial={{ opacity: 0, scale: 0.95 }}
-                   whileInView={{ opacity: 1, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 }}
                   className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-slate-100"
                 >
                   <div className="w-full h-56 mb-8 rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200">
-                    <img src="/images/invoice_system_mockup.png" alt="Invoice Tracking System" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img
+                      src="/images/invoice_system_mockup.png"
+                      alt="Invoice Tracking System"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
                     <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4 text-left">
                       <div className="flex gap-2 mb-2">
-                        <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">Verified OCR</span>
-                        <span className="bg-slate-500/20 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">Smart Sorting</span>
+                        <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
+                          Verified OCR
+                        </span>
+                        <span className="bg-slate-500/20 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
+                          Smart Sorting
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -453,25 +518,36 @@ export default function Landing() {
                     <Receipt className="w-10 h-10" strokeWidth={2.5} />
                   </div>
                   <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
-                    <Highlighter action="circle" color="#6366f1" strokeWidth={2} padding={10} isView={true}>
+                    <Highlighter
+                      action="circle"
+                      color="#6366f1"
+                      strokeWidth={2}
+                      padding={10}
+                      isView={true}
+                    >
                       Execute
                     </Highlighter>
                   </h3>
 
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
-                    Track quotes, actuals, and invoices against that budget with minimal manual work.
+                    Track quotes, actuals, and invoices against that budget with
+                    minimal manual work.
                   </p>
                 </motion.article>
 
                 <motion.article
                   initial={{ opacity: 0, scale: 0.95 }}
-                   whileInView={{ opacity: 1, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
                   className="glass-card hover:bg-white/80 transition-all duration-500 overflow-hidden flex flex-col items-center text-center p-8 group border-slate-100"
                 >
                   <div className="w-full h-56 mb-8 rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200">
-                    <img src="/images/seller_packet_mockup.png" alt="Buyer Handover Packet" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img
+                      src="/images/seller_packet_mockup.png"
+                      alt="Buyer Handover Packet"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
                     <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent" />
                   </div>
 
@@ -479,30 +555,48 @@ export default function Landing() {
                     <FileCheck className="w-10 h-10" strokeWidth={2.5} />
                   </div>
                   <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
-                    <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={3} iterations={1} isView={true}>
+                    <Highlighter
+                      action="highlight"
+                      color={LANDING_HIGHLIGHT_COLOR}
+                      padding={3}
+                      iterations={1}
+                      isView={true}
+                    >
                       Transfer
                     </Highlighter>
                   </h3>
 
                   <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
-                    Export that history into formats optimized for every stakeholder.
+                    Export that history into formats optimized for every
+                    stakeholder.
                   </p>
-                  
+
                   <div className="flex flex-col gap-3 w-full max-w-[280px]">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors">
-                      <span className="text-xs font-bold text-slate-900">For Buyers</span>
-                      <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">PDF Packet</span>
+                      <span className="text-xs font-bold text-slate-900">
+                        For Buyers
+                      </span>
+                      <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
+                        PDF Packet
+                      </span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors">
-                      <span className="text-xs font-bold text-slate-900">For Agents</span>
-                      <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">MLS-Ready</span>
+                      <span className="text-xs font-bold text-slate-900">
+                        For Agents
+                      </span>
+                      <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
+                        MLS-Ready
+                      </span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors">
-                      <span className="text-xs font-bold text-slate-900">For Lenders</span>
-                      <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">Verified Ledger</span>
+                      <span className="text-xs font-bold text-slate-900">
+                        For Lenders
+                      </span>
+                      <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
+                        Verified Ledger
+                      </span>
                     </div>
                   </div>
-
                 </motion.article>
               </div>
             </div>
@@ -515,7 +609,13 @@ export default function Landing() {
                 <Shield className="w-8 h-8 text-indigo-600" />
               </div>
               <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">
-                <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={4} iterations={1} isView={true}>
+                <Highlighter
+                  action="highlight"
+                  color={LANDING_HIGHLIGHT_COLOR}
+                  padding={4}
+                  iterations={1}
+                  isView={true}
+                >
                   {LANDING_STORY_COPY.heading}
                 </Highlighter>
               </h2>
@@ -583,39 +683,70 @@ export default function Landing() {
             aria-labelledby="features-heading"
           >
             <div className="mx-auto max-w-6xl">
-              <h2 id="features-heading" className="text-center text-2xl font-bold text-slate-900 sm:text-3xl">
+              <h2
+                id="features-heading"
+                className="text-center text-2xl font-bold text-slate-900 sm:text-3xl"
+              >
                 Built for homeowners
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-                <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} iterations={1} isView={true}>
+                <Highlighter
+                  action="underline"
+                  color="#6366f1"
+                  strokeWidth={2}
+                  padding={0}
+                  iterations={1}
+                  isView={true}
+                >
                   Not contractors.
                 </Highlighter>{" "}
                 You - planning, selling, or improving.
               </p>
-              <ul className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4" role="list">
+              <ul
+                className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+                role="list"
+              >
                 <li className="flex items-start gap-4">
-                  <BarChart3 className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+                  <BarChart3
+                    className="h-6 w-6 shrink-0 text-slate-900"
+                    aria-hidden
+                  />
                   <div>
-                    <h3 className="font-semibold text-slate-900">Photo-to-estimate</h3>
+                    <h3 className="font-semibold text-slate-900">
+                      Photo-to-estimate
+                    </h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Snap photos, get a grounded cost range in seconds.
                     </p>
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <Receipt className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+                  <Receipt
+                    className="h-6 w-6 shrink-0 text-slate-900"
+                    aria-hidden
+                  />
                   <div>
-                    <h3 className="font-semibold text-slate-900">Invoice tracking</h3>
+                    <h3 className="font-semibold text-slate-900">
+                      Invoice tracking
+                    </h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Upload receipts and quotes — we keep them organized.
                     </p>
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <Shield className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+                  <Shield
+                    className="h-6 w-6 shrink-0 text-slate-900"
+                    aria-hidden
+                  />
                   <div>
                     <h3 className="font-semibold text-slate-900">
-                      <Highlighter action="highlight" color="#ffd1dc" padding={2} isView={true}>
+                      <Highlighter
+                        action="highlight"
+                        color="#ffd1dc"
+                        padding={2}
+                        isView={true}
+                      >
                         Seller packet
                       </Highlighter>
                     </h3>
@@ -625,16 +756,20 @@ export default function Landing() {
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <Home className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+                  <Home
+                    className="h-6 w-6 shrink-0 text-slate-900"
+                    aria-hidden
+                  />
                   <div>
-                    <h3 className="font-semibold text-slate-900">Property record</h3>
+                    <h3 className="font-semibold text-slate-900">
+                      Property record
+                    </h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Your home’s financial twin — from idea to sale.
                     </p>
                   </div>
                 </li>
               </ul>
-
             </div>
           </section>
 
@@ -646,12 +781,17 @@ export default function Landing() {
           >
             <div className="mx-auto max-w-6xl">
               <div className="text-center space-y-4 mb-16">
-                <h2 id="pricing-heading" className="text-3xl font-black text-slate-900 sm:text-4xl italic uppercase tracking-tighter">
-                  Simple, <span className="text-slate-900">transparent</span> pricing
+                <h2
+                  id="pricing-heading"
+                  className="text-3xl font-black text-slate-900 sm:text-4xl italic uppercase tracking-tighter"
+                >
+                  Simple, <span className="text-slate-900">transparent</span>{" "}
+                  pricing
                 </h2>
 
                 <p className="mx-auto max-w-xl text-slate-600 text-lg">
-                  Protect your renovation investment with the right plan for your project.
+                  Protect your renovation investment with the right plan for
+                  your project.
                 </p>
               </div>
 
@@ -663,15 +803,32 @@ export default function Landing() {
                   viewport={{ once: true }}
                   className="relative group p-8 rounded-3xl bg-white border border-slate-200 shadow-xl shadow-slate-100/50 flex flex-col"
                 >
+                  <div className="absolute -top-6 -right-4 z-20 rotate-[14deg]">
+                    <div className="relative h-20 w-20 rounded-full border-2 border-slate-900/10 bg-white/90 shadow-[0_14px_30px_rgba(15,23,42,0.18)] ring-4 ring-slate-100/80 backdrop-blur-sm sm:h-24 sm:w-24">
+                      <img
+                        src="/upgrade-icon.svg"
+                        alt="Premium upgrade badge"
+                        className="h-full w-full object-contain p-2 drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)]"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  </div>
 
                   <div className="absolute top-0 inset-x-0 h-1.5 bg-slate-900 rounded-t-3xl" />
                   <div className="mb-8">
-                    <h3 className="text-2xl font-black text-slate-900 mb-2">Architect</h3>
+                    <h3 className="text-2xl font-black text-slate-900 mb-2">
+                      Architect
+                    </h3>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-black tracking-tight text-slate-900">$12</span>
+                      <span className="text-5xl font-black tracking-tight text-slate-900">
+                        $12
+                      </span>
                       <span className="text-slate-500 font-bold">/mo</span>
                     </div>
-                    <p className="mt-4 text-slate-600 font-medium">Professional grade project tracking for active renovators.</p>
+                    <p className="mt-4 text-slate-600 font-medium">
+                      Professional grade project tracking for active renovators.
+                    </p>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1">
                     {[
@@ -679,24 +836,25 @@ export default function Landing() {
                       "Up to 10 smart invoice scans per billing period",
                       "Track up to 2 active projects",
                       "Full property ledger & seller packet",
-                      "Cloud-backed Seller Records (PDF)"
+                      "Cloud-backed Seller Records (PDF)",
                     ].map((feature, i) => (
-                      <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
-                        <UpgradeIcon className="w-5 h-5 opacity-40 shrink-0 grayscale" />
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 text-slate-700 font-medium"
+                      >
+                        <HammerIcon className="w-5 h-5 opacity-40 shrink-0" />
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <Button 
-                    variant="primary" 
-                    size="lg" 
+                  <Button
+                    variant="primary"
+                    size="lg"
                     className="w-full h-14 rounded-2xl text-lg font-black liquid-metal-button border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
-
                     onClick={() => navigate("/onboarding")}
                   >
                     Start Architect free
                   </Button>
-
                 </motion.div>
 
                 {/* Project Pass */}
@@ -708,12 +866,18 @@ export default function Landing() {
                   className="relative group p-8 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col"
                 >
                   <div className="mb-8">
-                    <h3 className="text-2xl font-black text-slate-900 mb-2">Project Pass</h3>
+                    <h3 className="text-2xl font-black text-slate-900 mb-2">
+                      Project Pass
+                    </h3>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-black tracking-tight text-slate-900">$49</span>
+                      <span className="text-5xl font-black tracking-tight text-slate-900">
+                        $49
+                      </span>
                       <span className="text-slate-500 font-bold">/project</span>
                     </div>
-                    <p className="mt-4 text-slate-600 font-medium">One-time purchase for a single major remodel.</p>
+                    <p className="mt-4 text-slate-600 font-medium">
+                      One-time purchase for a single major remodel.
+                    </p>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1">
                     {[
@@ -721,17 +885,20 @@ export default function Landing() {
                       "Unlimited invoices (this project)",
                       "Expert AI Insights included",
                       "Lifetime read-access to ledger",
-                      "Perfect for one major remodel"
+                      "Perfect for one major remodel",
                     ].map((feature, i) => (
-                      <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 text-slate-700 font-medium"
+                      >
                         <CheckCircle2 className="w-5 h-5 text-indigo-600 shrink-0" />
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
+                  <Button
+                    variant="outline"
+                    size="lg"
                     className="w-full h-14 rounded-2xl text-lg font-black bg-white border-slate-200 hover:bg-white hover:shadow-lg group-hover:scale-[1.02] transition-transform"
                     onClick={() => navigate("/onboarding")}
                   >
@@ -741,7 +908,8 @@ export default function Landing() {
               </div>
 
               <p className="mt-12 text-center text-slate-500 font-medium italic">
-                All plans include a 3-invoice free trial per project. No credit card required to start.
+                All plans include a 3-invoice free trial per project. No credit
+                card required to start.
               </p>
 
               {/* Plan comparison */}
@@ -754,14 +922,15 @@ export default function Landing() {
               >
                 <div className="mb-8 text-center sm:mb-10">
                   <p className="mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
-                    <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                    <Hammer className="h-3.5 w-3.5" aria-hidden />
                     Plans
                   </p>
                   <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
                     Compare at a glance
                   </h3>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600 sm:text-base">
-                    Same core product — pick monthly for ongoing work, or a pass for one big remodel.
+                    Same core product — pick monthly for ongoing work, or a pass
+                    for one big remodel.
                   </p>
                 </div>
 
@@ -769,7 +938,8 @@ export default function Landing() {
                   <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
                     <table className="w-full min-w-[520px] border-collapse text-left">
                       <caption className="sr-only">
-                        Comparison of Architect subscription and Project Pass for BLUPRNT features
+                        Comparison of Architect subscription and Project Pass
+                        for BLUPRNT features
                       </caption>
                       <thead>
                         <tr className="border-b border-slate-200/90">
@@ -825,7 +995,9 @@ export default function Landing() {
                               scope="row"
                               className="sticky left-0 z-10 min-w-[10.5rem] border-r border-slate-100/90 bg-white px-4 py-4 text-left align-top shadow-[4px_0_12px_-6px_rgba(15,23,42,0.08)] transition-colors group-hover:bg-slate-50/95 sm:min-w-[13rem] sm:px-6 sm:py-5"
                             >
-                              <span className="block text-sm font-bold text-slate-900">{row.feature}</span>
+                              <span className="block text-sm font-bold text-slate-900">
+                                {row.feature}
+                              </span>
                               <span className="mt-1 block text-xs font-medium leading-snug text-slate-500">
                                 {row.hint}
                               </span>
@@ -846,8 +1018,9 @@ export default function Landing() {
                     </table>
                   </div>
                   <p className="border-t border-slate-100 bg-slate-50/50 px-4 py-4 text-center text-xs leading-relaxed text-slate-500 sm:px-6">
-                    Project Pass includes Architect features for six months, locked to one project. After that,
-                    your ledger stays readable — upgrade anytime if you start another remodel.
+                    Project Pass includes Architect features for six months,
+                    locked to one project. After that, your ledger stays
+                    readable — upgrade anytime if you start another remodel.
                   </p>
                 </div>
               </motion.div>
@@ -874,7 +1047,8 @@ export default function Landing() {
                   Common questions
                 </h2>
                 <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600 sm:text-base">
-                  Straight answers about estimates, tracking, and who BLUPRNT is for.
+                  Straight answers about estimates, tracking, and who BLUPRNT is
+                  for.
                 </p>
               </div>
               <div className="space-y-3 sm:space-y-4">
@@ -924,27 +1098,51 @@ export default function Landing() {
             aria-labelledby="cta-heading"
           >
             <div className="mx-auto max-w-3xl text-center">
-              <h2 id="cta-heading" className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={4} iterations={1} isView={true}>
+              <h2
+                id="cta-heading"
+                className="text-2xl font-bold text-slate-900 sm:text-3xl"
+              >
+                <Highlighter
+                  action="highlight"
+                  color={LANDING_HIGHLIGHT_COLOR}
+                  padding={4}
+                  iterations={1}
+                  isView={true}
+                >
                   Ready to start?
                 </Highlighter>
               </h2>
               <p className="mt-4 text-slate-600">
                 Get your first estimate in{" "}
-                <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} iterations={1} isView={true}>
+                <Highlighter
+                  action="underline"
+                  color="#6366f1"
+                  strokeWidth={2}
+                  padding={0}
+                  iterations={1}
+                  isView={true}
+                >
                   under a minute
                 </Highlighter>
                 . No credit card required.
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link to="/onboarding">
-                  <Button size="lg" variant="primary" className="h-12 px-8 text-base">
+                  <Button
+                    size="lg"
+                    variant="primary"
+                    className="h-12 px-8 text-base"
+                  >
                     Get my first estimate
                     <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button size="lg" variant="outline" className="h-12 px-8 text-base border-slate-300 text-slate-700 hover:bg-slate-50">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 text-base border-slate-300 text-slate-700 hover:bg-slate-50"
+                  >
                     Sign in
                   </Button>
                 </Link>
@@ -977,7 +1175,8 @@ export default function Landing() {
                   </span>
                 </Link>
                 <p className="max-w-xs text-center text-sm text-slate-600 sm:text-left">
-                  Home renovation financial OS — estimates, spending, and records in one place.
+                  Home renovation financial OS — estimates, spending, and
+                  records in one place.
                 </p>
               </div>
 
@@ -991,17 +1190,26 @@ export default function Landing() {
                   </p>
                   <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
                     <li>
-                      <Link to="/onboarding" className="font-medium hover:text-slate-900">
+                      <Link
+                        to="/onboarding"
+                        className="font-medium hover:text-slate-900"
+                      >
                         Get started
                       </Link>
                     </li>
                     <li>
-                      <Link to="/login" className="font-medium hover:text-slate-900">
+                      <Link
+                        to="/login"
+                        className="font-medium hover:text-slate-900"
+                      >
                         Sign in
                       </Link>
                     </li>
                     <li>
-                      <Link to="/register" className="font-medium hover:text-slate-900">
+                      <Link
+                        to="/register"
+                        className="font-medium hover:text-slate-900"
+                      >
                         Create account
                       </Link>
                     </li>
@@ -1036,12 +1244,18 @@ export default function Landing() {
                   </p>
                   <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
                     <li>
-                      <Link to="/privacy" className="font-medium hover:text-slate-900">
+                      <Link
+                        to="/privacy"
+                        className="font-medium hover:text-slate-900"
+                      >
                         Privacy Policy
                       </Link>
                     </li>
                     <li>
-                      <Link to="/terms" className="font-medium hover:text-slate-900">
+                      <Link
+                        to="/terms"
+                        className="font-medium hover:text-slate-900"
+                      >
                         Terms of Service
                       </Link>
                     </li>
@@ -1065,9 +1279,9 @@ export default function Landing() {
               </p>
               <p className="text-center text-xs text-slate-500 sm:text-right">
                 Built by{" "}
-                <a 
-                  href="https://www.monarch-labs.com/" 
-                  target="_blank" 
+                <a
+                  href="https://www.monarch-labs.com/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold text-slate-900 hover:text-indigo-600 transition-colors"
                 >

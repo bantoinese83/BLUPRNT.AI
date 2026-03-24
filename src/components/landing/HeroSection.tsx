@@ -1,11 +1,16 @@
 import { motion } from "motion/react";
-import { ArrowRight, UserPlus } from "lucide-react";
+import { ArrowRight, UserPlus, Hammer } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 import { LANDING_HERO_COPY, LANDING_HIGHLIGHT_COLOR } from "./landing-content";
 
-export function HeroSection({ onStart, onCreateAccount }: { onStart: () => void; onCreateAccount: () => void }) {
+export function HeroSection({
+  onStart,
+  onCreateAccount,
+}: {
+  onStart: () => void;
+  onCreateAccount: () => void;
+}) {
   return (
     <section
       className="relative overflow-hidden px-4 pt-24 pb-14 sm:px-6 sm:pt-28 sm:pb-16 mesh-bg"
@@ -29,8 +34,16 @@ export function HeroSection({ onStart, onCreateAccount }: { onStart: () => void;
               className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
             >
               {LANDING_HERO_COPY.titlePrefix}{" "}
-              <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} strokeWidth={4} padding={8} isView>
-                <span className="liquid-metal-text">{LANDING_HERO_COPY.titleHighlight}</span>
+              <Highlighter
+                action="highlight"
+                color={LANDING_HIGHLIGHT_COLOR}
+                strokeWidth={4}
+                padding={8}
+                isView
+              >
+                <span className="liquid-metal-text">
+                  {LANDING_HERO_COPY.titleHighlight}
+                </span>
               </Highlighter>
             </h1>
           </motion.div>
@@ -55,7 +68,8 @@ export function HeroSection({ onStart, onCreateAccount }: { onStart: () => void;
               className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
               onClick={onStart}
             >
-              {LANDING_HERO_COPY.primaryCta} <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
+              {LANDING_HERO_COPY.primaryCta}{" "}
+              <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
             </Button>
             <Button
               variant="outline"
@@ -63,7 +77,8 @@ export function HeroSection({ onStart, onCreateAccount }: { onStart: () => void;
               className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
               onClick={onCreateAccount}
             >
-              <UserPlus className="mr-2 h-5 w-5" aria-hidden /> {LANDING_HERO_COPY.secondaryCta}
+              <UserPlus className="mr-2 h-5 w-5" aria-hidden />{" "}
+              {LANDING_HERO_COPY.secondaryCta}
             </Button>
           </motion.div>
         </div>
@@ -85,11 +100,15 @@ export function HeroSection({ onStart, onCreateAccount }: { onStart: () => void;
             <div className="absolute bottom-3 left-3 right-3 glass-card animate-float rounded-xl p-3 sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white shadow-md sm:h-11 sm:w-11 sm:rounded-xl">
-                  <UpgradeIcon className="h-5 w-5 brightness-0 invert" aria-hidden />
+                  <Hammer className="h-5 w-5" aria-hidden />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-black text-slate-900 leading-tight sm:text-sm">AI Cost Analysis</p>
-                  <p className="text-[11px] font-bold text-slate-500 sm:text-xs">Regionally grounded pricing</p>
+                  <p className="text-xs font-black text-slate-900 leading-tight sm:text-sm">
+                    AI Cost Analysis
+                  </p>
+                  <p className="text-[11px] font-bold text-slate-500 sm:text-xs">
+                    Regionally grounded pricing
+                  </p>
                 </div>
               </div>
             </div>

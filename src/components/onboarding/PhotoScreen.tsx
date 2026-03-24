@@ -13,15 +13,17 @@ export function PhotoScreen() {
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return;
-    
-    const validFiles = Array.from(files).filter(file => {
+
+    const validFiles = Array.from(files).filter((file) => {
       if (file.size > 10 * 1024 * 1024) {
         toast.error(`"${file.name}" is too large. Max 10MB per photo.`);
         return false;
       }
       const validTypes = ["image/jpeg", "image/png", "image/webp"];
       if (!validTypes.includes(file.type)) {
-        toast.error(`"${file.name}" is not a supported format (JPEG, PNG, WEBP).`);
+        toast.error(
+          `"${file.name}" is not a supported format (JPEG, PNG, WEBP).`,
+        );
         return false;
       }
       return true;
@@ -68,7 +70,9 @@ export function PhotoScreen() {
               <ImagePlus className="w-8 h-8 text-indigo-600" />
             </div>
             <span className="text-slate-900 font-bold">Gallery</span>
-            <span className="text-slate-400 text-xs mt-1 font-medium">Upload photos</span>
+            <span className="text-slate-400 text-xs mt-1 font-medium">
+              Upload photos
+            </span>
           </button>
 
           <button
@@ -79,7 +83,8 @@ export function PhotoScreen() {
               camInput.type = "file";
               camInput.accept = "image/*";
               camInput.capture = "environment";
-              camInput.onchange = (e: any) => onFiles(e.target.files);
+              camInput.onchange = (e: Event) =>
+                onFiles((e.target as HTMLInputElement).files);
               camInput.click();
             }}
             className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-purple-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
@@ -89,7 +94,9 @@ export function PhotoScreen() {
               <Camera className="w-8 h-8 text-purple-600" />
             </div>
             <span className="text-slate-900 font-bold">Camera</span>
-            <span className="text-slate-400 text-xs mt-1 font-medium">Snap space</span>
+            <span className="text-slate-400 text-xs mt-1 font-medium">
+              Snap space
+            </span>
           </button>
         </div>
 
@@ -97,15 +104,15 @@ export function PhotoScreen() {
         {photos.length > 0 && (
           <div className="flex flex-wrap gap-2 justify-center py-2">
             {photos.map((p, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="w-16 h-16 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden relative group animate-in fade-in zoom-in duration-300"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <img 
-                  src={URL.createObjectURL(p)} 
-                  className="w-full h-full object-cover" 
-                  alt="" 
+                <img
+                  src={URL.createObjectURL(p)}
+                  className="w-full h-full object-cover"
+                  alt=""
                 />
                 <button
                   type="button"
@@ -130,10 +137,12 @@ export function PhotoScreen() {
             onClick={() => navigate("/onboarding/loading")}
             type="button"
           >
-            {photos.length ? `Analyze ${photos.length} Vision Assets` : "Proceed without vision"}
+            {photos.length
+              ? `Analyze ${photos.length} Vision Assets`
+              : "Proceed without vision"}
             <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
-          
+
           <p className="text-xs text-center text-slate-400 font-bold uppercase tracking-widest">
             Vision precision: +35% accuracy
           </p>

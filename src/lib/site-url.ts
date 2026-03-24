@@ -86,7 +86,7 @@ export function buildLandingJsonLd(siteUrl: string) {
           name: "Home renovation cost estimation, budgeting, and resale documentation",
         },
         description:
-          "Every upgrade should pay you back. Bluprnt helps homeowners estimate costs, track projects, and understand how renovations impact home value.",
+          "Every upgrade should pay you back. BLUPRNT helps homeowners estimate costs, track projects, and understand how renovations impact home value.",
       },
       {
         "@type": "SoftwareApplication",
@@ -110,18 +110,20 @@ export function buildLandingJsonLd(siteUrl: string) {
         "@id": `${siteUrl}/#estimator-service`,
         name: "AI Renovation Cost Estimator",
         provider: { "@id": orgId },
-        description: "Get grounded cost ranges for home renovations using regional labor and material data combined with AI photo analysis.",
+        description:
+          "Get grounded cost ranges for home renovations using regional labor and material data combined with AI photo analysis.",
         serviceType: "Home Improvement Planning",
-        areaServed: "United States"
+        areaServed: "United States",
       },
       {
         "@type": "Service",
         "@id": `${siteUrl}/#budget-tracker-service`,
         name: "Remodel Budget Tracker",
         provider: { "@id": orgId },
-        description: "Track renovation spending against your initial estimate by scanning and organizing project invoices and receipts.",
+        description:
+          "Track renovation spending against your initial estimate by scanning and organizing project invoices and receipts.",
         serviceType: "Financial Project Management",
-        areaServed: "United States"
+        areaServed: "United States",
       },
       {
         "@type": "FAQPage",

@@ -3,12 +3,20 @@ import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Upload, FileText, Loader2, ChevronDown, ChevronUp, ScanLine } from "lucide-react";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
+import {
+  Upload,
+  FileText,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  ScanLine,
+  Hammer,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 import { InvoiceReviewModal } from "./InvoiceReviewModal";
 
 import type { InvoiceRow } from "@/types/database";
@@ -25,7 +33,11 @@ const FREE_LIMIT = 3;
 const GUIDE_KEY = "bluprnt_invoice_guide_collapsed";
 
 function friendlyUploadError(err: unknown, body?: { error?: string }): string {
-  const msg = body?.error ?? (typeof err === "object" && err && "message" in err ? String((err as { message?: string }).message) : "");
+  const msg =
+    body?.error ??
+    (typeof err === "object" && err && "message" in err
+      ? String((err as { message?: string }).message)
+      : "");
   if (
     msg.includes("Free plan") ||
     msg.includes("Free limit") ||
@@ -54,7 +66,9 @@ export function InvoicesSection({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reviewInvoiceId, setReviewInvoiceId] = useState<string | null>(null);
-  const [documentType, setDocumentType] = useState<"invoice" | "quote" | "warranty" | "permit">("invoice");
+  const [documentType, setDocumentType] = useState<
+    "invoice" | "quote" | "warranty" | "permit"
+  >("invoice");
   const [guideDismissed, setGuideDismissed] = useState(() => {
     try {
       return localStorage.getItem(GUIDE_KEY) === "1";
@@ -63,12 +77,18 @@ export function InvoicesSection({
     }
   });
   const [guideExpanded, setGuideExpanded] = useState(true);
-  const invoiceCount = invoices.filter((i) => (i.document_type ?? "invoice") === "invoice").length;
+  const invoiceCount = invoices.filter(
+    (i) => (i.document_type ?? "invoice") === "invoice",
+  ).length;
   const atLimit = documentType === "invoice" && invoiceCount >= FREE_LIMIT;
 
   const typeParam = searchParams.get("type");
   useEffect(() => {
-    if (typeParam === "quote" || typeParam === "warranty" || typeParam === "permit") {
+    if (
+      typeParam === "quote" ||
+      typeParam === "warranty" ||
+      typeParam === "permit"
+    ) {
       setDocumentType(typeParam);
       setSearchParams({}, { replace: true });
     }
@@ -97,9 +117,16 @@ export function InvoicesSection({
       return;
     }
 
-    const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    const validTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
     if (!validTypes.includes(file.type)) {
-      toast.error("Unsupported file type. Please upload a PDF, JPEG, PNG, or WEBP.");
+      toast.error(
+        "Unsupported file type. Please upload a PDF, JPEG, PNG, or WEBP.",
+      );
       if (inputRef.current) inputRef.current.value = "";
       return;
     }
@@ -131,7 +158,11 @@ export function InvoicesSection({
         ) {
           onUpgradeClick("invoice_limit");
         }
-        setError(e.includes("limit") || e.includes("Architect") ? e : friendlyUploadError(null, data));
+        setError(
+          e.includes("limit") || e.includes("Architect")
+            ? e
+            : friendlyUploadError(null, data),
+        );
         return;
       }
       dismissGuide();
@@ -140,7 +171,9 @@ export function InvoicesSection({
       if (newId && documentType === "invoice") {
         setTimeout(() => setReviewInvoiceId(newId), 100);
       }
-      toast.success(`${documentType === 'invoice' ? 'Invoice' : 'Document'} uploaded successfully`);
+      toast.success(
+        `${documentType === "invoice" ? "Invoice" : "Document"} uploaded successfully`,
+      );
     } catch {
       setError(friendlyUploadError(null));
       toast.error("Upload failed");
@@ -167,57 +200,66 @@ export function InvoicesSection({
         className="hidden"
         onChange={(e) => onFile(e.target.files)}
       />
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h3 className="text-xl font-bold tracking-tight text-slate-900">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h3 className="text-xl font-black tracking-tight text-slate-900">
           Invoices & documents
         </h3>
-        <div className="flex items-center gap-2 relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 relative">
           <AnimatePresence>
             {uploading && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                className="absolute -left-36 top-1/2 -translate-y-1/2 flex items-center gap-2 text-slate-900 text-xs font-bold overflow-hidden whitespace-nowrap"
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className="absolute -top-8 left-0 right-0 sm:static sm:absolute sm:-left-36 sm:top-1/2 sm:-translate-y-1/2 flex items-center justify-center sm:justify-start gap-2 text-slate-900 text-[10px] font-black overflow-hidden whitespace-nowrap uppercase tracking-widest bg-white/80 backdrop-blur-sm sm:bg-transparent py-1 rounded-full border border-slate-100 sm:border-0 shadow-sm sm:shadow-none"
               >
                 <div className="relative">
-                  <ScanLine className="w-4 h-4 animate-pulse" />
-                  <motion.div 
-                    animate={{ y: [0, 8, 0] }}
+                  <ScanLine className="w-3 h-3 animate-pulse" />
+                  <motion.div
+                    animate={{ y: [0, 6, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
-                    className="absolute inset-x-0 top-0 h-0.5 bg-slate-950 shadow-[0_0_8px_black]"
+                    className="absolute inset-x-0 top-0 h-0.5 bg-slate-950 shadow-[0_0_4px_black]"
                   />
                 </div>
                 <span>AI READING...</span>
               </motion.div>
             )}
           </AnimatePresence>
-          <select
-            value={documentType}
-            onChange={(e) => setDocumentType(e.target.value as "invoice" | "quote" | "warranty" | "permit")}
-            className="text-sm rounded-xl border border-slate-200 px-3 py-2 bg-white shadow-sm focus:ring-2 focus:ring-slate-950/20 focus:border-slate-950"
-            aria-label="Document type"
-          >
-            <option value="invoice">Invoice</option>
-            <option value="quote">Quote</option>
-            <option value="warranty">Warranty</option>
-            <option value="permit">Permit</option>
-          </select>
-          <Button
-            variant="outline"
-            size="default"
-            onClick={openUpload}
-            disabled={uploading}
-            type="button"
-            className={uploading ? 'bg-slate-50 border-slate-200' : ''}
-          >
-            {uploading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin text-slate-900" />
-            ) : (
-              <Upload className="w-5 h-5 mr-2" />
-            )}
-            {uploading ? 'Processing' : 'Upload'}
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <select
+              value={documentType}
+              onChange={(e) =>
+                setDocumentType(
+                  e.target.value as "invoice" | "quote" | "warranty" | "permit",
+                )
+              }
+              className="flex-1 sm:flex-none text-sm font-bold rounded-xl border border-slate-200 pl-3 pr-8 py-2 bg-white shadow-sm focus:ring-2 focus:ring-slate-950/20 focus:border-slate-950 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.5rem_center] bg-no-repeat"
+              aria-label="Document type"
+            >
+              <option value="invoice">Invoice</option>
+              <option value="quote">Quote</option>
+              <option value="warranty">Warranty</option>
+              <option value="permit">Permit</option>
+            </select>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={openUpload}
+              disabled={uploading}
+              type="button"
+              className={cn(
+                "flex-1 sm:flex-none rounded-xl font-bold h-10",
+                uploading ? "bg-slate-50 border-slate-200" : "",
+              )}
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin text-slate-900" />
+              ) : (
+                <Upload className="w-4 h-4 mr-2 text-slate-500" />
+              )}
+              {uploading ? "Wait" : "Upload"}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -229,28 +271,47 @@ export function InvoicesSection({
             className="flex items-center justify-between w-full text-left font-semibold text-slate-950 gap-2"
           >
             <span className="flex items-center gap-2">
-              <UpgradeIcon className="w-5 h-5 opacity-70 shrink-0" aria-hidden />
+              <Hammer className="w-5 h-5 opacity-70 shrink-0" aria-hidden />
               First upload? Quick guide
             </span>
-            {guideExpanded ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
+            {guideExpanded ? (
+              <ChevronUp className="w-5 h-5 shrink-0" />
+            ) : (
+              <ChevronDown className="w-5 h-5 shrink-0" />
+            )}
           </button>
 
           {guideExpanded && (
             <>
               <ol className="text-sm text-slate-900/90 space-y-2 list-decimal list-inside pl-1">
                 <li>
-                  <strong>Pick a type</strong> above (invoice, quote, warranty, or permit).
+                  <strong>Pick a type</strong> above (invoice, quote, warranty,
+                  or permit).
                 </li>
                 <li>
-                  <strong>Upload</strong> a PDF or photo—we&apos;ll open it next so you can match lines to your estimate.
+                  <strong>Upload</strong> a PDF or photo—we&apos;ll open it next
+                  so you can match lines to your estimate.
                 </li>
               </ol>
 
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button type="button" size="sm" variant="primary" className="rounded-xl" onClick={openUpload} disabled={uploading || atLimit}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  className="rounded-xl"
+                  onClick={openUpload}
+                  disabled={uploading || atLimit}
+                >
                   Choose file
                 </Button>
-                <Button type="button" size="sm" variant="ghost" className="text-slate-800" onClick={dismissGuide}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="text-slate-800"
+                  onClick={dismissGuide}
+                >
                   Got it, hide this
                 </Button>
               </div>
@@ -264,23 +325,39 @@ export function InvoicesSection({
           {error}
         </p>
       )}
-      {documentType === "invoice" && invoiceCount > 0 && invoiceCount < FREE_LIMIT && (
-        <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
-          <span className="font-medium text-slate-700">{invoiceCount} of {FREE_LIMIT} free invoices used on this project.</span>{" "}
-          <button type="button" className="text-slate-900 font-bold hover:underline" onClick={() => onUpgradeClick()}>
-            See plans
-          </button>
-        </p>
-      )}
+      {documentType === "invoice" &&
+        invoiceCount > 0 &&
+        invoiceCount < FREE_LIMIT && (
+          <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
+            <span className="font-medium text-slate-700">
+              {invoiceCount} of {FREE_LIMIT} free invoices used on this project.
+            </span>{" "}
+            <button
+              type="button"
+              className="text-slate-900 font-bold hover:underline"
+              onClick={() => onUpgradeClick()}
+            >
+              See plans
+            </button>
+          </p>
+        )}
       {atLimit && (
         <div className="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-2 leading-relaxed">
           <p>
-            You&apos;ve used all <strong>{FREE_LIMIT} free invoices</strong> on this project. Upgrade to add more anytime.
+            You&apos;ve used all <strong>{FREE_LIMIT} free invoices</strong> on
+            this project. Upgrade to add more anytime.
           </p>
           <p className="text-slate-600">
-            <strong>Good news:</strong> quotes, warranties, and permits don&apos;t count—switch the dropdown and upload those for free.
+            <strong>Good news:</strong> quotes, warranties, and permits
+            don&apos;t count—switch the dropdown and upload those for free.
           </p>
-          <Button type="button" size="sm" variant="primary" className="rounded-xl mt-1" onClick={() => onUpgradeClick("invoice_limit")}>
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
+            className="rounded-xl mt-1"
+            onClick={() => onUpgradeClick("invoice_limit")}
+          >
             See upgrade options
           </Button>
         </div>
@@ -291,12 +368,27 @@ export function InvoicesSection({
             <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
               <FileText className="w-7 h-7 text-slate-400" />
             </div>
-            <h4 className="font-semibold text-slate-700 mb-1">No documents yet</h4>
+            <h4 className="font-semibold text-slate-700 mb-1">
+              No documents yet
+            </h4>
             <p className="text-sm text-slate-500 mb-5 max-w-sm">
-              <strong className="text-slate-700">Next step:</strong> Upload an invoice or quote. After upload, we&apos;ll open it so you can line items up with your estimate.
+              <strong className="text-slate-700">Next step:</strong> Upload an
+              invoice or quote. After upload, we&apos;ll open it so you can line
+              items up with your estimate.
             </p>
-            <Button variant="outline" size="sm" onClick={openUpload} disabled={uploading || atLimit} type="button" className="gap-2 rounded-xl">
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openUpload}
+              disabled={uploading || atLimit}
+              type="button"
+              className="gap-2 rounded-xl"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
               Upload your first document
             </Button>
           </div>
@@ -344,8 +436,13 @@ export function InvoicesSection({
                       {inv.document_type ?? "invoice"}
                     </Badge>
                     {(inv.document_type ?? "invoice") === "invoice" && (
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-700 capitalize">
-                        {inv.payment_status === "unpaid" ? "Unpaid" : inv.payment_status}
+                      <Badge
+                        variant="secondary"
+                        className="bg-slate-100 text-slate-700 capitalize"
+                      >
+                        {inv.payment_status === "unpaid"
+                          ? "Unpaid"
+                          : inv.payment_status}
                       </Badge>
                     )}
                   </div>

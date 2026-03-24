@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Settings2, FileDown, LifeBuoy, Plus } from "lucide-react";
+import {
+  LogOut,
+  Settings2,
+  FileDown,
+  LifeBuoy,
+  Plus,
+  Crown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 import { cn } from "@/lib/utils";
 
 type DashboardHeaderProps = {
@@ -44,7 +50,11 @@ export function DashboardHeader({
             className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:h-11 sm:w-11"
             aria-label="BLUPRNT — Dashboard home"
           >
-            <img src="/bluprnt_logo.svg" alt="" className="h-full w-full object-contain" />
+            <img
+              src="/bluprnt_logo.svg"
+              alt=""
+              className="h-full w-full object-contain"
+            />
           </Link>
 
           <div className="min-w-0 flex-1">
@@ -61,7 +71,10 @@ export function DashboardHeader({
                 </span>
               ) : null}
             </div>
-            <Breadcrumbs projectName={projectName} className="mt-0.5 text-xs sm:text-sm" />
+            <Breadcrumbs
+              projectName={projectName}
+              className="mt-0.5 text-xs sm:text-sm"
+            />
           </div>
         </div>
 
@@ -72,16 +85,19 @@ export function DashboardHeader({
           <Link
             to="/onboarding"
             className="shrink-0"
-            aria-label="Start a Bluprnt"
-            title="Start a Bluprnt"
+            aria-label="Start a BLUPRNT"
+            title="Start a BLUPRNT"
           >
             <span className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-2.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50/90 hover:text-indigo-900 sm:px-3">
               <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              <span className="hidden sm:inline">Start a Bluprnt</span>
+              <span className="hidden sm:inline">Start a BLUPRNT</span>
             </span>
           </Link>
 
-          <span className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:inline-block" aria-hidden />
+          <span
+            className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:inline-block"
+            aria-hidden
+          />
 
           {projectName && onExportPDF ? (
             <Button
@@ -91,7 +107,10 @@ export function DashboardHeader({
               onClick={onExportPDF}
               type="button"
             >
-              <FileDown className="h-4 w-4 text-slate-500 sm:mr-1.5" aria-hidden />
+              <FileDown
+                className="h-4 w-4 text-slate-500 sm:mr-1.5"
+                aria-hidden
+              />
               <span className="hidden font-semibold sm:inline">Export</span>
             </Button>
           ) : null}
@@ -104,7 +123,7 @@ export function DashboardHeader({
               onClick={onUpgradeClick}
               type="button"
             >
-              <UpgradeIcon className="mr-1 hidden h-3.5 w-3.5 sm:inline" />
+              <Crown className="mr-1 hidden h-3.5 w-3.5 sm:inline" />
               Upgrade
             </Button>
           ) : null}
@@ -138,12 +157,24 @@ export function DashboardHeader({
           />
 
           <Link to="/settings" className="sm:hidden">
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-slate-600" type="button" aria-label="Settings">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-slate-600"
+              type="button"
+              aria-label="Settings"
+            >
               <Settings2 className="h-4 w-4" aria-hidden />
             </Button>
           </Link>
           <a href="mailto:connect@monarch-labs.com" className="sm:hidden">
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-slate-600" type="button" aria-label="Contact support">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-slate-600"
+              type="button"
+              aria-label="Contact support"
+            >
               <LifeBuoy className="h-4 w-4" aria-hidden />
             </Button>
           </a>
@@ -155,7 +186,10 @@ export function DashboardHeader({
               className="h-9 rounded-xl px-2.5 text-slate-600 hover:bg-slate-100/90"
               type="button"
             >
-              <Settings2 className="mr-1.5 h-4 w-4 text-slate-500" aria-hidden />
+              <Settings2
+                className="mr-1.5 h-4 w-4 text-slate-500"
+                aria-hidden
+              />
               <span className="font-semibold">Settings</span>
             </Button>
           </Link>
@@ -172,7 +206,10 @@ export function DashboardHeader({
             </Button>
           </a>
 
-          <span className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:inline-block" aria-hidden />
+          <span
+            className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:inline-block"
+            aria-hidden
+          />
 
           <Button
             variant="ghost"

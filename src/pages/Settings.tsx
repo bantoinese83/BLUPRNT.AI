@@ -13,8 +13,8 @@ import {
   Loader2,
   CreditCard,
   HelpCircle,
+  Crown,
 } from "lucide-react";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 
 import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
 
@@ -27,7 +27,10 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<{ email?: string; user_metadata?: { full_name?: string } } | null>(null);
+  const [user, setUser] = useState<{
+    email?: string;
+    user_metadata?: { full_name?: string };
+  } | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
@@ -45,13 +48,13 @@ export default function Settings() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
 
-
-
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setUserLoading(true);
-      const { data: { user: u } } = await supabase.auth.getUser();
+      const {
+        data: { user: u },
+      } = await supabase.auth.getUser();
       if (cancelled) return;
       setUser(u ?? null);
       setDisplayName((u?.user_metadata?.full_name as string) ?? "");
@@ -66,7 +69,6 @@ export default function Settings() {
       }
 
       setUserLoading(false);
-
     };
     load();
     return () => {
@@ -97,18 +99,28 @@ export default function Settings() {
   }
 
   async function handleExportData() {
-    const { data: { user: u } } = await supabase.auth.getUser();
+    const {
+      data: { user: u },
+    } = await supabase.auth.getUser();
     if (!u) return;
     setExportMessage(null);
     setExportLoading(true);
     try {
       const { data: props } = await supabase
         .from("properties")
-        .select("id, postal_code, city, state, country, approximate_location, created_at");
+        .select(
+          "id, postal_code, city, state, country, approximate_location, created_at",
+        );
       const propIds = (props ?? []).map((p) => p.id);
-      const projs = propIds.length > 0
-        ? (await supabase.from("projects").select("*").in("property_id", propIds)).data ?? []
-        : [];
+      const projs =
+        propIds.length > 0
+          ? ((
+              await supabase
+                .from("projects")
+                .select("*")
+                .in("property_id", propIds)
+            ).data ?? [])
+          : [];
       const projectIds = projs.map((p) => p.id);
       let scopeItems: unknown[] = [];
       let invoices: unknown[] = [];
@@ -118,14 +130,20 @@ export default function Settings() {
         const [scopeRes, invRes, docsRes] = await Promise.all([
           supabase.from("scope_items").select("*").in("project_id", projectIds),
           supabase.from("invoices").select("*").in("project_id", projectIds),
-          supabase.from("documents").select("id, project_id, type, original_filename, created_at").in("project_id", projectIds),
+          supabase
+            .from("documents")
+            .select("id, project_id, type, original_filename, created_at")
+            .in("project_id", projectIds),
         ]);
         scopeItems = scopeRes.data ?? [];
         invoices = invRes.data ?? [];
         documents = docsRes.data ?? [];
         const invIds = (invRes.data ?? []).map((i: { id: string }) => i.id);
         if (invIds.length > 0) {
-          const lineRes = await supabase.from("invoice_line_items").select("*").in("invoice_id", invIds);
+          const lineRes = await supabase
+            .from("invoice_line_items")
+            .select("*")
+            .in("invoice_id", invIds);
           lineItems = lineRes.data ?? [];
         }
       }
@@ -191,7 +209,10 @@ export default function Settings() {
     setDeleteMessage(null);
     setDeleteLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke<{ success?: boolean; error?: string }>("delete-account", {
+      const { data, error } = await supabase.functions.invoke<{
+        success?: boolean;
+        error?: string;
+      }>("delete-account", {
         method: "POST",
       });
       if (error) throw new Error(error.message);
@@ -199,19 +220,21 @@ export default function Settings() {
       await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch (e) {
-      setDeleteMessage(e instanceof Error ? e.message : "Couldn't delete account.");
+      setDeleteMessage(
+        e instanceof Error ? e.message : "Couldn't delete account.",
+      );
     } finally {
       setDeleteLoading(false);
     }
   }
 
   if (!isSupabaseConfigured()) {
-
-
     return (
       <div className="flex min-h-screen flex-col bg-slate-50">
         <div className="flex flex-1 items-center justify-center p-6">
-          <p className="text-slate-600">Connect your account to manage settings.</p>
+          <p className="text-slate-600">
+            Connect your account to manage settings.
+          </p>
         </div>
         <AppSlimFooter className="bg-white/80" />
       </div>
@@ -253,7 +276,7 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form 
+            <form
               className="space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -261,7 +284,10 @@ export default function Settings() {
               }}
             >
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700" htmlFor="email">
+                <label
+                  className="text-sm font-medium text-slate-700"
+                  htmlFor="email"
+                >
                   Email
                 </label>
                 <Input
@@ -273,11 +299,15 @@ export default function Settings() {
                   autoComplete="email"
                 />
                 <p className="text-xs text-slate-500">
-                  Email is managed by your sign-in provider. Contact support to change it.
+                  Email is managed by your sign-in provider. Contact support to
+                  change it.
                 </p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700" htmlFor="displayName">
+                <label
+                  className="text-sm font-medium text-slate-700"
+                  htmlFor="displayName"
+                >
                   Display name
                 </label>
                 <Input
@@ -290,8 +320,9 @@ export default function Settings() {
                 />
               </div>
               {profileMessage && (
-                <p className={`text-sm ${profileMessage === "Saved." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
-
+                <p
+                  className={`text-sm ${profileMessage === "Saved." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}
+                >
                   {profileMessage}
                 </p>
               )}
@@ -301,13 +332,14 @@ export default function Settings() {
                 disabled={profileSaving}
                 type="submit"
               >
-                {profileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                {profileSaving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : null}
                 Save profile
               </Button>
             </form>
           </CardContent>
         </Card>
-
 
         {user?.email && (
           <Card>
@@ -318,7 +350,7 @@ export default function Settings() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form 
+              <form
                 className="space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -326,18 +358,30 @@ export default function Settings() {
                 }}
               >
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-slate-900">Change password</h4>
+                  <h4 className="text-sm font-medium text-slate-900">
+                    Change password
+                  </h4>
                   <p className="text-xs text-slate-500">
                     Update your account password.
                   </p>
                 </div>
-                
+
                 {/* Hidden username field for accessibility/password managers */}
-                <input type="text" name="username" autoComplete="email" value={user.email} readOnly className="hidden" />
+                <input
+                  type="text"
+                  name="username"
+                  autoComplete="email"
+                  value={user.email}
+                  readOnly
+                  className="hidden"
+                />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="new-password">
+                    <label
+                      className="text-xs font-bold text-slate-500 uppercase tracking-wider"
+                      htmlFor="new-password"
+                    >
                       New Password
                     </label>
                     <Input
@@ -351,7 +395,10 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider" htmlFor="confirm-password">
+                    <label
+                      className="text-xs font-bold text-slate-500 uppercase tracking-wider"
+                      htmlFor="confirm-password"
+                    >
                       Confirm Password
                     </label>
                     <Input
@@ -367,7 +414,9 @@ export default function Settings() {
                 </div>
 
                 {passwordMessage && (
-                  <p className={`text-sm ${passwordMessage.includes("Success") ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
+                  <p
+                    className={`text-sm ${passwordMessage.includes("Success") ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}
+                  >
                     {passwordMessage}
                   </p>
                 )}
@@ -379,15 +428,15 @@ export default function Settings() {
                   type="submit"
                   className="w-full sm:w-auto"
                 >
-                  {passwordSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  {passwordSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : null}
                   Update password
                 </Button>
               </form>
             </CardContent>
           </Card>
         )}
-
-
 
         <Card>
           <CardHeader>
@@ -399,23 +448,30 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isArchitect ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                  {isArchitect ? <UpgradeIcon className="w-5 h-5 brightness-0 invert" /> : <User className="w-5 h-5" />}
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${isArchitect ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-500"}`}
+                >
+                  {isArchitect ? (
+                    <Crown className="w-5 h-5" />
+                  ) : (
+                    <User className="w-5 h-5" />
+                  )}
                 </div>
-
 
                 <div>
                   <p className="text-sm font-bold text-slate-900 leading-none mb-1">
                     {isArchitect ? "Architect Plan" : "Free Plan"}
                   </p>
                   <p className="text-xs text-slate-500 font-medium">
-                    {isArchitect ? "Active Monthly Subscription • 10 scans/mo" : "Free Plan • 3 scans per project"}
+                    {isArchitect
+                      ? "Active Monthly Subscription • 10 scans/mo"
+                      : "Free Plan • 3 scans per project"}
                   </p>
                 </div>
               </div>
-              <Button 
-                variant={isArchitect ? "outline" : "primary"} 
-                size="sm" 
+              <Button
+                variant={isArchitect ? "outline" : "primary"}
+                size="sm"
                 className="rounded-xl shadow-sm"
                 onClick={() => setShowUpgrade(true)}
                 type="button"
@@ -426,17 +482,22 @@ export default function Settings() {
 
             {!isArchitect && (
               <p className="text-xs text-slate-500 leading-relaxed px-1 font-medium">
-                Upgrade to Architect for <span className="text-slate-900">Advanced AI Project Strategies</span>, 10 smart invoice scans per billing period, and priority support.
+                Upgrade to Architect for{" "}
+                <span className="text-slate-900">
+                  Advanced AI Project Strategies
+                </span>
+                , 10 smart invoice scans per billing period, and priority
+                support.
               </p>
             )}
             {isArchitect && (
               <p className="text-xs text-slate-500 leading-relaxed px-1">
-                You have active professional features. Billing is handled through Stripe.
+                You have active professional features. Billing is handled
+                through Stripe.
               </p>
             )}
           </CardContent>
         </Card>
-
 
         <Card>
           <CardHeader>
@@ -449,11 +510,13 @@ export default function Settings() {
             <div className="space-y-2">
               <h4 className="font-medium text-slate-900">Export your data</h4>
               <p className="text-sm text-slate-600">
-                Download a copy of your properties, projects, invoices, and documents in JSON format.
+                Download a copy of your properties, projects, invoices, and
+                documents in JSON format.
               </p>
               {exportMessage && (
-                <p className={`text-sm ${exportMessage === "Download started." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}>
-
+                <p
+                  className={`text-sm ${exportMessage === "Download started." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}
+                >
                   {exportMessage}
                 </p>
               )}
@@ -465,14 +528,19 @@ export default function Settings() {
                 disabled={exportLoading}
                 type="button"
               >
-                {exportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {exportLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
                 Export data
               </Button>
             </div>
             <div className="border-t border-slate-200 pt-6 space-y-2">
               <h4 className="font-medium text-slate-900">Delete account</h4>
               <p className="text-sm text-slate-600">
-                Permanently delete your account and all data. This cannot be undone.
+                Permanently delete your account and all data. This cannot be
+                undone.
               </p>
               <div className="flex items-center gap-1">
                 <input
@@ -482,7 +550,10 @@ export default function Settings() {
                   onChange={(e) => setDeleteConfirm(e.target.checked)}
                   className="rounded border-slate-300"
                 />
-                <label htmlFor="delete-confirm" className="text-sm text-slate-700">
+                <label
+                  htmlFor="delete-confirm"
+                  className="text-sm text-slate-700"
+                >
                   I understand this is permanent
                 </label>
               </div>
@@ -497,7 +568,11 @@ export default function Settings() {
                 disabled={!deleteConfirm || deleteLoading}
                 type="button"
               >
-                {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleteLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
                 Delete account
               </Button>
             </div>
@@ -513,7 +588,9 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-slate-600">
-              Got a question, need help with an estimate, or have an idea for a new feature? We're here to help you get the most out of BLUPRNT.AI.
+              Got a question, need help with an estimate, or have an idea for a
+              new feature? We're here to help you get the most out of
+              BLUPRNT.AI.
             </p>
             <a href="mailto:connect@monarch-labs.com" className="inline-block">
               <Button
@@ -545,12 +622,11 @@ export default function Settings() {
 
       <AppSlimFooter className="bg-white/80" />
 
-      <UpgradeModal 
-        isOpen={showUpgrade} 
+      <UpgradeModal
+        isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}
         openReason="general"
       />
     </div>
-
   );
 }

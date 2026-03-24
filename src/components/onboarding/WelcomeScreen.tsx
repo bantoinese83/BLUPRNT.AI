@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowRight, LogIn, UserPlus, LayoutDashboard, PlusCircle } from "lucide-react";
+import {
+  ArrowRight,
+  LogIn,
+  UserPlus,
+  LayoutDashboard,
+  PlusCircle,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
@@ -19,7 +25,9 @@ export function WelcomeScreen() {
         setChecking(false);
         return;
       }
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session?.user || cancelled) {
         setChecking(false);
         return;
@@ -68,52 +76,41 @@ export function WelcomeScreen() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col items-center text-center space-y-8 py-10">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="relative group"
-        >
-          <motion.div
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="flex h-28 w-28 items-center justify-center rounded-[2rem] bg-white p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] ring-8 ring-white/80 border border-slate-100 sm:h-32 sm:w-32"
-          >
-            <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
-          </motion.div>
-          <div className="absolute -inset-4 bg-indigo-500/5 blur-3xl rounded-full -z-10" />
-        </motion.div>
-
+      <div className="flex flex-col items-center text-center space-y-8 py-4 sm:py-10">
         <div className="space-y-4 max-w-sm">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"
+            transition={{ delay: 0.1 }}
+            className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl"
           >
-            <span className="liquid-metal-text leading-[1.1] block">Transform your renovation</span>
+            <span className="liquid-metal-text leading-[1.1] block">
+              Transform your renovation
+            </span>
             <span className="text-indigo-600">into a financial plan</span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-base text-slate-500 leading-relaxed px-4"
+            transition={{ delay: 0.2 }}
+            className="text-base text-slate-500 leading-relaxed px-4 font-medium"
           >
-            Get real-world costs, track invoices, and build a project record you can hand to future buyers.
+            Get real-world costs, track invoices, and build a project record you
+            can hand to future buyers.
           </motion.p>
         </div>
 
         {loggedIn && hasProjects ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="w-full space-y-3 pt-4"
           >
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Saved progress detected</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+              Saved progress detected
+            </p>
             <Button
               size="lg"
               variant="primary"
@@ -121,7 +118,10 @@ export function WelcomeScreen() {
               onClick={() => navigate("/dashboard")}
               type="button"
             >
-              <LayoutDashboard className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" aria-hidden />
+              <LayoutDashboard
+                className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                aria-hidden
+              />
               Continue to Dashboard
             </Button>
             <Button
@@ -149,7 +149,7 @@ export function WelcomeScreen() {
             </Button>
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -163,11 +163,17 @@ export function WelcomeScreen() {
               type="button"
             >
               Get my first estimate
-              <ArrowRight className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" aria-hidden />
+              <ArrowRight
+                className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1"
+                aria-hidden
+              />
             </Button>
-            
+
             <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div
+                className="absolute inset-0 flex items-center"
+                aria-hidden="true"
+              >
                 <div className="w-full border-t border-slate-100"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
@@ -200,4 +206,3 @@ export function WelcomeScreen() {
     </PageTransition>
   );
 }
-

@@ -1,6 +1,5 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Hammer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 
 const FREE_INVOICE_LIMIT = 3;
 
@@ -9,7 +8,10 @@ interface UpgradeBannerProps {
   onUpgradeClick: () => void;
 }
 
-export function UpgradeBanner({ invoiceCount, onUpgradeClick }: UpgradeBannerProps) {
+export function UpgradeBanner({
+  invoiceCount,
+  onUpgradeClick,
+}: UpgradeBannerProps) {
   if (invoiceCount < FREE_INVOICE_LIMIT) return null;
 
   return (
@@ -20,9 +22,12 @@ export function UpgradeBanner({ invoiceCount, onUpgradeClick }: UpgradeBannerPro
         </div>
 
         <div>
-          <h4 className="font-semibold text-slate-900">You&apos;ve used all 3 free invoices on this project.</h4>
+          <h4 className="font-semibold text-slate-900">
+            You&apos;ve used all 3 free invoices on this project.
+          </h4>
           <p className="text-sm text-slate-600 mt-0.5">
-            Quotes, warranties, and permits still upload free. Upgrade for more invoices.
+            Quotes, warranties, and permits still upload free. Upgrade for more
+            invoices.
           </p>
         </div>
       </div>
@@ -32,8 +37,7 @@ export function UpgradeBanner({ invoiceCount, onUpgradeClick }: UpgradeBannerPro
         onClick={onUpgradeClick}
         type="button"
       >
-        <UpgradeIcon className="shrink-0 mr-2" aria-hidden />
-
+        <Hammer className="shrink-0 mr-2 w-4 h-4" aria-hidden />
         See upgrade options
       </Button>
     </div>

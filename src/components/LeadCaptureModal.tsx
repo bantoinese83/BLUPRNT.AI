@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Mail, ArrowRight, TrendingDown, ShieldCheck, Loader2 } from "lucide-react";
+import {
+  X,
+  Mail,
+  ArrowRight,
+  TrendingDown,
+  ShieldCheck,
+  Loader2,
+  Hammer,
+  BadgeCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 
 interface LeadCaptureModalProps {
-  onPlanSelect?: (plan: 'architect' | 'pass') => void;
+  onPlanSelect?: (plan: "architect" | "pass") => void;
 }
 
 export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
@@ -43,7 +51,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
       try {
         await supabase.from("marketing_leads").insert({
           email: email.trim().toLowerCase(),
-          source: "exit_intent_modal"
+          source: "exit_intent_modal",
         });
         setSubmitted(true);
       } catch (err) {
@@ -67,7 +75,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
             onClick={() => setIsVisible(false)}
           />
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -84,7 +92,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
 
             {/* Left side: The Hook / visual */}
             <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 text-white relative flex flex-col justify-center overflow-hidden">
-               {/* Decorative background elements */}
+              {/* Decorative background elements */}
               <div className="absolute top-0 left-0 w-full h-full opacity-10">
                 <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white animate-pulse" />
                 <div className="absolute bottom-10 right-10 w-24 h-24 rounded-full border-2 border-white" />
@@ -92,14 +100,17 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
 
               <div className="relative z-10 space-y-6">
                 <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white">
-                  <UpgradeIcon className="w-3 h-3 text-amber-300" />
+                  <Hammer className="w-3 h-3 text-amber-300" />
                   Limited Time Offer
                 </div>
 
-                
                 <div className="space-y-1">
-                  <h3 className="text-4xl font-black tracking-tighter leading-none">35% OFF</h3>
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[11px]">Your Project Protections</p>
+                  <h3 className="text-4xl font-black tracking-tighter leading-none">
+                    35% OFF
+                  </h3>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[11px]">
+                    Your Project Protections
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -107,18 +118,21 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                       <TrendingDown className="w-4 h-4 text-slate-300" />
                     </div>
-                    <p className="text-xs font-medium text-slate-50">Cut renovation drift by 20%</p>
+                    <p className="text-xs font-medium text-slate-50">
+                      Cut renovation drift by 20%
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                       <ShieldCheck className="w-4 h-4 text-slate-300" />
                     </div>
-                    <p className="text-xs font-medium text-slate-50">Legal-grade invoice verifying</p>
+                    <p className="text-xs font-medium text-slate-50">
+                      Legal-grade invoice verifying
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-
 
             {/* Right side: Lead Capture / Upsell */}
             <div className="md:w-7/12 p-8 sm:p-12 flex flex-col justify-center bg-white">
@@ -129,7 +143,12 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                       Don&apos;t leave your budget to chance.
                     </h2>
                     <p className="text-slate-500 text-sm leading-relaxed">
-                      Enter your email to lock in your <span className="font-bold text-slate-700">35% discount</span>. We&apos;ll send you the code and our &quot;Budget Guard&quot; checklist for free.
+                      Enter your email to lock in your{" "}
+                      <span className="font-bold text-slate-700">
+                        35% discount
+                      </span>
+                      . We&apos;ll send you the code and our &quot;Budget
+                      Guard&quot; checklist for free.
                     </p>
                   </div>
 
@@ -145,8 +164,8 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                         required
                       />
                     </div>
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full py-6 rounded-2xl font-bold gap-2 shadow-lg shadow-slate-100 premium-gradient text-white"
                       disabled={loading}
                     >
@@ -165,38 +184,40 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                   </p>
                 </div>
               ) : (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="space-y-8"
                 >
                   <div className="space-y-3 text-center md:text-left">
                     <div className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto md:mx-0 shadow-lg">
-                      <UpgradeIcon className="w-8 h-8 brightness-0 invert" />
+                      <BadgeCheck className="w-8 h-8" />
                     </div>
 
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Code: BLUEPRINT35</h2>
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                      Code: BLUEPRINT35
+                    </h2>
 
                     <p className="text-slate-500 text-sm leading-relaxed">
-                      Your discount is locked in. Ready to start your project with professional-grade protections?
+                      Your discount is locked in. Ready to start your project
+                      with professional-grade protections?
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       className="w-full py-6 rounded-2xl font-bold bg-slate-900 hover:bg-slate-800 text-white"
-
-                      onClick={() => onPlanSelect?.('architect')}
+                      onClick={() => onPlanSelect?.("architect")}
                     >
                       Use discount for Architect Plan
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full py-6 rounded-2xl font-bold text-slate-600"
                       onClick={() => {
                         setIsVisible(false);
-                        onPlanSelect?.('pass');
+                        onPlanSelect?.("pass");
                       }}
                     >
                       View Project Pass options
