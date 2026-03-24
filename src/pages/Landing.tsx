@@ -18,6 +18,7 @@ import {
   MessageCircleQuestion,
   Sparkles,
   X,
+  CheckCircle2,
 } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 import { Highlighter } from "@/components/ui/Highlighter";
@@ -754,17 +755,16 @@ export default function Landing() {
                   </div>
                   <ul className="space-y-4 mb-10 flex-1">
                     {[
-                      "Unlimited estimates & photo analysis",
+                      "Expert AI Insights & Project Strategy",
+                      "Up to 10 smart invoice scans per month",
                       "Track up to 2 active projects",
-                      "Smart invoice scanning",
                       "Full property ledger & seller packet",
-                      "Priority AI model access"
+                      "Cloud-backed Seller Records (PDF)"
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
                         <UpgradeIcon className="w-5 h-5 opacity-40 shrink-0 grayscale" />
                         {feature}
                       </li>
-
                     ))}
                   </ul>
                   <Button 
@@ -798,13 +798,13 @@ export default function Landing() {
                   <ul className="space-y-4 mb-10 flex-1">
                     {[
                       "6 months of Architect features",
-                      "Locked to one specific project",
-                      "No recurring subscription",
-                      "Lifetime read-access to the ledger",
-                      "Perfect for one-off renovations"
+                      "Unlimited invoices (this project)",
+                      "Expert AI Insights included",
+                      "Lifetime read-access to ledger",
+                      "Perfect for one major remodel"
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
-                        <FileCheck className="w-5 h-5 text-slate-400 shrink-0" />
+                        <CheckCircle2 className="w-5 h-5 text-indigo-600 shrink-0" />
                         {feature}
                       </li>
                     ))}

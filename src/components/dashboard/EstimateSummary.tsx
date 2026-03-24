@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wallet, ListTree } from "lucide-react";
+import { Wallet, ListTree, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 
 import type { ProjectRow, ScopeRow } from "@/types/database";
 
@@ -11,9 +12,13 @@ import { money, getStars as stars } from "@/lib/formatters";
 export function EstimateSummary({
   project,
   scopeItems,
+  isArchitect,
+  onUpgradeClick,
 }: {
   project: ProjectRow;
   scopeItems: ScopeRow[];
+  isArchitect?: boolean;
+  onUpgradeClick?: () => void;
 }) {
   const navigate = useNavigate();
   const conf = project.confidence_score ?? 4.5;
@@ -38,6 +43,27 @@ export function EstimateSummary({
             {money(project.estimated_min_total, project.estimated_max_total)}
           </div>
           <p className="text-slate-400 text-sm font-medium">Full renovation lifecycle estimate</p>
+
+          {!isArchitect && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 pt-6 border-t border-slate-700/50"
+            >
+              <button 
+                onClick={onUpgradeClick}
+                className="group flex items-center gap-3 text-left hover:bg-slate-800/50 p-3 rounded-2xl transition-all"
+              >
+                <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white leading-none mb-1">Unlock Expert AI Strategies</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Get maintenance tips, phases & regional context.</p>
+                </div>
+              </button>
+            </motion.div>
+          )}
         </div>
         
         <div className="flex flex-col items-start md:items-end gap-3 relative z-10">

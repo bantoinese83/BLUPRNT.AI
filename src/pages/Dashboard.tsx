@@ -269,6 +269,26 @@ export default function Dashboard() {
   }, [load]);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("success") === "true") {
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, "", newUrl);
+
+      toast.success("Welcome to Architect!", {
+        description: "Your professional features and higher limits are now active.",
+        duration: 8000,
+      });
+
+      confetti({
+        particleCount: 200,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#6366f1", "#020617", "#94a3b8"]
+      });
+    }
+  }, [location.search]);
+
+  useEffect(() => {
     if (project && invoices.length > 0 && !hasCelebrated) {
       const total = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
       if (total >= (project.estimated_min_total ?? 0)) {
@@ -277,7 +297,6 @@ export default function Dashboard() {
           spread: 70,
           origin: { y: 0.6 },
           colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"]
-
         });
         setTimeout(() => setHasCelebrated(true), 100);
       }
@@ -531,7 +550,15 @@ export default function Dashboard() {
                       </>
                     }
                   >
-                    <EstimateSummary project={project} scopeItems={scopeItems} />
+                    <EstimateSummary 
+                      project={project} 
+                      scopeItems={scopeItems} 
+                      isArchitect={isArchitect}
+                      onUpgradeClick={() => {
+                        setUpgradeReason("general");
+                        setShowUpgrade(true);
+                      }}
+                    />
                     <Button
                       variant="outline"
                       className="w-full gap-2 rounded-xl border-slate-200 hover:bg-slate-50"

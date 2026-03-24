@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil, Trash2, Loader2, ListTree, Rocket } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Loader2, ListTree, Rocket, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,18 @@ import type { ProjectRow, ScopeRow } from "@/types/database";
 import { money, getStars as stars } from "@/lib/formatters";
 
 const TIERS = ["economy", "mid", "premium"] as const;
+
+const PHASE_ORDER = [
+  "Site Prep",
+  "Demolition",
+  "Structural",
+  "Rough-in",
+  "Drywall",
+  "Finishes",
+  "Fixtures",
+  "Appliances",
+  "Cleanup"
+];
 
 export function ScopeDetail({
   project,
@@ -210,135 +222,191 @@ export function ScopeDetail({
             </div>
           ) : (
           <div className="divide-y divide-slate-100">
-            {scopeItems.map((item) => {
-              const isEditing = editingId === item.id;
-              return (
-                <div
-                  key={item.id}
-                  className="p-4 sm:p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors"
-                >
-                  {isEditing ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-slate-900">{item.category}</h4>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditingId(null)}
-                            disabled={saving}
-                            type="button"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => handleSave(item)}
-                            disabled={saving}
-                            type="button"
-                            className="gap-2"
-                          >
-                            {saving ? (
-                              <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                            ) : null}
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-medium text-slate-700" htmlFor={`qty-${item.id}`}>
-                            Quantity
-                          </label>
-                          <input
-                            id={`qty-${item.id}`}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={editQty}
-                            onChange={(e) => setEditQty(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-700"
-                          />
-                          {item.unit && (
-                            <span className="text-xs text-slate-500 ml-2">{item.unit}</span>
-                          )}
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-slate-700" htmlFor={`tier-${item.id}`}>
-                            Finish tier
-                          </label>
-                          <select
-                            id={`tier-${item.id}`}
-                            value={editTier}
-                            onChange={(e) => setEditTier(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-700"
-                          >
-                            {TIERS.map((t) => (
-                              <option key={t} value={t}>
-                                {t.charAt(0).toUpperCase() + t.slice(1)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center flex-wrap gap-2">
-                          <h4 className="font-semibold text-slate-900">{item.category}</h4>
-                          {item.finish_tier && (
-                            <Badge variant="outline" className="text-xs capitalize">
-                              {item.finish_tier}
-                            </Badge>
-                          )}
-                          <div className="flex gap-1">
-                              <button
-                                type="button"
-                                onClick={() => startEdit(item)}
-                                className="p-1.5 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100"
-                                aria-label="Edit"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(item)}
-                                className="p-1.5 text-slate-500 hover:text-amber-600 rounded-lg hover:bg-amber-50"
-                                aria-label="Remove"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+            {Object.entries(
+              scopeItems.reduce((acc, item) => {
+                const phase = item.phase || item.metadata?.phase || "General";
+                if (!acc[phase]) acc[phase] = [];
+                acc[phase].push(item);
+                return acc;
+              }, {} as Record<string, ScopeRow[]>)
+            )
+              .sort(([a], [b]) => {
+                const idxA = PHASE_ORDER.indexOf(a);
+                const idxB = PHASE_ORDER.indexOf(b);
+                if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+                if (idxA === -1) return 1;
+                if (idxB === -1) return -1;
+                return idxA - idxB;
+              })
+              .map(([phase, items]) => (
+                <div key={phase} className="space-y-0">
+                  <div className="bg-slate-50/80 px-4 py-2 border-y border-slate-100">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{phase}</h3>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {items.map((item) => {
+                      const isEditing = editingId === item.id;
+                      const justification = item.justification || item.metadata?.justification;
+                      const priority = item.priority || item.metadata?.priority;
+                      const maintenance = item.maintenance_tips || item.metadata?.maintenance_tips;
+                      
+                      return (
+                        <div
+                          key={item.id}
+                          className="p-4 sm:p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors"
+                        >
+                          {isEditing ? (
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-slate-900">{item.category}</h4>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingId(null)}
+                                    disabled={saving}
+                                    type="button"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => handleSave(item)}
+                                    disabled={saving}
+                                    type="button"
+                                    className="gap-2"
+                                  >
+                                    {saving ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                                    ) : null}
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-slate-700" htmlFor={`qty-${item.id}`}>
+                                    Quantity
+                                  </label>
+                                  <input
+                                    id={`qty-${item.id}`}
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={editQty}
+                                    onChange={(e) => setEditQty(e.target.value)}
+                                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-700"
+                                  />
+                                  {item.unit && (
+                                    <span className="text-xs text-slate-500 ml-2">{item.unit}</span>
+                                  )}
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-slate-700" htmlFor={`tier-${item.id}`}>
+                                    Finish tier
+                                  </label>
+                                  <select
+                                    id={`tier-${item.id}`}
+                                    value={editTier}
+                                    onChange={(e) => setEditTier(e.target.value)}
+                                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-700"
+                                  >
+                                    {TIERS.map((t) => (
+                                      <option key={t} value={t}>
+                                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
                             </div>
+                          ) : (
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                              <div className="space-y-1.5 min-w-0">
+                                <div className="flex items-center flex-wrap gap-2">
+                                  <h4 className="font-semibold text-slate-900">{item.category}</h4>
+                                  {priority && (
+                                    <Badge 
+                                      variant="secondary" 
+                                      className={`text-[10px] h-4.5 px-1.5 uppercase font-black border-none ${
+                                        priority === "high" ? "bg-red-50 text-red-600" : 
+                                        priority === "medium" ? "bg-amber-50 text-amber-600" : 
+                                        "bg-slate-50 text-slate-500"
+                                      }`}
+                                    >
+                                      {priority}
+                                    </Badge>
+                                  )}
+                                  {item.finish_tier && (
+                                    <Badge variant="outline" className="text-[10px] h-4.5 px-1.5 capitalize border-slate-200 text-slate-500">
+                                      {item.finish_tier} tier
+                                    </Badge>
+                                  )}
+                                  <div className="flex gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => startEdit(item)}
+                                        className="p-1 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors"
+                                        aria-label="Edit"
+                                      >
+                                        <Pencil className="w-3 h-3" />
+                                      </button>
+        
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDelete(item)}
+                                        className="p-1 text-slate-400 hover:text-amber-600 rounded-md hover:bg-amber-50 transition-colors"
+                                        aria-label="Remove"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-slate-600 leading-snug">{item.description}</p>
+                                
+                                {justification && (
+                                  <p className="text-xs text-slate-400 flex items-start gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5 mt-0.5 shrink-0 text-indigo-400" />
+                                    <span>{justification}</span>
+                                  </p>
+                                )}
+
+                                {maintenance && (
+                                  <div className="pt-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-600/70 uppercase tracking-tight">
+                                    <div className="h-1 w-1 rounded-full bg-indigo-300" />
+                                    Care Tip: {maintenance}
+                                  </div>
+                                )}
+
+                                <div className="pt-1 flex items-center gap-1 text-[10px] font-medium text-slate-400">
+                                  {stars(item.confidence_score)}
+                                  <span className="ml-1">Regional pricing accuracy</span>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0 space-y-1">
+                                <div className="font-bold text-slate-900">
+                                  {money(item.total_cost_min, item.total_cost_max)}
+                                </div>
+                                {item.quantity != null && item.unit && (
+                                  <div className="text-xs text-slate-500">
+                                    {item.quantity} {item.unit}
+                                    {item.unit_cost_min != null && item.unit_cost_max != null && (
+                                      <span className="block opacity-70">
+                                        {money(item.unit_cost_min, item.unit_cost_max)} per {item.unit}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-slate-500">{item.description}</p>
-                        <div className="flex items-center gap-1 text-xs font-medium">
-                          {stars(item.confidence_score)}
-                          <span className="ml-1 text-slate-500">Regional pricing accuracy</span>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0 space-y-1">
-                        <div className="font-semibold text-slate-900">
-                          {money(item.total_cost_min, item.total_cost_max)}
-                        </div>
-                        {item.quantity != null && item.unit && (
-                          <div className="text-sm text-slate-500">
-                            {item.quantity} {item.unit}
-                            {item.unit_cost_min != null && item.unit_cost_max != null && (
-                              <span className="block text-xs">
-                                {money(item.unit_cost_min, item.unit_cost_max)} per {item.unit}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </div>
-              );
-            })}
+              ))}
           </div>
           )}
         </CardContent>

@@ -6,6 +6,10 @@ export type ProjectRow = {
   estimated_max_total: number | null;
   confidence_score: number | null;
   created_at?: string;
+  metadata?: {
+    value_engineering_tips?: string[];
+    regional_context?: string;
+  };
 };
 
 export type ScopeRow = {
@@ -21,6 +25,16 @@ export type ScopeRow = {
   total_cost_max: number | null;
   confidence_score: number | null;
   source?: "text" | "photo";
+  justification?: string;
+  priority?: "high" | "medium" | "low";
+  phase?: string;
+  maintenance_tips?: string;
+  metadata?: {
+    justification?: string;
+    priority?: "high" | "medium" | "low";
+    phase?: string;
+    maintenance_tips?: string;
+  };
 };
 
 export type InvoiceRow = {

@@ -172,7 +172,12 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                   </CardHeader>
                   <CardContent className="space-y-4 flex-1">
                     <ul className="space-y-3">
-                      {["Unlimited estimates & photo analysis", "Track up to 2 active projects", "Smart invoice scanning", "Seller Packet PDF for your property"].map((item, i) => (
+                      {[
+                        "Expert AI Insights & Project Strategy",
+                        "Up to 10 smart invoice uploads per month",
+                        "Track up to 2 active projects",
+                        "Cloud-backed Seller Packet PDF"
+                      ].map((item, i) => (
                         <li key={i} className="flex items-start space-x-3 text-sm text-slate-700">
                           <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
                           <span>{item}</span>
@@ -226,7 +231,12 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                   </CardHeader>
                   <CardContent className="space-y-4 flex-1">
                     <ul className="space-y-3">
-                      {["6 months of Architect features", "Locked to this project – no subscription", "Perfect for one big remodel"].map((item, i) => (
+                      {[
+                        "6 months of Architect features",
+                        "Unlimited invoices (this project)",
+                        "No subscription – one-time payment",
+                        "Perfect for one big remodel"
+                      ].map((item, i) => (
                         <li key={i} className="flex items-start space-x-3 text-sm text-slate-700">
                           <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
                           <span>{item}</span>
@@ -255,13 +265,20 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                 </Card>
               </div>
 
-              <div className="mt-8 text-center space-y-2">
-                <p className="text-sm text-slate-500">
-                  Most users with projects over $15,000 choose Architect or a Project Pass.
-                </p>
-                <button className="text-sm text-slate-400 hover:text-slate-600 font-medium transition-colors" onClick={onClose}>
-                  Maybe later
-                </button>
+              <div className="mt-8 text-center space-y-3">
+                <div className="inline-block px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+                  <p className="text-xs font-bold text-slate-900">
+                    Which should I pick?
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    One big remodel? <span className="font-semibold text-slate-700">Project Pass</span>. Ongoing maintenance? <span className="font-semibold text-slate-700">Architect</span>.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <button className="text-sm text-slate-400 hover:text-slate-600 font-medium transition-colors" onClick={onClose}>
+                    Maybe later
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

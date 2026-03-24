@@ -409,7 +409,7 @@ export default function Settings() {
                     {isArchitect ? "Architect Plan" : "Free Plan"}
                   </p>
                   <p className="text-xs text-slate-500 font-medium">
-                    {isArchitect ? "Active Monthly Subscription" : "Limited features"}
+                    {isArchitect ? "Active Monthly Subscription • 10 scans/mo" : "Free Plan • 3 scans per project"}
                   </p>
                 </div>
               </div>
@@ -425,8 +425,8 @@ export default function Settings() {
             </div>
 
             {!isArchitect && (
-              <p className="text-xs text-slate-500 leading-relaxed px-1">
-                Upgrade to Architect for unlimited estimates, more projects, and priority support.
+              <p className="text-xs text-slate-500 leading-relaxed px-1 font-medium">
+                Upgrade to Architect for <span className="text-slate-900">Advanced AI Project Strategies</span>, 10 smart invoice scans per month, and priority support.
               </p>
             )}
             {isArchitect && (

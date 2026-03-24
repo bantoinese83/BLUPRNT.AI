@@ -18,6 +18,8 @@ export interface EstimatePayload {
     estimated_min_total: number;
     estimated_max_total: number;
     confidence_score: number;
+    value_engineering_tips?: string[];
+    regional_context?: string;
   };
   scope_items: Array<{
     category: string;
@@ -31,6 +33,10 @@ export interface EstimatePayload {
     total_cost_max: number;
     confidence_score: number;
     source: "photo";
+    justification?: string;
+    priority?: "high" | "medium" | "low";
+    phase?: string;
+    maintenance_tips?: string;
   }>;
   explanations: string[];
 }
@@ -44,18 +50,29 @@ export async function extractScopeWithGemini(input: {
   photoParts?: GeminiPart[];
 }): Promise<EstimatePayload | null> {
   const { room_type, zip_code, finish_preference, scopeDescription, photoParts = [] } = input;
+  const area = cityFromZip(zip_code);
+  const dateStr = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long' });
 
-  const systemInstruction = `You are an expert residential construction estimator. 
-Analyze the project details and photos to generate a detailed, line-by-line cost estimate.
-Guidelines:
-1. Provide 6-12 detailed line items.
-2. If photos are provided, explicitly mention visible features.
-3. Ensure totals match (quantity * unit_cost).
-4. Summary total must be the sum of all line items.`;
+  const systemInstruction = `You are a Senior Residential Construction Estimator with 20+ years of experience in the ${area}.
+Your goal is to provide an ultra-detailed, high-value "Project Blueprint" that justifies its cost and helps the homeowner plan their budget.
 
-  const prompt = `Project: ${room_type} in ${zip_code} (adjust for region).
-Finish: ${finish_preference}.
-Description: ${scopeDescription || "Analyze photos"}.`;
+Expert Guidelines:
+1. Provide 8-15 specific line items. Group them mentally by construction phase (e.g., Site Prep, Rough-in, Finishes).
+2. For each item, provide a "Justification" explaining why this cost is necessary (e.g., "Standard for high-moisture kitchen areas", "Requires specialized labor for large-format tiles").
+3. Assign a "Priority" (high: essential for code/safety, medium: standard functionality, low: aesthetic upgrade).
+4. Provide "Maintenance Tips" for long-term value (e.g., "Seal grout every 6 months to prevent staining").
+5. In the summary, provide "Value Engineering Tips" on how to save 10-15% without sacrificing major quality.
+6. Provide "Regional Context" regarding ${area} labor markets, permit expectations, or material availability in ${dateStr}.
+7. Ensure all math is perfect: total_cost_min = quantity * unit_cost_min.
+8. If photos are provided, identify specific brands, damage, or structural constraints visible.`;
+
+  const prompt = `Project: ${room_type} Renovation
+Location: ${zip_code} (${area})
+Date: ${dateStr}
+Target Finish Tier: ${finish_preference}
+User Description: ${scopeDescription || "Analyze photos for full scope"}.
+
+Please generate the detailed blueprint.`;
 
   const responseSchema = {
     type: "object",
@@ -65,7 +82,9 @@ Description: ${scopeDescription || "Analyze photos"}.`;
         properties: {
           estimated_min_total: { type: "number" },
           estimated_max_total: { type: "number" },
-          confidence_score: { type: "number", description: "1 to 5" }
+          confidence_score: { type: "number", description: "1 to 5" },
+          value_engineering_tips: { type: "array", items: { type: "string" } },
+          regional_context: { type: "string" }
         },
         required: ["estimated_min_total", "estimated_max_total", "confidence_score"]
       },
@@ -83,9 +102,17 @@ Description: ${scopeDescription || "Analyze photos"}.`;
             unit_cost_max: { type: "number" },
             total_cost_min: { type: "number" },
             total_cost_max: { type: "number" },
-            confidence_score: { type: "number" }
+            confidence_score: { type: "number" },
+            justification: { type: "string" },
+            priority: { type: "string", enum: ["high", "medium", "low"] },
+            phase: { type: "string" },
+            maintenance_tips: { type: "string" }
           },
-          required: ["category", "description", "finish_tier", "quantity", "unit", "unit_cost_min", "unit_cost_max", "total_cost_min", "total_cost_max"]
+          required: [
+            "category", "description", "finish_tier", "quantity", "unit", 
+            "unit_cost_min", "unit_cost_max", "total_cost_min", "total_cost_max",
+            "justification", "priority", "phase"
+          ]
         }
       },
       explanations: {
@@ -126,11 +153,13 @@ Description: ${scopeDescription || "Analyze photos"}.`;
         estimated_min_total: Math.round(Number(parsed.summary.estimated_min_total)),
         estimated_max_total: Math.round(Number(parsed.summary.estimated_max_total)),
         confidence_score: Number(parsed.summary.confidence_score),
+        value_engineering_tips: parsed.summary.value_engineering_tips || [],
+        regional_context: parsed.summary.regional_context || "",
       },
       scope_items: parsed.scope_items.map((s: any) => ({
         category: String(s.category),
         description: String(s.description),
-        finish_tier: finish_preference,
+        finish_tier: (s.finish_tier as any) || finish_preference,
         quantity: Number(s.quantity),
         unit: String(s.unit),
         unit_cost_min: Math.round(Number(s.unit_cost_min)),
@@ -139,6 +168,10 @@ Description: ${scopeDescription || "Analyze photos"}.`;
         total_cost_max: Math.round(Number(s.total_cost_max)),
         confidence_score: Number(s.confidence_score || 3),
         source: "photo" as const,
+        justification: s.justification,
+        priority: s.priority,
+        phase: s.phase,
+        maintenance_tips: s.maintenance_tips,
       })),
       explanations: Array.isArray(parsed.explanations) ? parsed.explanations.map(String) : [],
     };

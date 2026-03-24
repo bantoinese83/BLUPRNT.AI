@@ -138,8 +138,46 @@ export function EstimateScreen() {
                     </div>
                 </div>
             </CardContent>
+
+            {summary?.value_engineering_tips && summary.value_engineering_tips.length > 0 && (
+                <div className="px-8 pb-8 space-y-4">
+                    <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100/50 p-5 space-y-3">
+                        <h5 className="text-xs font-black text-indigo-700 uppercase tracking-widest flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            AI Project Strategy
+                        </h5>
+                        <ul className="space-y-2">
+                            {summary.value_engineering_tips.map((tip, i) => (
+                                <li key={i} className="text-sm text-slate-700 leading-snug flex gap-2">
+                                    <span className="text-indigo-400 font-bold">•</span>
+                                    {tip}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
             </Card>
         </motion.div>
+
+        {summary?.regional_context && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.8 }}
+                className="flex items-start gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-100"
+            >
+                <div className="mt-0.5 p-1 bg-white rounded-md shadow-sm border border-slate-200">
+                    <BadgeCheck className="w-3.5 h-3.5 text-slate-400" />
+                </div>
+                <div className="space-y-1">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Local Market Intelligence</p>
+                    <p className="text-xs text-slate-600 leading-relaxed italic">
+                        "{summary.regional_context}"
+                    </p>
+                </div>
+            </motion.div>
+        )}
 
         {estimateError && (
             <motion.div 

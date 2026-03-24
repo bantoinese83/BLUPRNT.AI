@@ -14,6 +14,7 @@ import {
 } from "./_shared/estimate.ts";
 import { type GeminiPart } from "../_shared/gemini.ts";
 
+// @ts-ignore
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: getCorsHeaders(req) });
@@ -126,12 +127,18 @@ Deno.serve(async (req: Request) => {
         total_cost_max: s.total_cost_max,
         confidence_score: s.confidence_score,
         source: s.source,
+        metadata: {
+          justification: s.justification,
+          priority: s.priority,
+          phase: s.phase,
+          maintenance_tips: s.maintenance_tips,
+        },
       }));
 
       const { data: inserted, error: insErr } = await admin
         .from("scope_items")
         .insert(rows)
-        .select("id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source");
+        .select("id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata");
 
       if (insErr) {
         console.error(insErr);
@@ -144,24 +151,15 @@ Deno.serve(async (req: Request) => {
           estimated_min_total: payload.summary.estimated_min_total,
           estimated_max_total: payload.summary.estimated_max_total,
           confidence_score: payload.summary.confidence_score,
+          metadata: {
+            value_engineering_tips: payload.summary.value_engineering_tips,
+            regional_context: payload.summary.regional_context,
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", projectId);
 
-      const scope_items = (inserted ?? []).map((r: {
-        id: string;
-        category: string;
-        description: string;
-        finish_tier: string;
-        quantity: number;
-        unit: string;
-        unit_cost_min: number;
-        unit_cost_max: number;
-        total_cost_min: number;
-        total_cost_max: number;
-        confidence_score: number;
-        source: string;
-      }) => ({
+      const scope_items = (inserted ?? []).map((r: any) => ({
         id: r.id,
         category: r.category,
         description: r.description,
@@ -174,6 +172,10 @@ Deno.serve(async (req: Request) => {
         total_cost_max: r.total_cost_max,
         confidence_score: r.confidence_score,
         source: r.source,
+        justification: r.metadata?.justification,
+        priority: r.metadata?.priority,
+        phase: r.metadata?.phase,
+        maintenance_tips: r.metadata?.maintenance_tips,
       }));
 
       return jsonResponse(
