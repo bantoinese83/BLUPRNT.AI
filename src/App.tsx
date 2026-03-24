@@ -4,7 +4,7 @@
  */
 
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";

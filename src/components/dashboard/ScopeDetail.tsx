@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, Pencil, Trash2, Loader2, ListTree, Rocket } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Loader2, ListTree, Rocket } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,27 +8,7 @@ import { supabase } from "@/lib/supabase";
 
 import type { ProjectRow, ScopeRow } from "@/types/database";
 
-function money(a: number | null, b: number | null) {
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(n);
-  if (a != null && b != null) return `${fmt(a)} – ${fmt(b)}`;
-  if (a != null) return fmt(a);
-  return "—";
-}
-
-function stars(score: number | null) {
-  const n = score != null ? Math.min(5, Math.max(0, Math.round(score))) : 3;
-  return Array.from({ length: 5 }, (_, i) => (
-    <Star
-      key={i}
-      className={`w-3 h-3 ${i < n ? "fill-amber-400 text-amber-400" : "text-slate-200"}`}
-    />
-  ));
-}
+import { money, getStars as stars } from "@/lib/formatters";
 
 const TIERS = ["economy", "mid", "premium"] as const;
 

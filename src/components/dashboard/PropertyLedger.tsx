@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { generateSellerPacketBlob } from "@/lib/pdf-export";
+import { money } from "@/lib/formatters";
 
 type ScopeItem = {
   id: string;
@@ -36,14 +37,6 @@ type PropertyLedgerProps = {
   invoices?: InvoiceItem[];
   onUpgradeClick?: () => void;
 };
-
-function money(n: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
 
 export function PropertyLedger({
   projectId,

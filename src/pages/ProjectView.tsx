@@ -4,43 +4,15 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-type ProjectData = {
-  id: string;
-  name: string;
-  estimated_min_total: number | null;
-  estimated_max_total: number | null;
-  confidence_score: number | null;
-};
-
-type ScopeItem = {
-  id: string;
-  category: string;
-  description: string;
-  finish_tier: string | null;
-  quantity: number | null;
-  unit: string | null;
-  total_cost_min: number | null;
-  total_cost_max: number | null;
-};
-
-function money(a: number | null, b: number | null) {
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(n);
-  if (a != null && b != null) return `${fmt(a)} – ${fmt(b)}`;
-  if (a != null) return fmt(a);
-  return "—";
-}
+import { ProjectRow, ScopeRow } from "@/types/database";
+import { money } from "@/lib/formatters";
 
 export default function ProjectView() {
   const { token } = useParams<{ token: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [project, setProject] = useState<ProjectData | null>(null);
-  const [scopeItems, setScopeItems] = useState<ScopeItem[]>([]);
+  const [project, setProject] = useState<ProjectRow | null>(null);
+  const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
 
   useEffect(() => {
     if (!token) {
