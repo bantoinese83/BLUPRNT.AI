@@ -65,7 +65,7 @@ BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
    VITE_STRIPE_ARCHITECT_PRICE_ID=price_1...
    VITE_STRIPE_PROJECT_PASS_PRICE_ID=price_1...
    ```
-3. **Set Secrets**: In Supabase, set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+3. **Set Secrets**: In Supabase, set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and **`STRIPE_ARCHITECT_PRICE_ID`** (must match the Architect price used in checkout so the function can choose subscription vs one-time mode).
 4. **Deploy**: `supabase functions deploy create-checkout stripe-webhook`.
 
 ## Edge Functions (backend)
@@ -78,6 +78,7 @@ BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
 | `upload-invoice`   | On    | Upload PDF/image → Storage + `documents` + `invoices` (Gemini vision OCR when `GEMINI_API_KEY` is set) |
 | `get-invoice`      | On    | Load invoice + line items |
 | `get-project-view` | Off   | Public: fetch project + scope by share token |
+| `delete-account`   | On    | Delete user data, Storage files in `project-documents`, Stripe subscription/customer when `STRIPE_SECRET_KEY` is set, then remove auth user |
 
 \*Gateway JWT off so guests can run the first estimate; saving to a project still requires a valid user token.
 
@@ -106,9 +107,9 @@ Set via Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 | `ALLOWED_ORIGINS` | Comma-separated origins for CORS. If unset, allows `*`. |
 | `RATE_LIMIT_REQUESTS` | Max requests per window (default: 60) |
 | `RATE_LIMIT_WINDOW_MS` | Window in ms (default: 60000) |
-| `STRIPE_SECRET_KEY` | Stripe secret key for webhook (stripe-webhook function) |
+| `STRIPE_SECRET_KEY` | Stripe secret key: `stripe-webhook`, `create-checkout`, and `delete-account` (billing cleanup) |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signing secret from Stripe Dashboard |
-| `STRIPE_ARCHITECT_PRICE_ID` | Optional. Stripe Price ID for the Architect plan; `create-checkout` uses it to choose subscription vs one-time mode (falls back to a built-in default if unset). |
+| `STRIPE_ARCHITECT_PRICE_ID` | **Required** for `create-checkout`. Architect Price ID from Stripe; used to distinguish subscription (Architect) vs one-time (Project Pass) checkout mode. |
 | `GEMINI_API_KEY` | Google Gemini API key for **invoice OCR** and **photo-to-scope** estimates (Edge only; never expose in Vite). |
 | `GEMINI_MODEL` | Optional. Gemini model id (default `gemini-2.5-flash`). Override per [Gemini models](https://ai.google.dev/gemini-api/docs/models). |
 
@@ -134,6 +135,13 @@ Apply migrations from the Supabase SQL editor or CLI to match your project schem
 2. `20250318100000_full_schema.sql`
 3. `20250318110000_invoices_document_type.sql` (adds `document_type`)
 4. `20250318120000_subscriptions_and_passes.sql` (user_subscriptions, project_passes, Stripe webhook support)
+5. `20250324100000_lock_down_get_user_id_by_email.sql` (RPC callable only by `service_role`)
+
+### Observability and scaling
+
+- **Edge logs**: Functions emit JSON lines via `console` (`_shared/log.ts`). Search logs in Supabase (or your host) by `message` / `level`.
+- **Client crashes**: The root `ErrorBoundary` logs a single JSON line with a random `eventId`; users can share that id with support.
+- **Rate limits**: Default limiter is in-memory per isolate (see `_shared/rate-limit.ts`). For multi-instance fairness or stricter caps, add **Redis (e.g. Upstash)**, **gateway limits**, or a **shared DB counter**—see comments in that file.
 
 ### Schema overview
 

@@ -174,7 +174,7 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                     <ul className="space-y-3">
                       {[
                         "Expert AI Insights & Project Strategy",
-                        "Up to 10 smart invoice uploads per month",
+                        "Up to 10 smart invoice uploads per billing period",
                         "Track up to 2 active projects",
                         "Cloud-backed Seller Packet PDF"
                       ].map((item, i) => (

@@ -426,7 +426,7 @@ export default function Settings() {
 
             {!isArchitect && (
               <p className="text-xs text-slate-500 leading-relaxed px-1 font-medium">
-                Upgrade to Architect for <span className="text-slate-900">Advanced AI Project Strategies</span>, 10 smart invoice scans per month, and priority support.
+                Upgrade to Architect for <span className="text-slate-900">Advanced AI Project Strategies</span>, 10 smart invoice scans per billing period, and priority support.
               </p>
             )}
             {isArchitect && (

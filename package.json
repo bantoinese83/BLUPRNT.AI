@@ -11,6 +11,7 @@
     "lint": "eslint . && tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
+    "functions:check": "bash scripts/check-edge-functions.sh",
     "test:ui": "vitest --ui",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "functions:deploy": "supabase functions deploy --project-ref elucgaegaihkklnfoasm",

@@ -1,42 +1,50 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "https://esm.sh/stripe@14?target=denonext";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { getUserIdFromRequest } from "../_shared/auth.ts";
+import { logEdge } from "../_shared/log.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2023-10-16",
 });
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
+  }
+
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405, req);
   }
 
   try {
     const userId = await getUserIdFromRequest(req);
     if (!userId) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Unauthorized" }, 401, req);
     }
 
-    const { priceId, projectId } = await req.json();
+    const body = await req.json().catch(() => null) as {
+      priceId?: string;
+      projectId?: string;
+    } | null;
+    const priceId = typeof body?.priceId === "string" ? body.priceId.trim() : "";
+    const projectId =
+      typeof body?.projectId === "string" ? body.projectId.trim() : "";
 
     if (!priceId) {
-      return new Response(JSON.stringify({ error: "Missing priceId" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Missing priceId" }, 400, req);
     }
 
-    const architectPriceId =
-      Deno.env.get("STRIPE_ARCHITECT_PRICE_ID") ?? "price_1TEDh3DScOjm3APoyO5zBb73";
+    const architectPriceId = Deno.env.get("STRIPE_ARCHITECT_PRICE_ID")?.trim();
+    if (!architectPriceId) {
+      logEdge("error", "create-checkout missing STRIPE_ARCHITECT_PRICE_ID", {});
+      return jsonResponse(
+        { error: "Checkout is not configured. Please try again later." },
+        503,
+        req,
+      );
+    }
+
     const mode = priceId === architectPriceId ? "subscription" : "payment";
 
     const origin = req.headers.get("origin") ?? "";
@@ -54,19 +62,17 @@ Deno.serve(async (req: Request) => {
       cancel_url: `${origin}/dashboard`,
       metadata: {
         userId,
-        project_id: projectId ?? "",
+        project_id: projectId,
       },
       allow_promotion_codes: true,
     });
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ url: session.url }, 200, req);
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const message = error instanceof Error ? error.message : "Checkout failed";
+    logEdge("error", "create-checkout failed", {
+      detail: error instanceof Error ? error.stack : String(error),
     });
+    return jsonResponse({ error: message }, 500, req);
   }
 });

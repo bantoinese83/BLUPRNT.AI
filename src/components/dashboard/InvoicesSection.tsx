@@ -26,7 +26,12 @@ const GUIDE_KEY = "bluprnt_invoice_guide_collapsed";
 
 function friendlyUploadError(err: unknown, body?: { error?: string }): string {
   const msg = body?.error ?? (typeof err === "object" && err && "message" in err ? String((err as { message?: string }).message) : "");
-  if (msg.includes("Free limit") || msg.includes("10 invoice") || msg.includes("Architect plan")) {
+  if (
+    msg.includes("Free plan") ||
+    msg.includes("Free limit") ||
+    msg.includes("10 invoice") ||
+    msg.includes("Architect plan")
+  ) {
     return msg;
   }
   if (msg.includes("403") || msg.toLowerCase().includes("access denied")) {
@@ -117,7 +122,13 @@ export function InvoicesSection({
       }
       if (data && "error" in data && data.error) {
         const e = String(data.error);
-        if (e.includes("Free limit") || e.includes("10 invoice") || e.includes("Upgrade")) {
+        if (
+          e.includes("Free plan") ||
+          e.includes("Free limit") ||
+          e.includes("10 invoice") ||
+          e.includes("billing period") ||
+          e.includes("Upgrade")
+        ) {
           onUpgradeClick("invoice_limit");
         }
         setError(e.includes("limit") || e.includes("Architect") ? e : friendlyUploadError(null, data));

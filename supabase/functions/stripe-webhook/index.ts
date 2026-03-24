@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import { getServiceClient } from "../_shared/auth.ts";
+import { logEdge } from "../_shared/log.ts";
 
 /**
  * Stripe webhook handler. Verify signature, process events.
@@ -59,7 +60,11 @@ Deno.serve(async (req: Request) => {
             const { data: rpcUserId, error: rpcErr } = await admin.rpc("get_user_id_by_email", {
               user_email: customerEmail,
             });
-            if (rpcErr) console.error("RPC get_user_id_by_email:", rpcErr);
+            if (rpcErr) {
+              logEdge("error", "stripe-webhook get_user_id_by_email failed", {
+                detail: String(rpcErr.message),
+              });
+            }
             targetUserId = rpcUserId;
           }
 
@@ -110,11 +115,27 @@ Deno.serve(async (req: Request) => {
           : subscription.status === "past_due" ? "past_due"
           : "trialing";
 
+        const { data: row } = await admin
+          .from("user_subscriptions")
+          .select("current_period_end")
+          .eq("stripe_subscription_id", subscription.id)
+          .maybeSingle();
+
+        const oldMs = row?.current_period_end
+          ? new Date(row.current_period_end).getTime()
+          : 0;
+        const newMs = subscription.current_period_end
+          ? subscription.current_period_end * 1000
+          : 0;
+        const billingPeriodAdvanced = newMs > oldMs;
+
         await admin
           .from("user_subscriptions")
           .update({
             status,
             current_period_end: periodEnd,
+            invoice_uploads_reset_at: periodEnd,
+            ...(billingPeriodAdvanced ? { invoice_uploads_count: 0 } : {}),
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subscription.id);
@@ -137,7 +158,9 @@ Deno.serve(async (req: Request) => {
         break;
     }
   } catch (e) {
-    console.error("Webhook processing error:", e);
+    logEdge("error", "stripe-webhook handler failed", {
+      detail: e instanceof Error ? e.stack : String(e),
+    });
     return new Response("Webhook handler error", { status: 500 });
   }
 

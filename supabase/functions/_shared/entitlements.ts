@@ -1,8 +1,8 @@
 /**
  * Entitlement checks for invoice upload limits.
  * Free: 3 invoices per project.
- * Architect: 10 invoice uploads per month.
- * Project Pass: unlimited for that project for 6 months.
+ * Architect: 10 invoice uploads per Stripe billing period (aligned with current_period_end).
+ * Project Pass: unlimited invoices for that project while pass is valid.
  */
 
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -42,27 +42,24 @@ export async function checkInvoiceUploadAllowed(
     }
   }
 
-  // 2. Check Architect subscription (10/month)
+  // 2. Check Architect subscription (quota per Stripe billing period)
   const { data: sub } = await admin
     .from("user_subscriptions")
-    .select("status, current_period_end, invoice_uploads_count, invoice_uploads_reset_at")
+    .select("status, current_period_end, invoice_uploads_count")
     .eq("user_id", userId)
     .single();
 
   if (sub && sub.status === "active") {
     const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
     if (periodEnd && periodEnd > now) {
-      const resetAt = sub.invoice_uploads_reset_at ? new Date(sub.invoice_uploads_reset_at) : null;
-      let count = sub.invoice_uploads_count ?? 0;
-      if (resetAt && resetAt <= now) {
-        count = 0;
-      }
+      const count = sub.invoice_uploads_count ?? 0;
       if (count < ARCHITECT_UPLOADS_PER_MONTH) {
         return { allowed: true };
       }
       return {
         allowed: false,
-        reason: "Architect plan: 10 invoice uploads per month. Upgrade or wait for next month.",
+        reason:
+          "Architect plan: 10 invoice uploads per billing period. Your limit renews when your subscription renews.",
       };
     }
   }
@@ -77,7 +74,8 @@ export async function checkInvoiceUploadAllowed(
   if ((count ?? 0) >= FREE_INVOICE_LIMIT) {
     return {
       allowed: false,
-      reason: "Free limit: 3 invoices per project. Upgrade for unlimited.",
+      reason:
+        "Free plan: 3 invoices per project. Upgrade for more uploads and premium features.",
     };
   }
 
@@ -88,33 +86,25 @@ export async function incrementArchitectUploadCount(
   admin: SupabaseClient,
   userId: string
 ): Promise<void> {
+  const now = new Date();
   const { data: sub } = await admin
     .from("user_subscriptions")
-    .select("status, invoice_uploads_count, invoice_uploads_reset_at")
+    .select("status, invoice_uploads_count, current_period_end")
     .eq("user_id", userId)
     .single();
 
   if (!sub || sub.status !== "active") return;
 
-  const now = new Date();
-  const resetAt = sub.invoice_uploads_reset_at ? new Date(sub.invoice_uploads_reset_at) : null;
-  let count = sub.invoice_uploads_count ?? 0;
-  let newResetAt = resetAt;
+  const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
+  if (!periodEnd || periodEnd <= now) return;
 
-  if (!resetAt || resetAt <= now) {
-    count = 0;
-    const nextMonth = new Date(now);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    nextMonth.setDate(1);
-    nextMonth.setHours(0, 0, 0, 0);
-    newResetAt = nextMonth.toISOString();
-  }
+  const count = sub.invoice_uploads_count ?? 0;
 
   await admin
     .from("user_subscriptions")
     .update({
       invoice_uploads_count: count + 1,
-      invoice_uploads_reset_at: newResetAt,
+      invoice_uploads_reset_at: periodEnd.toISOString(),
       updated_at: now.toISOString(),
     })
     .eq("user_id", userId);

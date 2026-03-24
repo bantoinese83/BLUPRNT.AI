@@ -1,6 +1,11 @@
 /**
- * In-memory rate limiter per Edge Function instance.
- * For production at scale, use Redis/Upstash or Supabase KV.
+ * In-memory rate limiter per Edge Function instance (resets when isolates recycle).
+ *
+ * At higher traffic, use a shared store so limits apply across instances, e.g.:
+ * - Upstash Redis + sliding window, or
+ * - Supabase table/Vault-backed counter with advisory locks, or
+ * - API gateway rate limits (Cloudflare, Kong) in front of functions.
+ *
  * Set RATE_LIMIT_REQUESTS (default 60) and RATE_LIMIT_WINDOW_MS (default 60000).
  */
 const store = new Map<string, { count: number; resetAt: number }>();

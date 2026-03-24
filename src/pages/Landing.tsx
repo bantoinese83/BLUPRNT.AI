@@ -51,7 +51,7 @@ const PLAN_COMPARISON_ROWS = [
   },
   {
     feature: "Smart invoice scanning",
-    architect: "10 per month",
+    architect: "10 per billing period",
     pass: "Unlimited for 6 months",
     hint: "OCR and sorting for quotes and receipts.",
   },
@@ -756,7 +756,7 @@ export default function Landing() {
                   <ul className="space-y-4 mb-10 flex-1">
                     {[
                       "Expert AI Insights & Project Strategy",
-                      "Up to 10 smart invoice scans per month",
+                      "Up to 10 smart invoice scans per billing period",
                       "Track up to 2 active projects",
                       "Full property ledger & seller packet",
                       "Cloud-backed Seller Records (PDF)"
