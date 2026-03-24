@@ -144,14 +144,14 @@ export default function Landing() {
   return (
     <>
       <Helmet htmlAttributes={{ lang: "en" }}>
-        <title>BLUPRNT — Renovation Cost Estimates, Invoice Tracking &amp; Seller Records</title>
+        <title>Home Renovation Cost Estimator &amp; Remodel Budget Tracker | BLUPRNT.AI</title>
         <meta
           name="description"
-          content="Renovation estimates from photos and location, smart invoice scanning and history, seller record export for homeowners."
+          content="Get professional renovation cost estimates from photos and ZIP, track your remodel budget, and export a property ledger for resale. The financial home for homeowners."
         />
         <meta
           name="keywords"
-          content="renovation cost estimator, home remodel budget, kitchen remodel cost, bathroom remodel cost, invoice tracking, home improvement records, seller packet, property ledger, homeowner renovation app"
+          content="home renovation cost estimator, remodel budget tracker, kitchen remodel cost, bathroom remodel cost, home improvement record, property ledger, AI renovation planner, renovation cost estimator, home remodel budget, invoice tracking, seller packet"
         />
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <link rel="canonical" href={metaBase} />

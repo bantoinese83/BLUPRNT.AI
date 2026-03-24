@@ -102,8 +102,26 @@ export function buildLandingJsonLd(siteUrl: string) {
           description: "Free tier and trial; paid plans available.",
         },
         description:
-          "Renovation estimates from photos and location, smart invoice scanning and history, seller record export for homeowners.",
+          "AI home renovation cost estimator and remodel budget tracker. Plan kitchen and bathroom renovations with location-based pricing and photo analysis.",
         provider: { "@id": orgId },
+      },
+      {
+        "@type": "Service",
+        "@id": `${siteUrl}/#estimator-service`,
+        name: "AI Renovation Cost Estimator",
+        provider: { "@id": orgId },
+        description: "Get grounded cost ranges for home renovations using regional labor and material data combined with AI photo analysis.",
+        serviceType: "Home Improvement Planning",
+        areaServed: "United States"
+      },
+      {
+        "@type": "Service",
+        "@id": `${siteUrl}/#budget-tracker-service`,
+        name: "Remodel Budget Tracker",
+        provider: { "@id": orgId },
+        description: "Track renovation spending against your initial estimate by scanning and organizing project invoices and receipts.",
+        serviceType: "Financial Project Management",
+        areaServed: "United States"
       },
       {
         "@type": "FAQPage",

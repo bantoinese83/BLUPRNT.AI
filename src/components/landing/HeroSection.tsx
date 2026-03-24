@@ -78,7 +78,7 @@ export function HeroSection({ onStart, onCreateAccount }: { onStart: () => void;
           <div className="relative glass-card overflow-hidden rounded-[1.75rem] p-1.5 shadow-xl sm:rounded-[2rem] sm:p-2">
             <img
               src="/images/renovation_hero.png"
-              alt="Modern Home Renovation"
+              alt="Modern home renovation cost estimator dashboard showing AI-driven budget analysis"
               className="max-h-[min(38vh,340px)] w-full rounded-[1.25rem] object-cover object-center shadow-inner sm:max-h-[min(42vh,380px)] sm:rounded-[1.75rem] lg:max-h-[min(48vh,420px)]"
             />
 
