@@ -48,7 +48,7 @@ export function LocationScreen() {
   useEffect(() => {
     if (typeof sessionStorage === "undefined") return;
     if (sessionStorage.getItem(SESSION_IP_KEY)) return;
-    if (locationRef.current.trim()) return;
+    if (String(locationRef.current || "").trim()) return;
 
     sessionStorage.setItem(SESSION_IP_KEY, "1");
     let cancelled = false;
@@ -58,7 +58,7 @@ export function LocationScreen() {
     suggestLocationFromNetwork()
       .then((label) => {
         if (cancelled || !label) return;
-        if (locationRef.current.trim()) return;
+        if (String(locationRef.current || "").trim()) return;
         setLocationInput(label);
         setAutoSource("ip");
         setHint(
@@ -137,7 +137,7 @@ export function LocationScreen() {
               ZIP code or nearest intersection
             </label>
             <div className="relative">
-              {ipLoading && !locationInput.trim() ? (
+              {ipLoading && !String(locationInput || "").trim() ? (
                 <Loader2
                   className="absolute left-3 top-3.5 h-4 w-4 text-slate-900 animate-spin"
                   aria-hidden
@@ -206,7 +206,7 @@ export function LocationScreen() {
             variant="primary"
             className="w-full"
             onClick={() => {
-              if (!locationInput.trim()) {
+              if (!String(locationInput || "").trim()) {
                 toast.error(
                   "Please enter a ZIP code, or click 'Skip for now'.",
                 );

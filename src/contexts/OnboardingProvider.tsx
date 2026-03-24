@@ -43,8 +43,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
 
   const zipFromLocation = useCallback(() => {
-    const digits = locationInput.replace(/\D/g, "").slice(0, 5);
-    return digits.length === 5 ? digits : locationInput.trim() || "00000";
+    const lStr = String(locationInput || "");
+    const digits = lStr.replace(/\D/g, "").slice(0, 5);
+    return digits.length === 5 ? digits : lStr.trim() || "00000";
   }, [locationInput]);
 
   const runPhotoToScope = useCallback(
@@ -89,8 +90,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         formData.set("room_type", projectTypeToRoomType(projectType));
         formData.set("finish_preference", "mid");
         formData.set("location_unset", locationUnset ? "1" : "0");
-        if (scopeDescription.trim())
-          formData.set("scope_description", scopeDescription.trim());
+        if (String(scopeDescription || "").trim())
+          formData.set("scope_description", String(scopeDescription).trim());
         if (!opts?.textOnly) {
           photos.forEach((f) => formData.append("photos[]", f));
         }
