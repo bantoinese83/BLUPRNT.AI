@@ -133,6 +133,19 @@ export default function Dashboard() {
   const [isArchitect, setIsArchitect] = useState(false);
   const lastFetchedProjectId = useRef<string | null>(null);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const upgrade = params.get("upgrade");
+    if (upgrade !== "architect" && upgrade !== "pass") return;
+    params.delete("upgrade");
+    const qs = params.toString();
+    navigate(`${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`, {
+      replace: true,
+    });
+    const id = window.setTimeout(() => setShowUpgrade(true), 0);
+    return () => window.clearTimeout(id);
+  }, [location.search, location.pathname, location.hash, navigate]);
+
   const load = useCallback(async () => {
     if (!isSupabaseConfigured()) {
       setLoading(false);

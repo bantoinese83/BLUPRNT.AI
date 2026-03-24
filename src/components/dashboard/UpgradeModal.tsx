@@ -304,9 +304,7 @@ export function UpgradeModal({
                       className="w-full"
                       variant="outline"
                       size="lg"
-                      disabled={
-                        loadingPlan !== null || !PASS_PRICE_ID || !projectId
-                      }
+                      disabled={loadingPlan !== null || !PASS_PRICE_ID}
                       onClick={() => handleUpgrade("pass")}
                     >
                       {loadingPlan === "pass" ? (

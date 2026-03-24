@@ -36,6 +36,11 @@ export default function Login() {
   const urlErrorParam = searchParams.get("error");
   const urlError = urlErrorParam ? decodeURIComponent(urlErrorParam) : null;
   const displayError = error || urlError;
+  const redirectParam = searchParams.get("redirect");
+  const registerHref =
+    redirectParam != null && redirectParam.trim() !== ""
+      ? `/register?redirect=${encodeURIComponent(redirectParam)}`
+      : "/register";
 
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -302,7 +307,7 @@ export default function Login() {
                     <p className="text-[11px] text-slate-400 font-medium px-1">
                       New here? Use{" "}
                       <Link
-                        to="/register"
+                        to={registerHref}
                         className="text-indigo-600 font-bold hover:underline"
                       >
                         Create account
@@ -347,7 +352,7 @@ export default function Login() {
               variant="outline"
               size="lg"
               className="w-full h-14 gap-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 font-bold rounded-xl"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate(registerHref)}
             >
               <UserPlus className="w-5 h-5 shrink-0" aria-hidden />
               Create free account

@@ -23,11 +23,12 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Unauthorized" }, 401, req);
     }
 
-    const body = await req.json().catch(() => null) as {
+    const body = (await req.json().catch(() => null)) as {
       priceId?: string;
       projectId?: string;
     } | null;
-    const priceId = typeof body?.priceId === "string" ? body.priceId.trim() : "";
+    const priceId =
+      typeof body?.priceId === "string" ? body.priceId.trim() : "";
     const projectId =
       typeof body?.projectId === "string" ? body.projectId.trim() : "";
 
@@ -35,9 +36,9 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Missing priceId" }, 400, req);
     }
 
-    const architectPriceId = Deno.env.get("STRIPE_ARCHITECT_PRICE_ID")?.trim();
-    if (!architectPriceId) {
-      logEdge("error", "create-checkout missing STRIPE_ARCHITECT_PRICE_ID", {});
+    const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY")?.trim();
+    if (!stripeSecret) {
+      logEdge("error", "create-checkout missing STRIPE_SECRET_KEY", {});
       return jsonResponse(
         { error: "Checkout is not configured. Please try again later." },
         503,
@@ -45,7 +46,29 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const mode = priceId === architectPriceId ? "subscription" : "payment";
+    // Prefer Stripe Price metadata over duplicating Architect price id in Edge secrets.
+    const legacyArchitectId = Deno.env.get("STRIPE_ARCHITECT_PRICE_ID")?.trim();
+    let mode: "subscription" | "payment";
+    if (legacyArchitectId && priceId === legacyArchitectId) {
+      mode = "subscription";
+    } else {
+      try {
+        const price = await stripe.prices.retrieve(priceId);
+        mode = price.type === "recurring" ? "subscription" : "payment";
+      } catch (e) {
+        logEdge("error", "create-checkout price retrieve failed", {
+          detail: e instanceof Error ? e.message : String(e),
+        });
+        return jsonResponse(
+          {
+            error:
+              "That plan isn't available right now. Please refresh and try again.",
+          },
+          400,
+          req,
+        );
+      }
+    }
 
     const origin = req.headers.get("origin") ?? "";
 

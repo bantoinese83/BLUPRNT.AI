@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Helmet } from "react-helmet-async";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import {
@@ -40,6 +41,25 @@ export default function Landing() {
       block: "start",
     });
   }, []);
+
+  const handlePlanSelect = useCallback(
+    async (plan: "architect" | "pass") => {
+      if (!isSupabaseConfigured()) {
+        navigate("/login");
+        return;
+      }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        navigate(`/dashboard?upgrade=${plan}`);
+        return;
+      }
+      const afterAuth = `/dashboard?upgrade=${plan}`;
+      navigate(`/login?redirect=${encodeURIComponent(afterAuth)}`);
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     if (hash !== "#faq") return;
@@ -121,7 +141,7 @@ export default function Landing() {
           <LandingStory />
           <LandingFeatures />
           <LandingPricing
-            onNavigate={navigate}
+            onPlanSelect={handlePlanSelect}
             planComparisonRows={PLAN_COMPARISON_ROWS}
           />
           <LandingFaq faqData={LANDING_FAQ} />

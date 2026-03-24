@@ -64,7 +64,7 @@ BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
    VITE_STRIPE_ARCHITECT_PRICE_ID=price_1...
    VITE_STRIPE_PROJECT_PASS_PRICE_ID=price_1...
    ```
-3. **Set Secrets**: In Supabase, set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and **`STRIPE_ARCHITECT_PRICE_ID`** (must match the Architect price used in checkout so the function can choose subscription vs one-time mode).
+3. **Set Secrets**: In Supabase, set **`STRIPE_SECRET_KEY`** and `STRIPE_WEBHOOK_SECRET`. Checkout mode (subscription vs one-time) is inferred from each Stripe Price via the API, so **`STRIPE_ARCHITECT_PRICE_ID` on Edge is optional** (legacy override only).
 4. **Deploy**: Deploy `create-checkout` with gateway JWT off (matches [`supabase/config.toml`](supabase/config.toml)) so the client is not blocked by edge `Invalid JWT` before your code runs; auth is still enforced inside the function.
 
    ```bash
@@ -111,16 +111,16 @@ Edge runtime already has `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERV
 
 Set via Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 
-| Secret                      | Description                                                                                                                                                |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ALLOWED_ORIGINS`           | Comma-separated origins for CORS. If unset, allows `*`.                                                                                                    |
-| `RATE_LIMIT_REQUESTS`       | Max requests per window (default: 60)                                                                                                                      |
-| `RATE_LIMIT_WINDOW_MS`      | Window in ms (default: 60000)                                                                                                                              |
-| `STRIPE_SECRET_KEY`         | Stripe secret key: `stripe-webhook`, `create-checkout`, and `delete-account` (billing cleanup)                                                             |
-| `STRIPE_WEBHOOK_SECRET`     | Webhook signing secret from Stripe Dashboard                                                                                                               |
-| `STRIPE_ARCHITECT_PRICE_ID` | **Required** for `create-checkout`. Architect Price ID from Stripe; used to distinguish subscription (Architect) vs one-time (Project Pass) checkout mode. |
-| `GEMINI_API_KEY`            | Google Gemini API key for **invoice OCR** and **photo-to-scope** estimates (Edge only; never expose in Vite).                                              |
-| `GEMINI_MODEL`              | Optional. Gemini model id (default `gemini-2.5-flash`). Override per [Gemini models](https://ai.google.dev/gemini-api/docs/models).                        |
+| Secret                      | Description                                                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ALLOWED_ORIGINS`           | Comma-separated origins for CORS. If unset, allows `*`.                                                                                                      |
+| `RATE_LIMIT_REQUESTS`       | Max requests per window (default: 60)                                                                                                                        |
+| `RATE_LIMIT_WINDOW_MS`      | Window in ms (default: 60000)                                                                                                                                |
+| `STRIPE_SECRET_KEY`         | Stripe secret key: `stripe-webhook`, `create-checkout`, and `delete-account` (billing cleanup)                                                               |
+| `STRIPE_WEBHOOK_SECRET`     | Webhook signing secret from Stripe Dashboard                                                                                                                 |
+| `STRIPE_ARCHITECT_PRICE_ID` | Optional on Edge. If set, that price id is forced to subscription mode; otherwise mode comes from Stripe (`recurring` → subscription, `one_time` → payment). |
+| `GEMINI_API_KEY`            | Google Gemini API key for **invoice OCR** and **photo-to-scope** estimates (Edge only; never expose in Vite).                                                |
+| `GEMINI_MODEL`              | Optional. Gemini model id (default `gemini-2.5-flash`). Override per [Gemini models](https://ai.google.dev/gemini-api/docs/models).                          |
 
 #### Gemini API (Edge)
 

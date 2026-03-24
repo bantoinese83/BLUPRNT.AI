@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   AlertCircle,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
@@ -26,6 +27,12 @@ type Mode = "password" | "magic";
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const loginHref =
+    redirectParam != null && redirectParam.trim() !== ""
+      ? `/login?redirect=${encodeURIComponent(redirectParam)}`
+      : "/login";
   const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -118,7 +125,8 @@ export default function Register() {
       } catch {
         /* ignore */
       }
-      navigate("/dashboard", { replace: true });
+      const next = getSafeRedirect(redirectParam, "/dashboard");
+      navigate(next, { replace: true });
     } catch {
       setError("Sign-up failed. Try again.");
     } finally {
@@ -136,6 +144,13 @@ export default function Register() {
     if (!isSupabaseConfigured()) {
       setError("Sign-in isn't available right now. Please try again later.");
       return;
+    }
+    if (redirectParam) {
+      try {
+        sessionStorage.setItem("bluprnt_auth_redirect", redirectParam);
+      } catch {
+        /* ignore */
+      }
     }
     setLoading(true);
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -444,7 +459,7 @@ export default function Register() {
               variant="outline"
               size="lg"
               className="w-full h-14 gap-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 font-bold rounded-xl"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(loginHref)}
             >
               <LogIn className="w-5 h-5 shrink-0" aria-hidden />
               Sign in to account

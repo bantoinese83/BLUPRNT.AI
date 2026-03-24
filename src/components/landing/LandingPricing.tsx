@@ -10,12 +10,13 @@ interface PricingRow {
 }
 
 interface LandingPricingProps {
-  onNavigate: (path: string) => void;
+  /** Architect / Project Pass — not the generic onboarding path */
+  onPlanSelect: (plan: "architect" | "pass") => void;
   planComparisonRows: readonly PricingRow[];
 }
 
 export function LandingPricing({
-  onNavigate,
+  onPlanSelect,
   planComparisonRows,
 }: LandingPricingProps) {
   return (
@@ -95,7 +96,7 @@ export function LandingPricing({
               variant="primary"
               size="lg"
               className="w-full h-14 rounded-2xl text-lg font-black liquid-metal-button border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
-              onClick={() => onNavigate("/onboarding")}
+              onClick={() => onPlanSelect("architect")}
             >
               Start Architect free
             </Button>
@@ -144,7 +145,7 @@ export function LandingPricing({
               variant="outline"
               size="lg"
               className="w-full h-14 rounded-2xl text-lg font-black bg-white border-slate-200 hover:bg-white hover:shadow-lg group-hover:scale-[1.02] transition-transform"
-              onClick={() => onNavigate("/onboarding")}
+              onClick={() => onPlanSelect("pass")}
             >
               Get a project pass
             </Button>

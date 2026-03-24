@@ -42,6 +42,8 @@ export default function Settings() {
   const [userLoading, setUserLoading] = useState(true);
   const [isArchitect, setIsArchitect] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  /** Used for Project Pass checkout from Settings (Stripe metadata). */
+  const [upgradeProjectId, setUpgradeProjectId] = useState<string | null>(null);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -66,6 +68,25 @@ export default function Settings() {
           .eq("user_id", u.id)
           .maybeSingle();
         setIsArchitect(sub?.status === "active");
+
+        const { data: owned } = await supabase
+          .from("properties")
+          .select("id")
+          .eq("owner_user_id", u.id);
+        const propIds = (owned ?? []).map((p) => p.id);
+        if (propIds.length === 0) {
+          setUpgradeProjectId(null);
+        } else {
+          const { data: projs } = await supabase
+            .from("projects")
+            .select("id")
+            .in("property_id", propIds)
+            .order("updated_at", { ascending: false })
+            .limit(1);
+          setUpgradeProjectId(projs?.[0]?.id ?? null);
+        }
+      } else {
+        setUpgradeProjectId(null);
       }
 
       setUserLoading(false);
@@ -626,6 +647,7 @@ export default function Settings() {
         isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}
         openReason="general"
+        projectId={upgradeProjectId}
       />
     </div>
   );
