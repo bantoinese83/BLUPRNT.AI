@@ -141,16 +141,29 @@ export function UpgradeModal({
                 </div>
               )}
 
-              {openReason === "invoice_limit" && (
+              {openReason === "invoice_limit" && isArchitect && (
                 <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-                  You&apos;ve used all <strong>3 free invoices</strong> on this
-                  project. Upgrade to add more invoices anytime.{" "}
+                  You&apos;ve used your <strong>10 invoice uploads</strong> for
+                  this billing period. Your limit will reset when your
+                  subscription renews.{" "}
                   <span className="text-slate-600">
-                    Quotes, warranties, and permits don&apos;t count toward that
-                    limit—you can still upload those for free.
+                    Quotes, warranties, and permits don&apos;t count toward this
+                    limit.
                   </span>
                 </p>
               )}
+              {openReason === "invoice_limit" &&
+                !isArchitect &&
+                !hasProjectPass && (
+                  <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+                    You&apos;ve used all <strong>3 free invoices</strong> on
+                    this project. Upgrade to add more invoices anytime.{" "}
+                    <span className="text-slate-600">
+                      Quotes, warranties, and permits don&apos;t count toward
+                      that limit—you can still upload those for free.
+                    </span>
+                  </p>
+                )}
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
                 Protect your {formatEstimate(mid)} investment
               </h2>

@@ -27,6 +27,8 @@ type InvoicesSectionProps = {
   onUploaded: () => void;
   /** Pass invoice_limit when user hit the 3-invoice cap so the upgrade modal can explain. */
   onUpgradeClick: (reason?: "invoice_limit") => void;
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
 };
 
 const FREE_LIMIT = 3;
@@ -60,6 +62,8 @@ export function InvoicesSection({
   invoices,
   onUploaded,
   onUpgradeClick,
+  isArchitect = false,
+  hasProjectPass = false,
 }: InvoicesSectionProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -80,7 +84,11 @@ export function InvoicesSection({
   const invoiceCount = invoices.filter(
     (i) => (i.document_type ?? "invoice") === "invoice",
   ).length;
-  const atLimit = documentType === "invoice" && invoiceCount >= FREE_LIMIT;
+  const atLimit =
+    !isArchitect &&
+    !hasProjectPass &&
+    documentType === "invoice" &&
+    invoiceCount >= FREE_LIMIT;
 
   const typeParam = searchParams.get("type");
   useEffect(() => {
@@ -326,6 +334,8 @@ export function InvoicesSection({
         </p>
       )}
       {documentType === "invoice" &&
+        !isArchitect &&
+        !hasProjectPass &&
         invoiceCount > 0 &&
         invoiceCount < FREE_LIMIT && (
           <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">

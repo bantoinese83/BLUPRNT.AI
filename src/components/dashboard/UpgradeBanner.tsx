@@ -6,12 +6,17 @@ const FREE_INVOICE_LIMIT = 3;
 interface UpgradeBannerProps {
   invoiceCount: number;
   onUpgradeClick: () => void;
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
 }
 
 export function UpgradeBanner({
   invoiceCount,
   onUpgradeClick,
+  isArchitect = false,
+  hasProjectPass = false,
 }: UpgradeBannerProps) {
+  if (isArchitect || hasProjectPass) return null;
   if (invoiceCount < FREE_INVOICE_LIMIT) return null;
 
   return (

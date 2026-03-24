@@ -541,6 +541,8 @@ export default function Dashboard() {
         );
         setShowUpgrade(true);
       }}
+      isArchitect={isArchitect}
+      hasProjectPass={hasProjectPass}
     />
   );
 
@@ -641,6 +643,8 @@ export default function Dashboard() {
               setUpgradeReason("invoice_limit");
               setShowUpgrade(true);
             }}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
           />
         </motion.div>
 
