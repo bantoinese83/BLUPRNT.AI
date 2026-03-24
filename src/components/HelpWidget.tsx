@@ -37,6 +37,22 @@ export function HelpWidget() {
               </button>
             </div>
             <div className="p-4 space-y-3">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <h5 className="text-sm font-semibold text-slate-900">Command bar</h5>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
+                  Press{" "}
+                  <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-800 shadow-sm">
+                    ⌘K
+                  </kbd>{" "}
+                  on Mac or{" "}
+                  <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-800 shadow-sm">
+                    Ctrl+K
+                  </kbd>{" "}
+                  on Windows to open quick actions. Choose{" "}
+                  <span className="font-semibold text-slate-800">Create New Project</span> to run the estimate flow for another remodel.
+                </p>
+              </div>
+
               <a 
                 href="mailto:connect@monarch-labs.com?subject=Need%20Help%20with%20BLUPRNT"
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 transition-colors group"

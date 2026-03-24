@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, FolderOpen, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ChevronDown, FolderOpen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ProjectOption = {
@@ -36,41 +37,55 @@ export function ProjectSwitcher({
   const current = projects.find((p) => p.id === currentId);
   const label = current?.name ?? "Select project";
 
+  const newProjectButton = (
+    <Link
+      to="/onboarding"
+      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:border-indigo-200 hover:bg-indigo-50/80 hover:text-indigo-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:px-4"
+    >
+      <Plus className="h-4 w-4 shrink-0" aria-hidden />
+      <span>New project</span>
+    </Link>
+  );
+
   if (projects.length <= 1 && !onDelete) {
     return (
-      <div className="flex items-center gap-2.5 text-slate-700 bg-white/50 border border-slate-200/60 px-4 py-2 rounded-2xl shadow-sm">
-        <FolderOpen className="w-4 h-4 text-slate-900 shrink-0" aria-hidden />
-        <span className="font-bold text-sm truncate max-w-[180px]">{label}</span>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-slate-200/60 bg-white/50 px-4 py-2 text-slate-700 shadow-sm">
+          <FolderOpen className="h-4 w-4 shrink-0 text-slate-900" aria-hidden />
+          <span className="truncate text-sm font-bold">{label}</span>
+        </div>
+        {newProjectButton}
       </div>
-
     );
   }
 
   return (
-    <div ref={ref} className="relative">
-      <Button
-        variant="outline"
-        className={`gap-2.5 min-w-[160px] max-w-[240px] h-11 px-4 rounded-2xl border-slate-200/80 bg-white shadow-sm transition-all hover:border-slate-400 hover:shadow-md group ${open ? 'ring-2 ring-slate-950/20 border-slate-950' : ''}`}
-
-        onClick={() => setOpen((o) => !o)}
-        disabled={disabled}
-        type="button"
-        aria-expanded={open}
-      >
-        <FolderOpen className={`w-4 h-4 shrink-0 transition-colors ${open ? 'text-slate-950' : 'text-slate-400 group-hover:text-slate-600'}`} aria-hidden />
-        <span className="truncate font-bold text-slate-700">{label}</span>
-        <ChevronDown
-          className={`w-4 h-4 shrink-0 ml-auto transition-transform duration-300 ${open ? "rotate-180 text-slate-950" : "text-slate-400"}`}
-
-          aria-hidden
-        />
-      </Button>
-
-      {open && (
-        <div 
-          className="absolute top-full left-0 mt-2 w-full min-w-[260px] max-w-[320px] rounded-[1.25rem] border border-slate-200 bg-white shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
-          role="listbox"
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
+      <div ref={ref} className="relative min-w-0 flex-1">
+        <Button
+          variant="outline"
+          className={`h-11 min-w-0 max-w-full gap-2.5 rounded-2xl border-slate-200/80 bg-white px-4 shadow-sm transition-all hover:border-slate-400 hover:shadow-md group sm:min-w-[160px] sm:max-w-[280px] ${open ? "border-slate-950 ring-2 ring-slate-950/20" : ""}`}
+          onClick={() => setOpen((o) => !o)}
+          disabled={disabled}
+          type="button"
+          aria-expanded={open}
         >
+          <FolderOpen
+            className={`h-4 w-4 shrink-0 transition-colors ${open ? "text-slate-950" : "text-slate-400 group-hover:text-slate-600"}`}
+            aria-hidden
+          />
+          <span className="min-w-0 truncate font-bold text-slate-700">{label}</span>
+          <ChevronDown
+            className={`ml-auto h-4 w-4 shrink-0 transition-transform duration-300 ${open ? "rotate-180 text-slate-950" : "text-slate-400"}`}
+            aria-hidden
+          />
+        </Button>
+
+        {open && (
+          <div
+            className="animate-in fade-in slide-in-from-top-2 absolute left-0 top-full z-50 mt-2 w-full min-w-[260px] max-w-[min(100vw-2rem,320px)] rounded-[1.25rem] border border-slate-200 bg-white py-2 shadow-2xl duration-200"
+            role="listbox"
+          >
           <div className="px-3 pb-2 mb-2 border-b border-slate-50">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Your Projects</span>
           </div>
@@ -115,8 +130,20 @@ export function ProjectSwitcher({
               );
             })}
           </div>
+          <div className="border-t border-slate-100 px-2 pt-2">
+            <Link
+              to="/onboarding"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold text-indigo-700 transition-colors hover:bg-indigo-50"
+              onClick={() => setOpen(false)}
+            >
+              <Plus className="h-4 w-4 shrink-0" aria-hidden />
+              New project
+            </Link>
+          </div>
         </div>
-      )}
+        )}
+      </div>
+      {newProjectButton}
     </div>
   );
 }
