@@ -19,6 +19,7 @@
     "functions:deploy:project-view": "supabase functions deploy get-project-view --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:delete-account": "supabase functions deploy delete-account --project-ref elucgaegaihkklnfoasm",
     "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
+    "functions:deploy:send-email": "supabase functions deploy send-email --project-ref elucgaegaihkklnfoasm",
     "prepare": "husky"
   },
   "dependencies": {
