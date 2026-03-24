@@ -16,6 +16,7 @@ import {
   Camera,
   FileCheck,
   MessageCircleQuestion,
+  Sparkles,
   X,
 } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
@@ -32,6 +33,51 @@ const SITE_URL =
   (typeof window !== "undefined" ? window.location.origin : "");
 
 const FALLBACK_SITE_URL = "https://bluprntai.com";
+
+const PLAN_COMPARISON_ROWS = [
+  {
+    feature: "Active projects",
+    architect: "Up to 2 at once",
+    pass: "One project",
+    hint: "How many remodels you can run in parallel.",
+  },
+  {
+    feature: "Photo-to-estimate",
+    architect: "Unlimited",
+    pass: "Unlimited",
+    hint: "Turn photos and scope into grounded cost ranges.",
+  },
+  {
+    feature: "Smart invoice scanning",
+    architect: "10 per month",
+    pass: "Unlimited for 6 months",
+    hint: "OCR and sorting for quotes and receipts.",
+  },
+  {
+    feature: "Property ledger",
+    architect: "Full access",
+    pass: "Full access",
+    hint: "Your improvement history in one place.",
+  },
+  {
+    feature: "Export records",
+    architect: "Unlimited",
+    pass: "Unlimited",
+    hint: "Packets and exports for buyers, agents, and lenders.",
+  },
+  {
+    feature: "Support",
+    architect: "Priority",
+    pass: "Standard",
+    hint: "How fast we get back when you need help.",
+  },
+  {
+    feature: "Billing",
+    architect: "$12 / month",
+    pass: "$49 one-time",
+    hint: "Choose ongoing or a single-project pass.",
+  },
+] as const;
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -154,7 +200,7 @@ export default function Landing() {
                       className="h-full w-full object-contain"
                     />
                   </div>
-                  <span className="truncate text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
+                  <span className="truncate pr-1 text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
                     BLUPRNT<span className="text-indigo-600">.AI</span>
                   </span>
                 </Link>
@@ -549,11 +595,54 @@ export default function Landing() {
                   Our mission is to turn every renovation into a trackable, transparent financial asset. We believe homeowners deserve a clear, regional-grounded path from their first photo to their final sale.
                 </p>
               </div>
-              <div className="mt-10 flex flex-col items-center gap-2">
-                <div className="h-12 w-12 rounded-full border-2 border-white shadow-md overflow-hidden bg-slate-200">
-                  <div className="w-full h-full bg-slate-400" /> {/* Placeholder for founder photo */}
+              <div className="mt-12">
+                <p className="mb-8 text-center text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 sm:mb-10">
+                  The BLUPRNT Team
+                </p>
+                <div className="flex flex-col items-stretch justify-center gap-10 sm:flex-row sm:items-start sm:gap-14 lg:gap-16">
+                  <figure className="mx-auto flex max-w-[14rem] flex-col items-center text-center sm:mx-0">
+                    <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full bg-white shadow-xl shadow-slate-300/40 ring-[3px] ring-white sm:h-36 sm:w-36">
+                      <img
+                        src="/headshot-bryan.PNG"
+                        alt="Portrait of Bryan Antoine, co-founder of BLUPRNT"
+                        className="h-full w-full object-cover object-[center_15%]"
+                        width={288}
+                        height={288}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    <figcaption className="mt-4 space-y-0.5">
+                      <span className="block text-base font-black tracking-tight text-slate-900">
+                        Bryan Antoine
+                      </span>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Co-founder
+                      </span>
+                    </figcaption>
+                  </figure>
+                  <figure className="mx-auto flex max-w-[14rem] flex-col items-center text-center sm:mx-0">
+                    <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full bg-white shadow-xl shadow-slate-300/40 ring-[3px] ring-white sm:h-36 sm:w-36">
+                      <img
+                        src="/headshot-lauren.PNG"
+                        alt="Portrait of Lauren Antoine, co-founder of BLUPRNT"
+                        className="h-full w-full object-cover object-[center_15%]"
+                        width={288}
+                        height={288}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    <figcaption className="mt-4 space-y-0.5">
+                      <span className="block text-base font-black tracking-tight text-slate-900">
+                        Lauren Antoine
+                      </span>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Co-founder
+                      </span>
+                    </figcaption>
+                  </figure>
                 </div>
-                <p className="text-sm font-bold text-slate-900">The BLUPRNT Team</p>
               </div>
             </div>
           </section>
@@ -724,40 +813,113 @@ export default function Landing() {
                 All plans include a 3-invoice free trial per project. No credit card required to start.
               </p>
 
-              {/* Detailed Comparison Table */}
-              <div className="mt-24 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-100/50">
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                  <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-900">Feature Comparison</h3>
+              {/* Plan comparison */}
+              <motion.div
+                className="mx-auto mt-20 max-w-4xl sm:mt-24"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="mb-8 text-center sm:mb-10">
+                  <p className="mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                    Plans
+                  </p>
+                  <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                    Compare at a glance
+                  </h3>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600 sm:text-base">
+                    Same core product — pick monthly for ongoing work, or a pass for one big remodel.
+                  </p>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-200">
-                        <th className="px-6 py-4 text-sm font-black text-slate-900 bg-slate-50/50 w-1/2">Features</th>
-                        <th className="px-6 py-4 text-sm font-black text-slate-900 text-center">Architect</th>
-                        <th className="px-6 py-4 text-sm font-black text-slate-900 text-center">Project Pass</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {[
-                        ["Active Projects", "Up to 2", "Single Project"],
-                        ["Photo-to-Estimate", "Unlimited", "Unlimited"],
-                        ["Smart Scanning", "10 / month", "Unlimited (6mo)"],
-                        ["Property Ledger", "Full Access", "Full Access"],
-                        ["Export Records", "Unlimited", "Unlimited"],
-                        ["Support", "Priority", "Standard"],
-                        ["Subscription", "Monthly", "One-time"],
-                      ].map(([feature, architect, pass], i) => (
-                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-semibold text-slate-700">{feature}</td>
-                          <td className="px-6 py-4 text-sm text-center font-bold text-slate-900">{architect}</td>
-                          <td className="px-6 py-4 text-sm text-center font-bold text-slate-900">{pass}</td>
+
+                <div className="overflow-hidden rounded-[1.75rem] border border-slate-200/90 bg-white shadow-xl shadow-slate-200/40 ring-1 ring-slate-100/80">
+                  <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
+                    <table className="w-full min-w-[520px] border-collapse text-left">
+                      <caption className="sr-only">
+                        Comparison of Architect subscription and Project Pass for BLUPRNT features
+                      </caption>
+                      <thead>
+                        <tr className="border-b border-slate-200/90">
+                          <th
+                            scope="col"
+                            className="sticky left-0 z-20 min-w-[10.5rem] bg-gradient-to-b from-slate-50 to-slate-50/90 px-4 py-5 text-left align-bottom shadow-[6px_0_14px_-8px_rgba(15,23,42,0.12)] sm:min-w-[13rem] sm:px-6 sm:py-6"
+                          >
+                            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                              What you get
+                            </span>
+                          </th>
+                          <th
+                            scope="col"
+                            className="bg-gradient-to-b from-indigo-50 to-indigo-50/80 px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
+                          >
+                            <div className="flex flex-col items-center gap-1.5">
+                              <span className="text-xs font-black uppercase tracking-[0.14em] text-indigo-900">
+                                Architect
+                              </span>
+                              <span className="rounded-full bg-indigo-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm shadow-indigo-900/20">
+                                Most flexible
+                              </span>
+                              <span className="text-sm font-bold tabular-nums text-slate-700">
+                                $12<span className="text-slate-500">/mo</span>
+                              </span>
+                            </div>
+                          </th>
+                          <th
+                            scope="col"
+                            className="bg-gradient-to-b from-slate-50 to-white px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
+                          >
+                            <div className="flex flex-col items-center gap-1.5">
+                              <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-800">
+                                Project Pass
+                              </span>
+                              <span className="rounded-full bg-slate-200/80 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-600">
+                                One project
+                              </span>
+                              <span className="text-sm font-bold tabular-nums text-slate-700">
+                                $49<span className="text-slate-500"> once</span>
+                              </span>
+                            </div>
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {PLAN_COMPARISON_ROWS.map((row) => (
+                          <tr
+                            key={row.feature}
+                            className="group border-b border-slate-100/90 transition-colors last:border-0 hover:bg-slate-50/70"
+                          >
+                            <th
+                              scope="row"
+                              className="sticky left-0 z-10 min-w-[10.5rem] border-r border-slate-100/90 bg-white px-4 py-4 text-left align-top shadow-[4px_0_12px_-6px_rgba(15,23,42,0.08)] transition-colors group-hover:bg-slate-50/95 sm:min-w-[13rem] sm:px-6 sm:py-5"
+                            >
+                              <span className="block text-sm font-bold text-slate-900">{row.feature}</span>
+                              <span className="mt-1 block text-xs font-medium leading-snug text-slate-500">
+                                {row.hint}
+                              </span>
+                            </th>
+                            <td className="bg-indigo-50/35 px-4 py-4 text-center align-top transition-colors group-hover:bg-indigo-50/55 sm:px-6 sm:py-5">
+                              <span className="inline-block text-sm font-semibold tabular-nums text-indigo-950">
+                                {row.architect}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-center align-top text-slate-700 transition-colors group-hover:bg-white/80 sm:px-6 sm:py-5">
+                              <span className="inline-block text-sm font-semibold text-slate-800">
+                                {row.pass}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="border-t border-slate-100 bg-slate-50/50 px-4 py-4 text-center text-xs leading-relaxed text-slate-500 sm:px-6">
+                    Project Pass includes Architect features for six months, locked to one project. After that,
+                    your ledger stays readable — upgrade anytime if you start another remodel.
+                  </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </section>
 

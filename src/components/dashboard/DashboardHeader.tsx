@@ -25,7 +25,7 @@ export function DashboardHeader({ onSignOut, projectName, isArchitect, onUpgrade
           </Link>
           <div className="min-w-0">
             <Link to="/dashboard">
-              <h1 className="font-black text-slate-950 tracking-tighter block truncate text-lg leading-none mb-1 uppercase italic">
+              <h1 className="font-black pr-1 text-slate-950 tracking-tighter block truncate text-lg leading-none mb-1 uppercase italic">
                 BLUPRNT<span className="text-slate-900">.AI</span>
               </h1>
             </Link>
