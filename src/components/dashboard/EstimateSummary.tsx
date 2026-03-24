@@ -22,6 +22,7 @@ export function EstimateSummary({
 }) {
   const navigate = useNavigate();
   const conf = project.confidence_score ?? 4.5;
+  const regionalSignal = project.metadata?.regional_signal;
 
   const isEmpty = scopeItems.length === 0;
 
@@ -32,10 +33,17 @@ export function EstimateSummary({
         <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
 
         <div className="space-y-3 relative z-10">
-          <p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
-            <Wallet className="w-3.5 h-3.5 shrink-0" aria-hidden />
-            Projected Investment
-          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
+              <Wallet className="w-3.5 h-3.5 shrink-0" aria-hidden />
+              Projected Investment
+            </p>
+            {regionalSignal && (
+              <Badge className="bg-indigo-500/20 text-indigo-300 border-none text-[9px] font-black uppercase tracking-widest py-0.5 px-2">
+                {regionalSignal}
+              </Badge>
+            )}
+          </div>
 
           <div className="text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums text-white">
             {money(project.estimated_min_total, project.estimated_max_total)}

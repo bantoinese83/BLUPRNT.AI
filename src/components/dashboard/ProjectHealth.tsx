@@ -248,6 +248,34 @@ export function ProjectHealth({
             "{message}"
           </p>
         </motion.div>
+
+        {invoiceTotal > 0 && (
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 px-1">
+              <span>Project Completion</span>
+              <span className="text-slate-900">
+                {Math.min(
+                  100,
+                  Math.round((invoiceTotal / (estimatedMin || 1)) * 100),
+                )}
+                %
+              </span>
+            </div>
+            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative">
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-slate-900 rounded-full"
+                initial={{ width: 0 }}
+                animate={{
+                  width: `${Math.min(100, (invoiceTotal / (estimatedMin || 1)) * 100)}%`,
+                }}
+                transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
+              />
+            </div>
+            <p className="text-[9px] text-slate-400 font-bold text-center uppercase tracking-widest pt-1">
+              Based on paid invoices vs. minimum baseline
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

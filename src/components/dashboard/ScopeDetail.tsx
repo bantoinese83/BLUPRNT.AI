@@ -286,6 +286,9 @@ export function ScopeDetail({
                         const maintenance =
                           item.maintenance_tips ||
                           item.metadata?.maintenance_tips;
+                        const confidenceReason =
+                          item.confidence_reason ||
+                          item.metadata?.confidence_reason;
 
                         return (
                           <div
@@ -446,7 +449,8 @@ export function ScopeDetail({
                                   <div className="pt-1 flex items-center gap-1 text-[10px] font-medium text-slate-400">
                                     {stars(item.confidence_score)}
                                     <span className="ml-1">
-                                      Regional pricing accuracy
+                                      {confidenceReason ||
+                                        "Regional pricing accuracy"}
                                     </span>
                                   </div>
                                 </div>

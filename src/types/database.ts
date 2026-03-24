@@ -5,10 +5,12 @@ export type ProjectRow = {
   estimated_min_total: number | null;
   estimated_max_total: number | null;
   confidence_score: number | null;
+  stage: string | null;
   created_at?: string;
   metadata?: {
     value_engineering_tips?: string[];
     regional_context?: string;
+    regional_signal?: string;
   };
 };
 
@@ -24,6 +26,7 @@ export type ScopeRow = {
   total_cost_min: number | null;
   total_cost_max: number | null;
   confidence_score: number | null;
+  confidence_reason?: string;
   source?: "text" | "photo";
   justification?: string;
   priority?: "high" | "medium" | "low";
@@ -34,6 +37,7 @@ export type ScopeRow = {
     priority?: "high" | "medium" | "low";
     phase?: string;
     maintenance_tips?: string;
+    confidence_reason?: string;
   };
 };
 

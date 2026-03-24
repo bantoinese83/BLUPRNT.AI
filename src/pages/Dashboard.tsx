@@ -38,6 +38,7 @@ import {
 } from "@/components/dashboard/UpgradeModal";
 import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
+import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
 import { DashboardTabIntro } from "@/components/dashboard/DashboardTabIntro";
 import { Settings2, LogOut, ListTree } from "lucide-react";
 import { toast } from "sonner";
@@ -184,7 +185,7 @@ export default function Dashboard() {
     const { data: allProjects } = await supabase
       .from("projects")
       .select(
-        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, properties!inner(owner_user_id)",
+        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, properties!inner(owner_user_id)",
       )
       .eq("properties.owner_user_id", session.user.id)
       .order("created_at", { ascending: false });
@@ -358,22 +359,43 @@ export default function Dashboard() {
   async function handleProjectDelete(id: string) {
     if (!isSupabaseConfigured()) return;
 
+    // Store current state for rollback
+    const originalProjects = [...projects];
+    const originalCurrentProject = project;
+
+    // Optimistically update UI
+    setProjects(projects.filter((p) => p.id !== id));
+    if (id === project?.id) {
+      setProject(null);
+      setScopeItems([]);
+      setInvoices([]);
+    }
+
     const deleteAction = async () => {
       const { error } = await supabase.from("projects").delete().eq("id", id);
       if (error) throw error;
+
+      if (id === localStorage.getItem("bluprnt_project_id")) {
+        localStorage.removeItem("bluprnt_project_id");
+      }
       return true;
     };
 
     toast.promise(deleteAction(), {
       loading: "Deleting project...",
       success: () => {
-        if (id === project?.id) {
-          localStorage.removeItem("bluprnt_project_id");
+        // If we deleted the current project, we need to load or redirect
+        if (id === originalCurrentProject?.id) {
+          load();
         }
-        load();
         return "Project permanently removed";
       },
-      error: "Failed to delete project",
+      error: () => {
+        // Rollback on error
+        setProjects(originalProjects);
+        setProject(originalCurrentProject);
+        return "Failed to delete project";
+      },
     });
   }
 
@@ -544,6 +566,44 @@ export default function Dashboard() {
         <motion.div variants={itemVariants}>
           <DashboardWelcomeBanner />
         </motion.div>
+
+        {project && (
+          <motion.div variants={itemVariants}>
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
+                Your Guided Path
+              </h3>
+              <NextStepsChecklist
+                stage={project.stage || "planning"}
+                onAction={(id) => {
+                  if (id === "review-scope") navigate("/dashboard/scope");
+                  if (id === "upload-quote") {
+                    const scrollTarget = document.getElementById(
+                      "invoice-upload-anchor",
+                    );
+                    if (scrollTarget)
+                      scrollTarget.scrollIntoView({ behavior: "smooth" });
+                  }
+                  if (id === "export-packet") handleExportPDF();
+                  if (id === "upload-invoice") {
+                    const scrollTarget = document.getElementById(
+                      "invoice-upload-anchor",
+                    );
+                    if (scrollTarget)
+                      scrollTarget.scrollIntoView({ behavior: "smooth" });
+                  }
+                  if (id === "review-health") {
+                    const scrollTarget = document.getElementById(
+                      "property-ledger-anchor",
+                    );
+                    if (scrollTarget)
+                      scrollTarget.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
 
         <motion.div variants={itemVariants}>{stats}</motion.div>
 

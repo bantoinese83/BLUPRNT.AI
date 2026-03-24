@@ -363,7 +363,31 @@ export function InvoicesSection({
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {invoices.length === 0 && (
+        {uploading && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative"
+          >
+            <Card className="border-slate-200 bg-slate-50/50 border-dashed animate-pulse h-[100px]">
+              <CardContent className="p-4 flex items-center space-x-4 h-full">
+                <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center shrink-0">
+                  <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                </div>
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 bg-slate-200 rounded w-2/3" />
+                  <div className="h-3 bg-slate-200 rounded w-1/3" />
+                </div>
+              </CardContent>
+            </Card>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] bg-white px-3 py-1 rounded-full border border-slate-100 shadow-sm">
+                AI Reading...
+              </span>
+            </div>
+          </motion.div>
+        )}
+        {invoices.length === 0 && !uploading && (
           <div className="sm:col-span-2 flex flex-col items-center justify-center p-10 rounded-2xl border-2 border-dashed border-slate-200 bg-white/60 text-center">
             <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
               <FileText className="w-7 h-7 text-slate-400" />

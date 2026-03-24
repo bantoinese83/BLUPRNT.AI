@@ -30,7 +30,9 @@ export function cityFromZip(zip: string): string {
   if (prefix >= 600 && prefix <= 619) return "Miami area";
   if (prefix >= 500 && prefix <= 519) return "Phoenix area";
 
-  const region = ZIP_REGION_RANGES.find((r) => prefix >= r.min && prefix <= r.max);
+  const region = ZIP_REGION_RANGES.find(
+    (r) => prefix >= r.min && prefix <= r.max,
+  );
   if (region) return region.label;
 
   return "your area";
@@ -49,7 +51,7 @@ export async function cityFromZipUniversal(zip: string): Promise<string> {
       headers: { Accept: "application/json" },
     });
     if (!res.ok) return cityFromZip(z);
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       places?: Array<{
         "place name"?: string;
         "state abbreviation"?: string;
@@ -73,6 +75,7 @@ export interface EstimatePayload {
     confidence_score: number;
     value_engineering_tips?: string[];
     regional_context?: string;
+    regional_signal?: string; // e.g., "Matched to 2026 Material Costs in Austin"
   };
   scope_items: Array<{
     category: string;
@@ -85,6 +88,7 @@ export interface EstimatePayload {
     total_cost_min: number;
     total_cost_max: number;
     confidence_score: number;
+    confidence_reason?: string; // e.g., "Estimated as mid-range hardwood"
     source: "photo";
     justification?: string;
     priority?: "high" | "medium" | "low";
@@ -94,7 +98,6 @@ export interface EstimatePayload {
   explanations: string[];
 }
 
-
 export async function extractScopeWithGemini(input: {
   room_type: RoomType;
   zip_code: string;
@@ -102,9 +105,18 @@ export async function extractScopeWithGemini(input: {
   scopeDescription?: string | null;
   photoParts?: GeminiPart[];
 }): Promise<EstimatePayload | null> {
-  const { room_type, zip_code, finish_preference, scopeDescription, photoParts = [] } = input;
+  const {
+    room_type,
+    zip_code,
+    finish_preference,
+    scopeDescription,
+    photoParts = [],
+  } = input;
   const area = await cityFromZipUniversal(zip_code);
-  const dateStr = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long' });
+  const dateStr = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  });
 
   const systemInstruction = `You are a Senior Residential Construction Estimator with 20+ years of experience in the ${area}.
 Your goal is to provide an ultra-detailed, high-value "Project Blueprint" that justifies its cost and helps the homeowner plan their budget.
@@ -113,11 +125,13 @@ Expert Guidelines:
 1. Provide 8-15 specific line items. Group them mentally by construction phase (e.g., Site Prep, Rough-in, Finishes).
 2. For each item, provide a "Justification" explaining why this cost is necessary (e.g., "Standard for high-moisture kitchen areas", "Requires specialized labor for large-format tiles").
 3. Assign a "Priority" (high: essential for code/safety, medium: standard functionality, low: aesthetic upgrade).
-4. Provide "Maintenance Tips" for long-term value (e.g., "Seal grout every 6 months to prevent staining").
-5. In the summary, provide "Value Engineering Tips" on how to save 10-15% without sacrificing major quality.
-6. Provide "Regional Context" regarding ${area} labor markets, permit expectations, or material availability in ${dateStr}.
-7. Ensure all math is perfect: total_cost_min = quantity * unit_cost_min.
-8. If photos are provided, identify specific brands, damage, or structural constraints visible.`;
+4. For each item, provide a "Confidence Reason" if the score is less than 5 (e.g., "Estimated as mid-range hardwood based on color/grain visible", "Assuming standard 8ft ceiling height").
+5. Provide "Maintenance Tips" for long-term value (e.g., "Seal grout every 6 months to prevent staining").
+6. In the summary, provide "Value Engineering Tips" on how to save 10-15% without sacrificing major quality.
+7. Provide a "Regional Signal" regarding specific local data points (e.g., "Matched to Q1 2026 Labor Rates in ${area}").
+8. Provide "Regional Context" regarding ${area} labor markets, permit expectations, or material availability in ${dateStr}.
+9. Ensure all math is perfect: total_cost_min = quantity * unit_cost_min.
+10. If photos are provided, identify specific brands, damage, or structural constraints visible.`;
 
   const prompt = `Project: ${room_type} Renovation
 Location: ${zip_code} (${area})
@@ -137,9 +151,15 @@ Please generate the detailed blueprint.`;
           estimated_max_total: { type: "number" },
           confidence_score: { type: "number", description: "1 to 5" },
           value_engineering_tips: { type: "array", items: { type: "string" } },
-          regional_context: { type: "string" }
+          regional_context: { type: "string" },
+          regional_signal: { type: "string" },
         },
-        required: ["estimated_min_total", "estimated_max_total", "confidence_score"]
+        required: [
+          "estimated_min_total",
+          "estimated_max_total",
+          "confidence_score",
+          "regional_signal",
+        ],
       },
       scope_items: {
         type: "array",
@@ -148,7 +168,10 @@ Please generate the detailed blueprint.`;
           properties: {
             category: { type: "string" },
             description: { type: "string" },
-            finish_tier: { type: "string", enum: ["economy", "mid", "premium"] },
+            finish_tier: {
+              type: "string",
+              enum: ["economy", "mid", "premium"],
+            },
             quantity: { type: "number" },
             unit: { type: "string" },
             unit_cost_min: { type: "number" },
@@ -156,24 +179,35 @@ Please generate the detailed blueprint.`;
             total_cost_min: { type: "number" },
             total_cost_max: { type: "number" },
             confidence_score: { type: "number" },
+            confidence_reason: { type: "string" },
             justification: { type: "string" },
             priority: { type: "string", enum: ["high", "medium", "low"] },
             phase: { type: "string" },
-            maintenance_tips: { type: "string" }
+            maintenance_tips: { type: "string" },
           },
           required: [
-            "category", "description", "finish_tier", "quantity", "unit", 
-            "unit_cost_min", "unit_cost_max", "total_cost_min", "total_cost_max",
-            "justification", "priority", "phase"
-          ]
-        }
+            "category",
+            "description",
+            "finish_tier",
+            "quantity",
+            "unit",
+            "unit_cost_min",
+            "unit_cost_max",
+            "total_cost_min",
+            "total_cost_max",
+            "justification",
+            "priority",
+            "phase",
+            "confidence_reason",
+          ],
+        },
       },
       explanations: {
         type: "array",
-        items: { type: "string" }
-      }
+        items: { type: "string" },
+      },
     },
-    required: ["summary", "scope_items", "explanations"]
+    required: ["summary", "scope_items", "explanations"],
   };
 
   const parts: GeminiPart[] = [{ text: prompt }, ...photoParts];
@@ -197,17 +231,27 @@ Please generate the detailed blueprint.`;
     try {
       parsed = result.data || JSON.parse(result.text);
     } catch (e) {
-      console.error("Failed to parse Gemini JSON:", e, "Original text:", result.text);
+      console.error(
+        "Failed to parse Gemini JSON:",
+        e,
+        "Original text:",
+        result.text,
+      );
       return null;
     }
 
     return {
       summary: {
-        estimated_min_total: Math.round(Number(parsed.summary.estimated_min_total)),
-        estimated_max_total: Math.round(Number(parsed.summary.estimated_max_total)),
+        estimated_min_total: Math.round(
+          Number(parsed.summary.estimated_min_total),
+        ),
+        estimated_max_total: Math.round(
+          Number(parsed.summary.estimated_max_total),
+        ),
         confidence_score: Number(parsed.summary.confidence_score),
         value_engineering_tips: parsed.summary.value_engineering_tips || [],
         regional_context: parsed.summary.regional_context || "",
+        regional_signal: parsed.summary.regional_signal || "",
       },
       scope_items: parsed.scope_items.map((s: any) => ({
         category: String(s.category),
@@ -220,13 +264,16 @@ Please generate the detailed blueprint.`;
         total_cost_min: Math.round(Number(s.total_cost_min)),
         total_cost_max: Math.round(Number(s.total_cost_max)),
         confidence_score: Number(s.confidence_score || 3),
+        confidence_reason: s.confidence_reason || "",
         source: "photo" as const,
         justification: s.justification,
         priority: s.priority,
         phase: s.phase,
         maintenance_tips: s.maintenance_tips,
       })),
-      explanations: Array.isArray(parsed.explanations) ? parsed.explanations.map(String) : [],
+      explanations: Array.isArray(parsed.explanations)
+        ? parsed.explanations.map(String)
+        : [],
     };
   } catch (e) {
     console.error("Gemini scope extraction failed:", e);

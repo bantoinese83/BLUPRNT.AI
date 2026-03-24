@@ -4,6 +4,7 @@ export type EstimateSummary = {
   confidence_score: number;
   value_engineering_tips?: string[];
   regional_context?: string;
+  regional_signal?: string; // e.g., "Matched to 2026 Material Costs in Austin"
 };
 
 export type ScopeItemPreview = {
@@ -18,6 +19,7 @@ export type ScopeItemPreview = {
   total_cost_min: number | null;
   total_cost_max: number | null;
   confidence_score: number | null;
+  confidence_reason?: string; // e.g., "Estimated as mid-range hardwood"
   source: string;
   justification?: string;
   priority?: "high" | "medium" | "low";
