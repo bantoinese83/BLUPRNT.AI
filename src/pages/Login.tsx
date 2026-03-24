@@ -17,6 +17,7 @@ import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 type Mode = "password" | "magic";
 
@@ -97,7 +98,8 @@ export default function Login() {
         <title>Sign in — BLUPRNT.AI</title>
         <meta name="description" content="Access your renovation financial plan, track invoices, and manage your property improvements." />
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center p-4">
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white p-4">
+        <div className="flex flex-1 flex-col items-center justify-center">
         <div className="w-full max-w-md space-y-6">
           <div className="flex justify-center mb-4">
             <Breadcrumbs className="bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-100 shadow-sm" />
@@ -328,6 +330,8 @@ export default function Login() {
             </p>
           </div>
         </div>
+        </div>
+        <AppSlimFooter className="mt-auto shrink-0 bg-white/50" />
       </div>
     </>
   );

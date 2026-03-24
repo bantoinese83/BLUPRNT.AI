@@ -29,6 +29,7 @@ const itemVariants = {
   },
 } as const;
 
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { ProjectRow, ScopeRow } from "@/types/database";
 import { money } from "@/lib/formatters";
 
@@ -97,54 +98,59 @@ export default function ProjectView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 p-6">
-        <Loader2 className="w-10 h-10 text-slate-900 animate-spin" aria-hidden />
-
-        <p className="text-slate-600">Loading project…</p>
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
+          <Loader2 className="h-10 w-10 animate-spin text-slate-900" aria-hidden />
+          <p className="text-slate-600">Loading project…</p>
+        </div>
+        <AppSlimFooter className="bg-white/70" />
       </div>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-6 p-6 max-w-md mx-auto text-center">
-        <div className="rounded-2xl bg-amber-100 p-5 text-amber-800">
-          <AlertCircle className="w-12 h-12 mx-auto" aria-hidden />
-        </div>
-        <p className="text-slate-700 font-medium leading-relaxed">{error ?? "Something went wrong"}</p>
-        <p className="text-sm text-slate-500">
-          If you were sent this link, ask them to create a new share link from their dashboard.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <Button 
-            variant="outline" 
-            className="gap-2 w-full sm:w-auto" 
-            onClick={() => {
-              setLoading(true);
-              setError(null);
-              setRetryCount(prev => prev + 1);
-            }}
-          >
-            <RefreshCw className="w-4 h-4" />
-            Try again
-          </Button>
-          <Link to="/" className="w-full sm:w-auto">
-            <Button variant="primary" className="gap-2 w-full" type="button">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden shrink-0">
-                <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
-              </div>
-              Go to BLUPRNT.AI
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
+          <div className="rounded-2xl bg-amber-100 p-5 text-amber-800">
+            <AlertCircle className="mx-auto h-12 w-12" aria-hidden />
+          </div>
+          <p className="font-medium leading-relaxed text-slate-700">{error ?? "Something went wrong"}</p>
+          <p className="text-sm text-slate-500">
+            If you were sent this link, ask them to create a new share link from their dashboard.
+          </p>
+          <div className="flex flex-col items-center gap-3 sm:flex-row">
+            <Button
+              variant="outline"
+              className="w-full gap-2 sm:w-auto"
+              onClick={() => {
+                setLoading(true);
+                setError(null);
+                setRetryCount((prev) => prev + 1);
+              }}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try again
             </Button>
-          </Link>
+            <Link to="/" className="w-full sm:w-auto">
+              <Button variant="primary" className="w-full gap-2" type="button">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+                  <img src="/bluprnt_logo.svg" alt="BLUPRNT logo" className="h-full w-full object-contain" />
+                </div>
+                Go to BLUPRNT.AI
+              </Button>
+            </Link>
+          </div>
+          <div className="mt-2">
+            <a
+              href="mailto:privacy@bluprntai.com"
+              className="text-xs font-semibold text-slate-400 transition-colors hover:text-indigo-600"
+            >
+              Still have issues? Contact us
+            </a>
+          </div>
         </div>
-        <div className="mt-4">
-          <a 
-            href="mailto:support@bluprntai.com" 
-            className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors"
-          >
-            Still have issues? Contact support
-          </a>
-        </div>
+        <AppSlimFooter className="bg-white/70" />
       </div>
     );
   }
@@ -152,8 +158,8 @@ export default function ProjectView() {
   const conf = project.confidence_score ?? 4.5;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200">
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      <header className="border-b border-slate-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-slate-900">{project.name}</h1>
@@ -169,11 +175,11 @@ export default function ProjectView() {
         </div>
       </header>
 
-      <motion.main 
+      <motion.main
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="max-w-3xl mx-auto px-4 py-8 space-y-6"
+        className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-8"
       >
         <motion.div variants={itemVariants}>
           <Card className="overflow-hidden shadow-lg border-slate-200/60">
@@ -239,10 +245,12 @@ export default function ProjectView() {
           </Card>
         </motion.div>
 
-        <motion.p variants={itemVariants} className="text-center text-xs text-slate-500 font-medium">
+        <motion.p variants={itemVariants} className="text-center text-xs font-medium text-slate-500">
           Shared project view · Securely generated by BLUPRNT.AI
         </motion.p>
       </motion.main>
+
+      <AppSlimFooter className="mt-auto bg-white/70" />
     </div>
   );
 }

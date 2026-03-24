@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -208,8 +209,11 @@ export default function Settings() {
 
 
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <p className="text-slate-600">Connect your account to manage settings.</p>
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="flex flex-1 items-center justify-center p-6">
+          <p className="text-slate-600">Connect your account to manage settings.</p>
+        </div>
+        <AppSlimFooter className="bg-white/80" />
       </div>
     );
   }
@@ -538,6 +542,8 @@ export default function Settings() {
           </CardContent>
         </Card>
       </main>
+
+      <AppSlimFooter className="bg-white/80" />
 
       <UpgradeModal 
         isOpen={showUpgrade} 

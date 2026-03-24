@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { ensureUserHasWorkspace } from "@/lib/ensure-user-workspace";
 import { getSafeRedirect } from "@/lib/safe-redirect";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 /**
  * OAuth (Google) and magic-link redirects land here. PKCE: ?code=…
@@ -93,10 +94,12 @@ export default function AuthCallback() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 p-6 text-slate-600">
-      <Loader2 className="w-10 h-10 text-slate-900 animate-spin" aria-hidden />
-
-      <p className="text-sm font-medium text-center">{message}</p>
+    <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-slate-600">
+      <div className="flex flex-1 flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-slate-900" aria-hidden />
+        <p className="text-center text-sm font-medium">{message}</p>
+      </div>
+      <AppSlimFooter className="shrink-0 bg-slate-100/70" />
     </div>
   );
 }

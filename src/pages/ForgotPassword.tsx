@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { Loader } from "@/components/ui/Loader";
 
@@ -62,7 +63,8 @@ export default function ForgotPassword() {
       <Helmet>
         <title>Forgot Password — BLUPRNT.AI</title>
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center p-4">
+      <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white p-4">
+        <div className="flex flex-1 flex-col items-center justify-center">
         <div className="w-full max-w-md space-y-6">
           <div className="flex justify-center mb-4">
             <Breadcrumbs className="bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-100 shadow-sm" />
@@ -143,6 +145,8 @@ export default function ForgotPassword() {
             </Link>
           </div>
         </div>
+        </div>
+        <AppSlimFooter className="mt-auto shrink-0 bg-white/50" />
       </div>
     </>
   );

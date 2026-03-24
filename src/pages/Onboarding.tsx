@@ -11,18 +11,20 @@ import { LoadingScreen } from "@/components/onboarding/LoadingScreen";
 import { EstimateScreen } from "@/components/onboarding/EstimateScreen";
 import { SignupScreen } from "@/components/onboarding/SignupScreen";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 export default function Onboarding() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col items-center justify-center p-4 sm:p-6">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white p-4 sm:p-6">
       <Helmet>
         <title>Get Started — BLUPRNT.AI</title>
         <meta name="description" content="Get a real-world renovation cost estimate in minutes. Start your home project with the right financial baseline." />
       </Helmet>
 
-      <div className="w-full max-w-md relative">
+      <div className="flex flex-1 flex-col items-center justify-center">
+      <div className="relative w-full max-w-md">
         {location.pathname !== "/onboarding" && location.pathname !== "/onboarding/" && (
           <div className="flex justify-center mb-6">
             <Breadcrumbs className="bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-100 shadow-sm" />
@@ -43,6 +45,8 @@ export default function Onboarding() {
           </Routes>
         </AnimatePresence>
       </div>
+      </div>
+      <AppSlimFooter className="mt-auto shrink-0 bg-white/50" />
     </div>
   );
 }

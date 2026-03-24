@@ -1,14 +1,16 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center page-fade-in">
+    <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-center page-fade-in">
       <Helmet>
         <title>Page Not Found — BLUPRNT.AI</title>
       </Helmet>
 
+      <div className="flex flex-1 flex-col items-center justify-center">
       <div className="max-w-md w-full space-y-8">
         <div className="flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-sm border border-slate-200 overflow-hidden">
@@ -33,6 +35,8 @@ export default function NotFound() {
           </Link>
         </div>
       </div>
+      </div>
+      <AppSlimFooter className="shrink-0 bg-slate-100/70" />
     </div>
   );
 }

@@ -32,6 +32,7 @@ import { toast } from "sonner";
 
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getSafeRedirect } from "@/lib/safe-redirect";
@@ -334,48 +335,60 @@ export default function Dashboard() {
 
 
   if (loading) {
-    return <DashboardSkeleton />;
+    return (
+      <>
+        <DashboardSkeleton />
+        <AppSlimFooter className="border-slate-200/70 bg-white/50" />
+      </>
+    );
   }
 
   if (!isSupabaseConfigured()) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center gap-4 max-w-md mx-auto">
-        <div className="rounded-2xl bg-amber-100 p-4 text-amber-800">
-          <Settings2 className="w-10 h-10 mx-auto" aria-hidden />
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+          <div className="rounded-2xl bg-amber-100 p-4 text-amber-800">
+            <Settings2 className="mx-auto h-10 w-10" aria-hidden />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">BLUPRNT isn&apos;t connected yet</h2>
+          <p className="text-sm leading-relaxed text-slate-600">
+            This copy of the app needs your project keys to load. Ask whoever set up the app, or check the README in the project folder for step-by-step setup.
+          </p>
+          <p className="text-xs text-slate-500">
+            Developers: add <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_URL</code> and{" "}
+            <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_ANON_KEY</code> in{" "}
+            <code className="rounded bg-slate-200 px-1">.env</code>.
+          </p>
         </div>
-        <h2 className="text-lg font-semibold text-slate-900">BLUPRNT isn&apos;t connected yet</h2>
-        <p className="text-slate-600 text-sm leading-relaxed">
-          This copy of the app needs your project keys to load. Ask whoever set up the app, or check the README in the project folder for step-by-step setup.
-        </p>
-        <p className="text-xs text-slate-500">
-          Developers: add <code className="bg-slate-200 px-1 rounded">VITE_SUPABASE_URL</code> and{" "}
-          <code className="bg-slate-200 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> in <code className="bg-slate-200 px-1 rounded">.env</code>.
-        </p>
+        <AppSlimFooter className="bg-white/60" />
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <EmptyState
-          variant="projects"
-          title="No projects tracked yet"
-          description="Create your first project to start tracking benchmarks and managing your budget like a pro."
-          action={{
-            label: "Create Your First Project",
-            onClick: () => navigate("/onboarding")
-          }}
-          className="max-w-md w-full"
-        />
-        <button
-          type="button"
-          className="mt-8 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2 uppercase tracking-widest"
-          onClick={handleSignOut}
-        >
-          <LogOut className="w-4 h-4" />
-          Sign out account
-        </button>
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="flex flex-1 flex-col items-center justify-center p-6">
+          <EmptyState
+            variant="projects"
+            title="No projects tracked yet"
+            description="Create your first project to start tracking benchmarks and managing your budget like a pro."
+            action={{
+              label: "Create Your First Project",
+              onClick: () => navigate("/onboarding"),
+            }}
+            className="w-full max-w-md"
+          />
+          <button
+            type="button"
+            className="mt-8 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-900"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out account
+          </button>
+        </div>
+        <AppSlimFooter className="bg-white/60" />
       </div>
     );
   }
@@ -563,6 +576,8 @@ export default function Dashboard() {
           </motion.div>
         </AnimatePresence>
       </motion.main>
+
+      <AppSlimFooter className="border-slate-200/60 bg-white/40 backdrop-blur-sm" />
 
       <UpgradeModal
         isOpen={showUpgrade}
