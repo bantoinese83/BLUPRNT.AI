@@ -163,7 +163,7 @@ export function InvoicesSection({
                     className="absolute inset-x-0 top-0 h-0.5 bg-slate-950 shadow-[0_0_8px_black]"
                   />
                 </div>
-                <span>AI SCANNING...</span>
+                <span>AI READING...</span>
               </motion.div>
             )}
           </AnimatePresence>

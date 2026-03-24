@@ -87,7 +87,7 @@ export default function Landing() {
         <title>BLUPRNT — Renovation Cost Estimates, Invoice Tracking &amp; Seller Records</title>
         <meta
           name="description"
-          content="BLUPRNT helps homeowners plan remodels with grounded cost estimates from photos and ZIP, track invoices against budget, and export a renovation record for resale. Start free."
+          content="Renovation estimates from photos and location, smart invoice scanning and history, seller record export for homeowners."
         />
         <meta
           name="keywords"
@@ -606,7 +606,7 @@ export default function Landing() {
                 <li className="flex items-start gap-4">
                   <Home className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
                   <div>
-                    <h3 className="font-semibold text-slate-900">Property ledger</h3>
+                    <h3 className="font-semibold text-slate-900">Property record</h3>
                     <p className="mt-1 text-sm text-slate-600">
                       Your home’s financial twin — from idea to sale.
                     </p>
@@ -656,7 +656,7 @@ export default function Landing() {
                     {[
                       "Unlimited estimates & photo analysis",
                       "Track up to 2 active projects",
-                      "Invoice OCR (10 uploads/month)",
+                      "Smart invoice scanning",
                       "Full property ledger & seller packet",
                       "Priority AI model access"
                     ].map((feature, i) => (
@@ -742,7 +742,7 @@ export default function Landing() {
                       {[
                         ["Active Projects", "Up to 2", "Single Project"],
                         ["Photo-to-Estimate", "Unlimited", "Unlimited"],
-                        ["Invoice OCR", "10 / month", "Unlimited (6mo)"],
+                        ["Smart Scanning", "10 / month", "Unlimited (6mo)"],
                         ["Property Ledger", "Full Access", "Full Access"],
                         ["Export Records", "Unlimited", "Unlimited"],
                         ["Support", "Priority", "Standard"],

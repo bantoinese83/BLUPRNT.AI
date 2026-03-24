@@ -60,7 +60,7 @@ export function buildLandingJsonLd(siteUrl: string) {
         url: siteUrl,
         name: "BLUPRNT",
         description:
-          "Home renovation financial OS: grounded cost estimates, invoice tracking, and a property ledger for homeowners.",
+          "Home renovation financial OS: grounded cost estimates, invoice tracking, and a property record for homeowners.",
         publisher: { "@id": orgId },
         inLanguage: "en-US",
       },
@@ -102,7 +102,7 @@ export function buildLandingJsonLd(siteUrl: string) {
           description: "Free tier and trial; paid plans available.",
         },
         description:
-          "Renovation estimates from photos and location, invoice OCR and ledger, seller packet export for homeowners.",
+          "Renovation estimates from photos and location, smart invoice scanning and history, seller record export for homeowners.",
         provider: { "@id": orgId },
       },
       {

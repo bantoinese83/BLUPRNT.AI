@@ -172,7 +172,7 @@ export function UpgradeModal({ isOpen, onClose, estimatedAmount, projectId, open
                   </CardHeader>
                   <CardContent className="space-y-4 flex-1">
                     <ul className="space-y-3">
-                      {["Unlimited estimates & photo analysis", "Track up to 2 active projects", "Invoice OCR (10 uploads/month)", "Seller Packet PDF for your property"].map((item, i) => (
+                      {["Unlimited estimates & photo analysis", "Track up to 2 active projects", "Smart invoice scanning", "Seller Packet PDF for your property"].map((item, i) => (
                         <li key={i} className="flex items-start space-x-3 text-sm text-slate-700">
                           <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
                           <span>{item}</span>
