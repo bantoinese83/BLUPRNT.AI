@@ -49,7 +49,13 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getSafeRedirect } from "@/lib/safe-redirect";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  InvoiceRow,
+  UserSubscriptionRow,
+  ProjectPassRow,
+} from "@/types/database";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -131,7 +137,11 @@ export default function Dashboard() {
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [isArchitect, setIsArchitect] = useState(false);
+  const [subscription, setSubscription] = useState<UserSubscriptionRow | null>(
+    null,
+  );
   const [hasProjectPass, setHasProjectPass] = useState(false);
+  const [projectPasses, setProjectPasses] = useState<ProjectPassRow[]>([]);
   const lastFetchedProjectId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -183,7 +193,9 @@ export default function Dashboard() {
         if (c.scopeItems) setScopeItems(c.scopeItems);
         if (c.invoices) setInvoices(c.invoices);
         if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
+        if (c.subscription !== undefined) setSubscription(c.subscription);
         if (c.hasProjectPass !== undefined) setHasProjectPass(c.hasProjectPass);
+        if (c.projectPasses !== undefined) setProjectPasses(c.projectPasses);
         setLoading(false); // Render instantly (stale-while-revalidate)
       } catch {
         // ignore cache decode errors
@@ -256,25 +268,30 @@ export default function Dashboard() {
           .order("created_at", { ascending: false }),
         supabase
           .from("user_subscriptions")
-          .select("status")
+          .select("*")
           .eq("user_id", session.user.id)
           .maybeSingle(),
         supabase
           .from("project_passes")
-          .select("id")
+          .select("*")
           .eq("project_id", projectId)
           .maybeSingle(),
       ]);
 
       const newScopes = (scopesRes.data ?? []) as ScopeRow[];
       const newInvoices = (invRes.data ?? []) as InvoiceRow[];
-      const newIsArchitect = subRes.data?.status === "active";
-      const newHasProjectPass = !!subRes2.data;
+      const sub = subRes.data as UserSubscriptionRow | null;
+      const pass = subRes2.data as ProjectPassRow | null;
+
+      const newIsArchitect = sub?.status === "active";
+      const newHasProjectPass = !!pass;
 
       setScopeItems(newScopes);
       setInvoices(newInvoices);
       setIsArchitect(newIsArchitect);
+      setSubscription(sub);
       setHasProjectPass(newHasProjectPass);
+      setProjectPasses(pass ? [pass] : []);
 
       sessionStorage.setItem(
         cacheKey,
@@ -284,7 +301,9 @@ export default function Dashboard() {
           scopeItems: newScopes,
           invoices: newInvoices,
           isArchitect: newIsArchitect,
+          subscription: sub,
           hasProjectPass: newHasProjectPass,
+          projectPasses: pass ? [pass] : [],
         }),
       );
     } else {
@@ -542,6 +561,7 @@ export default function Dashboard() {
         setShowUpgrade(true);
       }}
       isArchitect={isArchitect}
+      subscription={subscription}
       hasProjectPass={hasProjectPass}
     />
   );

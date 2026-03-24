@@ -49,3 +49,26 @@ export type InvoiceRow = {
   payment_status: string;
   document_type?: string | null;
 };
+
+export type UserSubscriptionRow = {
+  id: string;
+  user_id: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan: "architect";
+  status: "active" | "canceled" | "past_due" | "trialing";
+  current_period_end: string | null;
+  invoice_uploads_count: number;
+  invoice_uploads_reset_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type ProjectPassRow = {
+  id: string;
+  project_id: string;
+  stripe_checkout_session_id: string | null;
+  purchased_at: string;
+  expires_at: string;
+  created_at: string | null;
+};

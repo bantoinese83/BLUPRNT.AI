@@ -19,7 +19,7 @@ import { supabase, invokeFunction } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { InvoiceReviewModal } from "./InvoiceReviewModal";
 
-import type { InvoiceRow } from "@/types/database";
+import type { InvoiceRow, UserSubscriptionRow } from "@/types/database";
 
 type InvoicesSectionProps = {
   projectId: string;
@@ -28,6 +28,7 @@ type InvoicesSectionProps = {
   /** Pass invoice_limit when user hit the 3-invoice cap so the upgrade modal can explain. */
   onUpgradeClick: (reason?: "invoice_limit") => void;
   isArchitect?: boolean;
+  subscription?: UserSubscriptionRow | null;
   hasProjectPass?: boolean;
 };
 
@@ -63,6 +64,7 @@ export function InvoicesSection({
   onUploaded,
   onUpgradeClick,
   isArchitect = false,
+  subscription = null,
   hasProjectPass = false,
 }: InvoicesSectionProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,11 +86,19 @@ export function InvoicesSection({
   const invoiceCount = invoices.filter(
     (i) => (i.document_type ?? "invoice") === "invoice",
   ).length;
+
+  const architectUploads = subscription?.invoice_uploads_count ?? 0;
+  const isArchitectActive = isArchitect && subscription?.status === "active";
+
   const atLimit =
-    !isArchitect &&
-    !hasProjectPass &&
     documentType === "invoice" &&
-    invoiceCount >= FREE_LIMIT;
+    !hasProjectPass &&
+    ((!isArchitectActive && invoiceCount >= FREE_LIMIT) ||
+      (isArchitectActive &&
+        invoiceCount >= FREE_LIMIT &&
+        architectUploads >= 10));
+
+  const isArchitectAtGlobalLimit = isArchitectActive && architectUploads >= 10;
 
   const typeParam = searchParams.get("type");
   useEffect(() => {
@@ -354,8 +364,18 @@ export function InvoicesSection({
       {atLimit && (
         <div className="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-2 leading-relaxed">
           <p>
-            You&apos;ve used all <strong>{FREE_LIMIT} free invoices</strong> on
-            this project. Upgrade to add more anytime.
+            {isArchitectAtGlobalLimit ? (
+              <>
+                You&apos;ve used all <strong>10 global uploads</strong> for this
+                billing period. Your quota will reset when your subscription
+                renews.
+              </>
+            ) : (
+              <>
+                You&apos;ve used all <strong>{FREE_LIMIT} free invoices</strong>{" "}
+                on this project. Upgrade to add more anytime.
+              </>
+            )}
           </p>
           <p className="text-slate-600">
             <strong>Good news:</strong> quotes, warranties, and permits
@@ -368,7 +388,9 @@ export function InvoicesSection({
             className="rounded-xl mt-1"
             onClick={() => onUpgradeClick("invoice_limit")}
           >
-            See upgrade options
+            {isArchitectAtGlobalLimit
+              ? "View subscription"
+              : "See upgrade options"}
           </Button>
         </div>
       )}

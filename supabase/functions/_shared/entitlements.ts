@@ -19,7 +19,7 @@ export async function checkInvoiceUploadAllowed(
   admin: SupabaseClient,
   userId: string,
   projectId: string,
-  documentType: string
+  documentType: string,
 ): Promise<EntitlementResult> {
   // Only invoices count toward the limit (quotes, warranties, permits are unlimited)
   if (documentType !== "invoice") {
@@ -38,53 +38,66 @@ export async function checkInvoiceUploadAllowed(
   if (pass) {
     const expiresAt = pass.expires_at ? new Date(pass.expires_at) : null;
     if (expiresAt && expiresAt > now) {
-      return { allowed: true };
+      return { allowed: true, reason: "project_pass" };
     }
   }
 
-  // 2. Check Architect subscription (quota per Stripe billing period)
-  const { data: sub } = await admin
-    .from("user_subscriptions")
-    .select("status, current_period_end, invoice_uploads_count")
-    .eq("user_id", userId)
-    .single();
+  // 2. Fetch Architect subscription and project-specific invoice count in parallel
+  const [subRes, invCountRes] = await Promise.all([
+    admin
+      .from("user_subscriptions")
+      .select("status, current_period_end, invoice_uploads_count")
+      .eq("user_id", userId)
+      .single(),
+    admin
+      .from("invoices")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", projectId)
+      .eq("document_type", "invoice"),
+  ]);
 
-  if (sub && sub.status === "active") {
-    const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
-    if (periodEnd && periodEnd > now) {
-      const count = sub.invoice_uploads_count ?? 0;
-      if (count < ARCHITECT_UPLOADS_PER_MONTH) {
-        return { allowed: true };
-      }
-      return {
-        allowed: false,
-        reason:
-          "Architect plan: 10 invoice uploads per billing period. Your limit renews when your subscription renews.",
-      };
-    }
+  const sub = subRes.data;
+  const projectInvoiceCount = invCountRes.count ?? 0;
+
+  const isArchitectActive = sub && sub.status === "active";
+  const periodEnd = sub?.current_period_end
+    ? new Date(sub.current_period_end)
+    : null;
+  const isPeriodValid = periodEnd && periodEnd > now;
+
+  const architectHasGlobalSpace =
+    isArchitectActive &&
+    isPeriodValid &&
+    (sub.invoice_uploads_count ?? 0) < ARCHITECT_UPLOADS_PER_MONTH;
+  const projectHasFreeSpace = projectInvoiceCount < FREE_INVOICE_LIMIT;
+
+  // 3. Evaluate permissions
+  // Architects get their global 10-upload quota OR the standard free 3-per-project floor.
+  if (architectHasGlobalSpace) {
+    return { allowed: true, reason: "architect_plan" };
   }
 
-  // 3. Free tier: 3 invoices per project
-  const { count } = await admin
-    .from("invoices")
-    .select("id", { count: "exact", head: true })
-    .eq("project_id", projectId)
-    .eq("document_type", "invoice");
+  if (projectHasFreeSpace) {
+    return { allowed: true, reason: "free_limit" };
+  }
 
-  if ((count ?? 0) >= FREE_INVOICE_LIMIT) {
+  // 4. Blocked - return descriptive reason
+  if (isArchitectActive && isPeriodValid) {
     return {
       allowed: false,
-      reason:
-        "Free plan: 3 invoices per project. Upgrade for more uploads and premium features.",
+      reason: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
     };
   }
 
-  return { allowed: true };
+  return {
+    allowed: false,
+    reason: `Free tier limit reached (${FREE_INVOICE_LIMIT} invoices for this project). Upgrade for more uploads and premium features.`,
+  };
 }
 
 export async function incrementArchitectUploadCount(
   admin: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<void> {
   const now = new Date();
   const { data: sub } = await admin
@@ -95,7 +108,9 @@ export async function incrementArchitectUploadCount(
 
   if (!sub || sub.status !== "active") return;
 
-  const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
+  const periodEnd = sub.current_period_end
+    ? new Date(sub.current_period_end)
+    : null;
   if (!periodEnd || periodEnd <= now) return;
 
   const count = sub.invoice_uploads_count ?? 0;
