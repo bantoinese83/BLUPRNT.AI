@@ -21,3 +21,32 @@ export const supabase = createClient(url ?? "", anonKey ?? "", {
 export function isSupabaseConfigured(): boolean {
   return Boolean(url && anonKey);
 }
+
+/**
+ * Robust wrapper for Edge Functions that ensures a fresh JWT is sent.
+ * Use this instead of supabase.functions.invoke() to avoid 'Invalid JWT' errors.
+ */
+export async function invokeFunction<T = any>(
+  name: string,
+  options?: {
+    body?: any;
+    headers?: Record<string, string>;
+    method?: "POST" | "GET" | "PUT" | "PATCH" | "DELETE";
+  },
+) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const headers = {
+    ...options?.headers,
+    ...(session?.access_token
+      ? { Authorization: `Bearer ${session.access_token}` }
+      : {}),
+  };
+
+  return supabase.functions.invoke<T>(name, {
+    ...options,
+    headers,
+  });
+}

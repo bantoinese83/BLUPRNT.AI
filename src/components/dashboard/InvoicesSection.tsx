@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { motion, AnimatePresence } from "motion/react";
-import { supabase } from "@/lib/supabase";
+import { supabase, invokeFunction } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { InvoiceReviewModal } from "./InvoiceReviewModal";
 
@@ -138,7 +138,7 @@ export function InvoicesSection({
       fd.set("project_id", projectId);
       fd.set("file", file);
       fd.set("document_type", documentType);
-      const { data, error: fnErr } = await supabase.functions.invoke<{
+      const { data, error: fnErr } = await invokeFunction<{
         invoice_id?: string;
         ocr_status?: string;
         error?: string;

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type { PhotoToScopeResult } from "@/types/estimate";
 import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase, invokeFunction } from "@/lib/supabase";
 import { userFriendlyEstimateError } from "@/lib/onboarding-estimate-errors";
 import {
   DEFAULT_ESTIMATE_CONFIDENCE,
@@ -100,7 +100,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         let data: PhotoToScopeResult | null = null;
         let error: unknown = null;
         for (let attempt = 0; attempt <= retries; attempt++) {
-          const result = await supabase.functions.invoke<PhotoToScopeResult>(
+          const result = await invokeFunction<PhotoToScopeResult>(
             "photo-to-scope",
             {
               body: formData,

@@ -5,10 +5,10 @@
 verify_jwt = false
 
 [functions.upload-invoice]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-invoice]
-verify_jwt = true
+verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false

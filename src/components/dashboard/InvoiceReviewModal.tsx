@@ -3,7 +3,7 @@ import { X, Loader2, Link2, FileText, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/lib/supabase";
+import { supabase, invokeFunction } from "@/lib/supabase";
 
 type LineItem = {
   id: string;
@@ -57,14 +57,13 @@ export function InvoiceReviewModal({
       setLoading(true);
       setError(null);
       try {
-        const { data: invData, error: invErr } =
-          await supabase.functions.invoke<{
-            invoice: InvoiceData;
-            line_items: LineItem[];
-            budget_mapping_suggestions?: ScopeSuggestion[];
-          }>("get-invoice", {
-            body: { invoice_id: invoiceId },
-          });
+        const { data: invData, error: invErr } = await invokeFunction<{
+          invoice: InvoiceData;
+          line_items: LineItem[];
+          budget_mapping_suggestions?: ScopeSuggestion[];
+        }>("get-invoice", {
+          body: { invoice_id: invoiceId },
+        });
         if (cancelled) return;
         if (invErr || !invData) {
           setError("Couldn't load invoice.");
