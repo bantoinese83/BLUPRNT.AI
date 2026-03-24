@@ -316,7 +316,7 @@ export default function Landing() {
                     className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
                   >
                     Turn your renovation into a{" "}
-                    <Highlighter action="highlight" color="rgba(99, 102, 241, 0.15)" strokeWidth={3} isView={true}>
+                    <Highlighter action="highlight" color="rgba(99, 102, 241, 0.2)" strokeWidth={4} padding={8} isView={true}>
                       <span className="liquid-metal-text">financial plan</span>
                     </Highlighter>
                   </h1>

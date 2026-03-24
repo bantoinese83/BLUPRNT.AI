@@ -42,7 +42,7 @@ export function Highlighter({
 
   const isInView = useInView(elementRef, {
     once: true,
-    margin: "-10%",
+    margin: "0px",
   })
 
   // If isView is false, always show. If isView is true, wait for inView
@@ -95,7 +95,7 @@ export function Highlighter({
   ])
 
   return (
-    <span ref={elementRef} className="relative inline-block bg-transparent group/highlight">
+    <span ref={elementRef} className="relative inline bg-transparent group/highlight">
       {children}
     </span>
   )
