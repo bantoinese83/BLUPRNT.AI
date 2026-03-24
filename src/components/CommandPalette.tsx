@@ -11,7 +11,6 @@ import {
   FileText, 
   Shield, 
   Zap,
-  Trash2,
   LogOut,
   ChevronRight
 } from "lucide-react";
