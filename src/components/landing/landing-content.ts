@@ -20,3 +20,43 @@ export const LANDING_STORY_COPY = {
     "Stop using messy spreadsheets and lost piles of paperwork. Use the first renovation management system built for the modern homeowner.",
   ],
 } as const;
+
+export interface PricingRow {
+  feature: string;
+  architect: string;
+  pass: string;
+  hint: string;
+}
+
+export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
+  {
+    feature: "Renovation AI",
+    architect: "Grounded Insights",
+    pass: "Included (6mo)",
+    hint: "Regional labor & material signals",
+  },
+  {
+    feature: "Smart Receipts",
+    architect: "10 scans / mo",
+    pass: "Unlimited",
+    hint: "OCR extraction & categorization",
+  },
+  {
+    feature: "Active Projects",
+    architect: "Up to 2",
+    pass: "1",
+    hint: "Concurrent tracking",
+  },
+  {
+    feature: "Seller Packet",
+    architect: "Included",
+    pass: "Included",
+    hint: "PDF export for resale",
+  },
+  {
+    feature: "Record Access",
+    architect: "Always",
+    pass: "Lifetime",
+    hint: "Read-only after pass expiry",
+  },
+] as const;

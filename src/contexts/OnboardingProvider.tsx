@@ -1,13 +1,8 @@
-import { useCallback, useMemo, useState, useEffect, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type { PhotoToScopeResult } from "@/types/estimate";
-import type {
-  ProjectTypeOption,
-  StageOption,
-} from "@/types/onboarding";
+import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import {
-  userFriendlyEstimateError,
-} from "@/lib/onboarding-estimate-errors";
+import { userFriendlyEstimateError } from "@/lib/onboarding-estimate-errors";
 import {
   DEFAULT_ESTIMATE_CONFIDENCE,
   DEFAULT_ESTIMATE_MAX,
@@ -19,142 +14,128 @@ import {
   stageToDb,
 } from "@/lib/onboarding-helpers";
 import { OnboardingContext } from "./onboarding-context";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
-  const [projectType, setProjectType] = useState<ProjectTypeOption | null>(() => {
-    const saved = localStorage.getItem("bluprnt_onboarding_type");
-    return saved ? (saved as ProjectTypeOption) : null;
-  });
-  const [locationInput, setLocationInput] = useState(() => 
-    localStorage.getItem("bluprnt_onboarding_location") || ""
+  const [projectType, setProjectType] =
+    useLocalStorage<ProjectTypeOption | null>("bluprnt_onboarding_type", null);
+  const [locationInput, setLocationInput] = useLocalStorage(
+    "bluprnt_onboarding_location",
+    "",
   );
-  const [locationUnset, setLocationUnset] = useState(() => 
-    localStorage.getItem("bluprnt_onboarding_location_unset") === "true"
+  const [locationUnset, setLocationUnset] = useLocalStorage(
+    "bluprnt_onboarding_location_unset",
+    false,
   );
-  const [scopeDescription, setScopeDescription] = useState(() => 
-    localStorage.getItem("bluprnt_onboarding_scope") || ""
+  const [scopeDescription, setScopeDescription] = useLocalStorage(
+    "bluprnt_onboarding_scope",
+    "",
   );
-  const [stage, setStage] = useState<StageOption | null>(() => {
-    const saved = localStorage.getItem("bluprnt_onboarding_stage");
-    return saved ? (saved as StageOption) : null;
-  });
+  const [stage, setStage] = useLocalStorage<StageOption | null>(
+    "bluprnt_onboarding_stage",
+    null,
+  );
+
   const [photos, setPhotos] = useState<File[]>([]);
   const [estimate, setEstimate] = useState<PhotoToScopeResult | null>(null);
   const [estimateError, setEstimateError] = useState<string | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
 
-  // Sync to localStorage
-  useEffect(() => {
-    if (projectType) localStorage.setItem("bluprnt_onboarding_type", projectType);
-    else localStorage.removeItem("bluprnt_onboarding_type");
-  }, [projectType]);
-
-  useEffect(() => {
-    localStorage.setItem("bluprnt_onboarding_location", locationInput);
-  }, [locationInput]);
-
-  useEffect(() => {
-    localStorage.setItem("bluprnt_onboarding_location_unset", String(locationUnset));
-  }, [locationUnset]);
-
-  useEffect(() => {
-    localStorage.setItem("bluprnt_onboarding_scope", scopeDescription);
-  }, [scopeDescription]);
-
-  useEffect(() => {
-    if (stage) localStorage.setItem("bluprnt_onboarding_stage", stage);
-    else localStorage.removeItem("bluprnt_onboarding_stage");
-  }, [stage]);
-
   const zipFromLocation = useCallback(() => {
     const digits = locationInput.replace(/\D/g, "").slice(0, 5);
     return digits.length === 5 ? digits : locationInput.trim() || "00000";
   }, [locationInput]);
 
-  const runPhotoToScope = useCallback(async (opts?: { textOnly?: boolean; maxRetries?: number }) => {
-    setEstimateError(null);
-    setEstimateLoading(true);
-    try {
-      if (!isSupabaseConfigured()) {
-        setEstimate({
-          project_id: null,
-          summary: {
-            estimated_min_total: DEFAULT_ESTIMATE_MIN,
-            estimated_max_total: DEFAULT_ESTIMATE_MAX,
-            confidence_score: DEFAULT_ESTIMATE_CONFIDENCE,
-          },
-          scope_items: [
-            {
-              id: "scope_1",
-              category: "Sample",
-              description: "Connect your account to load a real estimate.",
-              finish_tier: "mid",
-              quantity: 1,
-              unit: "job",
-              unit_cost_min: null,
-              unit_cost_max: null,
-              total_cost_min: DEFAULT_ESTIMATE_MIN,
-              total_cost_max: DEFAULT_ESTIMATE_MAX,
-              confidence_score: 4,
-              source: "text",
+  const runPhotoToScope = useCallback(
+    async (opts?: { textOnly?: boolean; maxRetries?: number }) => {
+      setEstimateError(null);
+      setEstimateLoading(true);
+      try {
+        if (!isSupabaseConfigured()) {
+          setEstimate({
+            project_id: null,
+            summary: {
+              estimated_min_total: DEFAULT_ESTIMATE_MIN,
+              estimated_max_total: DEFAULT_ESTIMATE_MAX,
+              confidence_score: DEFAULT_ESTIMATE_CONFIDENCE,
             },
-          ],
-          explanations: [
-            "Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable estimates from our service.",
-          ],
-          area_label: "your area",
-        });
-        return;
-      }
-
-      const formData = new FormData();
-      formData.set("zip_code", zipFromLocation());
-      formData.set("room_type", projectTypeToRoomType(projectType));
-      formData.set("finish_preference", "mid");
-      formData.set("location_unset", locationUnset ? "1" : "0");
-      if (scopeDescription.trim())
-        formData.set("scope_description", scopeDescription.trim());
-      if (!opts?.textOnly) {
-        photos.forEach((f) => formData.append("photos[]", f));
-      }
-
-      const retries = Math.max(0, Math.min(opts?.maxRetries ?? 1, 3));
-      let data: PhotoToScopeResult | null = null;
-      let error: unknown = null;
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        const result = await supabase.functions.invoke<PhotoToScopeResult>("photo-to-scope", {
-          body: formData,
-        });
-        data = result.data ?? null;
-        error = result.error;
-        if (!error) break;
-        if (attempt < retries) {
-          // Exponential backoff for transient edge/model failures.
-          const backoffMs = Math.min(2500, 300 * 2 ** attempt);
-          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+            scope_items: [
+              {
+                id: "scope_1",
+                category: "Sample",
+                description: "Connect your account to load a real estimate.",
+                finish_tier: "mid",
+                quantity: 1,
+                unit: "job",
+                unit_cost_min: null,
+                unit_cost_max: null,
+                total_cost_min: DEFAULT_ESTIMATE_MIN,
+                total_cost_max: DEFAULT_ESTIMATE_MAX,
+                confidence_score: 4,
+                source: "text",
+              },
+            ],
+            explanations: [
+              "Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable estimates from our service.",
+            ],
+            area_label: "your area",
+          });
+          return;
         }
-      }
 
-      if (error) {
-        const msg =
-          typeof error === "object" && error !== null && "message" in error
-            ? String((error as { message?: string }).message)
-            : "We couldn’t build your estimate. Try again.";
-        setEstimateError(userFriendlyEstimateError(msg));
-        return;
+        const formData = new FormData();
+        formData.set("zip_code", zipFromLocation());
+        formData.set("room_type", projectTypeToRoomType(projectType));
+        formData.set("finish_preference", "mid");
+        formData.set("location_unset", locationUnset ? "1" : "0");
+        if (scopeDescription.trim())
+          formData.set("scope_description", scopeDescription.trim());
+        if (!opts?.textOnly) {
+          photos.forEach((f) => formData.append("photos[]", f));
+        }
+
+        const retries = Math.max(0, Math.min(opts?.maxRetries ?? 1, 3));
+        let data: PhotoToScopeResult | null = null;
+        let error: unknown = null;
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          const result = await supabase.functions.invoke<PhotoToScopeResult>(
+            "photo-to-scope",
+            {
+              body: formData,
+            },
+          );
+          data = result.data ?? null;
+          error = result.error;
+          if (!error) break;
+          if (attempt < retries) {
+            // Exponential backoff for transient edge/model failures.
+            const backoffMs = Math.min(2500, 300 * 2 ** attempt);
+            await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          }
+        }
+
+        if (error) {
+          const msg =
+            typeof error === "object" && error !== null && "message" in error
+              ? String((error as { message?: string }).message)
+              : "We couldn’t build your estimate. Try again.";
+          setEstimateError(userFriendlyEstimateError(msg));
+          return;
+        }
+        if (data && typeof data === "object" && "summary" in data) {
+          setEstimate(data as PhotoToScopeResult);
+        } else {
+          setEstimateError(userFriendlyEstimateError("unknown"));
+        }
+      } catch {
+        setEstimateError(userFriendlyEstimateError("network"));
+      } finally {
+        setEstimateLoading(false);
       }
-      if (data && typeof data === "object" && "summary" in data) {
-        setEstimate(data as PhotoToScopeResult);
-      } else {
-        setEstimateError(userFriendlyEstimateError("unknown"));
-      }
-    } catch {
-      setEstimateError(userFriendlyEstimateError("network"));
-    } finally {
-      setEstimateLoading(false);
-    }
-  }, [photos, projectType, zipFromLocation, locationUnset, scopeDescription]);
+    },
+    [photos, projectType, zipFromLocation, locationUnset, scopeDescription],
+  );
 
   const persistProject = useCallback(async () => {
     if (!isSupabaseConfigured()) {
@@ -215,7 +196,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         return {
           ok: false,
           message:
-            signErr.message || "Couldn't sign in. Check your email and password.",
+            signErr.message ||
+            "Couldn't sign in. Check your email and password.",
         };
       }
       if (!auth.session?.user) {
@@ -243,7 +225,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         return {
           ok: false,
-          message: err instanceof Error ? err.message : "Couldn't save project.",
+          message:
+            err instanceof Error ? err.message : "Couldn't save project.",
         };
       }
     },
@@ -324,7 +307,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setEstimate(null);
     setEstimateError(null);
     setSavedProjectId(null);
-    
+
     // Clear localStorage
     localStorage.removeItem("bluprnt_onboarding_type");
     localStorage.removeItem("bluprnt_onboarding_location");

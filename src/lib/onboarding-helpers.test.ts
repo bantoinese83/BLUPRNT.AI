@@ -4,6 +4,9 @@ import {
   projectTypeToDb,
   stageToDb,
   projectDisplayName,
+  DEFAULT_ESTIMATE_MIN,
+  DEFAULT_ESTIMATE_MAX,
+  DEFAULT_ESTIMATE_CONFIDENCE,
 } from "./onboarding-helpers";
 
 describe("onboarding-helpers", () => {
@@ -58,6 +61,15 @@ describe("onboarding-helpers", () => {
     it("returns My project for Something else and null", () => {
       expect(projectDisplayName("Something else")).toBe("My project");
       expect(projectDisplayName(null)).toBe("My project");
+    });
+  });
+
+  describe("constants", () => {
+    it("has expected default estimate values", () => {
+      expect(DEFAULT_ESTIMATE_MIN).toBeGreaterThan(0);
+      expect(DEFAULT_ESTIMATE_MAX).toBeGreaterThan(DEFAULT_ESTIMATE_MIN);
+      expect(DEFAULT_ESTIMATE_CONFIDENCE).toBeGreaterThanOrEqual(1);
+      expect(DEFAULT_ESTIMATE_CONFIDENCE).toBeLessThanOrEqual(5);
     });
   });
 });

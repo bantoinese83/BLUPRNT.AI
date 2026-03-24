@@ -25,4 +25,25 @@ describe("getSafeRedirect", () => {
     expect(getSafeRedirect("/settings")).toBe("/settings");
     expect(getSafeRedirect("/project/abc-token")).toBe("/project/abc-token");
   });
+
+  it("handles null or empty input", () => {
+    expect(getSafeRedirect(null)).toBe("/dashboard");
+    expect(getSafeRedirect("   ")).toBe("/dashboard");
+  });
+
+  it("normalizes path with leading whitespace", () => {
+    expect(getSafeRedirect("  /dashboard")).toBe("/dashboard");
+  });
+
+  it("blocks paths with backslashes or colons", () => {
+    expect(getSafeRedirect("/dashboard\\evil")).toBe("/dashboard");
+    expect(getSafeRedirect("/dashboard:evil")).toBe("/dashboard");
+  });
+
+  it("allows query strings for all allowed prefixes", () => {
+    expect(getSafeRedirect("/onboarding?step=2")).toBe("/onboarding?step=2");
+    expect(getSafeRedirect("/settings?tab=profile")).toBe(
+      "/settings?tab=profile",
+    );
+  });
 });
