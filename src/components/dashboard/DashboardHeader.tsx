@@ -72,12 +72,12 @@ export function DashboardHeader({
           <Link
             to="/onboarding"
             className="shrink-0"
-            aria-label="Start new project"
-            title="Start new project"
+            aria-label="Start a Bluprnt"
+            title="Start a Bluprnt"
           >
             <span className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-2.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50/90 hover:text-indigo-900 sm:px-3">
               <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              <span className="hidden sm:inline">New project</span>
+              <span className="hidden sm:inline">Start a Bluprnt</span>
             </span>
           </Link>
 

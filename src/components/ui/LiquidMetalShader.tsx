@@ -35,10 +35,15 @@ export function LiquidMetalShader({
 }: LiquidMetalShaderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const shaderMountRef = useRef<ShaderMount | null>(null);
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    if (prefersReducedMotion) return;
 
     // Create a wrapper div to ensure the canvas sizing is correct
     const wrapper = document.createElement("div");
@@ -87,7 +92,8 @@ export function LiquidMetalShader({
     shape,
     offsetX,
     offsetY,
-    playState
+    playState,
+    prefersReducedMotion,
   ]);
 
   return (
@@ -95,6 +101,7 @@ export function LiquidMetalShader({
       ref={containerRef} 
       className={`liquid-metal-host ${className}`}
       style={{ isolation: 'isolate' }}
+      aria-hidden="true"
     />
   );
 }

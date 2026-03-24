@@ -2,14 +2,31 @@ import { callGemini, type GeminiPart } from "../../_shared/gemini.ts";
 
 export type RoomType = "kitchen" | "bathroom" | "other";
 
+const ZIP_REGION_RANGES: Array<{ min: number; max: number; label: string }> = [
+  { min: 5, max: 99, label: "Northeast US" },
+  { min: 100, max: 299, label: "Mid-Atlantic US" },
+  { min: 300, max: 399, label: "Southeast US" },
+  { min: 400, max: 599, label: "Midwest US" },
+  { min: 600, max: 799, label: "South Central US" },
+  { min: 800, max: 899, label: "Mountain West US" },
+  { min: 900, max: 961, label: "Pacific Coast US" },
+  { min: 970, max: 999, label: "Pacific Northwest US" },
+];
+
 export function cityFromZip(zip: string): string {
   const z = zip.replace(/\D/g, "").slice(0, 5);
-  if (z.length >= 3) {
-    const n = parseInt(z.slice(0, 3), 10);
-    if (n >= 100 && n <= 199) return "your area";
-    if (n >= 900 && n <= 961) return "Los Angeles area";
-    if (n >= 430 && n <= 459) return "Columbus area";
-  }
+  if (z.length !== 5) return "your area";
+  const prefix = parseInt(z.slice(0, 3), 10);
+  if (Number.isNaN(prefix)) return "your area";
+
+  // Keep a few trusted city-level labels where we know they are helpful.
+  if (prefix >= 900 && prefix <= 916) return "Los Angeles area";
+  if (prefix >= 430 && prefix <= 459) return "Columbus area";
+  if (prefix >= 100 && prefix <= 119) return "New York City area";
+
+  const region = ZIP_REGION_RANGES.find((r) => prefix >= r.min && prefix <= r.max);
+  if (region) return region.label;
+
   return "your area";
 }
 

@@ -6,6 +6,9 @@ import type {
 } from "@/types/onboarding";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import {
+  userFriendlyEstimateError,
+} from "@/lib/onboarding-estimate-errors";
+import {
   DEFAULT_ESTIMATE_CONFIDENCE,
   DEFAULT_ESTIMATE_MAX,
   DEFAULT_ESTIMATE_MIN,
@@ -69,7 +72,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     return digits.length === 5 ? digits : locationInput.trim() || "00000";
   }, [locationInput]);
 
-  const runPhotoToScope = useCallback(async () => {
+  const runPhotoToScope = useCallback(async (opts?: { textOnly?: boolean; maxRetries?: number }) => {
     setEstimateError(null);
     setEstimateLoading(true);
     try {
@@ -112,28 +115,42 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       formData.set("location_unset", locationUnset ? "1" : "0");
       if (scopeDescription.trim())
         formData.set("scope_description", scopeDescription.trim());
-      photos.forEach((f) => formData.append("photos[]", f));
+      if (!opts?.textOnly) {
+        photos.forEach((f) => formData.append("photos[]", f));
+      }
 
-      const { data, error } =
-        await supabase.functions.invoke<PhotoToScopeResult>("photo-to-scope", {
+      const retries = Math.max(0, Math.min(opts?.maxRetries ?? 1, 3));
+      let data: PhotoToScopeResult | null = null;
+      let error: unknown = null;
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        const result = await supabase.functions.invoke<PhotoToScopeResult>("photo-to-scope", {
           body: formData,
         });
+        data = result.data ?? null;
+        error = result.error;
+        if (!error) break;
+        if (attempt < retries) {
+          // Exponential backoff for transient edge/model failures.
+          const backoffMs = Math.min(2500, 300 * 2 ** attempt);
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        }
+      }
 
       if (error) {
         const msg =
           typeof error === "object" && error !== null && "message" in error
             ? String((error as { message?: string }).message)
             : "We couldn’t build your estimate. Try again.";
-        setEstimateError(msg);
+        setEstimateError(userFriendlyEstimateError(msg));
         return;
       }
       if (data && typeof data === "object" && "summary" in data) {
         setEstimate(data as PhotoToScopeResult);
       } else {
-        setEstimateError("Something went wrong. Please try again.");
+        setEstimateError(userFriendlyEstimateError("unknown"));
       }
     } catch {
-      setEstimateError("Connection issue. Check your network and try again.");
+      setEstimateError(userFriendlyEstimateError("network"));
     } finally {
       setEstimateLoading(false);
     }

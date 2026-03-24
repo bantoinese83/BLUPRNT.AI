@@ -43,7 +43,7 @@ export function ProjectSwitcher({
       className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:border-indigo-200 hover:bg-indigo-50/80 hover:text-indigo-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:px-4"
     >
       <Plus className="h-4 w-4 shrink-0" aria-hidden />
-      <span>New project</span>
+      <span>Start a Bluprnt</span>
     </Link>
   );
 
@@ -137,7 +137,7 @@ export function ProjectSwitcher({
               onClick={() => setOpen(false)}
             >
               <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              New project
+              Start a Bluprnt
             </Link>
           </div>
         </div>

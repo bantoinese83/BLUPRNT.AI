@@ -29,7 +29,10 @@ export type OnboardingContextValue = {
   estimate: PhotoToScopeResult | null;
   estimateError: string | null;
   estimateLoading: boolean;
-  runPhotoToScope: () => Promise<void>;
+  runPhotoToScope: (opts?: {
+    textOnly?: boolean;
+    maxRetries?: number;
+  }) => Promise<void>;
   persistProject: () => Promise<{ ok: boolean; message: string }>;
   persistProjectAfterSignup: (params: {
     email: string;

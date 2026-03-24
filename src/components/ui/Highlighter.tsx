@@ -1,6 +1,6 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import type React from "react"
 import { useInView } from "motion/react"
 import { annotate } from "rough-notation"
@@ -41,7 +41,10 @@ export function Highlighter({
   delay = 0,
 }: HighlighterProps) {
   const elementRef = useRef<HTMLSpanElement>(null)
-
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
   const isInView = useInView(elementRef, {
     once: true,
     margin: "0px",
@@ -50,42 +53,62 @@ export function Highlighter({
   // If isView is false, always show. If isView is true, wait for inView
   const shouldShow = !isView || isInView
 
-  useLayoutEffect(() => {
+  const inlineClassName = useMemo(() => {
+    // Box/circle/bracket-based annotations are more reliable on inline-block.
+    if (action === "box" || action === "circle" || action === "bracket") {
+      return "relative inline-block bg-transparent group/highlight align-baseline"
+    }
+    return "relative inline bg-transparent group/highlight"
+  }, [action])
+
+  useEffect(() => {
     const element = elementRef.current
     let annotation: RoughAnnotation | null = null
     let resizeObserver: ResizeObserver | null = null
+    let timeout: number | null = null
+    let resizeHandler: (() => void) | null = null
 
     if (shouldShow && element) {
-      const timeout = setTimeout(() => {
-        const annotationConfig = {
+      timeout = window.setTimeout(() => {
+        annotation = annotate(element, {
           type: action,
           color,
           strokeWidth,
-          animationDuration,
+          animationDuration: prefersReducedMotion ? 0 : animationDuration,
           iterations,
           padding,
           multiline,
-        }
-
-        const currentAnnotation = annotate(element, annotationConfig)
-        annotation = currentAnnotation
-        currentAnnotation.show()
-
-        resizeObserver = new ResizeObserver(() => {
-          currentAnnotation.hide()
-          currentAnnotation.show()
         })
+        annotation.show()
 
+      const repaint = () => {
+        if (!annotation) return
+        annotation.hide()
+        annotation.show()
+      }
+
+      if (typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(repaint)
         resizeObserver.observe(element)
-        resizeObserver.observe(document.body)
-      }, delay * 1000)
+      }
 
-      return () => {
-        clearTimeout(timeout)
-        annotation?.remove()
-        if (resizeObserver) {
-          resizeObserver.disconnect()
-        }
+      resizeHandler = repaint
+      window.addEventListener("resize", resizeHandler, { passive: true })
+    }, delay * 1000)
+    }
+
+    return () => {
+      if (timeout !== null) {
+        window.clearTimeout(timeout)
+      }
+      if (resizeHandler) {
+        window.removeEventListener("resize", resizeHandler)
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+      if (annotation) {
+        annotation.remove()
       }
     }
   }, [
@@ -98,10 +121,11 @@ export function Highlighter({
     padding,
     multiline,
     delay,
+    prefersReducedMotion,
   ])
 
   return (
-    <span ref={elementRef} className="relative inline bg-transparent group/highlight">
+    <span ref={elementRef} className={inlineClassName}>
       {children}
     </span>
   )

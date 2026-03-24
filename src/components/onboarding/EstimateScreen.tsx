@@ -19,18 +19,15 @@ import {
   DEFAULT_ESTIMATE_MAX,
   DEFAULT_ESTIMATE_MIN,
 } from "@/lib/onboarding-helpers";
+import { formatCurrency } from "@/lib/i18n";
 
 function formatMoney(n: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
+  return formatCurrency(n);
 }
 
 export function EstimateScreen() {
   const navigate = useNavigate();
-  const { estimate, estimateError, locationInput } = useOnboarding();
+  const { estimate, estimateError, locationInput, runPhotoToScope, setPhotos } = useOnboarding();
 
   const summary = estimate?.summary;
   const min = summary?.estimated_min_total ?? DEFAULT_ESTIMATE_MIN;
@@ -183,9 +180,30 @@ export function EstimateScreen() {
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-xs text-center text-amber-600 bg-amber-50/50 rounded-lg p-3 border border-amber-100/50"
+                className="text-xs text-center text-amber-700 bg-amber-50/70 rounded-lg p-4 border border-amber-100/80 space-y-3"
             >
                 <p>{estimate ? "This is a predicted baseline. Save to refine details." : estimateError}</p>
+                {!estimate ? (
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Button type="button" size="sm" variant="outline" onClick={() => void runPhotoToScope({ maxRetries: 2 })}>
+                      Retry
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={() => void runPhotoToScope({ textOnly: true, maxRetries: 1 })}>
+                      Use text only
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setPhotos([]);
+                        void runPhotoToScope({ textOnly: true, maxRetries: 1 });
+                      }}
+                    >
+                      Skip photos
+                    </Button>
+                  </div>
+                ) : null}
             </motion.div>
         )}
 

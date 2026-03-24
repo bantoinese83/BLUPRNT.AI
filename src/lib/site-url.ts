@@ -60,7 +60,7 @@ export function buildLandingJsonLd(siteUrl: string) {
         url: siteUrl,
         name: "BLUPRNT",
         description:
-          "Home renovation financial OS: grounded cost estimates, invoice tracking, and a property record for homeowners.",
+          "Home value management system: grounded cost estimates, project tracking, and a property value record for homeowners.",
         publisher: { "@id": orgId },
         inLanguage: "en-US",
       },
@@ -79,14 +79,14 @@ export function buildLandingJsonLd(siteUrl: string) {
         "@type": "WebPage",
         "@id": `${siteUrl}/#webpage`,
         url: siteUrl,
-        name: "BLUPRNT — Home renovation financial OS for homeowners",
+        name: "BLUPRNT — Home value management system for homeowners",
         isPartOf: { "@id": websiteId },
         about: {
           "@type": "Thing",
           name: "Home renovation cost estimation, budgeting, and resale documentation",
         },
         description:
-          "Turn your renovation into a financial plan: real-world cost ranges, invoice tracking, and a record you can hand to buyers.",
+          "Every upgrade should pay you back. Bluprnt helps homeowners estimate costs, track projects, and understand how renovations impact home value.",
       },
       {
         "@type": "SoftwareApplication",

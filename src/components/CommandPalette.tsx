@@ -65,13 +65,14 @@ export function CommandPalette() {
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4" role="dialog" aria-modal="true" aria-label="Command palette">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
+            aria-hidden="true"
           />
           
           <motion.div
@@ -81,12 +82,13 @@ export function CommandPalette() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative w-full max-w-2xl overflow-hidden glass-dark border-slate-800/80 shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-3xl"
           >
-            <Command className="flex flex-col h-full focus-within:outline-none">
+            <Command className="flex flex-col h-full focus-within:outline-none" label="Global command palette">
               <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-800/50">
                 <Search className="w-5 h-5 text-slate-500" />
                 <Command.Input
                   autoFocus
                   placeholder="Type a command or search projects..."
+                  aria-label="Search commands and projects"
                   className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-slate-500 text-lg font-medium"
                   value={search}
                   onValueChange={setSearch}

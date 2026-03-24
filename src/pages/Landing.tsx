@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { UpgradeIcon } from "@/components/ui/UpgradeIcon";
 import { Highlighter } from "@/components/ui/Highlighter";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { LANDING_HIGHLIGHT_COLOR, LANDING_STORY_COPY } from "@/components/landing/landing-content";
 
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -351,107 +353,7 @@ export default function Landing() {
         </header>
 
         <main>
-          {/* Hero */}
-          <section
-            className="relative overflow-hidden px-4 pt-24 pb-14 sm:px-6 sm:pt-28 sm:pb-16 mesh-bg"
-            aria-labelledby="hero-heading"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-100/50 via-transparent to-transparent opacity-60" />
-
-            <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-10">
-              <div className="space-y-5">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-3"
-                >
-                  <span className="text-[11px] font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-[0.18em] inline-block">
-                    Home Renovation Financial OS
-                  </span>
-                  <h1
-                    id="hero-heading"
-                    className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
-                  >
-                    Turn your renovation into a{" "}
-                    <Highlighter action="highlight" color="rgba(99, 102, 241, 0.2)" strokeWidth={4} padding={8} isView={true}>
-                      <span className="liquid-metal-text">financial plan</span>
-                    </Highlighter>
-                  </h1>
-                </motion.div>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="max-w-xl text-base text-slate-600 leading-relaxed font-medium sm:text-lg"
-                >
-                  Turn renovations into a{" "}
-                  <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} isView={true}>
-                    trackable financial asset
-                  </Highlighter>{" "}
-                  for your home. Get real-world costs, track invoices, and build a record you can hand to buyers.
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex flex-wrap gap-3 pt-1"
-                >
-                  <Button
-                    size="lg"
-                    className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
-                    onClick={() => navigate("/onboarding")}
-                  >
-                    Get my first estimate <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
-                    onClick={() => navigate("/register")}
-                  >
-                    <UserPlus className="mr-2 h-5 w-5" aria-hidden /> Create free account
-                  </Button>
-                </motion.div>
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-                className="relative mx-auto w-full max-w-lg lg:max-w-none"
-              >
-                <div className="absolute -inset-3 rounded-[1.75rem] bg-linear-to-r from-slate-500/15 to-slate-400/15 blur-2xl lg:-inset-2" />
-                <div className="relative glass-card overflow-hidden rounded-[1.75rem] p-1.5 shadow-xl sm:rounded-[2rem] sm:p-2">
-                  <img
-                    src="/images/renovation_hero.png"
-                    alt="Modern Home Renovation"
-                    className="max-h-[min(38vh,340px)] w-full rounded-[1.25rem] object-cover object-center shadow-inner sm:max-h-[min(42vh,380px)] sm:rounded-[1.75rem] lg:max-h-[min(48vh,420px)]"
-                  />
-
-                  <div className="absolute bottom-3 left-3 right-3 glass-card animate-float rounded-xl p-3 sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white shadow-md sm:h-11 sm:w-11 sm:rounded-xl">
-                        <UpgradeIcon className="h-5 w-5 brightness-0 invert" aria-hidden />
-                      </div>
-
-
-                      <div className="min-w-0">
-                        <p className="text-xs font-black text-slate-900 leading-tight sm:text-sm">
-                          AI Cost Analysis
-                        </p>
-                        <p className="text-[11px] font-bold text-slate-500 sm:text-xs">
-                          Regionally grounded pricing
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </section>
+          <HeroSection onStart={() => navigate("/onboarding")} onCreateAccount={() => navigate("/register")} />
 
           {/* Social Proof / Stats */}
           <section className="bg-white border-y border-slate-100 py-10">
@@ -459,7 +361,9 @@ export default function Landing() {
               <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
                 <div className="flex flex-col items-center gap-2 lg:items-start">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                    Trusted by homeowners
+                    <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={2} iterations={1} isView={true}>
+                      Trusted by homeowners
+                    </Highlighter>
                   </p>
                   <p className="text-2xl font-black text-slate-900">
                     {dbCount !== null ? dbCount.toLocaleString() : "..."} <span className="text-slate-500 font-bold">blueprints managed</span>
@@ -495,7 +399,11 @@ export default function Landing() {
                 How it works
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-                From idea to resale — in three steps.
+                From idea to resale in{" "}
+                <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} iterations={1} isView={true}>
+                  three steps
+                </Highlighter>
+                .
               </p>
               <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
                 <motion.article
@@ -512,7 +420,11 @@ export default function Landing() {
                   <div className="w-20 h-20 rounded-3xl bg-slate-50 text-slate-900 flex items-center justify-center mb-8 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
                     <Camera className="w-10 h-10" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">Plan</h3>
+                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
+                    <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={3} iterations={1} isView={true}>
+                      Plan
+                    </Highlighter>
+                  </h3>
 
                   <p className="text-slate-500 text-lg leading-relaxed font-medium">
                     Turn fuzzy ideas and photos into a realistic, regionally grounded budget.
@@ -566,7 +478,11 @@ export default function Landing() {
                   <div className="w-20 h-20 rounded-3xl bg-slate-50 text-slate-900 flex items-center justify-center mb-8 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 -mt-16 relative z-10 border-4 border-white">
                     <FileCheck className="w-10 h-10" strokeWidth={2.5} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">Transfer</h3>
+                  <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
+                    <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={3} iterations={1} isView={true}>
+                      Transfer
+                    </Highlighter>
+                  </h3>
 
                   <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
                     Export that history into formats optimized for every stakeholder.
@@ -598,14 +514,15 @@ export default function Landing() {
               <div className="inline-block p-3 rounded-2xl bg-white shadow-sm border border-slate-100 mb-6">
                 <Shield className="w-8 h-8 text-indigo-600" />
               </div>
-              <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">Built by homeowners, for homeowners.</h2>
+              <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">
+                <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={4} iterations={1} isView={true}>
+                  {LANDING_STORY_COPY.heading}
+                </Highlighter>
+              </h2>
               <div className="space-y-4 text-lg text-slate-600 leading-relaxed font-medium">
-                <p>
-                  We started BLUPRNT because we were tired of "cost estimates" that were actually lead-gen traps for contractors. Renovations are stressful enough—the financial planning shouldn't be.
-                </p>
-                <p>
-                  Our mission is to turn every renovation into a trackable, transparent financial asset. We believe homeowners deserve a clear, regional-grounded path from their first photo to their final sale.
-                </p>
+                {LANDING_STORY_COPY.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
               </div>
               <div className="mt-12">
                 <p className="mb-8 text-center text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 sm:mb-10">
@@ -670,7 +587,10 @@ export default function Landing() {
                 Built for homeowners
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-                Not contractors. You — planning, selling, or improving.
+                <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} iterations={1} isView={true}>
+                  Not contractors.
+                </Highlighter>{" "}
+                You - planning, selling, or improving.
               </p>
               <ul className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4" role="list">
                 <li className="flex items-start gap-4">
@@ -1005,10 +925,16 @@ export default function Landing() {
           >
             <div className="mx-auto max-w-3xl text-center">
               <h2 id="cta-heading" className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                Ready to start?
+                <Highlighter action="highlight" color={LANDING_HIGHLIGHT_COLOR} padding={4} iterations={1} isView={true}>
+                  Ready to start?
+                </Highlighter>
               </h2>
               <p className="mt-4 text-slate-600">
-                Get your first estimate in under a minute. No credit card required.
+                Get your first estimate in{" "}
+                <Highlighter action="underline" color="#6366f1" strokeWidth={2} padding={0} iterations={1} isView={true}>
+                  under a minute
+                </Highlighter>
+                . No credit card required.
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link to="/onboarding">
