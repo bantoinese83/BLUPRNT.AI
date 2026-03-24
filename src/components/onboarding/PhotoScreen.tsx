@@ -100,6 +100,33 @@ export function PhotoScreen() {
           </button>
         </div>
 
+        <div className="rounded-3xl bg-slate-50/80 p-5 border border-slate-100 flex gap-4 items-start shadow-sm ring-1 ring-slate-200/40">
+          <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0 ring-1 ring-slate-100">
+            <span className="text-xl" role="img" aria-label="light bulb">
+              💡
+            </span>
+          </div>
+          <div className="space-y-1.5 pt-0.5">
+            <p className="text-sm font-black text-slate-900 leading-tight uppercase tracking-wider">
+              Tips for best results:
+            </p>
+            <ul className="text-[13px] text-slate-500 space-y-1.5 font-medium leading-relaxed">
+              <li className="flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0" />
+                Capture floor-to-ceiling in each shot
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0" />
+                Ensure the space is well-lit
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0" />
+                Include multiple angles of the room
+              </li>
+            </ul>
+          </div>
+        </div>
+
         {/* Selected Photos Grid */}
         {photos.length > 0 && (
           <div className="flex flex-wrap gap-2 justify-center py-2">

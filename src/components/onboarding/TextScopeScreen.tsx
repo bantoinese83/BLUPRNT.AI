@@ -6,26 +6,32 @@ import { useOnboarding } from "@/hooks/use-onboarding";
 
 const QUICK_CHIPS: Record<string, string[]> = {
   Kitchen: [
-    "Replace cabinets",
-    "New countertops",
+    "New cabinets",
+    "Countertops",
     "Full remodel",
     "Add island",
-    "Update backsplash",
-    "New appliances",
+    "Backsplash",
+    "Pantry",
+    "New flooring",
+    "Lighting",
   ],
   Bathroom: [
-    "Replace vanity",
+    "Vanity replacement",
     "New tile",
     "Full remodel",
     "Update fixtures",
     "Add shower",
     "New tub",
+    "Lighting",
+    "Plumbing move",
   ],
   Other: [
     "General renovation",
     "Cosmetic updates",
     "Structural changes",
     "Multiple rooms",
+    "Electrical work",
+    "Drywall repair",
   ],
 };
 
@@ -47,11 +53,18 @@ export function TextScopeScreen() {
       <div className="space-y-8">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            Describe what you want to do
+            Tell us more about the project
           </h2>
-          <p className="text-slate-500">
-            Add a few details so we can build a better estimate.
-          </p>
+          <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2 mt-4">
+            <p className="text-xs font-black text-slate-900 leading-tight uppercase tracking-wider flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              Why details matter
+            </p>
+            <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
+              The more specific you are, the better our AI can match your vision
+              to local material & labor costs.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-3">

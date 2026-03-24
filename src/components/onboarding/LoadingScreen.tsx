@@ -7,7 +7,8 @@ import { Loader } from "@/components/ui/Loader";
 
 export function LoadingScreen() {
   const navigate = useNavigate();
-  const { runPhotoToScope, projectType, estimateError } = useOnboarding();
+  const { runPhotoToScope, projectType, estimateError, locationInput } =
+    useOnboarding();
   const [messageIdx, setMessageIdx] = useState(0);
 
   const kind =
@@ -15,13 +16,15 @@ export function LoadingScreen() {
       ? "kitchen"
       : projectType === "Bathroom"
         ? "bathroom"
-        : "similar";
+        : "project";
 
   const messages = [
-    "Checking local renovation costs...",
-    "Analyzing your property scope...",
-    `Comparing ${kind} projects in your area...`,
-    "Applying market labor rates...",
+    `Analyzing your ${kind} scope...`,
+    locationInput
+      ? `Scanning market rates in ${locationInput}...`
+      : "Checking local renovation costs...",
+    `Matching materials to ${kind} standards...`,
+    "Applying current market labor rates...",
     "Finalizing your financial blueprint...",
   ];
 

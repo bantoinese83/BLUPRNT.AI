@@ -39,8 +39,27 @@ function StepProgress({ currentPath }: { currentPath: string }) {
   );
   if (currentIndex === -1) return null;
 
+  const remainingSteps = ONBOARDING_STEPS.length - currentIndex - 1;
+  const timeLabel =
+    remainingSteps <= 1
+      ? "Seconds away"
+      : `${Math.ceil(remainingSteps / 2)} min left`;
+
   return (
-    <div className="w-full flex flex-col items-center space-y-5 mb-10">
+    <div className="w-full flex flex-col items-center space-y-6 mb-12">
+      <div className="flex w-full justify-between items-center px-2">
+        <h1 className="text-lg font-black italic tracking-tighter text-slate-900 leading-none">
+          {ONBOARDING_STEPS[currentIndex].label}{" "}
+          <span className="text-indigo-600">— Step {currentIndex + 1}</span>
+        </h1>
+        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
+          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+            {timeLabel}
+          </span>
+        </div>
+      </div>
+
       <div className="relative w-full px-2">
         {/* Connection Line */}
         <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
