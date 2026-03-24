@@ -85,6 +85,20 @@ export function InvoicesSection({
       onUpgradeClick("invoice_limit");
       return;
     }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File is too large. Please upload a file smaller than 10MB.");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Unsupported file type. Please upload a PDF, JPEG, PNG, or WEBP.");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
     setError(null);
     setUploading(true);
     try {

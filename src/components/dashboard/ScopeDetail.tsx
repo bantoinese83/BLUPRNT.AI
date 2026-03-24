@@ -54,11 +54,11 @@ export function ScopeDetail({
   const conf = project.confidence_score ?? 4.5;
 
   async function handleSave(item: ScopeRow) {
-    const qty = parseFloat(editQty);
-    if (Number.isNaN(qty) || qty < 0) {
-      setError("Enter a valid quantity");
-      return;
-    }
+    let qty = parseFloat(editQty || "0");
+    if (Number.isNaN(qty) || qty < 0) qty = 0;
+    if (qty > 1000000) qty = 1000000;
+
+    setEditQty(String(qty));
     setSaving(true);
     setError(null);
     const oldMult = item.finish_tier === "economy" ? 0.85 : item.finish_tier === "premium" ? 1.2 : 1;

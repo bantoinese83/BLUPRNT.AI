@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera, ImagePlus, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
 import { useOnboarding } from "@/hooks/use-onboarding";
@@ -12,7 +13,21 @@ export function PhotoScreen() {
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return;
-    const next = [...photos, ...Array.from(files)].slice(0, 10);
+    
+    const validFiles = Array.from(files).filter(file => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`"${file.name}" is too large. Max 10MB per photo.`);
+        return false;
+      }
+      const validTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        toast.error(`"${file.name}" is not a supported format (JPEG, PNG, WEBP).`);
+        return false;
+      }
+      return true;
+    });
+
+    const next = [...photos, ...validFiles].slice(0, 10);
     setPhotos(next);
   }
 

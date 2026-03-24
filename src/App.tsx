@@ -4,7 +4,7 @@
  */
 
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -31,6 +31,7 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 export default function App() {
   return (
@@ -64,17 +65,10 @@ export default function App() {
                 }
               />
               <Route path="/project/:token" element={<ProjectView />} />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
           <Toaster position="top-right" expand={false} richColors />

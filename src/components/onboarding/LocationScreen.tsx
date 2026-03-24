@@ -9,6 +9,7 @@ import {
   Radar,
   SkipForward,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageTransition } from "./PageTransition";
@@ -194,6 +195,10 @@ export function LocationScreen() {
             variant="primary"
             className="w-full"
             onClick={() => {
+              if (!locationInput.trim()) {
+                toast.error("Please enter a ZIP code, or click 'Skip for now'.");
+                return;
+              }
               setLocationUnset(false);
               navigate("/onboarding/stage");
             }}
