@@ -236,14 +236,14 @@ export default function Dashboard() {
       sessionStorage.removeItem(cacheKey);
     }
 
-    if (projectId === lastFetchedProjectId.current && project !== null) {
+    if (projectId === lastFetchedProjectId.current) {
       setLoading(false);
       return;
     }
     lastFetchedProjectId.current = projectId;
 
     setLoading(false);
-  }, [navigate, project]);
+  }, [navigate]);
 
 
 
