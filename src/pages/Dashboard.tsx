@@ -133,6 +133,23 @@ export default function Dashboard() {
       navigate(`/login?redirect=${encodeURIComponent(returnTo)}`, { replace: true });
       return;
     }
+
+    const cacheKey = `bluprnt_dash_${session.user.id}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
+    if (cachedData) {
+      try {
+        const c = JSON.parse(cachedData);
+        if (c.projects) setProjects(c.projects);
+        if (c.project) setProject(c.project);
+        if (c.scopeItems) setScopeItems(c.scopeItems);
+        if (c.invoices) setInvoices(c.invoices);
+        if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
+        setLoading(false); // Render instantly (stale-while-revalidate)
+      } catch (e) {
+        // ignore cache decode errors
+      }
+    }
+
     let projectId: string | null = null;
     try {
 
@@ -140,22 +157,18 @@ export default function Dashboard() {
     } catch {
       /* ignore */
     }
-    const { data: props } = await supabase
-      .from("properties")
-      .select("id")
-      .eq("owner_user_id", session.user.id);
-    const propIds = (props ?? []).map((p) => p.id);
+    // 1. Fetch all projects securely by joining properties
+    const { data: allProjects } = await supabase
+      .from("projects")
+      .select("id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, properties!inner(owner_user_id)")
+      .eq("properties.owner_user_id", session.user.id)
+      .order("created_at", { ascending: false });
 
-    if (propIds.length) {
-      const { data: allProjects } = await supabase
-        .from("projects")
-        .select("id, name, property_id, estimated_min_total, estimated_max_total, confidence_score")
-        .in("property_id", propIds)
-        .order("created_at", { ascending: false });
-      const rows = (allProjects ?? []) as ProjectRow[];
-      setProjects(rows);
+    const rows = (allProjects ?? []) as ProjectRow[];
+    setProjects(rows);
 
-      if (!projectId && rows.length) {
+    if (rows.length > 0) {
+      if (!projectId) {
         projectId = rows[0].id;
         try {
           localStorage.setItem("bluprnt_project_id", projectId);
@@ -163,58 +176,64 @@ export default function Dashboard() {
           /* ignore */
         }
       }
-      if (projectId) {
-        const proj = rows.find((p) => p.id === projectId) ?? null;
-        if (proj) {
-          setProject(proj);
-        } else {
-          const { data: single } = await supabase
-            .from("projects")
-            .select("id, name, property_id, estimated_min_total, estimated_max_total, confidence_score")
-            .eq("id", projectId)
-            .maybeSingle();
-          const resolved = (single ?? null) as ProjectRow | null;
-          setProject(resolved);
-
-          if (!resolved && rows.length) {
-            projectId = rows[0].id;
-            setProject(rows[0]);
-            try {
-              localStorage.setItem("bluprnt_project_id", projectId);
-            } catch {
-              /* ignore */
-            }
-          }
-        }
+      
+      const proj = rows.find((p) => p.id === projectId) ?? null;
+      if (proj) {
+        setProject(proj);
       } else {
-        setProject(rows[0] ?? null);
-        projectId = rows[0]?.id ?? null;
+        // Fallback if cached ID is invalid for this user
+        projectId = rows[0].id;
+        setProject(rows[0]);
+        try {
+          localStorage.setItem("bluprnt_project_id", projectId);
+        } catch {
+          /* ignore */
+        }
       }
+    } else {
+      // No projects
+      setProject(null);
+      projectId = null;
     }
 
     if (projectId) {
-      const { data: scopes } = await supabase
-        .from("scope_items")
-        .select("id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: true });
-      setScopeItems((scopes ?? []) as ScopeRow[]);
+      // 2. Fetch all required sub-data for the selected project in parallel
+      const [scopesRes, invRes, subRes] = await Promise.all([
+        supabase
+          .from("scope_items")
+          .select("id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score")
+          .eq("project_id", projectId)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("invoices")
+          .select("id, vendor_name, total, created_at, payment_status, document_type")
+          .eq("project_id", projectId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_subscriptions")
+          .select("status")
+          .eq("user_id", session.user.id)
+          .maybeSingle()
+      ]);
 
-      const { data: inv } = await supabase
-        .from("invoices")
-        .select("id, vendor_name, total, created_at, payment_status, document_type")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false });
-      setInvoices((inv ?? []) as InvoiceRow[]);
+      const newScopes = (scopesRes.data ?? []) as ScopeRow[];
+      const newInvoices = (invRes.data ?? []) as InvoiceRow[];
+      const newIsArchitect = subRes.data?.status === "active";
 
-      // Check subscription status
-      const { data: sub } = await supabase
-        .from("user_subscriptions")
-        .select("status")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      
-      setIsArchitect(sub?.status === "active");
+      setScopeItems(newScopes);
+      setInvoices(newInvoices);
+      setIsArchitect(newIsArchitect);
+
+      sessionStorage.setItem(cacheKey, JSON.stringify({
+        projects: rows,
+        project: rows.find(p => p.id === projectId) ?? rows[0] ?? null,
+        scopeItems: newScopes,
+        invoices: newInvoices,
+        isArchitect: newIsArchitect
+      }));
+    } else {
+      // Clear cache if no projects
+      sessionStorage.removeItem(cacheKey);
     }
 
     if (projectId === lastFetchedProjectId.current && project !== null) {
