@@ -8,6 +8,7 @@ import { motion } from "motion/react";
 import type { ProjectRow, ScopeRow } from "@/types/database";
 
 import { money, getStars as stars } from "@/lib/formatters";
+import { InsightTeaser } from "./InsightTeaser";
 
 export function EstimateSummary({
   project,
@@ -185,6 +186,12 @@ export function EstimateSummary({
                   <ListTree className="w-4 h-4 ml-2" />
                 </Button>
               </div>
+            )}
+            {!isArchitect && !hasProjectPass && onUpgradeClick && (
+              <InsightTeaser
+                onUpgradeClick={onUpgradeClick}
+                projectName={project.name}
+              />
             )}
           </div>
         )}

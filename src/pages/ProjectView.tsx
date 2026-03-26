@@ -32,6 +32,7 @@ const itemVariants = {
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { ProjectRow, ScopeRow } from "@/types/database";
 import { money } from "@/lib/formatters";
+import { PublicViewCrossSell } from "@/components/PublicViewCrossSell";
 
 export default function ProjectView() {
   const { token } = useParams<{ token: string }>();
@@ -276,6 +277,8 @@ export default function ProjectView() {
             </CardContent>
           </Card>
         </motion.div>
+
+        <PublicViewCrossSell />
 
         <motion.p
           variants={itemVariants}

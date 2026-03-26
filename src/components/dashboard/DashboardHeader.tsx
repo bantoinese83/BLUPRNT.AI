@@ -118,6 +118,11 @@ export function DashboardHeader({
                 aria-hidden
               />
               <span className="hidden font-semibold sm:inline">Export</span>
+              {!isArchitect && (
+                <span className="ml-1.5 hidden rounded-md bg-slate-900 px-1 py-0.5 text-[8px] font-black uppercase tracking-tighter text-white sm:inline">
+                  Pro
+                </span>
+              )}
             </Button>
           ) : null}
 

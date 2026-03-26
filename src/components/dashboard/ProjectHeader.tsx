@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FilePlus2, Share2, Copy, Check, Loader2, X } from "lucide-react";
+import {
+  FilePlus2,
+  Share2,
+  Copy,
+  Check,
+  Loader2,
+  X,
+  AlertTriangle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { generateProjectShareLink } from "@/lib/share-project";
@@ -64,6 +72,16 @@ export function ProjectHeader({ project }: { project: ProjectRow }) {
             </span>
             Active project
           </Badge>
+          {project.estimated_max_total &&
+            project.estimated_max_total > 30000 && (
+              <Badge
+                variant="outline"
+                className="bg-amber-50 text-amber-700 border-amber-200/50 gap-1.5 font-bold animate-in fade-in slide-in-from-left-2 duration-500"
+              >
+                <AlertTriangle className="w-3 h-3" />
+                High Value Project
+              </Badge>
+            )}
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
           {project.name}

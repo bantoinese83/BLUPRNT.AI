@@ -161,10 +161,9 @@ export function HelpWidget() {
       >
         <MessageCircle className="w-6 h-6" />
         {showPulse && !isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500" />
-          </span>
+          <div className="absolute -top-1 -right-1 bg-indigo-500 text-white rounded-full p-0.5 shadow-sm border-2 border-slate-900 ring-1 ring-indigo-400/20">
+            <HelpCircle className="w-2.5 h-2.5" />
+          </div>
         )}
       </motion.button>
     </>
