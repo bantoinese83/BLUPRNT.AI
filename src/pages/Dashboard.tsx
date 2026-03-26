@@ -33,6 +33,7 @@ import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeB
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
 import { Settings2, LogOut, ListTree } from "lucide-react";
 import { toast } from "sonner";
+import { ShareModal } from "@/components/dashboard/ShareModal";
 
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
@@ -60,6 +61,7 @@ export default function Dashboard() {
   const [upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
   const [hasCelebrated, setHasCelebrated] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const {
     loading,
@@ -367,27 +369,15 @@ export default function Dashboard() {
                 stage={project.stage || "planning"}
                 onAction={(id) => {
                   if (id === "review-scope") navigate("/dashboard/scope");
-                  if (id === "upload-quote") {
-                    const scrollTarget = document.getElementById(
-                      "invoice-upload-anchor",
-                    );
-                    if (scrollTarget)
-                      scrollTarget.scrollIntoView({ behavior: "smooth" });
+                  if (id === "upload-quote" || id === "upload-invoice") {
+                    navigate("/dashboard/execute");
                   }
                   if (id === "export-packet") handleExportPDF();
-                  if (id === "upload-invoice") {
-                    const scrollTarget = document.getElementById(
-                      "invoice-upload-anchor",
-                    );
-                    if (scrollTarget)
-                      scrollTarget.scrollIntoView({ behavior: "smooth" });
-                  }
                   if (id === "review-health") {
-                    const scrollTarget = document.getElementById(
-                      "property-ledger-anchor",
-                    );
-                    if (scrollTarget)
-                      scrollTarget.scrollIntoView({ behavior: "smooth" });
+                    navigate("/dashboard/record");
+                  }
+                  if (id === "share-access") {
+                    setShareOpen(true);
                   }
                 }}
               />
@@ -526,6 +516,11 @@ export default function Dashboard() {
           setUpgradeReason("general");
           setShowUpgrade(true);
         }}
+      />
+      <ShareModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        projectId={project?.id ?? ""}
       />
     </div>
   );
