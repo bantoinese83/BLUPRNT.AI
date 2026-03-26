@@ -61,7 +61,16 @@ export function HelpWidget() {
             className="fixed bottom-20 right-6 sm:right-8 z-50 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden"
           >
             <div className="bg-slate-900 p-4 text-white relative">
-              <h4 className="font-bold text-lg mb-1">Hello there! 👋</h4>
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-bold text-lg">Hello there!</h4>
+                <div className="w-8 h-8 rounded-lg bg-white/10 p-1 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0">
+                  <img
+                    src="/widget-icon.svg"
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
               <p className="text-sm text-slate-300">
                 How can we help you today?
               </p>

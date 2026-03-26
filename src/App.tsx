@@ -16,6 +16,7 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { Toaster } from "sonner";
 import { CommandPalette } from "@/components/CommandPalette";
 import { HelpWidget } from "@/components/HelpWidget";
+import { Analytics } from "@vercel/analytics/react";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -85,6 +86,7 @@ export default function App() {
             <CommandPalette />
             <CookieConsent />
             <HelpWidget />
+            <Analytics />
           </BrowserRouter>
         </ErrorBoundary>
       </AuthProvider>
