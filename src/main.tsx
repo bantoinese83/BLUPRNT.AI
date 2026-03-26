@@ -11,8 +11,7 @@ window.addEventListener(
     const isChunkError =
       /loading chunk|fetch dynamically imported module|script error/i.test(
         e.message,
-      ) ||
-      ((e as any).target && (e as any).target.tagName === "SCRIPT");
+      ) || e.target instanceof HTMLScriptElement;
 
     if (isChunkError) {
       const storageKey = "bluprnt_chunk_retry";

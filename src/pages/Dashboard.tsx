@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-  useRef,
-  type ReactNode,
-} from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Helmet } from "react-helmet-async";
@@ -23,7 +16,6 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
 import { generateDashboardSummaryPDF } from "@/lib/pdf-export";
-import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { EstimateSummary } from "@/components/dashboard/EstimateSummary";
@@ -39,7 +31,6 @@ import {
 import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
-import { DashboardTabIntro } from "@/components/dashboard/DashboardTabIntro";
 import { Settings2, LogOut, ListTree } from "lucide-react";
 import { toast } from "sonner";
 
@@ -48,75 +39,13 @@ import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { getSafeRedirect } from "@/lib/safe-redirect";
-import type {
-  ProjectRow,
-  ScopeRow,
-  InvoiceRow,
-  UserSubscriptionRow,
-  ProjectPassRow,
-} from "@/types/database";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
+import {
+  containerVariants,
+  itemVariants,
+} from "@/components/dashboard/dashboard-animations";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
-    },
-  },
-} as const;
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 20,
-    },
-  },
-} as const;
-
-function DashboardSubPage({
-  children,
-  side,
-}: {
-  children: ReactNode;
-  side: ReactNode;
-}) {
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-8"
-    >
-      <motion.div variants={itemVariants}>
-        <DashboardTabs />
-      </motion.div>
-      <motion.div variants={itemVariants}>
-        <DashboardTabIntro />
-      </motion.div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
-          {children}
-        </motion.div>
-        <motion.div
-          variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 content-start"
-        >
-          {side}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
-/** Collapse /dashboard/plan/plan/... (relative Navigate bug) to /dashboard/plan */
 function normalizeRepeatedPlanPath(pathname: string): string | null {
   if (!/^\/dashboard(\/plan)+$/.test(pathname)) return null;
   if (pathname === "/dashboard/plan") return null;
@@ -130,18 +59,24 @@ export default function Dashboard() {
   const [useDiscount, setUseDiscount] = useState(false);
   const [upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
-  const [loading, setLoading] = useState(true);
-  const [projects, setProjects] = useState<ProjectRow[]>([]);
-  const [project, setProject] = useState<ProjectRow | null>(null);
-  const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
-  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
-  const [isArchitect, setIsArchitect] = useState(false);
-  const [subscription, setSubscription] = useState<UserSubscriptionRow | null>(
-    null,
-  );
-  const [hasProjectPass, setHasProjectPass] = useState(false);
-  const lastFetchedProjectId = useRef<string | null>(null);
+
+  const {
+    loading,
+    projects,
+    project,
+    scopeItems,
+    invoices,
+    isArchitect,
+    subscription,
+    hasProjectPass,
+    load,
+    handleProjectSelect,
+    setProjects,
+    setProject,
+    setScopeItems,
+    setInvoices,
+  } = useDashboardData();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -156,185 +91,12 @@ export default function Dashboard() {
     return () => window.clearTimeout(id);
   }, [location.search, location.pathname, location.hash, navigate]);
 
-  const load = useCallback(async () => {
-    if (!isSupabaseConfigured()) {
-      setLoading(false);
-      return;
-    }
-
-    // Ensure the skeleton is visible for at least 1.2s
-    const minDelay = new Promise((resolve) => setTimeout(resolve, 1200));
-
-    const [
-      {
-        data: { session },
-      },
-    ] = await Promise.all([supabase.auth.getSession(), minDelay]);
-
-    if (!session) {
-      const returnTo = getSafeRedirect(
-        `${window.location.pathname}${window.location.search}`,
-        "/dashboard",
-      );
-      navigate(`/login?redirect=${encodeURIComponent(returnTo)}`, {
-        replace: true,
-      });
-      return;
-    }
-
-    const cacheKey = `bluprnt_dash_${session.user.id}`;
-    const cachedData = sessionStorage.getItem(cacheKey);
-    if (cachedData) {
-      try {
-        const c = JSON.parse(cachedData);
-        if (c.projects) setProjects(c.projects);
-        if (c.project) setProject(c.project);
-        if (c.scopeItems) setScopeItems(c.scopeItems);
-        if (c.invoices) setInvoices(c.invoices);
-        if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
-        if (c.subscription !== undefined) setSubscription(c.subscription);
-        if (c.hasProjectPass !== undefined) setHasProjectPass(c.hasProjectPass);
-        setLoading(false); // Render instantly (stale-while-revalidate)
-      } catch {
-        // ignore cache decode errors
-      }
-    }
-
-    let projectId: string | null = null;
-    try {
-      projectId = localStorage.getItem("bluprnt_project_id");
-    } catch {
-      /* ignore */
-    }
-    // 1. Fetch all projects securely by joining properties
-    const { data: allProjects } = await supabase
-      .from("projects")
-      .select(
-        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, properties!inner(owner_user_id)",
-      )
-      .eq("properties.owner_user_id", session.user.id)
-      .order("created_at", { ascending: false });
-
-    const rows = (allProjects ?? []) as ProjectRow[];
-    setProjects(rows);
-
-    if (rows.length > 0) {
-      if (!projectId) {
-        projectId = rows[0].id;
-        try {
-          localStorage.setItem("bluprnt_project_id", projectId);
-        } catch {
-          /* ignore */
-        }
-      }
-
-      const proj = rows.find((p) => p.id === projectId) ?? null;
-      if (proj) {
-        setProject(proj);
-      } else {
-        // Fallback if cached ID is invalid for this user
-        projectId = rows[0].id;
-        setProject(rows[0]);
-        try {
-          localStorage.setItem("bluprnt_project_id", projectId);
-        } catch {
-          /* ignore */
-        }
-      }
-    } else {
-      // No projects
-      setProject(null);
-      projectId = null;
-    }
-
-    if (projectId) {
-      // 2. Fetch all required sub-data for the selected project in parallel
-      const [scopesRes, invRes, subRes, subRes2] = await Promise.all([
-        supabase
-          .from("scope_items")
-          .select(
-            "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score",
-          )
-          .eq("project_id", projectId)
-          .order("created_at", { ascending: true }),
-        supabase
-          .from("invoices")
-          .select(
-            "id, vendor_name, total, created_at, payment_status, document_type",
-          )
-          .eq("project_id", projectId)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("user_subscriptions")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .maybeSingle(),
-        supabase
-          .from("project_passes")
-          .select("*")
-          .eq("project_id", projectId)
-          .maybeSingle(),
-      ]);
-
-      const newScopes = (scopesRes.data ?? []) as ScopeRow[];
-      const newInvoices = (invRes.data ?? []) as InvoiceRow[];
-      const sub = subRes.data as UserSubscriptionRow | null;
-      const pass = subRes2.data as ProjectPassRow | null;
-
-      const newIsArchitect = sub?.status === "active";
-      const newHasProjectPass = !!pass;
-
-      setScopeItems(newScopes);
-      setInvoices(newInvoices);
-      setIsArchitect(newIsArchitect);
-      setSubscription(sub);
-      setHasProjectPass(newHasProjectPass);
-
-      sessionStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          projects: rows,
-          project: rows.find((p) => p.id === projectId) ?? rows[0] ?? null,
-          scopeItems: newScopes,
-          invoices: newInvoices,
-          isArchitect: newIsArchitect,
-          subscription: sub,
-          hasProjectPass: newHasProjectPass,
-        }),
-      );
-    } else {
-      // Clear cache if no projects
-      sessionStorage.removeItem(cacheKey);
-    }
-
-    if (projectId === lastFetchedProjectId.current) {
-      setLoading(false);
-      return;
-    }
-    lastFetchedProjectId.current = projectId;
-
-    setLoading(false);
-  }, [navigate]);
-
   useLayoutEffect(() => {
     const fixed = normalizeRepeatedPlanPath(location.pathname);
     if (fixed) {
       navigate(`${fixed}${location.search}${location.hash}`, { replace: true });
     }
   }, [location.pathname, location.search, location.hash, navigate]);
-
-  useEffect(() => {
-    let active = true;
-    const executeLoad = async () => {
-      // Avoid synchronous setState on mount by waiting for next tick
-      await Promise.resolve();
-      if (active) load();
-    };
-    executeLoad();
-    return () => {
-      active = false;
-    };
-  }, [load]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -377,15 +139,6 @@ export default function Dashboard() {
     navigate("/onboarding");
   }
 
-  function handleProjectSelect(id: string) {
-    try {
-      localStorage.setItem("bluprnt_project_id", id);
-    } catch {
-      /* ignore */
-    }
-    load();
-  }
-
   const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
 
   const handleExportPDF = useCallback(async () => {
@@ -397,11 +150,9 @@ export default function Dashboard() {
   async function handleProjectDelete(id: string) {
     if (!isSupabaseConfigured()) return;
 
-    // Store current state for rollback
     const originalProjects = [...projects];
     const originalCurrentProject = project;
 
-    // Optimistically update UI
     setProjects(projects.filter((p) => p.id !== id));
     if (id === project?.id) {
       setProject(null);
@@ -422,14 +173,12 @@ export default function Dashboard() {
     toast.promise(deleteAction(), {
       loading: "Deleting project...",
       success: () => {
-        // If we deleted the current project, we need to load or redirect
         if (id === originalCurrentProject?.id) {
           load();
         }
         return "Project permanently removed";
       },
       error: () => {
-        // Rollback on error
         setProjects(originalProjects);
         setProject(originalCurrentProject);
         return "Failed to delete project";
@@ -504,7 +253,6 @@ export default function Dashboard() {
     );
   }
 
-  // Generate dynamic activity events
   const activityEvents = generateActivityEvents(project, invoices);
 
   const stats = (

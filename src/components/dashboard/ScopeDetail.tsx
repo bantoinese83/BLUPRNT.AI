@@ -1,24 +1,12 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Pencil,
-  Trash2,
-  Loader2,
-  ListTree,
-  Rocket,
-  Hammer,
-} from "lucide-react";
+import { ListTree, Rocket, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
-
+import { useScopeManagement } from "@/hooks/useScopeManagement";
+import { ScopeHeader } from "./ScopeHeader";
+import { ScopeSummary } from "./ScopeSummary";
+import { ScopeItemRow } from "./ScopeItemRow";
 import type { ProjectRow, ScopeRow } from "@/types/database";
-
-import { money, getStars as stars } from "@/lib/formatters";
-
-const TIERS = ["economy", "mid", "premium"] as const;
 
 const PHASE_ORDER = [
   "Site Prep",
@@ -48,104 +36,42 @@ export function ScopeDetail({
   hasProjectPass?: boolean;
 }) {
   const navigate = useNavigate();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editQty, setEditQty] = useState<string>("");
-  const [editTier, setEditTier] = useState<string>("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteConfirmItem, setDeleteConfirmItem] = useState<ScopeRow | null>(
-    null,
-  );
+  const {
+    editingId,
+    setEditingId,
+    editQty,
+    setEditQty,
+    editTier,
+    setEditTier,
+    saving,
+    error,
+    deleteConfirmItem,
+    setDeleteConfirmItem,
+    handleSave,
+    confirmDelete,
+    startEdit,
+  } = useScopeManagement({ projectId, onRefresh });
 
   const conf = project.confidence_score ?? 4.5;
 
-  async function handleSave(item: ScopeRow) {
-    let qty = parseFloat(editQty || "0");
-    if (Number.isNaN(qty) || qty < 0) qty = 0;
-    if (qty > 1000000) qty = 1000000;
+  const groupedItems = scopeItems.reduce(
+    (acc, item) => {
+      const phase = item.phase || item.metadata?.phase || "General";
+      if (!acc[phase]) acc[phase] = [];
+      acc[phase].push(item);
+      return acc;
+    },
+    {} as Record<string, ScopeRow[]>,
+  );
 
-    setEditQty(String(qty));
-    setSaving(true);
-    setError(null);
-    const oldMult =
-      item.finish_tier === "economy"
-        ? 0.85
-        : item.finish_tier === "premium"
-          ? 1.2
-          : 1;
-    const newMult =
-      editTier === "economy" ? 0.85 : editTier === "premium" ? 1.2 : 1;
-    const ucMin = Math.round((item.unit_cost_min ?? 0) * (newMult / oldMult));
-    const ucMax = Math.round((item.unit_cost_max ?? 0) * (newMult / oldMult));
-    const newTotalMin = Math.round(qty * ucMin);
-    const newTotalMax = Math.round(qty * ucMax);
-    const { error: err } = await supabase
-      .from("scope_items")
-      .update({
-        quantity: qty,
-        finish_tier: editTier,
-        unit_cost_min: ucMin,
-        unit_cost_max: ucMax,
-        total_cost_min: newTotalMin,
-        total_cost_max: newTotalMax,
-      })
-      .eq("id", item.id);
-    setSaving(false);
-    if (err) {
-      setError(err.message ?? "Couldn't save changes");
-      return;
-    }
-    await recalcProjectTotals();
-    setEditingId(null);
-    onRefresh();
-  }
-
-  async function recalcProjectTotals() {
-    const { data: items } = await supabase
-      .from("scope_items")
-      .select("total_cost_min, total_cost_max")
-      .eq("project_id", projectId);
-    if (!items?.length) return;
-    const minSum = items.reduce((s, i) => s + (i.total_cost_min ?? 0), 0);
-    const maxSum = items.reduce((s, i) => s + (i.total_cost_max ?? 0), 0);
-    await supabase
-      .from("projects")
-      .update({
-        estimated_min_total: Math.round(minSum),
-        estimated_max_total: Math.round(maxSum),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", projectId);
-  }
-
-  async function handleDelete(item: ScopeRow) {
-    setDeleteConfirmItem(item);
-  }
-
-  async function confirmDelete() {
-    const item = deleteConfirmItem;
-    if (!item) return;
-    setDeleteConfirmItem(null);
-    setSaving(true);
-    setError(null);
-    const { error: err } = await supabase
-      .from("scope_items")
-      .delete()
-      .eq("id", item.id);
-    setSaving(false);
-    if (err) {
-      setError(err.message ?? "Couldn't remove item");
-      return;
-    }
-    await recalcProjectTotals();
-    onRefresh();
-  }
-
-  function startEdit(item: ScopeRow) {
-    setEditingId(item.id);
-    setEditQty(String(item.quantity ?? 1));
-    setEditTier(item.finish_tier ?? "mid");
-  }
+  const sortedPhases = Object.entries(groupedItems).sort(([a], [b]) => {
+    const idxA = PHASE_ORDER.indexOf(a);
+    const idxB = PHASE_ORDER.indexOf(b);
+    if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+    if (idxA === -1) return 1;
+    if (idxB === -1) return -1;
+    return idxA - idxB;
+  });
 
   return (
     <div className="space-y-6">
@@ -171,62 +97,27 @@ export function ScopeDetail({
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => confirmDelete()}
+                onClick={confirmDelete}
                 disabled={saving}
                 type="button"
                 className="gap-2 bg-amber-600 hover:bg-amber-700"
               >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                ) : null}
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 Remove
               </Button>
             </div>
           </div>
         </div>
       )}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-2 text-slate-600"
-          onClick={() => navigate("/dashboard/plan")}
-          type="button"
-        >
-          <ArrowLeft className="w-4 h-4" aria-hidden />
-          Back to plan
-        </Button>
-      </div>
 
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-          Line-by-line costs
-        </h2>
-        <p className="text-slate-500">
-          Detailed breakdown for {project.name}. Tap an item to edit quantity or
-          tier.
-        </p>
-        {error && (
-          <p className="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
-      </div>
+      <ScopeHeader projectName={project.name} error={error} />
 
       <Card className="overflow-hidden">
-        <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <p className="text-slate-400 text-sm font-medium">
-              Estimated total
-            </p>
-            <div className="text-3xl font-bold tracking-tight">
-              {money(project.estimated_min_total, project.estimated_max_total)}
-            </div>
-          </div>
-          <Badge className="bg-slate-800 text-slate-300 border-slate-700">
-            Confidence: {conf}/5
-          </Badge>
-        </div>
+        <ScopeSummary
+          minTotal={project.estimated_min_total}
+          maxTotal={project.estimated_max_total}
+          confidenceScore={conf}
+        />
         <CardContent className="p-0">
           {scopeItems.length === 0 ? (
             <div className="p-10 sm:p-14 flex flex-col items-center text-center max-w-md mx-auto">
@@ -253,244 +144,35 @@ export function ScopeDetail({
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {Object.entries(
-                scopeItems.reduce(
-                  (acc, item) => {
-                    const phase =
-                      item.phase || item.metadata?.phase || "General";
-                    if (!acc[phase]) acc[phase] = [];
-                    acc[phase].push(item);
-                    return acc;
-                  },
-                  {} as Record<string, ScopeRow[]>,
-                ),
-              )
-                .sort(([a], [b]) => {
-                  const idxA = PHASE_ORDER.indexOf(a);
-                  const idxB = PHASE_ORDER.indexOf(b);
-                  if (idxA === -1 && idxB === -1) return a.localeCompare(b);
-                  if (idxA === -1) return 1;
-                  if (idxB === -1) return -1;
-                  return idxA - idxB;
-                })
-                .map(([phase, items]) => (
-                  <div key={phase} className="space-y-0">
-                    <div className="bg-slate-50/80 px-4 py-2 border-y border-slate-100">
-                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        {phase}
-                      </h3>
-                    </div>
-                    <div className="divide-y divide-slate-100">
-                      {items.map((item) => {
-                        const isEditing = editingId === item.id;
-                        const justification =
-                          item.justification || item.metadata?.justification;
-                        const priority =
-                          item.priority || item.metadata?.priority;
-                        const maintenance =
-                          item.maintenance_tips ||
-                          item.metadata?.maintenance_tips;
-                        const confidenceReason =
-                          item.confidence_reason ||
-                          item.metadata?.confidence_reason;
-
-                        return (
-                          <div
-                            key={item.id}
-                            className="p-4 sm:p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors"
-                          >
-                            {isEditing ? (
-                              <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                  <h4 className="font-semibold text-slate-900">
-                                    {item.category}
-                                  </h4>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setEditingId(null)}
-                                      disabled={saving}
-                                      type="button"
-                                    >
-                                      Cancel
-                                    </Button>
-                                    <Button
-                                      variant="primary"
-                                      size="sm"
-                                      onClick={() => handleSave(item)}
-                                      disabled={saving}
-                                      type="button"
-                                      className="gap-2"
-                                    >
-                                      {saving ? (
-                                        <Loader2
-                                          className="w-4 h-4 animate-spin"
-                                          aria-hidden
-                                        />
-                                      ) : null}
-                                      Save
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div>
-                                    <label
-                                      className="text-sm font-medium text-slate-700"
-                                      htmlFor={`qty-${item.id}`}
-                                    >
-                                      Quantity
-                                    </label>
-                                    <input
-                                      id={`qty-${item.id}`}
-                                      type="number"
-                                      min="0"
-                                      step="0.01"
-                                      value={editQty}
-                                      onChange={(e) =>
-                                        setEditQty(e.target.value)
-                                      }
-                                      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-700"
-                                    />
-                                    {item.unit && (
-                                      <span className="text-xs text-slate-500 ml-2">
-                                        {item.unit}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <label
-                                      className="text-sm font-medium text-slate-700"
-                                      htmlFor={`tier-${item.id}`}
-                                    >
-                                      Finish tier
-                                    </label>
-                                    <select
-                                      id={`tier-${item.id}`}
-                                      value={editTier}
-                                      onChange={(e) =>
-                                        setEditTier(e.target.value)
-                                      }
-                                      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-700"
-                                    >
-                                      {TIERS.map((t) => (
-                                        <option key={t} value={t}>
-                                          {t.charAt(0).toUpperCase() +
-                                            t.slice(1)}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                                <div className="space-y-1.5 min-w-0">
-                                  <div className="flex items-center flex-wrap gap-2">
-                                    <h4 className="font-semibold text-slate-900">
-                                      {item.category}
-                                    </h4>
-                                    {priority && (
-                                      <Badge
-                                        variant="secondary"
-                                        className={`text-[10px] h-4.5 px-1.5 uppercase font-black border-none ${
-                                          priority === "high"
-                                            ? "bg-red-50 text-red-600"
-                                            : priority === "medium"
-                                              ? "bg-amber-50 text-amber-600"
-                                              : "bg-slate-50 text-slate-500"
-                                        }`}
-                                      >
-                                        {priority}
-                                      </Badge>
-                                    )}
-                                    {item.finish_tier && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-[10px] h-4.5 px-1.5 capitalize border-slate-200 text-slate-500"
-                                      >
-                                        {item.finish_tier} tier
-                                      </Badge>
-                                    )}
-                                    <div className="flex gap-1">
-                                      <button
-                                        type="button"
-                                        onClick={() => startEdit(item)}
-                                        className="p-1 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors"
-                                        aria-label="Edit"
-                                      >
-                                        <Pencil className="w-3 h-3" />
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDelete(item)}
-                                        className="p-1 text-slate-400 hover:text-amber-600 rounded-md hover:bg-amber-50 transition-colors"
-                                        aria-label="Remove"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </button>
-                                    </div>
-                                  </div>
-                                  <p className="text-sm text-slate-600 leading-snug">
-                                    {item.description}
-                                  </p>
-
-                                  {(isArchitect || hasProjectPass) &&
-                                    justification && (
-                                      <p className="text-xs text-slate-400 flex items-start gap-1.5">
-                                        <Hammer className="w-3.5 h-3.5 mt-0.5 shrink-0 text-indigo-400" />
-                                        <span>{justification}</span>
-                                      </p>
-                                    )}
-
-                                  {(isArchitect || hasProjectPass) &&
-                                    maintenance && (
-                                      <div className="pt-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-600/70 uppercase tracking-tight">
-                                        <div className="h-1 w-1 rounded-full bg-indigo-300" />
-                                        Care Tip: {maintenance}
-                                      </div>
-                                    )}
-
-                                  <div className="pt-1 flex items-center gap-1 text-[10px] font-medium text-slate-400">
-                                    {stars(item.confidence_score)}
-                                    <span className="ml-1">
-                                      {confidenceReason ||
-                                        "Regional pricing accuracy"}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="text-right shrink-0 space-y-1">
-                                  <div className="font-bold text-slate-900">
-                                    {money(
-                                      item.total_cost_min,
-                                      item.total_cost_max,
-                                    )}
-                                  </div>
-                                  {item.quantity != null && item.unit && (
-                                    <div className="text-xs text-slate-500">
-                                      {item.quantity} {item.unit}
-                                      {item.unit_cost_min != null &&
-                                        item.unit_cost_max != null && (
-                                          <span className="block opacity-70">
-                                            {money(
-                                              item.unit_cost_min,
-                                              item.unit_cost_max,
-                                            )}{" "}
-                                            per {item.unit}
-                                          </span>
-                                        )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+              {sortedPhases.map(([phase, items]) => (
+                <div key={phase} className="space-y-0">
+                  <div className="bg-slate-50/80 px-4 py-2 border-y border-slate-100">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                      {phase}
+                    </h3>
                   </div>
-                ))}
+                  <div className="divide-y divide-slate-100">
+                    {items.map((item) => (
+                      <ScopeItemRow
+                        key={item.id}
+                        item={item}
+                        isEditing={editingId === item.id}
+                        onEdit={startEdit}
+                        onDelete={setDeleteConfirmItem}
+                        onCancelEdit={() => setEditingId(null)}
+                        onSave={handleSave}
+                        editQty={editQty}
+                        setEditQty={setEditQty}
+                        editTier={editTier}
+                        setEditTier={setEditTier}
+                        saving={saving}
+                        isArchitect={isArchitect}
+                        hasProjectPass={hasProjectPass}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>

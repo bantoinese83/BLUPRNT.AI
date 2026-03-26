@@ -26,10 +26,16 @@ export function isSupabaseConfigured(): boolean {
  * Robust wrapper for Edge Functions that ensures a fresh JWT is sent.
  * Use this instead of supabase.functions.invoke() to avoid 'Invalid JWT' errors.
  */
-export async function invokeFunction<T = any>(
+export async function invokeFunction<T = unknown>(
   name: string,
   options?: {
-    body?: any;
+    body?:
+      | string
+      | File
+      | Blob
+      | ArrayBuffer
+      | FormData
+      | Record<string, unknown>;
     headers?: Record<string, string>;
     method?: "POST" | "GET" | "PUT" | "PATCH" | "DELETE";
   },
