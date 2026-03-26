@@ -15,3 +15,12 @@ verify_jwt = false
 
 [functions.create-checkout]
 verify_jwt = false
+
+[functions.get-project-view]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false

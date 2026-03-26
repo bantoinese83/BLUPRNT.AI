@@ -2,11 +2,24 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { getUserIdFromRequest } from "../_shared/auth.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2023-10-16",
 });
+
+function getSafeOrigin(req: Request): string {
+  const origin = req.headers.get("origin") ?? "";
+  const allowed = Deno.env.get("ALLOWED_ORIGINS")?.trim();
+  if (!allowed) return origin || Deno.env.get("SITE_URL") || "";
+  const origins = allowed
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  if (origins.includes(origin)) return origin;
+  return origins[0] || "";
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -15,6 +28,16 @@ Deno.serve(async (req: Request) => {
 
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405, req);
+  }
+
+  const { ok, retryAfter } = checkRateLimit(req);
+  if (!ok) {
+    return jsonResponse(
+      { error: "Too many requests. Please try again later." },
+      429,
+      req,
+      retryAfter ?? 60,
+    );
   }
 
   try {
@@ -46,7 +69,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Prefer Stripe Price metadata over duplicating Architect price id in Edge secrets.
     const legacyArchitectId = Deno.env.get("STRIPE_ARCHITECT_PRICE_ID")?.trim();
     let mode: "subscription" | "payment";
     if (legacyArchitectId && priceId === legacyArchitectId) {
@@ -70,7 +92,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const origin = req.headers.get("origin") ?? "";
+    const origin = getSafeOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -92,10 +114,13 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse({ url: session.url }, 200, req);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Checkout failed";
     logEdge("error", "create-checkout failed", {
       detail: error instanceof Error ? error.stack : String(error),
     });
-    return jsonResponse({ error: message }, 500, req);
+    return jsonResponse(
+      { error: "Checkout failed. Please try again." },
+      500,
+      req,
+    );
   }
 });

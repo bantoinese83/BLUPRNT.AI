@@ -3,10 +3,13 @@ import { z } from "https://esm.sh/zod@3.23.8";
 const uuidSchema = z.string().uuid();
 
 export const photoToScopeSchema = z.object({
-  zip_code: z.string().max(20).transform((s) => {
-    const digits = s.replace(/\D/g, "").slice(0, 5);
-    return digits.length >= 5 ? digits : "00000";
-  }),
+  zip_code: z
+    .string()
+    .max(20)
+    .transform((s) => {
+      const digits = s.replace(/\D/g, "").slice(0, 5);
+      return digits.length >= 5 ? digits : "00000";
+    }),
   room_type: z.string().transform((s) => {
     const v = s.toLowerCase();
     if (v === "kitchen") return "kitchen" as const;
@@ -15,7 +18,10 @@ export const photoToScopeSchema = z.object({
   }),
   finish_preference: z.string().transform((s) => {
     const v = s.toLowerCase();
-    return (v === "economy" || v === "premium" ? v : "mid") as "economy" | "mid" | "premium";
+    return (v === "economy" || v === "premium" ? v : "mid") as
+      | "economy"
+      | "mid"
+      | "premium";
   }),
   project_id: z
     .string()
@@ -34,20 +40,32 @@ export const photoToScopeSchema = z.object({
   scope_description: z.string().max(2000).optional().nullable(),
 });
 
-const documentTypeSchema = z.enum(["invoice", "quote", "warranty", "permit"]).default("invoice");
+const documentTypeSchema = z
+  .enum(["invoice", "quote", "warranty", "permit"])
+  .default("invoice");
 
 export const uploadInvoiceSchema = z.object({
   project_id: uuidSchema,
   file: z
     .custom<File>((v) => v instanceof File && v.size > 0, "Valid file required")
-    .refine((f) => f.size <= 10 * 1024 * 1024, "File must be under 10MB"),
+    .refine((f) => f.size <= 10 * 1024 * 1024, "File must be under 10MB")
+    .refine(
+      (f) =>
+        ["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(
+          f.type,
+        ),
+      "Unsupported file type. Upload a PDF, JPEG, PNG, or WEBP.",
+    ),
   document_type: documentTypeSchema,
   vendor_hint: z.string().max(200).optional().nullable(),
-  amount_hint: z.union([z.string(), z.number()]).optional().transform((v) => {
-    if (v === "" || v == null) return null;
-    const n = typeof v === "string" ? parseFloat(v) : v;
-    return Number.isFinite(n) ? n : null;
-  }),
+  amount_hint: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => {
+      if (v === "" || v == null) return null;
+      const n = typeof v === "string" ? parseFloat(v) : v;
+      return Number.isFinite(n) ? n : null;
+    }),
 });
 
 export const getInvoiceSchema = z.object({

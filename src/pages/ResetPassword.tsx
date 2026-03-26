@@ -19,16 +19,24 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Basic verification of session or recovery hash
-    const checkHash = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        // Not an error yet, as they might have just landed from the link
-      }
+    let cancelled = false;
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (cancelled) return;
+        if (!session) {
+          setError(
+            "This reset link may have expired. Request a new one from the sign-in page.",
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled)
+          setError("Could not verify your session. Please try again.");
+      });
+    return () => {
+      cancelled = true;
     };
-    checkHash();
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -62,7 +70,7 @@ export default function ResetPassword() {
     }
 
     setSuccess(true);
-    setTimeout(() => {
+    window.setTimeout(() => {
       navigate("/login", { replace: true });
     }, 3000);
   }
@@ -174,7 +182,10 @@ export default function ResetPassword() {
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 flex items-start gap-2">
+                  <p
+                    role="alert"
+                    className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 flex items-start gap-2"
+                  >
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <span>{error}</span>
                   </p>

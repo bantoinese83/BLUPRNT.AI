@@ -141,7 +141,6 @@ export default function Dashboard() {
     null,
   );
   const [hasProjectPass, setHasProjectPass] = useState(false);
-  const [projectPasses, setProjectPasses] = useState<ProjectPassRow[]>([]);
   const lastFetchedProjectId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -195,7 +194,6 @@ export default function Dashboard() {
         if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
         if (c.subscription !== undefined) setSubscription(c.subscription);
         if (c.hasProjectPass !== undefined) setHasProjectPass(c.hasProjectPass);
-        if (c.projectPasses !== undefined) setProjectPasses(c.projectPasses);
         setLoading(false); // Render instantly (stale-while-revalidate)
       } catch {
         // ignore cache decode errors
@@ -291,7 +289,6 @@ export default function Dashboard() {
       setIsArchitect(newIsArchitect);
       setSubscription(sub);
       setHasProjectPass(newHasProjectPass);
-      setProjectPasses(pass ? [pass] : []);
 
       sessionStorage.setItem(
         cacheKey,
@@ -303,7 +300,6 @@ export default function Dashboard() {
           isArchitect: newIsArchitect,
           subscription: sub,
           hasProjectPass: newHasProjectPass,
-          projectPasses: pass ? [pass] : [],
         }),
       );
     } else {

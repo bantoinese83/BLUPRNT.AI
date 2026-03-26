@@ -99,7 +99,9 @@ export default function AuthCallback() {
           className="h-10 w-10 animate-spin text-slate-900"
           aria-hidden
         />
-        <p className="text-center text-sm font-medium">{message}</p>
+        <p aria-live="polite" className="text-center text-sm font-medium">
+          {message}
+        </p>
       </div>
       <AppSlimFooter className="shrink-0 bg-slate-100/70" />
     </div>

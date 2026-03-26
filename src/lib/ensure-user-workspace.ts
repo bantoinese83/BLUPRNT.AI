@@ -4,19 +4,36 @@ import { supabase } from "@/lib/supabase";
  * After OAuth or magic link, new users have no property/project. Create a starter workspace once.
  */
 export async function ensureUserHasWorkspace(userId: string): Promise<void> {
-  const { data: existing } = await supabase
+  const { data: existing, error: existErr } = await supabase
     .from("properties")
     .select("id")
     .eq("owner_user_id", userId)
     .limit(1);
 
+  if (existErr) {
+    console.warn(
+      "ensureUserHasWorkspace: properties query failed",
+      existErr.message,
+    );
+    return;
+  }
+
   if (existing?.length) {
-    const { data: projects } = await supabase
+    const { data: projects, error: projErr } = await supabase
       .from("projects")
       .select("id")
       .eq("property_id", existing[0].id)
       .order("created_at", { ascending: false })
       .limit(1);
+
+    if (projErr) {
+      console.warn(
+        "ensureUserHasWorkspace: projects query failed",
+        projErr.message,
+      );
+      return;
+    }
+
     const pid = projects?.[0]?.id;
     if (pid) {
       try {
@@ -41,7 +58,13 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     .select("id")
     .single();
 
-  if (pErr || !prop) return;
+  if (pErr || !prop) {
+    console.warn(
+      "ensureUserHasWorkspace: property insert failed",
+      pErr?.message,
+    );
+    return;
+  }
 
   const { data: proj, error: jErr } = await supabase
     .from("projects")
@@ -54,7 +77,12 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     .select("id")
     .single();
 
-  if (!jErr && proj?.id) {
+  if (jErr) {
+    console.warn("ensureUserHasWorkspace: project insert failed", jErr.message);
+    return;
+  }
+
+  if (proj?.id) {
     try {
       localStorage.setItem("bluprnt_project_id", proj.id);
     } catch {

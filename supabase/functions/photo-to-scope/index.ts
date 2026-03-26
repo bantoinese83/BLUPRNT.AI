@@ -71,9 +71,28 @@ Deno.serve(async (req: Request) => {
     } = parsed.data;
     const projectId = project_id ?? null;
 
+    if (projectId) {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        return jsonResponse(
+          { error: "Sign in to save this to a project." },
+          401,
+          req,
+        );
+      }
+      const admin = getServiceClient();
+      try {
+        await assertProjectOwner(admin, projectId, userId);
+      } catch (e) {
+        const m = e instanceof Error ? e.message : "";
+        if (m === "not_found")
+          return jsonResponse({ error: "Project not found" }, 404, req);
+        return jsonResponse({ error: "Access denied" }, 403, req);
+      }
+    }
+
     let payload = null;
 
-    // 1. Try Gemini if photos or description provided
     const photoParts: GeminiPart[] = [];
     for (const p of photos) {
       if (p instanceof File && p.size > 0) {
@@ -94,7 +113,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // 1. Call Gemini for estimation (Mocks removed per user request)
     payload = await extractScopeWithGemini({
       room_type: room_type as RoomType,
       zip_code,
@@ -115,23 +133,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (projectId) {
-      const userId = await getUserIdFromRequest(req);
-      if (!userId) {
-        return jsonResponse(
-          { error: "Sign in to save this to a project." },
-          401,
-          req,
-        );
-      }
       const admin = getServiceClient();
-      try {
-        await assertProjectOwner(admin, projectId, userId);
-      } catch (e) {
-        const m = e instanceof Error ? e.message : "";
-        if (m === "not_found")
-          return jsonResponse({ error: "Project not found" }, 404, req);
-        return jsonResponse({ error: "Access denied" }, 403, req);
-      }
 
       const { error: delErr } = await admin
         .from("scope_items")

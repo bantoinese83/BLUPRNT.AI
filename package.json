@@ -20,14 +20,13 @@
     "functions:deploy:photo": "supabase functions deploy photo-to-scope --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:invoices": "supabase functions deploy upload-invoice get-invoice --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:project-view": "supabase functions deploy get-project-view --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
-    "functions:deploy:delete-account": "supabase functions deploy delete-account --project-ref elucgaegaihkklnfoasm",
+    "functions:deploy:delete-account": "supabase functions deploy delete-account --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:checkout": "supabase functions deploy create-checkout --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
-    "functions:deploy:send-email": "supabase functions deploy send-email --project-ref elucgaegaihkklnfoasm",
+    "functions:deploy:send-email": "supabase functions deploy send-email --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "prepare": "husky"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
     "@supabase/supabase-js": "^2.49.1",
     "@tailwindcss/vite": "^4.1.14",
     "@types/canvas-confetti": "^1.9.0",

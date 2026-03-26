@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Settings2 } from "lucide-react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 import { PageLoader } from "./PageLoader";
 import { Button } from "@/components/ui/button";

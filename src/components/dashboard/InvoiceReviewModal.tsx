@@ -157,16 +157,28 @@ export function InvoiceReviewModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="invoice-review-title"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+          <h3
+            id="invoice-review-title"
+            className="text-lg font-semibold text-slate-900 flex items-center gap-2"
+          >
             <FileText className="w-5 h-5 text-red-500" />
             Review invoice
           </h3>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="p-2 rounded-lg hover:bg-slate-100"
           >
             <X className="w-5 h-5" />

@@ -48,12 +48,16 @@ export default function Landing() {
         navigate("/login");
         return;
       }
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        navigate(`/dashboard?upgrade=${plan}`);
-        return;
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          navigate(`/dashboard?upgrade=${plan}`);
+          return;
+        }
+      } catch {
+        // Session check failed; fall through to login
       }
       const afterAuth = `/dashboard?upgrade=${plan}`;
       navigate(`/login?redirect=${encodeURIComponent(afterAuth)}`);

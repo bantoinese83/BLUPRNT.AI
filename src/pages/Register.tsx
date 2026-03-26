@@ -62,8 +62,8 @@ export default function Register() {
       setError("Sign-up isn't available right now. Please try again later.");
       return;
     }
-    if (password.length < 6) {
-      setError("Use at least 6 characters for your password.");
+    if (password.length < 8) {
+      setError("Use at least 8 characters for your password.");
       return;
     }
 

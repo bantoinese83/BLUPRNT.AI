@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 
 const PROJECT_DOCUMENTS_BUCKET = "project-documents";
@@ -36,7 +37,9 @@ async function removeStorageForProjects(
   const unique = [...new Set(paths)];
   for (let i = 0; i < unique.length; i += STORAGE_REMOVE_BATCH) {
     const batch = unique.slice(i, i + STORAGE_REMOVE_BATCH);
-    const { error } = await admin.storage.from(PROJECT_DOCUMENTS_BUCKET).remove(batch);
+    const { error } = await admin.storage
+      .from(PROJECT_DOCUMENTS_BUCKET)
+      .remove(batch);
     if (error) {
       logEdge("error", "delete-account storage remove batch failed", {
         error: String(error.message),
@@ -85,15 +88,29 @@ async function cancelStripeForUser(
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: getCorsHeaders(req) });
+    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
   }
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405, req);
   }
 
+  const { ok, retryAfter } = checkRateLimit(req);
+  if (!ok) {
+    return jsonResponse(
+      { error: "Too many requests. Please try again later." },
+      429,
+      req,
+      retryAfter ?? 60,
+    );
+  }
+
   const userId = await getUserIdFromRequest(req);
   if (!userId) {
-    return jsonResponse({ error: "Please sign in to delete your account." }, 401, req);
+    return jsonResponse(
+      { error: "Please sign in to delete your account." },
+      401,
+      req,
+    );
   }
 
   try {
@@ -117,10 +134,16 @@ Deno.serve(async (req: Request) => {
       await removeStorageForProjects(admin, projectIds);
 
       for (const pid of projectIds) {
-        const { data: invs } = await admin.from("invoices").select("id").eq("project_id", pid);
+        const { data: invs } = await admin
+          .from("invoices")
+          .select("id")
+          .eq("project_id", pid);
         const invIds = (invs ?? []).map((i) => i.id);
         if (invIds.length > 0) {
-          await admin.from("invoice_line_items").delete().in("invoice_id", invIds);
+          await admin
+            .from("invoice_line_items")
+            .delete()
+            .in("invoice_id", invIds);
         }
         await admin.from("invoices").delete().eq("project_id", pid);
         await admin.from("documents").delete().eq("project_id", pid);
@@ -138,7 +161,11 @@ Deno.serve(async (req: Request) => {
       logEdge("error", "delete-account auth.admin.deleteUser failed", {
         error: String(delErr.message),
       });
-      return jsonResponse({ error: "Could not complete account deletion." }, 500, req);
+      return jsonResponse(
+        { error: "Could not complete account deletion." },
+        500,
+        req,
+      );
     }
 
     return jsonResponse({ success: true }, 200, req);

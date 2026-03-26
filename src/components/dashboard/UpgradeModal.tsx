@@ -105,7 +105,15 @@ export function UpgradeModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="upgrade-modal-title"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") onClose();
+          }}
+        >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -121,6 +129,7 @@ export function UpgradeModal({
           >
             <button
               onClick={onClose}
+              aria-label="Close"
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors z-10"
             >
               <X className="w-4 h-4" />
@@ -169,7 +178,10 @@ export function UpgradeModal({
                     </span>
                   </p>
                 )}
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              <h2
+                id="upgrade-modal-title"
+                className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"
+              >
                 Protect your {formatEstimate(mid)} investment
               </h2>
               <p className="text-slate-600 max-w-xl mx-auto text-base leading-relaxed">

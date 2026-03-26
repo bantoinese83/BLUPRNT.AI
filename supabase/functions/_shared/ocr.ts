@@ -17,7 +17,7 @@ export type OcrInvoiceResult = {
 
 export async function extractInvoiceFromPdf(
   pdfBase64: string,
-  mimeType: string
+  mimeType: string,
 ): Promise<OcrInvoiceResult | null> {
   const systemInstruction = `Extract structured data from the provided invoice/PDF.
 If a field cannot be extracted, return null. 
@@ -39,16 +39,24 @@ For line_items, ensure each entry has description, quantity, unit_price, and lin
             description: { type: "string" },
             quantity: { type: "number" },
             unit_price: { type: "number" },
-            line_total: { type: "number" }
+            line_total: { type: "number" },
           },
-          required: ["description", "quantity", "unit_price", "line_total"]
-        }
+          required: ["description", "quantity", "unit_price", "line_total"],
+        },
       },
       subtotal: { type: "number", nullable: true },
       tax_total: { type: "number", nullable: true },
-      total: { type: "number", nullable: true }
+      total: { type: "number", nullable: true },
     },
-    required: ["vendor_name", "invoice_number", "issue_date", "line_items", "subtotal", "tax_total", "total"]
+    required: [
+      "vendor_name",
+      "invoice_number",
+      "issue_date",
+      "line_items",
+      "subtotal",
+      "tax_total",
+      "total",
+    ],
   };
 
   const parts: GeminiPart[] = [
@@ -89,9 +97,9 @@ For line_items, ensure each entry has description, quantity, unit_price, and lin
       invoice_number: parsed.invoice_number || null,
       issue_date: parsed.issue_date || null,
       line_items: Array.isArray(parsed.line_items) ? parsed.line_items : [],
-      subtotal: parsed.subtotal || null,
-      tax_total: parsed.tax_total || null,
-      total: parsed.total || null,
+      subtotal: parsed.subtotal ?? null,
+      tax_total: parsed.tax_total ?? null,
+      total: parsed.total ?? null,
     };
   } catch (e) {
     console.error("OCR extraction error:", e);

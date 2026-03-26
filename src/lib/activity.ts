@@ -13,7 +13,7 @@ export function generateActivityEvents(
       id: `inv-${inv.id}`,
       type: "upload" as const,
       title: "Invoice Uploaded",
-      description: `${inv.vendor_name || "Vendor"} invoice for $${inv.total?.toLocaleString()} was added.`,
+      description: `${inv.vendor_name || "Vendor"} invoice for ${inv.total != null ? `$${inv.total.toLocaleString()}` : "an unspecified amount"} was added.`,
       timestamp: inv.created_at,
     })),
     // Base achievement for project creation
@@ -21,7 +21,7 @@ export function generateActivityEvents(
       id: `init-${project.id}`,
       type: "project_created" as const,
       title: "Project Initialized",
-      description: `Blueprint for '${project.name}' was created with a $${project.estimated_min_total?.toLocaleString()} baseline.`,
+      description: `Blueprint for '${project.name}' was created${project.estimated_min_total != null ? ` with a $${project.estimated_min_total.toLocaleString()} baseline` : ""}.`,
       timestamp: project.created_at || new Date().toISOString(),
     },
   ];

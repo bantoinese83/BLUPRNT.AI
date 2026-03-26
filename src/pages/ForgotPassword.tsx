@@ -138,7 +138,10 @@ export default function ForgotPassword() {
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 flex items-start gap-2">
+                  <p
+                    role="alert"
+                    className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5 flex items-start gap-2"
+                  >
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <span>{error}</span>
                   </p>

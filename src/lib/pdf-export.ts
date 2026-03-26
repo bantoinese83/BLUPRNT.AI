@@ -387,7 +387,7 @@ export async function generateDashboardSummaryPDF(
   doc.text("ESTIMATED RANGE:", 20, 85);
   doc.setFont("helvetica", "normal");
   doc.text(
-    `$${project.estimated_min_total?.toLocaleString()} - $${project.estimated_max_total?.toLocaleString()}`,
+    moneyRange(project.estimated_min_total, project.estimated_max_total),
     70,
     85,
   );
@@ -395,7 +395,7 @@ export async function generateDashboardSummaryPDF(
   doc.setFont("helvetica", "bold");
   doc.text("CURRENT SPEND:", 20, 95);
   doc.setFont("helvetica", "normal");
-  doc.text(`$${invoiceTotal.toLocaleString()}`, 70, 95);
+  doc.text(money(invoiceTotal), 70, 95);
 
   // Invoices Table Header
   doc.setFillColor(248, 250, 252);
@@ -409,7 +409,7 @@ export async function generateDashboardSummaryPDF(
   invoices.slice(0, 15).forEach((inv, i) => {
     const y = 130 + i * 10;
     doc.text(inv.vendor_name || "Unknown", 25, y);
-    doc.text(`$${inv.total?.toLocaleString()}`, 150, y);
+    doc.text(money(inv.total), 150, y);
     doc.setDrawColor(241, 245, 249);
     doc.line(20, y + 3, 190, y + 3);
   });

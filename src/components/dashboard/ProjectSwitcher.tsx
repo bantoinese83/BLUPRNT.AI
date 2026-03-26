@@ -30,8 +30,15 @@ export function ProjectSwitcher({
         setOpen(false);
       }
     }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   const current = projects.find((p) => p.id === currentId);
@@ -68,6 +75,7 @@ export function ProjectSwitcher({
           onClick={() => setOpen((o) => !o)}
           disabled={disabled}
           type="button"
+          aria-haspopup="listbox"
           aria-expanded={open}
         >
           <FolderOpen
@@ -103,6 +111,8 @@ export function ProjectSwitcher({
                   >
                     <button
                       type="button"
+                      role="option"
+                      aria-selected={isActive}
                       className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-left text-sm rounded-xl transition-all ${
                         isActive
                           ? "bg-slate-900 text-white font-bold"

@@ -44,7 +44,14 @@ export default function Login() {
   }, [user, authLoading, navigate, searchParams]);
 
   const urlErrorParam = searchParams.get("error");
-  const urlError = urlErrorParam ? decodeURIComponent(urlErrorParam) : null;
+  let urlError: string | null = null;
+  if (urlErrorParam) {
+    try {
+      urlError = decodeURIComponent(urlErrorParam);
+    } catch {
+      urlError = urlErrorParam;
+    }
+  }
   const displayError = error || urlError;
   const redirectParam = searchParams.get("redirect");
   const registerHref =

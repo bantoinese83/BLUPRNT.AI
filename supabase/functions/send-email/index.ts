@@ -1,68 +1,96 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "npm:resend";
+import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { getUserIdFromRequest } from "../_shared/auth.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { logEdge } from "../_shared/log.ts";
+import { getServiceClient } from "../_shared/auth.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-interface EmailRequest {
-  to: string | string[];
-  subject: string;
-  html: string;
-}
+const MAX_SUBJECT_LEN = 200;
+const MAX_HTML_LEN = 50_000;
 
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
+  }
+
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405, req);
+  }
+
+  const { ok, retryAfter } = checkRateLimit(req);
+  if (!ok) {
+    return jsonResponse(
+      { error: "Too many requests. Please try again later." },
+      429,
+      req,
+      retryAfter ?? 60,
+    );
   }
 
   try {
-    // Note: The Edge Function `--verify-jwt` flag handles authenticating the Authorization header
-    // so we can trust that only registered users can hit this endpoint.
-    
-    // Fallback runtime check if `--verify-jwt` isn't configured properly locally
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      return jsonResponse({ error: "Unauthorized" }, 401, req);
     }
 
-    const { to, subject, html }: EmailRequest = await req.json();
-
-    if (!to || !subject || !html) {
-      return new Response(JSON.stringify({ error: "Missing required fields: to, subject, html" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const admin = getServiceClient();
+    const { data: authUser } = await admin.auth.admin.getUserById(userId);
+    const userEmail = authUser?.user?.email;
+    if (!userEmail) {
+      return jsonResponse({ error: "Could not resolve user email." }, 400, req);
     }
 
-    // Attempt to send email via Resend
+    const body = (await req.json().catch(() => null)) as {
+      subject?: string;
+      html?: string;
+    } | null;
+
+    const subject =
+      typeof body?.subject === "string"
+        ? body.subject.slice(0, MAX_SUBJECT_LEN)
+        : "";
+    const html =
+      typeof body?.html === "string" ? body.html.slice(0, MAX_HTML_LEN) : "";
+
+    if (!subject || !html) {
+      return jsonResponse(
+        { error: "Missing required fields: subject, html" },
+        400,
+        req,
+      );
+    }
+
     const { data, error } = await resend.emails.send({
       from: "BLUPRNT.AI Notifications <connect@monarch-labs.com>",
-      to,
+      to: userEmail,
       subject,
       html,
     });
 
     if (error) {
-      throw error;
+      logEdge("error", "send-email Resend failed", {
+        detail:
+          error instanceof Error ? (error as Error).message : String(error),
+      });
+      return jsonResponse(
+        { error: "Could not send email. Please try again." },
+        500,
+        req,
+      );
     }
 
-    return new Response(JSON.stringify({ data }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return jsonResponse({ data }, 200, req);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+    logEdge("error", "send-email unexpected", {
+      detail: error instanceof Error ? error.message : String(error),
     });
+    return jsonResponse(
+      { error: "Could not send email. Please try again." },
+      500,
+      req,
+    );
   }
 });

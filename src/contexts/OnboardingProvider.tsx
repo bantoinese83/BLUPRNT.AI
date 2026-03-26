@@ -315,7 +315,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("bluprnt_onboarding_location_unset");
     localStorage.removeItem("bluprnt_onboarding_scope");
     localStorage.removeItem("bluprnt_onboarding_stage");
-  }, []);
+  }, [
+    setProjectType,
+    setLocationInput,
+    setLocationUnset,
+    setScopeDescription,
+    setStage,
+  ]);
 
   const value = useMemo(
     () => ({
@@ -346,10 +352,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }),
     [
       projectType,
+      setProjectType,
       locationInput,
+      setLocationInput,
       locationUnset,
+      setLocationUnset,
       scopeDescription,
+      setScopeDescription,
       stage,
+      setStage,
       photos,
       estimate,
       estimateError,

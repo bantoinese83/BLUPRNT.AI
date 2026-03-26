@@ -31,10 +31,13 @@ Deno.serve(async (req: Request) => {
       signature,
       secret,
       undefined,
-      cryptoProvider
+      cryptoProvider,
     );
   } catch (err) {
-    return new Response((err as Error).message, { status: 400 });
+    logEdge("error", "stripe-webhook signature verification failed", {
+      detail: (err as Error).message,
+    });
+    return new Response("Invalid signature", { status: 400 });
   }
 
   const admin = getServiceClient();
@@ -44,12 +47,14 @@ Deno.serve(async (req: Request) => {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId;
-        const customerEmail = session.customer_email ?? session.customer_details?.email;
+        const customerEmail =
+          session.customer_email ?? session.customer_details?.email;
 
         if (session.mode === "subscription" && session.subscription) {
-          const subId = typeof session.subscription === "string"
-            ? session.subscription
-            : session.subscription.id;
+          const subId =
+            typeof session.subscription === "string"
+              ? session.subscription
+              : session.subscription.id;
           const subscription = await stripe.subscriptions.retrieve(subId);
           const periodEnd = subscription.current_period_end
             ? new Date(subscription.current_period_end * 1000).toISOString()
@@ -57,9 +62,12 @@ Deno.serve(async (req: Request) => {
 
           let targetUserId = userId;
           if (!targetUserId && customerEmail) {
-            const { data: rpcUserId, error: rpcErr } = await admin.rpc("get_user_id_by_email", {
-              user_email: customerEmail,
-            });
+            const { data: rpcUserId, error: rpcErr } = await admin.rpc(
+              "get_user_id_by_email",
+              {
+                user_email: customerEmail,
+              },
+            );
             if (rpcErr) {
               logEdge("error", "stripe-webhook get_user_id_by_email failed", {
                 detail: String(rpcErr.message),
@@ -69,38 +77,52 @@ Deno.serve(async (req: Request) => {
           }
 
           if (targetUserId) {
-            await admin.from("user_subscriptions").upsert(
-              {
-                user_id: targetUserId,
-                stripe_subscription_id: subId,
-                stripe_customer_id:
-                  typeof session.customer === "string"
-                    ? session.customer
-                    : session.customer?.id ?? null,
-                plan: "architect",
-                status: "active",
-                current_period_end: periodEnd,
-                invoice_uploads_count: 0,
-                invoice_uploads_reset_at: periodEnd,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: "user_id" }
-            );
+            const { error: upsertErr } = await admin
+              .from("user_subscriptions")
+              .upsert(
+                {
+                  user_id: targetUserId,
+                  stripe_subscription_id: subId,
+                  stripe_customer_id:
+                    typeof session.customer === "string"
+                      ? session.customer
+                      : (session.customer?.id ?? null),
+                  plan: "architect",
+                  status: "active",
+                  current_period_end: periodEnd,
+                  invoice_uploads_count: 0,
+                  invoice_uploads_reset_at: periodEnd,
+                  updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id" },
+              );
+            if (upsertErr) {
+              logEdge("error", "stripe-webhook DB upsert failed", {
+                detail: upsertErr.message,
+              });
+              return new Response("Database error", { status: 500 });
+            }
           }
         } else if (session.mode === "payment" && session.metadata?.project_id) {
           const projectId = session.metadata.project_id;
           const expiresAt = new Date();
           expiresAt.setMonth(expiresAt.getMonth() + 6);
 
-          await admin.from("project_passes").upsert(
+          const { error: passErr } = await admin.from("project_passes").upsert(
             {
               project_id: projectId,
               stripe_checkout_session_id: session.id,
               purchased_at: new Date().toISOString(),
               expires_at: expiresAt.toISOString(),
             },
-            { onConflict: "project_id" }
+            { onConflict: "project_id" },
           );
+          if (passErr) {
+            logEdge("error", "stripe-webhook DB upsert failed", {
+              detail: passErr.message,
+            });
+            return new Response("Database error", { status: 500 });
+          }
         }
         break;
       }
@@ -110,10 +132,14 @@ Deno.serve(async (req: Request) => {
         const periodEnd = subscription.current_period_end
           ? new Date(subscription.current_period_end * 1000).toISOString()
           : null;
-        const status = subscription.status === "active" ? "active"
-          : subscription.status === "canceled" ? "canceled"
-          : subscription.status === "past_due" ? "past_due"
-          : "trialing";
+        const status =
+          subscription.status === "active"
+            ? "active"
+            : subscription.status === "canceled"
+              ? "canceled"
+              : subscription.status === "past_due"
+                ? "past_due"
+                : "trialing";
 
         const { data: row } = await admin
           .from("user_subscriptions")
@@ -129,7 +155,7 @@ Deno.serve(async (req: Request) => {
           : 0;
         const billingPeriodAdvanced = newMs > oldMs;
 
-        await admin
+        const { error: updateErr } = await admin
           .from("user_subscriptions")
           .update({
             status,
@@ -139,18 +165,30 @@ Deno.serve(async (req: Request) => {
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subscription.id);
+        if (updateErr) {
+          logEdge("error", "stripe-webhook DB upsert failed", {
+            detail: updateErr.message,
+          });
+          return new Response("Database error", { status: 500 });
+        }
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await admin
+        const { error: deleteErr } = await admin
           .from("user_subscriptions")
           .update({
             status: "canceled",
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subscription.id);
+        if (deleteErr) {
+          logEdge("error", "stripe-webhook DB upsert failed", {
+            detail: deleteErr.message,
+          });
+          return new Response("Database error", { status: 500 });
+        }
         break;
       }
 

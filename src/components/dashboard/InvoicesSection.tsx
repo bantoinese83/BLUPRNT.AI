@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { motion, AnimatePresence } from "motion/react";
-import { supabase, invokeFunction } from "@/lib/supabase";
+import { invokeFunction } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { InvoiceReviewModal } from "./InvoiceReviewModal";
 
@@ -94,9 +94,7 @@ export function InvoicesSection({
     documentType === "invoice" &&
     !hasProjectPass &&
     ((!isArchitectActive && invoiceCount >= FREE_LIMIT) ||
-      (isArchitectActive &&
-        invoiceCount >= FREE_LIMIT &&
-        architectUploads >= 10));
+      (isArchitectActive && architectUploads >= 10));
 
   const isArchitectAtGlobalLimit = isArchitectActive && architectUploads >= 10;
 
@@ -108,9 +106,11 @@ export function InvoicesSection({
       typeParam === "permit"
     ) {
       setDocumentType(typeParam);
-      setSearchParams({}, { replace: true });
+      const next = new URLSearchParams(searchParams);
+      next.delete("type");
+      setSearchParams(next, { replace: true });
     }
-  }, [typeParam, setSearchParams]);
+  }, [typeParam, setSearchParams, searchParams]);
 
   function dismissGuide() {
     try {

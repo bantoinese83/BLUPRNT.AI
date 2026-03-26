@@ -10,8 +10,10 @@
  */
 const store = new Map<string, { count: number; resetAt: number }>();
 
-const REQUESTS = parseInt(Deno.env.get("RATE_LIMIT_REQUESTS") ?? "60", 10);
-const WINDOW_MS = parseInt(Deno.env.get("RATE_LIMIT_WINDOW_MS") ?? "60000", 10);
+const REQUESTS =
+  parseInt(Deno.env.get("RATE_LIMIT_REQUESTS") ?? "60", 10) || 60;
+const WINDOW_MS =
+  parseInt(Deno.env.get("RATE_LIMIT_WINDOW_MS") ?? "60000", 10) || 60000;
 
 function getClientId(req: Request): string {
   return (
@@ -22,7 +24,10 @@ function getClientId(req: Request): string {
   );
 }
 
-export function checkRateLimit(req: Request): { ok: boolean; retryAfter?: number } {
+export function checkRateLimit(req: Request): {
+  ok: boolean;
+  retryAfter?: number;
+} {
   const id = getClientId(req);
   const now = Date.now();
   const entry = store.get(id);
