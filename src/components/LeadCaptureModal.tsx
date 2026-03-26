@@ -210,9 +210,22 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                       )}
                     </Button>
                   </form>
-                  <p className="text-[10px] text-center text-slate-400 font-medium">
-                    No spam. Just value. Unsubscribe any time.
-                  </p>
+                  <div className="space-y-4 pt-2">
+                    <p className="text-[10px] text-center text-slate-400 font-medium">
+                      No spam. Just value. Unsubscribe any time.
+                    </p>
+
+                    <div className="flex items-center justify-center gap-1.5 grayscale opacity-70">
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                        Secure logic powered by
+                      </span>
+                      <img
+                        src="/stripe-logo.svg"
+                        alt="Stripe"
+                        className="h-3.5 w-auto opacity-90"
+                      />
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <motion.div

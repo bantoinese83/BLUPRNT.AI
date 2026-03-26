@@ -364,7 +364,7 @@ export function UpgradeModal({
                 </Card>
               </div>
 
-              <div className="mt-8 text-center space-y-3">
+              <div className="mt-8 text-center space-y-4">
                 <div className="inline-block px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
                   <p className="text-xs font-bold text-slate-900">
                     Which should I pick?
@@ -381,7 +381,19 @@ export function UpgradeModal({
                     .
                   </p>
                 </div>
-                <div className="pt-2">
+
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <div className="flex items-center justify-center gap-1.5 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                      Secure payments via
+                    </span>
+                    <img
+                      src="/stripe-logo.svg"
+                      alt="Stripe"
+                      className="h-5 w-auto mb-0.5"
+                    />
+                  </div>
+
                   <button
                     className="text-sm text-slate-400 hover:text-slate-600 font-medium transition-colors"
                     onClick={onClose}
