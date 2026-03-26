@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { exportUserData } from "@/services/export-service";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function useUserSettings() {
   const navigate = useNavigate();
@@ -80,11 +81,10 @@ export function useUserSettings() {
     });
     setProfileSaving(false);
     if (error) {
-      setProfileMessage(error.message || "Couldn't save your name.");
+      toast.error(error.message || "Couldn't save your name.");
       return;
     }
-    setProfileMessage("Saved.");
-    setTimeout(() => setProfileMessage(null), 2000);
+    toast.success("Profile updated");
   };
 
   const handleExportData = async () => {
@@ -93,10 +93,9 @@ export function useUserSettings() {
     setExportLoading(true);
     try {
       await exportUserData(user.id, user.email ?? "");
-      setExportMessage("Download started.");
-      setTimeout(() => setExportMessage(null), 3000);
+      toast.success("Export download started");
     } catch {
-      setExportMessage("Export failed. Try again.");
+      toast.error("Export failed. Try again.");
     } finally {
       setExportLoading(false);
     }
@@ -120,14 +119,13 @@ export function useUserSettings() {
     setPasswordSaving(false);
 
     if (error) {
-      setPasswordMessage(error.message || "Couldn't update password.");
+      toast.error(error.message || "Couldn't update password.");
       return;
     }
 
-    setPasswordMessage("Success! Your password has been updated.");
+    toast.success("Password updated successfully");
     setNewPassword("");
     setConfirmPassword("");
-    setTimeout(() => setPasswordMessage(null), 3000);
   };
 
   const handleDeleteAccount = async (deleteConfirm: boolean) => {

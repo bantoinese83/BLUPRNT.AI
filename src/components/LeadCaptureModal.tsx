@@ -119,8 +119,14 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
             <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 text-white relative flex flex-col justify-center overflow-hidden">
               {/* Decorative background elements */}
               <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white animate-pulse" />
-                <div className="absolute bottom-10 right-10 w-24 h-24 rounded-full border-2 border-white" />
+                <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white/20 flex items-center justify-center p-6 grayscale brightness-[10]">
+                  <img
+                    src="/bluprnt_logo.svg"
+                    alt="BLUPRNT.AI"
+                    className="w-full h-auto opacity-100"
+                  />
+                </div>
+                <div className="absolute bottom-10 right-10 w-24 h-24 rounded-full border-2 border-white/20" />
               </div>
 
               <div className="relative z-10 space-y-6">

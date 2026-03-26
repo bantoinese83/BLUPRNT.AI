@@ -1,11 +1,16 @@
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { MessageCircle, X, ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { MessageCircle, X, ArrowRight, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPulse, setShowPulse] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const autoOpenDone = useRef(
+    sessionStorage.getItem("bluprnt_help_auto") === "true",
+  );
 
   // Hide the widget on Landing, Login, Register, Onboarding flows where it might distract
   // Show it primarily in the Dashboard and Settings.
@@ -16,12 +21,33 @@ export function HelpWidget() {
     "/forgot-password",
     "/auth/reset-password",
   ];
-  if (
+  const isHidden =
     hiddenPaths.includes(location.pathname) ||
-    location.pathname.startsWith("/onboarding")
-  ) {
-    return null;
-  }
+    location.pathname.startsWith("/onboarding");
+
+  // Auto-open after 60s on first dashboard visit (once per session)
+  useEffect(() => {
+    if (isHidden || autoOpenDone.current) return;
+
+    const timer = setTimeout(() => {
+      setShowPulse(true);
+      setIsOpen(true);
+      autoOpenDone.current = true;
+      sessionStorage.setItem("bluprnt_help_auto", "true");
+    }, 60_000);
+
+    // Show pulse indicator after 15s
+    const pulseTimer = setTimeout(() => {
+      if (!autoOpenDone.current) setShowPulse(true);
+    }, 15_000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(pulseTimer);
+    };
+  }, [isHidden]);
+
+  if (isHidden) return null;
 
   return (
     <>
@@ -69,6 +95,24 @@ export function HelpWidget() {
                 </p>
               </div>
 
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/#faq");
+                }}
+                className="flex items-center justify-between w-full p-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group text-left"
+              >
+                <div>
+                  <h5 className="font-semibold text-indigo-900 text-sm">
+                    Visit FAQ
+                  </h5>
+                  <p className="text-xs text-indigo-600/70 mt-0.5">
+                    Common questions answered
+                  </p>
+                </div>
+                <HelpCircle className="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
+              </button>
+
               <a
                 href="mailto:connect@monarch-labs.com?subject=Need%20Help%20with%20BLUPRNT"
                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 transition-colors group"
@@ -108,11 +152,20 @@ export function HelpWidget() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setShowPulse(false);
+        }}
         className="fixed bottom-6 right-6 sm:right-8 z-50 flex items-center justify-center w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 hover:bg-indigo-600 transition-colors duration-300"
         aria-label="Help and Support"
       >
         <MessageCircle className="w-6 h-6" />
+        {showPulse && !isOpen && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500" />
+          </span>
+        )}
       </motion.button>
     </>
   );

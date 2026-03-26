@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export function Shimmer() {
@@ -32,17 +33,27 @@ export function DashboardSkeleton() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Project header skeleton */}
-        <div className="space-y-2">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-2"
+        >
           <div className="relative overflow-hidden h-6 w-28 bg-slate-100 rounded-lg">
             <Shimmer />
           </div>
           <div className="relative overflow-hidden h-10 w-64 bg-slate-100 rounded-lg">
             <Shimmer />
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats strip skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
+        >
           {[1, 2, 3].map((i) => (
             <div
               key={i}
@@ -51,14 +62,24 @@ export function DashboardSkeleton() {
               <Shimmer />
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Upgrade banner skeleton */}
-        <div className="relative overflow-hidden h-16 w-full bg-slate-100 rounded-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="relative overflow-hidden h-16 w-full bg-slate-100 rounded-2xl"
+        >
           <Shimmer />
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
+        >
           <div className="lg:col-span-2 space-y-8">
             {/* Estimate summary skeleton */}
             <Card className="relative overflow-hidden">
@@ -160,7 +181,7 @@ export function DashboardSkeleton() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

@@ -23,6 +23,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { useEffect } from "react";
 
 type Mode = "password" | "magic";
@@ -319,7 +320,9 @@ export default function Register() {
                     placeholder="Min. 6 characters"
                   />
                 </div>
+                <PasswordStrengthMeter password={password} />
               </div>
+
               <div className="space-y-2">
                 <label
                   className="text-sm font-bold text-slate-700 ml-1"

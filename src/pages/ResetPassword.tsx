@@ -9,6 +9,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Loader } from "@/components/ui/Loader";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -155,6 +156,7 @@ export default function ResetPassword() {
                       placeholder="Min. 8 characters"
                     />
                   </div>
+                  <PasswordStrengthMeter password={password} />
                 </div>
 
                 <div className="space-y-2">

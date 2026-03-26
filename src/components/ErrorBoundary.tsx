@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from "react";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { reportClientError } from "@/lib/report-error";
 
@@ -40,10 +40,20 @@ export class ErrorBoundary extends Component<Props, State> {
       }
       return (
         <div
-          className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50"
+          className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 page-fade-in"
           role="alert"
         >
           <div className="max-w-md w-full text-center space-y-6">
+            <div className="flex justify-center mb-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm border border-slate-200 overflow-hidden">
+                <img
+                  src="/bluprnt_logo.svg"
+                  alt="BLUPRNT.AI logo"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            </div>
+
             <div className="rounded-2xl bg-amber-50 p-6 border border-amber-100">
               <AlertTriangle
                 className="w-12 h-12 text-amber-600 mx-auto mb-4"
@@ -74,6 +84,14 @@ export class ErrorBoundary extends Component<Props, State> {
                 </Button>
               </div>
             </div>
+
+            <a
+              href="mailto:connect@monarch-labs.com?subject=BLUPRNT%20Error%20Report"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              Contact support
+            </a>
           </div>
         </div>
       );

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import confetti from "canvas-confetti";
 import type { ScopeRow } from "@/types/database";
 
 interface UseScopeManagementProps {
@@ -18,6 +20,9 @@ export function useScopeManagement({
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmItem, setDeleteConfirmItem] = useState<ScopeRow | null>(
     null,
+  );
+  const hasCelebratedRef = useRef(
+    sessionStorage.getItem("bluprnt_scope_celebrated") === "true",
   );
 
   const recalcProjectTotals = async () => {
@@ -88,12 +93,22 @@ export function useScopeManagement({
 
     if (err) {
       setError(err.message ?? "Couldn't save changes");
+      toast.error("Couldn't save changes");
       setSaving(false);
       return;
     }
 
     await recalcProjectTotals();
     setSaving(false);
+
+    if (!hasCelebratedRef.current) {
+      hasCelebratedRef.current = true;
+      sessionStorage.setItem("bluprnt_scope_celebrated", "true");
+      toast.success("Budget updated — looking sharp! 🎉");
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+    } else {
+      toast.success("Item updated");
+    }
     setEditingId(null);
     onRefresh();
   };
@@ -112,12 +127,14 @@ export function useScopeManagement({
 
     if (err) {
       setError(err.message ?? "Couldn't remove item");
+      toast.error("Couldn't remove item");
       setSaving(false);
       return;
     }
 
     await recalcProjectTotals();
     setSaving(false);
+    toast.success("Item removed");
     onRefresh();
   };
 
