@@ -167,29 +167,6 @@ export function DashboardHeader({
             aria-hidden
           />
 
-          <Link to="/settings" className="sm:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-xl text-slate-600"
-              type="button"
-              aria-label="Settings"
-            >
-              <Settings2 className="h-4 w-4" aria-hidden />
-            </Button>
-          </Link>
-          <a href="mailto:connect@monarch-labs.com" className="sm:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-xl text-slate-600"
-              type="button"
-              aria-label="Contact support"
-            >
-              <LifeBuoy className="h-4 w-4" aria-hidden />
-            </Button>
-          </a>
-
           <Link to="/settings" className="hidden sm:block">
             <Button
               variant="ghost"
