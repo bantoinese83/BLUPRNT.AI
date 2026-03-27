@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Helmet } from "react-helmet-async";
