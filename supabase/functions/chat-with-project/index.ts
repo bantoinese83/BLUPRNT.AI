@@ -1,9 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
-import { getServiceClient, getUserIdFromRequest, assertProjectOwner } from "../_shared/auth.ts";
+import {
+  getServiceClient,
+  getUserIdFromRequest,
+  assertProjectOwner,
+} from "../_shared/auth.ts";
 import { callGemini } from "../_shared/gemini.ts";
 
-// @ts-ignore: Deno global
+// @ts-expect-error: Deno global
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: getCorsHeaders(req) });
@@ -40,10 +44,10 @@ Deno.serve(async (req: Request) => {
       Budget Estimate: $${project.estimated_min_total} - $${project.estimated_max_total}
       
       Scope Items:
-      ${scope.map((s: any) => `- ${s.category}: ${s.description} ($${s.total_cost_min}-$${s.total_cost_max})`).join('\n')}
+      ${scope.map((s: any) => `- ${s.category}: ${s.description} ($${s.total_cost_min}-$${s.total_cost_max})`).join("\n")}
       
       Current Invoices:
-      ${invoices.map((i: any) => `- ${i.vendor_name || 'Vendor'}: $${i.total} (${i.payment_status})`).join('\n')}
+      ${invoices.map((i: any) => `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`).join("\n")}
     `;
 
     const systemInstruction = `
@@ -68,10 +72,17 @@ Deno.serve(async (req: Request) => {
       temperature: 0.7,
     });
 
-    return jsonResponse({ reply: result?.text || "I'm sorry, I couldn't generate a response." }, 200, req);
-
+    return jsonResponse(
+      { reply: result?.text || "I'm sorry, I couldn't generate a response." },
+      200,
+      req,
+    );
   } catch (e: any) {
     console.error(e);
-    return jsonResponse({ error: e.message || "Internal server error" }, 500, req);
+    return jsonResponse(
+      { error: e.message || "Internal server error" },
+      500,
+      req,
+    );
   }
 });

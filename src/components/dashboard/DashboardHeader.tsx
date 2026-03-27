@@ -7,7 +7,6 @@ import {
   LifeBuoy,
   Plus,
   Crown,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -111,7 +110,12 @@ export function DashboardHeader({
               onClick={onOpenInsights}
               type="button"
             >
-              <img src="/insights-icon.svg" alt="" className="h-5 w-5 sm:mr-1.5 shrink-0" aria-hidden />
+              <img
+                src="/insights-icon.svg"
+                alt=""
+                className="h-5 w-5 sm:mr-1.5 shrink-0"
+                aria-hidden
+              />
               <span className="hidden font-semibold sm:inline">Insights</span>
             </Button>
           )}

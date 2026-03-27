@@ -41,6 +41,35 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
       } catch {
         /* ignore */
       }
+      return;
+    }
+
+    // Property exists but no project, fall through to project creation
+    const { data: proj, error: jErr } = await supabase
+      .from("projects")
+      .insert({
+        property_id: existing[0].id,
+        name: "My home project",
+        type: "other",
+        stage: "planning",
+      })
+      .select("id")
+      .single();
+
+    if (jErr) {
+      console.warn(
+        "ensureUserHasWorkspace: project insert failed",
+        jErr.message,
+      );
+      return;
+    }
+
+    if (proj?.id) {
+      try {
+        localStorage.setItem("bluprnt_project_id", proj.id);
+      } catch {
+        /* ignore */
+      }
     }
     return;
   }

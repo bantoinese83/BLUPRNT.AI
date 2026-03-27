@@ -442,13 +442,17 @@
 }
 
 @keyframes shine-sweep {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .glass-deep {
   @apply bg-slate-900/90 backdrop-blur-2xl border border-white/10 shadow-2xl;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.03) 0, transparent 50%),
     radial-gradient(at 100% 100%, rgba(0, 0, 0, 0.2) 0, transparent 50%);
 }
@@ -459,4 +463,72 @@
   opacity: 0.015;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+/* Markdown Content Styling */
+.markdown-content {
+  @apply space-y-3;
+}
+
+.markdown-content p {
+  @apply leading-relaxed;
+}
+
+.markdown-content strong {
+  @apply font-bold text-white;
+}
+
+.markdown-content ul {
+  @apply list-disc list-inside space-y-1 ml-1;
+}
+
+.markdown-content ol {
+  @apply list-decimal list-inside space-y-1 ml-1;
+}
+
+.markdown-content li {
+  @apply marker:text-slate-500;
+}
+
+.markdown-content li strong {
+  @apply text-indigo-300;
+}
+
+.markdown-content code {
+  @apply px-1.5 py-0.5 rounded-md bg-white/10 font-mono text-[0.9em] border border-white/5;
+}
+
+.markdown-content pre {
+  @apply p-3 rounded-xl bg-slate-900 border border-white/5 overflow-x-auto my-3;
+}
+
+.markdown-content pre code {
+  @apply p-0 bg-transparent border-0;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  @apply font-black tracking-tight text-white mt-4 mb-2;
+}
+
+.markdown-content h1 {
+  @apply text-base;
+}
+.markdown-content h2 {
+  @apply text-sm;
+}
+.markdown-content h3 {
+  @apply text-xs;
+}
+
+.markdown-content a {
+  @apply text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-400/30 transition-colors;
+}
+
+.markdown-content hr {
+  @apply border-white/5 my-4;
+}
+
+.markdown-content blockquote {
+  @apply pl-4 border-l-2 border-indigo-500/30 text-slate-400 italic;
 }

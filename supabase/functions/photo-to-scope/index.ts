@@ -15,7 +15,7 @@ import {
 } from "./_shared/estimate.ts";
 import { type GeminiPart } from "../_shared/gemini.ts";
 
-// @ts-ignore
+// @ts-expect-error: Deno global
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: getCorsHeaders(req) });

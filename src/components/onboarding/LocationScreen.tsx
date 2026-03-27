@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import {
   ArrowRight,
   MapPin,
@@ -196,11 +196,16 @@ export function LocationScreen() {
                     </span>
                   </div>
                   <p className="text-sm font-bold leading-tight">
-                    In {locationInput.includes(',') ? locationInput.split(',')[0] : 'this area'}, 
-                    Kitchen & Bath remodels are seeing a 12% higher ROI this quarter due to low inventory.
+                    In{" "}
+                    {locationInput.includes(",")
+                      ? locationInput.split(",")[0]
+                      : "this area"}
+                    , Kitchen & Bath remodels are seeing a 12% higher ROI this
+                    quarter due to low inventory.
                   </p>
                   <p className="text-[10px] text-indigo-200 font-medium">
-                    Our AI is grounding your estimate in recent local material surges.
+                    Our AI is grounding your estimate in recent local material
+                    surges.
                   </p>
                 </div>
               </motion.div>

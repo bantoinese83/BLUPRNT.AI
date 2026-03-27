@@ -5,7 +5,7 @@ import { GoogleGenAI } from "npm:@google/genai";
  * Migrated to the LATEST Google GenAI SDK architecture (2025/2026).
  */
 
-export type GeminiPart = 
+export type GeminiPart =
   | { text: string }
   | { inline_data: { mime_type: string; data: string } };
 
@@ -21,27 +21,33 @@ export async function callGemini(params: {
   responseSchema?: any;
   temperature?: number;
 }): Promise<GeminiResponse | null> {
-  // @ts-ignore: Deno global
+  // @ts-expect-error: Deno global
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey?.trim()) {
     console.error("[callGemini] GEMINI_API_KEY not found in environment");
     return null;
   }
 
-  const { parts, systemInstruction, responseMimeType = "application/json", responseSchema, temperature = 0.1 } = params;
-  
+  const {
+    parts,
+    systemInstruction,
+    responseMimeType = "application/json",
+    responseSchema,
+    temperature = 0.1,
+  } = params;
+
   try {
     // 1. Initialize the new unified Client
     const ai = new GoogleGenAI({ apiKey });
 
     // 2. Format parts for the new SDK structure
-    const sdkContents = parts.map(p => {
+    const sdkContents = parts.map((p) => {
       if ("inline_data" in p) {
         return {
           inlineData: {
             mimeType: p.inline_data.mime_type,
-            data: p.inline_data.data
-          }
+            data: p.inline_data.data,
+          },
         };
       }
       return { text: p.text };
@@ -69,7 +75,7 @@ export async function callGemini(params: {
 
     return {
       text: response.text.trim(),
-      data: response.data // The new SDK often parses the data automatically if schema is provided
+      data: response.data, // The new SDK often parses the data automatically if schema is provided
     };
   } catch (e: any) {
     console.error("[callGemini] New SDK Error:", e.name, e.message);

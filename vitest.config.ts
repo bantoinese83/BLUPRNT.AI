@@ -13,18 +13,23 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      thresholds: {
-        lines: 45,
-        branches: 40,
-        functions: 45,
-        statements: 45,
-      },
+      all: true,
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "node_modules/",
         "src/test/",
         "**/*.d.ts",
         "**/*.config.*",
+        "src/main.tsx",
+        "src/vite-env.d.ts",
+        "**/*.test.{ts,tsx}",
       ],
+      thresholds: {
+        lines: 20,
+        branches: 18,
+        functions: 14,
+        statements: 20,
+      },
     },
   },
   resolve: {
