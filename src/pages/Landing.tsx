@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Helmet } from "react-helmet-async";
@@ -10,6 +10,7 @@ import {
 } from "@/lib/site-url";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { PLAN_COMPARISON_ROWS } from "@/components/landing/landing-content";
+import { useAuth } from "@/hooks/use-auth";
 
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingSocialProof } from "@/components/landing/LandingSocialProof";
@@ -31,16 +32,29 @@ const FALLBACK_SITE_URL = "https://bluprntai.com";
 export default function Landing() {
   const navigate = useNavigate();
   const { hash } = useLocation();
+  const { user } = useAuth();
+  const [isArchitect, setIsArchitect] = useState(false);
+
+  useEffect(() => {
+    async function checkSubscription() {
+      if (!user) {
+        setIsArchitect(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("user_subscriptions")
+        .select("status")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setIsArchitect(data?.status === "active");
+    }
+    checkSubscription();
+  }, [user]);
 
   const metaBase = SITE_URL || FALLBACK_SITE_URL;
   const jsonLd = buildLandingJsonLd(metaBase);
-
-  const scrollToSection = useCallback((sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, []);
 
   const handlePlanSelect = useCallback(
     async (plan: "architect" | "pass") => {
@@ -133,7 +147,7 @@ export default function Landing() {
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 text-slate-900">
-        <LandingHeader scrollToSection={scrollToSection} />
+        <LandingHeader />
 
         <main>
           <HeroSection
@@ -146,6 +160,7 @@ export default function Landing() {
           <LandingStory />
           <LandingFeatures />
           <LandingPricing
+            isArchitect={isArchitect}
             onPlanSelect={handlePlanSelect}
             planComparisonRows={PLAN_COMPARISON_ROWS}
           />

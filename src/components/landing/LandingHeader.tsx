@@ -13,11 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { useAuth } from "@/hooks/use-auth";
 
-interface LandingHeaderProps {
-  scrollToSection: (id: string) => void;
-}
-
-export function LandingHeader({ scrollToSection }: LandingHeaderProps) {
+export function LandingHeader() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const headerScrolled = useScrollPosition(8);
   const { user } = useAuth();

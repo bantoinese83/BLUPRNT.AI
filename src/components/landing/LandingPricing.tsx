@@ -13,11 +13,13 @@ interface LandingPricingProps {
   /** Architect / Project Pass — not the generic onboarding path */
   onPlanSelect: (plan: "architect" | "pass") => void;
   planComparisonRows: readonly PricingRow[];
+  isArchitect?: boolean;
 }
 
 export function LandingPricing({
   onPlanSelect,
   planComparisonRows,
+  isArchitect = false,
 }: LandingPricingProps) {
   return (
     <section
@@ -93,12 +95,17 @@ export function LandingPricing({
               ))}
             </ul>
             <Button
-              variant="primary"
+              variant={isArchitect ? "outline" : "primary"}
               size="lg"
-              className="w-full h-14 rounded-2xl text-lg font-black liquid-metal-button border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
-              onClick={() => onPlanSelect("architect")}
+              disabled={isArchitect}
+              className={`w-full h-14 rounded-2xl text-lg font-black ${
+                isArchitect
+                  ? "bg-slate-50 border-slate-200 text-slate-400 group-hover:scale-100 cursor-default"
+                  : "liquid-metal-button border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
+              }`}
+              onClick={() => !isArchitect && onPlanSelect("architect")}
             >
-              Start Architect free
+              {isArchitect ? "Current Plan" : "Start Architect free"}
             </Button>
           </motion.div>
 
