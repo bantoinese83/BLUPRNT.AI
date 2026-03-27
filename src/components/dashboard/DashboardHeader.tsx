@@ -7,6 +7,7 @@ import {
   LifeBuoy,
   Plus,
   Crown,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -19,6 +20,7 @@ type DashboardHeaderProps = {
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
   onExportPDF?: () => void;
+  onOpenInsights?: () => void;
 };
 
 export function DashboardHeader({
@@ -28,6 +30,7 @@ export function DashboardHeader({
   hasProjectPass,
   onUpgradeClick,
   onExportPDF,
+  onOpenInsights,
 }: DashboardHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -99,6 +102,19 @@ export function DashboardHeader({
               <span className="hidden sm:inline">Start a BLUPRNT</span>
             </span>
           </Link>
+
+          {onOpenInsights && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 rounded-xl px-2 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 sm:px-3"
+              onClick={onOpenInsights}
+              type="button"
+            >
+              <img src="/insights-icon.svg" alt="" className="h-5 w-5 sm:mr-1.5 shrink-0" aria-hidden />
+              <span className="hidden font-semibold sm:inline">Insights</span>
+            </Button>
+          )}
 
           <span
             className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:inline-block"

@@ -58,7 +58,7 @@ export function HelpWidget() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-20 right-6 sm:right-8 z-50 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden"
+            className={`fixed bottom-20 ${location.pathname.startsWith('/dashboard') ? 'left-6 sm:left-8' : 'right-6 sm:right-8'} z-40 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden`}
           >
             <div className="bg-slate-900 p-4 text-white relative">
               <div className="flex items-center gap-2 mb-1">
@@ -165,7 +165,7 @@ export function HelpWidget() {
           setIsOpen(!isOpen);
           setShowPulse(false);
         }}
-        className="fixed bottom-6 right-6 sm:right-8 z-50 flex items-center justify-center w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 hover:bg-indigo-600 transition-colors duration-300"
+        className={`fixed bottom-6 ${location.pathname.startsWith('/dashboard') ? 'left-6 sm:left-8' : 'right-6 sm:right-8'} z-40 flex items-center justify-center w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 hover:bg-indigo-600 transition-colors duration-300`}
         aria-label="Help and Support"
       >
         <MessageCircle className="w-6 h-6" />

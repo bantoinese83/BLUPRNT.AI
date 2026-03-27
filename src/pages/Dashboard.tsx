@@ -31,7 +31,7 @@ import {
 import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
-import { Settings2, LogOut, ListTree } from "lucide-react";
+import { Settings2, ListTree } from "lucide-react";
 import { toast } from "sonner";
 import { ShareModal } from "@/components/dashboard/ShareModal";
 
@@ -48,18 +48,11 @@ import {
 } from "@/components/dashboard/dashboard-animations";
 
 import { useLogout } from "@/hooks/use-logout";
+import { AwarenessProvider, useAwareness } from "@/contexts/AwarenessProvider";
+import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
+import { AIAssistant } from "@/components/dashboard/AIAssistant";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { logout } = useLogout();
-  const [showUpgrade, setShowUpgrade] = useState(false);
-  const [useDiscount, setUseDiscount] = useState(false);
-  const [upgradeReason, setUpgradeReason] =
-    useState<UpgradeOpenReason>("general");
-  const [hasCelebrated, setHasCelebrated] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-
   const {
     loading,
     projects,
@@ -76,106 +69,6 @@ export default function Dashboard() {
     setScopeItems,
     setInvoices,
   } = useDashboardData();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const upgrade = params.get("upgrade");
-    if (upgrade !== "architect" && upgrade !== "pass") return;
-    params.delete("upgrade");
-    const qs = params.toString();
-    navigate(`${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`, {
-      replace: true,
-    });
-    const id = window.setTimeout(() => setShowUpgrade(true), 0);
-    return () => window.clearTimeout(id);
-  }, [location.search, location.pathname, location.hash, navigate]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get("success") === "true") {
-      const newUrl = window.location.pathname + window.location.hash;
-      window.history.replaceState({}, "", newUrl);
-
-      toast.success("Welcome to Architect!", {
-        description:
-          "Your professional features and higher limits are now active.",
-        duration: 8000,
-      });
-
-      confetti({
-        particleCount: 200,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ["#6366f1", "#020617", "#94a3b8"],
-      });
-    }
-  }, [location.search]);
-
-  useEffect(() => {
-    if (project && invoices.length > 0 && !hasCelebrated) {
-      const total = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
-      if (total >= (project.estimated_min_total ?? 0)) {
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"],
-        });
-        setTimeout(() => setHasCelebrated(true), 100);
-      }
-    }
-  }, [project, invoices, hasCelebrated]);
-
-  async function handleSignOut() {
-    await logout("/onboarding");
-  }
-
-  const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
-
-  const handleExportPDF = useCallback(async () => {
-    if (!project) return;
-    await generateDashboardSummaryPDF(project, invoices, invoiceTotal);
-    toast.success("Project summary exported to PDF");
-  }, [project, invoices, invoiceTotal]);
-
-  async function handleProjectDelete(id: string) {
-    if (!isSupabaseConfigured()) return;
-
-    const originalProjects = [...projects];
-    const originalCurrentProject = project;
-
-    setProjects(projects.filter((p) => p.id !== id));
-    if (id === project?.id) {
-      setProject(null);
-      setScopeItems([]);
-      setInvoices([]);
-    }
-
-    const deleteAction = async () => {
-      const { error } = await supabase.from("projects").delete().eq("id", id);
-      if (error) throw error;
-
-      if (id === localStorage.getItem("bluprnt_project_id")) {
-        localStorage.removeItem("bluprnt_project_id");
-      }
-      return true;
-    };
-
-    toast.promise(deleteAction(), {
-      loading: "Deleting project...",
-      success: () => {
-        if (id === originalCurrentProject?.id) {
-          load();
-        }
-        return "Project permanently removed";
-      },
-      error: () => {
-        setProjects(originalProjects);
-        setProject(originalCurrentProject);
-        return "Failed to delete project";
-      },
-    });
-  }
 
   if (loading) {
     return (
@@ -237,22 +130,166 @@ export default function Dashboard() {
             description="Create your first project to start tracking benchmarks and managing your budget like a pro."
             action={{
               label: "Create Your First Project",
-              onClick: () => navigate("/onboarding"),
+              onClick: () => { window.location.href = "/onboarding"; },
             }}
             className="w-full max-w-md"
           />
-          <button
-            type="button"
-            className="mt-8 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-900"
-            onClick={handleSignOut}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out account
-          </button>
         </div>
         <AppSlimFooter className="bg-white/60" />
       </div>
     );
+  }
+
+  return (
+    <AwarenessProvider
+      project={project}
+      scopeItems={scopeItems}
+      invoices={invoices}
+    >
+      <DashboardContent 
+        projects={projects}
+        project={project}
+        scopeItems={scopeItems}
+        invoices={invoices}
+        isArchitect={isArchitect}
+        subscription={subscription}
+        hasProjectPass={hasProjectPass}
+        load={load}
+        handleProjectSelect={handleProjectSelect}
+        setProjects={setProjects}
+        setProject={setProject}
+        setScopeItems={setScopeItems}
+        setInvoices={setInvoices}
+      />
+    </AwarenessProvider>
+  );
+}
+
+function DashboardContent({
+  projects,
+  project,
+  scopeItems,
+  invoices,
+  isArchitect,
+  subscription,
+  hasProjectPass,
+  load,
+  handleProjectSelect,
+  setProjects,
+  setProject,
+  setScopeItems,
+  setInvoices,
+}: any) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { logout } = useLogout();
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [useDiscount, setUseDiscount] = useState(false);
+  const [upgradeReason, setUpgradeReason] =
+    useState<UpgradeOpenReason>("general");
+  const [hasCelebrated, setHasCelebrated] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const { isSidebarOpen, setIsSidebarOpen } = useAwareness();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const upgrade = params.get("upgrade");
+    if (upgrade !== "architect" && upgrade !== "pass") return;
+    params.delete("upgrade");
+    const qs = params.toString();
+    navigate(`${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`, {
+      replace: true,
+    });
+    const id = window.setTimeout(() => setShowUpgrade(true), 0);
+    return () => window.clearTimeout(id);
+  }, [location.search, location.pathname, location.hash, navigate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("success") === "true") {
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, "", newUrl);
+
+      toast.success("Welcome to Architect!", {
+        description:
+          "Your professional features and higher limits are now active.",
+        duration: 8000,
+      });
+
+      confetti({
+        particleCount: 200,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#6366f1", "#020617", "#94a3b8"],
+      });
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (project && invoices.length > 0 && !hasCelebrated) {
+      const total = invoices.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
+      if (total >= (project.estimated_min_total ?? 0)) {
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"],
+        });
+        setTimeout(() => setHasCelebrated(true), 100);
+      }
+    }
+  }, [project, invoices, hasCelebrated]);
+
+  async function handleSignOut() {
+    await logout("/onboarding");
+  }
+
+  const invoiceTotal = invoices.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
+
+  const handleExportPDF = useCallback(async () => {
+    if (!project) return;
+    await generateDashboardSummaryPDF(project, invoices, invoiceTotal);
+    toast.success("Project summary exported to PDF");
+  }, [project, invoices, invoiceTotal]);
+
+  async function handleProjectDelete(id: string) {
+    if (!isSupabaseConfigured()) return;
+
+    const originalProjects = [...projects];
+    const originalCurrentProject = project;
+
+    setProjects(projects.filter((p: any) => p.id !== id));
+    if (id === project?.id) {
+      setProject(null);
+      setScopeItems([]);
+      setInvoices([]);
+    }
+
+    const deleteAction = async () => {
+      const { error } = await supabase.from("projects").delete().eq("id", id);
+      if (error) throw error;
+
+      if (id === localStorage.getItem("bluprnt_project_id")) {
+        localStorage.removeItem("bluprnt_project_id");
+      }
+      return true;
+    };
+
+    toast.promise(deleteAction(), {
+      loading: "Deleting project...",
+      success: () => {
+        if (id === originalCurrentProject?.id) {
+          load();
+        }
+        return "Project permanently removed";
+      },
+      error: () => {
+        setProjects(originalProjects);
+        setProject(originalCurrentProject);
+        return "Failed to delete project";
+      },
+    });
   }
 
   const activityEvents = generateActivityEvents(project, invoices);
@@ -332,6 +369,7 @@ export default function Dashboard() {
           setShowUpgrade(true);
         }}
         onExportPDF={handleExportPDF}
+        onOpenInsights={() => setIsSidebarOpen(true)}
       />
 
       <motion.main
@@ -345,7 +383,7 @@ export default function Dashboard() {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <ProjectSwitcher
-            projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+            projects={projects.map((p: any) => ({ id: p.id, name: p.name }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
             onDelete={handleProjectDelete}
@@ -391,7 +429,7 @@ export default function Dashboard() {
           <UpgradeBanner
             invoiceCount={
               invoices.filter(
-                (i) => (i.document_type ?? "invoice") === "invoice",
+                (i: any) => (i.document_type ?? "invoice") === "invoice",
               ).length
             }
             onUpgradeClick={() => {
@@ -522,6 +560,11 @@ export default function Dashboard() {
         onClose={() => setShareOpen(false)}
         projectId={project?.id ?? ""}
       />
+      <SmartSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+      <AIAssistant projectId={project?.id ?? ""} />
     </div>
   );
 }

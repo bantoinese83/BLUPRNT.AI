@@ -169,9 +169,9 @@ export function ProjectHealth({
     min,
     max,
   );
-
   return (
-    <Card className="overflow-hidden border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/30 rounded-[2rem]">
+    <Card className="overflow-hidden border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/30 rounded-[2rem] metal-surface relative">
+      <div className="absolute inset-0 noise-overlay opacity-[0.03] pointer-events-none" />
       <CardHeader className="pb-2">
         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center justify-between">
           <Highlighter
