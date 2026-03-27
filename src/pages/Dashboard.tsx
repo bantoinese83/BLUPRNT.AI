@@ -47,15 +47,12 @@ import {
   itemVariants,
 } from "@/components/dashboard/dashboard-animations";
 
-function normalizeRepeatedPlanPath(pathname: string): string | null {
-  if (!/^\/dashboard(\/plan)+$/.test(pathname)) return null;
-  if (pathname === "/dashboard/plan") return null;
-  return "/dashboard/plan";
-}
+import { useLogout } from "@/hooks/use-logout";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useLogout();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [useDiscount, setUseDiscount] = useState(false);
   const [upgradeReason, setUpgradeReason] =
@@ -92,13 +89,6 @@ export default function Dashboard() {
     const id = window.setTimeout(() => setShowUpgrade(true), 0);
     return () => window.clearTimeout(id);
   }, [location.search, location.pathname, location.hash, navigate]);
-
-  useLayoutEffect(() => {
-    const fixed = normalizeRepeatedPlanPath(location.pathname);
-    if (fixed) {
-      navigate(`${fixed}${location.search}${location.hash}`, { replace: true });
-    }
-  }, [location.pathname, location.search, location.hash, navigate]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -137,8 +127,7 @@ export default function Dashboard() {
   }, [project, invoices, hasCelebrated]);
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
-    navigate("/onboarding");
+    await logout("/onboarding");
   }
 
   const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
@@ -200,27 +189,38 @@ export default function Dashboard() {
   if (!isSupabaseConfigured()) {
     return (
       <div className="flex min-h-screen flex-col bg-slate-50">
-        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-          <div className="rounded-2xl bg-amber-100 p-4 text-amber-800">
-            <Settings2 className="mx-auto h-10 w-10" aria-hidden />
+        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
+          <div className="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm animate-pulse">
+            <Settings2 className="h-10 w-10 text-amber-500" aria-hidden />
           </div>
-          <h2 className="text-lg font-semibold text-slate-900">
-            BLUPRNT isn&apos;t connected yet
-          </h2>
-          <p className="text-sm leading-relaxed text-slate-600">
-            This copy of the app needs your project keys to load. Ask whoever
-            set up the app, or check the README in the project folder for
-            step-by-step setup.
-          </p>
-          <p className="text-xs text-slate-500">
-            Developers: add{" "}
-            <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_URL</code>{" "}
-            and{" "}
-            <code className="rounded bg-slate-200 px-1">
-              VITE_SUPABASE_ANON_KEY
-            </code>{" "}
-            in <code className="rounded bg-slate-200 px-1">.env</code>.
-          </p>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900">
+              Connection Required
+            </h2>
+            <p className="text-sm leading-relaxed text-slate-500 font-medium">
+              We&apos;re having trouble connecting to the database. This usually
+              means the environment keys are missing or the connection was
+              interrupted.
+            </p>
+          </div>
+          <div className="w-full p-4 rounded-2xl bg-slate-100 border border-slate-200 text-left space-y-2 font-mono text-[10px]">
+            <p className="text-slate-400 uppercase tracking-widest font-bold mb-2">
+              Developer Note:
+            </p>
+            <p className="text-slate-600 truncate">
+              VITE_SUPABASE_URL: missing
+            </p>
+            <p className="text-slate-600 truncate">
+              VITE_SUPABASE_ANON_KEY: missing
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="rounded-xl border-slate-200"
+            onClick={() => window.location.reload()}
+          >
+            Retry Connection
+          </Button>
         </div>
         <AppSlimFooter className="bg-white/60" />
       </div>
@@ -411,7 +411,7 @@ export default function Dashboard() {
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.2 }}
           >
-            <Routes location={location}>
+            <Routes>
               <Route
                 path=""
                 element={<Navigate to="/dashboard/plan" replace />}

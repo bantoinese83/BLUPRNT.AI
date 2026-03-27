@@ -24,8 +24,11 @@ import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
+import { useLogout } from "@/hooks/use-logout";
+
 export default function Settings() {
   const navigate = useNavigate();
+  const { logout } = useLogout();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<{
     email?: string;
@@ -99,8 +102,7 @@ export default function Settings() {
 
   async function handleSignOut() {
     setLoading(true);
-    await supabase.auth.signOut();
-    navigate("/", { replace: true });
+    await logout("/");
     setLoading(false);
   }
 
@@ -288,17 +290,17 @@ export default function Settings() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Account
+      <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
+        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+            <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
+              <User className="w-5 h-5 text-indigo-500" />
+              Account Profile
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form
-              className="space-y-4"
+              className="space-y-6"
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSaveProfile();
@@ -306,30 +308,29 @@ export default function Settings() {
             >
               <div className="space-y-2">
                 <label
-                  className="text-sm font-medium text-slate-700"
+                  className="text-xs font-bold text-slate-500 uppercase tracking-widest"
                   htmlFor="email"
                 >
-                  Email
+                  Email Address
                 </label>
                 <Input
                   id="email"
                   type="email"
                   value={user?.email ?? ""}
                   disabled
-                  className="bg-slate-50"
+                  className="bg-slate-50/50 border-slate-200 rounded-xl"
                   autoComplete="email"
                 />
-                <p className="text-xs text-slate-500">
-                  Email is managed by your sign-in provider. Contact support to
-                  change it.
+                <p className="text-[10px] text-slate-400 font-medium">
+                  Email is managed by your sign-in provider.
                 </p>
               </div>
               <div className="space-y-2">
                 <label
-                  className="text-sm font-medium text-slate-700"
+                  className="text-xs font-bold text-slate-500 uppercase tracking-widest"
                   htmlFor="displayName"
                 >
-                  Display name
+                  Display Name
                 </label>
                 <Input
                   id="displayName"
@@ -337,57 +338,59 @@ export default function Settings() {
                   placeholder="Your name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  className="rounded-xl border-slate-200 focus:ring-indigo-500/20"
                   autoComplete="name"
                 />
               </div>
               {profileMessage && (
                 <p
-                  className={`text-sm ${profileMessage === "Saved." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}
+                  className={`text-sm ${profileMessage === "Saved." ? "text-indigo-600 font-bold" : "text-amber-600 font-medium"}`}
                 >
                   {profileMessage}
                 </p>
               )}
               <Button
                 variant="primary"
-                size="sm"
+                size="lg"
+                className="w-full sm:w-auto rounded-xl liquid-metal-button shadow-indigo-200/50"
                 disabled={profileSaving}
                 type="submit"
               >
                 {profileSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
-                Save profile
+                Save Changes
               </Button>
             </form>
           </CardContent>
         </Card>
 
         {user?.email && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Security
+          <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+              <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
+                <Shield className="w-5 h-5 text-indigo-500" />
+                Security & Password
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <form
-                className="space-y-4"
+                className="space-y-6"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleChangePassword();
                 }}
               >
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-slate-900">
-                    Change password
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-slate-900">
+                    Update Password
                   </h4>
-                  <p className="text-xs text-slate-500">
-                    Update your account password.
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    Ensure your account is using a long, random password to stay
+                    secure.
                   </p>
                 </div>
 
-                {/* Hidden username field for accessibility/password managers */}
                 <input
                   type="text"
                   name="username"
@@ -397,10 +400,10 @@ export default function Settings() {
                   className="hidden"
                 />
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label
-                      className="text-xs font-bold text-slate-500 uppercase tracking-wider"
+                      className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]"
                       htmlFor="new-password"
                     >
                       New Password
@@ -411,13 +414,13 @@ export default function Settings() {
                       placeholder="Min. 8 characters"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="h-10"
+                      className="h-11 rounded-xl border-slate-200"
                       autoComplete="new-password"
                     />
                   </div>
                   <div className="space-y-2">
                     <label
-                      className="text-xs font-bold text-slate-500 uppercase tracking-wider"
+                      className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]"
                       htmlFor="confirm-password"
                     >
                       Confirm Password
@@ -428,7 +431,7 @@ export default function Settings() {
                       placeholder="Repeat password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="h-10"
+                      className="h-11 rounded-xl border-slate-200"
                       autoComplete="new-password"
                     />
                   </div>
@@ -436,7 +439,7 @@ export default function Settings() {
 
                 {passwordMessage && (
                   <p
-                    className={`text-sm ${passwordMessage.includes("Success") ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}
+                    className={`text-sm ${passwordMessage.includes("Success") ? "text-indigo-600 font-bold" : "text-amber-600 font-medium"}`}
                   >
                     {passwordMessage}
                   </p>
@@ -444,107 +447,112 @@ export default function Settings() {
 
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   disabled={passwordSaving || !newPassword}
                   type="submit"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto rounded-xl border-slate-200 hover:bg-slate-50"
                 >
                   {passwordSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   ) : null}
-                  Update password
+                  Update Password
                 </Button>
               </form>
             </CardContent>
           </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
+        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+            <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
+              <CreditCard className="w-5 h-5 text-indigo-500" />
               Plan & Billing
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-              <div className="flex items-center gap-3">
+          <CardContent className="pt-6 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-slate-50/80 border border-slate-200 rounded-3xl gap-4">
+              <div className="flex items-center gap-4">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${isArchitect ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-500"}`}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${isArchitect ? "bg-slate-900 text-white shadow-slate-700/50" : "bg-white text-slate-400 shadow-slate-200/50 border border-slate-100"}`}
                 >
                   {isArchitect ? (
-                    <Crown className="w-5 h-5" />
+                    <Crown className="w-7 h-7" />
                   ) : (
-                    <User className="w-5 h-5" />
+                    <User className="w-7 h-7" />
                   )}
                 </div>
 
-                <div>
-                  <p className="text-sm font-bold text-slate-900 leading-none mb-1">
-                    {isArchitect ? "Architect Plan" : "Free Plan"}
+                <div className="space-y-1">
+                  <p className="text-base font-black text-slate-900 leading-none">
+                    {isArchitect ? "Architect Plan" : "Free Explorer"}
                   </p>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
                     {isArchitect
-                      ? "Active Monthly Subscription • 10 scans/mo"
-                      : "Free Plan • 3 scans per project"}
+                      ? "Active Monthly Subscription"
+                      : "Standard Features Only"}
                   </p>
                 </div>
               </div>
               <Button
                 variant={isArchitect ? "outline" : "primary"}
-                size="sm"
-                className="rounded-xl shadow-sm"
+                size="lg"
+                className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-indigo-200/50" : "border-slate-200"}`}
                 onClick={() => setShowUpgrade(true)}
                 type="button"
               >
-                {isArchitect ? "View Plan Options" : "Upgrade"}
+                {isArchitect ? "Manage Plan" : "Upgrade Now"}
               </Button>
             </div>
 
-            {!isArchitect && (
-              <p className="text-xs text-slate-500 leading-relaxed px-1 font-medium">
-                Upgrade to Architect for{" "}
-                <span className="text-slate-900">
-                  Advanced AI Project Strategies
-                </span>
-                , 10 smart invoice scans per billing period, and priority
-                support.
-              </p>
-            )}
-            {isArchitect && (
-              <p className="text-xs text-slate-500 leading-relaxed px-1">
-                You have active professional features. Billing is handled
-                through Stripe.
-              </p>
-            )}
+            <div className="px-2">
+              {!isArchitect ? (
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                  Unlock{" "}
+                  <span className="text-slate-900 font-bold">
+                    Professional AI Generation
+                  </span>
+                  , 10 smart document scans per month, and priority project
+                  strategy consultations.
+                </p>
+              ) : (
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                  You have full access to professional renovation tools. Billing
+                  and invoices are handled securely through Stripe.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              Privacy & security
+        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+            <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
+              <Shield className="w-5 h-5 text-indigo-500" />
+              Data & Privacy
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <h4 className="font-medium text-slate-900">Export your data</h4>
-              <p className="text-sm text-slate-600">
-                Download a copy of your properties, projects, invoices, and
-                documents in JSON format.
-              </p>
+          <CardContent className="pt-6 space-y-8">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-bold text-slate-900">
+                  Export Project Data
+                </h4>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Download a comprehensive JSON archive of your properties,
+                  projects, scope items, and documents.
+                </p>
+              </div>
               {exportMessage && (
                 <p
-                  className={`text-sm ${exportMessage === "Download started." ? "text-slate-900 font-bold" : "text-amber-700 font-medium"}`}
+                  className={`text-sm ${exportMessage === "Download started." ? "text-indigo-600 font-bold" : "text-amber-600 font-medium"}`}
                 >
                   {exportMessage}
                 </p>
               )}
               <Button
                 variant="outline"
-                size="sm"
-                className="gap-2"
+                size="lg"
+                className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50"
                 onClick={handleExportData}
                 disabled={exportLoading}
                 type="button"
@@ -554,37 +562,44 @@ export default function Settings() {
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                Export data
+                Generate Export
               </Button>
             </div>
-            <div className="border-t border-slate-200 pt-6 space-y-2">
-              <h4 className="font-medium text-slate-900">Delete account</h4>
-              <p className="text-sm text-slate-600">
-                Permanently delete your account and all data. This cannot be
-                undone.
-              </p>
-              <div className="flex items-center gap-1">
+
+            <div className="border-t border-slate-100 pt-8 space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  Danger Zone
+                </h4>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Permanently delete your account and all associated data. This
+                  action is immediate and IRREVERSIBLE.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 p-4 bg-amber-50/50 border border-amber-100 rounded-2xl">
                 <input
                   id="delete-confirm"
                   type="checkbox"
                   checked={deleteConfirm}
                   onChange={(e) => setDeleteConfirm(e.target.checked)}
-                  className="rounded border-slate-300"
+                  className="w-4 h-4 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <label
                   htmlFor="delete-confirm"
-                  className="text-sm text-slate-700"
+                  className="text-sm text-slate-700 font-bold select-none cursor-pointer"
                 >
                   I understand this is permanent
                 </label>
               </div>
               {deleteMessage && (
-                <p className="text-sm text-amber-700">{deleteMessage}</p>
+                <p className="text-sm text-amber-700 font-bold px-1">
+                  {deleteMessage}
+                </p>
               )}
               <Button
                 variant="outline"
-                size="sm"
-                className="gap-2 text-amber-600 border-amber-200 hover:bg-amber-50"
+                size="lg"
+                className="w-full sm:w-auto gap-2 text-amber-600 border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-xl"
                 onClick={handleDeleteAccount}
                 disabled={!deleteConfirm || deleteLoading}
                 type="button"
@@ -594,51 +609,52 @@ export default function Settings() {
                 ) : (
                   <Trash2 className="w-4 h-4" />
                 )}
-                Delete account
+                Delete My Account
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-800">
-              <HelpCircle className="w-5 h-5" />
-              Help & Support
+        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+            <CardTitle className="flex items-center gap-2 text-slate-900">
+              <HelpCircle className="w-5 h-5 text-indigo-500" />
+              Support & Feedback
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-slate-600">
-              Got a question, need help with an estimate, or have an idea for a
-              new feature? We're here to help you get the most out of
-              BLUPRNT.AI.
+          <CardContent className="pt-6 space-y-6">
+            <p className="text-sm text-slate-500 font-medium leading-relaxed">
+              Have questions or need assistance with your project strategy? Our
+              team is ready to help you optimize your renovation budget.
             </p>
-            <a href="mailto:connect@monarch-labs.com" className="inline-block">
+            <a
+              href="mailto:connect@monarch-labs.com"
+              className="inline-block w-full sm:w-auto"
+            >
               <Button
                 variant="outline"
-                className="gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                className="w-full gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-xl"
                 type="button"
               >
-                Message our support team
+                Contact Concierge Support
               </Button>
             </a>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <Button
-              variant="outline"
-              className="w-full gap-2 text-slate-600 border-slate-200"
-              onClick={handleSignOut}
-              disabled={loading}
-              type="button"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign out
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="pt-4">
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full gap-2 text-slate-500 border-slate-200 rounded-2xl hover:bg-slate-50 hover:text-slate-900 transition-all font-bold"
+            onClick={handleSignOut}
+            disabled={loading}
+            type="button"
+          >
+            <LogOut className="w-5 h-5" />
+            Sign Out
+          </Button>
+        </div>
       </main>
 
       <AppSlimFooter className="bg-white/80" />

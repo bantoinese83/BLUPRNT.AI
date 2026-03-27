@@ -10,12 +10,14 @@ import {
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
+import { useLogout } from "@/hooks/use-logout";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 
 export function WelcomeScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { logout } = useLogout();
   const [checking, setChecking] = useState(true);
   const [hasProjects, setHasProjects] = useState(false);
   const loggedIn = !!user;
@@ -157,11 +159,7 @@ export function WelcomeScreen() {
               size="lg"
               variant="ghost"
               className="w-full text-slate-400 gap-2 font-medium"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                navigate("/onboarding", { replace: true });
-                window.location.reload();
-              }}
+              onClick={() => logout("/onboarding")}
               type="button"
             >
               Sign out
