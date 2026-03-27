@@ -35,6 +35,7 @@ export function LandingStory() {
                 <img
                   src="/headshot-bryan.PNG"
                   alt="Portrait of Bryan Antoine, co-founder of BLUPRNT"
+                  aria-label="Bryan Antoine, Co-founder"
                   className="h-full w-full object-cover object-[center_15%]"
                   width={288}
                   height={288}
@@ -56,6 +57,7 @@ export function LandingStory() {
                 <img
                   src="/headshot-lauren.PNG"
                   alt="Portrait of Lauren Antoine, co-founder of BLUPRNT"
+                  aria-label="Lauren Antoine, Co-founder"
                   className="h-full w-full object-cover object-[center_15%]"
                   width={288}
                   height={288}

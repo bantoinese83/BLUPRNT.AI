@@ -85,14 +85,13 @@ export function LandingHeader({ scrollToSection }: LandingHeaderProps) {
             className="absolute left-1/2 hidden -translate-x-1/2 lg:flex lg:items-center lg:gap-0.5"
           >
             {navLinks.map(([id, label]) => (
-              <button
+              <Link
                 key={id}
-                type="button"
-                onClick={() => scrollToSection(id)}
+                to={`/#${id}`}
                 className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100/80 hover:text-slate-900"
               >
                 {label}
-              </button>
+              </Link>
             ))}
           </motion.div>
 
@@ -175,17 +174,14 @@ export function LandingHeader({ scrollToSection }: LandingHeaderProps) {
             >
               <div className="flex flex-col gap-1">
                 {navLinks.map(([id, label]) => (
-                  <button
+                  <Link
                     key={id}
-                    type="button"
-                    onClick={() => {
-                      scrollToSection(id);
-                      setMobileNavOpen(false);
-                    }}
+                    to={`/#${id}`}
+                    onClick={() => setMobileNavOpen(false)}
                     className="rounded-xl px-3 py-3 text-left text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
                   >
                     {label}
-                  </button>
+                  </Link>
                 ))}
                 <div className="my-2 border-t border-slate-100" />
                 {user ? (

@@ -76,11 +76,31 @@ export function buildLandingJsonLd(siteUrl: string) {
         },
       },
       {
+        "@type": "BreadcrumbList",
+        "@id": `${siteUrl}/#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteUrl,
+          },
+        ],
+      },
+      {
         "@type": "WebPage",
         "@id": `${siteUrl}/#webpage`,
         url: siteUrl,
         name: "BLUPRNT — Home value management system for homeowners",
         isPartOf: { "@id": websiteId },
+        breadcrumb: { "@id": `${siteUrl}/#breadcrumb` },
+        speakable: {
+          "@type": "SpeakableSpecification",
+          xpath: [
+            "/html/head/title",
+            "/html/head/meta[@name='description']/@content",
+          ],
+        },
         about: {
           "@type": "Thing",
           name: "Home renovation cost estimation, budgeting, and resale documentation",

@@ -15,8 +15,6 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
       id="faq"
       className="scroll-mt-24 border-t border-slate-200/80 bg-slate-50/80 px-4 py-16 sm:scroll-mt-28 sm:px-6 sm:py-20"
       aria-labelledby="faq-heading"
-      itemScope
-      itemType="https://schema.org/FAQPage"
     >
       <div className="mx-auto max-w-3xl">
         <div className="mb-10 text-center">
@@ -38,9 +36,6 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
             <div
               key={item.question}
               className="rounded-2xl border border-slate-200/90 bg-white/95 p-5 shadow-sm shadow-slate-200/40 sm:p-6"
-              itemScope
-              itemProp="mainEntity"
-              itemType="https://schema.org/Question"
             >
               <div className="flex gap-3">
                 <MessageCircleQuestion
@@ -48,21 +43,11 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
                   aria-hidden
                 />
                 <div className="min-w-0 space-y-2">
-                  <h3
-                    className="text-base font-bold text-slate-900 sm:text-lg"
-                    itemProp="name"
-                  >
+                  <h3 className="text-base font-bold text-slate-900 sm:text-lg">
                     {item.question}
                   </h3>
-                  <div
-                    itemScope
-                    itemProp="acceptedAnswer"
-                    itemType="https://schema.org/Answer"
-                  >
-                    <p
-                      className="text-sm leading-relaxed text-slate-600 sm:text-[15px]"
-                      itemProp="text"
-                    >
+                  <div>
+                    <p className="text-sm leading-relaxed text-slate-600 sm:text-[15px]">
                       {item.answer}
                     </p>
                   </div>

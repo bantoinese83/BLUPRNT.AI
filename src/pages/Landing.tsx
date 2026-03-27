@@ -66,8 +66,9 @@ export default function Landing() {
   );
 
   useEffect(() => {
-    if (hash !== "#faq") return;
-    const el = document.getElementById("faq");
+    if (!hash) return;
+    const targetId = hash.replace("#", "");
+    const el = document.getElementById(targetId);
     if (!el) return;
     const t = window.setTimeout(() => {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
