@@ -10,6 +10,8 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
+import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { MotiView } from "moti";
 import { supabase } from "../../src/lib/supabase";
@@ -28,6 +30,7 @@ export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleRegister = async () => {
     if (!email || !password || !name) {
@@ -47,9 +50,11 @@ export default function RegisterScreen() {
     });
 
     if (error) {
-      Alert.alert("Registration Failed", error.message);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setErrorMsg(error.message);
       setLoading(false);
     } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Success", "Check your email to confirm your account", [
         { text: "OK", onPress: () => router.replace("/(auth)/login") },
       ]);
@@ -80,9 +85,17 @@ export default function RegisterScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.container}>
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => {
+                Haptics.selectionAsync();
+                router.back();
+              }}
               style={styles.backButton}
             >
+              <BlurView
+                intensity={20}
+                tint="light"
+                style={StyleSheet.absoluteFill}
+              />
               <ChevronLeft size={24} color="white" />
             </TouchableOpacity>
 
@@ -101,7 +114,10 @@ export default function RegisterScreen() {
                 <TextField
                   label="Full Name"
                   value={name}
-                  onChangeText={setName}
+                  onChangeText={(text) => {
+                    setName(text);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   placeholder="Enter your name"
                   autoCapitalize="words"
                 />
@@ -109,7 +125,10 @@ export default function RegisterScreen() {
                 <TextField
                   label="Email address"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   placeholder="Enter your email"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -118,10 +137,15 @@ export default function RegisterScreen() {
                 <TextField
                   label="Password"
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   placeholder="Create a password"
                   secureTextEntry
                 />
+
+                {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
                 <Button
                   title="Sign Up"
@@ -149,7 +173,12 @@ export default function RegisterScreen() {
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.push("/(auth)/login");
+                }}
+              >
                 <Text style={styles.linkText}>Sign In</Text>
               </TouchableOpacity>
             </View>
@@ -168,15 +197,18 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    top: Platform.OS === "ios" ? 12 : 20,
+    left: 20,
     zIndex: 10,
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   header: {
     marginBottom: 32,
@@ -234,5 +266,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Outfit_700Bold",
     fontSize: 14,
+  },
+  errorText: {
+    color: "#f43f5e",
+    fontSize: 13,
+    fontFamily: "Outfit_600SemiBold",
+    textAlign: "center",
+    marginBottom: 16,
+    backgroundColor: "rgba(244, 63, 94, 0.1)",
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(244, 63, 94, 0.2)",
+    overflow: "hidden",
   },
 });

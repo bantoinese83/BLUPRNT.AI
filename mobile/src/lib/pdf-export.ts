@@ -100,6 +100,36 @@ export async function generateSellerPacketPDF(
         </div>
 
         <div class="section">
+          <h2 class="section-title">Detailed Project Scope</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>CATEGORY</th>
+                <th>DESCRIPTION</th>
+                <th>BENCHMARK RANGE</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${
+                scopeItems.length === 0
+                  ? '<tr><td colspan="3" style="text-align:center; padding: 20px;">No scope defined.</td></tr>'
+                  : scopeItems
+                      .map(
+                        (s) => `
+                <tr>
+                  <td>${s.category}</td>
+                  <td>${s.description}</td>
+                  <td>${money(s.total_cost_min)} – ${money(s.total_cost_max)}</td>
+                </tr>
+              `,
+                      )
+                      .join("")
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
           <h2 class="section-title">Recorded Costs</h2>
           <table class="table">
             <thead>
@@ -144,17 +174,14 @@ export async function generateSellerPacketPDF(
 
   try {
     const { uri } = await Print.printToFileAsync({ html });
+    const fileName = `property-ledger-${project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`;
 
     // Cloud Save Sync
     const {
       data: { session },
     } = await supabase.auth.getSession();
     if (session?.user) {
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")
-        .slice(0, 19);
-      const storagePath = `${project.id}/${session.user.id}/seller-packet-${timestamp}.pdf`;
+      const storagePath = `${project.id}/${session.user.id}/${fileName}`;
 
       const response = await fetch(uri);
       const blob = await response.blob();

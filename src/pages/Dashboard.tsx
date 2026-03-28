@@ -130,7 +130,9 @@ export default function Dashboard() {
             description="Create your first project to start tracking benchmarks and managing your budget like a pro."
             action={{
               label: "Create Your First Project",
-              onClick: () => { window.location.href = "/onboarding"; },
+              onClick: () => {
+                window.location.href = "/onboarding";
+              },
             }}
             className="w-full max-w-md"
           />
@@ -146,7 +148,7 @@ export default function Dashboard() {
       scopeItems={scopeItems}
       invoices={invoices}
     >
-      <DashboardContent 
+      <DashboardContent
         projects={projects}
         project={project}
         scopeItems={scopeItems}
@@ -226,26 +228,45 @@ function DashboardContent({
     }
   }, [location.search]);
 
+  const [hasCelebratedFirst, setHasCelebratedFirst] = useState(false);
+
   useEffect(() => {
+    // Celebration: Budget Reached
     if (project && invoices.length > 0 && !hasCelebrated) {
-      const total = invoices.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
+      const total = invoices.reduce(
+        (s: number, i: any) => s + (i.total ?? 0),
+        0,
+      );
       if (total >= (project.estimated_min_total ?? 0)) {
         confetti({
-          particleCount: 150,
-          spread: 70,
+          particleCount: 200,
+          spread: 80,
           origin: { y: 0.6 },
-          colors: ["#020617", "#475569", "#94a3b8", "#e2e8f0"],
+          colors: ["#6366f1", "#020617", "#94a3b8"],
         });
         setTimeout(() => setHasCelebrated(true), 100);
       }
     }
-  }, [project, invoices, hasCelebrated]);
+    // Celebration: First Document
+    if (invoices.length === 1 && !hasCelebratedFirst) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#10b981", "#ffffff", "#020617"],
+      });
+      setTimeout(() => setHasCelebratedFirst(true), 100);
+    }
+  }, [project, invoices, hasCelebrated, hasCelebratedFirst]);
 
   async function handleSignOut() {
     await logout("/onboarding");
   }
 
-  const invoiceTotal = invoices.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
+  const invoiceTotal = invoices.reduce(
+    (s: number, i: any) => s + (i.total ?? 0),
+    0,
+  );
 
   const handleExportPDF = useCallback(async () => {
     if (!project) return;

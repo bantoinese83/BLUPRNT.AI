@@ -11,10 +11,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import {
   Mail,
-  ArrowLeft,
+  ChevronLeft,
   Wand2,
   AlertCircle,
   CheckCircle2,
@@ -81,11 +82,18 @@ export default function ForgotPasswordScreen() {
               style={styles.header}
             >
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.back();
+                }}
                 style={styles.backButton}
               >
-                <ArrowLeft size={20} color="#94a3b8" />
-                <Text style={styles.backText}>Back to Login</Text>
+                <BlurView
+                  intensity={20}
+                  tint="light"
+                  style={StyleSheet.absoluteFill}
+                />
+                <ChevronLeft size={24} color="white" />
               </TouchableOpacity>
 
               <View style={styles.iconContainer}>
@@ -182,16 +190,22 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   backButton: {
-    flexDirection: "row",
+    position: "absolute",
+    top: Platform.OS === "ios" ? 12 : 20,
+    left: 24,
+    zIndex: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    justifyContent: "center",
     alignItems: "center",
-    alignSelf: "flex-start",
-    gap: 8,
-    marginBottom: 40,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   backText: {
-    fontSize: 14,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    display: "none",
   },
   iconContainer: {
     width: 80,

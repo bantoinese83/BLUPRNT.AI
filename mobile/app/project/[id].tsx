@@ -11,7 +11,14 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { ChevronLeft, ListChecks, Share2, Download } from "lucide-react-native";
+import {
+  ChevronLeft,
+  ListChecks,
+  Share2,
+  Download,
+  Plus,
+} from "lucide-react-native";
+import { BlurView } from "expo-blur";
 import { generateSellerPacketPDF } from "../../src/lib/pdf-export";
 import { generateProjectShareLink } from "../../src/lib/share-project";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
@@ -22,6 +29,7 @@ import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { ProjectRow, ScopeRow } from "../../src/types/database";
+import { Theme } from "../../src/constants/Theme";
 
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -84,6 +92,22 @@ export default function ProjectDetailScreen() {
     fetchProject();
   }, [id]);
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    const [projRes, scopeRes] = await Promise.all([
+      supabase.from("projects").select("*").eq("id", id).single(),
+      supabase
+        .from("scope_items")
+        .select("*")
+        .eq("project_id", id)
+        .order("created_at", { ascending: true }),
+    ]);
+
+    if (projRes.data) setProject(projRes.data);
+    if (scopeRes.data) setScope(scopeRes.data);
+    setLoading(false);
+  };
+
   if (loading) {
     return (
       <ScreenWrapper style={styles.centerContainer}>
@@ -93,19 +117,43 @@ export default function ProjectDetailScreen() {
   }
 
   return (
-    <ScreenWrapper withScroll edges={["top", "bottom", "left", "right"]}>
+    <ScreenWrapper
+      withScroll
+      onRefresh={handleRefresh}
+      refreshing={loading}
+      edges={["top", "bottom", "left", "right"]}
+    >
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.back();
+          }}
           style={styles.backButton}
         >
+          <BlurView
+            intensity={20}
+            tint="light"
+            style={StyleSheet.absoluteFill}
+          />
           <ChevronLeft size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {project?.name}
         </Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.actionIcon} onPress={handleShare}>
+          <TouchableOpacity
+            style={styles.actionIcon}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleShare();
+            }}
+          >
+            <BlurView
+              intensity={10}
+              tint="light"
+              style={StyleSheet.absoluteFill}
+            />
             <Share2 size={20} color="white" />
           </TouchableOpacity>
         </View>
@@ -141,20 +189,34 @@ export default function ProjectDetailScreen() {
 
         {/* Scope Title */}
         <View style={styles.sectionHeader}>
-          <ListChecks size={20} color="#94a3b8" />
+          <ListChecks size={20} color={Theme.colors.text.secondary} />
           <Text style={styles.sectionTitle}>Project Scope Details</Text>
         </View>
 
         {/* Grouped Scope Items */}
         {Object.entries(groupedScope).map(([category, items], catIndex) => (
-          <View key={category} style={styles.categorySection}>
+          <MotiView
+            key={category}
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              type: "timing",
+              duration: 600,
+              delay: 200 + catIndex * 150,
+            }}
+            style={styles.categorySection}
+          >
             <Text style={styles.categoryTitle}>{category}</Text>
             {items.map((item, index) => (
               <MotiView
                 key={item.id}
-                from={{ opacity: 0, translateY: 10 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ delay: catIndex * 100 + index * 50 }}
+                from={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  type: "timing",
+                  duration: 400,
+                  delay: 300 + catIndex * 150 + index * 50,
+                }}
               >
                 <GlassCard intensity={10} style={styles.scopeCard}>
                   <View style={styles.scopeHeader}>
@@ -177,7 +239,7 @@ export default function ProjectDetailScreen() {
                 </GlassCard>
               </MotiView>
             ))}
-          </View>
+          </MotiView>
         ))}
 
         {/* Global Actions */}
@@ -255,11 +317,14 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   headerTitle: {
     flex: 1,
@@ -353,10 +418,13 @@ const styles = StyleSheet.create({
   actionIcon: {
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   globalActions: {
     flexDirection: "row",

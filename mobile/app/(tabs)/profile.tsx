@@ -30,6 +30,8 @@ import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { useAwareness } from "../../src/contexts/AwarenessProvider";
 import { supabase } from "../../src/lib/supabase";
 import { router } from "expo-router";
+import { MotiView } from "moti";
+import { Theme } from "../../src/constants/Theme";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -159,97 +161,133 @@ export default function ProfileScreen() {
         <Text style={styles.title}>Account Settings</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Profile Section */}
-        <GlassCard style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Identity</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name</Text>
-            <View style={styles.inputWrapper}>
-              <User size={18} color="#94a3b8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                value={displayName}
-                onChangeText={setDisplayName}
-                placeholder="Enter your name"
-                placeholderTextColor="#475569"
-              />
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 500 }}
+        >
+          <GlassCard style={styles.sectionCard}>
+            <Text style={styles.sectionHeader}>Identity</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Full Name</Text>
+              <View style={styles.inputWrapper}>
+                <User
+                  size={18}
+                  color={Theme.colors.text.secondary}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={displayName}
+                  onChangeText={setDisplayName}
+                  placeholder="Enter your name"
+                  placeholderTextColor={Theme.colors.text.disabled}
+                />
+              </View>
             </View>
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <View style={[styles.inputWrapper, styles.disabledInput]}>
-              <Mail size={18} color="#475569" style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: "#64748b" }]}
-                value={user?.email}
-                editable={false}
-              />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={[styles.inputWrapper, styles.disabledInput]}>
+                <Mail
+                  size={18}
+                  color={Theme.colors.text.disabled}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={[styles.input, { color: Theme.colors.text.muted }]}
+                  value={user?.email}
+                  editable={false}
+                />
+              </View>
             </View>
-          </View>
-          <Button
-            title={saving ? "Saving..." : "Save Profile"}
-            onPress={handleSaveProfile}
-            disabled={saving}
-            loading={saving}
-            style={styles.saveButton}
-          />
-        </GlassCard>
+            <Button
+              title={saving ? "Saving..." : "Save Profile"}
+              onPress={handleSaveProfile}
+              disabled={saving}
+              loading={saving}
+              style={styles.saveButton}
+            />
+          </GlassCard>
+        </MotiView>
 
         {/* Plan Section */}
-        <GlassCard style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Membership</Text>
-          <View style={styles.planCard}>
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 500, delay: 100 }}
+        >
+          <GlassCard style={styles.sectionCard}>
+            <Text style={styles.sectionHeader}>Membership</Text>
             <View
-              style={[styles.planIcon, isArchitect && styles.architectIcon]}
+              style={[styles.planCard, isArchitect && styles.architectPlanCard]}
             >
-              <Crown size={24} color={isArchitect ? "#818cf8" : "#f59e0b"} />
-            </View>
-            <View style={styles.planInfo}>
-              <Text style={styles.planName}>
-                {isArchitect ? "Architect Tier" : "Free Explorer"}
-              </Text>
-              <Text style={styles.planStatus}>
-                {isArchitect
-                  ? "Unlimited insights active"
-                  : "Standard benchmarks active"}
-              </Text>
-            </View>
-            {!isArchitect && (
-              <TouchableOpacity
-                style={styles.upgradeBtn}
-                onPress={handleUpgrade}
+              <View
+                style={[styles.planIcon, isArchitect && styles.architectIcon]}
               >
-                <Text style={styles.upgradeText}>Upgrade</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </GlassCard>
+                <Crown size={24} color={isArchitect ? "#fbbf24" : "#94a3b8"} />
+              </View>
+              <View style={styles.planInfo}>
+                <Text style={styles.planName}>
+                  {isArchitect ? "Architect Member" : "Free Explorer"}
+                </Text>
+                <Text style={styles.planStatus}>
+                  {isArchitect
+                    ? "Premium AI insights enabled"
+                    : "Standard benchmarks active"}
+                </Text>
+              </View>
+              {!isArchitect && (
+                <TouchableOpacity
+                  style={styles.upgradeBtn}
+                  onPress={handleUpgrade}
+                >
+                  <Text style={styles.upgradeText}>Upgrade</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </GlassCard>
+        </MotiView>
 
         {/* Security / Privacy */}
-        <GlassCard style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Security & Data</Text>
-          <SettingItem
-            icon={<Lock size={20} color="#94a3b8" />}
-            title="Reset Password"
-            subtitle="Sent via email"
-            onPress={handleChangePassword}
-          />
-          <SettingItem
-            icon={<Download size={20} color="#94a3b8" />}
-            title="Export My Data"
-            subtitle={exporting ? "Generating..." : "JSON Archive"}
-            onPress={handleExportData}
-          />
-          <SettingItem
-            icon={<Shield size={20} color="#94a3b8" />}
-            title="Privacy Policy"
-            onPress={() => router.push("/privacy")}
-          />
-        </GlassCard>
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 500, delay: 200 }}
+        >
+          <GlassCard style={styles.sectionCard}>
+            <Text style={styles.sectionHeader}>Security & Data</Text>
+            <SettingItem
+              icon={<Lock size={20} color="#94a3b8" />}
+              title="Reset Password"
+              subtitle="Sent via email"
+              onPress={handleChangePassword}
+            />
+            <SettingItem
+              icon={<Download size={20} color="#94a3b8" />}
+              title="Export My Data"
+              subtitle={exporting ? "Generating..." : "JSON Archive"}
+              onPress={handleExportData}
+            />
+            <SettingItem
+              icon={<Shield size={20} color={Theme.colors.text.secondary} />}
+              title="Privacy Policy"
+              onPress={() => router.push("/privacy")}
+            />
+          </GlassCard>
+        </MotiView>
 
         {/* Danger Zone */}
-        <View style={styles.dangerZone}>
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 400 }}
+          style={styles.dangerZone}
+        >
           <TouchableOpacity
             style={styles.dangerItem}
             onPress={handleDeleteAccount}
@@ -259,10 +297,10 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
-            <LogOut size={20} color="#94a3b8" />
+            <LogOut size={20} color={Theme.colors.text.secondary} />
             <Text style={styles.logoutText}>Sign Out</Text>
           </TouchableOpacity>
-        </View>
+        </MotiView>
 
         <Text style={styles.versionText}>BLUPRNT Mobile v1.0.4 • Build 24</Text>
       </ScrollView>
@@ -314,9 +352,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   sectionHeader: {
-    fontSize: 12,
-    fontFamily: "Outfit_700Bold",
-    color: "#4f46e5",
+    fontSize: Theme.typography.size.sm,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     marginBottom: 20,
@@ -366,16 +404,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     gap: 12,
   },
+  architectPlanCard: {
+    backgroundColor: "rgba(251, 191, 36, 0.05)",
+    borderColor: "rgba(251, 191, 36, 0.2)",
+    borderWidth: 1,
+  },
   planIcon: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "rgba(245, 158, 11, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     justifyContent: "center",
     alignItems: "center",
   },
   architectIcon: {
-    backgroundColor: "rgba(129, 140, 248, 0.1)",
+    backgroundColor: "rgba(251, 191, 36, 0.1)",
   },
   planInfo: {
     flex: 1,

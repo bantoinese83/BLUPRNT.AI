@@ -10,6 +10,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
+import { Theme } from "../../constants/Theme";
 
 interface Props {
   onPress: () => Promise<void> | void;
@@ -62,7 +63,7 @@ export function Button({
             style={styles.button}
           >
             <LinearGradient
-              colors={["#4f46e5", "#3730a3"]}
+              colors={[Theme.colors.brand.primary, Theme.colors.brand.deep]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
@@ -96,7 +97,7 @@ export function Button({
     >
       <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator color="#4f46e5" />
+          <ActivityIndicator color={Theme.colors.brand.primary} />
         ) : (
           <>
             <Text
@@ -120,7 +121,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   shadowContainer: {
-    shadowColor: "#4f46e5",
+    shadowColor: Theme.colors.brand.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -128,16 +129,16 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 56,
-    borderRadius: 16,
+    borderRadius: Theme.radius.lg,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
-    paddingHorizontal: 24,
+    paddingHorizontal: Theme.spacing.padding,
   },
   outline: {
     borderWidth: 1.5,
     borderColor: "rgba(79, 70, 229, 0.4)",
-    backgroundColor: "rgba(79, 70, 229, 0.05)",
+    backgroundColor: Theme.colors.brand.primary + "10",
   },
   ghost: {
     backgroundColor: "transparent",
@@ -149,13 +150,13 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
-    fontSize: 16,
-    fontFamily: "Outfit_800ExtraBold",
+    fontSize: Theme.typography.size.lg,
+    fontFamily: Theme.typography.family.black,
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   textBrand: {
-    color: "#818cf8",
+    color: Theme.colors.brand.light,
   },
   icon: {
     marginLeft: 8,

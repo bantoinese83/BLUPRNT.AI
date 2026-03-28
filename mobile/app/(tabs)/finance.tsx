@@ -154,7 +154,7 @@ export default function FinanceScreen() {
               return;
             }
             const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ["images"],
               quality: 0.8,
             });
             if (!result.canceled && result.assets[0]) {
@@ -221,7 +221,12 @@ export default function FinanceScreen() {
   }
 
   return (
-    <ScreenWrapper withScroll edges={["top", "left", "right"]}>
+    <ScreenWrapper
+      withScroll
+      onRefresh={load}
+      refreshing={loading}
+      edges={["top", "left", "right"]}
+    >
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Property Ledger</Text>
         <ProjectSwitcher

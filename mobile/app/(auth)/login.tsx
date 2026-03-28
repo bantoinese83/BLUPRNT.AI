@@ -10,6 +10,7 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { MotiView } from "moti";
@@ -28,6 +29,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -36,15 +38,18 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
+    setErrorMsg(null);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      Alert.alert("Login Failed", error.message);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setErrorMsg(error.message);
       setLoading(false);
     } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/(tabs)");
     }
   };
@@ -73,9 +78,17 @@ export default function LoginScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.container}>
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => {
+                Haptics.selectionAsync();
+                router.back();
+              }}
               style={styles.backButton}
             >
+              <BlurView
+                intensity={20}
+                tint="light"
+                style={StyleSheet.absoluteFill}
+              />
               <ChevronLeft size={24} color="white" />
             </TouchableOpacity>
 
@@ -94,10 +107,16 @@ export default function LoginScreen() {
                 <TextField
                   label="Email address"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   placeholder="Enter your email"
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  error={
+                    errorMsg && email === "" ? "Email is required" : undefined
+                  }
                 />
 
                 <TextField
@@ -119,6 +138,8 @@ export default function LoginScreen() {
                     Forgot password?
                   </Text>
                 </TouchableOpacity>
+
+                {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
                 <Button
                   title="Sign In"
@@ -146,7 +167,12 @@ export default function LoginScreen() {
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.push("/(auth)/register");
+                }}
+              >
                 <Text style={styles.linkText}>Create one</Text>
               </TouchableOpacity>
             </View>
@@ -165,15 +191,18 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 20,
+    top: Platform.OS === "ios" ? 12 : 20,
     left: 20,
     zIndex: 10,
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   header: {
     marginBottom: 32,
@@ -238,5 +267,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Outfit_700Bold",
     fontSize: 14,
+  },
+  errorText: {
+    color: "#f43f5e",
+    fontSize: 13,
+    fontFamily: "Outfit_600SemiBold",
+    textAlign: "center",
+    marginBottom: 16,
+    backgroundColor: "rgba(244, 63, 94, 0.1)",
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(244, 63, 94, 0.2)",
+    overflow: "hidden",
   },
 });

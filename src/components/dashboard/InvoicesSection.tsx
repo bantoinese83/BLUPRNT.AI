@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useInvoiceManagement } from "@/hooks/useInvoiceManagement";
 import { InvoiceUploadHeader } from "./InvoiceUploadHeader";
 import { InvoiceGuide } from "./InvoiceGuide";
@@ -29,6 +30,9 @@ export function InvoicesSection({
   subscription = null,
   hasProjectPass = false,
 }: InvoicesSectionProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const wasUploading = useRef(false);
+
   const {
     inputRef,
     uploading,
@@ -57,8 +61,19 @@ export function InvoicesSection({
     hasProjectPass,
   });
 
+  useEffect(() => {
+    if (wasUploading.current && !uploading && invoices.length > 0) {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    wasUploading.current = uploading;
+  }, [uploading, invoices.length]);
+
   return (
-    <div id="invoice-upload-anchor" className="space-y-5 scroll-mt-24">
+    <div
+      ref={scrollRef}
+      id="invoice-upload-anchor"
+      className="space-y-5 scroll-mt-24"
+    >
       <input
         ref={inputRef}
         type="file"

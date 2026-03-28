@@ -13,6 +13,7 @@ import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
 import { Logo } from "../src/components/ui/Logo";
+import * as Haptics from "expo-haptics";
 
 export default function LandingScreen() {
   return (
@@ -42,18 +43,36 @@ export default function LandingScreen() {
           </Text>
 
           <View style={styles.ctaContainer}>
-            <Button
-              title="Start Free Estimate"
-              onPress={() => router.push("/(auth)/register")}
-              icon={<ArrowRight size={20} color="white" />}
-            />
+            <MotiView
+              from={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 600, type: "timing", duration: 500 }}
+            >
+              <Button
+                title="Start Free Estimate"
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  router.push("/onboarding");
+                }}
+                icon={<ArrowRight size={20} color="white" />}
+              />
+            </MotiView>
             <View style={{ height: 12 }} />
-            <Button
-              title="Sign In"
-              variant="outline"
-              onPress={() => router.push("/(auth)/login")}
-              icon={<UserPlus size={20} color="#0f172a" />}
-            />
+            <MotiView
+              from={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 750, type: "timing", duration: 500 }}
+            >
+              <Button
+                title="Sign In"
+                variant="outline"
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.push("/(auth)/login");
+                }}
+                icon={<UserPlus size={20} color="white" />}
+              />
+            </MotiView>
           </View>
         </MotiView>
 

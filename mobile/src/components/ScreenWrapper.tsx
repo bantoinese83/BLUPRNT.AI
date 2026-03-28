@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GradientBackground } from "./ui/GradientBackground";
 import { StatusBar } from "expo-status-bar";
 import { Logo } from "./ui/Logo";
+import { Theme } from "../constants/Theme";
 
 interface Props {
   children: React.ReactNode;
@@ -79,8 +80,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   brandingText: {
-    fontSize: 18,
-    fontFamily: "Outfit_700Bold",
+    fontSize: Theme.typography.size.xl,
+    fontFamily: Theme.typography.family.bold,
     color: "white",
     letterSpacing: 2,
   },

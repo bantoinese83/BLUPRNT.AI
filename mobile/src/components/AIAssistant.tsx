@@ -10,10 +10,13 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { MessageSquare, Send, Bot, User } from "lucide-react-native";
+import { MessageSquare, Send, Bot, User, Sparkles } from "lucide-react-native";
 import Markdown from "react-native-markdown-display";
+import * as Haptics from "expo-haptics";
+import { MotiView } from "moti";
 import { supabase } from "../lib/supabase";
 import { GlassCard } from "./ui/GlassCard";
+import { Theme } from "../constants/Theme";
 
 interface Message {
   role: "user" | "assistant";
@@ -48,6 +51,7 @@ export function AIAssistant({ projectId }: Props) {
     if (!msg || isTyping) return;
 
     setInput("");
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setMessages((prev) => [...prev, { role: "user", content: msg }]);
     setIsTyping(true);
 
@@ -97,8 +101,15 @@ export function AIAssistant({ projectId }: Props) {
         showsVerticalScrollIndicator={false}
       >
         {messages.map((m, i) => (
-          <View
+          <MotiView
             key={i}
+            from={{ opacity: 0, scale: 0.9, translateY: 10 }}
+            animate={{ opacity: 1, scale: 1, translateY: 0 }}
+            transition={{
+              type: "timing",
+              duration: 300,
+              delay: i === messages.length - 1 ? 0 : 0,
+            }}
             style={[
               styles.messageWrapper,
               m.role === "user" ? styles.userWrapper : styles.assistantWrapper,
@@ -106,7 +117,7 @@ export function AIAssistant({ projectId }: Props) {
           >
             {m.role === "assistant" && (
               <View style={styles.botAvatar}>
-                <Bot size={14} color="white" />
+                <Sparkles size={14} color="white" />
               </View>
             )}
             <View
@@ -124,10 +135,14 @@ export function AIAssistant({ projectId }: Props) {
                 <Text style={styles.userText}>{m.content}</Text>
               )}
             </View>
-          </View>
+          </MotiView>
         ))}
         {isTyping && (
-          <View style={styles.assistantWrapper}>
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={styles.assistantWrapper}
+          >
             <View style={styles.botAvatar}>
               <Bot size={14} color="white" />
             </View>
@@ -139,9 +154,9 @@ export function AIAssistant({ projectId }: Props) {
                 { paddingVertical: 12, paddingHorizontal: 16 },
               ]}
             >
-              <ActivityIndicator size="small" color="#4f46e5" />
+              <ActivityIndicator size="small" color="#818cf8" />
             </View>
-          </View>
+          </MotiView>
         )}
       </ScrollView>
 
@@ -191,7 +206,7 @@ export function AIAssistant({ projectId }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0f172a",
+    backgroundColor: Theme.colors.background,
   },
   messagesContainer: {
     padding: 20,
@@ -209,44 +224,43 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   botAvatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#4f46e5",
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    backgroundColor: "#6366f1",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 8,
-    marginBottom: 4,
+    marginRight: 10,
+    marginBottom: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   messageBubble: {
-    maxWidth: "80%",
-    padding: 16,
-    borderRadius: 20,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    maxWidth: "85%",
+    padding: 18,
+    borderRadius: 22,
   },
   userBubble: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   userBubbleShape: {
     borderBottomRightRadius: 4,
   },
   assistantBubble: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    borderWidth: 1.2,
+    borderColor: "rgba(255, 255, 255, 0.12)",
   },
   assistantBubbleShape: {
     borderBottomLeftRadius: 4,
   },
   userText: {
     color: "white",
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: "Outfit_500Medium",
-    lineHeight: 22,
+    lineHeight: 24,
   },
   inputArea: {
     backgroundColor: "rgba(15, 23, 42, 0.98)",

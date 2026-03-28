@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
@@ -20,6 +21,7 @@ import {
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
+import { useAuth } from "../../src/contexts/auth-context";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { Button } from "../../src/components/ui/Button";
 import { InsightTeaser } from "../../src/components/InsightTeaser";
@@ -38,8 +40,10 @@ import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { supabase } from "../../src/lib/supabase";
 import { EmptyState } from "../../src/components/ui/EmptyState";
+import { Theme } from "../../src/constants/Theme";
 
 export default function DashboardScreen() {
+  const { user } = useAuth();
   const {
     loading,
     projects,
@@ -59,7 +63,31 @@ export default function DashboardScreen() {
     setUpgradeReason,
   } = useAwareness();
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   const [isUploading, setIsUploading] = useState(false);
+  const [hasCelebrated, setHasCelebrated] = useState(false);
+
+  // Budget Completion Celebration
+  React.useEffect(() => {
+    if (
+      project &&
+      invoices.length > 0 &&
+      project.estimated_min_total != null &&
+      !hasCelebrated
+    ) {
+      const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+      if (invoiceTotal >= project.estimated_min_total) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setHasCelebrated(true);
+      }
+    }
+  }, [project, invoices, hasCelebrated]);
 
   const handleFabPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -83,7 +111,7 @@ export default function DashboardScreen() {
             if (status !== "granted") return;
 
             const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ["images"],
               quality: 0.8,
             });
 
@@ -167,7 +195,35 @@ export default function DashboardScreen() {
       refreshing={loading}
       style={styles.scrollContent}
     >
-      {/* Active Project Highlight */}
+      {/* Personalized Greeting */}
+      <MotiView
+        from={{ opacity: 0, translateY: -20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: "timing", duration: 800 }}
+        style={styles.headerContainer}
+      >
+        <View>
+          <Text style={styles.welcomeText}>{getGreeting()},</Text>
+          <Text style={styles.userFirstName}>
+            {user?.user_metadata?.full_name?.split(" ")[0] || "there"}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.selectionAsync();
+            setIsInsightsOpen(true);
+          }}
+          style={styles.insightsButton}
+        >
+          <MessageCircle size={24} color={Theme.colors.brand.light} />
+          <View
+            style={[
+              styles.insightsDot,
+              { backgroundColor: Theme.colors.brand.light },
+            ]}
+          />
+        </TouchableOpacity>
+      </MotiView>
       <MotiView
         from={{ opacity: 0, translateY: 20 }}
         animate={{ opacity: 1, translateY: 0 }}
@@ -177,7 +233,7 @@ export default function DashboardScreen() {
         <GlassCard style={{ marginBottom: 24 }}>
           <View style={styles.projectHeader}>
             <View style={styles.projectIcon}>
-              <Hammer size={24} color="#4f46e5" />
+              <Hammer size={24} color={Theme.colors.brand.primary} />
             </View>
             <View style={styles.projectNameContainer}>
               <Text style={styles.projectName}>{project.name}</Text>
@@ -186,7 +242,7 @@ export default function DashboardScreen() {
               </Text>
             </View>
             <View style={styles.confidenceBadge}>
-              <ShieldCheck size={12} color="#10b981" />
+              <ShieldCheck size={12} color={Theme.colors.status.success} />
               <Text style={styles.confidenceText}>
                 {(project as any).confidence_score ?? 4.8}/5
               </Text>
@@ -197,12 +253,17 @@ export default function DashboardScreen() {
             <StatItem
               label="Budget"
               value={`$${(project.estimated_min_total ?? 0).toLocaleString()}`}
-              icon={<CircleDollarSign size={16} color="#94a3b8" />}
+              icon={
+                <CircleDollarSign
+                  size={16}
+                  color={Theme.colors.text.secondary}
+                />
+              }
             />
             <StatItem
               label="Spent"
               value={`$${invoiceTotal.toLocaleString()}`}
-              icon={<Calendar size={16} color="#94a3b8" />}
+              icon={<Calendar size={16} color={Theme.colors.text.secondary} />}
             />
           </View>
 
@@ -259,7 +320,10 @@ export default function DashboardScreen() {
                 style={styles.progressBarFill}
               >
                 <LinearGradient
-                  colors={["#818cf8", "#4f46e5"]}
+                  colors={[
+                    Theme.colors.brand.light,
+                    Theme.colors.brand.primary,
+                  ]}
                   start={{ x: 0, y: 0.5 }}
                   end={{ x: 1, y: 0.5 }}
                   style={StyleSheet.absoluteFill}
@@ -302,6 +366,12 @@ export default function DashboardScreen() {
                 id === "export-packet"
               ) {
                 handleFabPress();
+              }
+              if (id === "share-access") {
+                Share.share({
+                  message: `Check out my home renovation project '${project.name}' on BLUPRNT.AI!`,
+                  url: "https://bluprnt.ai",
+                });
               }
             }}
           />
@@ -408,9 +478,9 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   sectionHeader: {
-    fontSize: 11,
-    fontFamily: "Outfit_700Bold",
-    color: "#818cf8",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.light,
     letterSpacing: 1.5,
     textTransform: "uppercase",
     marginBottom: 16,
