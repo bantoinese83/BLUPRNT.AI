@@ -34,6 +34,12 @@ import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
 import { Settings2, ListTree } from "lucide-react";
 import { toast } from "sonner";
 import { ShareModal } from "@/components/dashboard/ShareModal";
+import type {
+  ProjectRow,
+  ScopeRow,
+  InvoiceRow,
+  UserSubscriptionRow,
+} from "@/types/database";
 
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
@@ -48,7 +54,8 @@ import {
 } from "@/components/dashboard/dashboard-animations";
 
 import { useLogout } from "@/hooks/use-logout";
-import { AwarenessProvider, useAwareness } from "@/contexts/AwarenessProvider";
+import { AwarenessProvider } from "@/contexts/AwarenessProvider";
+import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
 
@@ -167,6 +174,22 @@ export default function Dashboard() {
   );
 }
 
+interface DashboardContentProps {
+  projects: ProjectRow[];
+  project: ProjectRow;
+  scopeItems: ScopeRow[];
+  invoices: InvoiceRow[];
+  isArchitect: boolean;
+  subscription: UserSubscriptionRow | null;
+  hasProjectPass: boolean;
+  load: () => Promise<void>;
+  handleProjectSelect: (id: string) => void;
+  setProjects: (projects: ProjectRow[]) => void;
+  setProject: (project: ProjectRow | null) => void;
+  setScopeItems: (items: ScopeRow[]) => void;
+  setInvoices: (invoices: InvoiceRow[]) => void;
+}
+
 function DashboardContent({
   projects,
   project,
@@ -181,7 +204,7 @@ function DashboardContent({
   setProject,
   setScopeItems,
   setInvoices,
-}: any) {
+}: DashboardContentProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useLogout();
@@ -234,7 +257,7 @@ function DashboardContent({
     // Celebration: Budget Reached
     if (project && invoices.length > 0 && !hasCelebrated) {
       const total = invoices.reduce(
-        (s: number, i: any) => s + (i.total ?? 0),
+        (s: number, i: InvoiceRow) => s + (i.total ?? 0),
         0,
       );
       if (total >= (project.estimated_min_total ?? 0)) {
@@ -264,7 +287,7 @@ function DashboardContent({
   }
 
   const invoiceTotal = invoices.reduce(
-    (s: number, i: any) => s + (i.total ?? 0),
+    (s: number, i: InvoiceRow) => s + (i.total ?? 0),
     0,
   );
 
@@ -280,7 +303,7 @@ function DashboardContent({
     const originalProjects = [...projects];
     const originalCurrentProject = project;
 
-    setProjects(projects.filter((p: any) => p.id !== id));
+    setProjects(projects.filter((p: ProjectRow) => p.id !== id));
     if (id === project?.id) {
       setProject(null);
       setScopeItems([]);
@@ -404,7 +427,10 @@ function DashboardContent({
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <ProjectSwitcher
-            projects={projects.map((p: any) => ({ id: p.id, name: p.name }))}
+            projects={projects.map((p: ProjectRow) => ({
+              id: p.id,
+              name: p.name,
+            }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
             onDelete={handleProjectDelete}
@@ -450,7 +476,7 @@ function DashboardContent({
           <UpgradeBanner
             invoiceCount={
               invoices.filter(
-                (i: any) => (i.document_type ?? "invoice") === "invoice",
+                (i: InvoiceRow) => (i.document_type ?? "invoice") === "invoice",
               ).length
             }
             onUpgradeClick={() => {

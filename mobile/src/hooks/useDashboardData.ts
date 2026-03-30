@@ -144,20 +144,12 @@ export function useDashboardData() {
   }, []);
 
   useEffect(() => {
-    let isCancelled = false;
-
-    // Create a version of load that respects isCancelled
+    // Create a version of load that respects the closure
     const runLoad = async () => {
-      // For now, we just call load() and let it handle its own internal state
-      // But a better pattern is to pass isCancelled or use a ref
       await load();
     };
 
     runLoad();
-
-    return () => {
-      isCancelled = true;
-    };
   }, [load]);
 
   const handleProjectSelect = useCallback(
@@ -167,6 +159,68 @@ export function useDashboardData() {
     },
     [load],
   );
+
+  const recalcProjectTotals = async (pid: string) => {
+    const { data: items } = await supabase
+      .from("scope_items")
+      .select("total_cost_min, total_cost_max")
+      .eq("project_id", pid);
+
+    if (!items || items.length === 0) {
+      await supabase
+        .from("projects")
+        .update({
+          estimated_min_total: 0,
+          estimated_max_total: 0,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", pid);
+      return;
+    }
+
+    const minSum = items.reduce((s, i) => s + (i.total_cost_min ?? 0), 0);
+    const maxSum = items.reduce((s, i) => s + (i.total_cost_max ?? 0), 0);
+
+    await supabase
+      .from("projects")
+      .update({
+        estimated_min_total: Math.round(minSum),
+        estimated_max_total: Math.round(maxSum),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", pid);
+  };
+
+  const addItem = async (
+    pid: string,
+    newItem: {
+      category: string;
+      description: string;
+      phase: string;
+      cost: number;
+      quantity: number;
+      unit: string;
+    },
+  ) => {
+    const { error: err } = await supabase.from("scope_items").insert({
+      project_id: pid,
+      category: newItem.category,
+      description: newItem.description,
+      phase: newItem.phase,
+      quantity: newItem.quantity,
+      unit: newItem.unit,
+      finish_tier: "mid",
+      unit_cost_min: newItem.cost,
+      unit_cost_max: newItem.cost,
+      total_cost_min: newItem.cost * newItem.quantity,
+      total_cost_max: newItem.cost * newItem.quantity,
+    });
+
+    if (err) throw err;
+
+    await recalcProjectTotals(pid);
+    load(); // Refresh local data
+  };
 
   return {
     loading,
@@ -179,6 +233,8 @@ export function useDashboardData() {
     hasProjectPass,
     load,
     handleProjectSelect,
+    addItem,
+    recalcProjectTotals,
     setProjects,
     setProject,
     setScopeItems,

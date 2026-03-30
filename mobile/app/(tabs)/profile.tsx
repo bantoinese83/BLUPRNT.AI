@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
-  ActivityIndicator,
   ScrollView,
   Share,
 } from "react-native";
@@ -27,11 +26,14 @@ import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { Button } from "../../src/components/ui/Button";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
-import { useAwareness } from "../../src/contexts/AwarenessProvider";
-import { supabase } from "../../src/lib/supabase";
+import { useAwareness } from "../../src/contexts/AwarenessContext";
+import { supabase, invokeFunction } from "../../src/lib/supabase";
 import { router } from "expo-router";
 import { MotiView } from "moti";
 import { Theme } from "../../src/constants/Theme";
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
+
+const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -83,21 +85,13 @@ export default function ProfileScreen() {
     setExporting(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    if (!isArchitect) {
-      setUpgradeReason("export");
-      setShowUpgrade(true);
-      setExporting(false);
-      return;
-    }
-
     try {
-      // Basic export logic: fetch projects and properties
       const { data: props } = await supabase
         .from("properties")
         .select("*")
         .eq("owner_user_id", user?.id);
 
-      const propIds = (props || []).map((p) => p.id);
+      const propIds = (props || []).map((p: { id: string }) => p.id);
       const { data: projs } =
         propIds.length > 0
           ? await supabase
@@ -118,8 +112,8 @@ export default function ProfileScreen() {
         message: json,
         title: "BLUPRNT Data Export",
       });
-    } catch (err) {
-      Alert.alert("Export Failed", "Cloud not generate data archive.");
+    } catch (_) {
+      Alert.alert("Export Failed", "Couldn't generate data archive.");
     } finally {
       setExporting(false);
     }
@@ -129,17 +123,37 @@ export default function ProfileScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     Alert.alert(
       "Delete Account",
-      "This action is IRREVERSIBLE. All your projects, properties, and documents will be permanently deleted.",
+      "This action is permanent and cannot be undone. All your projects, documents, and data will be deleted.",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete Permanently",
           style: "destructive",
-          onPress: async () => {
-            // In a real app, this calls an Edge Function
+          onPress: () => {
             Alert.alert(
-              "Account Deletion",
-              "For security, please contact support to complete account deletion, or use the web dashboard settings.",
+              "Are you absolutely sure?",
+              "Type DELETE to confirm — or tap confirm to proceed.",
+              [
+                { text: "Go Back", style: "cancel" },
+                {
+                  text: "Confirm Delete",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      const { error } = await invokeFunction("delete-account", {
+                        method: "POST",
+                      });
+                      if (error) throw error;
+                      await signOut();
+                    } catch (_err) {
+                      Alert.alert(
+                        "Deletion Failed",
+                        "We couldn't delete your account. Please try again or contact support.",
+                      );
+                    }
+                  },
+                },
+              ],
             );
           },
         },
@@ -229,7 +243,14 @@ export default function ProfileScreen() {
               <View
                 style={[styles.planIcon, isArchitect && styles.architectIcon]}
               >
-                <Crown size={24} color={isArchitect ? "#fbbf24" : "#94a3b8"} />
+                <Crown
+                  size={24}
+                  color={
+                    isArchitect
+                      ? Theme.colors.status.warning
+                      : Theme.colors.text.muted
+                  }
+                />
               </View>
               <View style={styles.planInfo}>
                 <Text style={styles.planName}>
@@ -262,13 +283,13 @@ export default function ProfileScreen() {
           <GlassCard style={styles.sectionCard}>
             <Text style={styles.sectionHeader}>Security & Data</Text>
             <SettingItem
-              icon={<Lock size={20} color="#94a3b8" />}
+              icon={<Lock size={20} color={Theme.colors.text.muted} />}
               title="Reset Password"
               subtitle="Sent via email"
               onPress={handleChangePassword}
             />
             <SettingItem
-              icon={<Download size={20} color="#94a3b8" />}
+              icon={<Download size={20} color={Theme.colors.text.muted} />}
               title="Export My Data"
               subtitle={exporting ? "Generating..." : "JSON Archive"}
               onPress={handleExportData}
@@ -292,7 +313,7 @@ export default function ProfileScreen() {
             style={styles.dangerItem}
             onPress={handleDeleteAccount}
           >
-            <Trash2 size={20} color="#f43f5e" />
+            <Trash2 size={20} color={Theme.colors.status.error} />
             <Text style={styles.dangerText}>Delete My Account</Text>
           </TouchableOpacity>
 
@@ -326,30 +347,30 @@ function SettingItem({
         <Text style={styles.settingTitle}>{title}</Text>
         {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
       </View>
-      <ChevronRight size={18} color="#334155" />
+      <ChevronRight size={18} color={Theme.colors.text.primary} />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    padding: 24,
-    paddingBottom: 8,
+    padding: Theme.spacing.xl,
+    paddingBottom: Theme.spacing.xs,
   },
   title: {
-    fontSize: 28,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    fontSize: Theme.typography.size.display,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   scrollContent: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 32, // More space between major sections
+    padding: Theme.spacing.xl,
+    paddingBottom: TAB_BAR_OFFSET + 40,
+    gap: Theme.spacing.xxl,
   },
   sectionCard: {
-    padding: 20,
-    borderRadius: 24,
+    padding: Theme.spacing.lg,
+    borderRadius: Theme.radius.xl,
   },
   sectionHeader: {
     fontSize: Theme.typography.size.sm,
@@ -357,26 +378,26 @@ const styles = StyleSheet.create({
     color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 1.5,
-    marginBottom: 20,
+    marginBottom: Theme.spacing.lg,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: Theme.spacing.lg,
   },
   label: {
     fontSize: 12,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.muted,
     marginBottom: 8,
     paddingLeft: 4,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderRadius: 12,
+    backgroundColor: Theme.colors.inputBg,
+    borderRadius: Theme.radius.md,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    height: 56, // Increased for comfort
+    borderColor: Theme.colors.inputBorder,
+    height: 56,
     paddingHorizontal: 16,
   },
   disabledInput: {
@@ -388,87 +409,93 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: "white",
-    fontSize: 15,
-    fontFamily: "Outfit_500Medium",
+    color: Theme.colors.text.primary,
+    fontSize: Theme.typography.size.lg,
+    fontFamily: Theme.typography.family.medium,
   },
   saveButton: {
-    marginTop: 12,
+    marginTop: Theme.spacing.sm,
     height: 56,
   },
   planCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: Theme.colors.inputBg,
     padding: 16,
-    borderRadius: 16,
-    gap: 12,
+    borderRadius: Theme.radius.lg,
+    gap: Theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
   },
   architectPlanCard: {
-    backgroundColor: "rgba(251, 191, 36, 0.05)",
-    borderColor: "rgba(251, 191, 36, 0.2)",
+    backgroundColor: "rgba(245, 158, 11, 0.04)",
+    borderColor: "rgba(245, 158, 11, 0.2)",
     borderWidth: 1,
   },
   planIcon: {
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: Theme.radius.md,
+    backgroundColor: Theme.colors.card,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
   },
   architectIcon: {
-    backgroundColor: "rgba(251, 191, 36, 0.1)",
+    backgroundColor: "rgba(245, 158, 11, 0.08)",
   },
   planInfo: {
     flex: 1,
   },
   planName: {
-    fontSize: 15,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: Theme.typography.size.lg,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   planStatus: {
-    fontSize: 11,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   upgradeBtn: {
-    backgroundColor: "#4f46e5",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    backgroundColor: Theme.colors.brand.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 10, // Better touch target
+    borderRadius: Theme.radius.sm,
   },
   upgradeText: {
     color: "white",
-    fontSize: 12,
-    fontFamily: "Outfit_700Bold",
+    fontSize: Theme.typography.size.sm,
+    fontFamily: Theme.typography.family.bold,
   },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 18, // More breathable
+    paddingVertical: 18,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderBottomColor: Theme.colors.divider,
   },
   settingIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    width: 44, // Matched touch target
+    height: 44,
+    borderRadius: Theme.radius.md,
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
   },
   settingTitle: {
-    fontSize: 15,
-    fontFamily: "Outfit_600SemiBold",
-    color: "white",
+    fontSize: Theme.typography.size.lg,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
   },
   settingSubtitle: {
-    fontSize: 11,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     marginTop: 2,
   },
   dangerZone: {
@@ -479,35 +506,35 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    gap: 16,
-    borderRadius: 16,
+    gap: Theme.spacing.md,
+    borderRadius: Theme.radius.lg,
     backgroundColor: "rgba(244, 63, 94, 0.05)",
     borderWidth: 1,
     borderColor: "rgba(244, 63, 94, 0.1)",
   },
   dangerText: {
-    color: "#f43f5e",
-    fontSize: 14,
-    fontFamily: "Outfit_700Bold",
+    color: Theme.colors.status.error,
+    fontSize: Theme.typography.size.md,
+    fontFamily: Theme.typography.family.bold,
   },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    gap: 16,
-    borderRadius: 16,
+    gap: Theme.spacing.md,
+    borderRadius: Theme.radius.lg,
   },
   logoutText: {
-    fontSize: 14,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    fontSize: Theme.typography.size.md,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
   },
   versionText: {
     textAlign: "center",
     marginTop: 24,
-    fontSize: 10,
-    fontFamily: "Outfit_400Regular",
-    color: "#334155",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.muted,
     textTransform: "uppercase",
     letterSpacing: 2,
   },

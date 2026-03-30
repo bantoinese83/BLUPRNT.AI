@@ -1,4 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { invokeFunction } from "./supabase";
 
 export type ProjectTypeOption =
   | "Kitchen"
@@ -185,7 +186,8 @@ export async function saveOnboardingProject(params: {
       } as unknown as string);
     });
 
-    supabase.functions.invoke("photo-to-scope", { body: fd });
+    // Fire-and-forget background re-estimate with photos
+    invokeFunction("photo-to-scope", { body: fd });
   }
 
   return proj.id;

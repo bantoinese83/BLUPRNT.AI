@@ -26,6 +26,7 @@ import { supabase } from "../../src/lib/supabase";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { ProjectHealth } from "../../src/components/ProjectHealth";
 import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
+import { AddScopeItemModal } from "../../src/components/AddScopeItemModal";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { ProjectRow, ScopeRow } from "../../src/types/database";
@@ -36,8 +37,9 @@ export default function ProjectDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scope, setScope] = useState<ScopeRow[]>([]);
-  const { invoices, isArchitect, hasProjectPass } = useDashboardData();
+  const { invoices, isArchitect, hasProjectPass, addItem } = useDashboardData();
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const invoiceTotal = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
 
@@ -119,6 +121,7 @@ export default function ProjectDetailScreen() {
   return (
     <ScreenWrapper
       withScroll
+      withTabBar={false}
       onRefresh={handleRefresh}
       refreshing={loading}
       edges={["top", "bottom", "left", "right"]}
@@ -136,7 +139,7 @@ export default function ProjectDetailScreen() {
             tint="light"
             style={StyleSheet.absoluteFill}
           />
-          <ChevronLeft size={24} color="white" />
+          <ChevronLeft size={24} color={Theme.colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {project?.name}
@@ -154,7 +157,19 @@ export default function ProjectDetailScreen() {
               tint="light"
               style={StyleSheet.absoluteFill}
             />
-            <Share2 size={20} color="white" />
+            <Share2 size={20} color={Theme.colors.text.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionIcon,
+              { backgroundColor: Theme.colors.brand.primary },
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowAddModal(true);
+            }}
+          >
+            <Plus size={20} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -253,7 +268,7 @@ export default function ProjectDetailScreen() {
             style={[styles.actionButton, styles.shareBtn]}
             onPress={handleShare}
           >
-            <Share2 size={18} color="white" />
+            <Share2 size={18} color={Theme.colors.text.primary} />
             <Text style={styles.actionButtonText}>Share Project</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -280,7 +295,7 @@ export default function ProjectDetailScreen() {
                   scope,
                   invoices,
                 );
-              } catch (err) {
+              } catch (_) {
                 Alert.alert(
                   "Export Failed",
                   "Cloud not create project scope PDF.",
@@ -288,7 +303,7 @@ export default function ProjectDetailScreen() {
               }
             }}
           >
-            <Download size={18} color="white" />
+            <Download size={18} color={Theme.colors.text.primary} />
             <Text style={styles.actionButtonText}>Export Data</Text>
           </TouchableOpacity>
         </MotiView>
@@ -298,6 +313,16 @@ export default function ProjectDetailScreen() {
         isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}
         reason="export"
+      />
+
+      <AddScopeItemModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={async (item) => {
+          if (!id) return;
+          await addItem(id, item);
+          handleRefresh(); // Refresh screen data
+        }}
       />
     </ScreenWrapper>
   );
@@ -318,19 +343,19 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(15, 23, 42, 0.08)",
   },
   headerTitle: {
     flex: 1,
     fontSize: 22, // Increased for impact
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   content: {
@@ -347,7 +372,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: Theme.colors.text.primary,
     marginLeft: 12,
   },
   scopeCard: {
@@ -384,7 +409,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: "Outfit_600SemiBold",
-    color: "white",
+    color: Theme.colors.text.primary,
     marginRight: 12,
   },
   scopeHeader: {
@@ -409,7 +434,7 @@ const styles = StyleSheet.create({
   scopePrice: {
     fontSize: 14,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: Theme.colors.text.primary,
   },
   headerActions: {
     flexDirection: "row",
@@ -419,12 +444,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(15, 23, 42, 0.08)",
   },
   globalActions: {
     flexDirection: "row",
@@ -445,14 +470,14 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 14,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: Theme.colors.text.primary,
   },
   shareBtn: {
-    backgroundColor: "#4f46e5",
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "#ffffff",
+    borderColor: "rgba(15, 23, 42, 0.1)",
   },
   exportBtn: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#ffffff",
+    borderColor: "rgba(15, 23, 42, 0.1)",
   },
 });

@@ -1,28 +1,6 @@
-import React, { createContext, useContext, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "../types/database";
-
-export interface SmartInsight {
-  id: string;
-  type: "anomaly" | "tip" | "opportunity";
-  title: string;
-  description: string;
-  actionLabel?: string;
-  category?: string;
-}
-
-interface AwarenessState {
-  insights: SmartInsight[];
-  projectHealth: "optimal" | "warning" | "critical";
-  nextBestAction: string | null;
-  isInsightsOpen: boolean;
-  setIsInsightsOpen: (isOpen: boolean) => void;
-  showUpgrade: boolean;
-  setShowUpgrade: (show: boolean) => void;
-  upgradeReason: "export" | "invoice_limit" | "general";
-  setUpgradeReason: (reason: "export" | "invoice_limit" | "general") => void;
-}
-
-const AwarenessContext = createContext<AwarenessState | undefined>(undefined);
+import { AwarenessContext, SmartInsight } from "./AwarenessContext";
 
 export function AwarenessProvider({
   children,
@@ -56,7 +34,7 @@ export function AwarenessProvider({
     // 1. Budget Deviation Analysis
     const categoryTotals: Record<string, number> = {};
     invoices.forEach((inv) => {
-      const cat = (inv as any).category || "Uncategorized";
+      const cat = (inv as { category?: string }).category || "Uncategorized";
       categoryTotals[cat] = (categoryTotals[cat] || 0) + (inv.total || 0);
     });
 
@@ -140,12 +118,4 @@ export function AwarenessProvider({
       {children}
     </AwarenessContext.Provider>
   );
-}
-
-export function useAwareness() {
-  const context = useContext(AwarenessContext);
-  if (context === undefined) {
-    throw new Error("useAwareness must be used within an AwarenessProvider");
-  }
-  return context;
 }

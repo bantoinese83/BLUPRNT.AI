@@ -1,12 +1,13 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
-import { Folder, ArrowRight } from "lucide-react-native";
+import { Folder, ArrowRight, FolderOpen } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
+import { EmptyState } from "../../src/components/ui/EmptyState";
 
 export default function ProjectsScreen() {
   const { projects, loading, load } = useDashboardData();
@@ -19,6 +20,15 @@ export default function ProjectsScreen() {
       </View>
 
       <View style={styles.scrollContent}>
+        {!loading && projects.length === 0 && (
+          <EmptyState
+            icon={FolderOpen}
+            title="No projects yet"
+            description="Start your first renovation estimate to track budgets, documents, and AI insights."
+            actionTitle="Create a Project"
+            onAction={() => router.push("/onboarding")}
+          />
+        )}
         {projects.map((p, idx) => (
           <MotiView
             key={p.id}

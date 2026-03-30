@@ -178,18 +178,22 @@ export function PropertyLedger({
             to prove value to buyers and agents.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-bold text-slate-400">
             <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-100/50">
-              <span className="text-slate-900 block mb-1">
+              <span className="text-slate-900 block mb-1 uppercase text-[8.5px] tracking-tighter leading-tight font-black">
                 Capital Improvements
               </span>
-              Increases your home's cost basis (Tax Advantage).
+              <span className="font-medium text-slate-500 normal-case tracking-normal">
+                Increases your home's cost basis (Tax Advantage).
+              </span>
             </div>
             <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-100/50">
-              <span className="text-slate-900 block mb-1">
+              <span className="text-slate-900 block mb-1 uppercase text-[8.5px] tracking-tighter leading-tight font-black">
                 Maintenance Logs
               </span>
-              Essential upkeep to prove home health to buyers.
+              <span className="font-medium text-slate-500 normal-case tracking-normal">
+                Essential upkeep to prove home health to buyers.
+              </span>
             </div>
           </div>
 

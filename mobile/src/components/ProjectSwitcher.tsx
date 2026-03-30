@@ -11,6 +11,7 @@ import { Hammer, PlusCircle } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { supabase } from "../lib/supabase";
 import { GlassCard } from "./ui/GlassCard";
+import { Theme } from "../constants/Theme";
 import type { ProjectRow } from "../types/database";
 
 type ProjectSwitcherProps = {
@@ -37,7 +38,7 @@ export function ProjectSwitcher({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingHorizontal: 24 },
+          { paddingHorizontal: 24, paddingRight: 112 },
         ]}
       >
         {projects.map((p) => (
@@ -80,13 +81,20 @@ export function ProjectSwitcher({
             }}
           >
             <GlassCard
-              intensity={8}
+              intensity={p.id === currentId ? 0 : 8}
               style={[styles.card, p.id === currentId && styles.activeCard]}
             >
-              <View style={styles.iconContainer}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  p.id === currentId && styles.activeIconContainer,
+                ]}
+              >
                 <Hammer
                   size={12}
-                  color={p.id === currentId ? "white" : "#4f46e5"}
+                  color={
+                    p.id === currentId ? "white" : Theme.colors.brand.primary
+                  }
                 />
               </View>
               <Text
@@ -125,12 +133,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   label: {
-    fontSize: 12,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "#4f46e5",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     paddingHorizontal: 24,
+    marginBottom: 4,
   },
   scrollContent: {
     paddingRight: 24,
@@ -146,40 +155,43 @@ const styles = StyleSheet.create({
     gap: 12,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: Theme.colors.divider,
   },
   activeCard: {
-    backgroundColor: "rgba(79, 70, 229, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: "transparent",
   },
   iconContainer: {
     width: 24,
     height: 24,
     borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
+  },
+  activeIconContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   name: {
     flex: 1,
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   activeName: {
     color: "white",
   },
   addCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: "rgba(0, 0, 0, 0.02)",
     borderStyle: "dashed",
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: Theme.colors.divider,
   },
   addIconContainer: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
   },
   addText: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
   },
 });

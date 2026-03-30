@@ -1,0 +1,231 @@
+
+> blueprintai-v3@0.1.0 lint
+> eslint . && tsc --noEmit
+
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/coverage/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/coverage/prettify.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/coverage/sorter.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/.expo/types/router.d.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(auth)/forgot-password.tsx
+   8:3   warning  'Alert' is defined but never used         @typescript-eslint/no-unused-vars
+  64:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(tabs)/_layout.tsx
+   7:3   warning  'Folder' is defined but never used                                         @typescript-eslint/no-unused-vars
+  10:3   warning  'Wallet' is defined but never used                                         @typescript-eslint/no-unused-vars
+  65:28  warning  'focused' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(tabs)/ai.tsx
+  2:34  warning  'ActivityIndicator' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(tabs)/finance.tsx
+    6:3   warning  'ScrollView' is defined but never used                                 @typescript-eslint/no-unused-vars
+  120:14  warning  'error' is defined but never used                                      @typescript-eslint/no-unused-vars
+  181:32  warning  'uri' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  194:14  warning  'error' is defined but never used                                      @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(tabs)/index.tsx
+   28:24  warning  'ActivityEvent' is defined but never used                              @typescript-eslint/no-unused-vars
+   41:10  warning  'supabase' is defined but never used                                   @typescript-eslint/no-unused-vars
+  140:32  warning  'uri' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  155:14  warning  'error' is defined but never used                                      @typescript-eslint/no-unused-vars
+  247:30  warning  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(tabs)/new.tsx
+  2:10  warning  'View' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/(tabs)/profile.tsx
+    1:27  warning  'useEffect' is defined but never used          @typescript-eslint/no-unused-vars
+    9:3   warning  'ActivityIndicator' is defined but never used  @typescript-eslint/no-unused-vars
+  121:14  warning  'err' is defined but never used                @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/_layout.tsx
+  31:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/onboarding.tsx
+  22:3   warning  'ListTree' is defined but never used      @typescript-eslint/no-unused-vars
+  28:10  warning  'BlurView' is defined but never used      @typescript-eslint/no-unused-vars
+  76:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/app/project/[id].tsx
+   19:3   warning  'Plus' is defined but never used  @typescript-eslint/no-unused-vars
+  283:24  warning  'err' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/AIAssistant.tsx
+   1:35  warning  'useEffect' is defined but never used      @typescript-eslint/no-unused-vars
+  13:10  warning  'MessageSquare' is defined but never used  @typescript-eslint/no-unused-vars
+  13:36  warning  'User' is defined but never used           @typescript-eslint/no-unused-vars
+  18:10  warning  'GlassCard' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/ActivityFeed.tsx
+  111:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/ExternalLink.tsx
+  13:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/InvoiceReviewSheet.tsx
+  35:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/Themed.tsx
+  19:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/auth/GoogleIcon.tsx
+  6:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/ui/SkeletonLoader.tsx
+  40:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/components/ui/TextField.tsx
+  9:3  warning  'Pressable' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/contexts/AwarenessProvider.tsx
+   59:27  warning  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  145:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/mobile/src/hooks/useDashboardData.ts
+  147:9  warning  'isCancelled' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/contexts/AwarenessProvider.tsx
+  120:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/hooks/use-local-storage.test.ts
+  59:11  warning  'originalWindow' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  70:37  warning  Unexpected any. Specify a different type             @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/hooks/use-logout.test.ts
+  76:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/hooks/use-onboarding.test.ts
+  12:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/hooks/useDashboardData.test.ts
+   34:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   39:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   45:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   48:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   69:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   79:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/hooks/useInvoiceManagement.test.ts
+   31:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   65:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:76  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:75  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  216:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  281:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/hooks/useScopeManagement.test.ts
+   29:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   29:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   46:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  131:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:73  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  176:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  186:73  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/activity.test.ts
+  10:8   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:8   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  43:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  63:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/email.test.ts
+  20:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  63:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  79:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  95:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/ensure-user-workspace.test.ts
+   31:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  119:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  148:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/location.test.ts
+   20:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   38:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   47:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  188:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  203:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/onboarding-helpers.test.ts
+   79:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/share-project.test.ts
+   32:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   62:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   71:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  108:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  131:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/site-url.test.ts
+  31:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/lib/supabase.test.ts
+  32:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  54:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  72:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/src/pages/Dashboard.tsx
+  184:4   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  237:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  267:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  407:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  453:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 143 problems (0 errors, 143 warnings)
+  0 errors and 4 warnings potentially fixable with the `--fix` option.
+

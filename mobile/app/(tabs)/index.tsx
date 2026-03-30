@@ -25,7 +25,7 @@ import { useAuth } from "../../src/contexts/auth-context";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { Button } from "../../src/components/ui/Button";
 import { InsightTeaser } from "../../src/components/InsightTeaser";
-import { ActivityFeed, ActivityEvent } from "../../src/components/ActivityFeed";
+import { ActivityFeed } from "../../src/components/ActivityFeed";
 import { ProjectHealth } from "../../src/components/ProjectHealth";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { SkeletonLoader } from "../../src/components/ui/SkeletonLoader";
@@ -33,14 +33,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
 import { NextStepsChecklist } from "../../src/components/NextStepsChecklist";
 import { ProjectSwitcher } from "../../src/components/ProjectSwitcher";
-import { useAwareness } from "../../src/contexts/AwarenessProvider";
+import { useAwareness } from "../../src/contexts/AwarenessContext";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
 import { generateActivityEvents } from "../../src/lib/activity";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
-import { supabase } from "../../src/lib/supabase";
+import { uploadDocumentWithType } from "../../src/lib/upload-document";
 import { EmptyState } from "../../src/components/ui/EmptyState";
 import { Theme } from "../../src/constants/Theme";
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
+
+const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -92,8 +95,11 @@ export default function DashboardScreen() {
   const handleFabPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-    // Check invoice limit for free users
-    if (!isArchitect && !hasProjectPass && invoices.length >= 3) {
+    // Only count actual invoice documents towards the free tier limit (mirrors web logic)
+    const invoiceDocCount = invoices.filter(
+      (i) => (i.document_type ?? "invoice") === "invoice",
+    ).length;
+    if (!isArchitect && !hasProjectPass && invoiceDocCount >= 3) {
       setUpgradeReason("invoice_limit");
       setShowUpgrade(true);
       return;
@@ -116,7 +122,7 @@ export default function DashboardScreen() {
             });
 
             if (!result.canceled && result.assets[0]) {
-              processUpload(result.assets[0].uri);
+              processUpload(result.assets[0].uri, "image/jpeg");
             }
           },
         },
@@ -128,7 +134,8 @@ export default function DashboardScreen() {
             });
 
             if (!result.canceled && result.assets[0]) {
-              processUpload(result.assets[0].uri);
+              const asset = result.assets[0];
+              processUpload(asset.uri, asset.mimeType || "image/jpeg");
             }
           },
         },
@@ -137,22 +144,42 @@ export default function DashboardScreen() {
     );
   };
 
-  const processUpload = async (uri: string) => {
+  const processUpload = async (uri: string, mimeType?: string) => {
     if (!project) return;
 
     setIsUploading(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      // Simulation of upload & processing
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await uploadDocumentWithType(
+        uri,
+        mimeType || "image/jpeg",
+        project.id,
+      );
 
+      if (!result.success) {
+        if (result.error) {
+          if (
+            result.error.includes("limit") ||
+            result.error.includes("Architect") ||
+            result.error.includes("Free")
+          ) {
+            setUpgradeReason("invoice_limit");
+            setShowUpgrade(true);
+          } else {
+            Alert.alert("Upload Failed", result.error);
+          }
+        }
+        return;
+      }
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
-        "Analysis Complete",
-        "Document captured and processed. Your dashboard has been updated.",
+        "Document Processed",
+        "Your document was uploaded and AI-analysed. Your dashboard has been updated.",
       );
       load();
-    } catch (error) {
+    } catch (_) {
       Alert.alert("Error", "Failed to process document. Please try again.");
     } finally {
       setIsUploading(false);
@@ -208,21 +235,34 @@ export default function DashboardScreen() {
             {user?.user_metadata?.full_name?.split(" ")[0] || "there"}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            Haptics.selectionAsync();
-            setIsInsightsOpen(true);
-          }}
-          style={styles.insightsButton}
-        >
-          <MessageCircle size={24} color={Theme.colors.brand.light} />
-          <View
-            style={[
-              styles.insightsDot,
-              { backgroundColor: Theme.colors.brand.light },
-            ]}
-          />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.selectionAsync();
+              setIsInsightsOpen(true);
+            }}
+            style={styles.headerBtn}
+          >
+            <MessageCircle size={22} color={Theme.colors.brand.primary} />
+            <View
+              style={[
+                styles.insightsDot,
+                { backgroundColor: Theme.colors.brand.primary },
+              ]}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleFabPress}
+            disabled={isUploading}
+            style={[styles.headerBtn, styles.captureBtn]}
+          >
+            {isUploading ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <Plus size={22} color="white" />
+            )}
+          </TouchableOpacity>
+        </View>
       </MotiView>
       <MotiView
         from={{ opacity: 0, translateY: 20 }}
@@ -231,51 +271,55 @@ export default function DashboardScreen() {
       >
         <Text style={styles.sectionHeader}>Active Project</Text>
         <GlassCard style={{ marginBottom: 24 }}>
-          <View style={styles.projectHeader}>
-            <View style={styles.projectIcon}>
-              <Hammer size={24} color={Theme.colors.brand.primary} />
+          <View style={{ padding: 20 }}>
+            <View style={styles.projectHeader}>
+              <View style={styles.projectIcon}>
+                <Hammer size={24} color={Theme.colors.brand.primary} />
+              </View>
+              <View style={styles.projectNameContainer}>
+                <Text style={styles.projectName}>{project.name}</Text>
+                <Text style={styles.projectStage}>
+                  {project.stage || "Planning"}
+                </Text>
+              </View>
+              <View style={styles.confidenceBadge}>
+                <ShieldCheck size={12} color={Theme.colors.status.success} />
+                <Text style={styles.confidenceText}>
+                  {project.confidence_score ?? 4.8}/5
+                </Text>
+              </View>
             </View>
-            <View style={styles.projectNameContainer}>
-              <Text style={styles.projectName}>{project.name}</Text>
-              <Text style={styles.projectStage}>
-                {project.stage || "Planning"}
-              </Text>
-            </View>
-            <View style={styles.confidenceBadge}>
-              <ShieldCheck size={12} color={Theme.colors.status.success} />
-              <Text style={styles.confidenceText}>
-                {(project as any).confidence_score ?? 4.8}/5
-              </Text>
-            </View>
-          </View>
 
-          <View style={styles.statsGrid}>
-            <StatItem
-              label="Budget"
-              value={`$${(project.estimated_min_total ?? 0).toLocaleString()}`}
-              icon={
-                <CircleDollarSign
-                  size={16}
-                  color={Theme.colors.text.secondary}
-                />
-              }
-            />
-            <StatItem
-              label="Spent"
-              value={`$${invoiceTotal.toLocaleString()}`}
-              icon={<Calendar size={16} color={Theme.colors.text.secondary} />}
+            <View style={styles.statsGrid}>
+              <StatItem
+                label="Budget"
+                value={`$${(project.estimated_min_total ?? 0).toLocaleString()}`}
+                icon={
+                  <CircleDollarSign
+                    size={16}
+                    color={Theme.colors.text.secondary}
+                  />
+                }
+              />
+              <StatItem
+                label="Spent"
+                value={`$${invoiceTotal.toLocaleString()}`}
+                icon={
+                  <Calendar size={16} color={Theme.colors.text.secondary} />
+                }
+              />
+            </View>
+
+            <Button
+              title="View Full Scope"
+              variant="outline"
+              onPress={() => {
+                Haptics.selectionAsync();
+                router.push(`/project/${project.id}`);
+              }}
+              style={{ marginTop: 20 }}
             />
           </View>
-
-          <Button
-            title="View Full Scope"
-            variant="outline"
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push(`/project/${project.id}`);
-            }}
-            style={{ marginTop: 20 }}
-          />
         </GlassCard>
       </MotiView>
 
@@ -404,41 +448,7 @@ export default function DashboardScreen() {
         />
 
         {/* Extra Bottom Padding for FAB comfort */}
-        <View style={{ height: 80 }} />
-      </View>
-
-      {/* Branded FAB with Pulse */}
-      <View style={styles.fabContainer}>
-        {!isUploading && (
-          <MotiView
-            from={{ scale: 1, opacity: 0.5 }}
-            animate={{ scale: 1.4, opacity: 0 }}
-            transition={{
-              type: "timing",
-              duration: 2000,
-              loop: true,
-              repeatReverse: false,
-            }}
-            style={styles.fabPulse}
-          />
-        )}
-        <MotiView
-          from={{ opacity: 0, scale: 0.5, translateY: 20 }}
-          animate={{ opacity: 1, scale: 1, translateY: 0 }}
-          transition={{ type: "spring", delay: 1000 }}
-        >
-          <TouchableOpacity
-            style={styles.fab}
-            onPress={handleFabPress}
-            disabled={isUploading}
-          >
-            {isUploading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Plus size={32} color="white" />
-            )}
-          </TouchableOpacity>
-        </MotiView>
+        <View style={{ height: 40 }} />
       </View>
 
       <UpgradeModal
@@ -479,67 +489,73 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     fontSize: Theme.typography.size.xs,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.brand.light,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.brand.primary,
     letterSpacing: 1.5,
     textTransform: "uppercase",
     marginBottom: 16,
     marginLeft: 4,
-    opacity: 0.8,
+    marginTop: 8,
   },
   projectHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
+    marginTop: 4, // Added top breathing room
   },
   projectIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "rgba(79, 70, 229, 0.15)",
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
     borderWidth: 1,
-    borderColor: "rgba(79, 70, 229, 0.2)",
+    borderColor: Theme.colors.divider,
   },
   projectNameContainer: {
     flex: 1,
+    justifyContent: "center",
   },
   projectName: {
-    fontSize: 22,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: 20,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   projectStage: {
-    fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontSize: 13,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textTransform: "capitalize",
+    marginTop: 2,
   },
   confidenceBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(16, 185, 129, 0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: "rgba(16, 185, 129, 0.08)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(16, 185, 129, 0.15)",
+    borderColor: "rgba(16, 185, 129, 0.12)",
+    marginRight: -4,
   },
   confidenceText: {
-    fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#10b981",
+    fontSize: 11,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.status.success,
   },
   statsGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: Theme.colors.inputBg,
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
   },
   statItem: {
     flex: 1,
@@ -551,14 +567,14 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
     marginLeft: 6,
   },
   statValue: {
     fontSize: 18,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   emptyContainer: {
     alignItems: "center",
@@ -567,23 +583,23 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     marginTop: 24,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 32,
   },
   otherProjectName: {
     fontSize: 14,
-    fontFamily: "Outfit_600SemiBold",
-    color: "white",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
   },
   otherProjectsSection: {
     marginTop: 8,
@@ -603,6 +619,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     borderRadius: 14,
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
   },
   miniIcon: {
     width: 28,
@@ -624,17 +643,17 @@ const styles = StyleSheet.create({
   },
   budgetLabel: {
     fontSize: 12,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   budgetValue: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "#818cf8",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
   },
   progressBarBg: {
     height: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: Theme.colors.divider,
     borderRadius: 4,
     overflow: "hidden",
     marginBottom: 8,
@@ -646,41 +665,29 @@ const styles = StyleSheet.create({
   },
   budgetNote: {
     fontSize: 9,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
-  fabContainer: {
-    position: "absolute",
-    bottom: 30,
-    right: 30,
-    zIndex: 100,
-    alignItems: "center",
-    justifyContent: "center",
+  headerRight: {
+    flexDirection: "row",
+    gap: 12,
   },
-  fabPulse: {
-    position: "absolute",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#4f46e5",
-  },
-  fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#4f46e5",
+  headerBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#4f46e5",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: Theme.colors.divider,
+  },
+  captureBtn: {
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: "transparent",
   },
   headerContainer: {
     flexDirection: "row",
@@ -691,32 +698,33 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 16,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   userFirstName: {
     fontSize: 28,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   insightsButton: {
     width: 48,
     height: 48,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderRadius: Theme.radius.md,
+    backgroundColor: Theme.colors.inputBg,
     borderWidth: 1,
+    borderColor: Theme.colors.divider,
     justifyContent: "center",
     alignItems: "center",
   },
   insightsDot: {
     position: "absolute",
-    top: 12,
-    right: 12,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: 13,
+    right: 13,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
     borderWidth: 2,
-    borderColor: "#0f172a",
+    borderColor: "rgba(255, 255, 255, 0.9)",
   },
 });

@@ -307,15 +307,15 @@ export function UpgradeModal({
                       {showDiscount ? (
                         <>
                           <span className="text-4xl font-bold tracking-tight">
-                            $31.85
+                            $5.85
                           </span>
                           <span className="text-slate-400 line-through text-lg ml-2">
-                            $49
+                            $9
                           </span>
                         </>
                       ) : (
                         <span className="text-4xl font-bold tracking-tight">
-                          $49
+                          $9
                         </span>
                       )}
                       <span className="text-slate-500 ml-1">/project</span>

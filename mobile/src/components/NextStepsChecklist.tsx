@@ -16,6 +16,7 @@ import {
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { GlassCard } from "./ui/GlassCard";
+import { Theme } from "../constants/Theme";
 
 type Step = {
   id: string;
@@ -86,8 +87,8 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
       {steps.map((step, i) => (
         <MotiView
           key={step.id}
-          from={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          from={{ opacity: 0, translateY: 10 }}
+          animate={{ opacity: 1, translateY: 0 }}
           transition={{ delay: i * 100 }}
           style={styles.stepWrapper}
         >
@@ -97,14 +98,14 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
               onAction(step.id);
             }}
           >
-            <GlassCard intensity={15} style={styles.stepCard}>
+            <GlassCard intensity={10} style={styles.stepCard}>
               <View style={styles.iconContainer}>
-                <step.icon size={20} color="#818cf8" />
+                <step.icon size={18} color={Theme.colors.brand.primary} />
               </View>
               <View style={styles.textContainer}>
                 <View style={styles.titleRow}>
                   <Text style={styles.label}>{step.label}</Text>
-                  <ArrowRight size={12} color="#4f46e5" />
+                  <ArrowRight size={14} color={Theme.colors.brand.primary} />
                 </View>
                 <Text style={styles.description} numberOfLines={2}>
                   {step.description}
@@ -125,22 +126,22 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 24,
-    paddingRight: 40, // Extra breathing room at the end
-    gap: 16, // Increased gap for premium feel
+    paddingRight: 40,
+    gap: 16,
   },
   stepWrapper: {
-    width: 220,
+    width: 200,
   },
   stepCard: {
-    padding: 16,
+    padding: 18,
     height: 140,
     justifyContent: "space-between",
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(129, 140, 248, 0.1)",
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: "rgba(79, 70, 229, 0.08)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -153,14 +154,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   label: {
-    fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: 15,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   description: {
     fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     lineHeight: 16,
   },
 });

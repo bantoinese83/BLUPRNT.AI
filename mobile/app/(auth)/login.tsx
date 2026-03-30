@@ -22,6 +22,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { GoogleIcon } from "../../src/components/auth/GoogleIcon";
 import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
+import { Theme } from "../../src/constants/Theme";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
@@ -102,7 +103,7 @@ export default function LoginScreen() {
               <Text style={styles.subtitle}>Sign in to your account</Text>
             </MotiView>
 
-            <GlassCard intensity={10} style={styles.formCard}>
+            <GlassCard intensity={8} style={styles.formCard}>
               <View style={styles.form}>
                 <TextField
                   label="Email address"
@@ -197,33 +198,35 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(15, 23, 42, 0.1)",
   },
   header: {
     marginBottom: 32,
     alignItems: "center",
   },
   title: {
-    fontSize: 36,
+    fontSize: 34,
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
-    marginBottom: 12,
+    color: Theme.colors.text.primary,
+    marginBottom: 8,
     letterSpacing: -1,
   },
   subtitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     textAlign: "center",
   },
   formCard: {
     padding: 24,
     borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.05)",
   },
   form: {
     width: "100%",
@@ -233,7 +236,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   forgotPasswordText: {
-    color: "#94a3b8",
+    color: Theme.colors.brand.primary,
     fontFamily: "Outfit_600SemiBold",
     fontSize: 14,
   },
@@ -245,10 +248,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(15, 23, 42, 0.08)",
   },
   dividerText: {
-    color: "#94a3b8",
+    color: Theme.colors.text.muted,
     fontFamily: "Outfit_400Regular",
     fontSize: 14,
     marginHorizontal: 16,
@@ -259,26 +262,26 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   footerText: {
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     fontFamily: "Outfit_400Regular",
     fontSize: 14,
   },
   linkText: {
-    color: "white",
+    color: Theme.colors.brand.primary,
     fontFamily: "Outfit_700Bold",
     fontSize: 14,
   },
   errorText: {
-    color: "#f43f5e",
+    color: Theme.colors.status.error,
     fontSize: 13,
     fontFamily: "Outfit_600SemiBold",
     textAlign: "center",
     marginBottom: 16,
-    backgroundColor: "rgba(244, 63, 94, 0.1)",
+    backgroundColor: "rgba(244, 63, 94, 0.05)",
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(244, 63, 94, 0.2)",
+    borderColor: "rgba(244, 63, 94, 0.1)",
     overflow: "hidden",
   },
 });

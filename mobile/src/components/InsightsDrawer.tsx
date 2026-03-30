@@ -11,23 +11,24 @@ import {
 import { X, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { useAwareness, type SmartInsight } from "../contexts/AwarenessProvider";
+import { useAwareness, SmartInsight } from "../contexts/AwarenessContext";
 import { GlassCard } from "./ui/GlassCard";
+import { Theme } from "../constants/Theme";
 
 const HEALTH_COLORS = {
   optimal: {
-    bg: "rgba(16, 185, 129, 0.15)",
-    text: "#10b981",
+    bg: "rgba(16, 185, 129, 0.12)",
+    text: Theme.colors.status.success,
     label: "Optimal",
   },
   warning: {
-    bg: "rgba(245, 158, 11, 0.15)",
-    text: "#f59e0b",
+    bg: "rgba(245, 158, 11, 0.12)",
+    text: Theme.colors.status.warning,
     label: "Watch Closely",
   },
   critical: {
-    bg: "rgba(244, 63, 94, 0.15)",
-    text: "#f43f5e",
+    bg: "rgba(244, 63, 94, 0.12)",
+    text: Theme.colors.status.error,
     label: "Needs Attention",
   },
 };
@@ -41,24 +42,24 @@ function InsightCard({
 }) {
   const iconColor =
     insight.type === "anomaly"
-      ? "#f43f5e"
+      ? Theme.colors.status.error
       : insight.type === "opportunity"
-        ? "#818cf8"
-        : "#f59e0b";
+        ? Theme.colors.brand.light
+        : Theme.colors.status.warning;
 
   const bg =
     insight.type === "anomaly"
-      ? "rgba(244, 63, 94, 0.08)"
+      ? "rgba(244, 63, 94, 0.06)"
       : insight.type === "opportunity"
-        ? "rgba(129, 140, 248, 0.08)"
-        : "rgba(245, 158, 11, 0.08)";
+        ? "rgba(129, 140, 248, 0.06)"
+        : "rgba(245, 158, 11, 0.06)";
 
   const border =
     insight.type === "anomaly"
-      ? "rgba(244, 63, 94, 0.15)"
+      ? "rgba(244, 63, 94, 0.12)"
       : insight.type === "opportunity"
-        ? "rgba(129, 140, 248, 0.15)"
-        : "rgba(245, 158, 11, 0.15)";
+        ? "rgba(129, 140, 248, 0.12)"
+        : "rgba(245, 158, 11, 0.12)";
 
   const Icon =
     insight.type === "anomaly"
@@ -139,7 +140,7 @@ export function InsightsDrawer() {
             </View>
           </View>
           <TouchableOpacity style={styles.closeBtn} onPress={handleClose}>
-            <X size={20} color="#64748b" />
+            <X size={20} color={Theme.colors.text.secondary} />
           </TouchableOpacity>
         </View>
 
@@ -152,7 +153,7 @@ export function InsightsDrawer() {
           {insights.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
-                <Lightbulb size={32} color="#334155" />
+                <Lightbulb size={32} color={Theme.colors.text.secondary} />
               </View>
               <Text style={styles.emptyTitle}>All Looking Good</Text>
               <Text style={styles.emptySubtitle}>
@@ -185,7 +186,7 @@ export function InsightsDrawer() {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(15, 23, 42, 0.4)",
   },
   sheet: {
     position: "absolute",
@@ -193,79 +194,82 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "75%",
-    backgroundColor: "#0d1526",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    backgroundColor: Theme.colors.card,
+    borderTopLeftRadius: Theme.radius.xl,
+    borderTopRightRadius: Theme.radius.xl,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.06)",
+    borderTopColor: Theme.colors.divider,
   },
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 2,
+    backgroundColor: Theme.colors.border,
+    borderRadius: Theme.radius.sm,
     alignSelf: "center",
-    marginTop: 12,
+    marginTop: Theme.spacing.sm,
     marginBottom: 4,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 24,
+    padding: Theme.spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderBottomColor: Theme.colors.divider,
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: Theme.spacing.sm,
   },
   healthDot: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: Theme.radius.md,
     justifyContent: "center",
     alignItems: "center",
   },
   healthDotInner: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: Theme.radius.full,
   },
   title: {
-    fontSize: 18,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: Theme.typography.size.xl,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     letterSpacing: -0.3,
   },
   healthLabel: {
-    fontSize: 11,
-    fontFamily: "Outfit_700Bold",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.bold,
     textTransform: "uppercase",
     letterSpacing: 1,
     marginTop: 1,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    // Accessible touch target (44x44)
+    width: 44,
+    height: 44,
+    borderRadius: Theme.radius.md,
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
   },
   content: {
     flex: 1,
   },
   contentInner: {
-    padding: 24,
+    padding: Theme.spacing.xl,
     gap: 12,
     paddingBottom: 8,
   },
   insightCard: {
     flexDirection: "row",
     padding: 16,
-    borderRadius: 16,
+    borderRadius: Theme.radius.lg,
     borderWidth: 1,
     gap: 14,
     marginBottom: 12,
@@ -273,7 +277,7 @@ const styles = StyleSheet.create({
   insightIcon: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: Theme.radius.md,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
@@ -282,20 +286,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   insightTitle: {
-    fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: Theme.typography.size.md,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     marginBottom: 4,
   },
   insightDesc: {
     fontSize: 13,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     lineHeight: 19,
   },
   insightAction: {
-    fontSize: 11,
-    fontFamily: "Outfit_700Bold",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.bold,
     textTransform: "uppercase",
     letterSpacing: 1,
     marginTop: 8,
@@ -308,41 +312,41 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 64,
     height: 64,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderRadius: Theme.radius.xl,
+    backgroundColor: "rgba(100, 116, 139, 0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: Theme.colors.divider,
     justifyContent: "center",
     alignItems: "center",
   },
   emptyTitle: {
-    fontSize: 18,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: Theme.typography.size.xl,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   emptySubtitle: {
-    fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#475569",
+    fontSize: Theme.typography.size.md,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     lineHeight: 21,
     maxWidth: 260,
   },
   footer: {
-    padding: 20,
+    padding: Theme.spacing.lg,
     paddingTop: 8,
   },
   footerCard: {
     padding: 14,
-    borderRadius: 16,
+    borderRadius: Theme.radius.lg,
   },
   footerText: {
-    fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#818cf8",
+    fontSize: Theme.typography.size.sm,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.brand.light,
     lineHeight: 18,
   },
   footerBold: {
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
   },
 });

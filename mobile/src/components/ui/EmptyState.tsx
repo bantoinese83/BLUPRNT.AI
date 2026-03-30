@@ -72,14 +72,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    color: "#0f172a",
     textAlign: "center",
     marginBottom: 12,
   },
   description: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: "#64748b",
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 32,

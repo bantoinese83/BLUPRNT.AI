@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
@@ -28,12 +27,18 @@ import { ProjectSwitcher } from "../../src/components/ProjectSwitcher";
 import { generateSellerPacketPDF } from "../../src/lib/pdf-export";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
+import { uploadDocumentWithType } from "../../src/lib/upload-document";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
 import { InvoiceReviewSheet } from "../../src/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "../../src/types/database";
 
 import { EmptyState } from "../../src/components/ui/EmptyState";
-import { useAwareness } from "../../src/contexts/AwarenessProvider";
+import { useAwareness } from "../../src/contexts/AwarenessContext";
+import { Theme } from "../../src/constants/Theme";
+import { SegmentedControl } from "../../src/components/ui/SegmentedControl";
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
+
+const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
 export default function FinanceScreen() {
   const {
@@ -117,7 +122,7 @@ export default function FinanceScreen() {
         [],
         invoices,
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert(
         "Export Failed",
         "We couldn't generate the PDF. Please check your connection.",
@@ -130,8 +135,11 @@ export default function FinanceScreen() {
   const handleAdd = () => {
     Haptics.selectionAsync();
 
-    // Check invoice limit for free users
-    if (!isArchitect && !hasProjectPass && invoices.length >= 3) {
+    // Only count actual invoice documents towards the free tier limit (mirrors web logic)
+    const invoiceDocCount = invoices.filter(
+      (i) => (i.document_type ?? "invoice") === "invoice",
+    ).length;
+    if (!isArchitect && !hasProjectPass && invoiceDocCount >= 3) {
       setUpgradeReason("invoice_limit");
       setShowUpgrade(true);
       return;
@@ -158,7 +166,7 @@ export default function FinanceScreen() {
               quality: 0.8,
             });
             if (!result.canceled && result.assets[0]) {
-              processUpload(result.assets[0].uri);
+              processUpload(result.assets[0].uri, "image/jpeg");
             }
           },
         },
@@ -169,7 +177,8 @@ export default function FinanceScreen() {
               type: ["application/pdf", "image/*"],
             });
             if (!result.canceled && result.assets[0]) {
-              processUpload(result.assets[0].uri);
+              const asset = result.assets[0];
+              processUpload(asset.uri, asset.mimeType || "image/jpeg");
             }
           },
         },
@@ -178,20 +187,42 @@ export default function FinanceScreen() {
     );
   };
 
-  const processUpload = async (uri: string) => {
+  const processUpload = async (uri: string, mimeType?: string) => {
+    if (!project) return;
+
     setIsUploading(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      // Simulation of upload & processing
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await uploadDocumentWithType(
+        uri,
+        mimeType || "image/jpeg",
+        project.id,
+      );
 
+      if (!result.success) {
+        if (result.error) {
+          if (
+            result.error.includes("limit") ||
+            result.error.includes("Architect") ||
+            result.error.includes("Free")
+          ) {
+            setUpgradeReason("invoice_limit");
+            setShowUpgrade(true);
+          } else {
+            Alert.alert("Upload Failed", result.error);
+          }
+        }
+        return;
+      }
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
-        "Success",
-        "Document captured and processed. Your ledger has been updated.",
+        "Document Added",
+        "Your document has been uploaded and AI-analysed. Your ledger has been updated.",
       );
       load();
-    } catch (error) {
+    } catch (_) {
       Alert.alert("Error", "Failed to process document. Please try again.");
     } finally {
       setIsUploading(false);
@@ -228,7 +259,20 @@ export default function FinanceScreen() {
       edges={["top", "left", "right"]}
     >
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Property Ledger</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.pageTitle}>Property Ledger</Text>
+          <TouchableOpacity
+            style={styles.headerCaptureBtn}
+            onPress={handleAdd}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <Plus size={22} color="white" />
+            )}
+          </TouchableOpacity>
+        </View>
         <ProjectSwitcher
           projects={projects}
           currentId={project.id}
@@ -247,7 +291,7 @@ export default function FinanceScreen() {
           <GlassCard style={styles.mainCard}>
             <View style={styles.ledgerHeader}>
               <View style={styles.iconBox}>
-                <BookOpen size={24} color="white" />
+                <BookOpen size={24} color={Theme.colors.brand.primary} />
               </View>
               <View>
                 <Text style={styles.ledgerTitle}>Verified Record</Text>
@@ -294,66 +338,19 @@ export default function FinanceScreen() {
           </GlassCard>
         </MotiView>
 
-        {/* Filter Tabs */}
-        <View style={styles.filterContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              Haptics.selectionAsync();
-              setFilter("all");
-            }}
-            style={[
-              styles.filterTab,
-              filter === "all" && styles.filterTabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                filter === "all" && styles.filterTextActive,
-              ]}
-            >
-              All Docs
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              Haptics.selectionAsync();
-              setFilter("capital");
-            }}
-            style={[
-              styles.filterTab,
-              filter === "capital" && styles.filterTabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                filter === "capital" && styles.filterTextActive,
-              ]}
-            >
-              Capital
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              Haptics.selectionAsync();
-              setFilter("maintenance");
-            }}
-            style={[
-              styles.filterTab,
-              filter === "maintenance" && styles.filterTabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                filter === "maintenance" && styles.filterTextActive,
-              ]}
-            >
-              Maintenance
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <SegmentedControl
+          options={[
+            { label: "All", value: "all" },
+            { label: "Capital", value: "capital" },
+            { label: "Maintenance", value: "maintenance" },
+          ]}
+          value={filter}
+          onChange={(val: any) => {
+            Haptics.selectionAsync();
+            setFilter(val);
+          }}
+          containerStyle={{ marginTop: 32, marginBottom: 16 }}
+        />
 
         {/* Invoices List */}
         <View style={styles.listContainer}>
@@ -414,21 +411,6 @@ export default function FinanceScreen() {
         onClose={() => setShowUpgrade(false)}
         reason={upgradeReason}
       />
-      {/* FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-          handleAdd();
-        }}
-        disabled={isUploading}
-      >
-        {isUploading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Plus size={32} color="white" />
-        )}
-      </TouchableOpacity>
 
       <InvoiceReviewSheet
         invoice={selectedInvoice}
@@ -453,16 +435,29 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 24,
-    gap: 12,
+    gap: 16,
+  },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  headerCaptureBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Theme.colors.brand.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
   pageTitle: {
     fontSize: 24,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   content: {
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: TAB_BAR_OFFSET + 20,
   },
   mainCard: {
     padding: 24,
@@ -478,19 +473,21 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: "#0f172a",
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
   },
   ledgerTitle: {
     fontSize: 18,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   ledgerSubtitle: {
     fontSize: 12,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
@@ -502,7 +499,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: Theme.colors.inputBg,
     padding: 12,
     borderRadius: 12,
   },
@@ -518,13 +515,13 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 13,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
   },
   statValue: {
     fontSize: 15,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   exportButton: {
     height: 52,
@@ -540,13 +537,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 99,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(15, 23, 42, 0.08)",
   },
   filterTabActive: {
     backgroundColor: "#4f46e5",
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "#4f46e5",
   },
   filterText: {
     fontSize: 13,
@@ -571,7 +568,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: Theme.colors.inputBg,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -581,18 +578,18 @@ const styles = StyleSheet.create({
   },
   vendorName: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   invoiceDate: {
     fontSize: 11,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   invoiceAmount: {
     fontSize: 15,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   emptyList: {
     padding: 60,
@@ -601,8 +598,8 @@ const styles = StyleSheet.create({
   },
   emptyListText: {
     fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#475569",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   emptyText: {
     color: "#94a3b8",
@@ -610,15 +607,15 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: 30,
-    right: 30,
+    bottom: TAB_BAR_OFFSET,
+    right: 24,
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#4f46e5",
+    shadowColor: Theme.colors.brand.primary,
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.5,
     shadowRadius: 16,

@@ -12,6 +12,7 @@ import { MotiView } from "moti";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { formatRelativeTime } from "../lib/activity";
+import { Theme } from "../constants/Theme";
 
 export type ActivityEvent = {
   id: string;
@@ -38,24 +39,24 @@ const COLOR_MAP: Record<
   { text: string; bg: string; border: string }
 > = {
   upload: {
-    text: "#60a5fa",
-    bg: "rgba(96, 165, 250, 0.1)",
-    border: "rgba(96, 165, 250, 0.2)",
+    text: Theme.colors.brand.primary,
+    bg: "rgba(79, 70, 229, 0.08)",
+    border: "rgba(79, 70, 229, 0.12)",
   },
   status_change: {
-    text: "#fbbf24",
-    bg: "rgba(251, 191, 36, 0.1)",
-    border: "rgba(251, 191, 36, 0.2)",
+    text: Theme.colors.status.warning,
+    bg: "rgba(245, 158, 11, 0.08)",
+    border: "rgba(245, 158, 11, 0.12)",
   },
   project_created: {
-    text: "#34d399",
-    bg: "rgba(52, 211, 153, 0.1)",
-    border: "rgba(52, 211, 153, 0.2)",
+    text: Theme.colors.status.success,
+    bg: "rgba(16, 185, 129, 0.08)",
+    border: "rgba(16, 185, 129, 0.12)",
   },
   goal_reached: {
-    text: "#a78bfa",
-    bg: "rgba(167, 139, 250, 0.1)",
-    border: "rgba(167, 139, 250, 0.2)",
+    text: "#818cf8",
+    bg: "rgba(129, 140, 248, 0.08)",
+    border: "rgba(129, 140, 248, 0.12)",
   },
 };
 
@@ -108,7 +109,9 @@ export function ActivityFeed({ events }: Props) {
                     style={styles.linkButton}
                     onPress={() => {
                       Haptics.selectionAsync();
-                      router.push(event.link as any);
+                      router.push(
+                        event.link as Parameters<typeof router.push>[0],
+                      );
                     }}
                   >
                     <Text style={styles.linkText}>View Details</Text>
@@ -140,16 +143,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   headerTitle: {
-    fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#64748b",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 2,
   },
   headerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: Theme.colors.divider,
     marginLeft: 12,
   },
   feedContainer: {
@@ -162,7 +165,7 @@ const styles = StyleSheet.create({
     top: 4,
     bottom: 4,
     width: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: Theme.colors.divider,
   },
   eventRow: {
     flexDirection: "row",
@@ -190,19 +193,19 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   eventTime: {
     fontSize: 10,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
     textTransform: "uppercase",
   },
   eventDescription: {
     fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     lineHeight: 18,
   },
   linkButton: {
@@ -212,8 +215,8 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 1,
   },

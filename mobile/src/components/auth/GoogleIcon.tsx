@@ -1,9 +1,9 @@
-import React from "react";
+import { ViewStyle } from "react-native";
 import Svg, { Path, G } from "react-native-svg";
 
 interface Props {
   size?: number;
-  style?: any;
+  style?: ViewStyle;
 }
 
 export function GoogleIcon({ size = 20, style }: Props) {

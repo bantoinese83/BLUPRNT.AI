@@ -166,7 +166,7 @@ Apply migrations from the Supabase SQL editor or CLI to match your project schem
 | `project_view_tokens` | `project_id`, token, expires_at — for share links                                                                    |
 | `seller_packets`      | `project_id`, `property_id`, `storage_path`, `generated_at`                                                          |
 | `user_subscriptions`  | Architect plan: stripe_subscription_id, status, invoice_uploads_count                                                |
-| `project_passes`      | One-time $49: project_id, expires_at (6 months)                                                                      |
+| `project_passes`      | One-time $9: project_id, expires_at (6 months)                                                                       |
 
 ## Scripts
 

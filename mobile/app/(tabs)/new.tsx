@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 

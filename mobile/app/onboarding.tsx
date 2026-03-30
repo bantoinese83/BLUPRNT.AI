@@ -19,13 +19,11 @@ import {
   Image as ImageIcon,
   Sparkles,
   AlertCircle,
-  ListTree,
   ArrowRight,
   UserPlus,
   LogIn,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
-import { BlurView } from "expo-blur";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
@@ -73,7 +71,7 @@ export default function OnboardingScreen() {
   );
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval>;
     if (step === 4) {
       let current = 0;
       interval = setInterval(() => {
@@ -547,7 +545,11 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <ScreenWrapper withScroll edges={["top", "bottom", "left", "right"]}>
+    <ScreenWrapper
+      withScroll
+      withTabBar={false}
+      edges={["top", "bottom", "left", "right"]}
+    >
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <ChevronLeft size={24} color="white" />
@@ -624,39 +626,41 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stepTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    color: "#0f172a",
     marginBottom: 12,
-    letterSpacing: -1,
+    letterSpacing: -0.5,
   },
   stepSubtitle: {
     fontSize: 16,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: "#475569",
     marginBottom: 32,
+    lineHeight: 24,
   },
   options: {
     gap: 12,
   },
   optionButton: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
     padding: 20,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 20,
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "#e2e8f0",
+    marginBottom: 12,
   },
   optionButtonActive: {
-    backgroundColor: Theme.colors.brand.primary + "33", // 20% opacity
-    borderColor: Theme.colors.brand.primary,
+    backgroundColor: "rgba(79, 70, 229, 0.05)",
+    borderColor: "#4f46e5",
   },
   optionText: {
     fontSize: 16,
     fontFamily: "Outfit_600SemiBold",
-    color: "#cbd5e1",
+    color: "#0f172a",
   },
   optionTextActive: {
     color: "white",
@@ -664,12 +668,28 @@ const styles = StyleSheet.create({
   inputCard: {
     padding: 4,
   },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    paddingHorizontal: 20,
+    height: 64,
+  },
+  input: {
+    flex: 1,
+    color: "#0f172a",
+    fontSize: 16,
+    fontFamily: "Outfit_500Medium",
+  },
   textInput: {
     height: 64,
     paddingHorizontal: 20,
     fontSize: 28,
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    color: "#0f172a",
     letterSpacing: 2,
   },
   reviewCard: {
@@ -684,12 +704,12 @@ const styles = StyleSheet.create({
   reviewLabel: {
     fontSize: 14,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: "#64748b",
   },
   reviewValue: {
     fontSize: 16,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: "#0f172a",
   },
   footer: {
     padding: 24,
@@ -706,9 +726,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "#e2e8f0",
     alignItems: "center",
   },
   visionIcon: {
@@ -722,7 +742,7 @@ const styles = StyleSheet.create({
   visionLabel: {
     fontSize: 14,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: "#0f172a",
   },
   photoGrid: {
     flexDirection: "row",
@@ -734,11 +754,11 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#f1f5f9",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "#e2e8f0",
     overflow: "hidden",
   },
   photoRemoveOverlay: {
@@ -753,7 +773,7 @@ const styles = StyleSheet.create({
   },
   scopeInput: {
     minHeight: 120,
-    color: "white",
+    color: "#0f172a",
     fontSize: 16,
     fontFamily: "Outfit_400Regular",
     textAlignVertical: "top",
@@ -770,13 +790,13 @@ const styles = StyleSheet.create({
   analysisTitle: {
     fontSize: 24,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: "#0f172a",
     marginBottom: 8,
   },
   analysisSubtitle: {
     fontSize: 16,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: "#64748b",
     textAlign: "center",
     marginTop: 8,
   },
@@ -800,7 +820,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "#e2e8f0",
   },
   skipContainer: {
     marginTop: 32,
@@ -847,7 +867,7 @@ const styles = StyleSheet.create({
   estimateValue: {
     fontSize: 40,
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    color: "#0f172a",
     letterSpacing: -1,
     marginBottom: 24,
     textAlign: "center",
@@ -855,7 +875,7 @@ const styles = StyleSheet.create({
   estimateDivider: {
     width: "100%",
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#f1f5f9",
     marginBottom: 24,
   },
   breakdown: {
@@ -870,7 +890,7 @@ const styles = StyleSheet.create({
   breakdownText: {
     fontSize: 14,
     fontFamily: "Outfit_600SemiBold",
-    color: "#cbd5e1",
+    color: "#475569",
   },
   accountChoice: {
     gap: 16,

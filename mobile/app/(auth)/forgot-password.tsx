@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
@@ -54,15 +53,15 @@ export default function ForgotPasswordScreen() {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
         {
-          redirectTo: "bluprnt://reset-password",
+          redirectTo: "mobile://reset-password",
         },
       );
 
       if (resetError) throw resetError;
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSent(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to send reset link.");
+    } catch (err) {
+      setError((err as Error).message || "Failed to send reset link.");
     } finally {
       setLoading(false);
     }

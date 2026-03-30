@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "eslint . && tsc --noEmit",
+    "lint": "eslint . && tsc --noEmit && npm run lint --prefix mobile",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

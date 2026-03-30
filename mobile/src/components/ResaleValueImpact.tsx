@@ -10,6 +10,7 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 import { GlassCard } from "./ui/GlassCard";
+import { Theme } from "../constants/Theme";
 
 interface Props {
   investment: number;
@@ -32,73 +33,77 @@ export function ResaleValueImpact({ investment, projectName }: Props) {
 
   return (
     <GlassCard style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <TrendingUp size={16} color="#818cf8" />
-          <Text style={styles.title}>RESALE VALUE IMPACT</Text>
-        </View>
-        {investment > 0 && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>LEDGER PREMIUM ACTIVE</Text>
+      <View style={styles.inner}>
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <TrendingUp size={16} color={Theme.colors.brand.primary} />
+            <Text style={styles.title}>RESALE VALUE IMPACT</Text>
           </View>
-        )}
-      </View>
+          {investment > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>LEDGER PREMIUM ACTIVE</Text>
+            </View>
+          )}
+        </View>
 
-      <View style={styles.impactRow}>
-        <MotiView
-          from={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          key={totalImpact}
-        >
-          <Text style={styles.impactValue}>{formatCurrency(totalImpact)}</Text>
-        </MotiView>
-        <Text style={styles.impactLabel}>Est. Added Value</Text>
-      </View>
+        <View style={styles.impactRow}>
+          <MotiView
+            from={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            key={totalImpact}
+          >
+            <Text style={styles.impactValue}>
+              {formatCurrency(totalImpact)}
+            </Text>
+          </MotiView>
+          <Text style={styles.impactLabel}>Est. Added Value</Text>
+        </View>
 
-      {ledgerPremium > 0 && (
-        <View style={styles.premiumBox}>
-          <View>
-            <Text style={styles.premiumTitle}>LEDGER PREMIUM</Text>
-            <Text style={styles.premiumSubtitle}>
-              Earned through documentation
+        {ledgerPremium > 0 && (
+          <View style={styles.premiumBox}>
+            <View>
+              <Text style={styles.premiumTitle}>LEDGER PREMIUM</Text>
+              <Text style={styles.premiumSubtitle}>
+                Earned through documentation
+              </Text>
+            </View>
+            <Text style={styles.premiumValue}>
+              +{formatCurrency(ledgerPremium)}
             </Text>
           </View>
-          <Text style={styles.premiumValue}>
-            +{formatCurrency(ledgerPremium)}
+        )}
+
+        {/* ROI Visualization */}
+        <View style={styles.chartContainer}>
+          <Svg width="100%" height="60" viewBox="0 0 300 60">
+            <Defs>
+              <LinearGradient id="grad" x1="0" y1="0" x2="300" y2="0">
+                <Stop offset="0" stopColor="transparent" />
+                <Stop offset="100" stopColor="#4f46e5" />
+              </LinearGradient>
+            </Defs>
+            <Path
+              d="M0 50 Q 75 45, 150 30 T 300 10"
+              fill="none"
+              stroke="url(#grad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <Circle cx="300" cy="10" r="5" fill="#4f46e5" />
+          </Svg>
+          <View style={styles.peakBadge}>
+            <Text style={styles.peakText}>PEAK ROI</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoBox}>
+          <Info size={14} color="#64748b" />
+          <Text style={styles.infoText}>
+            Based on current renovation data for{" "}
+            <Text style={styles.bold}>{projectName}</Text>. Professional
+            documentation typically yields higher appraisal values.
           </Text>
         </View>
-      )}
-
-      {/* ROI Visualization */}
-      <View style={styles.chartContainer}>
-        <Svg width="100%" height="60" viewBox="0 0 300 60">
-          <Defs>
-            <LinearGradient id="grad" x1="0" y1="0" x2="300" y2="0">
-              <Stop offset="0" stopColor="transparent" />
-              <Stop offset="100" stopColor="#818cf8" />
-            </LinearGradient>
-          </Defs>
-          <Path
-            d="M0 50 Q 75 45, 150 30 T 300 10"
-            fill="none"
-            stroke="url(#grad)"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-          <Circle cx="300" cy="10" r="4" fill="#818cf8" />
-        </Svg>
-        <View style={styles.peakBadge}>
-          <Text style={styles.peakText}>PEAK ROI</Text>
-        </View>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Info size={14} color="#64748b" />
-        <Text style={styles.infoText}>
-          Based on current renovation data for{" "}
-          <Text style={styles.bold}>{projectName}</Text>. Professional
-          documentation typically yields higher appraisal values.
-        </Text>
       </View>
     </GlassCard>
   );
@@ -108,11 +113,15 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 24,
   },
+  inner: {
+    padding: 20,
+    paddingTop: 24, // Extra top breathing room
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   titleRow: {
     flexDirection: "row",
@@ -120,102 +129,109 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#94a3b8",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
     letterSpacing: 1.5,
+    textTransform: "uppercase",
   },
   badge: {
-    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    backgroundColor: "rgba(16, 185, 129, 0.08)",
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 5,
+    borderRadius: 8,
   },
   badgeText: {
     fontSize: 8,
-    fontFamily: "Outfit_700Bold",
-    color: "#10b981",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.status.success,
   },
   impactRow: {
     flexDirection: "row",
     alignItems: "baseline",
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   impactValue: {
-    fontSize: 32,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: 40,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    letterSpacing: -1,
   },
   impactLabel: {
-    fontSize: 12,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#64748b",
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
   },
   premiumBox: {
-    backgroundColor: "rgba(129, 140, 248, 0.05)",
+    backgroundColor: Theme.colors.inputBg,
     borderWidth: 1,
-    borderColor: "rgba(129, 140, 248, 0.1)",
-    borderRadius: 12,
+    borderColor: Theme.colors.divider,
+    borderRadius: 14,
     padding: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   premiumTitle: {
     fontSize: 9,
-    fontFamily: "Outfit_700Bold",
-    color: "#818cf8",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.brand.primary,
     letterSpacing: 1,
   },
   premiumSubtitle: {
     fontSize: 11,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   premiumValue: {
-    fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "#818cf8",
+    fontSize: 16,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
   },
   chartContainer: {
-    height: 60,
+    height: 70,
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   peakBadge: {
     position: "absolute",
     top: 0,
-    right: 0,
-    backgroundColor: "#818cf8",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    right: 4,
+    backgroundColor: Theme.colors.brand.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    shadowColor: Theme.colors.brand.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
   peakText: {
-    fontSize: 8,
-    fontFamily: "Outfit_700Bold",
+    fontSize: 9,
+    fontFamily: Theme.typography.family.black,
     color: "white",
   },
   infoBox: {
     flexDirection: "row",
-    gap: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
-    padding: 12,
-    borderRadius: 12,
+    gap: 12,
+    backgroundColor: Theme.colors.inputBg,
+    padding: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: Theme.colors.divider,
   },
   infoText: {
     flex: 1,
     fontSize: 11,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
-    lineHeight: 16,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 18,
   },
   bold: {
-    fontFamily: "Outfit_700Bold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
 });

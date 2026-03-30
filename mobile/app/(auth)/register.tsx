@@ -77,7 +77,11 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ScreenWrapper withScroll edges={["top", "bottom", "left", "right"]}>
+    <ScreenWrapper
+      withScroll
+      withTabBar={false}
+      edges={["top", "bottom", "left", "right"]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}

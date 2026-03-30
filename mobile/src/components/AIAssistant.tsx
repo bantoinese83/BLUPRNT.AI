@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -10,13 +10,15 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { MessageSquare, Send, Bot, User, Sparkles } from "lucide-react-native";
+import { Send, Bot, Sparkles } from "lucide-react-native";
 import Markdown from "react-native-markdown-display";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
-import { supabase } from "../lib/supabase";
-import { GlassCard } from "./ui/GlassCard";
+import { invokeFunction } from "../lib/supabase";
 import { Theme } from "../constants/Theme";
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
+
+const TAB_BAR_BUFFER = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 32;
 
 interface Message {
   role: "user" | "assistant";
@@ -56,7 +58,7 @@ export function AIAssistant({ projectId }: Props) {
     setIsTyping(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke(
+      const { data, error } = await invokeFunction<{ reply?: string }>(
         "chat-with-project",
         {
           body: { query: msg, projectId },
@@ -69,7 +71,7 @@ export function AIAssistant({ projectId }: Props) {
         ...prev,
         {
           role: "assistant",
-          content: data.reply || "Sorry, I couldn't process that right now.",
+          content: data?.reply || "Sorry, I couldn't process that right now.",
         },
       ]);
     } catch (err) {
@@ -108,7 +110,7 @@ export function AIAssistant({ projectId }: Props) {
             transition={{
               type: "timing",
               duration: 300,
-              delay: i === messages.length - 1 ? 0 : 0,
+              delay: 0,
             }}
             style={[
               styles.messageWrapper,
@@ -117,7 +119,7 @@ export function AIAssistant({ projectId }: Props) {
           >
             {m.role === "assistant" && (
               <View style={styles.botAvatar}>
-                <Sparkles size={14} color="white" />
+                <Sparkles size={14} color="#6366f1" />
               </View>
             )}
             <View
@@ -144,7 +146,7 @@ export function AIAssistant({ projectId }: Props) {
             style={styles.assistantWrapper}
           >
             <View style={styles.botAvatar}>
-              <Bot size={14} color="white" />
+              <Bot size={14} color="#6366f1" />
             </View>
             <View
               style={[
@@ -206,10 +208,11 @@ export function AIAssistant({ projectId }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Theme.colors.background,
+    backgroundColor: "#ffffff",
   },
   messagesContainer: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   messageWrapper: {
@@ -227,13 +230,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 12,
-    backgroundColor: "#6366f1",
+    backgroundColor: "#f5f3ff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
     marginBottom: 2,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "#e0e7ff",
   },
   messageBubble: {
     maxWidth: "85%",
@@ -249,9 +252,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   assistantBubble: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
-    borderWidth: 1.2,
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
   },
   assistantBubbleShape: {
     borderBottomLeftRadius: 4,
@@ -259,14 +262,14 @@ const styles = StyleSheet.create({
   userText: {
     color: "white",
     fontSize: 16,
-    fontFamily: "Outfit_500Medium",
+    fontFamily: Theme.typography.family.medium,
     lineHeight: 24,
   },
   inputArea: {
-    backgroundColor: "rgba(15, 23, 42, 0.98)",
+    backgroundColor: "#ffffff",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.08)",
-    paddingBottom: Platform.OS === "ios" ? 34 : 20, // Tab padding
+    borderTopColor: "#f1f5f9",
+    paddingBottom: Platform.OS === "ios" ? TAB_BAR_BUFFER : 20,
   },
   suggestionsScroll: {
     maxHeight: 50,
@@ -280,14 +283,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#f1f5f9",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "#e2e8f0",
   },
   chipText: {
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     fontSize: 13,
-    fontFamily: "Outfit_600SemiBold",
+    fontFamily: Theme.typography.family.semibold,
   },
   inputContainer: {
     flexDirection: "row",
@@ -297,22 +300,22 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: "#f8fafc",
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 14,
-    color: "white",
-    fontFamily: "Outfit_400Regular",
+    color: Theme.colors.text.primary,
+    fontFamily: Theme.typography.family.regular,
     fontSize: 16,
     maxHeight: 120,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: Theme.colors.divider,
   },
   sendButton: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 12,
@@ -324,23 +327,23 @@ const styles = StyleSheet.create({
 
 const markdownStyles = {
   body: {
-    color: "#cbd5e1",
+    color: Theme.colors.text.secondary,
     fontSize: 14,
-    fontFamily: "Outfit_400Regular",
+    fontFamily: Theme.typography.family.regular,
   },
   strong: {
-    color: "white",
-    fontFamily: "Outfit_700Bold",
+    color: Theme.colors.text.primary,
+    fontFamily: Theme.typography.family.bold,
   },
   heading1: {
-    color: "white",
-    fontFamily: "Outfit_700Bold",
+    color: Theme.colors.text.primary,
+    fontFamily: Theme.typography.family.bold,
     fontSize: 18,
     marginVertical: 8,
   },
   heading2: {
-    color: "white",
-    fontFamily: "Outfit_700Bold",
+    color: Theme.colors.text.primary,
+    fontFamily: Theme.typography.family.bold,
     fontSize: 16,
     marginVertical: 4,
   },
@@ -349,9 +352,11 @@ const markdownStyles = {
   },
   list_item: {
     marginVertical: 2,
+    color: Theme.colors.text.secondary,
   },
   code_inline: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#f1f5f9",
+    color: "#0f172a",
     borderRadius: 4,
     paddingHorizontal: 4,
   },

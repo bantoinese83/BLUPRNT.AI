@@ -1,23 +1,23 @@
 export const Theme = {
   colors: {
-    // Deep Space Palette
-    background: "#020617", // Slate 950
-    header: "#0f172a", // Slate 900
-    card: "rgba(255, 255, 255, 0.03)",
+    // Light Liquid Palette
+    background: "#f8fafc", // Slate 50
+    header: "#ffffff",
+    card: "#ffffff",
 
     // Brand Palette
     brand: {
-      light: "#818cf8", // Indigo 400
+      light: "#6366f1", // Indigo 500
       primary: "#4f46e5", // Indigo 600
       deep: "#3730a3", // Indigo 800
     },
 
     // Text Palette
     text: {
-      primary: "#ffffff",
-      secondary: "#94a3b8", // Slate 400
-      muted: "#64748b", // Slate 500
-      disabled: "#475569", // Slate 600
+      primary: "#0f172a", // Slate 900
+      secondary: "#64748b", // Slate 500
+      muted: "#94a3b8", // Slate 400
+      disabled: "#cbd5e1", // Slate 300
     },
 
     // Status Palette
@@ -28,11 +28,17 @@ export const Theme = {
       info: "#3b82f6", // Blue 500
     },
 
-    // Glassmorphism
+    // UI Elements
+    border: "#e2e8f0", // Slate 200
+    divider: "#f1f5f9", // Slate 100
+    inputBg: "#f8fafc", // Slate 50
+    inputBorder: "#e2e8f0", // Slate 200
+
+    // Glassmorphism (Light Optimized)
     glass: {
-      bg: "rgba(255, 255, 255, 0.03)",
-      border: "rgba(255, 255, 255, 0.08)",
-      highlight: "rgba(255, 255, 255, 0.15)",
+      bg: "rgba(255, 255, 255, 0.8)",
+      border: "rgba(15, 23, 42, 0.08)",
+      highlight: "rgba(255, 255, 255, 0.5)",
     },
   },
 

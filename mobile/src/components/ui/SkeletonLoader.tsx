@@ -1,5 +1,11 @@
 import React from "react";
-import { View, StyleSheet, Animated, ViewStyle } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Animated,
+  ViewStyle,
+  DimensionValue,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface Props {
@@ -37,7 +43,11 @@ export function SkeletonLoader({
     <View
       style={[
         styles.container,
-        { width: width as any, height: height as any, borderRadius },
+        {
+          width: width as DimensionValue,
+          height: height as DimensionValue,
+          borderRadius,
+        },
         style,
       ]}
       onLayout={(e) => setLayoutWidth(e.nativeEvent.layout.width)}

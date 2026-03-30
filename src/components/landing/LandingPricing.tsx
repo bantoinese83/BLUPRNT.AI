@@ -123,7 +123,7 @@ export function LandingPricing({
               </h3>
               <div className="flex items-baseline gap-1">
                 <span className="text-5xl font-black tracking-tight text-slate-900">
-                  $49
+                  $9
                 </span>
                 <span className="text-slate-500 font-bold">/project</span>
               </div>
@@ -231,7 +231,7 @@ export function LandingPricing({
                           One project
                         </span>
                         <span className="text-sm font-bold tabular-nums text-slate-700">
-                          $49<span className="text-slate-500"> once</span>
+                          $9<span className="text-slate-500"> once</span>
                         </span>
                       </div>
                     </th>

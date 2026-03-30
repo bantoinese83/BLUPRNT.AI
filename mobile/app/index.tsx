@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
 import {
@@ -8,16 +8,22 @@ import {
   Hammer,
   ShieldCheck,
   TrendingUp,
+  LogIn,
 } from "lucide-react-native";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
 import { Logo } from "../src/components/ui/Logo";
+import { Theme } from "../src/constants/Theme";
 import * as Haptics from "expo-haptics";
 
 export default function LandingScreen() {
   return (
-    <ScreenWrapper withScroll edges={["top", "bottom", "left", "right"]}>
+    <ScreenWrapper
+      withScroll
+      withTabBar={false}
+      edges={["top", "bottom", "left", "right"]}
+    >
       <View style={styles.scrollContent}>
         {/* Hero Section */}
         <MotiView
@@ -27,7 +33,7 @@ export default function LandingScreen() {
           style={styles.hero}
         >
           <View style={styles.logoContainer}>
-            <Logo size={80} />
+            <Logo size={100} />
           </View>
           <View style={styles.badgeContainer}>
             <Text style={styles.badgeText}>AI RENOVATION PLANNER</Text>
@@ -70,7 +76,7 @@ export default function LandingScreen() {
                   Haptics.selectionAsync();
                   router.push("/(auth)/login");
                 }}
-                icon={<UserPlus size={20} color="white" />}
+                icon={<LogIn size={20} color={Theme.colors.brand.primary} />}
               />
             </MotiView>
           </View>
@@ -79,19 +85,19 @@ export default function LandingScreen() {
         {/* Value Props */}
         <View style={styles.features}>
           <FeatureCard
-            icon={<Hammer size={24} color="#4f46e5" />}
+            icon={<Hammer size={24} color={Theme.colors.brand.primary} />}
             title="AI Cost Analysis"
             description="Regionally grounded pricing for labor and materials."
             delay={400}
           />
           <FeatureCard
-            icon={<ShieldCheck size={24} color="#10b981" />}
+            icon={<ShieldCheck size={24} color={Theme.colors.status.success} />}
             title="Secure Records"
             description="Keep all receipts, warranties, and permits in one place."
             delay={500}
           />
           <FeatureCard
-            icon={<TrendingUp size={24} color="#f59e0b" />}
+            icon={<TrendingUp size={24} color={Theme.colors.status.warning} />}
             title="Resale Value"
             description="Automatically generate a professional property ledger."
             delay={600}
@@ -117,7 +123,7 @@ function FeatureCard({ icon, title, description, delay }: FeatureCardProps) {
       transition={{ delay, type: "timing", duration: 600 }}
       style={{ marginBottom: 16 }}
     >
-      <GlassCard intensity={20}>
+      <GlassCard intensity={15} style={styles.featureCard}>
         <View style={styles.featureRow}>
           <View style={styles.iconContainer}>{icon}</View>
           <View style={styles.featureText}>
@@ -133,48 +139,51 @@ function FeatureCard({ icon, title, description, delay }: FeatureCardProps) {
 const styles = StyleSheet.create({
   scrollContent: {
     padding: 24,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "ios" ? 40 : 60, // Refined for notch
   },
   hero: {
     alignItems: "center",
     marginBottom: 48,
   },
   logoContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
+    marginTop: 20,
   },
   badgeContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(79, 70, 229, 0.08)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 99,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(79, 70, 229, 0.1)",
   },
   badgeText: {
-    color: "white",
+    color: Theme.colors.brand.primary,
     fontSize: 10,
     fontFamily: "Outfit_700Bold",
     letterSpacing: 2,
   },
   title: {
-    fontSize: 36,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: 32,
+    fontFamily: "Outfit_800ExtraBold",
+    color: Theme.colors.text.primary,
     textAlign: "center",
-    lineHeight: 42,
+    lineHeight: 40,
+    letterSpacing: -1,
   },
   highlightTitle: {
-    fontSize: 36,
-    fontFamily: "Outfit_700Bold",
-    color: "#cbd5e1",
+    fontSize: 32,
+    fontFamily: "Outfit_800ExtraBold",
+    color: Theme.colors.text.secondary,
     textAlign: "center",
-    lineHeight: 42,
+    lineHeight: 40,
     marginBottom: 20,
+    letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     lineHeight: 24,
     fontFamily: "Outfit_400Regular",
@@ -187,6 +196,11 @@ const styles = StyleSheet.create({
   features: {
     marginTop: 20,
   },
+  featureCard: {
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.05)",
+  },
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -195,7 +209,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(79, 70, 229, 0.08)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -204,14 +218,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "Outfit_700Bold",
-    color: "white",
-    marginBottom: 4,
+    color: Theme.colors.text.primary,
+    marginBottom: 2,
   },
   featureDescription: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     fontFamily: "Outfit_400Regular",
   },
 });

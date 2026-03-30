@@ -8,14 +8,32 @@ interface Props {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   intensity?: number;
+  vibrancy?:
+    | "light"
+    | "extraLight"
+    | "dark"
+    | "regular"
+    | "prominent"
+    | "ultraThinMaterial"
+    | "thinMaterial"
+    | "thickMaterial"
+    | "systemMaterial"
+    | "systemThickMaterial"
+    | "systemThinMaterial"
+    | "systemUltraThinMaterial";
 }
 
-export function GlassCard({ children, style, intensity = 20 }: Props) {
+export function GlassCard({
+  children,
+  style,
+  intensity = 20,
+  vibrancy,
+}: Props) {
   return (
     <View style={[styles.container, style]}>
       <BlurView
         intensity={intensity}
-        tint="dark"
+        tint="systemUltraThinMaterial"
         style={StyleSheet.absoluteFill}
       />
 
@@ -33,7 +51,7 @@ export function GlassCard({ children, style, intensity = 20 }: Props) {
         style={[StyleSheet.absoluteFill]}
       >
         <LinearGradient
-          colors={["transparent", "rgba(255, 255, 255, 0.12)", "transparent"]}
+          colors={["transparent", "rgba(15, 23, 42, 0.04)", "transparent"]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={StyleSheet.absoluteFill}
@@ -42,7 +60,7 @@ export function GlassCard({ children, style, intensity = 20 }: Props) {
 
       {/* Internal Polish / Depth Glow */}
       <LinearGradient
-        colors={["rgba(255, 255, 255, 0.05)", "transparent"]}
+        colors={["rgba(255, 255, 255, 0.5)", "transparent"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0.5, y: 0.5 }}
         style={StyleSheet.absoluteFill}
@@ -65,22 +83,22 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.glass.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.2,
-        shadowRadius: 24,
+        shadowColor: "#1e293b",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.06,
+        shadowRadius: 16,
       },
       android: {
-        elevation: 12,
+        elevation: 4,
       },
     }),
   },
   borderHighlight: {
     borderWidth: 1.2,
     borderColor: "transparent",
-    borderTopColor: Theme.colors.glass.highlight,
-    borderLeftColor: "rgba(255,255,255,0.08)",
-    borderRightColor: "rgba(255,255,255,0.02)",
+    borderTopColor: "rgba(255,255,255,0.8)",
+    borderLeftColor: "rgba(255,255,255,0.4)",
+    borderRightColor: "rgba(0,0,0,0.01)",
     borderRadius: Theme.radius.xl,
   },
   childContainer: {

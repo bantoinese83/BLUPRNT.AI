@@ -74,22 +74,22 @@ export function AIAssistant({ projectId }: { projectId: string }) {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="absolute bottom-20 right-0 w-[350px] sm:w-[400px] h-[500px] max-h-[70vh] glass-deep rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-white/10 z-50"
+            className="absolute bottom-20 right-0 w-[350px] sm:w-[400px] h-[500px] max-h-[70vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-200 z-50"
           >
             <div className="noise-overlay" />
 
             {/* Header */}
-            <div className="p-4 border-b border-white/5 flex items-center justify-between relative z-10">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between relative z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                  <Bot className="w-6 h-6 text-indigo-400" />
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
+                  <Bot className="w-6 h-6 text-indigo-600" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-white">
+                  <h3 className="text-sm font-black text-slate-900">
                     Project Assistant
                   </h3>
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                       Always Active
                     </span>
                   </div>
@@ -99,7 +99,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="rounded-xl text-slate-400 hover:text-white hover:bg-white/10"
+                className="rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -120,8 +120,8 @@ export function AIAssistant({ projectId }: { projectId: string }) {
                   <div
                     className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${
                       m.role === "user"
-                        ? "bg-indigo-600 text-white rounded-tr-none"
-                        : "bg-white/5 text-slate-200 border border-white/10 rounded-tl-none"
+                        ? "bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-100"
+                        : "bg-slate-100 text-slate-700 border border-slate-200 rounded-tl-none"
                     }`}
                   >
                     {m.role === "user" ? (
@@ -138,7 +138,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
               ))}
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/10 flex gap-1">
+                  <div className="bg-slate-100 p-3 rounded-2xl rounded-tl-none border border-slate-200 flex gap-1">
                     <div
                       className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
@@ -157,7 +157,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-white/5 relative z-10">
+            <div className="p-4 border-t border-slate-100 relative z-10">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -169,7 +169,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask about your project..."
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/50 transition-colors"
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
                 />
                 <Button
                   type="submit"
@@ -189,10 +189,10 @@ export function AIAssistant({ projectId }: { projectId: string }) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700/50 flex items-center justify-center text-white shadow-2xl relative overflow-hidden group"
+        className="w-14 h-14 rounded-2xl bg-indigo-600 border border-indigo-500 flex items-center justify-center text-white shadow-2xl relative overflow-hidden group"
       >
-        <div className="absolute inset-0 bg-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
-        <div className="absolute inset-0 noise-overlay opacity-50" />
+        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+        <div className="absolute inset-0 noise-overlay opacity-10" />
         {isOpen ? (
           <X className="w-6 h-6" />
         ) : (

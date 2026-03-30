@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useAwareness } from "@/contexts/AwarenessProvider";
+import { useAwareness } from "@/contexts/AwarenessContext";
 import { Button } from "@/components/ui/button";
 
 export function SmartSidebar({
@@ -30,14 +30,14 @@ export function SmartSidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100]"
+            className="fixed inset-0 bg-white/20 backdrop-blur-md z-[100]"
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md glass-deep z-[101] p-6 flex flex-col gap-6 shadow-2xl overflow-hidden"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-white/95 backdrop-blur-xl border-l border-slate-200 z-[101] p-6 flex flex-col gap-6 shadow-[0_0_50px_rgba(0,0,0,0.1)] overflow-hidden"
           >
             <div className="noise-overlay" />
 
@@ -49,15 +49,15 @@ export function SmartSidebar({
                   <img
                     src="/insights-icon.svg"
                     alt=""
-                    className="w-5 h-5 brightness-0 invert opacity-90"
+                    className="w-5 h-5 opacity-90"
                     aria-hidden
                   />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black tracking-tight text-white">
+                  <h2 className="text-lg font-black tracking-tight text-slate-900">
                     Smart Insights
                   </h2>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
                     Project Status: {projectHealth}
                   </p>
                 </div>
@@ -66,7 +66,7 @@ export function SmartSidebar({
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="rounded-xl text-slate-400 hover:text-white hover:bg-white/10"
+                className="rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -75,10 +75,10 @@ export function SmartSidebar({
             <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar relative z-10">
               {insights.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-center space-y-4">
-                  <div className="p-4 rounded-3xl bg-slate-800/50 border border-white/5">
-                    <Lightbulb className="w-8 h-8 text-slate-500" />
+                  <div className="p-4 rounded-3xl bg-slate-100 border border-slate-200">
+                    <Lightbulb className="w-8 h-8 text-slate-400" />
                   </div>
-                  <p className="text-sm text-slate-400 max-w-[200px]">
+                  <p className="text-sm text-slate-500 max-w-[200px]">
                     Your project looks solid. Check back later for new insights!
                   </p>
                 </div>
@@ -88,7 +88,7 @@ export function SmartSidebar({
                     key={insight.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
+                    className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100 transition-all group"
                   >
                     <div className="flex gap-4">
                       <div
@@ -109,10 +109,10 @@ export function SmartSidebar({
                         )}
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                           {insight.title}
                         </h4>
-                        <div className="text-xs text-slate-400 leading-relaxed markdown-content">
+                        <div className="text-xs text-slate-500 leading-relaxed markdown-content">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {insight.description}
                           </ReactMarkdown>
@@ -130,12 +130,12 @@ export function SmartSidebar({
               )}
             </div>
 
-            <div className="mt-auto pt-6 border-t border-white/5 relative z-10">
-              <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                <p className="text-[10px] text-indigo-300 leading-relaxed">
-                  <span className="font-bold">Pro Tip:</span> Keeping your
-                  project data up to date ensures these insights remain accurate
-                  and actionable.
+            <div className="mt-auto pt-6 border-t border-slate-100 relative z-10">
+              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+                <p className="text-[10px] text-indigo-600 leading-relaxed">
+                  <span className="font-bold font-black">Pro Tip:</span> Keeping
+                  your project data up to date ensures these insights remain
+                  accurate and actionable.
                 </p>
               </div>
             </div>

@@ -18,6 +18,7 @@ import {
   Calendar,
   Tag,
   CreditCard,
+  LucideIcon,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
@@ -32,7 +33,7 @@ interface Props {
   onDeleted: (id: string) => void;
 }
 
-const DOC_ICONS: Record<string, React.FC<any>> = {
+const DOC_ICONS: Record<string, LucideIcon> = {
   invoice: Wrench,
   quote: Tag,
   warranty: ShieldCheck,

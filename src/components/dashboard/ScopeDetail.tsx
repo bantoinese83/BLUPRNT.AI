@@ -6,6 +6,7 @@ import { useScopeManagement } from "@/hooks/useScopeManagement";
 import { ScopeHeader } from "./ScopeHeader";
 import { ScopeSummary } from "./ScopeSummary";
 import { ScopeItemRow } from "./ScopeItemRow";
+import { AddScopeItemModal } from "./AddScopeItemModal";
 import type { ProjectRow, ScopeRow } from "@/types/database";
 
 const PHASE_ORDER = [
@@ -50,6 +51,9 @@ export function ScopeDetail({
     handleSave,
     confirmDelete,
     startEdit,
+    addItem,
+    isAdding,
+    setIsAdding,
   } = useScopeManagement({ projectId, onRefresh });
 
   const conf = project.confidence_score ?? 4.5;
@@ -110,7 +114,19 @@ export function ScopeDetail({
         </div>
       )}
 
-      <ScopeHeader projectName={project.name} error={error} />
+      <ScopeHeader
+        projectName={project.name}
+        itemCount={scopeItems.length}
+        error={error}
+        onAddClick={() => setIsAdding(true)}
+      />
+
+      <AddScopeItemModal
+        isOpen={isAdding}
+        onClose={() => setIsAdding(false)}
+        onAdd={addItem}
+        saving={saving}
+      />
 
       <Card className="overflow-hidden">
         <ScopeSummary

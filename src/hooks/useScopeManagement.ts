@@ -17,6 +17,7 @@ export function useScopeManagement({
   const [editQty, setEditQty] = useState<string>("");
   const [editTier, setEditTier] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirmItem, setDeleteConfirmItem] = useState<ScopeRow | null>(
     null,
@@ -144,6 +145,47 @@ export function useScopeManagement({
     setEditTier(item.finish_tier ?? "mid");
   };
 
+  const addItem = async (newItem: {
+    category: string;
+    description: string;
+    phase: string;
+    cost: number;
+    quantity?: number;
+    unit?: string;
+  }) => {
+    setSaving(true);
+    setError(null);
+
+    const { error: err } = await supabase.from("scope_items").insert({
+      project_id: projectId,
+      category: newItem.category,
+      description: newItem.description || "",
+      phase: newItem.phase,
+      quantity: newItem.quantity || 1,
+      unit: newItem.unit || "ea",
+      finish_tier: "mid",
+      unit_cost_min: newItem.cost,
+      unit_cost_max: newItem.cost,
+      total_cost_min: newItem.cost * (newItem.quantity || 1),
+      total_cost_max: newItem.cost * (newItem.quantity || 1),
+    });
+
+    if (err) {
+      console.error("Add item error:", err);
+      setError(err.message ?? "Couldn't add item");
+      toast.error("Couldn't add item");
+      setSaving(false);
+      return false;
+    }
+
+    await recalcProjectTotals();
+    toast.success("Item added to budget");
+    onRefresh();
+    setSaving(false);
+    setIsAdding(false);
+    return true;
+  };
+
   return {
     editingId,
     setEditingId,
@@ -158,5 +200,8 @@ export function useScopeManagement({
     handleSave,
     confirmDelete,
     startEdit,
+    addItem,
+    isAdding,
+    setIsAdding,
   };
 }

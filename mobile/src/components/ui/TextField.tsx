@@ -6,7 +6,6 @@ import {
   TextInput,
   ViewStyle,
   TouchableOpacity,
-  Pressable,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import * as Haptics from "expo-haptics";

@@ -1,8 +1,9 @@
 import React from "react";
-import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { AIAssistant } from "../../src/components/AIAssistant";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
+import { Theme } from "../../src/constants/Theme";
 
 export default function AIScreen() {
   const { project, loading } = useDashboardData();
@@ -36,20 +37,21 @@ export default function AIScreen() {
 const styles = StyleSheet.create({
   header: {
     padding: 24,
-    paddingBottom: 12,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: Theme.colors.divider,
+    backgroundColor: "white",
   },
   title: {
     fontSize: 32,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
     letterSpacing: -1,
   },
   subtitle: {
     fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     marginTop: 4,
   },
   assistantContainer: {

@@ -4,6 +4,7 @@ import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { Shield, TrendingUp } from "lucide-react-native";
 import { MotiView } from "moti";
 import { GlassCard } from "./ui/GlassCard";
+import { Theme } from "../constants/Theme";
 
 type Props = {
   estimatedMin?: number | null;
@@ -16,8 +17,8 @@ function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
     return {
       score: 0,
       status: "Analyzing",
-      color: "#94a3b8",
-      secondary: "#64748b",
+      color: Theme.colors.text.secondary,
+      secondary: Theme.colors.text.muted,
       message: "Processing your initial project data...",
     };
   }
@@ -30,7 +31,7 @@ function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
     return {
       score: Math.max(0, Math.round(70 - overPct)),
       status: "Over Budget",
-      color: "#f43f5e",
+      color: Theme.colors.status.error,
       secondary: "#ea580c",
       message: "Careful! You've exceeded your lifecycle estimate.",
     };
@@ -40,8 +41,8 @@ function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
     return {
       score: 75,
       status: "At Limit",
-      color: "#fbbf24",
-      secondary: "#f59e0b",
+      color: Theme.colors.status.warning,
+      secondary: Theme.colors.status.warning,
       message: "You're approaching the upper limit of your budget.",
     };
   }
@@ -50,7 +51,7 @@ function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
     return {
       score: 95,
       status: "Excellent",
-      color: "#34d399",
+      color: Theme.colors.status.success,
       secondary: "#14b8a6",
       message: "Starting strong! Your initial spending is well-aligned.",
     };
@@ -59,8 +60,8 @@ function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
   return {
     score: 88,
     status: "Healthy",
-    color: "#6366f1",
-    secondary: "#2563eb",
+    color: Theme.colors.brand.primary,
+    secondary: Theme.colors.brand.deep,
     message: "Your project spending is pacing well against estimates.",
   };
 }
@@ -88,7 +89,7 @@ export function ProjectHealth({
     <GlassCard intensity={20} style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Health Index</Text>
-        <Shield size={14} color="#64748b" />
+        <Shield size={14} color={Theme.colors.text.secondary} />
       </View>
 
       <View style={styles.content}>
@@ -108,7 +109,7 @@ export function ProjectHealth({
             </View>
             {invoiceTotal > 0 && (
               <View style={styles.liveIndicator}>
-                <TrendingUp size={10} color="#34d399" />
+                <TrendingUp size={10} color={Theme.colors.status.success} />
                 <Text style={styles.liveText}>Live</Text>
               </View>
             )}
@@ -137,7 +138,7 @@ export function ProjectHealth({
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke="rgba(255,255,255,0.05)"
+              stroke="rgba(0,0,0,0.03)"
               strokeWidth={strokeWidth}
               fill="none"
             />
@@ -173,19 +174,19 @@ export function ProjectHealth({
 
 const styles = StyleSheet.create({
   card: {
-    padding: 20,
-    marginBottom: 20,
+    padding: Theme.spacing.xl,
+    marginBottom: Theme.spacing.xl,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: Theme.spacing.md,
   },
   headerTitle: {
-    fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#64748b",
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
     textTransform: "uppercase",
     letterSpacing: 2,
   },
@@ -200,17 +201,17 @@ const styles = StyleSheet.create({
   scoreRow: {
     flexDirection: "row",
     alignItems: "baseline",
-    marginBottom: 8,
+    marginBottom: Theme.spacing.xs,
   },
   score: {
-    fontSize: 52,
-    fontFamily: "Outfit_800ExtraBold",
+    fontSize: 56,
+    fontFamily: Theme.typography.family.black,
     letterSpacing: -1.5,
   },
   scoreMax: {
-    fontSize: 16,
-    fontFamily: "Outfit_700Bold",
-    color: "#64748b",
+    fontSize: Theme.typography.size.xl,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
     marginLeft: 4,
   },
   statusRow: {
@@ -220,14 +221,15 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: Theme.radius.sm,
   },
   statusText: {
-    fontSize: 10,
-    fontFamily: "Outfit_700Bold",
+    fontSize: 9,
+    fontFamily: Theme.typography.family.black,
     color: "white",
     textTransform: "uppercase",
+    letterSpacing: 1,
   },
   liveIndicator: {
     flexDirection: "row",
@@ -236,8 +238,8 @@ const styles = StyleSheet.create({
   },
   liveText: {
     fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#34d399",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.status.success,
     textTransform: "uppercase",
   },
   rightCol: {
@@ -248,15 +250,15 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "0deg" }],
   },
   messageBox: {
-    marginTop: 20,
-    padding: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderRadius: 12,
+    marginTop: Theme.spacing.xl,
+    padding: 14,
+    backgroundColor: Theme.colors.inputBg,
+    borderRadius: Theme.radius.lg,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: Theme.colors.divider,
   },
   dot: {
     width: 6,
@@ -266,8 +268,8 @@ const styles = StyleSheet.create({
   messageText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
-    fontStyle: "italic",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 18,
   },
 });

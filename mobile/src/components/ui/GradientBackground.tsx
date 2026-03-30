@@ -13,9 +13,9 @@ interface Props {
 export function GradientBackground({ children, style }: Props) {
   return (
     <View style={[styles.container, style]}>
-      {/* Base Deep Space Gradient */}
+      {/* Base Light Liquid Gradient */}
       <LinearGradient
-        colors={["#020617", "#0f172a", "#1e1b4b"]}
+        colors={["#f8fafc", "#f1f5f9", "#e2e8f0"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -34,7 +34,7 @@ export function GradientBackground({ children, style }: Props) {
         style={styles.absolute}
       >
         <LinearGradient
-          colors={["rgba(79, 70, 229, 0.4)", "transparent"]}
+          colors={["rgba(79, 70, 229, 0.08)", "transparent"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.6, y: 0.6 }}
           style={styles.glow}
@@ -54,16 +54,16 @@ export function GradientBackground({ children, style }: Props) {
         style={styles.absolute}
       >
         <LinearGradient
-          colors={["transparent", "rgba(79, 70, 229, 0.2)"]}
+          colors={["transparent", "rgba(79, 70, 229, 0.05)"]}
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 1 }}
           style={styles.glow}
         />
       </MotiView>
 
-      {/* Fixed Noise/Grain Overlay (Optional visual depth) */}
+      {/* Fixed Grain Overlay (Extremely subtle) */}
       <View
-        style={[styles.gradient, { opacity: 0.02, backgroundColor: "#fff" }]}
+        style={[styles.gradient, { opacity: 0.01, backgroundColor: "#000" }]}
       />
 
       {children}
@@ -74,7 +74,7 @@ export function GradientBackground({ children, style }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#020617",
+    backgroundColor: "#f8fafc",
   },
   gradient: {
     position: "absolute",
