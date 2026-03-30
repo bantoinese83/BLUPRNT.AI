@@ -7,6 +7,7 @@ import {
   DimensionValue,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Theme } from "../../constants/Theme";
 
 interface Props {
   width?: number | string;
@@ -68,9 +69,9 @@ export function SkeletonLoader({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: Theme.colors.background,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: Theme.colors.divider,
   },
 });

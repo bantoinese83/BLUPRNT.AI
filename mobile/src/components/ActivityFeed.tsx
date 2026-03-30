@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { formatRelativeTime } from "../lib/activity";
 import { Theme } from "../constants/Theme";
+import { LinearGradient } from "expo-linear-gradient";
 
 export type ActivityEvent = {
   id: string;
@@ -39,24 +40,24 @@ const COLOR_MAP: Record<
   { text: string; bg: string; border: string }
 > = {
   upload: {
-    text: Theme.colors.brand.primary,
-    bg: "rgba(79, 70, 229, 0.08)",
-    border: "rgba(79, 70, 229, 0.12)",
+    text: "#60a5fa",
+    bg: "rgba(96, 165, 250, 0.08)",
+    border: "rgba(96, 165, 250, 0.12)",
   },
   status_change: {
-    text: Theme.colors.status.warning,
-    bg: "rgba(245, 158, 11, 0.08)",
-    border: "rgba(245, 158, 11, 0.12)",
+    text: "#fbbf24",
+    bg: "rgba(251, 191, 36, 0.08)",
+    border: "rgba(251, 191, 36, 0.12)",
   },
   project_created: {
-    text: Theme.colors.status.success,
-    bg: "rgba(16, 185, 129, 0.08)",
-    border: "rgba(16, 185, 129, 0.12)",
+    text: "#34d399",
+    bg: "rgba(52, 211, 153, 0.08)",
+    border: "rgba(52, 211, 153, 0.12)",
   },
   goal_reached: {
-    text: "#818cf8",
-    bg: "rgba(129, 140, 248, 0.08)",
-    border: "rgba(129, 140, 248, 0.12)",
+    text: "#a78bfa",
+    bg: "rgba(167, 139, 250, 0.08)",
+    border: "rgba(167, 139, 250, 0.12)",
   },
 };
 
@@ -72,7 +73,12 @@ export function ActivityFeed({ events }: Props) {
 
       <View style={styles.feedContainer}>
         {/* Vertical Line */}
-        <View style={styles.timeline} />
+        <View style={styles.timelineContainer}>
+          <LinearGradient
+            colors={[Theme.colors.divider, "transparent"]}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
 
         {events.map((event, idx) => {
           const Icon = ICON_MAP[event.type];
@@ -96,32 +102,34 @@ export function ActivityFeed({ events }: Props) {
               </View>
 
               <View style={styles.eventContent}>
-                <View style={styles.eventHeader}>
-                  <Text style={styles.eventTitle}>{event.title}</Text>
-                  <Text style={styles.eventTime}>
-                    {formatRelativeTime(event.timestamp)}
-                  </Text>
-                </View>
-                <Text style={styles.eventDescription}>{event.description}</Text>
-
-                {event.link && (
-                  <TouchableOpacity
-                    style={styles.linkButton}
-                    onPress={() => {
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (event.link) {
                       Haptics.selectionAsync();
-                      router.push(
-                        event.link as Parameters<typeof router.push>[0],
-                      );
-                    }}
-                  >
-                    <Text style={styles.linkText}>View Details</Text>
-                    <ArrowUpRight
-                      size={12}
-                      color="#94a3b8"
-                      style={{ marginLeft: 4 }}
-                    />
-                  </TouchableOpacity>
-                )}
+                      router.push(event.link as any);
+                    }
+                  }}
+                  disabled={!event.link}
+                >
+                  <View style={styles.eventHeader}>
+                    <View style={styles.eventTitleWrapper}>
+                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      {event.link && (
+                        <ArrowUpRight
+                          size={14}
+                          color={Theme.colors.text.muted}
+                        />
+                      )}
+                    </View>
+                    <Text style={styles.eventTime}>
+                      {formatRelativeTime(event.timestamp)}
+                    </Text>
+                  </View>
+                  <Text style={styles.eventDescription}>
+                    {event.description}
+                  </Text>
+                </TouchableOpacity>
               </View>
             </MotiView>
           );
@@ -159,13 +167,13 @@ const styles = StyleSheet.create({
     position: "relative",
     paddingLeft: 4,
   },
-  timeline: {
+  timelineContainer: {
     position: "absolute",
     left: 21,
     top: 4,
     bottom: 4,
-    width: 1,
-    backgroundColor: Theme.colors.divider,
+    width: 1.5,
+    overflow: "hidden",
   },
   eventRow: {
     flexDirection: "row",
@@ -208,16 +216,10 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     lineHeight: 18,
   },
-  linkButton: {
+  eventTitleWrapper: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
-  },
-  linkText: {
-    fontSize: 10,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.brand.primary,
-    textTransform: "uppercase",
-    letterSpacing: 1,
+    gap: 6,
   },
 });

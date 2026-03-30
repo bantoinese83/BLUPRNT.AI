@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     fontSize: Theme.typography.size.display,
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
   scrollContent: {
     padding: Theme.spacing.xl,
@@ -373,11 +373,11 @@ const styles = StyleSheet.create({
     borderRadius: Theme.radius.xl,
   },
   sectionHeader: {
-    fontSize: Theme.typography.size.sm,
-    fontFamily: Theme.typography.family.bold,
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.brand.primary,
     textTransform: "uppercase",
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     marginBottom: Theme.spacing.lg,
   },
   inputGroup: {
@@ -450,8 +450,9 @@ const styles = StyleSheet.create({
   },
   planName: {
     fontSize: Theme.typography.size.lg,
-    fontFamily: Theme.typography.family.bold,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
+    letterSpacing: -0.3,
   },
   planStatus: {
     fontSize: Theme.typography.size.xs,
@@ -515,7 +516,8 @@ const styles = StyleSheet.create({
   dangerText: {
     color: Theme.colors.status.error,
     fontSize: Theme.typography.size.md,
-    fontFamily: Theme.typography.family.bold,
+    fontFamily: Theme.typography.family.black,
+    letterSpacing: 0.5,
   },
   logoutButton: {
     flexDirection: "row",

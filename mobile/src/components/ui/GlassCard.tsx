@@ -1,4 +1,12 @@
-import { StyleSheet, View, ViewStyle, Platform, StyleProp } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ViewStyle,
+  Platform,
+  StyleProp,
+  TouchableOpacity,
+} from "react-native";
+import * as Haptics from "expo-haptics";
 import { BlurView } from "expo-blur";
 import { MotiView } from "moti";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +29,8 @@ interface Props {
     | "systemThickMaterial"
     | "systemThinMaterial"
     | "systemUltraThinMaterial";
+  onPress?: () => void;
+  activeOpacity?: number;
 }
 
 export function GlassCard({
@@ -28,8 +38,10 @@ export function GlassCard({
   style,
   intensity = 20,
   vibrancy,
+  onPress,
+  activeOpacity = 0.85,
 }: Props) {
-  return (
+  const CardContent = (
     <View style={[styles.container, style]}>
       <BlurView
         intensity={intensity}
@@ -72,6 +84,22 @@ export function GlassCard({
       <View style={styles.childContainer}>{children}</View>
     </View>
   );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
+        activeOpacity={activeOpacity}
+      >
+        {CardContent}
+      </TouchableOpacity>
+    );
+  }
+
+  return CardContent;
 }
 
 const styles = StyleSheet.create({

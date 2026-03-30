@@ -20,6 +20,7 @@ interface Props {
   icon?: React.ReactNode;
   style?: ViewStyle;
   disabled?: boolean;
+  textSize?: number;
 }
 
 export function Button({
@@ -30,6 +31,7 @@ export function Button({
   icon,
   style,
   disabled = false,
+  textSize,
 }: Props) {
   const isInteractionDisabled = loading || disabled;
 
@@ -48,7 +50,7 @@ export function Button({
 
   if (variant === "primary") {
     return (
-      <View style={[styles.shadowContainer, style]}>
+      <View style={[styles.shadowContainer, { flex: style?.flex }]}>
         <TouchableOpacity
           onPress={handlePress}
           disabled={isInteractionDisabled}
@@ -60,7 +62,7 @@ export function Button({
               opacity: isInteractionDisabled ? 0.6 : 1,
             }}
             transition={{ type: "timing", duration: 150 }}
-            style={styles.button}
+            style={[styles.button, style]}
           >
             <LinearGradient
               colors={[Theme.colors.brand.primary, Theme.colors.brand.deep]}
@@ -73,8 +75,21 @@ export function Button({
                 <ActivityIndicator color="white" />
               ) : (
                 <>
-                  <Text style={styles.text}>{title}</Text>
-                  {icon && <View style={styles.icon}>{icon}</View>}
+                  <Text
+                    style={[
+                      styles.text,
+                      textSize ? { fontSize: textSize } : {},
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {title}
+                  </Text>
+                  {icon && (
+                    <View style={[styles.icon, title ? { marginLeft: 8 } : {}]}>
+                      {icon}
+                    </View>
+                  )}
                 </>
               )}
             </View>
@@ -107,11 +122,18 @@ export function Button({
                   ? styles.textBrand
                   : {},
                 isInteractionDisabled ? { opacity: 0.5 } : {},
+                textSize ? { fontSize: textSize } : {},
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
               {title}
             </Text>
-            {icon && <View style={styles.icon}>{icon}</View>}
+            {icon && (
+              <View style={[styles.icon, title ? { marginLeft: 8 } : {}]}>
+                {icon}
+              </View>
+            )}
           </>
         )}
       </View>
@@ -159,6 +181,6 @@ const styles = StyleSheet.create({
     color: Theme.colors.brand.light,
   },
   icon: {
-    marginLeft: 8,
+    // No margin if there's no text to separate from
   },
 });

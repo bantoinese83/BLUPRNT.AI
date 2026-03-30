@@ -79,10 +79,20 @@ export function DashboardHeader({
                 </span>
               ) : null}
             </div>
-            <Breadcrumbs
-              projectName={projectName}
-              className="mt-0.5 text-xs sm:text-sm"
-            />
+            <div className="flex items-center gap-2">
+              <Breadcrumbs
+                projectName={projectName}
+                className="mt-0.5 text-xs sm:text-sm"
+              />
+              {projectName && (
+                <div className="hidden items-center gap-1.5 sm:flex">
+                  <div className="h-1 w-1 animate-pulse rounded-full bg-emerald-500" />
+                  <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">
+                    Live Sync
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { Hammer, PlusCircle } from "lucide-react-native";
+import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { supabase } from "../lib/supabase";
 import { GlassCard } from "./ui/GlassCard";
@@ -84,7 +85,14 @@ export function ProjectSwitcher({
               intensity={p.id === currentId ? 0 : 8}
               style={[styles.card, p.id === currentId && styles.activeCard]}
             >
-              <View
+              <MotiView
+                from={{ scale: 1 }}
+                animate={{ scale: p.id === currentId ? 1.1 : 1 }}
+                transition={{
+                  type: "spring",
+                  damping: 10,
+                  loop: p.id === currentId ? true : false,
+                }}
                 style={[
                   styles.iconContainer,
                   p.id === currentId && styles.activeIconContainer,
@@ -96,7 +104,7 @@ export function ProjectSwitcher({
                     p.id === currentId ? "white" : Theme.colors.brand.primary
                   }
                 />
-              </View>
+              </MotiView>
               <Text
                 style={[styles.name, p.id === currentId && styles.activeName]}
                 numberOfLines={1}
@@ -109,7 +117,7 @@ export function ProjectSwitcher({
 
         {/* Create New Trigger */}
         <TouchableOpacity
-          style={styles.cardWrapper}
+          style={styles.addCardWrapper}
           onPress={() => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             onAdd();
@@ -117,9 +125,8 @@ export function ProjectSwitcher({
         >
           <GlassCard intensity={12} style={[styles.card, styles.addCard]}>
             <View style={[styles.iconContainer, styles.addIconContainer]}>
-              <PlusCircle size={14} color="white" />
+              <PlusCircle size={18} color="white" />
             </View>
-            <Text style={styles.addText}>New Project</Text>
           </GlassCard>
         </TouchableOpacity>
       </ScrollView>
@@ -148,6 +155,9 @@ const styles = StyleSheet.create({
   cardWrapper: {
     width: 160,
   },
+  addCardWrapper: {
+    width: 80,
+  },
   card: {
     flexDirection: "row",
     alignItems: "center",
@@ -160,6 +170,12 @@ const styles = StyleSheet.create({
   activeCard: {
     backgroundColor: Theme.colors.brand.primary,
     borderColor: "transparent",
+  },
+  addCard: {
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.02)",
+    borderStyle: "dashed",
+    borderColor: Theme.colors.divider,
   },
   iconContainer: {
     width: 24,
@@ -180,11 +196,6 @@ const styles = StyleSheet.create({
   },
   activeName: {
     color: "white",
-  },
-  addCard: {
-    backgroundColor: "rgba(0, 0, 0, 0.02)",
-    borderStyle: "dashed",
-    borderColor: Theme.colors.divider,
   },
   addIconContainer: {
     backgroundColor: Theme.colors.brand.primary,

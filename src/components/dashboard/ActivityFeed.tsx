@@ -34,10 +34,10 @@ const ICON_MAP: Record<ActivityEvent["type"], LucideIcon> = {
 };
 
 const COLOR_MAP: Record<ActivityEvent["type"], string> = {
-  upload: "text-blue-400 bg-blue-500/10 border-blue-500/20",
-  status_change: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  project_created: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  goal_reached: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+  upload: "text-[#60a5fa] bg-[#60a5fa]/10 border-[#60a5fa]/20",
+  status_change: "text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/20",
+  project_created: "text-[#34d399] bg-[#34d399]/10 border-[#34d399]/20",
+  goal_reached: "text-[#a78bfa] bg-[#a78bfa]/10 border-[#a78bfa]/20",
 };
 
 export function ActivityFeed({ events, className }: ActivityFeedProps) {

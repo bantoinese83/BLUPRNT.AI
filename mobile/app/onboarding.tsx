@@ -627,14 +627,14 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: 28,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "#0f172a",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
     marginBottom: 12,
     letterSpacing: -0.5,
   },
   stepSubtitle: {
     fontSize: 16,
-    fontFamily: "Outfit_400Regular",
+    fontFamily: Theme.typography.family.regular,
     color: "#475569",
     marginBottom: 32,
     lineHeight: 24,
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     fontFamily: "Outfit_600SemiBold",
-    color: "#0f172a",
+    color: Theme.colors.text.primary,
   },
   optionTextActive: {
     color: "white",
@@ -680,16 +680,16 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: "#0f172a",
+    color: Theme.colors.text.primary,
     fontSize: 16,
-    fontFamily: "Outfit_500Medium",
+    fontFamily: Theme.typography.family.medium,
   },
   textInput: {
     height: 64,
     paddingHorizontal: 20,
     fontSize: 28,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "#0f172a",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
     letterSpacing: 2,
   },
   reviewCard: {
@@ -703,13 +703,13 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   reviewValue: {
     fontSize: 16,
-    fontFamily: "Outfit_700Bold",
-    color: "#0f172a",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   footer: {
     padding: 24,
@@ -741,8 +741,8 @@ const styles = StyleSheet.create({
   },
   visionLabel: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
-    color: "#0f172a",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   photoGrid: {
     flexDirection: "row",
@@ -773,9 +773,9 @@ const styles = StyleSheet.create({
   },
   scopeInput: {
     minHeight: 120,
-    color: "#0f172a",
+    color: Theme.colors.text.primary,
     fontSize: 16,
-    fontFamily: "Outfit_400Regular",
+    fontFamily: Theme.typography.family.regular,
     textAlignVertical: "top",
   },
   centerContainer: {
@@ -789,14 +789,14 @@ const styles = StyleSheet.create({
   },
   analysisTitle: {
     fontSize: 24,
-    fontFamily: "Outfit_700Bold",
-    color: "#0f172a",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     marginBottom: 8,
   },
   analysisSubtitle: {
     fontSize: 16,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     marginTop: 8,
   },
@@ -830,9 +830,9 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   skipText: {
-    color: "#64748b",
+    color: Theme.colors.text.secondary,
     fontSize: 14,
-    fontFamily: "Outfit_500Medium",
+    fontFamily: Theme.typography.family.medium,
     textDecorationLine: "underline",
   },
   estimateCard: {
@@ -852,13 +852,13 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 12,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: "#818cf8",
     textTransform: "uppercase",
   },
   estimateLabel: {
     fontSize: 12,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: "#6366f1",
     textTransform: "uppercase",
     letterSpacing: 2,
@@ -866,8 +866,8 @@ const styles = StyleSheet.create({
   },
   estimateValue: {
     fontSize: 40,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "#0f172a",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
     letterSpacing: -1,
     marginBottom: 24,
     textAlign: "center",
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
   },
   accountBtnText: {
     fontSize: 18,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: "white",
   },
   badgeContainer: {
@@ -934,14 +934,14 @@ const styles = StyleSheet.create({
   },
   successText: {
     fontSize: 12,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: "#10b981",
     textTransform: "uppercase",
   },
   privacyNote: {
     fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     marginTop: 24,
   },

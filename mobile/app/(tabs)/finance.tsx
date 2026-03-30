@@ -83,19 +83,36 @@ export default function FinanceScreen() {
     return { capital, maintenance, total: capital + maintenance };
   }, [invoices]);
 
-  const filteredInvoices = useMemo(() => {
-    if (filter === "all") return invoices;
-    if (filter === "capital") {
-      return invoices.filter((i) => {
-        const type = (i.document_type || "invoice").toLowerCase();
-        return type === "invoice" || type === "quote";
+  const sortedInvoices = useMemo(() => {
+    return [...invoices].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+  }, [invoices]);
+
+  const groupedInvoices = useMemo(() => {
+    const active =
+      filter === "all"
+        ? sortedInvoices
+        : sortedInvoices.filter((i) => {
+            const type = (i.document_type || "").toLowerCase();
+            if (filter === "capital")
+              return type === "invoice" || type === "quote";
+            return type === "warranty" || type === "permit";
+          });
+
+    const groups: { [key: string]: InvoiceRow[] } = {};
+    active.forEach((inv) => {
+      const date = new Date(inv.created_at);
+      const key = date.toLocaleString("default", {
+        month: "long",
+        year: "numeric",
       });
-    }
-    return invoices.filter((i) => {
-      const type = (i.document_type || "").toLowerCase();
-      return type === "warranty" || type === "permit";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(inv);
     });
-  }, [invoices, filter]);
+    return groups;
+  }, [sortedInvoices, filter]);
 
   const handleExport = async () => {
     if (!project) return;
@@ -304,19 +321,15 @@ export default function FinanceScreen() {
             <View style={styles.statsGrid}>
               <View style={styles.statRow}>
                 <View style={styles.statLabelContainer}>
-                  <View
-                    style={[styles.statDot, { backgroundColor: "#818cf8" }]}
-                  />
-                  <Text style={styles.statLabel}>Capital Improvements</Text>
+                  <Wrench size={14} color="#818cf8" />
+                  <Text style={styles.statLabel}>Capital</Text>
                 </View>
                 <Text style={styles.statValue}>{money(stats.capital)}</Text>
               </View>
               <View style={styles.statRow}>
                 <View style={styles.statLabelContainer}>
-                  <View
-                    style={[styles.statDot, { backgroundColor: "#10b981" }]}
-                  />
-                  <Text style={styles.statLabel}>Maintenance Log</Text>
+                  <ShieldCheck size={14} color="#10b981" />
+                  <Text style={styles.statLabel}>Maintenance</Text>
                 </View>
                 <Text style={styles.statValue}>{money(stats.maintenance)}</Text>
               </View>
@@ -354,52 +367,63 @@ export default function FinanceScreen() {
 
         {/* Invoices List */}
         <View style={styles.listContainer}>
-          {filteredInvoices.length === 0 ? (
+          {Object.keys(groupedInvoices).length === 0 ? (
             <View style={styles.emptyList}>
               <Receipt size={40} color="#334155" />
               <Text style={styles.emptyListText}>No documents found.</Text>
             </View>
           ) : (
-            filteredInvoices.map((inv, idx) => (
-              <MotiView
-                key={inv.id}
-                from={{ opacity: 0, translateY: 10 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ delay: idx * 50 }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    setSelectedInvoice(inv);
-                    setIsReviewOpen(true);
-                    Haptics.selectionAsync();
-                  }}
-                >
-                  <GlassCard intensity={8} style={styles.invoiceCard}>
-                    <View style={styles.invoiceMain}>
-                      <View style={styles.invoiceIcon}>
-                        {(inv.document_type || "invoice").toLowerCase() ===
-                        "invoice" ? (
-                          <Wrench size={18} color="#94a3b8" />
-                        ) : (
-                          <ShieldCheck size={18} color="#94a3b8" />
-                        )}
-                      </View>
-                      <View style={styles.invoiceText}>
-                        <Text style={styles.vendorName}>
-                          {inv.vendor_name || "Uncategorized"}
-                        </Text>
-                        <Text style={styles.invoiceDate}>
-                          {new Date(inv.created_at).toLocaleDateString()} •{" "}
-                          {inv.document_type || "Invoice"}
-                        </Text>
-                      </View>
-                      <Text style={styles.invoiceAmount}>
-                        {money(inv.total)}
-                      </Text>
-                    </View>
-                  </GlassCard>
-                </TouchableOpacity>
-              </MotiView>
+            Object.entries(groupedInvoices).map(([month, items], gIdx) => (
+              <View key={month} style={styles.monthGroup}>
+                <View style={styles.monthHeader}>
+                  <Text style={styles.monthHeaderText}>{month}</Text>
+                  <View style={styles.monthHeaderLine} />
+                </View>
+                <View style={{ gap: 12 }}>
+                  {items.map((inv, idx) => (
+                    <MotiView
+                      key={inv.id}
+                      from={{ opacity: 0, translateY: 10 }}
+                      animate={{ opacity: 1, translateY: 0 }}
+                      transition={{ delay: idx * 50 }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedInvoice(inv);
+                          setIsReviewOpen(true);
+                          Haptics.selectionAsync();
+                        }}
+                      >
+                        <GlassCard intensity={8} style={styles.invoiceCard}>
+                          <View style={styles.invoiceMain}>
+                            <View style={styles.invoiceIcon}>
+                              {(
+                                inv.document_type || "invoice"
+                              ).toLowerCase() === "invoice" ? (
+                                <Wrench size={18} color="#94a3b8" />
+                              ) : (
+                                <ShieldCheck size={18} color="#94a3b8" />
+                              )}
+                            </View>
+                            <View style={styles.invoiceText}>
+                              <Text style={styles.vendorName}>
+                                {inv.vendor_name || "Uncategorized"}
+                              </Text>
+                              <Text style={styles.invoiceDate}>
+                                {new Date(inv.created_at).toLocaleDateString()}{" "}
+                                • {inv.document_type || "Invoice"}
+                              </Text>
+                            </View>
+                            <Text style={styles.invoiceAmount}>
+                              {money(inv.total)}
+                            </Text>
+                          </View>
+                        </GlassCard>
+                      </TouchableOpacity>
+                    </MotiView>
+                  ))}
+                </View>
+              </View>
             ))
           )}
         </View>
@@ -452,8 +476,9 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 24,
-    fontFamily: Theme.typography.family.bold,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
+    letterSpacing: -1,
   },
   content: {
     paddingHorizontal: 24,
@@ -481,8 +506,9 @@ const styles = StyleSheet.create({
   },
   ledgerTitle: {
     fontSize: 18,
-    fontFamily: Theme.typography.family.bold,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
+    letterSpacing: -0.3,
   },
   ledgerSubtitle: {
     fontSize: 12,
@@ -520,7 +546,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 15,
-    fontFamily: Theme.typography.family.bold,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
   },
   exportButton: {
@@ -578,8 +604,9 @@ const styles = StyleSheet.create({
   },
   vendorName: {
     fontSize: 14,
-    fontFamily: Theme.typography.family.bold,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
+    letterSpacing: -0.2,
   },
   invoiceDate: {
     fontSize: 11,
@@ -600,6 +627,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
+  },
+  monthGroup: {
+    marginBottom: 24,
+  },
+  monthHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 12,
+  },
+  monthHeaderText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.muted,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+  },
+  monthHeaderLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Theme.colors.divider,
   },
   emptyText: {
     color: "#94a3b8",

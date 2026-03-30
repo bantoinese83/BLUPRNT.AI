@@ -10,26 +10,15 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
-import {
-  Hammer,
-  CircleDollarSign,
-  Calendar,
-  PlusCircle,
-  Plus,
-  ShieldCheck,
-  MessageCircle,
-} from "lucide-react-native";
+import { Hammer, Plus, PlusCircle, MessageCircle } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { useAuth } from "../../src/contexts/auth-context";
-import { GlassCard } from "../../src/components/ui/GlassCard";
-import { Button } from "../../src/components/ui/Button";
 import { InsightTeaser } from "../../src/components/InsightTeaser";
 import { ActivityFeed } from "../../src/components/ActivityFeed";
 import { ProjectHealth } from "../../src/components/ProjectHealth";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { SkeletonLoader } from "../../src/components/ui/SkeletonLoader";
-import { LinearGradient } from "expo-linear-gradient";
 import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
 import { NextStepsChecklist } from "../../src/components/NextStepsChecklist";
 import { ProjectSwitcher } from "../../src/components/ProjectSwitcher";
@@ -42,6 +31,9 @@ import { uploadDocumentWithType } from "../../src/lib/upload-document";
 import { EmptyState } from "../../src/components/ui/EmptyState";
 import { Theme } from "../../src/constants/Theme";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
+import { DashboardStats } from "../../src/components/DashboardStats";
+import { DashboardWelcomeBanner } from "../../src/components/DashboardWelcomeBanner";
+import { DashboardSkeleton } from "../../src/components/DashboardSkeleton";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
@@ -67,6 +59,15 @@ export default function DashboardScreen() {
   } = useAwareness();
 
   const getGreeting = () => {
+    if (invoices.length > 0) {
+      if (
+        project?.estimated_min_total &&
+        invoiceTotal >= project.estimated_min_total
+      ) {
+        return "Budget reached";
+      }
+      return `${invoices.length} Documents tracked`;
+    }
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
     if (hour < 17) return "Good afternoon";
@@ -95,7 +96,6 @@ export default function DashboardScreen() {
   const handleFabPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-    // Only count actual invoice documents towards the free tier limit (mirrors web logic)
     const invoiceDocCount = invoices.filter(
       (i) => (i.document_type ?? "invoice") === "invoice",
     ).length;
@@ -187,15 +187,7 @@ export default function DashboardScreen() {
   };
 
   if (loading && !project) {
-    return (
-      <ScreenWrapper withLogo style={styles.scrollContent}>
-        <View style={{ gap: 24 }}>
-          <SkeletonLoader height={180} borderRadius={24} />
-          <SkeletonLoader height={120} borderRadius={24} />
-          <SkeletonLoader height={240} borderRadius={24} />
-        </View>
-      </ScreenWrapper>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!project) {
@@ -264,66 +256,23 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       </MotiView>
-      <MotiView
-        from={{ opacity: 0, translateY: 20 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: "timing", duration: 600 }}
-      >
-        <Text style={styles.sectionHeader}>Active Project</Text>
-        <GlassCard style={{ marginBottom: 24 }}>
-          <View style={{ padding: 20 }}>
-            <View style={styles.projectHeader}>
-              <View style={styles.projectIcon}>
-                <Hammer size={24} color={Theme.colors.brand.primary} />
-              </View>
-              <View style={styles.projectNameContainer}>
-                <Text style={styles.projectName}>{project.name}</Text>
-                <Text style={styles.projectStage}>
-                  {project.stage || "Planning"}
-                </Text>
-              </View>
-              <View style={styles.confidenceBadge}>
-                <ShieldCheck size={12} color={Theme.colors.status.success} />
-                <Text style={styles.confidenceText}>
-                  {project.confidence_score ?? 4.8}/5
-                </Text>
-              </View>
-            </View>
 
-            <View style={styles.statsGrid}>
-              <StatItem
-                label="Budget"
-                value={`$${(project.estimated_min_total ?? 0).toLocaleString()}`}
-                icon={
-                  <CircleDollarSign
-                    size={16}
-                    color={Theme.colors.text.secondary}
-                  />
-                }
-              />
-              <StatItem
-                label="Spent"
-                value={`$${invoiceTotal.toLocaleString()}`}
-                icon={
-                  <Calendar size={16} color={Theme.colors.text.secondary} />
-                }
-              />
-            </View>
+      <DashboardWelcomeBanner
+        onAction={(id) => {
+          if (id === "upload") handleFabPress();
+          if (id === "scope") router.push(`/project/${project.id}`);
+          if (id === "export") handleFabPress();
+        }}
+      />
 
-            <Button
-              title="View Full Scope"
-              variant="outline"
-              onPress={() => {
-                Haptics.selectionAsync();
-                router.push(`/project/${project.id}`);
-              }}
-              style={{ marginTop: 20 }}
-            />
-          </View>
-        </GlassCard>
-      </MotiView>
+      <DashboardStats
+        estimatedMin={project.estimated_min_total}
+        estimatedMax={project.estimated_max_total}
+        invoiceTotal={invoiceTotal}
+        invoiceCount={invoices.length}
+      />
 
-      <View style={{ gap: 24 }}>
+      <View style={{ gap: 24, marginTop: 24 }}>
         {/* Project Health Index */}
         <MotiView
           from={{ opacity: 0, translateY: 20 }}
@@ -335,50 +284,6 @@ export default function DashboardScreen() {
             estimatedMax={project.estimated_max_total}
             invoiceTotal={invoiceTotal}
           />
-        </MotiView>
-
-        {/* Budget Progress */}
-        <MotiView
-          from={{ opacity: 0, translateY: 20 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 600, delay: 250 }}
-        >
-          <GlassCard intensity={10} style={styles.budgetCard}>
-            <View style={styles.budgetHeader}>
-              <Text style={styles.budgetLabel}>Project Progress</Text>
-              <Text style={styles.budgetValue}>
-                {project.estimated_min_total
-                  ? Math.round(
-                      (invoiceTotal / project.estimated_min_total) * 100,
-                    )
-                  : 0}
-                %
-              </Text>
-            </View>
-            <View style={styles.progressBarBg}>
-              <MotiView
-                from={{ width: "0%" }}
-                animate={{
-                  width: `${Math.min(100, project.estimated_min_total ? (invoiceTotal / project.estimated_min_total) * 100 : 0)}%`,
-                }}
-                style={styles.progressBarFill}
-              >
-                <LinearGradient
-                  colors={[
-                    Theme.colors.brand.light,
-                    Theme.colors.brand.primary,
-                  ]}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={StyleSheet.absoluteFill}
-                />
-              </MotiView>
-            </View>
-
-            <Text style={styles.budgetNote}>
-              Based on paid invoices vs. minimum estimate
-            </Text>
-          </GlassCard>
         </MotiView>
 
         {/* Resale ROI Impact */}
@@ -447,7 +352,6 @@ export default function DashboardScreen() {
           onAdd={() => router.push("/onboarding")}
         />
 
-        {/* Extra Bottom Padding for FAB comfort */}
         <View style={{ height: 40 }} />
       </View>
 
@@ -457,24 +361,6 @@ export default function DashboardScreen() {
         reason={upgradeReason}
       />
     </ScreenWrapper>
-  );
-}
-
-interface StatItemProps {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}
-
-function StatItem({ label, value, icon }: StatItemProps) {
-  return (
-    <View style={styles.statItem}>
-      <View style={styles.statLabelRow}>
-        {icon}
-        <Text style={styles.statLabel}>{label}</Text>
-      </View>
-      <Text style={styles.statValue}>{value}</Text>
-    </View>
   );
 }
 
@@ -496,180 +382,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginLeft: 4,
     marginTop: 8,
-  },
-  projectHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-    marginTop: 4, // Added top breathing room
-  },
-  projectIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: Theme.colors.inputBg,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
-  },
-  projectNameContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  projectName: {
-    fontSize: 20,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-    letterSpacing: -0.5,
-  },
-  projectStage: {
-    fontSize: 13,
-    fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
-    textTransform: "capitalize",
-    marginTop: 2,
-  },
-  confidenceBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(16, 185, 129, 0.08)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(16, 185, 129, 0.12)",
-    marginRight: -4,
-  },
-  confidenceText: {
-    fontSize: 11,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.status.success,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: Theme.colors.inputBg,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
-  },
-  statItem: {
-    flex: 1,
-  },
-  statLabelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: Theme.typography.family.semibold,
-    color: Theme.colors.text.secondary,
-    marginLeft: 6,
-  },
-  statValue: {
-    fontSize: 18,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    padding: 32,
-    width: "100%",
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
-    textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 32,
-  },
-  otherProjectName: {
-    fontSize: 14,
-    fontFamily: Theme.typography.family.semibold,
-    color: Theme.colors.text.primary,
-  },
-  otherProjectsSection: {
-    marginTop: 8,
-    marginBottom: 100,
-  },
-  miniGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  miniProjectCard: {
-    width: "48%",
-  },
-  miniProjectInner: {
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderRadius: 14,
-    backgroundColor: Theme.colors.inputBg,
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
-  },
-  miniIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: "rgba(79, 70, 229, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  budgetCard: {
-    padding: 20,
-    marginBottom: 24,
-  },
-  budgetHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  budgetLabel: {
-    fontSize: 12,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-  },
-  budgetValue: {
-    fontSize: 14,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.brand.primary,
-  },
-  progressBarBg: {
-    height: 8,
-    backgroundColor: Theme.colors.divider,
-    borderRadius: 4,
-    overflow: "hidden",
-    marginBottom: 8,
-  },
-  progressBarFill: {
-    height: "100%",
-    borderRadius: 4,
-    overflow: "hidden",
-  },
-  budgetNote: {
-    fontSize: 9,
-    fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
-    textAlign: "center",
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
   headerRight: {
     flexDirection: "row",
@@ -707,24 +419,14 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
-  insightsButton: {
-    width: 48,
-    height: 48,
-    borderRadius: Theme.radius.md,
-    backgroundColor: Theme.colors.inputBg,
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   insightsDot: {
     position: "absolute",
-    top: 13,
-    right: 13,
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.9)",
+    top: 10,
+    right: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: "white",
   },
 });
