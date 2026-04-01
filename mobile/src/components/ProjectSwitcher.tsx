@@ -4,7 +4,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   Alert,
 } from "react-native";
 import { Hammer, PlusCircle } from "lucide-react-native";
@@ -34,17 +34,17 @@ export function ProjectSwitcher({
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Switch Project</Text>
-      <ScrollView
+      <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingHorizontal: 24, paddingRight: 112 },
         ]}
-      >
-        {projects.map((p) => (
+        data={projects}
+        keyExtractor={(p) => p.id}
+        renderItem={({ item: p }) => (
           <TouchableOpacity
-            key={p.id}
             style={styles.cardWrapper}
             onPress={() => {
               Haptics.selectionAsync();
@@ -113,23 +113,25 @@ export function ProjectSwitcher({
               </Text>
             </GlassCard>
           </TouchableOpacity>
-        ))}
-
-        {/* Create New Trigger */}
-        <TouchableOpacity
-          style={styles.addCardWrapper}
-          onPress={() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            onAdd();
-          }}
-        >
-          <GlassCard intensity={12} style={[styles.card, styles.addCard]}>
-            <View style={[styles.iconContainer, styles.addIconContainer]}>
-              <PlusCircle size={18} color="white" />
-            </View>
-          </GlassCard>
-        </TouchableOpacity>
-      </ScrollView>
+        )}
+        ListFooterComponent={
+          <TouchableOpacity
+            style={styles.addCardWrapper}
+            onPress={() => {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              onAdd();
+            }}
+          >
+            <GlassCard intensity={12} style={[styles.card, styles.addCard]}>
+              <View style={[styles.iconContainer, styles.addIconContainer]}>
+                <PlusCircle size={18} color="white" />
+              </View>
+            </GlassCard>
+          </TouchableOpacity>
+        }
+      />
     </View>
   );
 }

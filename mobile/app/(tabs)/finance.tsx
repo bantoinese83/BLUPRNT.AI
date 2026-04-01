@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  SectionList,
 } from "react-native";
 import {
   BookOpen,
@@ -113,6 +114,13 @@ export default function FinanceScreen() {
     });
     return groups;
   }, [sortedInvoices, filter]);
+
+  const sections = useMemo(() => {
+    return Object.entries(groupedInvoices).map(([month, items]) => ({
+      title: month,
+      data: items,
+    }));
+  }, [groupedInvoices]);
 
   const handleExport = async () => {
     if (!project) return;
@@ -268,13 +276,8 @@ export default function FinanceScreen() {
     );
   }
 
-  return (
-    <ScreenWrapper
-      withScroll
-      onRefresh={load}
-      refreshing={loading}
-      edges={["top", "left", "right"]}
-    >
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.pageTitle}>Property Ledger</Text>
@@ -358,76 +361,85 @@ export default function FinanceScreen() {
             { label: "Maintenance", value: "maintenance" },
           ]}
           value={filter}
-          onChange={(val: any) => {
+          onChange={(val: string) => {
             Haptics.selectionAsync();
-            setFilter(val);
+            setFilter(val as "all" | "capital" | "maintenance");
           }}
           containerStyle={{ marginTop: 32, marginBottom: 16 }}
         />
-
-        {/* Invoices List */}
-        <View style={styles.listContainer}>
-          {Object.keys(groupedInvoices).length === 0 ? (
-            <View style={styles.emptyList}>
-              <Receipt size={40} color="#334155" />
-              <Text style={styles.emptyListText}>No documents found.</Text>
-            </View>
-          ) : (
-            Object.entries(groupedInvoices).map(([month, items], gIdx) => (
-              <View key={month} style={styles.monthGroup}>
-                <View style={styles.monthHeader}>
-                  <Text style={styles.monthHeaderText}>{month}</Text>
-                  <View style={styles.monthHeaderLine} />
-                </View>
-                <View style={{ gap: 12 }}>
-                  {items.map((inv, idx) => (
-                    <MotiView
-                      key={inv.id}
-                      from={{ opacity: 0, translateY: 10 }}
-                      animate={{ opacity: 1, translateY: 0 }}
-                      transition={{ delay: idx * 50 }}
-                    >
-                      <TouchableOpacity
-                        onPress={() => {
-                          setSelectedInvoice(inv);
-                          setIsReviewOpen(true);
-                          Haptics.selectionAsync();
-                        }}
-                      >
-                        <GlassCard intensity={8} style={styles.invoiceCard}>
-                          <View style={styles.invoiceMain}>
-                            <View style={styles.invoiceIcon}>
-                              {(
-                                inv.document_type || "invoice"
-                              ).toLowerCase() === "invoice" ? (
-                                <Wrench size={18} color="#94a3b8" />
-                              ) : (
-                                <ShieldCheck size={18} color="#94a3b8" />
-                              )}
-                            </View>
-                            <View style={styles.invoiceText}>
-                              <Text style={styles.vendorName}>
-                                {inv.vendor_name || "Uncategorized"}
-                              </Text>
-                              <Text style={styles.invoiceDate}>
-                                {new Date(inv.created_at).toLocaleDateString()}{" "}
-                                • {inv.document_type || "Invoice"}
-                              </Text>
-                            </View>
-                            <Text style={styles.invoiceAmount}>
-                              {money(inv.total)}
-                            </Text>
-                          </View>
-                        </GlassCard>
-                      </TouchableOpacity>
-                    </MotiView>
-                  ))}
-                </View>
-              </View>
-            ))
-          )}
-        </View>
       </View>
+    </>
+  );
+
+  return (
+    <ScreenWrapper edges={["top", "left", "right"]}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.id}
+        refreshing={loading}
+        onRefresh={load}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={renderHeader}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET + 20 }}
+        stickySectionHeadersEnabled={false}
+        ListEmptyComponent={
+          <View style={styles.emptyList}>
+            <Receipt size={40} color="#334155" />
+            <Text style={styles.emptyListText}>No documents found.</Text>
+          </View>
+        }
+        renderSectionHeader={({ section: { title } }) => (
+          <View style={[styles.monthGroup, { paddingHorizontal: 24 }]}>
+            <View style={styles.monthHeader}>
+              <Text style={styles.monthHeaderText}>{title}</Text>
+              <View style={styles.monthHeaderLine} />
+            </View>
+          </View>
+        )}
+        renderItem={({ item: inv, index }) => (
+          <View style={{ paddingHorizontal: 24, paddingBottom: 12 }}>
+            <MotiView
+              from={{ opacity: 0, translateY: 10 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ delay: Math.min(index * 50, 400) }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedInvoice(inv);
+                  setIsReviewOpen(true);
+                  Haptics.selectionAsync();
+                }}
+              >
+                <GlassCard intensity={8} style={styles.invoiceCard}>
+                  <View style={styles.invoiceMain}>
+                    <View style={styles.invoiceIcon}>
+                      {(inv.document_type || "invoice").toLowerCase() ===
+                      "invoice" ? (
+                        <Wrench size={18} color="#94a3b8" />
+                      ) : (
+                        <ShieldCheck size={18} color="#94a3b8" />
+                      )}
+                    </View>
+                    <View style={styles.invoiceText}>
+                      <Text style={styles.vendorName}>
+                        {inv.vendor_name || "Uncategorized"}
+                      </Text>
+                      <Text style={styles.invoiceDate}>
+                        {new Date(inv.created_at).toLocaleDateString()} •{" "}
+                        {inv.document_type || "Invoice"}
+                      </Text>
+                    </View>
+                    <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
+                  </View>
+                </GlassCard>
+              </TouchableOpacity>
+            </MotiView>
+          </View>
+        )}
+      />
 
       {/* Modals */}
       <UpgradeModal
@@ -482,7 +494,6 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 24,
-    paddingBottom: TAB_BAR_OFFSET + 20,
   },
   mainCard: {
     padding: 24,
