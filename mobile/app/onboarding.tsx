@@ -203,7 +203,9 @@ export default function OnboardingScreen() {
                   >
                     {type}
                   </Text>
-                  {projectType === type && <Check size={20} color="white" />}
+                  {projectType === type && (
+                    <Check size={20} color={Theme.colors.brand.primary} />
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -268,7 +270,9 @@ export default function OnboardingScreen() {
                   >
                     {s}
                   </Text>
-                  {stage === s && <Check size={20} color="white" />}
+                  {stage === s && (
+                    <Check size={20} color={Theme.colors.brand.primary} />
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -555,7 +559,7 @@ export default function OnboardingScreen() {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <ChevronLeft size={24} color="white" />
+          <ChevronLeft size={24} color="#0f172a" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           {STEPS.map((_, i) => (
@@ -575,20 +579,16 @@ export default function OnboardingScreen() {
         <AnimatePresence exitBeforeEnter>{renderStep()}</AnimatePresence>
       </View>
 
-      <View style={styles.footer}>
-        <Button
-          title={step === STEPS.length - 1 ? "Finish" : "Continue"}
-          onPress={handleNext}
-          loading={loading}
-          icon={
-            step < STEPS.length - 1 ? (
-              <ChevronRight size={20} color="white" />
-            ) : (
-              <Check size={20} color="white" />
-            )
-          }
-        />
-      </View>
+      {step < STEPS.length - 1 && (
+        <View style={styles.footer}>
+          <Button
+            title="Continue"
+            onPress={handleNext}
+            loading={loading}
+            icon={<ChevronRight size={20} color="white" />}
+          />
+        </View>
+      )}
     </ScreenWrapper>
   );
 }
@@ -603,13 +603,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
-    overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "#e2e8f0",
   },
   progressContainer: {
     flex: 1,
@@ -619,10 +618,10 @@ const styles = StyleSheet.create({
   progressBar: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#e2e8f0",
   },
   progressBarActive: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
   },
   content: {
     padding: 24,
@@ -658,7 +657,7 @@ const styles = StyleSheet.create({
   },
   optionButtonActive: {
     backgroundColor: "rgba(79, 70, 229, 0.05)",
-    borderColor: "#4f46e5",
+    borderColor: Theme.colors.brand.primary,
   },
   optionText: {
     fontSize: 16,
@@ -666,7 +665,7 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.primary,
   },
   optionTextActive: {
-    color: "white",
+    color: Theme.colors.brand.primary,
   },
   inputCard: {
     padding: 4,
