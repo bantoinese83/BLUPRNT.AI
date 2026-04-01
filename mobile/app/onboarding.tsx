@@ -27,6 +27,7 @@ import * as ImagePicker from "expo-image-picker";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
+import { Logo } from "../src/components/ui/Logo";
 import {
   ProjectTypeOption,
   StageOption,
@@ -404,7 +405,7 @@ export default function OnboardingScreen() {
                 ]}
               />
               <GlassCard intensity={40} style={styles.iconCircle}>
-                <Sparkles size={40} color="white" />
+                <Logo size={40} />
               </GlassCard>
             </View>
             <Text style={styles.analysisTitle}>Analyzing Blueprint</Text>
