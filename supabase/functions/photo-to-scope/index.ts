@@ -214,11 +214,13 @@ Deno.serve(async (req: Request) => {
         total_cost_max: r.total_cost_max,
         confidence_score: r.confidence_score,
         source: r.source,
-        justification: r.metadata?.justification,
-        priority: r.metadata?.priority,
-        phase: r.metadata?.phase,
-        maintenance_tips: r.metadata?.maintenance_tips,
-        materials: r.metadata?.materials || [],
+        metadata: {
+          justification: r.metadata?.justification || "",
+          priority: r.metadata?.priority || "medium",
+          phase: r.metadata?.phase || "standard",
+          maintenance_tips: r.metadata?.maintenance_tips || "",
+          materials: r.metadata?.materials || [],
+        },
       }));
 
       return jsonResponse(
@@ -235,7 +237,24 @@ Deno.serve(async (req: Request) => {
 
     const scope_items = payload.scope_items.map((s, i) => ({
       id: `scope_${i + 1}`,
-      ...s,
+      category: s.category,
+      description: s.description,
+      finish_tier: s.finish_tier,
+      quantity: s.quantity,
+      unit: s.unit,
+      unit_cost_min: s.unit_cost_min,
+      unit_cost_max: s.unit_cost_max,
+      total_cost_min: s.total_cost_min,
+      total_cost_max: s.total_cost_max,
+      confidence_score: s.confidence_score,
+      source: s.source,
+      metadata: {
+        justification: s.justification || "",
+        priority: s.priority || "medium",
+        phase: s.phase || "standard",
+        maintenance_tips: s.maintenance_tips || "",
+        materials: Array.isArray(s.materials) ? s.materials : [],
+      },
     }));
 
     const areaLabel = await cityFromZipUniversal(zip_code);

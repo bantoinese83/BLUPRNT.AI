@@ -25,6 +25,21 @@ export type ScopeItemPreview = {
   priority?: "high" | "medium" | "low";
   phase?: string;
   maintenance_tips?: string;
+  metadata?: {
+    justification?: string;
+    priority?: "high" | "medium" | "low";
+    phase?: string;
+    maintenance_tips?: string;
+    confidence_reason?: string;
+    materials?: Array<{
+      name: string;
+      brand?: string;
+      model?: string;
+      quantity?: number;
+      unit?: string;
+      estimated_cost?: number;
+    }>;
+  };
 };
 
 export type PhotoToScopeResult = {

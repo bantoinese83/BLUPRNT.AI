@@ -128,6 +128,7 @@ export async function saveOnboardingProject(params: {
       total_cost_max: s.total_cost_max,
       confidence_score: s.confidence_score,
       source: (s.source === "photo" ? "photo" : "text") as "photo" | "text",
+      metadata: s.metadata,
     }));
     await supabase.from("scope_items").insert(rows);
   }
