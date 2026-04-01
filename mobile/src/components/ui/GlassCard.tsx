@@ -72,7 +72,7 @@ export function GlassCard({
 
       {/* Internal Polish / Depth Glow */}
       <LinearGradient
-        colors={["rgba(255, 255, 255, 0.5)", "transparent"]}
+        colors={["rgba(255, 255, 255, 0.15)", "transparent"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0.5, y: 0.5 }}
         style={StyleSheet.absoluteFill}
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
   borderHighlight: {
     borderWidth: 1.2,
     borderColor: "transparent",
-    borderTopColor: "rgba(255,255,255,0.8)",
-    borderLeftColor: "rgba(255,255,255,0.4)",
+    borderTopColor: "rgba(255,255,255,0.3)",
+    borderLeftColor: "rgba(255,255,255,0.15)",
     borderRightColor: "rgba(0,0,0,0.01)",
     borderRadius: Theme.radius.xl,
   },

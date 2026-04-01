@@ -352,7 +352,7 @@ export default function DashboardScreen() {
           onAdd={() => router.push("/onboarding")}
         />
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 120 }} />
       </View>
 
       <UpgradeModal
