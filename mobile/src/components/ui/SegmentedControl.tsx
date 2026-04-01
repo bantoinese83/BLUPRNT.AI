@@ -37,12 +37,11 @@ export function SegmentedControl({
       {/* Sliding Backdrop */}
       <MotiView
         animate={{
-          translateX: activeIndex * (itemWidth + 4),
+          translateX: activeIndex * itemWidth,
         }}
         transition={{
-          type: "spring",
-          damping: 20,
-          stiffness: 150,
+          type: "timing",
+          duration: 200,
         }}
         style={[styles.activeBackdrop, { width: itemWidth }]}
       />
