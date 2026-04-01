@@ -425,6 +425,7 @@ export default function OnboardingScreen() {
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
+            exit={{ opacity: 0, translateY: -20 }}
             key="step5"
           >
             <Text style={styles.stepTitle}>You're Ready</Text>
@@ -464,6 +465,7 @@ export default function OnboardingScreen() {
           <MotiView
             from={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             key="step6-final"
             style={styles.visionContainer}
           >
