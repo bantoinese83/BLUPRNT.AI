@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import { ArrowLeft, Shield } from "lucide-react-native";
 import { MotiView } from "moti";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
+import { Theme } from "../src/constants/Theme";
 
 export default function PrivacyScreen() {
   return (
@@ -19,12 +20,12 @@ export default function PrivacyScreen() {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <ArrowLeft size={20} color="#94a3b8" />
+          <ArrowLeft size={20} color={Theme.colors.text.primary} />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
 
         <View style={styles.iconContainer}>
-          <Shield size={32} color="#818cf8" />
+          <Shield size={32} color={Theme.colors.brand.primary} />
         </View>
         <Text style={styles.title}>Privacy Policy</Text>
         <Text style={styles.subtitle}>Last updated: October 2023</Text>
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderBottomColor: Theme.colors.divider,
   },
   backButton: {
     flexDirection: "row",
@@ -94,28 +95,28 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 14,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
   },
   iconContainer: {
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: "rgba(129, 140, 248, 0.1)",
+    backgroundColor: "rgba(79, 70, 229, 0.08)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
   },
   title: {
     fontSize: 24,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   content: {
     flex: 1,
@@ -129,14 +130,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     marginBottom: 8,
   },
   sectionContent: {
     fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     lineHeight: 22,
   },
 });
