@@ -28,9 +28,9 @@ export function StageScreen() {
 
   return (
     <PageTransition>
-      <div className="space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-1.5 sm:space-y-2">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
             Where are you in the process?
           </h2>
         </div>

@@ -17,7 +17,13 @@ import {
   Share2,
   Download,
   Plus,
+  ChevronDown,
+  ChevronUp,
+  Package,
+  Tag,
+  Boxes,
 } from "lucide-react-native";
+import { AnimatePresence } from "moti";
 import { BlurView } from "expo-blur";
 import { generateSellerPacketPDF } from "../../src/lib/pdf-export";
 import { generateProjectShareLink } from "../../src/lib/share-project";
@@ -32,11 +38,54 @@ import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { ProjectRow, ScopeRow } from "../../src/types/database";
 import { Theme } from "../../src/constants/Theme";
 
+function MaterialDetailList({
+  materials,
+}: {
+  materials: NonNullable<ScopeRow["metadata"]>["materials"];
+}) {
+  if (!materials || materials.length === 0) return null;
+
+  return (
+    <View style={styles.materialContainer}>
+      <View style={styles.materialHeader}>
+        <Package size={12} color={Theme.colors.brand.primary} />
+        <Text style={styles.materialHeaderText}>Bill of Materials</Text>
+      </View>
+      <View style={styles.materialGrid}>
+        {materials.map((m: any, idx: number) => (
+          <View key={idx} style={styles.materialCard}>
+            <View style={styles.materialIconBg}>
+              <Boxes size={14} color={Theme.colors.text.muted} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.materialName}>{m.name}</Text>
+              <View style={styles.materialMetaRow}>
+                {m.brand && (
+                  <View style={styles.brandTag}>
+                    <Tag size={10} color={Theme.colors.brand.primary} />
+                    <Text style={styles.brandText}>{m.brand}</Text>
+                  </View>
+                )}
+                {m.quantity && (
+                  <Text style={styles.materialQuantity}>
+                    {m.quantity} {m.unit || "units"}
+                  </Text>
+                )}
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scope, setScope] = useState<ScopeRow[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const { invoices, isArchitect, hasProjectPass, addItem } = useDashboardData();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -233,7 +282,13 @@ export default function ProjectDetailScreen() {
                   delay: 300 + catIndex * 150 + index * 50,
                 }}
               >
-                <GlassCard intensity={10} style={styles.scopeCard}>
+                <GlassCard
+                  intensity={10}
+                  style={[
+                    styles.scopeCard,
+                    expandedId === item.id && styles.expandedScopeCard,
+                  ]}
+                >
                   <View style={styles.scopeHeader}>
                     <Text style={styles.scopeDescription}>
                       {item.description}
@@ -251,6 +306,63 @@ export default function ProjectDetailScreen() {
                       {(item.total_cost_max || 0).toLocaleString()}
                     </Text>
                   </View>
+
+                  {item.metadata?.materials &&
+                    item.metadata.materials.length > 0 && (
+                      <>
+                        <TouchableOpacity
+                          style={[
+                            styles.viewDetailsBtn,
+                            expandedId === item.id &&
+                              styles.activeViewDetailsBtn,
+                          ]}
+                          onPress={() => {
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                            setExpandedId(
+                              expandedId === item.id ? null : item.id,
+                            );
+                          }}
+                        >
+                          <Text
+                            style={[
+                              styles.viewDetailsText,
+                              expandedId === item.id &&
+                                styles.activeViewDetailsText,
+                            ]}
+                          >
+                            {expandedId === item.id
+                              ? "Hide Breakdown"
+                              : "View Breakdown"}
+                          </Text>
+                          {expandedId === item.id ? (
+                            <ChevronUp size={14} color="white" />
+                          ) : (
+                            <ChevronDown
+                              size={14}
+                              color={Theme.colors.text.secondary}
+                            />
+                          )}
+                        </TouchableOpacity>
+
+                        <AnimatePresence>
+                          {expandedId === item.id && (
+                            <MotiView
+                              from={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ type: "timing", duration: 300 }}
+                              style={{ overflow: "hidden" }}
+                            >
+                              <MaterialDetailList
+                                materials={item.metadata.materials}
+                              />
+                            </MotiView>
+                          )}
+                        </AnimatePresence>
+                      </>
+                    )}
                 </GlassCard>
               </MotiView>
             ))}
@@ -479,5 +591,98 @@ const styles = StyleSheet.create({
   exportBtn: {
     backgroundColor: "#ffffff",
     borderColor: "rgba(15, 23, 42, 0.1)",
+  },
+  materialContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
+    borderRadius: 14,
+  },
+  materialHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  materialHeaderText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+  },
+  materialGrid: {
+    gap: 8,
+  },
+  materialCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.04)",
+  },
+  materialIconBg: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: Theme.colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  materialName: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
+  },
+  materialMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 2,
+  },
+  brandTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  brandText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
+    textTransform: "uppercase",
+  },
+  materialQuantity: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.muted,
+  },
+  viewDetailsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    marginTop: 12,
+    borderRadius: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
+    gap: 6,
+  },
+  activeViewDetailsBtn: {
+    backgroundColor: Theme.colors.text.primary,
+  },
+  viewDetailsText: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+  },
+  activeViewDetailsText: {
+    color: "white",
+  },
+  expandedScopeCard: {
+    borderColor: "rgba(79, 70, 229, 0.2)",
+    borderWidth: 1,
   },
 });

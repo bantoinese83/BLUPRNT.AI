@@ -162,10 +162,11 @@ Deno.serve(async (req: Request) => {
         confidence_score: s.confidence_score,
         source: s.source,
         metadata: {
-          justification: s.justification,
-          priority: s.priority,
-          phase: s.phase,
-          maintenance_tips: s.maintenance_tips,
+          justification: s.justification || "",
+          priority: s.priority || "medium",
+          phase: s.phase || "standard",
+          maintenance_tips: s.maintenance_tips || "",
+          materials: Array.isArray(s.materials) ? s.materials : [],
         },
       }));
 
@@ -217,6 +218,7 @@ Deno.serve(async (req: Request) => {
         priority: r.metadata?.priority,
         phase: r.metadata?.phase,
         maintenance_tips: r.metadata?.maintenance_tips,
+        materials: r.metadata?.materials || [],
       }));
 
       return jsonResponse(

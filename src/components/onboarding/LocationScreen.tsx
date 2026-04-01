@@ -101,16 +101,16 @@ export function LocationScreen() {
 
   return (
     <PageTransition>
-      <div className="space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-1.5 sm:space-y-2">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
             Where is this home?
           </h2>
-          <p className="text-slate-500">
+          <p className="text-sm sm:text-base text-slate-500 leading-relaxed">
             We use your area to ground costs in real numbers, not guesses.
           </p>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           <div className="flex flex-col gap-2">
             <Button
               type="button"

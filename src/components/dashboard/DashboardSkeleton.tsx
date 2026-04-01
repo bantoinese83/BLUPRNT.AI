@@ -13,7 +13,7 @@ export function DashboardSkeleton() {
     <div className="min-h-screen dashboard-bg">
       {/* Header skeleton */}
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md">
               <div className="h-10 w-10 sm:h-11 sm:w-11 bg-slate-100 rounded-lg flex items-center justify-center relative overflow-hidden">
@@ -31,7 +31,7 @@ export function DashboardSkeleton() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Project header skeleton */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}

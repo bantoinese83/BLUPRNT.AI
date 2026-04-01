@@ -24,7 +24,7 @@ export function AppSlimFooter({
       )}
     >
       <nav
-        className="mx-auto flex max-w-5xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-between sm:gap-y-2"
+        className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-between sm:gap-y-2"
         aria-label="Site footer"
       >
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-slate-500 sm:text-sm">

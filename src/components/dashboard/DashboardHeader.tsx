@@ -47,7 +47,7 @@ export function DashboardHeader({
         scrolled && "shadow-sm shadow-slate-200/40",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:h-[4.25rem] sm:gap-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-[4.25rem] sm:gap-4 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-3.5">
           <Link
             to="/dashboard"
@@ -62,7 +62,7 @@ export function DashboardHeader({
           </Link>
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <div className="flex items-center gap-x-2 gap-y-1">
               <Link
                 to="/dashboard"
                 className="text-base font-black italic tracking-tight text-slate-900 sm:text-lg"
@@ -197,7 +197,7 @@ export function DashboardHeader({
             aria-hidden
           />
 
-          <Link to="/settings" className="hidden sm:block">
+          <Link to="/settings" className="block">
             <Button
               variant="ghost"
               size="sm"
@@ -205,22 +205,22 @@ export function DashboardHeader({
               type="button"
             >
               <Settings2
-                className="mr-1.5 h-4 w-4 text-slate-500"
+                className="h-4 w-4 text-slate-500 lg:mr-1.5"
                 aria-hidden
               />
-              <span className="font-semibold">Settings</span>
+              <span className="hidden font-semibold lg:inline">Settings</span>
             </Button>
           </Link>
 
-          <a href="mailto:connect@monarch-labs.com" className="hidden sm:block">
+          <a href="mailto:connect@monarch-labs.com" className="block">
             <Button
               variant="ghost"
               size="sm"
               className="h-9 rounded-xl px-2.5 text-slate-600 hover:bg-slate-100/90 hover:text-indigo-600"
               type="button"
             >
-              <LifeBuoy className="mr-1.5 h-4 w-4" aria-hidden />
-              <span className="font-semibold">Support</span>
+              <LifeBuoy className="h-4 w-4 lg:mr-1.5" aria-hidden />
+              <span className="hidden font-semibold lg:inline">Support</span>
             </Button>
           </a>
 

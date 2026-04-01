@@ -2,13 +2,84 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wallet, ListTree, Hammer } from "lucide-react";
-import { motion } from "motion/react";
+import {
+  Wallet,
+  ListTree,
+  Hammer,
+  ChevronDown,
+  ChevronUp,
+  Package,
+  Tag,
+  Boxes,
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 import type { ProjectRow, ScopeRow } from "@/types/database";
 
 import { money, getStars as stars } from "@/lib/formatters";
 import { InsightTeaser } from "./InsightTeaser";
+
+function MaterialDetailList({
+  materials,
+}: {
+  materials: NonNullable<ScopeRow["metadata"]>["materials"];
+}) {
+  if (!materials || materials.length === 0) return null;
+
+  return (
+    <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+      <div className="flex items-center gap-2 mb-2">
+        <Package className="w-4 h-4 text-indigo-500" />
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+          Detailed Bill of Materials
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {materials.map((m, idx) => (
+          <div
+            key={idx}
+            className="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:border-indigo-100 group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 transition-colors">
+              <Boxes className="w-4 h-4 text-slate-400 group-hover:text-indigo-500" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold text-slate-900 leading-tight">
+                {m.name}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                {m.brand && (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                    <Tag className="w-3 h-3" />
+                    {m.brand}
+                  </span>
+                )}
+                {m.quantity && (
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none">
+                    {m.quantity} {m.unit || "units"}
+                  </span>
+                )}
+              </div>
+              {m.model && (
+                <p className="text-[10px] text-slate-400 font-medium mt-1 truncate">
+                  Model: {m.model}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="pt-2 flex items-center justify-center">
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
+          <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+          Quantities grounded in regional waste factors
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function EstimateSummary({
   project,
@@ -24,6 +95,7 @@ export function EstimateSummary({
   onUpgradeClick?: () => void;
 }) {
   const navigate = useNavigate();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const conf = project.confidence_score ?? 4.5;
   const regionalSignal = project.metadata?.regional_signal;
 
@@ -130,50 +202,112 @@ export function EstimateSummary({
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {scopeItems.slice(0, 10).map((item) => (
-              <div
-                key={item.id}
-                className="group p-5 sm:p-7 flex flex-col sm:flex-row items-start justify-between gap-6 hover:bg-slate-50/50 transition-all duration-300"
-              >
-                <div className="space-y-2 min-w-0 flex-1">
-                  <div className="flex items-center flex-wrap gap-2.5">
-                    <h4 className="font-bold text-slate-900 tracking-tight group-hover:text-slate-950 transition-colors uppercase">
-                      {item.category}
-                    </h4>
+            {scopeItems.slice(0, 10).map((item) => {
+              const isExpanded = expandedId === item.id;
+              const materials = item.metadata?.materials;
+              const hasMaterials = materials && materials.length > 0;
 
-                    {item.finish_tier && (
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-600 border-none px-2 py-0.5"
-                      >
-                        {item.finish_tier}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-0.5">
-                      {stars(item.confidence_score)}
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      Market Precision
-                    </span>
-                  </div>
-                </div>
-                <div className="text-left sm:text-right shrink-0">
-                  <div className="font-bold text-lg text-slate-900 tabular-nums mb-0.5">
-                    {money(item.total_cost_min, item.total_cost_max)}
-                  </div>
-                  {item.quantity != null && item.unit && (
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded inline-block">
-                      {item.quantity} {item.unit}
-                    </div>
+              if (
+                item.category === "FLOORING" ||
+                item.category === "CABINETRY"
+              ) {
+                console.log(
+                  `DASHBOARD_DEBUG: Item ${item.category} has materials?`,
+                  hasMaterials,
+                  item.metadata,
+                );
+              }
+
+              return (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "group p-5 sm:p-7 flex flex-col hover:bg-slate-50/30 transition-all duration-300 border-l-4 border-l-transparent",
+                    isExpanded &&
+                      "bg-slate-50/50 border-l-indigo-500 shadow-inner",
                   )}
+                >
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
+                    <div className="space-y-2 min-w-0 flex-1">
+                      <div className="flex items-center flex-wrap gap-2.5">
+                        <h4 className="font-bold text-slate-900 tracking-tight group-hover:text-slate-950 transition-colors uppercase">
+                          {item.category}
+                        </h4>
+
+                        {item.finish_tier && (
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-extrabold uppercase tracking-wider bg-slate-100/80 text-slate-600 border-none px-2 py-0.5"
+                          >
+                            {item.finish_tier}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">
+                        {item.description}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="flex gap-0.5">
+                          {stars(item.confidence_score)}
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          Market Precision
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-start sm:items-end shrink-0 gap-3">
+                      <div className="text-left sm:text-right">
+                        <div className="font-bold text-lg text-slate-900 tabular-nums mb-0.5">
+                          {money(item.total_cost_min, item.total_cost_max)}
+                        </div>
+                        {item.quantity != null && item.unit && (
+                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded inline-block">
+                            {item.quantity} {item.unit}
+                          </div>
+                        )}
+                      </div>
+
+                      {hasMaterials && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setExpandedId(isExpanded ? null : item.id)
+                          }
+                          className={cn(
+                            "h-8 px-3 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all",
+                            isExpanded
+                              ? "bg-slate-900 text-white hover:bg-black"
+                              : "bg-white text-slate-600 shadow-sm border border-slate-100 hover:bg-slate-50",
+                          )}
+                        >
+                          {isExpanded ? "Hide Details" : "View Breakdown"}
+                          {isExpanded ? (
+                            <ChevronUp className="w-3 h-3 ml-1.5" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3 ml-1.5" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <MaterialDetailList materials={materials} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {scopeItems.length > 10 && (
               <div className="p-6 bg-slate-50/50 flex justify-center border-t border-slate-100">
                 <Button

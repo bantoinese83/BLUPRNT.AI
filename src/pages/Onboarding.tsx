@@ -41,18 +41,24 @@ function StepProgress({ currentPath }: { currentPath: string }) {
 
   const remainingSteps = ONBOARDING_STEPS.length - currentIndex - 1;
   const timeLabel =
-    remainingSteps <= 1
-      ? "Seconds away"
-      : `${Math.ceil(remainingSteps / 2)} min left`;
+    remainingSteps <= 0
+      ? "Almost done"
+      : remainingSteps === 1
+        ? "Seconds away"
+        : `${Math.ceil(remainingSteps / 2)} min left`;
 
   return (
-    <div className="w-full flex flex-col items-center space-y-6 mb-12">
-      <div className="flex w-full justify-between items-center px-2">
-        <h1 className="text-lg font-black italic tracking-tighter text-slate-900 leading-none">
-          {ONBOARDING_STEPS[currentIndex].label}{" "}
-          <span className="text-indigo-600">— Step {currentIndex + 1}</span>
-        </h1>
-        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
+    <div className="w-full flex flex-col items-center space-y-4 mb-8 sm:mb-12">
+      <div className="flex w-full justify-between items-end px-1">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600/60 leading-none">
+            Progress — {currentIndex + 1} of {ONBOARDING_STEPS.length}
+          </p>
+          <h1 className="text-lg sm:text-xl font-black italic tracking-tighter text-slate-900 leading-none">
+            {ONBOARDING_STEPS[currentIndex].label}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
             {timeLabel}
@@ -60,66 +66,39 @@ function StepProgress({ currentPath }: { currentPath: string }) {
         </div>
       </div>
 
-      <div className="relative w-full px-2">
-        {/* Connection Line */}
-        <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
-        <motion.div
-          className="absolute top-1/2 left-0 h-0.5 bg-indigo-600 -translate-y-1/2 z-0 origin-left"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: currentIndex / (ONBOARDING_STEPS.length - 1) }}
-          transition={{ type: "spring", stiffness: 50, damping: 20 }}
-        />
+      <div className="relative w-full px-1">
+        {/* Progress Track */}
+        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-indigo-600 origin-left"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: (currentIndex + 1) / ONBOARDING_STEPS.length }}
+            transition={{ type: "spring", stiffness: 50, damping: 20 }}
+          />
+        </div>
 
-        <div className="relative z-10 flex justify-between w-full">
+        {/* Clickable Step Markers (Desktop only for full list, or dot-only for mobile) */}
+        <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 z-10 flex justify-between px-1 pointer-events-none">
           {ONBOARDING_STEPS.map((step, idx) => {
             const isCompleted = idx < currentIndex;
             const isActive = idx === currentIndex;
-
             return (
               <button
                 key={step.path}
                 type="button"
                 onClick={() => idx < currentIndex && navigate(step.path)}
                 disabled={idx >= currentIndex}
-                className="group flex flex-col items-center gap-2 outline-none"
-              >
-                <motion.div
-                  initial={false}
-                  animate={{
-                    backgroundColor:
-                      isActive || isCompleted
-                        ? "var(--color-indigo-600)"
-                        : "white",
-                    borderColor:
-                      isActive || isCompleted
-                        ? "var(--color-indigo-600)"
-                        : "var(--color-slate-200)",
-                    scale: isActive ? 1.15 : 1,
-                  }}
-                  className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-full border-2 text-[11px] font-black transition-all",
-                    isCompleted ? "cursor-pointer" : "cursor-default",
-                    isActive
-                      ? "shadow-[0_0_12px_rgba(79,70,229,0.3)] text-white"
-                      : "text-slate-400",
-                    isCompleted && "text-white",
-                  )}
-                >
-                  {idx + 1}
-                </motion.div>
-                <span
-                  className={cn(
-                    "hidden sm:block text-[9px] uppercase tracking-widest font-black transition-colors",
-                    isActive
-                      ? "text-indigo-600"
-                      : isCompleted
-                        ? "text-slate-900"
-                        : "text-slate-400",
-                  )}
-                >
-                  {step.label}
-                </span>
-              </button>
+                className={cn(
+                  "pointer-events-auto h-3 w-3 rounded-full border-2 transition-all duration-300",
+                  idx > currentIndex
+                    ? "bg-white border-slate-200"
+                    : "bg-white border-transparent",
+                  isCompleted && "bg-indigo-600 border-indigo-600",
+                  isActive &&
+                    "bg-indigo-600 border-indigo-100 ring-2 ring-indigo-600/20 scale-125",
+                )}
+                aria-label={`Go to step ${idx + 1}: ${step.label}`}
+              />
             );
           })}
         </div>
@@ -147,7 +126,7 @@ export default function Onboarding() {
       <AppSimpleHeader showSignIn={isWelcome} />
 
       <div className="flex flex-1 flex-col items-center p-4 sm:p-6">
-        <div className="w-full max-w-4xl py-2 mb-6">
+        <div className="hidden sm:block w-full max-w-4xl py-2 mb-6">
           <Breadcrumbs className="px-2" />
         </div>
 

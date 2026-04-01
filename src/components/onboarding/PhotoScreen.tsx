@@ -38,12 +38,12 @@ export function PhotoScreen() {
 
   return (
     <PageTransition>
-      <div className="space-y-8">
-        <div className="space-y-2 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-1.5 sm:space-y-2 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
             Vision-Match Your Room
           </h2>
-          <p className="text-slate-500 text-lg">
+          <p className="text-sm sm:text-lg text-slate-500 leading-relaxed max-w-[280px] mx-auto sm:max-w-none">
             Snap a photo or upload from gallery for a high-fidelity estimate.
           </p>
         </div>

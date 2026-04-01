@@ -90,18 +90,22 @@ export function ProjectTypeScreen() {
                   }`}
                   onClick={() => setProjectType(opt)}
                 >
-                  <CardContent className="p-4 flex flex-col items-center justify-center gap-3 min-h-[7rem] text-center relative z-10">
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-[6rem] sm:min-h-[7.5rem] text-center relative z-10">
                     <div
-                      className={`rounded-2xl p-3 transition-all duration-300 ${
+                      className={`rounded-xl sm:rounded-2xl p-2.5 sm:p-3 transition-all duration-300 ${
                         selected
                           ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
                           : "bg-slate-50 text-slate-500"
                       }`}
                     >
-                      <Icon className="w-6 h-6" strokeWidth={2.5} aria-hidden />
+                      <Icon
+                        className="w-5 h-5 sm:w-6 sm:h-6"
+                        strokeWidth={2.5}
+                        aria-hidden
+                      />
                     </div>
                     <span
-                      className={`font-bold text-sm leading-tight transition-colors ${
+                      className={`font-bold text-xs sm:text-sm leading-tight transition-colors ${
                         selected ? "text-indigo-950" : "text-slate-600"
                       }`}
                     >

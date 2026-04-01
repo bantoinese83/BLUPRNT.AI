@@ -57,7 +57,7 @@ export async function callGemini(params: {
 
     // 3. Execute request using the centralized config pattern
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: sdkContents,
       config: {
         systemInstruction: systemInstruction,

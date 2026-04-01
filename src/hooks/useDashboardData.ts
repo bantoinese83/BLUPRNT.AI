@@ -118,7 +118,7 @@ export function useDashboardData() {
         supabase
           .from("scope_items")
           .select(
-            "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score",
+            "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata",
           )
           .eq("project_id", projectId)
           .order("created_at", { ascending: true }),
@@ -149,6 +149,7 @@ export function useDashboardData() {
       const newIsArchitect = sub?.status === "active";
       const newHasProjectPass = !!pass;
 
+      console.log("DASHBOARD_DEBUG: Loaded Scope Items:", newScopes);
       setScopeItems(newScopes);
       setInvoices(newInvoices);
       setIsArchitect(newIsArchitect);

@@ -10,6 +10,11 @@
   --color-border: #f1f5f9;
   --color-border-focus: #334155;
   --color-slate-950: #020617;
+  --color-indigo-600: #4f46e5;
+  --color-slate-200: #e2e8f0;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-900: #0f172a;
 
   --shadow-card:
     0 1px 3px 0 rgb(0 0 0 / 0.02), 0 1px 2px -1px rgb(0 0 0 / 0.02);

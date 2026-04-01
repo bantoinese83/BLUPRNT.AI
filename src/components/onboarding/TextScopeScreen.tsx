@@ -50,17 +50,17 @@ export function TextScopeScreen() {
 
   return (
     <PageTransition>
-      <div className="space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-1.5 sm:space-y-2">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
             Tell us more about the project
           </h2>
-          <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2 mt-4">
-            <p className="text-xs font-black text-slate-900 leading-tight uppercase tracking-wider flex items-center gap-2">
+          <div className="rounded-2xl bg-slate-50 p-3 sm:p-4 border border-slate-100 space-y-1.5 sm:space-y-2 mt-3 sm:mt-4">
+            <p className="text-[10px] font-black text-slate-900 leading-tight uppercase tracking-wider flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
               Why details matter
             </p>
-            <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
+            <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-medium">
               The more specific you are, the better our AI can match your vision
               to local material & labor costs.
             </p>

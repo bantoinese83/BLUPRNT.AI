@@ -38,6 +38,14 @@ export type ScopeRow = {
     phase?: string;
     maintenance_tips?: string;
     confidence_reason?: string;
+    materials?: Array<{
+      name: string;
+      brand?: string;
+      model?: string;
+      quantity?: number;
+      unit?: string;
+      estimated_cost?: number;
+    }>;
   };
 };
 

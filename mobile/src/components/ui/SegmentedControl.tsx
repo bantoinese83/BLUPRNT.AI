@@ -37,7 +37,7 @@ export function SegmentedControl({
       {/* Sliding Backdrop */}
       <MotiView
         animate={{
-          translateX: activeIndex * itemWidth,
+          translateX: activeIndex * (itemWidth + 4),
         }}
         transition={{
           type: "spring",
@@ -45,13 +45,7 @@ export function SegmentedControl({
           stiffness: 150,
         }}
         style={[styles.activeBackdrop, { width: itemWidth }]}
-      >
-        <BlurView
-          intensity={80}
-          tint="systemMaterial"
-          style={StyleSheet.absoluteFill}
-        />
-      </MotiView>
+      />
 
       {/* Options */}
       {options.map((option) => {
@@ -97,14 +91,9 @@ const styles = StyleSheet.create({
   activeBackdrop: {
     position: "absolute",
     height: 38,
-    backgroundColor: "white", // Glassy white active state
+    backgroundColor: "white",
     borderRadius: 10,
     left: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   option: {
     height: "100%",

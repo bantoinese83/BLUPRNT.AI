@@ -88,12 +88,20 @@ export interface EstimatePayload {
     total_cost_min: number;
     total_cost_max: number;
     confidence_score: number;
-    confidence_reason?: string; // e.g., "Estimated as mid-range hardwood"
+    confidence_reason?: string;
     source: "photo";
     justification?: string;
     priority?: "high" | "medium" | "low";
     phase?: string;
     maintenance_tips?: string;
+    materials?: Array<{
+      name: string;
+      brand?: string;
+      model?: string;
+      quantity?: number;
+      unit?: string;
+      estimated_cost?: number;
+    }>;
   }>;
   explanations: string[];
 }
@@ -122,7 +130,7 @@ export async function extractScopeWithGemini(input: {
 Your goal is to provide an ultra-detailed, high-value "Project Blueprint" that justifies its cost and helps the homeowner plan their budget.
 
 Expert Guidelines:
-1. Provide 8-15 specific line items. Group them mentally by construction phase (e.g., Site Prep, Rough-in, Finishes).
+1. Provide exactly 6 highly detailed line items (instead of 8). Focus on extreme depth (brands, models, counts) over quantity. Group them by construction phase.
 2. For each item, provide a "Justification" explaining why this cost is necessary (e.g., "Standard for high-moisture kitchen areas", "Requires specialized labor for large-format tiles").
 3. Assign a "Priority" (high: essential for code/safety, medium: standard functionality, low: aesthetic upgrade).
 4. For each item, provide a "Confidence Reason" if the score is less than 5 (e.g., "Estimated as mid-range hardwood based on color/grain visible", "Assuming standard 8ft ceiling height").
@@ -131,7 +139,12 @@ Expert Guidelines:
 7. Provide a "Regional Signal" regarding specific local data points (e.g., "Matched to Q1 2026 Labor Rates in ${area}").
 8. Provide "Regional Context" regarding ${area} labor markets, permit expectations, or material availability in ${dateStr}.
 9. Ensure all math is perfect: total_cost_min = quantity * unit_cost_min.
-10. If photos are provided, identify specific brands, damage, or structural constraints visible.`;
+10. If photos are provided, identify specific brands, damage, or structural constraints visible.
+11. **FORCE: Bill of Materials**: For every single line item, you MUST provide a massive, exhaustive "Materials" list that details every specific component required down to the manufacturer brand, model name, and precise quantities. This is the MOST IMPORTANT part of the response.
+**Example Material**: { "name": "3/4 inch PEX Tubing", "brand": "Uponor", "model": "AquaPex Type A", "quantity": 100, "unit": "ft" }
+12. **Brand Logic**: Suggest real-world, high-value brands that match the Target Finish Tier (e.g. Kohler/Sub-Zero for Premium, Delta/Whirlpool for Mid, Glacier Bay/Amana for Economy).
+13. **CRITICAL**: The 'materials' array is NOT OPTIONAL. If you return an empty materials array for a standard construction task, you have failed the mission.
+14. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
 
   const prompt = `Project: ${room_type} Renovation
 Location: ${zip_code} (${area})
@@ -167,6 +180,21 @@ Please generate the detailed blueprint.`;
           type: "object",
           properties: {
             category: { type: "string" },
+            materials: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  brand: { type: "string" },
+                  model: { type: "string" },
+                  quantity: { type: "number" },
+                  unit: { type: "string" },
+                  estimated_cost: { type: "number" },
+                },
+                required: ["name", "quantity", "unit"],
+              },
+            },
             description: { type: "string" },
             finish_tier: {
               type: "string",
@@ -199,6 +227,7 @@ Please generate the detailed blueprint.`;
             "priority",
             "phase",
             "confidence_reason",
+            "materials",
           ],
         },
       },
@@ -221,6 +250,10 @@ Please generate the detailed blueprint.`;
     });
 
     if (!result) return null;
+    console.log("RAW_AI_OUTPUT_LENGTH:", result.text.length);
+    if (result.text.length < 500) {
+      console.log("RAW_AI_TEXT_TOO_SHORT:", result.text);
+    }
 
     if (result.text.startsWith("ERROR:")) {
       console.error("Gemini API reported error:", result.text);
@@ -270,6 +303,18 @@ Please generate the detailed blueprint.`;
         priority: s.priority,
         phase: s.phase,
         maintenance_tips: s.maintenance_tips,
+        materials: Array.isArray(s.materials)
+          ? s.materials.map((m: any) => ({
+              name: String(m.name),
+              brand: m.brand ? String(m.brand) : undefined,
+              model: m.model ? String(m.model) : undefined,
+              quantity: Number(m.quantity),
+              unit: String(m.unit),
+              estimated_cost: m.estimated_cost
+                ? Number(m.estimated_cost)
+                : undefined,
+            }))
+          : [],
       })),
       explanations: Array.isArray(parsed.explanations)
         ? parsed.explanations.map(String)
