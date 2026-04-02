@@ -22,6 +22,11 @@ import {
   ArrowRight,
   UserPlus,
   LogIn,
+  Package,
+  Boxes,
+  Tag,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import { money } from "../src/lib/formatters";
@@ -59,6 +64,53 @@ const ANALYSIS_MESSAGES = [
   "Reviewing permit requirements...",
 ];
 
+function MaterialDetailList({
+  materials,
+}: {
+  materials: {
+    name: string;
+    brand?: string;
+    quantity?: number | string;
+    unit?: string;
+  }[];
+}) {
+  if (!materials || materials.length === 0) return null;
+
+  return (
+    <View style={styles.materialContainer}>
+      <View style={styles.materialHeader}>
+        <Package size={12} color={Theme.colors.brand.primary} />
+        <Text style={styles.materialHeaderText}>Bill of Materials</Text>
+      </View>
+      <View style={styles.materialGrid}>
+        {materials.map((m, idx: number) => (
+          <View key={idx} style={styles.materialCard}>
+            <View style={styles.materialIconBg}>
+              <Boxes size={14} color={Theme.colors.text.muted} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.materialName}>{m.name}</Text>
+              <View style={styles.materialMetaRow}>
+                {m.brand && (
+                  <View style={styles.brandTag}>
+                    <Tag size={10} color={Theme.colors.brand.primary} />
+                    <Text style={styles.brandText}>{m.brand}</Text>
+                  </View>
+                )}
+                {m.quantity && (
+                  <Text style={styles.materialQuantity}>
+                    {m.quantity} {m.unit || "units"}
+                  </Text>
+                )}
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export default function OnboardingScreen() {
   const { user, session } = useAuth();
   const [step, setStep] = useState(0);
@@ -71,9 +123,12 @@ export default function OnboardingScreen() {
   const [scopeDescription, setScopeDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisIndex, setAnalysisIndex] = useState(0);
-  const [estimate, setEstimate] = useState<{ min: number; max: number } | null>(
-    null,
-  );
+  const [estimate, setEstimate] = useState<{
+    min: number;
+    max: number;
+    scope: any[];
+  } | null>(null);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   const runAnalysis = async () => {
     try {
@@ -114,6 +169,7 @@ export default function OnboardingScreen() {
       setEstimate({
         min: result.summary.estimated_min_total,
         max: result.summary.estimated_max_total,
+        scope: result.scope_items,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setStep(5);
@@ -121,7 +177,7 @@ export default function OnboardingScreen() {
       console.error("Analysis Error:", err);
       // Fallback to a type-based range if AI fails, but mark it clearly
       const range = getRangeForType(projectType);
-      setEstimate({ min: range.min, max: range.max });
+      setEstimate({ min: range.min, max: range.max, scope: [] });
       setStep(5);
       Alert.alert(
         "Regional Estimation",
@@ -544,10 +600,60 @@ export default function OnboardingScreen() {
                   <Check size={14} color="#818cf8" />
                   <Text style={styles.breakdownText}>National Labor Data</Text>
                 </View>
-                <View style={styles.breakdownItem}>
-                  <Check size={14} color="#818cf8" />
-                  <Text style={styles.breakdownText}>Material Indices</Text>
-                </View>
+                {estimate?.scope && estimate.scope.length > 0 ? (
+                  <>
+                    <TouchableOpacity
+                      style={[
+                        styles.viewDetailsBtn,
+                        showBreakdown && styles.activeViewDetailsBtn,
+                      ]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowBreakdown(!showBreakdown);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.viewDetailsText,
+                          showBreakdown && styles.activeViewDetailsText,
+                        ]}
+                      >
+                        {showBreakdown ? "Hide Breakdown" : "View Breakdown"}
+                      </Text>
+                      {showBreakdown ? (
+                        <ChevronUp size={14} color="white" />
+                      ) : (
+                        <ChevronDown
+                          size={14}
+                          color={Theme.colors.text.secondary}
+                        />
+                      )}
+                    </TouchableOpacity>
+
+                    <AnimatePresence>
+                      {showBreakdown && (
+                        <MotiView
+                          from={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ type: "timing", duration: 300 }}
+                          style={{ overflow: "hidden", width: "100%" }}
+                        >
+                          <MaterialDetailList
+                            materials={estimate.scope.flatMap(
+                              (s) => s.metadata?.materials || [],
+                            )}
+                          />
+                        </MotiView>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : (
+                  <View style={styles.breakdownItem}>
+                    <Check size={14} color="#818cf8" />
+                    <Text style={styles.breakdownText}>Material Indices</Text>
+                  </View>
+                )}
               </View>
             </GlassCard>
           </MotiView>
@@ -1043,5 +1149,96 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textAlign: "center",
     marginTop: 24,
+  },
+  materialContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
+    borderRadius: 14,
+    width: "100%",
+  },
+  materialHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  materialHeaderText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+  },
+  materialGrid: {
+    gap: 8,
+  },
+  materialCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.04)",
+  },
+  materialIconBg: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: Theme.colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  materialName: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
+  },
+  materialMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 2,
+  },
+  brandTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  brandText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
+    textTransform: "uppercase",
+  },
+  materialQuantity: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.muted,
+  },
+  viewDetailsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    marginTop: 12,
+    borderRadius: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
+    gap: 6,
+    width: "100%",
+  },
+  activeViewDetailsBtn: {
+    backgroundColor: Theme.colors.text.primary,
+  },
+  viewDetailsText: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+  },
+  activeViewDetailsText: {
+    color: "white",
   },
 });
