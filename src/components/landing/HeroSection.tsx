@@ -61,25 +61,43 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="flex flex-wrap gap-3 pt-1"
+            className="flex flex-wrap items-center gap-4 pt-1"
           >
-            <Button
-              size="lg"
-              className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
-              onClick={onStart}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
+                onClick={onStart}
+              >
+                {LANDING_HERO_COPY.primaryCta}{" "}
+                <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
+                onClick={onCreateAccount}
+              >
+                <UserPlus className="mr-2 h-5 w-5" aria-hidden />{" "}
+                {LANDING_HERO_COPY.secondaryCta}
+              </Button>
+            </div>
+
+            <div className="h-12 w-px bg-slate-200/50 hidden sm:block mx-1" />
+
+            <a
+              href="https://apps.apple.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block hover:scale-[1.03] active:scale-[0.97] transition-all"
+              aria-label="Download on the App Store"
             >
-              {LANDING_HERO_COPY.primaryCta}{" "}
-              <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
-              onClick={onCreateAccount}
-            >
-              <UserPlus className="mr-2 h-5 w-5" aria-hidden />{" "}
-              {LANDING_HERO_COPY.secondaryCta}
-            </Button>
+              <img
+                src="/app-store-badge.svg"
+                alt="Available on the App Store"
+                className="h-10 w-auto sm:h-[42px]"
+              />
+            </a>
           </motion.div>
         </div>
 
