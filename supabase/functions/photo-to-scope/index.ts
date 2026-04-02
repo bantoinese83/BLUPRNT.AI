@@ -46,6 +46,11 @@ Deno.serve(async (req: Request) => {
       `[photo-to-scope] Received ${photoCount} photos, zip: ${formData.get("zip_code")}, room: ${formData.get("room_type")}`,
     );
 
+    // is_initial_analysis=1 means: safe to wipe existing scope (first-time).
+    // Any subsequent re-analysis must use upsert to preserve user edits.
+    const isInitialAnalysis =
+      String(formData.get("is_initial_analysis") ?? "1") === "1";
+
     const parsed = photoToScopeSchema.safeParse({
       zip_code: String(formData.get("zip_code") ?? "").trim() || "00000",
       room_type: String(formData.get("room_type") ?? "other"),
@@ -135,17 +140,21 @@ Deno.serve(async (req: Request) => {
     if (projectId) {
       const admin = getServiceClient();
 
-      const { error: delErr } = await admin
-        .from("scope_items")
-        .delete()
-        .eq("project_id", projectId);
-      if (delErr) {
-        console.error("Scope items delete failed:", delErr);
-        return jsonResponse(
-          { error: "Could not reset existing scope" },
-          500,
-          req,
-        );
+      // Only wipe existing scope on first-time analysis.
+      // Re-analysis from the dashboard preserves user customisations.
+      if (isInitialAnalysis) {
+        const { error: delErr } = await admin
+          .from("scope_items")
+          .delete()
+          .eq("project_id", projectId);
+        if (delErr) {
+          console.error("Scope items delete failed:", delErr);
+          return jsonResponse(
+            { error: "Could not reset existing scope" },
+            500,
+            req,
+          );
+        }
       }
 
       const rows = payload.scope_items.map((s) => ({

@@ -37,7 +37,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   );
 
   const [photos, setPhotos] = useState<File[]>([]);
-  const [estimate, setEstimate] = useState<PhotoToScopeResult | null>(null);
+
+  // Hydrate estimate from sessionStorage on mount (survives page refresh).
+  const [estimate, setEstimate] = useState<PhotoToScopeResult | null>(() => {
+    try {
+      const raw = sessionStorage.getItem("bluprnt_pending_estimate");
+      return raw ? (JSON.parse(raw) as PhotoToScopeResult) : null;
+    } catch {
+      return null;
+    }
+  });
   const [estimateError, setEstimateError] = useState<string | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
@@ -125,7 +134,17 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (data && typeof data === "object" && "summary" in data) {
-          setEstimate(data as PhotoToScopeResult);
+          const result = data as PhotoToScopeResult;
+          setEstimate(result);
+          // Persist to sessionStorage so a page refresh doesn't lose the analysis.
+          try {
+            sessionStorage.setItem(
+              "bluprnt_pending_estimate",
+              JSON.stringify(result),
+            );
+          } catch {
+            // sessionStorage not available (private browsing edge case) — no-op.
+          }
         } else {
           setEstimateError(userFriendlyEstimateError("unknown"));
         }
@@ -315,6 +334,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("bluprnt_onboarding_location_unset");
     localStorage.removeItem("bluprnt_onboarding_scope");
     localStorage.removeItem("bluprnt_onboarding_stage");
+    // Clear sessionStorage persisted estimate
+    sessionStorage.removeItem("bluprnt_pending_estimate");
   }, [
     setProjectType,
     setLocationInput,

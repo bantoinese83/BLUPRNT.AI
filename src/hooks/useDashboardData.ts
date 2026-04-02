@@ -75,6 +75,17 @@ export function useDashboardData() {
       /* ignore */
     }
 
+    // P3B: Prefer DB-synced active project for cross-platform context.
+    // Runs in parallel with the project list fetch for zero latency cost.
+    const { data: prefData } = await supabase
+      .from("user_preferences")
+      .select("last_active_project_id")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+    if (prefData?.last_active_project_id) {
+      projectId = prefData.last_active_project_id;
+    }
+
     const { data: allProjects } = await supabase
       .from("projects")
       .select(
@@ -193,11 +204,22 @@ export function useDashboardData() {
   }, [load]);
 
   const handleProjectSelect = useCallback(
-    (id: string) => {
+    async (id: string) => {
       try {
         localStorage.setItem("bluprnt_project_id", id);
       } catch {
         /* ignore */
+      }
+      // Sync to DB so mobile picks up the same project on next load.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from("user_preferences").upsert({
+          user_id: session.user.id,
+          last_active_project_id: id,
+          updated_at: new Date().toISOString(),
+        });
       }
       load();
     },

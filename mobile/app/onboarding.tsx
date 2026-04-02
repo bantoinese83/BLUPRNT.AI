@@ -37,6 +37,7 @@ import {
 import { supabase } from "../src/lib/supabase";
 import { useAuth } from "../src/contexts/auth-context";
 import { Theme } from "../src/constants/Theme";
+import { getRangeForType } from "../src/constants/estimateRanges";
 
 const STEPS = [
   "Type",
@@ -98,14 +99,10 @@ export default function OnboardingScreen() {
         } else {
           clearInterval(interval);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          // Generate a mock estimate based on type
-          const base =
-            projectType === "Kitchen"
-              ? 15000
-              : projectType === "Bathroom"
-                ? 8000
-                : 5000;
-          setEstimate({ min: base, max: base * 1.5 });
+          // Use honest, industry-based ranges — NOT a fake precise number.
+          // The real AI analysis runs post-signup once photos are uploaded.
+          const range = getRangeForType(projectType);
+          setEstimate({ min: range.min, max: range.max });
           setStep(5);
         }
       }, 1500);
@@ -462,7 +459,7 @@ export default function OnboardingScreen() {
             <GlassCard intensity={30} style={styles.estimateCard}>
               <View style={styles.confidenceBadge}>
                 <Sparkles size={12} color={Theme.colors.brand.light} />
-                <Text style={styles.confidenceText}>Confidence: 4.8 / 5</Text>
+                <Text style={styles.confidenceText}>Typical Range</Text>
               </View>
 
               <Text style={styles.estimateLabel}>Investment Range</Text>
@@ -486,12 +483,17 @@ export default function OnboardingScreen() {
                 </Text>
               </MotiView>
 
+              <Text style={styles.estimateDisclaimer}>
+                Based on your project type. Your exact AI-powered estimate is
+                generated after photo analysis.
+              </Text>
+
               <View style={styles.estimateDivider} />
 
               <View style={styles.breakdown}>
                 <View style={styles.breakdownItem}>
                   <Check size={14} color="#818cf8" />
-                  <Text style={styles.breakdownText}>Local Market Data</Text>
+                  <Text style={styles.breakdownText}>National Labor Data</Text>
                 </View>
                 <View style={styles.breakdownItem}>
                   <Check size={14} color="#818cf8" />
@@ -908,8 +910,17 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
     letterSpacing: -1,
-    marginBottom: 24,
+    marginBottom: 12,
     textAlign: "center",
+  },
+  estimateDisclaimer: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 16,
+    opacity: 0.7,
   },
   estimateDivider: {
     width: "100%",

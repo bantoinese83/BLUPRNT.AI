@@ -26,35 +26,9 @@ export function useScopeManagement({
     sessionStorage.getItem("bluprnt_scope_celebrated") === "true",
   );
 
+  // Delegates to the authoritative DB function — prevents logic drift vs. mobile.
   const recalcProjectTotals = async () => {
-    const { data: items } = await supabase
-      .from("scope_items")
-      .select("total_cost_min, total_cost_max")
-      .eq("project_id", projectId);
-
-    if (!items?.length) {
-      await supabase
-        .from("projects")
-        .update({
-          estimated_min_total: 0,
-          estimated_max_total: 0,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", projectId);
-      return;
-    }
-
-    const minSum = items.reduce((s, i) => s + (i.total_cost_min ?? 0), 0);
-    const maxSum = items.reduce((s, i) => s + (i.total_cost_max ?? 0), 0);
-
-    await supabase
-      .from("projects")
-      .update({
-        estimated_min_total: Math.round(minSum),
-        estimated_max_total: Math.round(maxSum),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", projectId);
+    await supabase.rpc("recalc_project_totals", { p_id: projectId });
   };
 
   const handleSave = async (item: ScopeRow) => {

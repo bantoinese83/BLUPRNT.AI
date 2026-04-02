@@ -49,7 +49,20 @@ export function useDashboardData() {
       }
     }
 
+    // P3B: Prefer DB-synced active project (cross-platform) over local storage.
+    // This ensures web→mobile context is preserved.
     let projectId = await AsyncStorage.getItem("bluprnt_project_id");
+
+    // Try to fetch the DB-stored preference first (cross-platform sync).
+    const { data: prefData } = await supabase
+      .from("user_preferences")
+      .select("last_active_project_id")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+
+    if (prefData?.last_active_project_id) {
+      projectId = prefData.last_active_project_id;
+    }
 
     const { data: allProjects } = await supabase
       .from("projects")
@@ -154,41 +167,29 @@ export function useDashboardData() {
 
   const handleProjectSelect = useCallback(
     async (id: string) => {
+      // Write to local storage for fast offline access.
       await AsyncStorage.setItem("bluprnt_project_id", id);
+
+      // Write to DB for cross-platform sync (web will pick this up on next load).
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from("user_preferences").upsert({
+          user_id: session.user.id,
+          last_active_project_id: id,
+          updated_at: new Date().toISOString(),
+        });
+      }
+
       load();
     },
     [load],
   );
 
+  // Delegates to the authoritative DB function — prevents logic drift vs. web.
   const recalcProjectTotals = async (pid: string) => {
-    const { data: items } = await supabase
-      .from("scope_items")
-      .select("total_cost_min, total_cost_max")
-      .eq("project_id", pid);
-
-    if (!items || items.length === 0) {
-      await supabase
-        .from("projects")
-        .update({
-          estimated_min_total: 0,
-          estimated_max_total: 0,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", pid);
-      return;
-    }
-
-    const minSum = items.reduce((s, i) => s + (i.total_cost_min ?? 0), 0);
-    const maxSum = items.reduce((s, i) => s + (i.total_cost_max ?? 0), 0);
-
-    await supabase
-      .from("projects")
-      .update({
-        estimated_min_total: Math.round(minSum),
-        estimated_max_total: Math.round(maxSum),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", pid);
+    await supabase.rpc("recalc_project_totals", { p_id: pid });
   };
 
   const addItem = async (

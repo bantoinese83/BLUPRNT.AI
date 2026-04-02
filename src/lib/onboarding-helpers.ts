@@ -63,22 +63,28 @@ export async function saveOnboardingProject(params: {
     photos,
   } = params;
 
-  // 1. Resolve or create property
+  // 1. Resolve or create property — match by ZIP to avoid cross-property contamination
+  //    (e.g. user manages primary home + rental at different ZIPs).
   let propertyId: string;
-  const { data: existingProps } = await supabase
+  const resolvedZip = zipCode.replace(/\D/g, "").slice(0, 5) || "00000";
+
+  const { data: matchedProps } = await supabase
     .from("properties")
     .select("id")
     .eq("owner_user_id", userId)
+    .eq("postal_code", resolvedZip)
     .limit(1);
 
-  if (existingProps?.length) {
-    propertyId = existingProps[0].id;
+  if (matchedProps?.length) {
+    // Reuse the existing property that matches this ZIP code.
+    propertyId = matchedProps[0].id;
   } else {
+    // No match for this ZIP — create a new property record for this location.
     const { data: prop, error: pErr } = await supabase
       .from("properties")
       .insert({
         owner_user_id: userId,
-        postal_code: zipCode,
+        postal_code: resolvedZip,
         city: "",
         state: "",
         country: "US",

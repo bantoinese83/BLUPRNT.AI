@@ -48,13 +48,11 @@ export function ScreenWrapper({
   withTabBar = true,
   withKeyboard = false,
 }: Props) {
-  const [isOffline, setIsOffline] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       const offline = state.isConnected === false;
-      setIsOffline(offline);
 
       if (offline) {
         setShowBanner(true);

@@ -197,19 +197,6 @@ export function PhotoScreen() {
             <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
 
-          {photos.length === 0 && !scopeDescription.trim() && (
-            <Button
-              size="lg"
-              variant="ghost"
-              className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
-              onClick={() => {
-                navigate("/onboarding/text-scope");
-              }}
-            >
-              Skip to detailed text focus
-            </Button>
-          )}
-
           {photos.length > 0 && (
             <Button
               size="lg"
