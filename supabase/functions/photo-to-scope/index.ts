@@ -218,44 +218,39 @@ Deno.serve(async (req: Request) => {
         .eq("id", projectId);
 
       if (projUpErr) {
-        console.error("Project update failed:", projUpErr);
-        // We don't return 500 here since the scope items are already saved, but we log it.
+        console.error("[photo-to-scope] Project update failed:", projUpErr);
       }
 
-      const scope_items = (inserted ?? []).map(
-        (r: Record<string, unknown>) => ({
-          id: (r as { id: string }).id,
-          category: (r as { category: string }).category,
-          description: (r as { description: string }).description,
-          finish_tier: (r as { finish_tier: string }).finish_tier,
-          quantity: (r as { quantity: number }).quantity,
-          unit: (r as { unit: string }).unit,
-          unit_cost_min: (r as { unit_cost_min: number }).unit_cost_min,
-          unit_cost_max: (r as { unit_cost_max: number }).unit_cost_max,
-          total_cost_min: (r as { total_cost_min: number }).total_cost_min,
-          total_cost_max: (r as { total_cost_max: number }).total_cost_max,
-          confidence_score: (r as { confidence_score: number })
-            .confidence_score,
-          source: (r as { source: string }).source,
-          metadata: {
-            justification:
-              (r as { metadata: { justification: string } }).metadata
-                ?.justification || "",
-            priority:
-              (r as { metadata: { priority: string } }).metadata?.priority ||
-              "medium",
-            phase:
-              (r as { metadata: { phase: string } }).metadata?.phase ||
-              "standard",
-            maintenance_tips:
-              (r as { metadata: { maintenance_tips: string } }).metadata
-                ?.maintenance_tips || "",
-            materials:
-              (r as { metadata: { materials: unknown[] } }).metadata
-                ?.materials || [],
-          },
-        }),
-      );
+      // Safe mapping helper to prevent 500s during response preparation
+      const safeMapItems = (items: any[]) =>
+        items.map((r) => {
+          const metadata = r.metadata || {};
+          return {
+            id: r.id,
+            category: r.category || "General",
+            description: r.description || "",
+            finish_tier: r.finish_tier || "mid",
+            quantity: Number(r.quantity || 0),
+            unit: r.unit || "unit",
+            unit_cost_min: Number(r.unit_cost_min || 0),
+            unit_cost_max: Number(r.unit_cost_max || 0),
+            total_cost_min: Number(r.total_cost_min || 0),
+            total_cost_max: Number(r.total_cost_max || 0),
+            confidence_score: Number(r.confidence_score || 3),
+            source: r.source || "text",
+            metadata: {
+              justification: metadata.justification || "",
+              priority: metadata.priority || "medium",
+              phase: metadata.phase || "standard",
+              maintenance_tips: metadata.maintenance_tips || "",
+              materials: Array.isArray(metadata.materials)
+                ? metadata.materials
+                : [],
+            },
+          };
+        });
+
+      const scope_items = safeMapItems(inserted ?? []);
 
       return jsonResponse(
         {
@@ -305,7 +300,8 @@ Deno.serve(async (req: Request) => {
     );
   } catch (e: unknown) {
     const error = e as Error;
-    console.error(error);
+    console.error("[photo-to-scope] CRITICAL ERROR:");
+    console.error(error.stack || error);
     return jsonResponse(
       { error: "Something went wrong. Try again in a moment." },
       500,
