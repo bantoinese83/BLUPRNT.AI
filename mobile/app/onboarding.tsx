@@ -196,7 +196,7 @@ export default function OnboardingScreen() {
     }
 
     if (!session) {
-      // Step 6 handles account creation choice
+      router.replace("/");
       return;
     }
 
