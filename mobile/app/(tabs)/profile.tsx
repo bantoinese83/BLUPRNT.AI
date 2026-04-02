@@ -341,7 +341,13 @@ function SettingItem({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.settingItem}
+      onPress={() => {
+        Haptics.selectionAsync();
+        onPress();
+      }}
+    >
       <View style={styles.settingIcon}>{icon}</View>
       <View style={{ flex: 1 }}>
         <Text style={styles.settingTitle}>{title}</Text>

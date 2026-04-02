@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { X, Upload, ListTree, FileDown } from "lucide-react-native";
 import { MotiView, AnimatePresence } from "moti";

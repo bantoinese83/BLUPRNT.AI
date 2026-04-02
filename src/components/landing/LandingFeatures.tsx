@@ -1,4 +1,4 @@
-import { BarChart3, Receipt, Shield, Home } from "lucide-react";
+import { BarChart3, Shield, Landmark, TrendingUp } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 
 export function LandingFeatures() {
@@ -39,19 +39,19 @@ export function LandingFeatures() {
             />
             <div>
               <h3 className="font-semibold text-slate-900">
-                Photo-to-estimate
+                AI Photo Analysis
               </h3>
               <p className="mt-1 text-sm text-slate-600">
-                Snap photos, get a grounded cost range in seconds.
+                Snap photos, get a "hardened" cost range and BOM in seconds.
               </p>
             </div>
           </li>
           <li className="flex items-start gap-4">
-            <Receipt className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+            <Landmark className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
             <div>
-              <h3 className="font-semibold text-slate-900">Invoice tracking</h3>
+              <h3 className="font-semibold text-slate-900">Lender ready</h3>
               <p className="mt-1 text-sm text-slate-600">
-                Upload receipts and quotes — we keep them organized.
+                AI-validated data that bankers and appraisers actually trust.
               </p>
             </div>
           </li>
@@ -69,16 +69,19 @@ export function LandingFeatures() {
                 </Highlighter>
               </h3>
               <p className="mt-1 text-sm text-slate-600">
-                Document your improvements for buyers and agents.
+                Document your improvements and capture every dollar of equity.
               </p>
             </div>
           </li>
           <li className="flex items-start gap-4">
-            <Home className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+            <TrendingUp
+              className="h-6 w-6 shrink-0 text-slate-900"
+              aria-hidden
+            />
             <div>
-              <h3 className="font-semibold text-slate-900">Property record</h3>
+              <h3 className="font-semibold text-slate-900">Equity Analytics</h3>
               <p className="mt-1 text-sm text-slate-600">
-                Your home’s financial twin — from idea to sale.
+                Track how every renovation impacts your long-term home value.
               </p>
             </div>
           </li>

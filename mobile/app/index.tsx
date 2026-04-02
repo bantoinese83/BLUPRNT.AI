@@ -1,16 +1,19 @@
 import React from "react";
-import { StyleSheet, View, Text, Platform } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
 import { router } from "expo-router";
-import { MotiView } from "moti";
+import { MotiView, AnimatePresence } from "moti";
 import {
   ArrowRight,
-  UserPlus,
   Hammer,
   ShieldCheck,
   TrendingUp,
-  LogIn,
 } from "lucide-react-native";
-import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
 import { Logo } from "../src/components/ui/Logo";
@@ -18,136 +21,163 @@ import { Theme } from "../src/constants/Theme";
 import * as Haptics from "expo-haptics";
 
 export default function LandingScreen() {
+  const [activeSlide, setActiveSlide] = React.useState(0);
+
+  const slides = [
+    {
+      title: "Scan. See. Save.",
+      highlight: "Professional AI Analysis",
+      subtitle:
+        "Snap a photo of any room. Our AI extracts a bill of materials and regional labor costs in seconds. Stop guessing, start building.",
+      icon: <Hammer size={32} color={Theme.colors.brand.primary} />,
+      badge: "AI VISION",
+    },
+    {
+      title: "The Property Ledger",
+      highlight: "Every Quote, Verified.",
+      subtitle:
+        "Track invoices and receipts against your AI-hardened budget. We extract the data so you can see your project health at a glance.",
+      icon: <ShieldCheck size={32} color={Theme.colors.status.success} />,
+      badge: "FINANCIAL CONTROL",
+    },
+    {
+      title: "Lender Ready.",
+      highlight: "Data Bankers Trust.",
+      subtitle:
+        "Export professional reports that accelerate loan approvals and permits. AI-validated data gives you immediate credibility.",
+      icon: <ShieldCheck size={32} color={Theme.colors.brand.primary} />,
+      badge: "PROFESSIONAL GRADE",
+    },
+    {
+      title: "Sold for More.",
+      highlight: "Capture Every Dollar.",
+      subtitle:
+        "When you're ready to move, generate a professional Seller Packet that proves every dollar of equity you've built to buyers.",
+      icon: <TrendingUp size={32} color={Theme.colors.status.warning} />,
+      badge: "EQUITY BUILDING",
+    },
+  ];
+
+  const nextSlide = () => {
+    Haptics.selectionAsync();
+    setActiveSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const slide = slides[activeSlide];
+
   return (
     <ScreenWrapper
-      withScroll
+      withScroll={false}
       withTabBar={false}
       edges={["top", "bottom", "left", "right"]}
     >
-      <View style={styles.scrollContent}>
+      <View style={styles.container}>
+        {/* Progress Bars */}
+        <View style={styles.progressContainer}>
+          {slides.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.progressBar,
+                {
+                  backgroundColor:
+                    i === activeSlide
+                      ? Theme.colors.brand.primary
+                      : "rgba(0,0,0,0.05)",
+                },
+              ]}
+            />
+          ))}
+        </View>
+
         {/* Hero Section */}
-        <MotiView
-          from={{ opacity: 0, translateY: 20 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ delay: 200, type: "timing", duration: 800 }}
-          style={styles.hero}
-        >
+        <View style={styles.hero}>
           <View style={styles.logoContainer}>
-            <Logo size={100} />
-          </View>
-          <View style={styles.badgeContainer}>
-            <Text style={styles.badgeText}>AI RENOVATION PLANNER</Text>
+            <Logo size={60} />
           </View>
 
-          <Text style={styles.title}>Every upgrade should pay you back.</Text>
-          <Text style={styles.highlightTitle}>BLUPRNT makes sure it does.</Text>
-
-          <Text style={styles.subtitle}>
-            Professional home renovation planner and budget tracker. Get
-            grounded cost estimates and track every invoice against your
-            long-term home value.
-          </Text>
-
-          <View style={styles.ctaContainer}>
+          <AnimatePresence exitBeforeEnter>
             <MotiView
-              from={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 600, type: "timing", duration: 500 }}
+              key={activeSlide}
+              from={{ opacity: 0, translateX: 50 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              exit={{ opacity: 0, translateX: -50 }}
+              transition={{ type: "timing", duration: 400 }}
+              style={styles.slideContent}
             >
-              <Button
-                title="Start Free Estimate"
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  router.push("/onboarding");
-                }}
-                icon={<ArrowRight size={20} color="white" />}
-              />
-            </MotiView>
-            <View style={{ height: 12 }} />
-            <MotiView
-              from={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 750, type: "timing", duration: 500 }}
-            >
-              <Button
-                title="Sign In"
-                variant="outline"
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  router.push("/(auth)/login");
-                }}
-                icon={<LogIn size={20} color={Theme.colors.brand.primary} />}
-              />
-            </MotiView>
-          </View>
-        </MotiView>
+              <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>{slide.badge}</Text>
+              </View>
 
-        {/* Value Props */}
-        <View style={styles.features}>
-          <FeatureCard
-            icon={<Hammer size={24} color={Theme.colors.brand.primary} />}
-            title="AI Cost Analysis"
-            description="Regionally grounded pricing for labor and materials."
-            delay={400}
+              <Text style={styles.title}>{slide.title}</Text>
+              <Text style={styles.highlightTitle}>{slide.highlight}</Text>
+
+              <Text style={styles.subtitle}>{slide.subtitle}</Text>
+
+              <View style={styles.slideIconContainer}>{slide.icon}</View>
+            </MotiView>
+          </AnimatePresence>
+        </View>
+
+        {/* CTA Container */}
+        <View style={styles.ctaContainer}>
+          <Button
+            title={activeSlide === slides.length - 1 ? "Get Started" : "Next"}
+            onPress={() => {
+              if (activeSlide === slides.length - 1) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/onboarding");
+              } else {
+                nextSlide();
+              }
+            }}
+            icon={<ArrowRight size={20} color="white" />}
           />
-          <FeatureCard
-            icon={<ShieldCheck size={24} color={Theme.colors.status.success} />}
-            title="Secure Records"
-            description="Keep all receipts, warranties, and permits in one place."
-            delay={500}
-          />
-          <FeatureCard
-            icon={<TrendingUp size={24} color={Theme.colors.status.warning} />}
-            title="Resale Value"
-            description="Automatically generate a professional property ledger."
-            delay={600}
-          />
+          <View style={{ height: 12 }} />
+          <TouchableOpacity
+            style={styles.signInLink}
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push("/(auth)/login");
+            }}
+          >
+            <Text style={styles.signInText}>
+              Already have an account? Sign In
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScreenWrapper>
   );
 }
 
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  delay: number;
-}
-
-function FeatureCard({ icon, title, description, delay }: FeatureCardProps) {
-  return (
-    <MotiView
-      from={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, type: "timing", duration: 600 }}
-      style={{ marginBottom: 16 }}
-    >
-      <GlassCard intensity={15} style={styles.featureCard}>
-        <View style={styles.featureRow}>
-          <View style={styles.iconContainer}>{icon}</View>
-          <View style={styles.featureText}>
-            <Text style={styles.featureTitle}>{title}</Text>
-            <Text style={styles.featureDescription}>{description}</Text>
-          </View>
-        </View>
-      </GlassCard>
-    </MotiView>
-  );
-}
-
 const styles = StyleSheet.create({
-  scrollContent: {
+  container: {
+    flex: 1,
     padding: 24,
-    paddingTop: Platform.OS === "ios" ? 40 : 60, // Refined for notch
+    justifyContent: "space-between",
+    paddingTop: Platform.OS === "ios" ? 20 : 40,
+  },
+  progressContainer: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 40,
+  },
+  progressBar: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
   },
   hero: {
+    flex: 1,
     alignItems: "center",
-    marginBottom: 48,
   },
   logoContainer: {
-    marginBottom: 20,
-    marginTop: 20,
+    marginBottom: 40,
+  },
+  slideContent: {
+    alignItems: "center",
+    width: "100%",
   },
   badgeContainer: {
     backgroundColor: "rgba(79, 70, 229, 0.08)",
@@ -173,13 +203,13 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   highlightTitle: {
-    fontSize: 32,
-    fontFamily: "Outfit_800ExtraBold",
-    color: Theme.colors.text.secondary,
+    fontSize: 24,
+    fontFamily: "Outfit_700Bold",
+    color: Theme.colors.brand.primary,
     textAlign: "center",
-    lineHeight: 40,
+    lineHeight: 32,
     marginBottom: 20,
-    letterSpacing: -1,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 16,
@@ -187,45 +217,34 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
     fontFamily: "Outfit_400Regular",
-    marginBottom: 32,
+    marginBottom: 40,
     paddingHorizontal: 10,
+  },
+  slideIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    marginTop: 20,
   },
   ctaContainer: {
     width: "100%",
+    paddingBottom: 20,
   },
-  features: {
-    marginTop: 20,
-  },
-  featureCard: {
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "rgba(15, 23, 42, 0.05)",
-  },
-  featureRow: {
-    flexDirection: "row",
+  signInLink: {
     alignItems: "center",
+    paddingVertical: 12,
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "rgba(79, 70, 229, 0.08)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  featureText: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 16,
-    fontFamily: "Outfit_700Bold",
-    color: Theme.colors.text.primary,
-    marginBottom: 2,
-  },
-  featureDescription: {
+  signInText: {
     fontSize: 14,
+    fontFamily: "Outfit_600SemiBold",
     color: Theme.colors.text.secondary,
-    fontFamily: "Outfit_400Regular",
   },
 });

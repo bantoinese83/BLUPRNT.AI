@@ -44,10 +44,10 @@ Deno.serve(async (req: Request) => {
       Budget Estimate: $${project.estimated_min_total} - $${project.estimated_max_total}
       
       Scope Items:
-      ${scope.map((s: any) => `- ${s.category}: ${s.description} ($${s.total_cost_min}-$${s.total_cost_max})`).join("\n")}
+      ${(scope as Array<{ category: string; description: string; total_cost_min: number; total_cost_max: number }>).map((s) => `- ${s.category}: ${s.description} ($${s.total_cost_min}-$${s.total_cost_max})`).join("\n")}
       
       Current Invoices:
-      ${invoices.map((i: any) => `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`).join("\n")}
+      ${(invoices as Array<{ vendor_name: string; total: number; payment_status: string }>).map((i) => `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`).join("\n")}
     `;
 
     const systemInstruction = `
@@ -77,10 +77,11 @@ Deno.serve(async (req: Request) => {
       200,
       req,
     );
-  } catch (e: any) {
-    console.error(e);
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error(error);
     return jsonResponse(
-      { error: e.message || "Internal server error" },
+      { error: error.message || "Internal server error" },
       500,
       req,
     );

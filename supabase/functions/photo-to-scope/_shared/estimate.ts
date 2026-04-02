@@ -260,9 +260,9 @@ Please generate the detailed blueprint.`;
       return null;
     }
 
-    let parsed: any;
+    let parsed: EstimatePayload;
     try {
-      parsed = result.data || JSON.parse(result.text);
+      parsed = (result.data || JSON.parse(result.text)) as EstimatePayload;
     } catch (e) {
       console.error(
         "Failed to parse Gemini JSON:",
@@ -286,10 +286,10 @@ Please generate the detailed blueprint.`;
         regional_context: parsed.summary.regional_context || "",
         regional_signal: parsed.summary.regional_signal || "",
       },
-      scope_items: parsed.scope_items.map((s: any) => ({
+      scope_items: parsed.scope_items.map((s) => ({
         category: String(s.category),
         description: String(s.description),
-        finish_tier: (s.finish_tier as any) || finish_preference,
+        finish_tier: s.finish_tier || finish_preference,
         quantity: Number(s.quantity),
         unit: String(s.unit),
         unit_cost_min: Math.round(Number(s.unit_cost_min)),
@@ -304,7 +304,7 @@ Please generate the detailed blueprint.`;
         phase: s.phase,
         maintenance_tips: s.maintenance_tips,
         materials: Array.isArray(s.materials)
-          ? s.materials.map((m: any) => ({
+          ? s.materials.map((m) => ({
               name: String(m.name),
               brand: m.brand ? String(m.brand) : undefined,
               model: m.model ? String(m.model) : undefined,
@@ -316,12 +316,14 @@ Please generate the detailed blueprint.`;
             }))
           : [],
       })),
-      explanations: Array.isArray(parsed.explanations)
-        ? parsed.explanations.map(String)
-        : [],
+      explanations:
+        parsed.explanations && Array.isArray(parsed.explanations)
+          ? parsed.explanations.map(String)
+          : [],
     };
-  } catch (e) {
-    console.error("Gemini scope extraction failed:", e);
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error("Gemini scope extraction failed:", error.message);
     return null;
   }
 }

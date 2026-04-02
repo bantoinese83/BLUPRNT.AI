@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import confetti from "canvas-confetti";
 import { motion } from "motion/react";
 import {
   BadgeCheck,
@@ -29,6 +31,17 @@ export function EstimateScreen() {
   const navigate = useNavigate();
   const { estimate, estimateError, locationInput, runPhotoToScope, setPhotos } =
     useOnboarding();
+
+  useEffect(() => {
+    if (estimate) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#6366f1", "#818cf8", "#4f46e5"],
+      });
+    }
+  }, [estimate]);
 
   const summary = estimate?.summary;
   const min = summary?.estimated_min_total ?? DEFAULT_ESTIMATE_MIN;

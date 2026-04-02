@@ -74,12 +74,19 @@ export function TextField({
           autoCapitalize={autoCapitalize}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          accessibilityLabel={label}
+          accessibilityHint={placeholder}
+          accessibilityRole="text"
         />
         {secureTextEntry && (
           <TouchableOpacity
             onPress={togglePassword}
             style={styles.toggle}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel={
+              showPassword ? "Hide password" : "Show password"
+            }
+            accessibilityRole="button"
           >
             {showPassword ? (
               <EyeOff size={20} color="#94a3b8" />

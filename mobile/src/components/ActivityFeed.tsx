@@ -9,7 +9,7 @@ import {
   LucideIcon,
 } from "lucide-react-native";
 import { MotiView } from "moti";
-import { router } from "expo-router";
+import { router, Href } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { formatRelativeTime } from "../lib/activity";
 import { Theme } from "../constants/Theme";
@@ -21,7 +21,7 @@ export type ActivityEvent = {
   title: string;
   description: string;
   timestamp: string;
-  link?: string;
+  link?: Href;
 };
 
 interface Props {
@@ -107,7 +107,7 @@ export function ActivityFeed({ events }: Props) {
                   onPress={() => {
                     if (event.link) {
                       Haptics.selectionAsync();
-                      router.push(event.link as any);
+                      router.push(event.link as Href);
                     }
                   }}
                   disabled={!event.link}

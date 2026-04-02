@@ -5,11 +5,11 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 import { MotiView } from "moti";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { Theme } from "../../constants/Theme";
 
 interface Option {
   label: string;
@@ -20,7 +20,7 @@ interface Props {
   options: Option[];
   value: string;
   onChange: (value: string) => void;
-  containerStyle?: any;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export function SegmentedControl({

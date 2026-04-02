@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Helmet } from "react-helmet-async";
@@ -133,6 +133,7 @@ export default function Dashboard() {
         <div className="flex flex-1 flex-col items-center justify-center p-6">
           <EmptyState
             variant="projects"
+            currentStep={1}
             title="No projects tracked yet"
             description="Create your first project to start tracking benchmarks and managing your budget like a pro."
             action={{
@@ -336,7 +337,10 @@ function DashboardContent({
     });
   }
 
-  const activityEvents = generateActivityEvents(project, invoices);
+  const activityEvents = useMemo(
+    () => generateActivityEvents(project, invoices),
+    [project, invoices],
+  );
 
   const stats = (
     <DashboardStats
@@ -393,6 +397,20 @@ function DashboardContent({
     />
   );
 
+  const handleProjectRename = async (id: string, newName: string) => {
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ name: newName })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Project renamed successfully.");
+      load();
+    } catch (_e) {
+      toast.error("Failed to rename project.");
+    }
+  };
+
   return (
     <div className="min-h-screen dashboard-bg page-fade-in">
       <Helmet>
@@ -437,7 +455,10 @@ function DashboardContent({
           />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <ProjectHeader project={project} />
+          <ProjectHeader
+            project={project}
+            onRename={(newName) => handleProjectRename(project.id, newName)}
+          />
         </motion.div>
 
         <motion.div variants={itemVariants}>

@@ -12,6 +12,7 @@ interface EmptyStateProps {
   actionTitle?: string;
   onAction?: () => void;
   style?: ViewStyle;
+  withRoadmap?: boolean;
 }
 
 export function EmptyState({
@@ -21,6 +22,7 @@ export function EmptyState({
   actionTitle,
   onAction,
   style,
+  withRoadmap = false,
 }: EmptyStateProps) {
   return (
     <MotiView
@@ -42,6 +44,35 @@ export function EmptyState({
             onPress={onAction}
             style={styles.button}
           />
+        )}
+
+        {withRoadmap && (
+          <View style={styles.roadmapContainer}>
+            <View style={styles.roadmapStep}>
+              <View style={[styles.roadmapDot, styles.activeDot]}>
+                <Text style={[styles.roadmapNumber, styles.activeNumber]}>
+                  1
+                </Text>
+              </View>
+              <Text style={[styles.roadmapLabel, styles.activeLabel]}>
+                Vision
+              </Text>
+            </View>
+            <View style={styles.roadmapLine} />
+            <View style={styles.roadmapStep}>
+              <View style={styles.roadmapDot}>
+                <Text style={styles.roadmapNumber}>2</Text>
+              </View>
+              <Text style={styles.roadmapLabel}>Estimate</Text>
+            </View>
+            <View style={styles.roadmapLine} />
+            <View style={styles.roadmapStep}>
+              <View style={styles.roadmapDot}>
+                <Text style={styles.roadmapNumber}>3</Text>
+              </View>
+              <Text style={styles.roadmapLabel}>Ledger</Text>
+            </View>
+          </View>
         )}
       </GlassCard>
     </MotiView>
@@ -87,5 +118,64 @@ const styles = StyleSheet.create({
   button: {
     width: "100%",
     height: 56,
+  },
+  roadmapContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
+    paddingTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.05)",
+    width: "100%",
+  },
+  roadmapStep: {
+    alignItems: "center",
+    gap: 8,
+  },
+  roadmapDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#f1f5f9",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  activeDot: {
+    backgroundColor: "#4f46e5",
+    borderColor: "#4f46e5",
+    shadowColor: "#4f46e5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+    transform: [{ scale: 1.1 }],
+  },
+  activeNumber: {
+    color: "#ffffff",
+  },
+  roadmapNumber: {
+    fontSize: 12,
+    fontFamily: "Outfit_800ExtraBold",
+    color: "#94a3b8",
+  },
+  roadmapLabel: {
+    fontSize: 10,
+    fontFamily: "Outfit_700Bold",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  activeLabel: {
+    color: "#4f46e5",
+  },
+  roadmapLine: {
+    width: 30,
+    height: 1,
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: 8,
+    marginBottom: 20, // Align with dots
   },
 });

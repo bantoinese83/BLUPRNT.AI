@@ -1,3 +1,4 @@
+import type { Href } from "expo-router";
 import type { InvoiceRow, ProjectRow } from "../types/database";
 
 export type ActivityEvent = {
@@ -6,7 +7,7 @@ export type ActivityEvent = {
   title: string;
   description: string;
   timestamp: string;
-  link?: string;
+  link?: Href;
 };
 
 /**

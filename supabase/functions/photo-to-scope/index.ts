@@ -201,27 +201,40 @@ Deno.serve(async (req: Request) => {
         // We don't return 500 here since the scope items are already saved, but we log it.
       }
 
-      const scope_items = (inserted ?? []).map((r: any) => ({
-        id: r.id,
-        category: r.category,
-        description: r.description,
-        finish_tier: r.finish_tier,
-        quantity: r.quantity,
-        unit: r.unit,
-        unit_cost_min: r.unit_cost_min,
-        unit_cost_max: r.unit_cost_max,
-        total_cost_min: r.total_cost_min,
-        total_cost_max: r.total_cost_max,
-        confidence_score: r.confidence_score,
-        source: r.source,
-        metadata: {
-          justification: r.metadata?.justification || "",
-          priority: r.metadata?.priority || "medium",
-          phase: r.metadata?.phase || "standard",
-          maintenance_tips: r.metadata?.maintenance_tips || "",
-          materials: r.metadata?.materials || [],
-        },
-      }));
+      const scope_items = (inserted ?? []).map(
+        (r: Record<string, unknown>) => ({
+          id: (r as { id: string }).id,
+          category: (r as { category: string }).category,
+          description: (r as { description: string }).description,
+          finish_tier: (r as { finish_tier: string }).finish_tier,
+          quantity: (r as { quantity: number }).quantity,
+          unit: (r as { unit: string }).unit,
+          unit_cost_min: (r as { unit_cost_min: number }).unit_cost_min,
+          unit_cost_max: (r as { unit_cost_max: number }).unit_cost_max,
+          total_cost_min: (r as { total_cost_min: number }).total_cost_min,
+          total_cost_max: (r as { total_cost_max: number }).total_cost_max,
+          confidence_score: (r as { confidence_score: number })
+            .confidence_score,
+          source: (r as { source: string }).source,
+          metadata: {
+            justification:
+              (r as { metadata: { justification: string } }).metadata
+                ?.justification || "",
+            priority:
+              (r as { metadata: { priority: string } }).metadata?.priority ||
+              "medium",
+            phase:
+              (r as { metadata: { phase: string } }).metadata?.phase ||
+              "standard",
+            maintenance_tips:
+              (r as { metadata: { maintenance_tips: string } }).metadata
+                ?.maintenance_tips || "",
+            materials:
+              (r as { metadata: { materials: unknown[] } }).metadata
+                ?.materials || [],
+          },
+        }),
+      );
 
       return jsonResponse(
         {
@@ -269,8 +282,9 @@ Deno.serve(async (req: Request) => {
       200,
       req,
     );
-  } catch (e) {
-    console.error(e);
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error(error);
     return jsonResponse(
       { error: "Something went wrong. Try again in a moment." },
       500,

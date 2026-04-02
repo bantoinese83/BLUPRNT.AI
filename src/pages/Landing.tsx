@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingSocialProof } from "@/components/landing/LandingSocialProof";
 import { LandingHowItWorks } from "@/components/landing/LandingHowItWorks";
+import { LandingComparison } from "@/components/landing/LandingComparison";
 import { LandingStory } from "@/components/landing/LandingStory";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
 import { LandingPricing } from "@/components/landing/LandingPricing";
@@ -157,6 +158,7 @@ export default function Landing() {
 
           <LandingSocialProof />
           <LandingHowItWorks />
+          <LandingComparison />
           <LandingStory />
           <LandingFeatures />
           <LandingPricing

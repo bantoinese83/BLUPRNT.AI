@@ -24,6 +24,7 @@ import {
   LogIn,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
+import { money } from "../src/lib/formatters";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
@@ -72,6 +73,21 @@ export default function OnboardingScreen() {
   );
 
   useEffect(() => {
+    // Skip onboarding if user already has projects (Fast-track)
+    const checkExistingProjects = async () => {
+      if (user) {
+        const { count, error } = await supabase
+          .from("projects")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id);
+
+        if (!error && count && count > 0) {
+          router.replace("/(tabs)");
+        }
+      }
+    };
+    checkExistingProjects();
+
     let interval: ReturnType<typeof setInterval>;
     if (step === 4) {
       let current = 0;
@@ -95,7 +111,7 @@ export default function OnboardingScreen() {
       }, 1500);
     }
     return () => clearInterval(interval);
-  }, [step, projectType]);
+  }, [step, projectType, user]);
 
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -118,7 +134,12 @@ export default function OnboardingScreen() {
     } else if (step > 0) {
       setStep(step - 1);
     } else {
-      router.back();
+      // Explicitly navigate back or replace to ensure no "hang" on step 0
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/"); // Go to Landing Carousel
+      }
     }
   };
 
@@ -445,10 +466,25 @@ export default function OnboardingScreen() {
               </View>
 
               <Text style={styles.estimateLabel}>Investment Range</Text>
-              <Text style={styles.estimateValue}>
-                ${(estimate?.min || 0).toLocaleString()} – $
-                {(estimate?.max || 0).toLocaleString()}
-              </Text>
+              <MotiView
+                from={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 10,
+                  delay: 500,
+                }}
+                onDidAnimate={() => {
+                  Haptics.notificationAsync(
+                    Haptics.NotificationFeedbackType.Success,
+                  );
+                }}
+              >
+                <Text style={styles.estimateValue}>
+                  {money(estimate?.min ?? 0, estimate?.max ?? 0)}
+                </Text>
+              </MotiView>
 
               <View style={styles.estimateDivider} />
 
@@ -555,6 +591,7 @@ export default function OnboardingScreen() {
     <ScreenWrapper
       withScroll
       withTabBar={false}
+      withKeyboard
       edges={["top", "bottom", "left", "right"]}
     >
       <View style={styles.header}>

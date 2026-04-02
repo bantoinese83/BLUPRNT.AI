@@ -6,6 +6,7 @@ type DashboardStatsProps = {
   estimatedMax: number | null;
   invoiceTotal: number;
   invoiceCount: number;
+  isLoading?: boolean;
 };
 
 function formatCurrency(n: number) {
@@ -16,12 +17,36 @@ function formatCurrency(n: number) {
   }).format(n);
 }
 
+function StatSkeleton() {
+  return (
+    <div className="glass-card flex flex-col items-start p-5 sm:p-6 animate-pulse">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-slate-100" />
+        <div className="h-3 w-16 bg-slate-100 rounded" />
+      </div>
+      <div className="h-8 w-32 bg-slate-100 rounded mb-2" />
+      <div className="h-3 w-24 bg-slate-50 rounded" />
+    </div>
+  );
+}
+
 export function DashboardStats({
   estimatedMin,
   estimatedMax,
   invoiceTotal,
   invoiceCount,
+  isLoading = false,
 }: DashboardStatsProps) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatSkeleton />
+        <StatSkeleton />
+        <StatSkeleton />
+      </div>
+    );
+  }
+
   const estimatedMid =
     (estimatedMin ?? 0) + (estimatedMax ?? 0)
       ? ((estimatedMin ?? 0) + (estimatedMax ?? 0)) / 2

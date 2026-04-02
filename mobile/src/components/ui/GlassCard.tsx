@@ -16,19 +16,6 @@ interface Props {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   intensity?: number;
-  vibrancy?:
-    | "light"
-    | "extraLight"
-    | "dark"
-    | "regular"
-    | "prominent"
-    | "ultraThinMaterial"
-    | "thinMaterial"
-    | "thickMaterial"
-    | "systemMaterial"
-    | "systemThickMaterial"
-    | "systemThinMaterial"
-    | "systemUltraThinMaterial";
   onPress?: () => void;
   activeOpacity?: number;
 }
@@ -37,7 +24,6 @@ export function GlassCard({
   children,
   style,
   intensity = 20,
-  vibrancy,
   onPress,
   activeOpacity = 0.85,
 }: Props) {

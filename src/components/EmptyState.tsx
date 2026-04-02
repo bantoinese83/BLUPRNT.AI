@@ -13,6 +13,40 @@ interface EmptyStateProps {
   };
   variant?: "projects" | "invoices" | "error";
   className?: string;
+  currentStep?: number;
+}
+
+function RoadmapStep({
+  number,
+  label,
+  isActive,
+}: {
+  number: number;
+  label: string;
+  isActive: boolean;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        className={cn(
+          "w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-500",
+          isActive
+            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110"
+            : "bg-slate-100 text-slate-400",
+        )}
+      >
+        {number}
+      </div>
+      <span
+        className={cn(
+          "text-[9px] font-black uppercase tracking-widest transition-colors duration-500",
+          isActive ? "text-indigo-600" : "text-slate-400",
+        )}
+      >
+        {label}
+      </span>
+    </div>
+  );
 }
 
 export function EmptyState({
@@ -22,6 +56,7 @@ export function EmptyState({
   action,
   variant = "projects",
   className,
+  currentStep = 1,
 }: EmptyStateProps) {
   const DefaultIcon = {
     projects: FolderPlus,
@@ -36,7 +71,7 @@ export function EmptyState({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "flex flex-col items-center justify-center p-12 text-center rounded-[3rem] border border-slate-200/50 bg-white/40 backdrop-blur-sm",
+        "flex flex-col items-center justify-center p-12 text-center rounded-[3rem] border border-slate-200/50 bg-white/40 backdrop-blur-sm shadow-xl shadow-slate-100/50",
         className,
       )}
     >
@@ -51,13 +86,13 @@ export function EmptyState({
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="w-24 h-24 rounded-[2rem] bg-slate-900 flex items-center justify-center text-white shadow-2xl relative z-10"
+          className="w-24 h-24 rounded-[2.25rem] bg-slate-900 flex items-center justify-center text-white shadow-2xl relative z-10"
         >
           <FinalIcon className="w-10 h-10" strokeWidth={1.5} />
         </motion.div>
 
         {/* Decorative elements */}
-        <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rounded-2xl -rotate-12 opacity-20 blur-xl" />
+        <div className="absolute -top-4 -right-4 w-12 h-12 bg-indigo-500 rounded-2xl -rotate-12 opacity-20 blur-xl animate-pulse" />
         <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-10 blur-xl" />
       </div>
 
@@ -65,7 +100,7 @@ export function EmptyState({
         <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">
           {title}
         </h3>
-        <p className="text-sm text-slate-500 font-medium leading-relaxed">
+        <p className="text-sm text-slate-500 font-medium leading-relaxed px-4">
           {description}
         </p>
       </div>
@@ -75,7 +110,7 @@ export function EmptyState({
           variant="primary"
           size="lg"
           onClick={action.onClick}
-          className="group relative px-8 overflow-hidden"
+          className="group relative px-10 h-14 text-sm font-black rounded-2xl liquid-metal-button shadow-xl shadow-indigo-200/50"
         >
           <span className="relative z-10 flex items-center gap-2">
             {action.label}
@@ -86,12 +121,33 @@ export function EmptyState({
               <FilePlus className="w-4 h-4" />
             </motion.span>
           </span>
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
         </Button>
       )}
 
-      {/* Help Link */}
-      <div className="mt-8">
+      {/* Help Link & Getting Started */}
+      <div className="mt-12 space-y-6 flex flex-col items-center">
+        {variant === "projects" && (
+          <div className="flex items-center gap-6 py-5 px-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+            <RoadmapStep
+              number={1}
+              label="Vision"
+              isActive={currentStep === 1}
+            />
+            <div className="w-6 h-px bg-slate-100" />
+            <RoadmapStep
+              number={2}
+              label="Estimate"
+              isActive={currentStep === 2}
+            />
+            <div className="w-6 h-px bg-slate-100" />
+            <RoadmapStep
+              number={3}
+              label="Ledger"
+              isActive={currentStep === 3}
+            />
+          </div>
+        )}
+
         <a
           href="mailto:connect@monarch-labs.com"
           className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1.5"

@@ -52,7 +52,7 @@ function MaterialDetailList({
         <Text style={styles.materialHeaderText}>Bill of Materials</Text>
       </View>
       <View style={styles.materialGrid}>
-        {materials.map((m: any, idx: number) => (
+        {materials.map((m, idx: number) => (
           <View key={idx} style={styles.materialCard}>
             <View style={styles.materialIconBg}>
               <Boxes size={14} color={Theme.colors.text.muted} />

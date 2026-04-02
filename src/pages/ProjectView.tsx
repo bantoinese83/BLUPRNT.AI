@@ -102,13 +102,20 @@ export default function ProjectView() {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-slate-50">
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <Loader2
-            className="h-10 w-10 animate-spin text-slate-900"
-            aria-hidden
-          />
-          <p className="text-slate-600">Loading project…</p>
-        </div>
+        <header className="border-b border-slate-200 bg-white">
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            <div className="h-8 w-48 bg-slate-100 rounded-lg animate-pulse" />
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-8">
+          <div className="h-40 w-full bg-slate-200/50 rounded-[2rem] animate-pulse" />
+          <div className="space-y-4">
+            <div className="h-24 w-full bg-white rounded-2xl animate-pulse" />
+            <div className="h-24 w-full bg-white rounded-2xl animate-pulse" />
+            <div className="h-24 w-full bg-white rounded-2xl animate-pulse" />
+          </div>
+        </main>
         <AppSlimFooter className="bg-white/70" />
       </div>
     );

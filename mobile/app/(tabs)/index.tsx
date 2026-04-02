@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,10 +7,11 @@ import {
   Alert,
   ActivityIndicator,
   Share,
+  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
-import { Hammer, Plus, PlusCircle, MessageCircle } from "lucide-react-native";
+import { Plus, PlusCircle, MessageCircle } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { useAuth } from "../../src/contexts/auth-context";
@@ -18,7 +19,6 @@ import { InsightTeaser } from "../../src/components/InsightTeaser";
 import { ActivityFeed } from "../../src/components/ActivityFeed";
 import { ProjectHealth } from "../../src/components/ProjectHealth";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { SkeletonLoader } from "../../src/components/ui/SkeletonLoader";
 import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
 import { NextStepsChecklist } from "../../src/components/NextStepsChecklist";
 import { ProjectSwitcher } from "../../src/components/ProjectSwitcher";
@@ -30,12 +30,11 @@ import * as DocumentPicker from "expo-document-picker";
 import { uploadDocumentWithType } from "../../src/lib/upload-document";
 import { EmptyState } from "../../src/components/ui/EmptyState";
 import { Theme } from "../../src/constants/Theme";
-import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
 import { DashboardStats } from "../../src/components/DashboardStats";
 import { DashboardWelcomeBanner } from "../../src/components/DashboardWelcomeBanner";
 import { DashboardSkeleton } from "../../src/components/DashboardSkeleton";
-
-const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
+import { Confetti } from "../../src/components/ui/Confetti";
+import { supabase } from "../../src/lib/supabase";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -58,6 +57,8 @@ export default function DashboardScreen() {
     setUpgradeReason,
   } = useAwareness();
 
+  const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+
   const getGreeting = () => {
     if (invoices.length > 0) {
       if (
@@ -76,22 +77,63 @@ export default function DashboardScreen() {
 
   const [isUploading, setIsUploading] = useState(false);
   const [hasCelebrated, setHasCelebrated] = useState(false);
+  const [isCelebrating, setIsCelebrating] = useState(false);
 
   // Budget Completion Celebration
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       project &&
       invoices.length > 0 &&
       project.estimated_min_total != null &&
       !hasCelebrated
     ) {
-      const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
       if (invoiceTotal >= project.estimated_min_total) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setIsCelebrating(true);
         setHasCelebrated(true);
       }
     }
-  }, [project, invoices, hasCelebrated]);
+  }, [project, invoices, hasCelebrated, invoiceTotal]);
+
+  const handleRenameProject = () => {
+    if (!project) return;
+    Haptics.selectionAsync();
+
+    if (Platform.OS === "ios") {
+      Alert.prompt(
+        "Rename Project",
+        "Enter a new name for your renovation project.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Save",
+            onPress: async (newName?: string) => {
+              if (!newName?.trim()) return;
+              try {
+                const { error } = await supabase
+                  .from("projects")
+                  .update({ name: newName.trim() })
+                  .eq("id", project.id);
+                if (error) throw error;
+                load();
+              } catch (_e) {
+                Alert.alert("Error", "Could not rename project.");
+              }
+            },
+          },
+        ],
+        "plain-text",
+        project.name,
+      );
+    } else {
+      // Android / Fallback: Simple prompt isn't built-in, so we use a standard alert for now
+      // (Future: Custom Modal)
+      Alert.alert(
+        "Rename project",
+        "Feature available in Profile -> Managed Projects.",
+      );
+    }
+  };
 
   const handleFabPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -192,19 +234,23 @@ export default function DashboardScreen() {
 
   if (!project) {
     return (
-      <ScreenWrapper withLogo style={styles.centerContainer}>
+      <ScreenWrapper
+        withLogo
+        onRefresh={load}
+        refreshing={loading}
+        style={styles.centerContainer}
+      >
         <EmptyState
           icon={PlusCircle}
           title="No projects yet"
           description="Create your first property renovation to start tracking benchmarks, managing documents, and getting AI insights."
           actionTitle="Start New Project"
           onAction={() => router.push("/onboarding")}
+          withRoadmap
         />
       </ScreenWrapper>
     );
   }
-
-  const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
 
   return (
     <ScreenWrapper
@@ -221,12 +267,14 @@ export default function DashboardScreen() {
         transition={{ type: "timing", duration: 800 }}
         style={styles.headerContainer}
       >
-        <View>
+        <TouchableOpacity onPress={handleRenameProject}>
           <Text style={styles.welcomeText}>{getGreeting()},</Text>
           <Text style={styles.userFirstName}>
-            {user?.user_metadata?.full_name?.split(" ")[0] || "there"}
+            {project?.name ||
+              user?.user_metadata?.full_name?.split(" ")[0] ||
+              "there"}
           </Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.headerRight}>
           <TouchableOpacity
             onPress={() => {
@@ -360,6 +408,7 @@ export default function DashboardScreen() {
         onClose={() => setShowUpgrade(false)}
         reason={upgradeReason}
       />
+      <Confetti active={isCelebrating} />
     </ScreenWrapper>
   );
 }

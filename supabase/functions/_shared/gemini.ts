@@ -11,14 +11,14 @@ export type GeminiPart =
 
 export interface GeminiResponse {
   text: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 export async function callGemini(params: {
   parts: GeminiPart[];
   systemInstruction?: string;
   responseMimeType?: "application/json" | "text/plain";
-  responseSchema?: any;
+  responseSchema?: Record<string, unknown>;
   temperature?: number;
 }): Promise<GeminiResponse | null> {
   // @ts-expect-error: Deno global
@@ -53,10 +53,10 @@ export async function callGemini(params: {
       return { text: p.text };
     });
 
-    console.log(`[callGemini] Calling New SDK (Model: gemini-2.5-flash)`);
+    console.log(`[callGemini] Calling New SDK (Model: gemini-3-flash-preview)`);
 
     // 3. Execute request using the centralized config pattern
-    const response = await ai.models.generateContent({
+    const response = (await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: sdkContents,
       config: {
@@ -66,7 +66,7 @@ export async function callGemini(params: {
         responseMimeType: responseMimeType,
         responseSchema: responseSchema,
       },
-    });
+    })) as { text?: string; data?: Record<string, unknown> };
 
     if (!response || !response.text) {
       console.warn("[callGemini] No response text returned");
@@ -77,8 +77,9 @@ export async function callGemini(params: {
       text: response.text.trim(),
       data: response.data, // The new SDK often parses the data automatically if schema is provided
     };
-  } catch (e: any) {
-    console.error("[callGemini] New SDK Error:", e.name, e.message);
-    return { text: `ERROR: ${e.message}` };
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error("[callGemini] New SDK Error:", error.name, error.message);
+    return { text: `ERROR: ${error.message}` };
   }
 }
