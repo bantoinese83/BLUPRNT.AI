@@ -89,7 +89,7 @@ export interface EstimatePayload {
     total_cost_max: number;
     confidence_score: number;
     confidence_reason?: string;
-    source: "photo";
+    source: "photo" | "text";
     justification?: string;
     priority?: "high" | "medium" | "low";
     phase?: string;
@@ -140,17 +140,21 @@ Expert Guidelines:
 8. Provide "Regional Context" regarding ${area} labor markets, permit expectations, or material availability in ${dateStr}.
 9. Ensure all math is perfect: total_cost_min = quantity * unit_cost_min.
 10. If photos are provided, identify specific brands, damage, or structural constraints visible.
-11. **FORCE: Bill of Materials**: For every single line item, you MUST provide a massive, exhaustive "Materials" list that details every specific component required down to the manufacturer brand, model name, and precise quantities. This is the MOST IMPORTANT part of the response.
+11. **Text-Only Mode**: If no photos are provided, you MUST generate the most plausible scope for a standard US home based ONLY on the user's description and the regional building codes for ${area}.
+12. **FORCE: Bill of Materials**: For every single line item, you MUST provide a massive, exhaustive "Materials" list that details every specific component required down to the manufacturer brand, model name, and precise quantities. This is the MOST IMPORTANT part of the response.
 **Example Material**: { "name": "3/4 inch PEX Tubing", "brand": "Uponor", "model": "AquaPex Type A", "quantity": 100, "unit": "ft" }
 12. **Brand Logic**: Suggest real-world, high-value brands that match the Target Finish Tier (e.g. Kohler/Sub-Zero for Premium, Delta/Whirlpool for Mid, Glacier Bay/Amana for Economy).
 13. **CRITICAL**: The 'materials' array is NOT OPTIONAL. If you return an empty materials array for a standard construction task, you have failed the mission.
 14. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
 
+  const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
 Location: ${zip_code} (${area})
-Date: ${dateStr}
+Analysis Mode: ${hasPhotos ? "Vision & Text Integration" : "Text-Only Estimation"}
 Target Finish Tier: ${finish_preference}
-User Description: ${scopeDescription || "Analyze photos for full scope"}.
+User Description: ${scopeDescription || (hasPhotos ? "Analyze photos for full scope" : "Standard renovation for this room type")}.
+
+${hasPhotos ? "Analyze the attached photos deeply first, then use the description for context." : "Construct a high-fidelity estimate based EXCLUSIVELY on the text description provided."}
 
 Please generate the detailed blueprint.`;
 
@@ -298,7 +302,7 @@ Please generate the detailed blueprint.`;
         total_cost_max: Math.round(Number(s.total_cost_max)),
         confidence_score: Number(s.confidence_score || 3),
         confidence_reason: s.confidence_reason || "",
-        source: "photo" as const,
+        source: hasPhotos ? ("photo" as const) : ("text" as const),
         justification: s.justification,
         priority: s.priority,
         phase: s.phase,

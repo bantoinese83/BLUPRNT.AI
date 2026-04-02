@@ -74,6 +74,18 @@ Deno.serve(async (req: Request) => {
       location_unset,
       scope_description,
     } = parsed.data;
+
+    // Reject if neither photos nor a text description were provided.
+    if (photoCount === 0 && !scope_description) {
+      return jsonResponse(
+        {
+          error:
+            "Please provide at least one photo or a detailed project description.",
+        },
+        400,
+        req,
+      );
+    }
     const projectId = project_id ?? null;
 
     if (projectId) {
