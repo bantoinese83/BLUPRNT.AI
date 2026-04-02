@@ -149,6 +149,37 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Safe mapping helper to prevent 500s during response preparation
+    const safeMapItems = (items: any[]) =>
+      items.map((r: any, i: number) => {
+        const metadata = r.metadata || {};
+        const isFromDB = !!r.id && String(r.id).includes("-"); // UUID check
+
+        return {
+          id: isFromDB ? r.id : `scope_${i + 1}`,
+          category: r.category || "General",
+          description: r.description || "",
+          finish_tier: r.finish_tier || "mid",
+          quantity: Number(r.quantity || 0),
+          unit: r.unit || "unit",
+          unit_cost_min: Number(r.unit_cost_min || 0),
+          unit_cost_max: Number(r.unit_cost_max || 0),
+          total_cost_min: Number(r.total_cost_min || 0),
+          total_cost_max: Number(r.total_cost_max || 0),
+          confidence_score: Number(r.confidence_score || 3),
+          source: r.source || "text",
+          metadata: {
+            justification: metadata.justification || "",
+            priority: metadata.priority || "medium",
+            phase: metadata.phase || "standard",
+            maintenance_tips: metadata.maintenance_tips || "",
+            materials: Array.isArray(metadata.materials)
+              ? metadata.materials
+              : [],
+          },
+        };
+      });
+
     if (projectId) {
       const admin = getServiceClient();
 
@@ -221,35 +252,6 @@ Deno.serve(async (req: Request) => {
         console.error("[photo-to-scope] Project update failed:", projUpErr);
       }
 
-      // Safe mapping helper to prevent 500s during response preparation
-      const safeMapItems = (items: any[]) =>
-        items.map((r) => {
-          const metadata = r.metadata || {};
-          return {
-            id: r.id,
-            category: r.category || "General",
-            description: r.description || "",
-            finish_tier: r.finish_tier || "mid",
-            quantity: Number(r.quantity || 0),
-            unit: r.unit || "unit",
-            unit_cost_min: Number(r.unit_cost_min || 0),
-            unit_cost_max: Number(r.unit_cost_max || 0),
-            total_cost_min: Number(r.total_cost_min || 0),
-            total_cost_max: Number(r.total_cost_max || 0),
-            confidence_score: Number(r.confidence_score || 3),
-            source: r.source || "text",
-            metadata: {
-              justification: metadata.justification || "",
-              priority: metadata.priority || "medium",
-              phase: metadata.phase || "standard",
-              maintenance_tips: metadata.maintenance_tips || "",
-              materials: Array.isArray(metadata.materials)
-                ? metadata.materials
-                : [],
-            },
-          };
-        });
-
       const scope_items = safeMapItems(inserted ?? []);
 
       return jsonResponse(
@@ -264,29 +266,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const scope_items = payload.scope_items.map((s, i) => ({
-      id: `scope_${i + 1}`,
-      category: s.category,
-      description: s.description,
-      finish_tier: s.finish_tier,
-      quantity: s.quantity,
-      unit: s.unit,
-      unit_cost_min: s.unit_cost_min,
-      unit_cost_max: s.unit_cost_max,
-      total_cost_min: s.total_cost_min,
-      total_cost_max: s.total_cost_max,
-      confidence_score: s.confidence_score,
-      source: s.source,
-      metadata: {
-        justification: s.justification || "",
-        priority: s.priority || "medium",
-        phase: s.phase || "standard",
-        maintenance_tips: s.maintenance_tips || "",
-        materials: Array.isArray(s.materials) ? s.materials : [],
-      },
-    }));
-
+    // Final Onboarding Preview path
+    const scope_items = safeMapItems(payload.scope_items);
     const areaLabel = await cityFromZipUniversal(zip_code);
+
     return jsonResponse(
       {
         project_id: null,
