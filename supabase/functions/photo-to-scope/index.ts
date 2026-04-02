@@ -11,7 +11,9 @@ import {
   cityFromZip,
   cityFromZipUniversal,
   extractScopeWithGemini,
+  getFallbackEstimate,
   type RoomType,
+  type SourceType,
 } from "./_shared/estimate.ts";
 import { type GeminiPart } from "../_shared/gemini.ts";
 
@@ -147,14 +149,10 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!payload) {
-      return jsonResponse(
-        {
-          error:
-            "AI estimation failed. Please try adding a description or better photos.",
-        },
-        500,
-        req,
+      console.warn(
+        `[photo-to-scope] AI analysis failed for ZIP ${zip_code}. Invoking high-fidelity fallback.`,
       );
+      payload = getFallbackEstimate(room_type as RoomType, zip_code);
     }
 
     // Safe mapping helper to prevent 500s during response preparation
@@ -176,6 +174,7 @@ Deno.serve(async (req: Request) => {
           total_cost_max: Number(r.total_cost_max || 0),
           confidence_score: Number(r.confidence_score || 3),
           source: r.source || "text",
+          verification_required: !!r.verification_required,
           metadata: {
             justification: metadata.justification || "",
             priority: metadata.priority || "medium",

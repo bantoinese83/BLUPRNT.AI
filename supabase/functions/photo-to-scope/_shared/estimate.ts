@@ -231,6 +231,52 @@ export function sanitizeEstimate(
   };
 }
 
+/**
+ * Provides a high-fidelity 'Best Guess' estimate when AI analysis fails.
+ * Ensures the user experiences zero downtime even if the LLM is overloaded.
+ */
+export function getFallbackEstimate(
+  roomType: RoomType,
+  zip: string,
+): EstimatePayload {
+  const isWet = roomType === "kitchen" || roomType === "bathroom";
+  const min = isWet ? 12000 : 4500;
+  const max = isWet ? 35000 : 12000;
+
+  return {
+    summary: {
+      estimated_min_total: min,
+      estimated_max_total: max,
+      confidence_score: 2,
+      regional_context: `Standard mid-tier averages for the ${cityFromZip(zip)}.`,
+      value_engineering_tips: [
+        "Consider mid-range materials for better ROI.",
+        "Refurbish existing cabinets instead of replacing.",
+      ],
+    },
+    scope_items: [
+      {
+        category: "General",
+        description: `Standard ${roomType} refresh and renovation items.`,
+        finish_tier: "mid",
+        quantity: 1,
+        unit: "lot",
+        unit_cost_min: min,
+        unit_cost_max: max,
+        total_cost_min: min,
+        total_cost_max: max,
+        confidence_score: 1,
+        source: "fallback",
+        justification: "Calculated based on regional mid-market averages.",
+        materials: [],
+      },
+    ],
+    explanations: [
+      "This is a regional average estimate provided because our deep vision analysis was unable to process your specific photos at this time.",
+    ],
+  };
+}
+
 export async function extractScopeWithGemini(input: {
   room_type: RoomType;
   zip_code: string;
@@ -269,7 +315,8 @@ Expert Guidelines:
 12. **FORCE: Bill of Materials**: For every single line item, you MUST provide a massive, exhaustive "Materials" list that details every specific component required down to the manufacturer brand, model name, and precise quantities. This is the MOST IMPORTANT part of the response.
 13. **Brand Logic**: Suggest real-world, high-value brands that match the Target Finish Tier (e.g. Kohler/Sub-Zero for Premium, Delta/Whirlpool for Mid, Glacier Bay/Amana for Economy).
 14. **CRITICAL**: The 'materials' array is NOT OPTIONAL. If you return an empty materials array for a standard construction task, you have failed the mission.
-15. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
+15. **Verification**: Set 'verification_required' to true if exact counts or materials are hard to confirm from photos alone.
+16. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
 
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
@@ -337,6 +384,7 @@ Please generate the detailed blueprint.`;
             confidence_score: { type: "number" },
             confidence_reason: { type: "string" },
             justification: { type: "string" },
+            verification_required: { type: "boolean" },
             priority: { type: "string", enum: ["high", "medium", "low"] },
             phase: { type: "string" },
             maintenance_tips: { type: "string" },
