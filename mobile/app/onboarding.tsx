@@ -86,6 +86,10 @@ export default function OnboardingScreen() {
       fd.append("room_type", projectTypeToRoomType(projectType));
       fd.append("finish_preference", "mid");
 
+      if (scopeDescription?.trim()) {
+        fd.append("scope_description", scopeDescription.trim());
+      }
+
       photos.forEach((uri, index) => {
         // @ts-expect-error: React Native FormData needs this object format
         fd.append("photos[]", {
