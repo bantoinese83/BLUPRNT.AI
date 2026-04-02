@@ -13,7 +13,6 @@ import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import {
   ChevronLeft,
-  ListChecks,
   Share2,
   Download,
   Plus,
@@ -251,123 +250,142 @@ export default function ProjectDetailScreen() {
           )}
         </MotiView>
 
-        {/* Scope Title */}
-        <View style={styles.sectionHeader}>
-          <ListChecks size={20} color={Theme.colors.text.secondary} />
-          <Text style={styles.sectionTitle}>Project Scope Details</Text>
-        </View>
+        {Object.entries(groupedScope).length > 0 ? (
+          Object.entries(groupedScope).map(([category, items], catIndex) => (
+            <MotiView
+              key={category}
+              from={{ opacity: 0, translateY: 20 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{
+                type: "timing",
+                duration: 600,
+                delay: 200 + catIndex * 150,
+              }}
+              style={styles.categorySection}
+            >
+              <Text style={styles.categoryTitle}>{category}</Text>
+              {items.map((item, index) => (
+                <MotiView
+                  key={item.id}
+                  from={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    type: "timing",
+                    duration: 400,
+                    delay: 300 + catIndex * 150 + index * 50,
+                  }}
+                >
+                  <GlassCard
+                    intensity={10}
+                    style={[
+                      styles.scopeCard,
+                      expandedId === item.id && styles.expandedScopeCard,
+                    ]}
+                  >
+                    <View style={styles.scopeHeader}>
+                      <Text style={styles.scopeDescription}>
+                        {item.description}
+                      </Text>
+                      <View style={styles.tierBadge}>
+                        <Text style={styles.tierText}>{item.finish_tier}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.scopeFooter}>
+                      <Text style={styles.scopeMeta}>
+                        {item.quantity} {item.unit}
+                      </Text>
+                      <Text style={styles.scopePrice}>
+                        ${(item.total_cost_min || 0).toLocaleString()} - $
+                        {(item.total_cost_max || 0).toLocaleString()}
+                      </Text>
+                    </View>
 
-        {/* Grouped Scope Items */}
-        {Object.entries(groupedScope).map(([category, items], catIndex) => (
+                    {item.metadata?.materials &&
+                      item.metadata.materials.length > 0 && (
+                        <>
+                          <TouchableOpacity
+                            style={[
+                              styles.viewDetailsBtn,
+                              expandedId === item.id &&
+                                styles.activeViewDetailsBtn,
+                            ]}
+                            onPress={() => {
+                              Haptics.impactAsync(
+                                Haptics.ImpactFeedbackStyle.Light,
+                              );
+                              setExpandedId(
+                                expandedId === item.id ? null : item.id,
+                              );
+                            }}
+                          >
+                            <Text
+                              style={[
+                                styles.viewDetailsText,
+                                expandedId === item.id &&
+                                  styles.activeViewDetailsText,
+                              ]}
+                            >
+                              {expandedId === item.id
+                                ? "Hide Breakdown"
+                                : "View Breakdown"}
+                            </Text>
+                            {expandedId === item.id ? (
+                              <ChevronUp size={14} color="white" />
+                            ) : (
+                              <ChevronDown
+                                size={14}
+                                color={Theme.colors.text.secondary}
+                              />
+                            )}
+                          </TouchableOpacity>
+
+                          <AnimatePresence>
+                            {expandedId === item.id && (
+                              <MotiView
+                                from={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ type: "timing", duration: 300 }}
+                                style={{ overflow: "hidden" }}
+                              >
+                                <MaterialDetailList
+                                  materials={item.metadata.materials}
+                                />
+                              </MotiView>
+                            )}
+                          </AnimatePresence>
+                        </>
+                      )}
+                  </GlassCard>
+                </MotiView>
+              ))}
+            </MotiView>
+          ))
+        ) : (
           <MotiView
-            key={category}
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{
-              type: "timing",
-              duration: 600,
-              delay: 200 + catIndex * 150,
-            }}
-            style={styles.categorySection}
+            style={styles.generatingContainer}
           >
-            <Text style={styles.categoryTitle}>{category}</Text>
-            {items.map((item, index) => (
-              <MotiView
-                key={item.id}
-                from={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  type: "timing",
-                  duration: 400,
-                  delay: 300 + catIndex * 150 + index * 50,
-                }}
-              >
-                <GlassCard
-                  intensity={10}
-                  style={[
-                    styles.scopeCard,
-                    expandedId === item.id && styles.expandedScopeCard,
-                  ]}
-                >
-                  <View style={styles.scopeHeader}>
-                    <Text style={styles.scopeDescription}>
-                      {item.description}
-                    </Text>
-                    <View style={styles.tierBadge}>
-                      <Text style={styles.tierText}>{item.finish_tier}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.scopeFooter}>
-                    <Text style={styles.scopeMeta}>
-                      {item.quantity} {item.unit}
-                    </Text>
-                    <Text style={styles.scopePrice}>
-                      ${(item.total_cost_min || 0).toLocaleString()} - $
-                      {(item.total_cost_max || 0).toLocaleString()}
-                    </Text>
-                  </View>
-
-                  {item.metadata?.materials &&
-                    item.metadata.materials.length > 0 && (
-                      <>
-                        <TouchableOpacity
-                          style={[
-                            styles.viewDetailsBtn,
-                            expandedId === item.id &&
-                              styles.activeViewDetailsBtn,
-                          ]}
-                          onPress={() => {
-                            Haptics.impactAsync(
-                              Haptics.ImpactFeedbackStyle.Light,
-                            );
-                            setExpandedId(
-                              expandedId === item.id ? null : item.id,
-                            );
-                          }}
-                        >
-                          <Text
-                            style={[
-                              styles.viewDetailsText,
-                              expandedId === item.id &&
-                                styles.activeViewDetailsText,
-                            ]}
-                          >
-                            {expandedId === item.id
-                              ? "Hide Breakdown"
-                              : "View Breakdown"}
-                          </Text>
-                          {expandedId === item.id ? (
-                            <ChevronUp size={14} color="white" />
-                          ) : (
-                            <ChevronDown
-                              size={14}
-                              color={Theme.colors.text.secondary}
-                            />
-                          )}
-                        </TouchableOpacity>
-
-                        <AnimatePresence>
-                          {expandedId === item.id && (
-                            <MotiView
-                              from={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ type: "timing", duration: 300 }}
-                              style={{ overflow: "hidden" }}
-                            >
-                              <MaterialDetailList
-                                materials={item.metadata.materials}
-                              />
-                            </MotiView>
-                          )}
-                        </AnimatePresence>
-                      </>
-                    )}
-                </GlassCard>
-              </MotiView>
-            ))}
+            <View style={styles.generatingIcon}>
+              <ActivityIndicator
+                size="small"
+                color={Theme.colors.brand.primary}
+              />
+            </View>
+            <Text style={styles.generatingTitle}>Generating Blueprint...</Text>
+            <Text style={styles.generatingText}>
+              Our AI is currently estimating materials and costs for your
+              project. This usually takes 30-45 seconds.
+            </Text>
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={handleRefresh}
+            >
+              <Text style={styles.refreshButtonText}>Check Status</Text>
+            </TouchableOpacity>
           </MotiView>
-        ))}
+        )}
 
         {/* Global Actions */}
         <MotiView
@@ -684,5 +702,51 @@ const styles = StyleSheet.create({
   expandedScopeCard: {
     borderColor: "rgba(79, 70, 229, 0.2)",
     borderWidth: 1,
+  },
+  generatingContainer: {
+    padding: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginTop: 20,
+  },
+  generatingIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(79, 70, 229, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  generatingTitle: {
+    fontSize: 18,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  generatingText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+    paddingHorizontal: 12,
+  },
+  refreshButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: Theme.colors.brand.primary,
+  },
+  refreshButtonText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: "white",
   },
 });

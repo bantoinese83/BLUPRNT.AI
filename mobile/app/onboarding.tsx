@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { MotiView, AnimatePresence } from "moti";
@@ -33,7 +34,6 @@ import { money } from "../src/lib/formatters";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
-import { Logo } from "../src/components/ui/Logo";
 import {
   ProjectTypeOption,
   StageOption,
@@ -41,6 +41,7 @@ import {
   projectTypeToRoomType,
   PhotoToScopeResult,
 } from "../src/lib/onboarding-helpers";
+import { ProjectIcon } from "../src/lib/project-icons";
 import { supabase } from "../src/lib/supabase";
 import { useAuth } from "../src/contexts/auth-context";
 import { Theme } from "../src/constants/Theme";
@@ -126,11 +127,11 @@ export default function OnboardingScreen() {
   const [estimate, setEstimate] = useState<{
     min: number;
     max: number;
-    scope: any[];
+    scope: PhotoToScopeResult["scope_items"];
   } | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
 
-  const runAnalysis = async () => {
+  const runAnalysis = React.useCallback(async () => {
     try {
       const fd = new FormData();
       // Extract zip from location string (simple 5-digit match)
@@ -184,7 +185,7 @@ export default function OnboardingScreen() {
         "We couldn't perform a deep vision analysis on these photos, so we've provided a refined regional estimate based on your project type.",
       );
     }
-  };
+  }, [location, projectType, scopeDescription, photos]);
 
   useEffect(() => {
     // Skip onboarding if user already has projects (Fast-track)
@@ -213,7 +214,7 @@ export default function OnboardingScreen() {
       runAnalysis();
     }
     return () => clearInterval(messageInterval);
-  }, [step, projectType, user]);
+  }, [step, projectType, user, runAnalysis]);
 
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -273,7 +274,8 @@ export default function OnboardingScreen() {
                 estimated_max_total: estimate.max,
                 confidence_score: 4.8,
               },
-              scope_items: [],
+              // Pass full AI-generated scope so BOM is persisted to DB
+              scope_items: estimate.scope ?? [],
             }
           : null,
         photos: photos.map((p) => ({ uri: p })),
@@ -298,36 +300,54 @@ export default function OnboardingScreen() {
             key="step0"
           >
             <Text style={styles.stepTitle}>What are you planning?</Text>
-            <View style={styles.options}>
+            <View style={styles.iconGrid}>
               {[
-                "Kitchen",
-                "Bathroom",
-                "Painting",
-                "Roof",
-                "Flooring",
-                "Something else",
-              ].map((type) => (
+                { name: "Kitchen" },
+                { name: "Bathroom" },
+                { name: "Painting" },
+                { name: "Roof" },
+                { name: "Flooring" },
+                { name: "Something else" },
+              ].map((opt) => (
                 <TouchableOpacity
-                  key={type}
+                  key={opt.name}
                   style={[
-                    styles.optionButton,
-                    projectType === type && styles.optionButtonActive,
+                    styles.iconCard,
+                    projectType === opt.name && styles.iconCardActive,
                   ]}
                   onPress={() => {
                     Haptics.selectionAsync();
-                    setProjectType(type as ProjectTypeOption);
+                    setProjectType(opt.name as ProjectTypeOption);
                   }}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.optionText,
-                      projectType === type && styles.optionTextActive,
+                      styles.iconCircleBig,
+                      projectType === opt.name && styles.iconCircleBigActive,
                     ]}
                   >
-                    {type}
+                    <ProjectIcon
+                      name={opt.name}
+                      size={32}
+                      color={
+                        projectType === opt.name
+                          ? Theme.colors.brand.primary
+                          : Theme.colors.text.secondary
+                      }
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.iconLabel,
+                      projectType === opt.name && styles.iconLabelActive,
+                    ]}
+                  >
+                    {opt.name}
                   </Text>
-                  {projectType === type && (
-                    <Check size={20} color={Theme.colors.brand.primary} />
+                  {projectType === opt.name && (
+                    <View style={styles.checkSeal}>
+                      <Check size={12} color="white" />
+                    </View>
                   )}
                 </TouchableOpacity>
               ))}
@@ -368,32 +388,48 @@ export default function OnboardingScreen() {
             key="step2"
           >
             <Text style={styles.stepTitle}>Project stage?</Text>
-            <View style={styles.options}>
+            <View style={{ gap: 12, marginTop: 20 }}>
               {[
-                "Planning & budgeting",
-                "Collecting quotes",
-                "Already started work",
+                { name: "Planning & budgeting" },
+                { name: "Collecting quotes" },
+                { name: "Already started work" },
               ].map((s) => (
                 <TouchableOpacity
-                  key={s}
+                  key={s.name}
                   style={[
-                    styles.optionButton,
-                    stage === s && styles.optionButtonActive,
+                    styles.stageButton,
+                    stage === s.name && styles.stageButtonActive,
                   ]}
                   onPress={() => {
                     Haptics.selectionAsync();
-                    setStage(s as StageOption);
+                    setStage(s.name as StageOption);
                   }}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.optionText,
-                      stage === s && styles.optionTextActive,
+                      styles.stageIconContainer,
+                      stage === s.name && styles.stageIconContainerActive,
                     ]}
                   >
-                    {s}
+                    <ProjectIcon
+                      name={s.name}
+                      size={24}
+                      color={
+                        stage === s.name
+                          ? Theme.colors.brand.primary
+                          : Theme.colors.text.secondary
+                      }
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.stageText,
+                      stage === s.name && styles.stageTextActive,
+                    ]}
+                  >
+                    {s.name}
                   </Text>
-                  {stage === s && (
+                  {stage === s.name && (
                     <Check size={20} color={Theme.colors.brand.primary} />
                   )}
                 </TouchableOpacity>
@@ -532,7 +568,11 @@ export default function OnboardingScreen() {
                 ]}
               />
               <GlassCard intensity={40} style={styles.iconCircle}>
-                <Logo size={40} />
+                <ProjectIcon
+                  name={projectType || ""}
+                  size={40}
+                  color={Theme.colors.brand.primary}
+                />
               </GlassCard>
             </View>
             <Text style={styles.analysisTitle}>Analyzing Blueprint</Text>
@@ -562,9 +602,18 @@ export default function OnboardingScreen() {
             </Text>
 
             <GlassCard intensity={30} style={styles.estimateCard}>
-              <View style={styles.confidenceBadge}>
-                <Sparkles size={12} color={Theme.colors.brand.light} />
-                <Text style={styles.confidenceText}>Typical Range</Text>
+              <View style={styles.estimateHeader}>
+                <View style={styles.estimateIconCircle}>
+                  <ProjectIcon
+                    name={projectType || ""}
+                    size={32}
+                    color={Theme.colors.brand.primary}
+                  />
+                </View>
+                <View style={styles.confidenceBadge}>
+                  <Sparkles size={12} color={Theme.colors.brand.light} />
+                  <Text style={styles.confidenceText}>Refined Range</Text>
+                </View>
               </View>
 
               <Text style={styles.estimateLabel}>Investment Range</Text>
@@ -751,6 +800,7 @@ export default function OnboardingScreen() {
       withKeyboard
       edges={["top", "bottom", "left", "right"]}
     >
+      <StatusBar style="dark" />
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <ChevronLeft size={24} color="#0f172a" />
@@ -791,18 +841,113 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 24,
+    padding: 20,
+    marginTop: 10,
+  },
+  iconGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 20,
+  },
+  iconCard: {
+    width: "48%",
+    aspectRatio: 1,
+    backgroundColor: "white",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  iconCardActive: {
+    borderColor: Theme.colors.brand.primary,
+    borderWidth: 2,
+    backgroundColor: Theme.colors.brand.primary + "05",
+  },
+  iconCircleBig: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#f8fafc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  iconCircleBigActive: {
+    backgroundColor: Theme.colors.brand.primary + "15",
+  },
+  iconLabel: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.black,
+    color: "#64748b",
+  },
+  iconLabelActive: {
+    color: Theme.colors.brand.primary,
+  },
+  checkSeal: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Theme.colors.brand.primary,
+    alignItems: "center",
+    justifyContent: "center",
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#ffffff",
-    justifyContent: "center",
+    backgroundColor: "white",
     alignItems: "center",
-    marginRight: 16,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  stageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "white",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#f1f5f9",
+    gap: 16,
+  },
+  stageButtonActive: {
+    borderColor: Theme.colors.brand.primary,
+    backgroundColor: Theme.colors.brand.primary + "05",
+  },
+  stageIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#f8fafc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stageIconContainerActive: {
+    backgroundColor: Theme.colors.brand.primary + "15",
+  },
+  stageText: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: Theme.typography.family.semibold,
+    color: "#334155",
+  },
+  stageTextActive: {
+    color: Theme.colors.brand.primary,
   },
   progressContainer: {
     flex: 1,
@@ -1035,6 +1180,26 @@ const styles = StyleSheet.create({
     padding: 24,
     borderRadius: 32,
     alignItems: "center",
+  },
+  estimateHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 20,
+  },
+  estimateIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   confidenceBadge: {
     flexDirection: "row",

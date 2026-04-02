@@ -55,8 +55,12 @@ export async function callGemini(params: {
 
     console.log(`[callGemini] Calling New SDK (Model: gemini-3-flash-preview)`);
 
-    // 3. Execute request using the centralized config pattern
-    const response = (await ai.models.generateContent({
+    // 3. Execute request with a 50s timeout to prevent Edge Function hit-and-run
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Gemini API Timeout (50s)")), 50000),
+    );
+
+    const callPromise = ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: sdkContents,
       config: {
@@ -66,7 +70,12 @@ export async function callGemini(params: {
         responseMimeType: responseMimeType,
         responseSchema: responseSchema,
       },
-    })) as { text?: string; data?: Record<string, unknown> };
+    });
+
+    const response = (await Promise.race([callPromise, timeoutPromise])) as {
+      text?: string;
+      data?: Record<string, unknown>;
+    };
 
     if (!response || !response.text) {
       console.warn("[callGemini] No response text returned");
@@ -75,7 +84,7 @@ export async function callGemini(params: {
 
     return {
       text: response.text.trim(),
-      data: response.data, // The new SDK often parses the data automatically if schema is provided
+      data: response.data,
     };
   } catch (e: unknown) {
     const error = e as Error;

@@ -19,16 +19,39 @@ export function cityFromZip(zip: string): string {
   const prefix = parseInt(z.slice(0, 3), 10);
   if (Number.isNaN(prefix)) return "your area";
 
-  // Keep a few trusted city-level labels where we know they are helpful.
-  if (prefix >= 900 && prefix <= 916) return "Los Angeles area";
-  if (prefix >= 430 && prefix <= 459) return "Columbus area";
-  if (prefix >= 100 && prefix <= 119) return "New York City area";
-  if (prefix >= 200 && prefix <= 219) return "Chicago area";
-  if (prefix >= 700 && prefix <= 719) return "Houston area";
-  if (prefix >= 300 && prefix <= 319) return "Atlanta area";
-  if (prefix >= 800 && prefix <= 819) return "Seattle area";
-  if (prefix >= 600 && prefix <= 619) return "Miami area";
-  if (prefix >= 500 && prefix <= 519) return "Phoenix area";
+  // Detailed Metro-Prefix Mapping (Top 30+ US Markets)
+  if (prefix >= 100 && prefix <= 119) return "NYC Metro area"; // NYC / Long Island
+  if (prefix >= 200 && prefix <= 212) return "Chicago area";
+  if (prefix >= 900 && prefix <= 918) return "Los Angeles area";
+  if (prefix >= 770 && prefix <= 775) return "Houston area";
+  if (prefix >= 190 && prefix <= 191) return "Philadelphia area";
+  if (prefix >= 850 && prefix <= 853) return "Phoenix area";
+  if (prefix >= 780 && prefix <= 782) return "San Antonio area";
+  if (prefix >= 920 && prefix <= 921) return "San Diego area";
+  if (prefix >= 750 && prefix <= 753) return "Dallas/Fort Worth area";
+  if (prefix >= 940 && prefix <= 951) return "SF Bay Area";
+  if (prefix >= 320 && prefix <= 333) return "Florida East Coast"; // Miami/Ft Lauderdale
+  if (prefix >= 300 && prefix <= 303) return "Atlanta area";
+  if (prefix >= 200 && prefix <= 201) return "Washington DC area";
+  if (prefix >= 21 && prefix <= 22) return "Boston area";
+  if (prefix >= 480 && prefix <= 483) return "Detroit area";
+  if (prefix >= 980 && prefix <= 981) return "Seattle area";
+  if (prefix >= 550 && prefix <= 555) return "Minneapolis/St Paul";
+  if (prefix >= 800 && prefix <= 802) return "Denver area";
+  if (prefix >= 275 && prefix <= 277) return "Research Triangle (NC)";
+  if (prefix >= 370 && prefix <= 372) return "Nashville area";
+  if (prefix >= 890 && prefix <= 891) return "Las Vegas area";
+  if (prefix >= 430 && prefix <= 432) return "Columbus area";
+  if (prefix >= 460 && prefix <= 462) return "Indianapolis area";
+  if (prefix >= 530 && prefix <= 532) return "Milwaukee area";
+  if (prefix >= 630 && prefix <= 631) return "St. Louis area";
+  if (prefix >= 327 && prefix <= 328) return "Orlando area";
+  if (prefix >= 970 && prefix <= 972) return "Portland area";
+  if (prefix >= 730 && prefix <= 731) return "Oklahoma City area";
+  if (prefix >= 840 && prefix <= 841) return "Salt Lake City area";
+  if (prefix >= 600 && prefix <= 606) return "Chicago North Suburban";
+  if (prefix >= 926 && prefix <= 928) return "Orange County area";
+  if (prefix >= 335 && prefix <= 337) return "Tampa Bay area";
 
   const region = ZIP_REGION_RANGES.find(
     (r) => prefix >= r.min && prefix <= r.max,
@@ -106,6 +129,108 @@ export interface EstimatePayload {
   explanations: string[];
 }
 
+export function sanitizeEstimate(
+  parsed: any,
+  finish_preference: string,
+  hasPhotos: boolean,
+): EstimatePayload {
+  const summary = {
+    estimated_min_total: Math.round(
+      Number(parsed.summary?.estimated_min_total || 0),
+    ),
+    estimated_max_total: Math.round(
+      Number(parsed.summary?.estimated_max_total || 0),
+    ),
+    confidence_score: Number(parsed.summary?.confidence_score || 3),
+    value_engineering_tips: Array.isArray(
+      parsed.summary?.value_engineering_tips,
+    )
+      ? parsed.summary.value_engineering_tips.map(String)
+      : [],
+    regional_context: String(parsed.summary?.regional_context || ""),
+    regional_signal: String(parsed.summary?.regional_signal || ""),
+  };
+
+  const scope_items = (
+    Array.isArray(parsed.scope_items) ? parsed.scope_items : []
+  ).map((s: any) => {
+    const qty = Number(s.quantity || 0);
+    const u_min = Number(s.unit_cost_min || 0);
+    const u_max = Number(s.unit_cost_max || 0);
+
+    // Enforce math: total = qty * unit_cost
+    const t_min = Math.round(qty * u_min);
+    const t_max = Math.round(qty * u_max);
+
+    return {
+      category: String(s.category || "General"),
+      description: String(s.description || ""),
+      finish_tier: (s.finish_tier as any) || finish_preference,
+      quantity: qty,
+      unit: String(s.unit || "unit"),
+      unit_cost_min: Math.round(u_min),
+      unit_cost_max: Math.round(u_max),
+      total_cost_min: t_min,
+      total_cost_max: t_max,
+      confidence_score: Number(s.confidence_score || 3),
+      confidence_reason: String(s.confidence_reason || ""),
+      source: hasPhotos ? ("photo" as const) : ("text" as const),
+      justification: String(s.justification || ""),
+      priority: (s.priority as any) || "medium",
+      phase: String(s.phase || "Standard"),
+      maintenance_tips: String(s.maintenance_tips || ""),
+      materials: Array.isArray(s.materials)
+        ? s.materials.map((m: any) => ({
+            name: String(m.name || "Material"),
+            brand: m.brand ? String(m.brand) : undefined,
+            model: m.model ? String(m.model) : undefined,
+            quantity: Number(m.quantity || 1),
+            unit: String(m.unit || "pc"),
+            estimated_cost: m.estimated_cost
+              ? Number(m.estimated_cost)
+              : undefined,
+          }))
+        : [],
+    };
+  });
+
+  // Re-calculate summary totals based on itemized rows if they drifted
+  const calculated_min = scope_items.reduce(
+    (sum: number, item: any) => sum + item.total_cost_min,
+    0,
+  );
+  const calculated_max = scope_items.reduce(
+    (sum: number, item: any) => sum + item.total_cost_max,
+    0,
+  );
+
+  // If AI total is significantly off (> 5%), use ours. Otherwise trust AI's rounding/contingency.
+  if (
+    summary.estimated_min_total === 0 ||
+    Math.abs(summary.estimated_min_total - calculated_min) /
+      (summary.estimated_min_total || 1) >
+      0.05
+  ) {
+    summary.estimated_min_total = calculated_min;
+  }
+  if (
+    summary.estimated_max_total === 0 ||
+    Math.abs(summary.estimated_max_total - calculated_max) /
+      (summary.estimated_max_total || 1) >
+      0.05
+  ) {
+    summary.estimated_max_total = calculated_max;
+  }
+
+  return {
+    summary,
+    scope_items,
+    explanations: Array.isArray(parsed.explanations)
+      ? parsed.explanations.map(String)
+      : [],
+  };
+}
+
 export async function extractScopeWithGemini(input: {
   room_type: RoomType;
   zip_code: string;
@@ -142,10 +267,9 @@ Expert Guidelines:
 10. If photos are provided, identify specific brands, damage, or structural constraints visible.
 11. **Text-Only Mode**: If no photos are provided, you MUST generate the most plausible scope for a standard US home based ONLY on the user's description and the regional building codes for ${area}.
 12. **FORCE: Bill of Materials**: For every single line item, you MUST provide a massive, exhaustive "Materials" list that details every specific component required down to the manufacturer brand, model name, and precise quantities. This is the MOST IMPORTANT part of the response.
-**Example Material**: { "name": "3/4 inch PEX Tubing", "brand": "Uponor", "model": "AquaPex Type A", "quantity": 100, "unit": "ft" }
-12. **Brand Logic**: Suggest real-world, high-value brands that match the Target Finish Tier (e.g. Kohler/Sub-Zero for Premium, Delta/Whirlpool for Mid, Glacier Bay/Amana for Economy).
-13. **CRITICAL**: The 'materials' array is NOT OPTIONAL. If you return an empty materials array for a standard construction task, you have failed the mission.
-14. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
+13. **Brand Logic**: Suggest real-world, high-value brands that match the Target Finish Tier (e.g. Kohler/Sub-Zero for Premium, Delta/Whirlpool for Mid, Glacier Bay/Amana for Economy).
+14. **CRITICAL**: The 'materials' array is NOT OPTIONAL. If you return an empty materials array for a standard construction task, you have failed the mission.
+15. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
 
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
@@ -253,10 +377,9 @@ Please generate the detailed blueprint.`;
       temperature: 0.1,
     });
 
-    if (!result) return null;
-    console.log("RAW_AI_OUTPUT_LENGTH:", result.text.length);
-    if (result.text.length < 500) {
-      console.log("RAW_AI_TEXT_TOO_SHORT:", result.text);
+    if (!result) {
+      console.error("[extractScopeWithGemini] No output from Gemini.");
+      return null;
     }
 
     if (result.text.startsWith("ERROR:")) {
@@ -264,67 +387,30 @@ Please generate the detailed blueprint.`;
       return null;
     }
 
-    let parsed: EstimatePayload;
+    let parsed: any;
     try {
-      parsed = (result.data || JSON.parse(result.text)) as EstimatePayload;
+      if (result.data && typeof result.data === "object") {
+        parsed = result.data;
+      } else {
+        let text = result.text.trim();
+        // Strip markdown code block wrapping if present
+        if (text.startsWith("```")) {
+          text = text.replace(/^```+(json)?\s*/i, "").replace(/\s*```+$/i, "");
+        }
+        parsed = JSON.parse(text);
+      }
     } catch (e) {
       console.error(
         "Failed to parse Gemini JSON:",
         e,
-        "Original text:",
+        "\n--- RAW TEXT START ---\n",
         result.text,
+        "\n--- RAW TEXT END ---",
       );
       return null;
     }
 
-    return {
-      summary: {
-        estimated_min_total: Math.round(
-          Number(parsed.summary.estimated_min_total),
-        ),
-        estimated_max_total: Math.round(
-          Number(parsed.summary.estimated_max_total),
-        ),
-        confidence_score: Number(parsed.summary.confidence_score),
-        value_engineering_tips: parsed.summary.value_engineering_tips || [],
-        regional_context: parsed.summary.regional_context || "",
-        regional_signal: parsed.summary.regional_signal || "",
-      },
-      scope_items: parsed.scope_items.map((s) => ({
-        category: String(s.category),
-        description: String(s.description),
-        finish_tier: s.finish_tier || finish_preference,
-        quantity: Number(s.quantity),
-        unit: String(s.unit),
-        unit_cost_min: Math.round(Number(s.unit_cost_min)),
-        unit_cost_max: Math.round(Number(s.unit_cost_max)),
-        total_cost_min: Math.round(Number(s.total_cost_min)),
-        total_cost_max: Math.round(Number(s.total_cost_max)),
-        confidence_score: Number(s.confidence_score || 3),
-        confidence_reason: s.confidence_reason || "",
-        source: hasPhotos ? ("photo" as const) : ("text" as const),
-        justification: s.justification,
-        priority: s.priority,
-        phase: s.phase,
-        maintenance_tips: s.maintenance_tips,
-        materials: Array.isArray(s.materials)
-          ? s.materials.map((m) => ({
-              name: String(m.name),
-              brand: m.brand ? String(m.brand) : undefined,
-              model: m.model ? String(m.model) : undefined,
-              quantity: Number(m.quantity),
-              unit: String(m.unit),
-              estimated_cost: m.estimated_cost
-                ? Number(m.estimated_cost)
-                : undefined,
-            }))
-          : [],
-      })),
-      explanations:
-        parsed.explanations && Array.isArray(parsed.explanations)
-          ? parsed.explanations.map(String)
-          : [],
-    };
+    return sanitizeEstimate(parsed, finish_preference, hasPhotos);
   } catch (e: unknown) {
     const error = e as Error;
     console.error("Gemini scope extraction failed:", error.message);

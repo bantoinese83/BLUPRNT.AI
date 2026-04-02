@@ -63,7 +63,7 @@ Deno.serve(async (req: Request) => {
     const { data: scopeItems, error: scopeErr } = await admin
       .from("scope_items")
       .select(
-        "id, category, description, finish_tier, quantity, unit, total_cost_min, total_cost_max",
+        "id, category, description, finish_tier, quantity, unit, total_cost_min, total_cost_max, metadata, source",
       )
       .eq("project_id", row.project_id)
       .order("created_at", { ascending: true });

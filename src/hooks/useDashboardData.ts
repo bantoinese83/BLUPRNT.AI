@@ -89,7 +89,7 @@ export function useDashboardData() {
     const { data: allProjects } = await supabase
       .from("projects")
       .select(
-        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, properties!inner(owner_user_id)",
+        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id)",
       )
       .eq("properties.owner_user_id", session.user.id)
       .order("created_at", { ascending: false });
@@ -160,7 +160,6 @@ export function useDashboardData() {
       const newIsArchitect = sub?.status === "active";
       const newHasProjectPass = !!pass;
 
-      console.log("DASHBOARD_DEBUG: Loaded Scope Items:", newScopes);
       setScopeItems(newScopes);
       setInvoices(newInvoices);
       setIsArchitect(newIsArchitect);

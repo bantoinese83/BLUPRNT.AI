@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
@@ -270,14 +270,27 @@ export default function ProjectView() {
                     </motion.div>
                   ))
                 ) : (
-                  <div className="p-12 text-slate-500 text-sm text-center max-w-sm mx-auto space-y-3">
-                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
-                      <Loader2 className="w-6 h-6 text-slate-300" />
+                  <div className="p-16 text-slate-500 text-sm text-center max-w-md mx-auto space-y-4">
+                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-2 rotate-3">
+                      <RefreshCw className="w-8 h-8 text-slate-300 animate-spin-slow" />
                     </div>
-                    <p>
-                      No detailed line items in this shared view. The owner may
-                      still be building their scope.
-                    </p>
+                    <div className="space-y-1">
+                      <p className="font-bold text-slate-900">
+                        Generating your detailed scope...
+                      </p>
+                      <p className="text-slate-500">
+                        We're still calculating the final line items for this
+                        project. This usually takes less than a minute.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => setRetryCount((c) => c + 1)}
+                    >
+                      Check for updates
+                    </Button>
                   </div>
                 )}
               </div>

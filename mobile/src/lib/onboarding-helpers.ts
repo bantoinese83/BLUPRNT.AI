@@ -64,7 +64,15 @@ export interface ScopeItem {
   total_cost_min: number;
   total_cost_max: number;
   confidence_score: number;
-  source?: "text" | "image";
+  source?: "text" | "photo";
+  metadata?: {
+    materials?: Array<{
+      name: string;
+      brand?: string;
+      quantity?: number | string;
+      unit?: string;
+    }>;
+  };
 }
 
 export interface PhotoToScopeResult {
@@ -131,6 +139,10 @@ export async function saveOnboardingProject(params: {
   }
 
   // 2. Create project
+  const estMin = estimate?.summary?.estimated_min_total;
+  const estMax = estimate?.summary?.estimated_max_total;
+  const conf = estimate?.summary?.confidence_score;
+
   const { data: proj, error: jErr } = await supabase
     .from("projects")
     .insert({
@@ -138,9 +150,9 @@ export async function saveOnboardingProject(params: {
       name: projectDisplayName(projectType),
       type: projectTypeToDb(projectType),
       stage: stageToDb(stage),
-      estimated_min_total: estimate?.summary?.estimated_min_total ?? null,
-      estimated_max_total: estimate?.summary?.estimated_max_total ?? null,
-      confidence_score: estimate?.summary?.confidence_score ?? null,
+      estimated_min_total: Number.isFinite(estMin) ? estMin : null,
+      estimated_max_total: Number.isFinite(estMax) ? estMax : null,
+      confidence_score: Number.isFinite(conf) ? conf : null,
     })
     .select("id")
     .single();
@@ -153,17 +165,19 @@ export async function saveOnboardingProject(params: {
   if (estimate?.scope_items?.length) {
     const rows = estimate.scope_items.map((s) => ({
       project_id: proj.id,
-      category: s.category,
-      description: s.description,
+      category: s.category || "General",
+      description: s.description || "",
       finish_tier: s.finish_tier || "mid",
 
-      quantity: s.quantity,
-      unit: s.unit,
-      unit_cost_min: s.unit_cost_min,
-      unit_cost_max: s.unit_cost_max,
-      total_cost_min: s.total_cost_min,
-      total_cost_max: s.total_cost_max,
-      confidence_score: s.confidence_score,
+      quantity: Number.isFinite(s.quantity) ? s.quantity : 0,
+      unit: s.unit || "unit",
+      unit_cost_min: Number.isFinite(s.unit_cost_min) ? s.unit_cost_min : 0,
+      unit_cost_max: Number.isFinite(s.unit_cost_max) ? s.unit_cost_max : 0,
+      total_cost_min: Number.isFinite(s.total_cost_min) ? s.total_cost_min : 0,
+      total_cost_max: Number.isFinite(s.total_cost_max) ? s.total_cost_max : 0,
+      confidence_score: Number.isFinite(s.confidence_score)
+        ? s.confidence_score
+        : 3,
       source: s.source || "text",
     }));
     await supabase.from("scope_items").insert(rows);
@@ -187,7 +201,9 @@ export async function saveOnboardingProject(params: {
     });
 
     // Fire-and-forget background re-estimate with photos
-    invokeFunction("photo-to-scope", { body: fd });
+    invokeFunction("photo-to-scope", { body: fd }).catch((err) => {
+      console.error("[saveOnboardingProject] Background analysis failed:", err);
+    });
   }
 
   return proj.id;

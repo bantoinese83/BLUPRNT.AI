@@ -67,7 +67,7 @@ export function useDashboardData() {
     const { data: allProjects } = await supabase
       .from("projects")
       .select(
-        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, properties!inner(owner_user_id)",
+        "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id)",
       )
       .eq("properties.owner_user_id", session.user.id)
       .order("created_at", { ascending: false });
@@ -207,7 +207,6 @@ export function useDashboardData() {
       project_id: pid,
       category: newItem.category,
       description: newItem.description,
-      phase: newItem.phase,
       quantity: newItem.quantity,
       unit: newItem.unit,
       finish_tier: "mid",
@@ -215,6 +214,7 @@ export function useDashboardData() {
       unit_cost_max: newItem.cost,
       total_cost_min: newItem.cost * newItem.quantity,
       total_cost_max: newItem.cost * newItem.quantity,
+      metadata: { phase: newItem.phase, priority: "medium" },
     });
 
     if (err) throw err;

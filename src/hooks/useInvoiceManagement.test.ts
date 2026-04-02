@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
 vi.mock("@/lib/supabase", () => ({
-  invokeFunction: vi.fn(),
+  invokeFunction: vi.fn().mockResolvedValue({ data: {}, error: null }),
 }));
 
 vi.mock("sonner", () => ({
@@ -226,9 +226,9 @@ describe("useInvoiceManagement", () => {
     });
 
     it("handles invokeFunction error using friendlyUploadError", async () => {
-      vi.mocked(invokeFunction).mockResolvedValue({
+      vi.mocked(invokeFunction as any).mockResolvedValueOnce({
         data: null,
-        error: { message: "Some internal error" },
+        error: { status: 500, message: "Server Error" },
       });
 
       const { result } = renderHook(() => useInvoiceManagement(defaultProps));

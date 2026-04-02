@@ -448,6 +448,8 @@ function DashboardContent({
             projects={projects.map((p: ProjectRow) => ({
               id: p.id,
               name: p.name,
+              created_at: p.created_at,
+              estimated_min_total: p.estimated_min_total,
             }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}

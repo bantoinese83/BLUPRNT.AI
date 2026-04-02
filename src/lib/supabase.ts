@@ -39,6 +39,7 @@ export async function invokeFunction<T = unknown>(
     headers?: Record<string, string>;
     method?: "POST" | "GET" | "PUT" | "PATCH" | "DELETE";
   },
+  retries = 2,
 ) {
   const {
     data: { session },
@@ -51,8 +52,50 @@ export async function invokeFunction<T = unknown>(
       : {}),
   };
 
-  return supabase.functions.invoke<T>(name, {
-    ...options,
-    headers,
-  });
+  let lastResult: {
+    data: T | null;
+    error: { status: number; message: string } | Error | null;
+  } = { data: null, error: null };
+
+  for (let i = 0; i <= retries; i++) {
+    try {
+      lastResult = await supabase.functions.invoke<T>(name, {
+        ...options,
+        headers,
+      });
+
+      if (!lastResult.error) {
+        return lastResult;
+      }
+
+      // Retry on 5xx errors
+      const status =
+        lastResult.error && "status" in lastResult.error
+          ? (lastResult.error as { status: number }).status
+          : 0;
+      if (status >= 500 && i < retries) {
+        const delay = Math.pow(2, i) * 1000;
+        console.warn(
+          `[invokeFunction] ${name} failed with ${status}. Retrying in ${delay}ms...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      return lastResult;
+    } catch (err) {
+      lastResult = { data: null, error: err as Error };
+      if (i < retries) {
+        const delay = Math.pow(2, i) * 1000;
+        console.warn(
+          `[invokeFunction] ${name} threw error. Retrying in ${delay}ms...`,
+          err,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+    }
+  }
+
+  return lastResult;
 }

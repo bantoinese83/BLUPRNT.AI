@@ -51,8 +51,17 @@ Deno.serve(async (req: Request) => {
     const isInitialAnalysis =
       String(formData.get("is_initial_analysis") ?? "1") === "1";
 
+    // Validate ZIP code
+    let zipCodeInput = String(formData.get("zip_code") ?? "").trim();
+    if (zipCodeInput && !/^\d{5}$/.test(zipCodeInput)) {
+      console.warn(
+        `[photo-to-scope] Invalid ZIP received: ${zipCodeInput}. Defaulting.`,
+      );
+      zipCodeInput = "00000";
+    }
+
     const parsed = photoToScopeSchema.safeParse({
-      zip_code: String(formData.get("zip_code") ?? "").trim() || "00000",
+      zip_code: zipCodeInput || "00000",
       room_type: String(formData.get("room_type") ?? "other"),
       finish_preference: String(formData.get("finish_preference") ?? "mid"),
       project_id: (formData.get("project_id") as string | null)?.trim() || null,
@@ -114,13 +123,12 @@ Deno.serve(async (req: Request) => {
     for (const p of photos) {
       if (p instanceof File && p.size > 0) {
         const buf = await p.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        let binary = "";
-        const chunkSize = 8192;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-        }
-        const base64 = btoa(binary);
+        const base64 = btoa(
+          new Uint8Array(buf).reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            "",
+          ),
+        );
         photoParts.push({
           inline_data: {
             mime_type: p.type || "image/jpeg",

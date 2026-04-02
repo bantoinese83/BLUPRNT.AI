@@ -7,13 +7,14 @@ import {
   FlatList,
   Alert,
 } from "react-native";
-import { Hammer, PlusCircle } from "lucide-react-native";
+import { PlusCircle } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { supabase } from "../lib/supabase";
 import { GlassCard } from "./ui/GlassCard";
 import { Theme } from "../constants/Theme";
 import type { ProjectRow } from "../types/database";
+import { ProjectIcon } from "../lib/project-icons";
 
 type ProjectSwitcherProps = {
   projects: ProjectRow[];
@@ -98,19 +99,39 @@ export function ProjectSwitcher({
                   p.id === currentId && styles.activeIconContainer,
                 ]}
               >
-                <Hammer
-                  size={12}
+                <ProjectIcon
+                  name={p.name}
+                  size={14}
                   color={
                     p.id === currentId ? "white" : Theme.colors.brand.primary
                   }
                 />
               </MotiView>
-              <Text
-                style={[styles.name, p.id === currentId && styles.activeName]}
-                numberOfLines={1}
-              >
-                {p.name}
-              </Text>
+              <View style={styles.textContainer}>
+                <Text
+                  style={[styles.name, p.id === currentId && styles.activeName]}
+                  numberOfLines={1}
+                >
+                  {p.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.metaText,
+                    p.id === currentId && styles.activeMetaText,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {p.created_at
+                    ? new Date(p.created_at).toLocaleDateString(undefined, {
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : ""}
+                  {p.estimated_min_total
+                    ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
+                    : " • Planning"}
+                </Text>
+              </View>
             </GlassCard>
           </TouchableOpacity>
         )}
@@ -198,6 +219,19 @@ const styles = StyleSheet.create({
   },
   activeName: {
     color: "white",
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  metaText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    marginTop: 2,
+  },
+  activeMetaText: {
+    color: "rgba(255, 255, 255, 0.8)",
   },
   addIconContainer: {
     backgroundColor: Theme.colors.brand.primary,

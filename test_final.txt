@@ -1,0 +1,213 @@
+
+> blueprintai-v3@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.1.0 [39m[90m/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3[39m
+
+[90mstderr[2m | src/hooks/use-local-storage.test.ts[2m > [22m[2museLocalStorage[2m > [22m[2mshould handle SSR environment where window is undefined
+[22m[39mError reading localStorage key "test-key": TypeError: Cannot read properties of undefined (reading 'getItem')
+    at [90m/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39msrc/hooks/use-local-storage.ts:11:40
+    at mountStateImpl [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:8268:24[90m)[39m
+    at mountState [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:8289:22[90m)[39m
+    at Object.useState [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:26243:18[90m)[39m
+    at process.env.NODE_ENV.exports.useState [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4mreact[24m/cjs/react.development.js:1263:34[90m)[39m
+    at useLocalStorage [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39msrc/hooks/use-local-storage.ts:8:41[90m)[39m
+    at [90m/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39msrc/hooks/use-local-storage.test.ts:72:41
+    at TestComponent [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@testing-library/react[24m/dist/pure.js:330:27[90m)[39m
+    at Object.react_stack_bottom_frame [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:25904:20[90m)[39m
+    at renderWithHooks [90m(/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:7662:22[90m)[39m
+
+ [32m✓[39m src/hooks/use-local-storage.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/hooks/use-logout.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/hooks/use-auth.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/hooks/useInvoiceManagement.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/hooks/useScopeManagement.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/hooks/use-scroll-position.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/lib/formatters.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+ [32m✓[39m src/hooks/useDashboardData.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 235[2mms[22m[39m
+ [32m✓[39m src/components/onboarding/WelcomeScreen.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 107[2mms[22m[39m
+ [32m✓[39m src/components/ProtectedRoute.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 211[2mms[22m[39m
+ [31m❯[39m src/lib/supabase-retry.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[33m 832[2mms[22m[39m
+[31m     [31m×[31m returns data on first success[39m[32m 290[2mms[22m[39m
+[31m     [31m×[31m retries on 500 error and eventually succeeds[39m[32m 142[2mms[22m[39m
+[31m     [31m×[31m does not retry on 400 error[39m[32m 110[2mms[22m[39m
+[31m     [31m×[31m retries on exceptions (network errors)[39m[32m 182[2mms[22m[39m
+[31m     [31m×[31m exhausts all retries and returns the last error[39m[32m 107[2mms[22m[39m
+ [32m✓[39m src/lib/i18n.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/lib/activity.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/lib/cookie-consent.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/onboarding-helpers.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstderr[2m | src/lib/email.test.ts[2m > [22m[2msendEmail[2m > [22m[2mhandles Supabase invoke error
+[22m[39mFailed to invoke send-email function: Error: Failed to send
+    at [90m/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39msrc/lib/email.test.ts:40:23
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:296:11
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1258:26
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1681:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1678:10[90m)[39m
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1660:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1627:10[90m)[39m
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:2309:64
+Error sending email via Supabase Edge Function: Error: Failed to send
+    at [90m/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39msrc/lib/email.test.ts:40:23
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:296:11
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1258:26
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1681:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1678:10[90m)[39m
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1660:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1627:10[90m)[39m
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:2309:64
+
+[90mstderr[2m | src/lib/email.test.ts[2m > [22m[2msendEmail[2m > [22m[2mhandles general catch block error (Error object)
+[22m[39mError sending email via Supabase Edge Function: Error: Network Error
+    at [90m/Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39msrc/lib/email.test.ts:62:23
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:296:11
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1258:26
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1681:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1678:10[90m)[39m
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1660:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1627:10[90m)[39m
+    at [90mfile:///Users/monarchlabsinc./Desktop/Work/Projects/blueprintai-v3/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:2309:64
+
+[90mstderr[2m | src/lib/email.test.ts[2m > [22m[2msendEmail[2m > [22m[2mhandles general catch block error (non-Error object)
+[22m[39mError sending email via Supabase Edge Function: Something went wrong
+
+ [32m✓[39m src/lib/email.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/location.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/hooks/use-onboarding.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/ensure-user-workspace.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/lib/share-project.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/lib/report-error.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/lib/supabase.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/lib/site-url.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/lib/onboarding-estimate-errors.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/lib/safe-redirect.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/lib/auth-redirect.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/lib/supabase-retry.test.ts[2m > [22minvokeFunction retry logic[2m > [22mreturns data on first success
+[31m[1mAssertionError[22m: expected null to deeply equal { result: 'success' }[39m
+
+[32m- Expected:[39m
+{
+  "result": "success",
+}
+
+[31m+ Received:[39m
+null
+
+[36m [2m❯[22m src/lib/supabase-retry.test.ts:[2m42:25[22m[39m
+    [90m 40|[39m     [35mconst[39m result [33m=[39m [35mawait[39m promise[33m;[39m
+    [90m 41|[39m
+    [90m 42|[39m     [34mexpect[39m(result[33m.[39mdata)[33m.[39m[34mtoEqual[39m({ result[33m:[39m [32m"success"[39m })[33m;[39m
+    [90m   |[39m                         [31m^[39m
+    [90m 43|[39m     [34mexpect[39m(supabase[33m.[39mfunctions[33m.[39minvoke)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m 44|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/supabase-retry.test.ts[2m > [22minvokeFunction retry logic[2m > [22mretries on 500 error and eventually succeeds
+[31m[1mAssertionError[22m: expected null to deeply equal { Fixed: true }[39m
+
+[32m- Expected:[39m
+{
+  "Fixed": true,
+}
+
+[31m+ Received:[39m
+null
+
+[36m [2m❯[22m src/lib/supabase-retry.test.ts:[2m64:25[22m[39m
+    [90m 62|[39m     [35mconst[39m result [33m=[39m [35mawait[39m promise[33m;[39m
+    [90m 63|[39m
+    [90m 64|[39m     [34mexpect[39m(result[33m.[39mdata)[33m.[39m[34mtoEqual[39m({ [33mFixed[39m[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m   |[39m                         [31m^[39m
+    [90m 65|[39m     [34mexpect[39m(supabase[33m.[39mfunctions[33m.[39minvoke)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m2[39m)[33m;[39m
+    [90m 66|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/supabase-retry.test.ts[2m > [22minvokeFunction retry logic[2m > [22mdoes not retry on 400 error
+[31m[1mAssertionError[22m: expected FunctionsHttpError: Edge Function returne… { context: Response { status: 404, statusText: 'Not Found', headers: Headers { date: 'Thu, 02 Apr 2026 19:53:07 GMT', 'content-type': 'application/json', 'content-length': '83', connection: 'keep-alive', server: 'cloudflare', 'cf-ray': '9e6260bfe853c4e5-ORD', 'cf-cache-status': 'DYNAMIC', 'access-control-allow-origin': '*', 'content-encoding': 'gzip', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', vary: 'Accept-Encoding', 'access-control-allow-headers': 'authorization, x-client-info, apikey', 'sb-gateway-version': '1', 'sb-project-ref': 'elucgaegaihkklnfoasm', 'sb-request-id': '019d4fc1-b3f9-726a-bbdf-8e8a892899e6', 'x-sb-edge-region': 'us-east-2', 'x-served-by': 'supabase-edge-runtime', 'set-cookie': '__cf_bm=d.k1sQ5zVmgxpmaanBi997D17SwhIyK7KyjhubhWrgw-1775159587-1.0.1.1-USs5.yGj_K9rJKEWcaVzxdW6DTZFFnZWgAKxvCETx2KtVQsWiFamECqY8JwmTVrNiXubXR3XHBzt1vHbE.GhSLjcoJ4NDOzVsXc5pBOYMz4; path=/; expires=Thu, 02-Apr-26 20:23:07 GMT; domain=.supabase.co; HttpOnly; Secure; SameSite=None', 'alt-svc': 'h3=":443"; ma=86400' }, body: ReadableStream { locked: false, state: 'readable', supportsBYOB: true }, bodyUsed: false, ok: false, redirected: false, type: 'basic', url: 'https://elucgaegaihkklnfoasm.supabase.co/functions/v1/test-func' } } to match object { status: 400 }
+(2 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "status": 400,[39m
+[31m+ FunctionsHttpError {[39m
+[31m+   "message": "Edge Function returned a non-2xx status code",[39m
+[31m+   "name": "FunctionsHttpError",[39m
+[31m+   "context": Response {},[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/lib/supabase-retry.test.ts:[2m76:26[22m[39m
+    [90m 74|[39m     [35mconst[39m result [33m=[39m [35mawait[39m [34minvokeFunction[39m([32m"test-func"[39m[33m,[39m {}[33m,[39m [34m2[39m)[33m;[39m
+    [90m 75|[39m
+    [90m 76|[39m     [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoMatchObject[39m({ status[33m:[39m [34m400[39m })[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 77|[39m     [34mexpect[39m(supabase[33m.[39mfunctions[33m.[39minvoke)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m1[39m)[33m;[39m
+    [90m 78|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/supabase-retry.test.ts[2m > [22minvokeFunction retry logic[2m > [22mretries on exceptions (network errors)
+[31m[1mAssertionError[22m: expected null to deeply equal { Recovered: true }[39m
+
+[32m- Expected:[39m
+{
+  "Recovered": true,
+}
+
+[31m+ Received:[39m
+null
+
+[36m [2m❯[22m src/lib/supabase-retry.test.ts:[2m94:25[22m[39m
+    [90m 92|[39m     [35mconst[39m result [33m=[39m [35mawait[39m promise[33m;[39m
+    [90m 93|[39m
+    [90m 94|[39m     [34mexpect[39m(result[33m.[39mdata)[33m.[39m[34mtoEqual[39m({ [33mRecovered[39m[33m:[39m [35mtrue[39m })[33m;[39m
+    [90m   |[39m                         [31m^[39m
+    [90m 95|[39m     [34mexpect[39m(supabase[33m.[39mfunctions[33m.[39minvoke)[33m.[39m[34mtoHaveBeenCalledTimes[39m([34m2[39m)[33m;[39m
+    [90m 96|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/supabase-retry.test.ts[2m > [22minvokeFunction retry logic[2m > [22mexhausts all retries and returns the last error
+[31m[1mAssertionError[22m: expected FunctionsHttpError: Edge Function returne… { context: Response { status: 404, statusText: 'Not Found', headers: Headers { date: 'Thu, 02 Apr 2026 19:53:08 GMT', 'content-type': 'application/json', 'content-length': '83', connection: 'keep-alive', server: 'cloudflare', 'cf-ray': '9e6260c1a99aeae2-ORD', 'cf-cache-status': 'DYNAMIC', 'access-control-allow-origin': '*', 'content-encoding': 'gzip', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', vary: 'Accept-Encoding', 'access-control-allow-headers': 'authorization, x-client-info, apikey', 'sb-gateway-version': '1', 'sb-project-ref': 'elucgaegaihkklnfoasm', 'sb-request-id': '019d4fc1-b519-7a1f-ab13-dc417adc2096', 'x-sb-edge-region': 'us-east-2', 'x-served-by': 'supabase-edge-runtime', 'set-cookie': '__cf_bm=POun3whWVS_VCq8m9I4wedfhgHFGt_P1qaNEx7h5lIE-1775159588-1.0.1.1-DN7jaXQ3.uJzK7MG9VaEthtIxNzYM9TU_sZqGlN0k_mDKqhTgi5usBFNuHqqsk8h05MvNODjZYcN0XVwehEQlKElkc1jFpZqztdeaZwjmFc; path=/; expires=Thu, 02-Apr-26 20:23:08 GMT; domain=.supabase.co; HttpOnly; Secure; SameSite=None', 'alt-svc': 'h3=":443"; ma=86400' }, body: ReadableStream { locked: false, state: 'readable', supportsBYOB: true }, bodyUsed: false, ok: false, redirected: false, type: 'basic', url: 'https://elucgaegaihkklnfoasm.supabase.co/functions/v1/test-func' } } to match object { status: 503 }
+(2 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "status": 503,[39m
+[31m+ FunctionsHttpError {[39m
+[31m+   "message": "Edge Function returned a non-2xx status code",[39m
+[31m+   "name": "FunctionsHttpError",[39m
+[31m+   "context": Response {},[39m
+[2m  }[22m
+
+[36m [2m❯[22m src/lib/supabase-retry.test.ts:[2m110:26[22m[39m
+    [90m108|[39m     [35mconst[39m result [33m=[39m [35mawait[39m promise[33m;[39m
+    [90m109|[39m
+    [90m110|[39m     [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoMatchObject[39m({ status[33m:[39m [34m503[39m })[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m111|[39m     expect(supabase.functions.invoke).toHaveBeenCalledTimes(3); // 1 i…
+    [90m112|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m25 passed[39m[22m[90m (26)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m167 passed[39m[22m[90m (172)[39m
+[2m   Start at [22m 15:53:06
+[2m   Duration [22m 2.77s[2m (transform 866ms, setup 2.08s, import 3.17s, tests 1.65s, environment 18.10s)[22m
+

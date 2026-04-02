@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { invokeFunction } from "./supabase";
 import {
   projectTypeToRoomType,
   projectTypeToDb,
@@ -9,6 +10,10 @@ import {
   DEFAULT_ESTIMATE_MAX,
   DEFAULT_ESTIMATE_CONFIDENCE,
 } from "./onboarding-helpers";
+
+vi.mock("./supabase", () => ({
+  invokeFunction: vi.fn().mockResolvedValue({ data: {}, error: null }),
+}));
 
 describe("onboarding-helpers", () => {
   describe("projectTypeToRoomType", () => {
@@ -251,7 +256,7 @@ describe("onboarding-helpers", () => {
         photos: [mockFile],
       });
 
-      expect(mockSupabase.functions.invoke).toHaveBeenCalledWith(
+      expect(invokeFunction).toHaveBeenCalledWith(
         "photo-to-scope",
         expect.any(Object),
       );
@@ -267,12 +272,10 @@ describe("onboarding-helpers", () => {
       mockSupabase.from.mockReturnValueOnce({
         insert: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
-        single: vi
-          .fn()
-          .mockResolvedValue({
-            data: null,
-            error: { message: "Property fail" },
-          }),
+        single: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: "Property fail" },
+        }),
       });
 
       await expect(

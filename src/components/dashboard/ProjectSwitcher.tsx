@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, FolderOpen, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getProjectIcon } from "@/lib/onboarding-icons";
 
 type ProjectOption = {
   id: string;
   name: string;
+  created_at?: string;
+  estimated_min_total?: number | null;
 };
 
 export function ProjectSwitcher({
@@ -58,7 +61,11 @@ export function ProjectSwitcher({
     return (
       <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-slate-200/60 bg-white/50 px-4 py-2 text-slate-700 shadow-sm">
-          <FolderOpen className="h-4 w-4 shrink-0 text-slate-900" aria-hidden />
+          <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+            {getProjectIcon(label)({
+              className: "w-4 h-4 text-slate-900 invert-0 grayscale opacity-80",
+            })}
+          </div>
           <span className="truncate text-sm font-bold">{label}</span>
         </div>
         {newProjectButton}
@@ -78,10 +85,13 @@ export function ProjectSwitcher({
           aria-haspopup="listbox"
           aria-expanded={open}
         >
-          <FolderOpen
-            className={`h-4 w-4 shrink-0 transition-colors ${open ? "text-slate-950" : "text-slate-400 group-hover:text-slate-600"}`}
-            aria-hidden
-          />
+          <div
+            className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-slate-900" : "bg-slate-50 group-hover:bg-slate-100"}`}
+          >
+            {getProjectIcon(label)({
+              className: `w-3.5 h-3.5 transition-all ${open ? "brightness-0 invert opacity-100" : "grayscale opacity-70"}`,
+            })}
+          </div>
           <span className="min-w-0 truncate font-bold text-slate-700">
             {label}
           </span>
@@ -124,10 +134,32 @@ export function ProjectSwitcher({
                       }}
                     >
                       <div
-                        className={`w-1.5 h-1.5 rounded-full transition-all ${isActive ? "bg-white scale-100" : "bg-transparent scale-0 group-hover:bg-slate-300 group-hover:scale-100"}`}
-                      />
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/20" : "bg-slate-50 group-hover:bg-slate-100"}`}
+                      >
+                        {getProjectIcon(p.name)({
+                          className: `w-4 h-4 transition-all ${isActive ? "brightness-0 invert opacity-100" : "grayscale opacity-60"}`,
+                        })}
+                      </div>
 
-                      <span className="truncate">{p.name}</span>
+                      <div className="flex flex-col min-w-0 pr-6">
+                        <span className="truncate">{p.name}</span>
+                        <span
+                          className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-indigo-200" : "text-slate-400"}`}
+                        >
+                          {p.created_at
+                            ? new Date(p.created_at).toLocaleDateString(
+                                undefined,
+                                {
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )
+                            : ""}
+                          {p.estimated_min_total
+                            ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
+                            : " • Planning"}
+                        </span>
+                      </div>
                     </button>
                     {onDelete && (
                       <button
