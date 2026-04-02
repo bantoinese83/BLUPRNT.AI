@@ -7,12 +7,23 @@ function getAllowedOrigin(requestOrigin: string | null): string {
   if (!allowed?.trim()) {
     return "*";
   }
-  const origins = allowed.split(",").map((o) => o.trim()).filter(Boolean);
+  const origins = allowed
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
   if (origins.length === 0) return "*";
-  if (requestOrigin && origins.includes(requestOrigin)) {
-    return requestOrigin;
+
+  if (requestOrigin) {
+    if (origins.includes(requestOrigin) || origins.includes("*")) {
+      return requestOrigin;
+    }
+    // Specific fix for production domain if not explicitly in env
+    if (requestOrigin.includes("bluprntai.com")) {
+      return requestOrigin;
+    }
   }
-  return origins[0];
+
+  return origins[0] || "*";
 }
 
 export function getCorsHeaders(req: Request): Record<string, string> {
