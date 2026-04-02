@@ -33,6 +33,8 @@ import {
   ProjectTypeOption,
   StageOption,
   saveOnboardingProject,
+  projectTypeToRoomType,
+  PhotoToScopeResult,
 } from "../src/lib/onboarding-helpers";
 import { supabase } from "../src/lib/supabase";
 import { useAuth } from "../src/contexts/auth-context";
@@ -73,6 +75,57 @@ export default function OnboardingScreen() {
     null,
   );
 
+  const runAnalysis = async () => {
+    try {
+      const fd = new FormData();
+      // Extract zip from location string (simple 5-digit match)
+      const zipMatch = location.match(/\d{5}/);
+      const zip = zipMatch ? zipMatch[0] : "00000";
+
+      fd.append("zip_code", zip);
+      fd.append("room_type", projectTypeToRoomType(projectType));
+      fd.append("finish_preference", "mid");
+
+      photos.forEach((uri, index) => {
+        // @ts-expect-error: React Native FormData needs this object format
+        fd.append("photos[]", {
+          uri,
+          name: `vision_asset_${index}.jpg`,
+          type: "image/jpeg",
+        });
+      });
+
+      const { data, error } = await supabase.functions.invoke(
+        "photo-to-scope",
+        {
+          body: fd,
+        },
+      );
+
+      if (error || !data) {
+        throw new Error(error?.message || "AI Analysis failed");
+      }
+
+      const result = data as PhotoToScopeResult;
+      setEstimate({
+        min: result.summary.estimated_min_total,
+        max: result.summary.estimated_max_total,
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setStep(5);
+    } catch (err) {
+      console.error("Analysis Error:", err);
+      // Fallback to a type-based range if AI fails, but mark it clearly
+      const range = getRangeForType(projectType);
+      setEstimate({ min: range.min, max: range.max });
+      setStep(5);
+      Alert.alert(
+        "Regional Estimation",
+        "We couldn't perform a deep vision analysis on these photos, so we've provided a refined regional estimate based on your project type.",
+      );
+    }
+  };
+
   useEffect(() => {
     // Skip onboarding if user already has projects (Fast-track)
     const checkExistingProjects = async () => {
@@ -89,25 +142,17 @@ export default function OnboardingScreen() {
     };
     checkExistingProjects();
 
-    let interval: ReturnType<typeof setInterval>;
+    let messageInterval: ReturnType<typeof setInterval>;
     if (step === 4) {
       let current = 0;
-      interval = setInterval(() => {
-        current++;
-        if (current < ANALYSIS_MESSAGES.length) {
-          setAnalysisIndex(current);
-        } else {
-          clearInterval(interval);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          // Use honest, industry-based ranges — NOT a fake precise number.
-          // The real AI analysis runs post-signup once photos are uploaded.
-          const range = getRangeForType(projectType);
-          setEstimate({ min: range.min, max: range.max });
-          setStep(5);
-        }
-      }, 1500);
+      messageInterval = setInterval(() => {
+        current = (current + 1) % ANALYSIS_MESSAGES.length;
+        setAnalysisIndex(current);
+      }, 2000);
+
+      runAnalysis();
     }
-    return () => clearInterval(interval);
+    return () => clearInterval(messageInterval);
   }, [step, projectType, user]);
 
   const handleNext = () => {
