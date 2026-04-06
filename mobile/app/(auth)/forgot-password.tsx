@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -12,19 +11,15 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
-import {
-  Mail,
-  ChevronLeft,
-  Wand2,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react-native";
+import { ChevronLeft, Wand2, CheckCircle2 } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Button } from "../../src/components/ui/Button";
 import { GlassCard } from "../../src/components/ui/GlassCard";
+import { TextField } from "../../src/components/ui/TextField";
 import { supabase } from "../../src/lib/supabase";
+import { Theme } from "../../src/constants/Theme";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -68,105 +63,106 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <ScreenWrapper style={styles.container}>
+    <ScreenWrapper edges={["top", "bottom", "left", "right"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.content}>
+          <View style={styles.container}>
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.selectionAsync();
+                router.back();
+              }}
+              style={styles.backButton}
+            >
+              <BlurView
+                intensity={20}
+                tint="light"
+                style={StyleSheet.absoluteFill}
+              />
+              <ChevronLeft size={24} color={Theme.colors.text.primary} />
+            </TouchableOpacity>
+
             <MotiView
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
+              from={{ opacity: 0, scale: 0.9, translateY: 20 }}
+              animate={{ opacity: 1, scale: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 800 }}
               style={styles.header}
             >
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  router.back();
-                }}
-                style={styles.backButton}
-              >
-                <BlurView
-                  intensity={20}
-                  tint="light"
-                  style={StyleSheet.absoluteFill}
-                />
-                <ChevronLeft size={24} color="white" />
-              </TouchableOpacity>
-
-              <View style={styles.iconContainer}>
-                <Mail size={40} color="#818cf8" />
-              </View>
-
-              <Text style={styles.title}>Reset Password</Text>
+              <Text style={styles.title}>Reset password</Text>
               <Text style={styles.subtitle}>
-                Enter your email and we'll send you a link to get back into your
-                account.
+                We’ll email you a link to choose a new password.
               </Text>
             </MotiView>
 
             {sent ? (
               <MotiView
-                from={{ opacity: 0, scale: 0.9 }}
+                from={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
+                style={{ width: "100%" }}
               >
-                <GlassCard style={styles.successCard}>
-                  <CheckCircle2 size={48} color="#10b981" />
-                  <Text style={styles.successTitle}>Check your email</Text>
-                  <Text style={styles.successSubtitle}>
-                    We've sent a password reset link to {"\n"}
-                    <Text style={styles.bold}>{email}</Text>
-                  </Text>
-                  <Button
-                    title="Try another email"
-                    variant="outline"
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setSent(false);
-                    }}
-                    style={{ marginTop: 12 }}
-                  />
+                <GlassCard intensity={8} style={styles.card}>
+                  <View style={styles.successInner}>
+                    <View style={styles.successIconWrap}>
+                      <CheckCircle2
+                        size={40}
+                        color={Theme.colors.status.success}
+                      />
+                    </View>
+                    <Text style={styles.successTitle}>Check your email</Text>
+                    <Text style={styles.successSubtitle}>
+                      If an account exists for{" "}
+                      <Text style={styles.emailEmphasis}>{email}</Text>, you
+                      will receive a reset link shortly.
+                    </Text>
+                    <Button
+                      title="Try another email"
+                      variant="outline"
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        setSent(false);
+                        setError(null);
+                      }}
+                      style={{ marginTop: 8 }}
+                    />
+                    <Button
+                      title="Back to sign in"
+                      variant="ghost"
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        router.replace("/(auth)/login");
+                      }}
+                      style={{ marginTop: 4 }}
+                    />
+                  </View>
                 </GlassCard>
               </MotiView>
             ) : (
-              <MotiView
-                from={{ opacity: 0, translateY: 20 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ delay: 200 }}
-              >
+              <GlassCard intensity={8} style={styles.card}>
                 <View style={styles.form}>
-                  <View style={styles.inputContainer}>
-                    <Mail size={20} color="#64748b" style={styles.inputIcon} />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Email address"
-                      placeholderTextColor="#64748b"
-                      value={email}
-                      onChangeText={(text) => {
-                        setEmail(text);
-                        if (error) setError(null);
-                      }}
-                      autoCapitalize="none"
-                      keyboardType="email-address"
-                    />
-                  </View>
-
-                  {error && (
-                    <View style={styles.errorContainer}>
-                      <AlertCircle size={16} color="#f43f5e" />
-                      <Text style={styles.errorText}>{error}</Text>
-                    </View>
-                  )}
+                  <TextField
+                    label="Email address"
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (error) setError(null);
+                    }}
+                    placeholder="you@example.com"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    error={error ?? undefined}
+                  />
 
                   <Button
-                    title="Send Reset Link"
+                    title="Send reset link"
                     onPress={handleReset}
                     loading={loading}
                     icon={<Wand2 size={20} color="white" />}
                   />
                 </View>
-              </MotiView>
+              </GlassCard>
             )}
           </View>
         </TouchableWithoutFeedback>
@@ -178,117 +174,84 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
     padding: 24,
     justifyContent: "center",
-    flex: 1,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 40,
   },
   backButton: {
     position: "absolute",
     top: Platform.OS === "ios" ? 12 : 20,
-    left: 24,
+    left: 20,
     zIndex: 10,
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(15, 23, 42, 0.1)",
   },
-  backText: {
-    display: "none",
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    backgroundColor: "rgba(129, 140, 248, 0.1)",
-    justifyContent: "center",
+  header: {
+    marginBottom: 32,
     alignItems: "center",
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "rgba(129, 140, 248, 0.2)",
   },
   title: {
-    fontSize: 28,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: 34,
+    fontFamily: "Outfit_800ExtraBold",
+    color: Theme.colors.text.primary,
+    marginBottom: 8,
+    letterSpacing: -1,
     textAlign: "center",
-    marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     lineHeight: 24,
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
+  },
+  card: {
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.05)",
+    width: "100%",
   },
   form: {
-    gap: 20,
+    width: "100%",
+    gap: 4,
   },
-  inputContainer: {
-    flexDirection: "row",
+  successInner: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-    paddingHorizontal: 16,
-    height: 56,
+    gap: 12,
   },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    color: "white",
-    fontSize: 16,
-    fontFamily: "Outfit_400Regular",
-  },
-  errorContainer: {
-    flexDirection: "row",
+  successIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(16, 185, 129, 0.12)",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: "rgba(244, 63, 94, 0.1)",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(244, 63, 94, 0.2)",
-  },
-  errorText: {
-    color: "#fb7185",
-    fontSize: 13,
-    fontFamily: "Outfit_400Regular",
-    flex: 1,
-  },
-  successCard: {
-    alignItems: "center",
-    padding: 32,
-    gap: 16,
+    justifyContent: "center",
+    marginBottom: 4,
   },
   successTitle: {
-    fontSize: 20,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontSize: 22,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+    textAlign: "center",
   },
   successSubtitle: {
-    fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontSize: 15,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 22,
+    paddingHorizontal: 4,
   },
-  bold: {
-    color: "white",
-    fontFamily: "Outfit_700Bold",
+  emailEmphasis: {
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
   },
 });
