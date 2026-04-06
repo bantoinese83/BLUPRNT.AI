@@ -21,6 +21,7 @@ import { useColorScheme } from "../src/components/useColorScheme";
 import { AuthProvider } from "../src/contexts/AuthProvider";
 import { useAuth } from "../src/contexts/auth-context";
 import { AppToastHost } from "../src/components/AppToastHost";
+import { BrandedSplash } from "../src/components/BrandedSplash";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
@@ -65,14 +66,14 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
+  // Drop the native splash as soon as JS is running so the branded view below
+  // is visible (Expo Go often keeps its own artwork until the bundle loads).
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    void SplashScreen.hideAsync();
+  }, []);
 
   if (!loaded) {
-    return null;
+    return <BrandedSplash />;
   }
 
   return (
