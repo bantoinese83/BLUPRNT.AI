@@ -92,3 +92,9 @@ export function useCachedData<T>({
 
   return { data, error, isLoading, mutate: setData };
 }
+
+/** Clears module-level caches — use only from tests to avoid cross-test leakage. */
+export function resetCachedDataStoresForTests() {
+  promiseCache.clear();
+  dataCache.clear();
+}

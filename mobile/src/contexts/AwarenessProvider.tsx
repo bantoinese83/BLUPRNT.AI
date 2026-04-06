@@ -103,18 +103,21 @@ export function AwarenessProvider({
     };
   }, [project, scopeItems, invoices]);
 
+  const value = useMemo(
+    () => ({
+      ...awarenessData,
+      isInsightsOpen,
+      setIsInsightsOpen,
+      showUpgrade,
+      setShowUpgrade,
+      upgradeReason,
+      setUpgradeReason,
+    }),
+    [awarenessData, isInsightsOpen, showUpgrade, upgradeReason],
+  );
+
   return (
-    <AwarenessContext.Provider
-      value={{
-        ...awarenessData,
-        isInsightsOpen,
-        setIsInsightsOpen,
-        showUpgrade,
-        setShowUpgrade,
-        upgradeReason,
-        setUpgradeReason,
-      }}
-    >
+    <AwarenessContext.Provider value={value}>
       {children}
     </AwarenessContext.Provider>
   );

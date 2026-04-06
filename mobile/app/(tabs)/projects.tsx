@@ -79,7 +79,7 @@ export default function ProjectsScreen() {
             title="No projects yet"
             description="Start your first renovation estimate to track budgets, documents, and AI insights."
             actionTitle="Create a Project"
-            onAction={() => router.push("/onboarding")}
+            onAction={() => router.push("/onboarding?newProject=1")}
           />
         )}
         {projects.map((p, idx) => (

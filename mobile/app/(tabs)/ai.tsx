@@ -1,5 +1,6 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 import { AIAssistant } from "../../src/components/AIAssistant";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
@@ -52,6 +53,15 @@ export default function AIScreen() {
                 ? loadError
                 : "Create a project to start chatting with your AI assistant."}
           </Text>
+          {!loading && !loadError ? (
+            <TouchableOpacity
+              style={styles.emptyCta}
+              onPress={() => router.push("/onboarding?newProject=1")}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.emptyCtaText}>Start a project</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       )}
     </ScreenWrapper>
@@ -86,6 +96,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 40,
+  },
+  emptyCta: {
+    marginTop: 20,
+    backgroundColor: Theme.colors.text.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 14,
+  },
+  emptyCtaText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontFamily: Theme.typography.family.bold,
   },
   emptyText: {
     color: "#94a3b8",

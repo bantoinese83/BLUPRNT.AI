@@ -11,8 +11,7 @@ import { ScreenWrapper } from "../../src/components/ScreenWrapper";
  */
 export default function NewProjectRedirect() {
   useEffect(() => {
-    // Immediate redirect to onboarding
-    router.push("/onboarding");
+    router.replace("/onboarding?newProject=1");
   }, []);
 
   return (

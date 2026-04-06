@@ -269,7 +269,7 @@ export default function DashboardScreen() {
           title="No projects yet"
           description="Create your first property renovation to start tracking benchmarks, managing documents, and getting AI insights."
           actionTitle="Start New Project"
-          onAction={() => router.push("/onboarding")}
+          onAction={() => router.push("/onboarding?newProject=1")}
           withRoadmap
         />
       </ScreenWrapper>
@@ -428,7 +428,7 @@ export default function DashboardScreen() {
           projects={projects}
           currentId={project.id}
           onSelect={handleProjectSelect}
-          onAdd={() => router.push("/onboarding")}
+          onAdd={() => router.push("/onboarding?newProject=1")}
         />
 
         <View style={{ height: 120 }} />

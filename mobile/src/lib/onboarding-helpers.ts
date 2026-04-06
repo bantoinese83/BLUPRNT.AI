@@ -64,7 +64,7 @@ export interface ScopeItem {
   total_cost_min: number;
   total_cost_max: number;
   confidence_score: number;
-  source?: "text" | "photo";
+  source?: "text" | "photo" | "fallback";
   metadata?: {
     materials?: Array<{
       name: string;
@@ -178,7 +178,7 @@ export async function saveOnboardingProject(params: {
       confidence_score: Number.isFinite(s.confidence_score)
         ? s.confidence_score
         : 3,
-      source: s.source || "text",
+      source: s.source === "photo" ? "photo" : "text",
     }));
     await supabase.from("scope_items").insert(rows);
   }

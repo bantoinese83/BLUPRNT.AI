@@ -299,7 +299,7 @@ export default function FinanceScreen() {
           title="No Project Active"
           description="Select a property renovation or create a new one to start tracking your equity and expenses."
           actionTitle="Start New Project"
-          onAction={() => router.push("/onboarding")}
+          onAction={() => router.push("/onboarding?newProject=1")}
         />
       </ScreenWrapper>
     );
@@ -335,7 +335,7 @@ export default function FinanceScreen() {
           projects={projects}
           currentId={project.id}
           onSelect={handleProjectSelect}
-          onAdd={() => router.push("/onboarding")}
+          onAdd={() => router.push("/onboarding?newProject=1")}
         />
       </View>
 

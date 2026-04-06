@@ -13,11 +13,9 @@ import {
   extractScopeWithGemini,
   getFallbackEstimate,
   type RoomType,
-  type SourceType,
 } from "./_shared/estimate.ts";
 import { type GeminiPart } from "../_shared/gemini.ts";
 
-// @ts-expect-error: Deno global
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: getCorsHeaders(req) });

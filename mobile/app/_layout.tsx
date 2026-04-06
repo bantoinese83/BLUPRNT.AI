@@ -12,7 +12,7 @@ import {
   Outfit_700Bold,
   Outfit_800ExtraBold,
 } from "@expo-google-fonts/outfit";
-import { Stack, router, useSegments } from "expo-router";
+import { Stack, router, useSegments, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
@@ -26,6 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
 import { View, Text, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "../src/constants/Theme";
 import { WifiOff } from "lucide-react-native";
 
@@ -52,15 +53,6 @@ export default function RootLayout() {
     Outfit_800ExtraBold,
   });
 
-  const [isOffline, setIsOffline] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOffline(!state.isConnected);
-    });
-    return () => unsubscribe();
-  }, []);
-
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
@@ -82,12 +74,7 @@ export default function RootLayout() {
         <AuthProvider>
           <RootLayoutNav />
           <AppToastHost />
-          {isOffline && (
-            <View style={styles.offlineBanner}>
-              <WifiOff size={16} color="white" />
-              <Text style={styles.offlineText}>No internet connection</Text>
-            </View>
-          )}
+          <OfflineBannerHost />
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -97,7 +84,6 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   offlineBanner: {
     position: "absolute",
-    top: 60,
     left: 20,
     right: 20,
     backgroundColor: Theme.colors.brand.primary,
@@ -122,27 +108,64 @@ const styles = StyleSheet.create({
   },
 });
 
+function OfflineBannerHost() {
+  const insets = useSafeAreaInsets();
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOffline(!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (!isOffline) return null;
+
+  return (
+    <View style={[styles.offlineBanner, { top: insets.top + 8 }]}>
+      <WifiOff size={16} color="white" />
+      <Text style={styles.offlineText}>No internet connection</Text>
+    </View>
+  );
+}
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { session, loading } = useAuth();
   const segments = useSegments();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === "(auth)";
-    const inTabsGroup = segments[0] === "(tabs)";
+    const segs = segments as unknown as string[];
+    const inAuthGroup = segs[0] === "(auth)";
+    const inTabsGroup = segs[0] === "(tabs)";
+    const onOnboarding =
+      segs[0] === "onboarding" || pathname.startsWith("/onboarding");
+    /** Root carousel — typed `segments` omits `index`, so use pathname + string segments. */
+    const isLanding =
+      pathname === "/" ||
+      pathname === "/index" ||
+      pathname === "" ||
+      segs.length === 0 ||
+      (segs.length === 1 && segs[0] === "index");
 
     if (!session && inTabsGroup) {
       router.replace("/");
-    } else if (session) {
-      const isLanding = (segments as string[]).length === 0;
-
-      if (inAuthGroup || isLanding) {
-        router.replace("/(tabs)");
-      }
+      return;
     }
-  }, [session, loading, segments]);
+
+    if (!session) return;
+
+    if (onOnboarding) {
+      return;
+    }
+
+    if (inAuthGroup || isLanding) {
+      router.replace("/(tabs)");
+    }
+  }, [session, loading, segments, pathname]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

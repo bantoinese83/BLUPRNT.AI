@@ -1,115 +1,50 @@
-import React from "react";
-import { Platform, useColorScheme } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {
-  Icon,
-  Label,
-  NativeTabs,
-  VectorIcon,
-} from "expo-router/unstable-native-tabs";
+import React, { useCallback } from "react";
+import { Tabs } from "expo-router/tabs";
 
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { AwarenessProvider } from "../../src/contexts/AwarenessProvider";
 import { useAwareness } from "../../src/contexts/AwarenessContext";
 import { InsightsDrawer } from "../../src/components/InsightsDrawer";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
-import { Theme } from "../../src/constants/Theme";
+import { NotchedTabBar } from "../../src/components/NotchedTabBar";
 
 /**
- * Bottom clearance for scroll content (native tab bar + margin).
- * Native liquid tab bar is shorter than the old custom floating pill + FAB.
+ * Bottom clearance for scroll content (notched bar + FAB overlap + margin).
  */
-export const TAB_BAR_HEIGHT = 52;
-export const TAB_BAR_MARGIN = 20;
+export const TAB_BAR_HEIGHT = 72;
+export const TAB_BAR_MARGIN = 18;
 
-/** Icons must be direct children of `Trigger` — wrappers break `child.type === Icon` detection. */
-function TabContent() {
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
+function TabShell() {
+  return (
+    <Tabs
+      tabBar={(props) => <NotchedTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="finance" options={{ title: "Finance" }} />
+      <Tabs.Screen name="new" options={{ title: "Add" }} />
+      <Tabs.Screen name="ai" options={{ title: "Assistant" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      <Tabs.Screen name="projects" options={{ href: null }} />
+    </Tabs>
+  );
+}
+
+function TabOverlays() {
   const { showUpgrade, setShowUpgrade, upgradeReason } = useAwareness();
 
-  const backgroundColor =
-    Platform.OS === "ios"
-      ? "transparent"
-      : isDark
-        ? "#000000"
-        : Theme.colors.background;
-
-  const indicatorColor = isDark ? "#2E3135" : "#E0E1E6";
-
-  const selectedLabelColor = isDark ? "#f8fafc" : Theme.colors.text.primary;
+  const handleCloseUpgrade = useCallback(() => {
+    setShowUpgrade(false);
+  }, [setShowUpgrade]);
 
   return (
     <>
-      <NativeTabs
-        backgroundColor={backgroundColor}
-        indicatorColor={indicatorColor}
-        labelStyle={{
-          selected: {
-            color: selectedLabelColor,
-            fontWeight: "700",
-          },
-        }}
-        iconColor={{
-          default: Theme.colors.text.muted,
-          selected: Theme.colors.brand.primary,
-        }}
-        tintColor={Theme.colors.brand.primary}
-      >
-        <NativeTabs.Trigger name="index">
-          <Label>Home</Label>
-          <Icon
-            sf="house.fill"
-            androidSrc={<VectorIcon family={MaterialIcons} name="home" />}
-          />
-        </NativeTabs.Trigger>
-
-        <NativeTabs.Trigger name="finance">
-          <Label>Finance</Label>
-          <Icon
-            sf="creditcard.fill"
-            androidSrc={
-              <VectorIcon
-                family={MaterialIcons}
-                name="account-balance-wallet"
-              />
-            }
-          />
-        </NativeTabs.Trigger>
-
-        <NativeTabs.Trigger name="new">
-          <Label>Add</Label>
-          <Icon
-            sf="plus.circle.fill"
-            androidSrc={<VectorIcon family={MaterialIcons} name="add-circle" />}
-          />
-        </NativeTabs.Trigger>
-
-        <NativeTabs.Trigger name="ai">
-          <Label>Assistant</Label>
-          <Icon
-            sf="sparkles"
-            androidSrc={
-              <VectorIcon family={MaterialIcons} name="auto-awesome" />
-            }
-          />
-        </NativeTabs.Trigger>
-
-        <NativeTabs.Trigger name="profile">
-          <Label>Profile</Label>
-          <Icon
-            sf="person.crop.circle.fill"
-            androidSrc={<VectorIcon family={MaterialIcons} name="person" />}
-          />
-        </NativeTabs.Trigger>
-
-        <NativeTabs.Trigger name="projects" hidden />
-      </NativeTabs>
-
       <InsightsDrawer />
       <UpgradeModal
         isOpen={showUpgrade}
-        onClose={() => setShowUpgrade(false)}
+        onClose={handleCloseUpgrade}
         reason={upgradeReason || "general"}
       />
     </>
@@ -125,7 +60,8 @@ export default function TabLayout() {
       scopeItems={scopeItems}
       invoices={invoices}
     >
-      <TabContent />
+      <TabShell />
+      <TabOverlays />
     </AwarenessProvider>
   );
 }

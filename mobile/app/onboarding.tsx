@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { MotiView, AnimatePresence } from "moti";
 import {
   ChevronLeft,
@@ -28,6 +28,7 @@ import {
   Tag,
   ChevronDown,
   ChevronUp,
+  Layers,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import { money } from "../src/lib/formatters";
@@ -40,6 +41,7 @@ import {
   saveOnboardingProject,
   projectTypeToRoomType,
   PhotoToScopeResult,
+  type ScopeItem,
 } from "../src/lib/onboarding-helpers";
 import { ProjectIcon } from "../src/lib/project-icons";
 import { supabase } from "../src/lib/supabase";
@@ -64,6 +66,44 @@ const ANALYSIS_MESSAGES = [
   "Calculating regional cost baseline...",
   "Reviewing permit requirements...",
 ];
+
+/** Line-item costs from AI scope — always shown when the user opens “Breakdown”. */
+function ScopeEstimateBreakdown({ items }: { items: ScopeItem[] }) {
+  if (!items?.length) return null;
+
+  return (
+    <View style={styles.scopeBreakdownContainer}>
+      <View style={styles.materialHeader}>
+        <Layers size={12} color={Theme.colors.brand.primary} />
+        <Text style={styles.materialHeaderText}>Cost breakdown</Text>
+      </View>
+      <View style={styles.scopeLineList}>
+        {items.map((item, idx) => (
+          <View
+            key={`${item.category}-${idx}`}
+            style={[
+              styles.scopeLineCard,
+              idx < items.length - 1 && styles.scopeLineCardBorder,
+            ]}
+          >
+            <View style={styles.scopeLineTextCol}>
+              <Text style={styles.scopeLineCategory}>{item.category}</Text>
+              {item.description ? (
+                <Text style={styles.scopeLineDesc}>{item.description}</Text>
+              ) : null}
+              <Text style={styles.scopeLineMeta}>
+                {item.quantity} {item.unit}
+              </Text>
+            </View>
+            <Text style={styles.scopeLineCost}>
+              {money(item.total_cost_min, item.total_cost_max)}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
 
 function MaterialDetailList({
   materials,
@@ -114,6 +154,15 @@ function MaterialDetailList({
 
 export default function OnboardingScreen() {
   const { user, session } = useAuth();
+  const { newProject: newProjectParam } = useLocalSearchParams<{
+    newProject?: string;
+  }>();
+  /** From Add tab / “new project” CTAs — skip fast-track so existing users can add another project. */
+  const isAddingAnotherProject =
+    newProjectParam === "1" ||
+    newProjectParam === "true" ||
+    newProjectParam === "yes";
+
   const [step, setStep] = useState(0);
   const [projectType, setProjectType] = useState<ProjectTypeOption | null>(
     null,
@@ -187,34 +236,43 @@ export default function OnboardingScreen() {
     }
   }, [location, projectType, scopeDescription, photos]);
 
+  const runAnalysisRef = React.useRef(runAnalysis);
+  runAnalysisRef.current = runAnalysis;
+
   useEffect(() => {
-    // Skip onboarding if user already has projects (Fast-track)
-    const checkExistingProjects = async () => {
-      if (user) {
-        const { count, error } = await supabase
-          .from("projects")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id);
+    if (isAddingAnotherProject || !user?.id) return;
 
-        if (!error && count && count > 0) {
-          router.replace("/(tabs)");
-        }
+    let cancelled = false;
+    void (async () => {
+      const { count, error } = await supabase
+        .from("projects")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (cancelled) return;
+      if (!error && count && count > 0) {
+        router.replace("/(tabs)");
       }
+    })();
+
+    return () => {
+      cancelled = true;
     };
-    checkExistingProjects();
+  }, [user?.id, isAddingAnotherProject]);
 
-    let messageInterval: ReturnType<typeof setInterval>;
-    if (step === 4) {
-      let current = 0;
-      messageInterval = setInterval(() => {
-        current = (current + 1) % ANALYSIS_MESSAGES.length;
-        setAnalysisIndex(current);
-      }, 2000);
+  useEffect(() => {
+    if (step !== 4) return;
 
-      runAnalysis();
-    }
+    let current = 0;
+    const messageInterval = setInterval(() => {
+      current = (current + 1) % ANALYSIS_MESSAGES.length;
+      setAnalysisIndex(current);
+    }, 2000);
+
+    void runAnalysisRef.current();
+
     return () => clearInterval(messageInterval);
-  }, [step, projectType, user, runAnalysis]);
+  }, [step]);
 
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -595,6 +653,7 @@ export default function OnboardingScreen() {
             animate={{ opacity: 1, translateY: 0 }}
             exit={{ opacity: 0, translateY: -20 }}
             key="step5"
+            style={styles.step5Column}
           >
             <Text style={styles.stepTitle}>You're Ready</Text>
             <Text style={styles.stepSubtitle}>
@@ -686,8 +745,9 @@ export default function OnboardingScreen() {
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ type: "timing", duration: 300 }}
-                          style={{ overflow: "hidden", width: "100%" }}
+                          style={styles.breakdownExpand}
                         >
+                          <ScopeEstimateBreakdown items={estimate.scope} />
                           <MaterialDetailList
                             materials={estimate.scope.flatMap(
                               (s) => s.metadata?.materials || [],
@@ -965,6 +1025,10 @@ const styles = StyleSheet.create({
   content: {
     padding: 24,
     flex: 1,
+    width: "100%",
+  },
+  step5Column: {
+    width: "100%",
   },
   stepTitle: {
     fontSize: 28,
@@ -1179,7 +1243,8 @@ const styles = StyleSheet.create({
   estimateCard: {
     padding: 24,
     borderRadius: 32,
-    alignItems: "center",
+    alignItems: "stretch",
+    width: "100%",
   },
   estimateHeader: {
     flexDirection: "row",
@@ -1224,6 +1289,9 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
     marginBottom: 8,
+    textAlign: "center",
+    alignSelf: "center",
+    width: "100%",
   },
   estimateValue: {
     fontSize: 40,
@@ -1250,7 +1318,13 @@ const styles = StyleSheet.create({
   },
   breakdown: {
     width: "100%",
+    alignSelf: "stretch",
     gap: 12,
+  },
+  breakdownExpand: {
+    overflow: "hidden",
+    width: "100%",
+    alignSelf: "stretch",
   },
   breakdownItem: {
     flexDirection: "row",
@@ -1314,6 +1388,57 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textAlign: "center",
     marginTop: 24,
+  },
+  scopeBreakdownContainer: {
+    width: "100%",
+    padding: 12,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
+    borderRadius: 14,
+  },
+  scopeLineList: {
+    gap: 0,
+  },
+  scopeLineCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    paddingVertical: 10,
+  },
+  scopeLineCardBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(15, 23, 42, 0.06)",
+  },
+  scopeLineTextCol: {
+    flex: 1,
+    minWidth: 0,
+  },
+  scopeLineCategory: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
+  },
+  scopeLineDesc: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  scopeLineMeta: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.muted,
+    marginTop: 6,
+  },
+  scopeLineCost: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+    marginTop: 2,
+    flexShrink: 0,
+    marginLeft: 8,
+    minWidth: 108,
+    textAlign: "right",
   },
   materialContainer: {
     marginTop: 16,

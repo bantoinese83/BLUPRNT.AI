@@ -112,7 +112,7 @@ export interface EstimatePayload {
     total_cost_max: number;
     confidence_score: number;
     confidence_reason?: string;
-    source: "photo" | "text";
+    source: "photo" | "text" | "fallback";
     justification?: string;
     priority?: "high" | "medium" | "low";
     phase?: string;

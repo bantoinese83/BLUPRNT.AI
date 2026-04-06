@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Mail,
   Crown,
+  FileText,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "../../src/contexts/auth-context";
@@ -308,6 +309,11 @@ export default function ProfileScreen() {
               icon={<Shield size={20} color={Theme.colors.text.secondary} />}
               title="Privacy Policy"
               onPress={() => router.push("/privacy")}
+            />
+            <SettingItem
+              icon={<FileText size={20} color={Theme.colors.text.secondary} />}
+              title="Terms of Service"
+              onPress={() => router.push("/terms")}
             />
           </GlassCard>
         </MotiView>

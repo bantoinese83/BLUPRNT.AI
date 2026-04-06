@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: Theme.radius.xl,
   },
   childContainer: {
-    // No default padding to allow flexible content layout
+    width: "100%",
   },
   content: {
     padding: 20,

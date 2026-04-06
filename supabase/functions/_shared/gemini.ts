@@ -21,7 +21,6 @@ export async function callGemini(params: {
   responseSchema?: Record<string, unknown>;
   temperature?: number;
 }): Promise<GeminiResponse | null> {
-  // @ts-expect-error: Deno global
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey?.trim()) {
     console.error("[callGemini] GEMINI_API_KEY not found in environment");

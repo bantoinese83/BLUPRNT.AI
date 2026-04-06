@@ -15,6 +15,7 @@ fi
 CONFIG="$ROOT/supabase/functions/deno.json"
 
 FILES=(
+  supabase/functions/chat-with-project/index.ts
   supabase/functions/create-checkout/index.ts
   supabase/functions/delete-account/index.ts
   supabase/functions/get-invoice/index.ts

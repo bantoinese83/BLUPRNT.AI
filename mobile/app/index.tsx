@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
   hero: {
     flex: 1,
     alignItems: "center",
+    zIndex: 1,
   },
   logoContainer: {
     marginBottom: 40,
@@ -178,6 +179,7 @@ const styles = StyleSheet.create({
   slideContent: {
     alignItems: "center",
     width: "100%",
+    zIndex: 2,
   },
   badgeContainer: {
     backgroundColor: "rgba(79, 70, 229, 0.08)",
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: Theme.colors.text.secondary,
+    color: "#475569",
     textAlign: "center",
     lineHeight: 24,
     fontFamily: "Outfit_400Regular",
@@ -237,6 +239,7 @@ const styles = StyleSheet.create({
   ctaContainer: {
     width: "100%",
     paddingBottom: 20,
+    zIndex: 1,
   },
   signInLink: {
     alignItems: "center",
