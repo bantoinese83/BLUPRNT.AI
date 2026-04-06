@@ -76,8 +76,8 @@ function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  // Drop the native splash as soon as JS is running so the branded view below
-  // is visible (Expo Go often keeps its own artwork until the bundle loads).
+  // Hide native layer as soon as JS runs so BrandedSplash (real icon + wordmark)
+  // shows immediately. Expo Go may still flash its default for a moment before JS.
   useEffect(() => {
     void SplashScreen.hideAsync();
   }, []);
