@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Share,
   Alert,
+  Switch,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { MotiView } from "moti";
@@ -35,7 +36,7 @@ import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
 import { AddScopeItemModal } from "../../src/components/AddScopeItemModal";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { ProjectRow, ScopeRow } from "../../src/types/database";
+import { InvoiceRow, ProjectRow, ScopeRow } from "../../src/types/database";
 import { Theme } from "../../src/constants/Theme";
 
 function MaterialDetailList({
@@ -86,11 +87,16 @@ function ProjectDetailScreenInner() {
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scope, setScope] = useState<ScopeRow[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { invoices, isArchitect, hasProjectPass, addItem } = useDashboardData();
+  const [detailInvoices, setDetailInvoices] = useState<InvoiceRow[]>([]);
+  const [includeAppendix, setIncludeAppendix] = useState(false);
+  const { isArchitect, hasProjectPass, addItem } = useDashboardData();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const invoiceTotal = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+  const invoiceTotal = detailInvoices.reduce(
+    (sum, inv) => sum + (inv.total || 0),
+    0,
+  );
 
   // Group scope by category
   const groupedScope = scope.reduce(
@@ -126,17 +132,25 @@ function ProjectDetailScreenInner() {
     async function fetchProject() {
       if (!id) return;
 
-      const [projRes, scopeRes] = await Promise.all([
+      const [projRes, scopeRes, invRes] = await Promise.all([
         supabase.from("projects").select("*").eq("id", id).single(),
         supabase
           .from("scope_items")
           .select("*")
           .eq("project_id", id)
           .order("created_at", { ascending: true }),
+        supabase
+          .from("invoices")
+          .select(
+            "id, vendor_name, total, created_at, payment_status, document_type, document_id",
+          )
+          .eq("project_id", id)
+          .order("created_at", { ascending: false }),
       ]);
 
       if (projRes.data) setProject(projRes.data);
       if (scopeRes.data) setScope(scopeRes.data);
+      setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
       setLoading(false);
     }
 
@@ -145,17 +159,25 @@ function ProjectDetailScreenInner() {
 
   const handleRefresh = async () => {
     setLoading(true);
-    const [projRes, scopeRes] = await Promise.all([
+    const [projRes, scopeRes, invRes] = await Promise.all([
       supabase.from("projects").select("*").eq("id", id).single(),
       supabase
         .from("scope_items")
         .select("*")
         .eq("project_id", id)
         .order("created_at", { ascending: true }),
+      supabase
+        .from("invoices")
+        .select(
+          "id, vendor_name, total, created_at, payment_status, document_type, document_id",
+        )
+        .eq("project_id", id)
+        .order("created_at", { ascending: false }),
     ]);
 
     if (projRes.data) setProject(projRes.data);
     if (scopeRes.data) setScope(scopeRes.data);
+    setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
     setLoading(false);
   };
 
@@ -395,48 +417,77 @@ function ProjectDetailScreenInner() {
           transition={{ delay: 500 }}
           style={styles.globalActions}
         >
-          <TouchableOpacity
-            style={[styles.actionButton, styles.shareBtn]}
-            onPress={handleShare}
-          >
-            <Share2 size={18} color={Theme.colors.text.primary} />
-            <Text style={styles.actionButtonText}>Share Project</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.exportBtn]}
-            onPress={async () => {
-              if (!project) return;
+          <View style={styles.exportAppendixRow}>
+            <View style={styles.exportAppendixTextCol}>
+              <Text style={styles.exportAppendixLabel}>
+                Append image originals
+              </Text>
+              <Text style={styles.exportAppendixHint}>
+                Larger PDF. PDF uploads appear as notes only.
+              </Text>
+            </View>
+            <Switch
+              value={includeAppendix}
+              onValueChange={setIncludeAppendix}
+              disabled={!detailInvoices.some((i) => Boolean(i.document_id))}
+              trackColor={{
+                false: "rgba(148,163,184,0.35)",
+                true: Theme.colors.brand.primary,
+              }}
+              thumbColor="#f8fafc"
+            />
+          </View>
+          <View style={styles.globalActionRow}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.shareBtn]}
+              onPress={handleShare}
+            >
+              <Share2 size={18} color={Theme.colors.text.primary} />
+              <Text style={styles.actionButtonText}>Share Project</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.exportBtn]}
+              onPress={async () => {
+                if (!project) return;
 
-              // Gate export
-              if (!isArchitect && !hasProjectPass) {
-                setShowUpgrade(true);
-                return;
-              }
+                // Gate export
+                if (!isArchitect && !hasProjectPass) {
+                  setShowUpgrade(true);
+                  return;
+                }
 
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              try {
-                await generateSellerPacketPDF(
-                  {
-                    id: project.id,
-                    property_id: project.property_id,
-                    name: project.name,
-                    estimated_min_total: project.estimated_min_total,
-                    estimated_max_total: project.estimated_max_total,
-                  },
-                  scope,
-                  invoices,
-                );
-              } catch (_) {
-                Alert.alert(
-                  "Export Failed",
-                  "Cloud not create project scope PDF.",
-                );
-              }
-            }}
-          >
-            <Download size={18} color={Theme.colors.text.primary} />
-            <Text style={styles.actionButtonText}>Export Data</Text>
-          </TouchableOpacity>
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                try {
+                  const scopeForPdf = scope.map((s) => ({
+                    category: s.category,
+                    description: s.description,
+                    total_cost_min: s.total_cost_min,
+                    total_cost_max: s.total_cost_max,
+                  }));
+                  await generateSellerPacketPDF(
+                    {
+                      id: project.id,
+                      property_id: project.property_id,
+                      name: project.name,
+                      estimated_min_total: project.estimated_min_total,
+                      estimated_max_total: project.estimated_max_total,
+                    },
+                    scopeForPdf,
+                    detailInvoices,
+                    { includeAppendix },
+                  );
+                } catch (_) {
+                  Alert.alert(
+                    "Export Failed",
+                    "We couldn’t generate the PDF. Check your connection and try again.",
+                  );
+                }
+              }}
+            >
+              <Download size={18} color={Theme.colors.text.primary} />
+              <Text style={styles.actionButtonText}>Export Seller Packet</Text>
+            </TouchableOpacity>
+          </View>
         </MotiView>
       </View>
 
@@ -594,10 +645,39 @@ const styles = StyleSheet.create({
     borderColor: "rgba(15, 23, 42, 0.08)",
   },
   globalActions: {
-    flexDirection: "row",
-    gap: 12,
+    gap: 14,
     marginTop: 20,
     marginBottom: 40,
+  },
+  globalActionRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  exportAppendixRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: "rgba(15, 23, 42, 0.04)",
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.08)",
+  },
+  exportAppendixTextCol: {
+    flex: 1,
+    gap: 4,
+  },
+  exportAppendixLabel: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
+  },
+  exportAppendixHint: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 15,
   },
   actionButton: {
     flex: 1,

@@ -3,6 +3,8 @@ import * as Sharing from "expo-sharing";
 import { money } from "./formatters";
 import { supabase } from "./supabase";
 import { planVsActualPdfLines } from "./plan-vs-actual";
+import { buildSellerPacketAppendixHtml } from "./seller-packet-appendix";
+import type { InvoiceRow } from "../types/database";
 
 type ScopeItem = {
   category: string;
@@ -12,10 +14,12 @@ type ScopeItem = {
 };
 
 type InvoiceItem = {
+  id: string;
   vendor_name: string | null;
   total: number | null;
   created_at: string;
   document_type?: string | null;
+  document_id?: string | null;
 };
 
 type ProjectInfo = {
@@ -38,10 +42,16 @@ function formatDate(iso: string): string {
   }
 }
 
+export type SellerPacketPdfOptions = {
+  /** Larger PDF; may embed receipt images. PDF uploads stay as notes only. */
+  includeAppendix?: boolean;
+};
+
 export async function generateSellerPacketPDF(
   project: ProjectInfo,
   scopeItems: ScopeItem[],
   invoices: InvoiceItem[],
+  options?: SellerPacketPdfOptions,
 ) {
   const capitalTotal = invoices
     .filter((i) => {
@@ -56,6 +66,11 @@ export async function generateSellerPacketPDF(
       return t === "warranty" || t === "permit";
     })
     .reduce((s, i) => s + (i.total || 0), 0);
+
+  const appendixHtml =
+    options?.includeAppendix && invoices.some((i) => i.document_id)
+      ? await buildSellerPacketAppendixHtml(invoices as InvoiceRow[])
+      : "";
 
   const html = `
     <html>
@@ -184,6 +199,8 @@ export async function generateSellerPacketPDF(
             </tbody>
           </table>
         </div>
+
+        ${appendixHtml}
 
         <div class="footer">
           BLUPRNT.AI — Includes regional estimate, plan vs documented spend, and uploaded records. Not a substitute for professional appraisal or tax advice.

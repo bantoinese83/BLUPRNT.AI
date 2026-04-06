@@ -56,6 +56,8 @@ export type InvoiceRow = {
   created_at: string;
   payment_status: string;
   document_type?: string | null;
+  /** Present when an upload exists in Storage; used for View original / export appendix. */
+  document_id?: string | null;
 };
 
 export type UserSubscriptionRow = {

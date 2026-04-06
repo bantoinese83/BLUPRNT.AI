@@ -160,7 +160,7 @@ export function useDashboardData() {
         supabase
           .from("invoices")
           .select(
-            "id, vendor_name, total, created_at, payment_status, document_type",
+            "id, vendor_name, total, created_at, payment_status, document_type, document_id",
           )
           .eq("project_id", projectId)
           .order("created_at", { ascending: false }),

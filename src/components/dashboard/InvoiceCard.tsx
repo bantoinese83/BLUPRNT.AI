@@ -1,4 +1,5 @@
-import { FileText } from "lucide-react";
+import { ExternalLink, FileText } from "lucide-react";
+import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
@@ -67,6 +68,19 @@ export function InvoiceCard({ invoice, index, onClick }: InvoiceCardProps) {
                 </Badge>
               )}
             </div>
+            {invoice.document_id ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void openOriginalDocumentForInvoice(invoice.id);
+                }}
+                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2"
+              >
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                View original
+              </button>
+            ) : null}
           </div>
         </CardContent>
       </Card>

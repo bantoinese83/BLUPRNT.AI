@@ -120,6 +120,8 @@ Deno.serve(async (req: Request) => {
           payment_status: inv.payment_status,
           created_at: inv.created_at,
           updated_at: inv.updated_at,
+          document_type: inv.document_type,
+          document_id: inv.document_id,
         },
         line_items: (lines ?? []).map((l) => ({
           id: l.id,

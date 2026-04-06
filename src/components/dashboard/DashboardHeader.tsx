@@ -142,12 +142,16 @@ export function DashboardHeader({
               className="h-9 rounded-xl px-2 text-slate-600 hover:bg-slate-100/90 hover:text-slate-900 sm:px-3"
               onClick={onExportPDF}
               type="button"
+              title="Download seller packet PDF"
+              aria-label="Download seller packet PDF"
             >
               <FileDown
                 className="h-4 w-4 text-slate-500 sm:mr-1.5"
                 aria-hidden
               />
-              <span className="hidden font-semibold sm:inline">Export</span>
+              <span className="hidden font-semibold sm:inline">
+                Export packet
+              </span>
               {!isArchitect && (
                 <span className="ml-1.5 hidden rounded-md bg-slate-900 px-1 py-0.5 text-[8px] font-black uppercase tracking-tighter text-white sm:inline">
                   Pro

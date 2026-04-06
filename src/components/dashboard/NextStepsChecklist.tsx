@@ -34,8 +34,9 @@ export function NextStepsChecklist({
       },
       {
         id: "export-packet",
-        label: "Export project brief",
-        description: "Get a PDF to share with pros for bidding.",
+        label: "Export seller packet",
+        description:
+          "Download the full ledger PDF—scope, plan vs spend, and costs.",
         icon: Share2,
       },
     );

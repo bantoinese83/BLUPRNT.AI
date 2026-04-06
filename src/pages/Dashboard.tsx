@@ -15,7 +15,7 @@ import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
-import { generateDashboardSummaryPDF } from "@/lib/pdf-export";
+import { downloadSellerPacket } from "@/lib/seller-packet-download";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { EstimateSummary } from "@/components/dashboard/EstimateSummary";
@@ -370,9 +370,51 @@ function DashboardContent({
 
   const handleExportPDF = useCallback(async () => {
     if (!project) return;
-    await generateDashboardSummaryPDF(project, invoices, invoiceTotal);
-    toast.success("Project summary exported to PDF");
-  }, [project, invoices, invoiceTotal]);
+    if (!isArchitect && !hasProjectPass) {
+      setUpgradeReason("export");
+      setShowUpgrade(true);
+      return;
+    }
+    if (!project.property_id) {
+      toast.error(
+        "We need your project’s property record to export. Try refreshing the page.",
+      );
+      return;
+    }
+
+    const dismiss = toast.loading("Generating seller packet…");
+    try {
+      const scopeForPdf = scopeItems.map((s) => ({
+        category: s.category,
+        description: s.description,
+        total_cost_min: s.total_cost_min,
+        total_cost_max: s.total_cost_max,
+      }));
+      const { savedToProject } = await downloadSellerPacket({
+        projectId: project.id,
+        propertyId: project.property_id,
+        project: {
+          name: project.name,
+          estimated_min_total: project.estimated_min_total,
+          estimated_max_total: project.estimated_max_total,
+        },
+        scopeItems: scopeForPdf,
+        invoices,
+        includeAppendix: false,
+      });
+      toast.dismiss(dismiss);
+      toast.success(
+        savedToProject
+          ? "Seller packet downloaded. A copy was saved with this project."
+          : "Seller packet downloaded. Cloud copy wasn’t saved—open the Record tab and export again if you need it in your account.",
+      );
+    } catch {
+      toast.dismiss(dismiss);
+      toast.error(
+        "We couldn’t generate the PDF. Check your connection and try again.",
+      );
+    }
+  }, [project, scopeItems, invoices, isArchitect, hasProjectPass]);
 
   async function handleProjectDelete(id: string) {
     if (!isSupabaseConfigured()) return;
@@ -448,8 +490,9 @@ function DashboardContent({
         }}
         scopeItems={scopeItems}
         invoices={invoices}
-        onUpgradeClick={() => {
-          setUpgradeReason("general");
+        canExportSellerPacket={isArchitect || hasProjectPass}
+        onExportNotAllowed={() => {
+          setUpgradeReason("export");
           setShowUpgrade(true);
         }}
       />

@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase, invokeFunction } from "@/lib/supabase";
+import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
 
 type LineItem = {
   id: string;
@@ -29,6 +30,8 @@ type InvoiceData = {
   payment_status: string;
   line_items: LineItem[];
   budget_mapping_suggestions?: ScopeSuggestion[];
+  document_id?: string | null;
+  document_type?: string | null;
 };
 
 export function InvoiceReviewModal({
@@ -189,6 +192,18 @@ export function InvoiceReviewModal({
             <strong className="text-slate-800">Tip:</strong> Match each line to
             your estimate below so you can see what&apos;s on or off budget.
           </p>
+          {invoice.document_id ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto gap-2 rounded-xl"
+              onClick={() => void openOriginalDocumentForInvoice(invoiceId)}
+            >
+              <Link2 className="w-4 h-4" aria-hidden />
+              View original upload
+            </Button>
+          ) : null}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h4 className="font-medium text-slate-900 flex items-center gap-2">

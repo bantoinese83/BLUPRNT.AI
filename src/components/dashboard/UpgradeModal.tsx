@@ -8,7 +8,7 @@ import { invokeFunction } from "@/lib/supabase";
 const FREE_INVOICE_LIMIT = 3;
 const ARCHITECT_INVOICE_LIMIT = 10;
 
-export type UpgradeOpenReason = "general" | "invoice_limit";
+export type UpgradeOpenReason = "general" | "invoice_limit" | "export";
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -178,6 +178,14 @@ export function UpgradeModal({
                     </span>
                   </p>
                 )}
+              {openReason === "export" && !isArchitect && !hasProjectPass && (
+                <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+                  The full <strong>seller packet PDF</strong> (estimate scope,
+                  plan vs documented spend, and recorded costs) is included with{" "}
+                  <strong>Architect</strong> or a <strong>Project Pass</strong>.
+                  You can still browse your project on the free plan.
+                </p>
+              )}
               <h2
                 id="upgrade-modal-title"
                 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"

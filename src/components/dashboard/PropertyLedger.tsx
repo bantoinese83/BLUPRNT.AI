@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BookOpen, FileDown, Loader2, Wrench, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
-import { generateSellerPacketBlob } from "@/lib/pdf-export";
+import { downloadSellerPacket } from "@/lib/seller-packet-download";
+import type { InvoiceRow } from "@/types/database";
 import { money } from "@/lib/formatters";
 
 type ScopeItem = {
@@ -15,13 +15,15 @@ type ScopeItem = {
   total_cost_max: number | null;
 };
 
-type InvoiceItem = {
-  id: string;
-  vendor_name: string | null;
-  total: number | null;
-  created_at: string;
-  document_type?: string | null;
-};
+type InvoiceItem = Pick<
+  InvoiceRow,
+  | "id"
+  | "vendor_name"
+  | "total"
+  | "created_at"
+  | "document_type"
+  | "document_id"
+>;
 
 type ProjectInfo = {
   name: string;
@@ -35,7 +37,9 @@ type PropertyLedgerProps = {
   project?: ProjectInfo;
   scopeItems?: ScopeItem[];
   invoices?: InvoiceItem[];
-  onUpgradeClick?: () => void;
+  /** Full seller packet export requires Architect or Project Pass (same as mobile). */
+  canExportSellerPacket?: boolean;
+  onExportNotAllowed?: () => void;
 };
 
 export function PropertyLedger({
@@ -44,21 +48,12 @@ export function PropertyLedger({
   project,
   scopeItems = [],
   invoices = [],
-  onUpgradeClick,
+  canExportSellerPacket = false,
+  onExportNotAllowed,
 }: PropertyLedgerProps) {
   const [exporting, setExporting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!cancelled) setUserId(user?.id ?? null);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const [includeOriginalAppendix, setIncludeOriginalAppendix] = useState(false);
 
   const capitalTotal = invoices
     .filter((i) => {
@@ -79,51 +74,29 @@ export function PropertyLedger({
       setMessage("Project details needed to export.");
       return;
     }
+    if (!canExportSellerPacket) {
+      onExportNotAllowed?.();
+      return;
+    }
     setExporting(true);
     setMessage(null);
     try {
-      const blob = await generateSellerPacketBlob(
-        project,
-        scopeItems,
-        invoices,
+      const scopeForPdf = scopeItems.map(
+        ({ category, description, total_cost_min, total_cost_max }) => ({
+          category,
+          description,
+          total_cost_min,
+          total_cost_max,
+        }),
       );
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")
-        .slice(0, 19);
-      const storagePath = userId
-        ? `${projectId}/${userId}/seller-packet-${timestamp}.pdf`
-        : `${projectId}/seller-packet-${timestamp}.pdf`;
-
-      let savedToProject = false;
-      if (userId) {
-        const { error: uploadErr } = await supabase.storage
-          .from("project-documents")
-          .upload(storagePath, blob, {
-            contentType: "application/pdf",
-            upsert: true,
-          });
-
-        if (!uploadErr) {
-          await supabase.from("seller_packets").upsert(
-            {
-              project_id: projectId,
-              property_id: propertyId,
-              storage_path: storagePath,
-              generated_at: new Date().toISOString(),
-            },
-            { onConflict: "project_id" },
-          );
-          savedToProject = true;
-        }
-      }
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `property-ledger-${project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const { savedToProject } = await downloadSellerPacket({
+        projectId,
+        propertyId,
+        project,
+        scopeItems: scopeForPdf,
+        invoices: invoices as InvoiceRow[],
+        includeAppendix: includeOriginalAppendix,
+      });
       setMessage(
         savedToProject
           ? "Downloaded to your device. A copy is also saved with this project."
@@ -133,7 +106,6 @@ export function PropertyLedger({
       setMessage(
         "We couldn’t finish that. Check your connection and try again.",
       );
-      onUpgradeClick?.();
     } finally {
       setExporting(false);
     }
@@ -171,13 +143,32 @@ export function PropertyLedger({
         </CardHeader>
         <CardContent className="px-6 sm:px-8 pb-8 space-y-8 relative">
           <p className="text-base text-slate-500 leading-relaxed font-medium max-w-sm">
-            Your estimate, plan vs documented spend, line-item scope, and every
-            uploaded receipt—in one PDF. Export the{" "}
+            Your estimate, plan vs documented spend, and recorded costs—in one
+            PDF. Optionally append image receipts below (larger file; may
+            include personal details). Export the{" "}
             <span className="text-slate-900 font-bold underline decoration-slate-300">
               Seller Packet
             </span>{" "}
-            so buyers and agents see a coherent story, not a folder of files.
+            so buyers and agents see a clear story.
           </p>
+
+          <label className="flex items-start gap-3 cursor-pointer rounded-2xl border border-slate-200/80 bg-white/50 p-4 text-left hover:bg-white/80 transition-colors">
+            <input
+              type="checkbox"
+              checked={includeOriginalAppendix}
+              onChange={(e) => setIncludeOriginalAppendix(e.target.checked)}
+              disabled={exporting || invoices.every((i) => !i.document_id)}
+              className="mt-1 size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+            />
+            <span className="text-sm text-slate-600 leading-snug">
+              <span className="font-semibold text-slate-900 block mb-0.5">
+                Append image originals
+              </span>
+              Embeds photo receipts in the PDF (not PDF uploads). Larger
+              download; only turn on if you are comfortable sharing those
+              images.
+            </span>
+          </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-bold text-slate-400">
             <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-100/50">

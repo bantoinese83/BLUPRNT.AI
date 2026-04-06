@@ -18,11 +18,13 @@ import {
   Calendar,
   Tag,
   CreditCard,
+  ExternalLink,
   LucideIcon,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { supabase } from "../lib/supabase";
+import { openOriginalDocumentForInvoice } from "../lib/open-original-document";
 import { money } from "../lib/formatters";
 import type { InvoiceRow } from "../types/database";
 
@@ -154,6 +156,19 @@ export function InvoiceReviewSheet({
               valueColor={statusColor}
             />
           </View>
+
+          {invoice.document_id ? (
+            <TouchableOpacity
+              style={styles.viewOriginalBtn}
+              onPress={() => {
+                Haptics.selectionAsync();
+                void openOriginalDocumentForInvoice(invoice.id);
+              }}
+            >
+              <ExternalLink size={18} color="#818cf8" />
+              <Text style={styles.viewOriginalBtnText}>View original</Text>
+            </TouchableOpacity>
+          ) : null}
 
           {/* Delete */}
           <TouchableOpacity
@@ -298,6 +313,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Outfit_700Bold",
     color: "white",
+  },
+  viewOriginalBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 14,
+    borderRadius: 16,
+    marginBottom: 16,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  viewOriginalBtnText: {
+    fontSize: 15,
+    fontFamily: "Outfit_600SemiBold",
+    color: "#e2e8f0",
   },
   deleteBtn: {
     flexDirection: "row",

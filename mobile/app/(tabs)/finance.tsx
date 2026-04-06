@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   SectionList,
+  Switch,
 } from "react-native";
 import {
   BookOpen,
@@ -43,6 +44,7 @@ import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullS
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 import { FinanceTabSkeleton } from "../../src/components/TabLoadingSkeletons";
 import { showAppToast } from "../../src/lib/app-toast";
+import { openOriginalDocumentForInvoice } from "../../src/lib/open-original-document";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
@@ -55,6 +57,7 @@ export default function FinanceScreen() {
     configurationMissing,
     projects,
     project,
+    scopeItems,
     invoices,
     handleProjectSelect,
     isArchitect,
@@ -74,6 +77,7 @@ export default function FinanceScreen() {
   );
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [includeAppendix, setIncludeAppendix] = useState(false);
 
   const stats = useMemo(() => {
     const capital = invoices
@@ -99,6 +103,17 @@ export default function FinanceScreen() {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
   }, [invoices]);
+
+  const scopeForSellerPacket = useMemo(
+    () =>
+      scopeItems.map((s) => ({
+        category: s.category,
+        description: s.description,
+        total_cost_min: s.total_cost_min,
+        total_cost_max: s.total_cost_max,
+      })),
+    [scopeItems],
+  );
 
   const groupedInvoices = useMemo(() => {
     const active =
@@ -153,8 +168,9 @@ export default function FinanceScreen() {
           estimated_min_total: project.estimated_min_total,
           estimated_max_total: project.estimated_max_total,
         },
-        [],
+        scopeForSellerPacket,
         invoices,
+        { includeAppendix },
       );
     } catch (_error) {
       Alert.alert(
@@ -373,6 +389,27 @@ export default function FinanceScreen() {
               </View>
             </View>
 
+            <View style={styles.appendixRow}>
+              <View style={styles.appendixTextCol}>
+                <Text style={styles.appendixLabel}>Append image originals</Text>
+                <Text style={styles.appendixHint}>
+                  Larger PDF. PDF uploads appear as notes only, not full pages.
+                </Text>
+              </View>
+              <Switch
+                value={includeAppendix}
+                onValueChange={setIncludeAppendix}
+                disabled={
+                  exporting || !invoices.some((i) => Boolean(i.document_id))
+                }
+                trackColor={{
+                  false: "rgba(148,163,184,0.35)",
+                  true: Theme.colors.brand.primary,
+                }}
+                thumbColor="#f8fafc"
+              />
+            </View>
+
             <Button
               title={exporting ? "Generating..." : "Export Seller Packet"}
               onPress={handleExport}
@@ -441,14 +478,15 @@ export default function FinanceScreen() {
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ delay: Math.min(index * 50, 400) }}
             >
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedInvoice(inv);
-                  setIsReviewOpen(true);
-                  Haptics.selectionAsync();
-                }}
-              >
-                <GlassCard intensity={8} style={styles.invoiceCard}>
+              <GlassCard intensity={8} style={styles.invoiceCard}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedInvoice(inv);
+                    setIsReviewOpen(true);
+                    Haptics.selectionAsync();
+                  }}
+                  activeOpacity={0.85}
+                >
                   <View style={styles.invoiceMain}>
                     <View style={styles.invoiceIcon}>
                       {(inv.document_type || "invoice").toLowerCase() ===
@@ -469,8 +507,19 @@ export default function FinanceScreen() {
                     </View>
                     <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
                   </View>
-                </GlassCard>
-              </TouchableOpacity>
+                </TouchableOpacity>
+                {inv.document_id ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      void openOriginalDocumentForInvoice(inv.id);
+                    }}
+                    style={styles.viewOriginalBtn}
+                  >
+                    <Text style={styles.viewOriginalText}>View original</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </GlassCard>
             </MotiView>
           </View>
         )}
@@ -598,6 +647,44 @@ const styles = StyleSheet.create({
   exportButton: {
     height: 52,
     borderRadius: 16,
+  },
+  appendixRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+  },
+  appendixTextCol: {
+    flex: 1,
+    gap: 4,
+  },
+  appendixLabel: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
+  },
+  appendixHint: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 15,
+  },
+  viewOriginalBtn: {
+    marginTop: 10,
+    paddingVertical: 8,
+    alignSelf: "flex-start",
+  },
+  viewOriginalText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.brand.primary,
+    textDecorationLine: "underline",
   },
   filterContainer: {
     flexDirection: "row",

@@ -8,9 +8,16 @@ import { jsPDF } from "jspdf";
 type JsPdfInstance = InstanceType<typeof jsPDF>;
 import {
   capitalImprovementTotal,
-  planVsActualNarrative,
   planVsActualPdfLines,
 } from "@/lib/plan-vs-actual";
+import type { SellerPacketAppendixItem } from "@/lib/seller-packet-appendix";
+
+export type { SellerPacketAppendixItem } from "@/lib/seller-packet-appendix";
+
+export type SellerPacketExportOptions = {
+  /** Optional pages with embedded images / notes for originals (off by default for privacy & size). */
+  appendixItems?: SellerPacketAppendixItem[];
+};
 
 type ScopeItem = {
   category: string;
@@ -109,10 +116,91 @@ function drawPlanVsActualSection(
   return y;
 }
 
+function drawSellerPacketAppendix(
+  doc: JsPdfInstance,
+  appendixItems: SellerPacketAppendixItem[],
+): void {
+  if (!appendixItems.length) return;
+
+  doc.addPage();
+  let y = MARGIN;
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(HEADING_SIZE);
+  doc.setFont("helvetica", "bold");
+  doc.text("Appendix: Original uploads", MARGIN, y);
+  y += LINE_HEIGHT * 1.75;
+
+  doc.setFontSize(FONT_SIZE - 1);
+  doc.setFont("helvetica", "normal");
+  const intro = doc.splitTextToSize(
+    "Optional section. Image receipts appear below. PDFs are not pasted into this file to keep size down—use View original in the app. Sharing this PDF may expose personal or financial details from receipts.",
+    170,
+  );
+  for (const line of intro) {
+    doc.text(line, MARGIN, y);
+    y += LINE_HEIGHT * 1.1;
+  }
+
+  const pageH = doc.internal.pageSize.height;
+  const pageW = doc.internal.pageSize.width;
+
+  for (const item of appendixItems) {
+    doc.addPage();
+    y = MARGIN;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    for (const t of doc.splitTextToSize(item.title, 170)) {
+      doc.text(t, MARGIN, y);
+      y += LINE_HEIGHT * 1.2;
+    }
+    y += LINE_HEIGHT * 0.5;
+
+    if (item.kind === "image") {
+      try {
+        const props = doc.getImageProperties(item.dataUrl);
+        const maxW = pageW - 2 * MARGIN;
+        const maxH = pageH - y - MARGIN - 10;
+        const ratio = props.height / props.width;
+        let w = maxW;
+        let h = w * ratio;
+        if (h > maxH) {
+          h = maxH;
+          w = h / ratio;
+        }
+        doc.addImage(item.dataUrl, item.imageFormat, MARGIN, y, w, h);
+      } catch {
+        doc.setFontSize(FONT_SIZE);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          "We couldn’t embed this image in the PDF. Open the original in the app.",
+          MARGIN,
+          y,
+          { maxWidth: 170 },
+        );
+      }
+    } else {
+      doc.setFontSize(FONT_SIZE);
+      doc.setFont("helvetica", "normal");
+      for (const noteLine of item.noteLines) {
+        for (const p of doc.splitTextToSize(noteLine, 170)) {
+          if (y > pageH - MARGIN) {
+            doc.addPage();
+            y = MARGIN;
+          }
+          doc.text(p, MARGIN, y);
+          y += LINE_HEIGHT * 1.2;
+        }
+      }
+    }
+  }
+}
+
 export async function generateSellerPacketPDF(
   project: ProjectInfo,
   scopeItems: ScopeItem[],
   invoices: InvoiceItem[],
+  options?: SellerPacketExportOptions,
 ): Promise<void> {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -231,6 +319,8 @@ export async function generateSellerPacketPDF(
     y,
   );
 
+  drawSellerPacketAppendix(doc, options?.appendixItems ?? []);
+
   // Footer
   y = doc.internal.pageSize.height - MARGIN;
   doc.setFont("helvetica", "normal");
@@ -254,6 +344,7 @@ export async function generateSellerPacketBlob(
   project: ProjectInfo,
   scopeItems: ScopeItem[],
   invoices: InvoiceItem[],
+  options?: SellerPacketExportOptions,
 ): Promise<Blob> {
   const { jsPDF: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
@@ -368,6 +459,8 @@ export async function generateSellerPacketBlob(
     y,
   );
 
+  drawSellerPacketAppendix(doc, options?.appendixItems ?? []);
+
   y = doc.internal.pageSize.height - MARGIN;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
@@ -379,104 +472,4 @@ export async function generateSellerPacketBlob(
   );
 
   return doc.output("blob");
-}
-
-/**
- * Generate PDF for Dashboard Project Summary.
- */
-export async function generateDashboardSummaryPDF(
-  project: ProjectInfo,
-  invoices: InvoiceItem[],
-  invoiceTotal: number,
-) {
-  const { jsPDF: JsPDF } = await import("jspdf");
-  const doc = new JsPDF();
-  const capitalTracked = capitalImprovementTotal(invoices);
-  const title = project.name.toUpperCase();
-  const date = new Date().toLocaleDateString();
-
-  // Header
-  doc.setFillColor(15, 23, 42); // slate-900
-  doc.rect(0, 0, 210, 40, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bold");
-  doc.text("BLUPRNT.AI", 20, 25);
-  doc.setFontSize(10);
-  doc.text("EXECUTIVE PROJECT SUMMARY", 150, 25);
-
-  // Body
-  doc.setTextColor(15, 23, 42);
-  doc.setFontSize(18);
-  doc.text(title, 20, 55);
-  doc.setFontSize(10);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Generated on ${date}`, 20, 62);
-
-  // Stats Section
-  doc.setDrawColor(226, 232, 240);
-  doc.line(20, 70, 190, 70);
-
-  doc.setFontSize(12);
-  doc.setTextColor(15, 23, 42);
-  doc.text("ESTIMATED RANGE:", 20, 85);
-  doc.setFont("helvetica", "normal");
-  doc.text(
-    moneyRange(project.estimated_min_total, project.estimated_max_total),
-    70,
-    85,
-  );
-
-  doc.setFont("helvetica", "bold");
-  doc.text("TOTAL LOGGED (ALL DOCS):", 20, 95);
-  doc.setFont("helvetica", "normal");
-  doc.text(money(invoiceTotal), 70, 95);
-
-  const snapshot = planVsActualNarrative(
-    project.estimated_min_total,
-    project.estimated_max_total,
-    capitalTracked,
-  );
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("PLAN VS DOCUMENTED (INVOICES & QUOTES):", 20, 104);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  const snapshotText = `${snapshot.headline} ${snapshot.body}`;
-  const snapshotLines = doc.splitTextToSize(snapshotText, 170);
-  let yTable = 108;
-  snapshotLines.forEach((fragment: string) => {
-    doc.text(fragment, 20, yTable);
-    yTable += 5;
-  });
-  yTable += 6;
-
-  // Invoices Table Header
-  doc.setFontSize(12);
-  doc.setFillColor(248, 250, 252);
-  doc.rect(20, yTable, 170, 10, "F");
-  doc.setFont("helvetica", "bold");
-  doc.text("VENDOR", 25, yTable + 7);
-  doc.text("TOTAL", 150, yTable + 7);
-  yTable += 14;
-
-  // Invoices Rows
-  doc.setFont("helvetica", "normal");
-  invoices.slice(0, 15).forEach((inv, i) => {
-    const y = yTable + i * 10;
-    doc.text(inv.vendor_name || "Unknown", 25, y);
-    doc.text(money(inv.total), 150, y);
-    doc.setDrawColor(241, 245, 249);
-    doc.line(20, y + 3, 190, y + 3);
-  });
-
-  doc.setFontSize(8);
-  doc.setTextColor(148, 163, 184);
-  doc.text(
-    "This report was generated by BLUPRNT.AI. All benchmarks are regional averages.",
-    20,
-    280,
-  );
-
-  doc.save(`${project.name.toLowerCase().replace(/\s+/g, "-")}-summary.pdf`);
 }
