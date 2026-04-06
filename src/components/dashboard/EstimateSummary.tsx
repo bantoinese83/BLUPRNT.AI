@@ -207,17 +207,6 @@ export function EstimateSummary({
               const materials = item.metadata?.materials;
               const hasMaterials = materials && materials.length > 0;
 
-              if (
-                item.category === "FLOORING" ||
-                item.category === "CABINETRY"
-              ) {
-                console.log(
-                  `DASHBOARD_DEBUG: Item ${item.category} has materials?`,
-                  hasMaterials,
-                  item.metadata,
-                );
-              }
-
               return (
                 <div
                   key={item.id}

@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "check-types": "tsc --noEmit",
-    "lint": "eslint . && tsc --noEmit"
+    "lint": "eslint . --max-warnings 0 && tsc --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",

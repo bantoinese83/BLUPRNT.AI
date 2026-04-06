@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text, ViewStyle } from "react-native";
 import { LucideIcon } from "lucide-react-native";
 import { MotiView } from "moti";
+import { Theme } from "../../constants/Theme";
 import { Button } from "./Button";
 import { GlassCard } from "./GlassCard";
 
@@ -33,7 +34,11 @@ export function EmptyState({
     >
       <GlassCard intensity={15} style={styles.card}>
         <View style={styles.iconContainer}>
-          <Icon size={40} color="#4f46e5" strokeWidth={1.5} />
+          <Icon
+            size={40}
+            color={Theme.colors.brand.primary}
+            strokeWidth={1.5}
+          />
         </View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
@@ -137,16 +142,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: Theme.colors.divider,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: Theme.colors.border,
   },
   activeDot: {
-    backgroundColor: "#4f46e5",
-    borderColor: "#4f46e5",
-    shadowColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: Theme.colors.brand.primary,
+    shadowColor: Theme.colors.brand.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -169,12 +174,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   activeLabel: {
-    color: "#4f46e5",
+    color: Theme.colors.brand.primary,
   },
   roadmapLine: {
     width: 30,
     height: 1,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: Theme.colors.border,
     marginHorizontal: 8,
     marginBottom: 20, // Align with dots
   },

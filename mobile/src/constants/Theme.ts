@@ -1,15 +1,25 @@
+/**
+ * BLUPRNT design tokens — keep in sync with web `src/index.css` `@theme` block
+ * (surface, accent indigo, slate text, primary CTA slate-900).
+ */
 export const Theme = {
   colors: {
-    // Light Liquid Palette
-    background: "#f8fafc", // Slate 50
+    // Light shell — matches web `--color-surface`
+    background: "#f9fafb",
     header: "#ffffff",
     card: "#ffffff",
 
-    // Brand Palette
+    // Accent (indigo) — matches web `--color-accent` / EmptyState highlights
     brand: {
       light: "#6366f1", // Indigo 500
       primary: "#4f46e5", // Indigo 600
       deep: "#3730a3", // Indigo 800
+    },
+
+    // Primary CTA gradient — matches web `.liquid-metal-button` (slate-900 base)
+    cta: {
+      from: "#0f172a",
+      to: "#1e293b",
     },
 
     // Text Palette

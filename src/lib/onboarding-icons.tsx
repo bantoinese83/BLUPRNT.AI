@@ -1,3 +1,4 @@
+import { OnboardingCustomIcon } from "@/lib/onboarding-custom-icon";
 import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
 
 interface IconProps {
@@ -6,60 +7,43 @@ interface IconProps {
   "aria-hidden"?: boolean;
 }
 
-const CustomIcon = ({
-  src,
-  className,
-  ...props
-}: {
-  src: string;
-  className?: string;
-}) => (
-  <img
-    src={src}
-    className={className}
-    alt=""
-    style={{ filter: "brightness(0) invert(1)" }}
-    {...props}
-  />
-);
-
 // We use relative paths from public/
 export const PROJECT_TYPE_ICON: Record<
   ProjectTypeOption,
   (props: IconProps) => React.ReactNode
 > = {
   Kitchen: (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/043-kitchen cabinet.svg"
       {...props}
     />
   ),
   Bathroom: (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/004-bathroom.svg"
       {...props}
     />
   ),
   Painting: (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/054-paint brush.svg"
       {...props}
     />
   ),
   Roof: (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/042-house.svg"
       {...props}
     />
   ),
   Flooring: (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/030-tiles.svg"
       {...props}
     />
   ),
   "Something else": (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/079-tool box.svg"
       {...props}
     />
@@ -71,19 +55,19 @@ export const STAGE_ICON: Record<
   (props: IconProps) => React.ReactNode
 > = {
   "Just planning": (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/060-project.svg"
       {...props}
     />
   ),
   "Collecting quotes": (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/033-quotes.svg"
       {...props}
     />
   ),
   "Already started work": (props: IconProps) => (
-    <CustomIcon
+    <OnboardingCustomIcon
       src="/assets/icons/home-improvements/009-builder.svg"
       {...props}
     />

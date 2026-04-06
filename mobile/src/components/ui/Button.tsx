@@ -65,7 +65,7 @@ export function Button({
             style={[styles.button, style]}
           >
             <LinearGradient
-              colors={[Theme.colors.brand.primary, Theme.colors.brand.deep]}
+              colors={[Theme.colors.cta.from, Theme.colors.cta.to]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
@@ -112,7 +112,7 @@ export function Button({
     >
       <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator color={Theme.colors.brand.primary} />
+          <ActivityIndicator color={Theme.colors.cta.from} />
         ) : (
           <>
             <Text
@@ -143,7 +143,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   shadowContainer: {
-    shadowColor: Theme.colors.brand.primary,
+    shadowColor: Theme.colors.cta.from,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
   },
   outline: {
     borderWidth: 1.5,
-    borderColor: "rgba(79, 70, 229, 0.4)",
-    backgroundColor: Theme.colors.brand.primary + "10",
+    borderColor: "rgba(15, 23, 42, 0.2)",
+    backgroundColor: "rgba(15, 23, 42, 0.04)",
   },
   ghost: {
     backgroundColor: "transparent",
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   textBrand: {
-    color: Theme.colors.brand.light,
+    color: Theme.colors.text.primary,
   },
   icon: {
     // No margin if there's no text to separate from
