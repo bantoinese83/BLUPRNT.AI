@@ -41,6 +41,7 @@ import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
+import { FinanceTabSkeleton } from "../../src/components/TabLoadingSkeletons";
 import { showAppToast } from "../../src/lib/app-toast";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
@@ -268,11 +269,7 @@ export default function FinanceScreen() {
   }
 
   if (loading && !project) {
-    return (
-      <ScreenWrapper style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="white" />
-      </ScreenWrapper>
-    );
+    return <FinanceTabSkeleton />;
   }
 
   if (loadError && !project && projects.length === 0) {

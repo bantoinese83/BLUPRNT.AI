@@ -39,49 +39,61 @@ export default function App() {
       <AuthProvider>
         <ErrorBoundary>
           <BrowserRouter>
+            <a
+              href="#main-content"
+              className="fixed left-4 top-4 z-[100] -translate-y-[130%] rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition-transform focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+            >
+              Skip to main content
+            </a>
             <AuthListener />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route
-                  path="/onboarding/*"
-                  element={
-                    <OnboardingProvider>
-                      <Onboarding />
-                    </OnboardingProvider>
-                  }
-                />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route
-                  path="/auth/reset-password"
-                  element={<ResetPassword />}
-                />
+            <div
+              id="main-content"
+              tabIndex={-1}
+              className="min-h-0 outline-none focus:outline-none"
+            >
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route
+                    path="/onboarding/*"
+                    element={
+                      <OnboardingProvider>
+                        <Onboarding />
+                      </OnboardingProvider>
+                    }
+                  />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route
+                    path="/auth/reset-password"
+                    element={<ResetPassword />}
+                  />
 
-                <Route
-                  path="/dashboard/*"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/project/:token" element={<ProjectView />} />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+                  <Route
+                    path="/dashboard/*"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/project/:token" element={<ProjectView />} />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </div>
             <Toaster position="top-right" expand={false} richColors />
             <CommandPalette />
             <CookieConsent />

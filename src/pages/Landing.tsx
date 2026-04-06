@@ -9,6 +9,7 @@ import {
   LANDING_FAQ,
 } from "@/lib/site-url";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { LandingTrustStrip } from "@/components/landing/LandingTrustStrip";
 import { PLAN_COMPARISON_ROWS } from "@/components/landing/landing-content";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -100,7 +101,7 @@ export default function Landing() {
         </title>
         <meta
           name="description"
-          content="Get professional renovation cost estimates from photos and ZIP, track your remodel budget, and export a property ledger for resale. The financial home for homeowners."
+          content="Regional remodel cost ranges, plan vs documented spend from your invoices and quotes, and a seller-ready property ledger—built for homeowners, not contractor CRMs."
         />
         <meta
           name="keywords"
@@ -156,6 +157,7 @@ export default function Landing() {
             onCreateAccount={() => navigate("/register")}
           />
 
+          <LandingTrustStrip />
           <LandingSocialProof />
           <LandingHowItWorks />
           <LandingComparison />

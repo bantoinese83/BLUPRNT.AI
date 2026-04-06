@@ -39,6 +39,7 @@ import { ConfigurationRequired } from "../../src/components/ConfigurationRequire
 import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 import { showAppToast } from "../../src/lib/app-toast";
+import { PlanVsActualCard } from "../../src/components/PlanVsActualCard";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -350,6 +351,15 @@ export default function DashboardScreen() {
         invoiceTotal={invoiceTotal}
         invoiceCount={invoices.length}
       />
+
+      <View style={{ marginTop: 20 }}>
+        <PlanVsActualCard
+          estimatedMin={project.estimated_min_total}
+          estimatedMax={project.estimated_max_total}
+          invoices={invoices}
+          projectId={project.id}
+        />
+      </View>
 
       <View style={{ gap: 24, marginTop: 24 }}>
         {/* Project Health Index */}

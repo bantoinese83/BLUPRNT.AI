@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Camera, Receipt, FileCheck } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
-import { LANDING_HIGHLIGHT_COLOR } from "./landing-content";
+import { LANDING_HIGHLIGHT_COLOR, LANDING_HOW_INTRO } from "./landing-content";
 
 export function LandingHowItWorks() {
   return (
@@ -17,8 +17,8 @@ export function LandingHowItWorks() {
         >
           How it works
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-          From idea to resale in{" "}
+        <p className="mx-auto mt-3 max-w-lg text-center text-slate-600 leading-relaxed">
+          {LANDING_HOW_INTRO}{" "}
           <Highlighter
             action="underline"
             color="#6366f1"
@@ -27,9 +27,9 @@ export function LandingHowItWorks() {
             iterations={1}
             isView={true}
           >
-            three steps
-          </Highlighter>
-          .
+            Three steps
+          </Highlighter>{" "}
+          from plan to packet.
         </p>
         <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
           <motion.article

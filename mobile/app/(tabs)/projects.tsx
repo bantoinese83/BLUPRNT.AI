@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { Folder, ArrowRight, FolderOpen } from "lucide-react-native";
 import { MotiView } from "moti";
@@ -17,6 +11,7 @@ import { EmptyState } from "../../src/components/ui/EmptyState";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
+import { ProjectsTabSkeleton } from "../../src/components/TabLoadingSkeletons";
 
 export default function ProjectsScreen() {
   const {
@@ -49,11 +44,7 @@ export default function ProjectsScreen() {
   }
 
   if (loading && projects.length === 0) {
-    return (
-      <ScreenWrapper withLogo style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator size="large" color="white" />
-      </ScreenWrapper>
-    );
+    return <ProjectsTabSkeleton />;
   }
 
   return (

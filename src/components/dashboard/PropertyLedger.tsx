@@ -171,11 +171,12 @@ export function PropertyLedger({
         </CardHeader>
         <CardContent className="px-6 sm:px-8 pb-8 space-y-8 relative">
           <p className="text-base text-slate-500 leading-relaxed font-medium max-w-sm">
-            Detailed history of home improvements. Export this{" "}
+            Your estimate, plan vs documented spend, line-item scope, and every
+            uploaded receipt—in one PDF. Export the{" "}
             <span className="text-slate-900 font-bold underline decoration-slate-300">
               Seller Packet
             </span>{" "}
-            to prove value to buyers and agents.
+            so buyers and agents see a coherent story, not a folder of files.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-bold text-slate-400">

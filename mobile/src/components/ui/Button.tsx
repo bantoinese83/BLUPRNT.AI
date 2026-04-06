@@ -21,6 +21,8 @@ interface Props {
   style?: ViewStyle;
   disabled?: boolean;
   textSize?: number;
+  /** Overrides visible title for screen readers when needed */
+  accessibilityLabel?: string;
 }
 
 export function Button({
@@ -32,7 +34,9 @@ export function Button({
   style,
   disabled = false,
   textSize,
+  accessibilityLabel,
 }: Props) {
+  const a11yLabel = accessibilityLabel ?? title;
   const isInteractionDisabled = loading || disabled;
 
   const handlePress = () => {
@@ -55,6 +59,9 @@ export function Button({
           onPress={handlePress}
           disabled={isInteractionDisabled}
           activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={a11yLabel}
+          accessibilityState={{ disabled: isInteractionDisabled }}
         >
           <MotiView
             animate={{
@@ -104,6 +111,9 @@ export function Button({
       onPress={handlePress}
       disabled={isInteractionDisabled}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
+      accessibilityState={{ disabled: isInteractionDisabled }}
       style={[
         styles.button,
         variant === "outline" ? styles.outline : styles.ghost,

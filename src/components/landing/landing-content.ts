@@ -4,10 +4,20 @@ export const LANDING_HERO_COPY = {
   badge: "AI Home Renovation Financial Operating System",
   titlePrefix: "Every upgrade should pay you back.",
   titleHighlight: "BLUPRNT makes sure it does.",
-  body: "Stop flying blind on your remodel. Get professional AI-driven cost estimates, track every invoice against a hardened property ledger, and build a resale-ready record that lenders and buyers trust.",
+  body: "Know what your remodel should cost in your area, see what you actually paid on every invoice and quote, and explain the gap in plain language—with a seller-ready export when you list.",
   primaryCta: "Build Your Asset",
   secondaryCta: "Create Free Account",
 } as const;
+
+/** Trust & distribution — short pills below the hero */
+export const LANDING_TRUST_PILLS = [
+  { label: "Built for homeowners first" },
+  { label: "Export your ledger anytime" },
+  { label: "Clear plan vs documented spend" },
+] as const;
+
+export const LANDING_HOW_INTRO =
+  "Regional estimate, real receipts, one story you can hand to an agent or buyer.";
 
 export const LANDING_STORY_COPY = {
   heading: "Property Intelligence for the Modern Owner.",

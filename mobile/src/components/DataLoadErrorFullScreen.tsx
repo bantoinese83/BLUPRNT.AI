@@ -11,13 +11,21 @@ type Props = {
 
 export function DataLoadErrorFullScreen({ message, onRetry }: Props) {
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+    >
       <View style={styles.iconWrap}>
         <AlertTriangle size={36} color={Theme.colors.status.warning} />
       </View>
       <Text style={styles.title}>Something went wrong</Text>
       <Text style={styles.body}>{message}</Text>
-      <Button title="Try again" onPress={onRetry} />
+      <Button
+        title="Try again"
+        onPress={onRetry}
+        accessibilityLabel="Try loading again"
+      />
     </View>
   );
 }

@@ -36,6 +36,11 @@ export const LANDING_FAQ = [
     answer:
       "Homeowners who want clarity on remodel costs, organized records for resale, and a single place to connect estimates, actuals, and improvement history—not generic contractor software built for job sites.",
   },
+  {
+    question: "How does “plan vs actual” work?",
+    answer:
+      "Your plan is the regional lifecycle estimate BLUPRNT builds from your project and location. “Actual” is the total from invoices and quotes you upload (capital improvements). We compare the two in the app and in your seller packet so you can explain the gap—whether you are still in progress, under-logged, or over scope.",
+  },
 ] as const;
 
 export function buildLandingJsonLd(siteUrl: string) {

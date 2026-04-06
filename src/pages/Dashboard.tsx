@@ -59,6 +59,7 @@ import { AwarenessProvider } from "@/contexts/AwarenessProvider";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
+import { PlanVsActualCard } from "@/components/dashboard/PlanVsActualCard";
 
 export default function Dashboard() {
   const {
@@ -83,45 +84,55 @@ export default function Dashboard() {
 
   if (!isSupabaseConfigured()) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50">
-        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-amber-100 bg-amber-50 shadow-sm">
-            <Settings2 className="h-10 w-10 text-amber-500" aria-hidden />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">
-              Can&apos;t connect right now
-            </h2>
-            <p className="text-sm font-medium leading-relaxed text-slate-500">
-              We couldn&apos;t reach BLUPRNT. Check your connection, try again,
-              or contact support if this keeps happening.
-            </p>
-          </div>
-          {import.meta.env.DEV && (
-            <div className="w-full space-y-2 rounded-2xl border border-slate-200 bg-slate-100 p-4 text-left font-mono text-[10px]">
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-                Developer
-              </p>
-              <p className="truncate text-slate-600">VITE_SUPABASE_URL</p>
-              <p className="truncate text-slate-600">VITE_SUPABASE_ANON_KEY</p>
+      <>
+        <Helmet>
+          <title>Can&apos;t connect — BLUPRNT.AI</title>
+        </Helmet>
+        <div className="flex min-h-screen flex-col bg-slate-50">
+          <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-amber-100 bg-amber-50 shadow-sm">
+              <Settings2 className="h-10 w-10 text-amber-500" aria-hidden />
             </div>
-          )}
-          <Button
-            variant="outline"
-            className="rounded-xl border-slate-200"
-            onClick={() => window.location.reload()}
-          >
-            Try again
-          </Button>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black tracking-tight text-slate-900">
+                Can&apos;t connect right now
+              </h2>
+              <p className="text-sm font-medium leading-relaxed text-slate-500">
+                We couldn&apos;t reach BLUPRNT. Check your connection, try
+                again, or contact support if this keeps happening.
+              </p>
+            </div>
+            {import.meta.env.DEV && (
+              <div className="w-full space-y-2 rounded-2xl border border-slate-200 bg-slate-100 p-4 text-left font-mono text-[10px]">
+                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                  Developer
+                </p>
+                <p className="truncate text-slate-600">VITE_SUPABASE_URL</p>
+                <p className="truncate text-slate-600">
+                  VITE_SUPABASE_ANON_KEY
+                </p>
+              </div>
+            )}
+            <Button
+              variant="outline"
+              className="rounded-xl border-slate-200"
+              onClick={() => window.location.reload()}
+            >
+              Try again
+            </Button>
+          </div>
+          <AppSlimFooter className="bg-white/60" />
         </div>
-        <AppSlimFooter className="bg-white/60" />
-      </div>
+      </>
     );
   }
 
   if (loading && !project) {
     return (
       <>
+        <Helmet>
+          <title>Loading dashboard — BLUPRNT.AI</title>
+        </Helmet>
         <DashboardSkeleton />
         <AppSlimFooter className="border-slate-200/70 bg-white/50" />
       </>
@@ -130,64 +141,74 @@ export default function Dashboard() {
 
   if (loadError && !project && projects.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50">
-        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-amber-100 bg-amber-50">
-            <Settings2 className="h-10 w-10 text-amber-600" aria-hidden />
+      <>
+        <Helmet>
+          <title>Couldn&apos;t load dashboard — BLUPRNT.AI</title>
+        </Helmet>
+        <div className="flex min-h-screen flex-col bg-slate-50">
+          <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-amber-100 bg-amber-50">
+              <Settings2 className="h-10 w-10 text-amber-600" aria-hidden />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">
+                Something went wrong
+              </h2>
+              <p className="text-sm leading-relaxed text-slate-600">
+                {loadError}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                type="button"
+                className="rounded-xl"
+                onClick={() => {
+                  void load();
+                }}
+              >
+                Try again
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl border-slate-200"
+                onClick={() => window.location.assign("/")}
+              >
+                Back to home
+              </Button>
+            </div>
           </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">
-              Something went wrong
-            </h2>
-            <p className="text-sm leading-relaxed text-slate-600">
-              {loadError}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button
-              type="button"
-              className="rounded-xl"
-              onClick={() => {
-                void load();
-              }}
-            >
-              Try again
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl border-slate-200"
-              onClick={() => window.location.assign("/")}
-            >
-              Back to home
-            </Button>
-          </div>
+          <AppSlimFooter className="bg-white/60" />
         </div>
-        <AppSlimFooter className="bg-white/60" />
-      </div>
+      </>
     );
   }
 
   if (!project) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50">
-        <div className="flex flex-1 flex-col items-center justify-center p-6">
-          <EmptyState
-            variant="projects"
-            currentStep={1}
-            title="No projects tracked yet"
-            description="Create your first project to start tracking benchmarks and managing your budget like a pro."
-            action={{
-              label: "Create Your First Project",
-              onClick: () => {
-                window.location.href = "/onboarding";
-              },
-            }}
-            className="w-full max-w-md"
-          />
+      <>
+        <Helmet>
+          <title>Get started — BLUPRNT.AI</title>
+        </Helmet>
+        <div className="flex min-h-screen flex-col bg-slate-50">
+          <div className="flex flex-1 flex-col items-center justify-center p-6">
+            <EmptyState
+              variant="projects"
+              currentStep={1}
+              title="No projects tracked yet"
+              description="Create your first project to start tracking benchmarks and managing your budget like a pro."
+              action={{
+                label: "Create Your First Project",
+                onClick: () => {
+                  window.location.href = "/onboarding";
+                },
+              }}
+              className="w-full max-w-md"
+            />
+          </div>
+          <AppSlimFooter className="bg-white/60" />
         </div>
-        <AppSlimFooter className="bg-white/60" />
-      </div>
+      </>
     );
   }
 
@@ -610,6 +631,11 @@ function DashboardContent({
                         setShowUpgrade(true);
                       }}
                     />
+                    <PlanVsActualCard
+                      estimatedMin={project.estimated_min_total}
+                      estimatedMax={project.estimated_max_total}
+                      invoices={invoices}
+                    />
                     <Button
                       variant="outline"
                       className="w-full gap-2 rounded-xl border-slate-200 hover:bg-slate-50"
@@ -640,6 +666,11 @@ function DashboardContent({
                 path="execute"
                 element={
                   <DashboardSubPage side={health}>
+                    <PlanVsActualCard
+                      estimatedMin={project.estimated_min_total}
+                      estimatedMax={project.estimated_max_total}
+                      invoices={invoices}
+                    />
                     {invoicesComp}
                   </DashboardSubPage>
                 }
