@@ -27,7 +27,8 @@ import { BlurView } from "expo-blur";
 import { generateSellerPacketPDF } from "../../src/lib/pdf-export";
 import { generateProjectShareLink } from "../../src/lib/share-project";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
-import { supabase } from "../../src/lib/supabase";
+import { supabase, isSupabaseConfigured } from "../../src/lib/supabase";
+import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { ProjectHealth } from "../../src/components/ProjectHealth";
 import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
@@ -79,7 +80,7 @@ function MaterialDetailList({
   );
 }
 
-export default function ProjectDetailScreen() {
+function ProjectDetailScreenInner() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<ProjectRow | null>(null);
@@ -456,6 +457,17 @@ export default function ProjectDetailScreen() {
       />
     </ScreenWrapper>
   );
+}
+
+export default function ProjectDetailScreen() {
+  if (!isSupabaseConfigured()) {
+    return (
+      <ScreenWrapper>
+        <ConfigurationRequired onRetry={() => router.replace("/(tabs)")} />
+      </ScreenWrapper>
+    );
+  }
+  return <ProjectDetailScreenInner />;
 }
 
 const styles = StyleSheet.create({

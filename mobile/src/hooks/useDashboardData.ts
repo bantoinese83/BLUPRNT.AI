@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase } from "../lib/supabase";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { friendlyDashboardLoadError } from "../lib/dashboard-load-error";
 import type {
   ProjectRow,
   ScopeRow,
@@ -11,6 +12,9 @@ import type {
 
 export function useDashboardData() {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [configurationMissing, setConfigurationMissing] = useState(false);
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
@@ -22,49 +26,73 @@ export function useDashboardData() {
   const [hasProjectPass, setHasProjectPass] = useState(false);
   const lastFetchedProjectId = useRef<string | null>(null);
 
+  const clearLoadError = useCallback(() => setLoadError(null), []);
+
   const load = useCallback(async () => {
+    setLoadError(null);
+
+    if (!isSupabaseConfigured()) {
+      setConfigurationMissing(true);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+    setConfigurationMissing(false);
+
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
     if (!session) {
       setLoading(false);
+      setRefreshing(false);
       return;
     }
 
     const cacheKey = `bluprnt_dash_${session.user.id}`;
-    const cachedData = await AsyncStorage.getItem(cacheKey);
-    if (cachedData) {
+    const cachedRaw = await AsyncStorage.getItem(cacheKey);
+    let hadCache = false;
+    if (cachedRaw) {
       try {
-        const c = JSON.parse(cachedData);
-        if (c.projects) setProjects(c.projects);
-        if (c.project) setProject(c.project);
-        if (c.scopeItems) setScopeItems(c.scopeItems);
-        if (c.invoices) setInvoices(c.invoices);
-        if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
-        if (c.subscription !== undefined) setSubscription(c.subscription);
-        if (c.hasProjectPass !== undefined) setHasProjectPass(c.hasProjectPass);
+        const c = JSON.parse(cachedRaw) as Record<string, unknown>;
+        if (c && typeof c === "object" && Array.isArray(c.projects)) {
+          hadCache = true;
+          setProjects(c.projects as ProjectRow[]);
+          if (c.project) setProject(c.project as ProjectRow);
+          if (c.scopeItems) setScopeItems(c.scopeItems as ScopeRow[]);
+          if (c.invoices) setInvoices(c.invoices as InvoiceRow[]);
+          if (c.isArchitect !== undefined)
+            setIsArchitect(Boolean(c.isArchitect));
+          if (c.subscription !== undefined)
+            setSubscription(c.subscription as UserSubscriptionRow | null);
+          if (c.hasProjectPass !== undefined)
+            setHasProjectPass(Boolean(c.hasProjectPass));
+          setLoading(false);
+          setRefreshing(true);
+        }
       } catch {
         /* ignore */
       }
     }
 
-    // P3B: Prefer DB-synced active project (cross-platform) over local storage.
-    // This ensures web→mobile context is preserved.
+    if (!hadCache) {
+      setLoading(true);
+      setRefreshing(false);
+    }
+
     let projectId = await AsyncStorage.getItem("bluprnt_project_id");
 
-    // Try to fetch the DB-stored preference first (cross-platform sync).
-    const { data: prefData } = await supabase
+    const prefRes = await supabase
       .from("user_preferences")
       .select("last_active_project_id")
       .eq("user_id", session.user.id)
       .maybeSingle();
 
-    if (prefData?.last_active_project_id) {
-      projectId = prefData.last_active_project_id;
+    if (!prefRes.error && prefRes.data?.last_active_project_id) {
+      projectId = prefRes.data.last_active_project_id;
     }
 
-    const { data: allProjects } = await supabase
+    const projRes = await supabase
       .from("projects")
       .select(
         "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id)",
@@ -72,7 +100,14 @@ export function useDashboardData() {
       .eq("properties.owner_user_id", session.user.id)
       .order("created_at", { ascending: false });
 
-    const rows = (allProjects ?? []) as ProjectRow[];
+    if (projRes.error) {
+      setLoadError(friendlyDashboardLoadError(projRes.error));
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    const rows = (projRes.data ?? []) as ProjectRow[];
     setProjects(rows);
 
     if (rows.length > 0) {
@@ -99,7 +134,7 @@ export function useDashboardData() {
         supabase
           .from("scope_items")
           .select(
-            "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score",
+            "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata",
           )
           .eq("project_id", projectId)
           .order("created_at", { ascending: true }),
@@ -121,6 +156,14 @@ export function useDashboardData() {
           .eq("project_id", projectId)
           .maybeSingle(),
       ]);
+
+      const detailErr =
+        scopesRes.error || invRes.error || subRes.error || subRes2.error;
+      if (detailErr) {
+        setLoadError(
+          "Some details couldn’t load. Your summary may be incomplete — pull to refresh.",
+        );
+      }
 
       const newScopes = (scopesRes.data ?? []) as ScopeRow[];
       const newInvoices = (invRes.data ?? []) as InvoiceRow[];
@@ -153,24 +196,21 @@ export function useDashboardData() {
     }
 
     lastFetchedProjectId.current = projectId;
+    setRefreshing(false);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    // Create a version of load that respects the closure
     const runLoad = async () => {
       await load();
     };
-
     runLoad();
   }, [load]);
 
   const handleProjectSelect = useCallback(
     async (id: string) => {
-      // Write to local storage for fast offline access.
       await AsyncStorage.setItem("bluprnt_project_id", id);
 
-      // Write to DB for cross-platform sync (web will pick this up on next load).
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -187,7 +227,6 @@ export function useDashboardData() {
     [load],
   );
 
-  // Delegates to the authoritative DB function — prevents logic drift vs. web.
   const recalcProjectTotals = async (pid: string) => {
     await supabase.rpc("recalc_project_totals", { p_id: pid });
   };
@@ -220,11 +259,15 @@ export function useDashboardData() {
     if (err) throw err;
 
     await recalcProjectTotals(pid);
-    load(); // Refresh local data
+    load();
   };
 
   return {
     loading,
+    refreshing,
+    loadError,
+    clearLoadError,
+    configurationMissing,
     projects,
     project,
     scopeItems,

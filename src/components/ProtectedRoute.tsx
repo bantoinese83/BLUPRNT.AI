@@ -42,26 +42,27 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isSupabaseConfigured()) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center gap-4 max-w-md mx-auto">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 bg-slate-50 p-6 text-center">
         <div className="rounded-2xl bg-amber-100 p-4 text-amber-800">
-          <Settings2 className="w-10 h-10 mx-auto" aria-hidden />
+          <Settings2 className="mx-auto h-10 w-10" aria-hidden />
         </div>
         <h2 className="text-lg font-semibold text-slate-900">
-          BLUPRNT isn&apos;t connected yet
+          Can&apos;t connect right now
         </h2>
-        <p className="text-slate-600 text-sm leading-relaxed">
-          This copy of the app needs your project keys to load. Check the README
-          in the project folder for setup steps.
+        <p className="text-sm leading-relaxed text-slate-600">
+          We couldn&apos;t reach BLUPRNT. Try again later or go back home.
         </p>
-        <p className="text-xs text-slate-500">
-          Add{" "}
-          <code className="bg-slate-200 px-1 rounded">VITE_SUPABASE_URL</code>{" "}
-          and{" "}
-          <code className="bg-slate-200 px-1 rounded">
-            VITE_SUPABASE_ANON_KEY
-          </code>{" "}
-          in <code className="bg-slate-200 px-1 rounded">.env</code>.
-        </p>
+        {import.meta.env.DEV && (
+          <p className="text-left text-xs text-slate-500">
+            Local setup: add{" "}
+            <code className="rounded bg-slate-200 px-1">VITE_SUPABASE_URL</code>{" "}
+            and{" "}
+            <code className="rounded bg-slate-200 px-1">
+              VITE_SUPABASE_ANON_KEY
+            </code>{" "}
+            in <code className="rounded bg-slate-200 px-1">.env</code>.
+          </p>
+        )}
         <Button
           variant="outline"
           className="mt-2"

@@ -117,6 +117,44 @@ describe("useDashboardData", () => {
     );
   });
 
+  it("sets loadError when the projects query fails", async () => {
+    (supabase.auth.getSession as any).mockResolvedValue({
+      data: { session: { user: { id: mockUserId } } },
+    });
+
+    (supabase.from as any).mockImplementation((table: string) => {
+      if (table === "user_preferences") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }
+      if (table === "projects") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: null,
+            error: { message: "upstream failure", code: "PGRST000" },
+          }),
+        };
+      }
+      return mockSupabaseQuery([]);
+    });
+
+    const { result } = renderHook(() => useDashboardData());
+
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.loadError).toBeTruthy();
+        expect(result.current.projects).toEqual([]);
+      },
+      { timeout: 3000 },
+    );
+  });
+
   it("fetches related data when a project exists", async () => {
     const mockProjectId = "proj-123";
     const mockProjects = [{ id: mockProjectId, name: "Project 1" }];

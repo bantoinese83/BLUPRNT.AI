@@ -131,7 +131,7 @@ describe("ProtectedRoute", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /isn't connected yet/i }),
+        screen.getByRole("heading", { name: /connect right now/i }),
       ).toBeInTheDocument();
     });
   });

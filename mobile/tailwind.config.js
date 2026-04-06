@@ -10,6 +10,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Grocery-style OLED tokens (optional; use with dark mode surfaces)
+        element: "#18181A",
+        selected: "#2E3135",
         primary: "#0f172a",
         "primary-hover": "#020617",
         "primary-muted": "#f8fafc",

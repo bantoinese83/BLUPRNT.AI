@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   StyleSheet,
   View,
@@ -9,9 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import NetInfo from "@react-native-community/netinfo";
-import { WifiOff } from "lucide-react-native";
-import { MotiView, AnimatePresence } from "moti";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GradientBackground } from "./ui/GradientBackground";
 import { StatusBar } from "expo-status-bar";
@@ -19,7 +16,6 @@ import { Logo } from "./ui/Logo";
 import { Theme } from "../constants/Theme";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
 
-// Total vertical space consumed by the floating tab bar above the safe-area bottom
 const TAB_BAR_CLEARANCE = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 8;
 
 interface Props {
@@ -30,10 +26,7 @@ interface Props {
   refreshing?: boolean;
   edges?: Array<"top" | "right" | "bottom" | "left">;
   withLogo?: boolean;
-  /** Pass true (default) when the screen sits inside the main tab navigator
-   *  so scroll content gets bottom padding equal to the floating tab bar height. */
   withTabBar?: boolean;
-  /** Enables KeyboardAvoidingView for the entire screen */
   withKeyboard?: boolean;
 }
 
@@ -48,25 +41,6 @@ export function ScreenWrapper({
   withTabBar = true,
   withKeyboard = false,
 }: Props) {
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      const offline = state.isConnected === false;
-
-      if (offline) {
-        setShowBanner(true);
-      } else {
-        // Delay hiding the banner to prevent flickering on rapid transitions
-        const timer = setTimeout(() => {
-          setShowBanner(false);
-        }, 200);
-        return () => clearTimeout(timer);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   const content = withScroll ? (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -107,20 +81,6 @@ export function ScreenWrapper({
     <GradientBackground>
       <StatusBar style="dark" />
       <SafeAreaView style={styles.container} edges={edges}>
-        <AnimatePresence>
-          {showBanner && (
-            <MotiView
-              from={{ translateY: -50, opacity: 0 }}
-              animate={{ translateY: 0, opacity: 1 }}
-              exit={{ translateY: -50, opacity: 0 }}
-              style={styles.offlineBanner}
-            >
-              <WifiOff size={16} color="white" />
-              <Text style={styles.offlineText}>No internet connection</Text>
-            </MotiView>
-          )}
-        </AnimatePresence>
-
         {withLogo && (
           <View style={styles.logoHeader}>
             <Logo size={32} />
@@ -156,18 +116,5 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  offlineBanner: {
-    backgroundColor: Theme.colors.brand.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    gap: 8,
-  },
-  offlineText: {
-    color: "white",
-    fontSize: 12,
-    fontFamily: Theme.typography.family.bold,
   },
 });

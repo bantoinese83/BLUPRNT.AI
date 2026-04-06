@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { router } from "expo-router";
 import { Folder, ArrowRight, FolderOpen } from "lucide-react-native";
 import { MotiView } from "moti";
@@ -8,12 +14,59 @@ import { GlassCard } from "../../src/components/ui/GlassCard";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { EmptyState } from "../../src/components/ui/EmptyState";
+import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
+import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
+import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 
 export default function ProjectsScreen() {
-  const { projects, loading, load } = useDashboardData();
+  const {
+    projects,
+    loading,
+    refreshing,
+    load,
+    loadError,
+    clearLoadError,
+    configurationMissing,
+  } = useDashboardData();
+
+  if (configurationMissing) {
+    return (
+      <ScreenWrapper withLogo style={{ flex: 1, justifyContent: "center" }}>
+        <ConfigurationRequired onRetry={() => void load()} />
+      </ScreenWrapper>
+    );
+  }
+
+  if (loadError && !loading && projects.length === 0) {
+    return (
+      <ScreenWrapper withLogo style={{ flex: 1, justifyContent: "center" }}>
+        <DataLoadErrorFullScreen
+          message={loadError}
+          onRetry={() => void load()}
+        />
+      </ScreenWrapper>
+    );
+  }
+
+  if (loading && projects.length === 0) {
+    return (
+      <ScreenWrapper withLogo style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="white" />
+      </ScreenWrapper>
+    );
+  }
 
   return (
-    <ScreenWrapper withLogo withScroll onRefresh={load} refreshing={loading}>
+    <ScreenWrapper withLogo withScroll onRefresh={load} refreshing={refreshing}>
+      {loadError && projects.length > 0 ? (
+        <View style={{ paddingHorizontal: 24, paddingBottom: 8 }}>
+          <DashboardLoadErrorBanner
+            message={loadError}
+            onRetry={() => void load()}
+            onDismiss={clearLoadError}
+          />
+        </View>
+      ) : null}
       <View style={styles.header}>
         <Text style={styles.title}>Your Projects</Text>
         <Text style={styles.subtitle}>All home renovation estimates</Text>

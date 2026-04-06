@@ -35,11 +35,19 @@ import { DashboardWelcomeBanner } from "../../src/components/DashboardWelcomeBan
 import { DashboardSkeleton } from "../../src/components/DashboardSkeleton";
 import { Confetti } from "../../src/components/ui/Confetti";
 import { supabase } from "../../src/lib/supabase";
+import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
+import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
+import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
+import { showAppToast } from "../../src/lib/app-toast";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
   const {
     loading,
+    refreshing,
+    loadError,
+    clearLoadError,
+    configurationMissing,
     projects,
     project,
     invoices,
@@ -216,10 +224,7 @@ export default function DashboardScreen() {
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        "Document Processed",
-        "Your document was uploaded and AI-analysed. Your dashboard has been updated.",
-      );
+      showAppToast("Document added — your dashboard is updated.");
       load();
     } catch (_) {
       Alert.alert("Error", "Failed to process document. Please try again.");
@@ -228,8 +233,27 @@ export default function DashboardScreen() {
     }
   };
 
+  if (configurationMissing) {
+    return (
+      <ScreenWrapper withLogo style={styles.centerContainer}>
+        <ConfigurationRequired onRetry={() => void load()} />
+      </ScreenWrapper>
+    );
+  }
+
   if (loading && !project) {
     return <DashboardSkeleton />;
+  }
+
+  if (loadError && !project && projects.length === 0) {
+    return (
+      <ScreenWrapper withLogo style={styles.centerContainer}>
+        <DataLoadErrorFullScreen
+          message={loadError}
+          onRetry={() => void load()}
+        />
+      </ScreenWrapper>
+    );
   }
 
   if (!project) {
@@ -237,7 +261,7 @@ export default function DashboardScreen() {
       <ScreenWrapper
         withLogo
         onRefresh={load}
-        refreshing={loading}
+        refreshing={refreshing}
         style={styles.centerContainer}
       >
         <EmptyState
@@ -257,9 +281,16 @@ export default function DashboardScreen() {
       withLogo
       withScroll
       onRefresh={load}
-      refreshing={loading}
+      refreshing={refreshing}
       style={styles.scrollContent}
     >
+      {loadError ? (
+        <DashboardLoadErrorBanner
+          message={loadError}
+          onRetry={() => void load()}
+          onDismiss={clearLoadError}
+        />
+      ) : null}
       {/* Personalized Greeting */}
       <MotiView
         from={{ opacity: 0, translateY: -20 }}

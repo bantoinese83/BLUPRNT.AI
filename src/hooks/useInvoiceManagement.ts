@@ -179,8 +179,9 @@ export function useInvoiceManagement({
         `${documentType === "invoice" ? "Invoice" : "Document"} uploaded successfully`,
       );
     } catch {
-      setError(friendlyUploadError(null));
-      toast.error("Upload failed");
+      const msg = friendlyUploadError(null);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";

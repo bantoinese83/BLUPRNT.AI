@@ -17,14 +17,31 @@ const ExpoSecureStoreAdapter = {
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
 
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    "BLUPRNT: Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in env.",
+  );
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: ExpoSecureStoreAdapter,
+    flowType: "pkce",
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
   },
 });
+
+export function isSupabaseConfigured(): boolean {
+  return Boolean(supabaseUrl && supabaseAnonKey);
+}
+
+function devWarn(...args: unknown[]) {
+  if (__DEV__) {
+    console.warn(...args);
+  }
+}
 
 /**
  * Robust wrapper for Edge Functions that ensures a fresh JWT is sent.
@@ -79,7 +96,7 @@ export async function invokeFunction<T = unknown>(
           : 0;
       if (status >= 500 && i < retries) {
         const delay = Math.pow(2, i) * 1000;
-        console.warn(
+        devWarn(
           `[invokeFunction] ${name} failed with ${status}. Retrying in ${delay}ms...`,
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -91,7 +108,7 @@ export async function invokeFunction<T = unknown>(
       lastResult = { data: null, error: err as Error };
       if (i < retries) {
         const delay = Math.pow(2, i) * 1000;
-        console.warn(
+        devWarn(
           `[invokeFunction] ${name} threw error. Retrying in ${delay}ms...`,
           err,
         );

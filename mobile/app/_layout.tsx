@@ -20,6 +20,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "../src/components/useColorScheme";
 import { AuthProvider } from "../src/contexts/AuthProvider";
 import { useAuth } from "../src/contexts/auth-context";
+import { AppToastHost } from "../src/components/AppToastHost";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
@@ -79,10 +80,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <AuthProvider>
           <RootLayoutNav />
+          <AppToastHost />
           {isOffline && (
             <View style={styles.offlineBanner}>
               <WifiOff size={16} color="white" />
-              <Text style={styles.offlineText}>Awaiting Connection...</Text>
+              <Text style={styles.offlineText}>No internet connection</Text>
             </View>
           )}
         </AuthProvider>

@@ -4,9 +4,31 @@ import { AIAssistant } from "../../src/components/AIAssistant";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Theme } from "../../src/constants/Theme";
+import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
+import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
 
 export default function AIScreen() {
-  const { project, loading } = useDashboardData();
+  const { project, loading, projects, load, loadError, configurationMissing } =
+    useDashboardData();
+
+  if (configurationMissing) {
+    return (
+      <ScreenWrapper withLogo>
+        <ConfigurationRequired onRetry={() => void load()} />
+      </ScreenWrapper>
+    );
+  }
+
+  if (loadError && !project && projects.length === 0 && !loading) {
+    return (
+      <ScreenWrapper withLogo>
+        <DataLoadErrorFullScreen
+          message={loadError}
+          onRetry={() => void load()}
+        />
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper withLogo>
@@ -26,7 +48,9 @@ export default function AIScreen() {
           <Text style={styles.emptyText}>
             {loading
               ? "Loading project..."
-              : "Create a project to start chatting with your AI assistant."}
+              : loadError
+                ? loadError
+                : "Create a project to start chatting with your AI assistant."}
           </Text>
         </View>
       )}

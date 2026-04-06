@@ -43,6 +43,7 @@ import type {
 
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { DashboardDataStatus } from "@/components/dashboard/DashboardDataStatus";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -62,6 +63,9 @@ import { AIAssistant } from "@/components/dashboard/AIAssistant";
 export default function Dashboard() {
   const {
     loading,
+    refreshing,
+    loadError,
+    clearLoadError,
     projects,
     project,
     scopeItems,
@@ -77,7 +81,45 @@ export default function Dashboard() {
     setInvoices,
   } = useDashboardData();
 
-  if (loading) {
+  if (!isSupabaseConfigured()) {
+    return (
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-amber-100 bg-amber-50 shadow-sm">
+            <Settings2 className="h-10 w-10 text-amber-500" aria-hidden />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900">
+              Can&apos;t connect right now
+            </h2>
+            <p className="text-sm font-medium leading-relaxed text-slate-500">
+              We couldn&apos;t reach BLUPRNT. Check your connection, try again,
+              or contact support if this keeps happening.
+            </p>
+          </div>
+          {import.meta.env.DEV && (
+            <div className="w-full space-y-2 rounded-2xl border border-slate-200 bg-slate-100 p-4 text-left font-mono text-[10px]">
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                Developer
+              </p>
+              <p className="truncate text-slate-600">VITE_SUPABASE_URL</p>
+              <p className="truncate text-slate-600">VITE_SUPABASE_ANON_KEY</p>
+            </div>
+          )}
+          <Button
+            variant="outline"
+            className="rounded-xl border-slate-200"
+            onClick={() => window.location.reload()}
+          >
+            Try again
+          </Button>
+        </div>
+        <AppSlimFooter className="bg-white/60" />
+      </div>
+    );
+  }
+
+  if (loading && !project) {
     return (
       <>
         <DashboardSkeleton />
@@ -86,41 +128,40 @@ export default function Dashboard() {
     );
   }
 
-  if (!isSupabaseConfigured()) {
+  if (loadError && !project && projects.length === 0) {
     return (
       <div className="flex min-h-screen flex-col bg-slate-50">
         <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm animate-pulse">
-            <Settings2 className="h-10 w-10 text-amber-500" aria-hidden />
+          <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-amber-100 bg-amber-50">
+            <Settings2 className="h-10 w-10 text-amber-600" aria-hidden />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">
-              Connection Required
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              Something went wrong
             </h2>
-            <p className="text-sm leading-relaxed text-slate-500 font-medium">
-              We&apos;re having trouble connecting to the database. This usually
-              means the environment keys are missing or the connection was
-              interrupted.
+            <p className="text-sm leading-relaxed text-slate-600">
+              {loadError}
             </p>
           </div>
-          <div className="w-full p-4 rounded-2xl bg-slate-100 border border-slate-200 text-left space-y-2 font-mono text-[10px]">
-            <p className="text-slate-400 uppercase tracking-widest font-bold mb-2">
-              Developer Note:
-            </p>
-            <p className="text-slate-600 truncate">
-              VITE_SUPABASE_URL: missing
-            </p>
-            <p className="text-slate-600 truncate">
-              VITE_SUPABASE_ANON_KEY: missing
-            </p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              type="button"
+              className="rounded-xl"
+              onClick={() => {
+                void load();
+              }}
+            >
+              Try again
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl border-slate-200"
+              onClick={() => window.location.assign("/")}
+            >
+              Back to home
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            className="rounded-xl border-slate-200"
-            onClick={() => window.location.reload()}
-          >
-            Retry Connection
-          </Button>
         </div>
         <AppSlimFooter className="bg-white/60" />
       </div>
@@ -165,6 +206,9 @@ export default function Dashboard() {
         subscription={subscription}
         hasProjectPass={hasProjectPass}
         load={load}
+        loadError={loadError}
+        refreshing={refreshing}
+        clearLoadError={clearLoadError}
         handleProjectSelect={handleProjectSelect}
         setProjects={setProjects}
         setProject={setProject}
@@ -184,6 +228,9 @@ interface DashboardContentProps {
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
   load: () => Promise<void>;
+  loadError: string | null;
+  refreshing: boolean;
+  clearLoadError: () => void;
   handleProjectSelect: (id: string) => void;
   setProjects: (projects: ProjectRow[]) => void;
   setProject: (project: ProjectRow | null) => void;
@@ -200,6 +247,9 @@ function DashboardContent({
   subscription,
   hasProjectPass,
   load,
+  loadError,
+  refreshing,
+  clearLoadError,
   handleProjectSelect,
   setProjects,
   setProject,
@@ -432,6 +482,15 @@ function DashboardContent({
         }}
         onExportPDF={handleExportPDF}
         onOpenInsights={() => setIsSidebarOpen(true)}
+      />
+
+      <DashboardDataStatus
+        loadError={loadError}
+        refreshing={refreshing}
+        onRetry={() => {
+          void load();
+        }}
+        onDismissError={clearLoadError}
       />
 
       <motion.main

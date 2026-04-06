@@ -22,6 +22,12 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(url && anonKey);
 }
 
+function devWarn(...args: unknown[]) {
+  if (import.meta.env.DEV) {
+    console.warn(...args);
+  }
+}
+
 /**
  * Robust wrapper for Edge Functions that ensures a fresh JWT is sent.
  * Use this instead of supabase.functions.invoke() to avoid 'Invalid JWT' errors.
@@ -75,7 +81,7 @@ export async function invokeFunction<T = unknown>(
           : 0;
       if (status >= 500 && i < retries) {
         const delay = Math.pow(2, i) * 1000;
-        console.warn(
+        devWarn(
           `[invokeFunction] ${name} failed with ${status}. Retrying in ${delay}ms...`,
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -87,7 +93,7 @@ export async function invokeFunction<T = unknown>(
       lastResult = { data: null, error: err as Error };
       if (i < retries) {
         const delay = Math.pow(2, i) * 1000;
-        console.warn(
+        devWarn(
           `[invokeFunction] ${name} threw error. Retrying in ${delay}ms...`,
           err,
         );

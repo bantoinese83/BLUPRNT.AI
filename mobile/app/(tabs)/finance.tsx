@@ -38,12 +38,20 @@ import { useAwareness } from "../../src/contexts/AwarenessContext";
 import { Theme } from "../../src/constants/Theme";
 import { SegmentedControl } from "../../src/components/ui/SegmentedControl";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
+import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
+import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
+import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
+import { showAppToast } from "../../src/lib/app-toast";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
 export default function FinanceScreen() {
   const {
     loading,
+    refreshing,
+    loadError,
+    clearLoadError,
+    configurationMissing,
     projects,
     project,
     invoices,
@@ -242,10 +250,7 @@ export default function FinanceScreen() {
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        "Document Added",
-        "Your document has been uploaded and AI-analysed. Your ledger has been updated.",
-      );
+      showAppToast("Document added — your ledger is updated.");
       load();
     } catch (_) {
       Alert.alert("Error", "Failed to process document. Please try again.");
@@ -254,7 +259,15 @@ export default function FinanceScreen() {
     }
   };
 
-  if (loading) {
+  if (configurationMissing) {
+    return (
+      <ScreenWrapper style={styles.centerContainer}>
+        <ConfigurationRequired onRetry={() => void load()} />
+      </ScreenWrapper>
+    );
+  }
+
+  if (loading && !project) {
     return (
       <ScreenWrapper style={styles.centerContainer}>
         <ActivityIndicator size="large" color="white" />
@@ -262,9 +275,25 @@ export default function FinanceScreen() {
     );
   }
 
-  if (!project) {
+  if (loadError && !project && projects.length === 0) {
     return (
       <ScreenWrapper style={styles.centerContainer}>
+        <DataLoadErrorFullScreen
+          message={loadError}
+          onRetry={() => void load()}
+        />
+      </ScreenWrapper>
+    );
+  }
+
+  if (!project) {
+    return (
+      <ScreenWrapper
+        style={styles.centerContainer}
+        withScroll
+        onRefresh={load}
+        refreshing={refreshing}
+      >
         <EmptyState
           icon={BookOpen}
           title="No Project Active"
@@ -278,6 +307,15 @@ export default function FinanceScreen() {
 
   const renderHeader = () => (
     <>
+      {loadError ? (
+        <View style={{ paddingHorizontal: 24, paddingTop: 8 }}>
+          <DashboardLoadErrorBanner
+            message={loadError}
+            onRetry={() => void load()}
+            onDismiss={clearLoadError}
+          />
+        </View>
+      ) : null}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.pageTitle}>Property Ledger</Text>
@@ -376,7 +414,7 @@ export default function FinanceScreen() {
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
-        refreshing={loading}
+        refreshing={refreshing}
         onRefresh={load}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={renderHeader}

@@ -32,13 +32,15 @@ import { router } from "expo-router";
 import { MotiView } from "moti";
 import { Theme } from "../../src/constants/Theme";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
+import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
+import { showAppToast } from "../../src/lib/app-toast";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
 
-  const { isArchitect } = useDashboardData();
+  const { isArchitect, configurationMissing, load } = useDashboardData();
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
 
   const [displayName, setDisplayName] = useState(
@@ -65,7 +67,7 @@ export default function ProfileScreen() {
     if (error) {
       Alert.alert("Error", error.message);
     } else {
-      Alert.alert("Success", "Profile updated successfully.");
+      showAppToast("Profile updated.");
     }
   };
 
@@ -77,7 +79,7 @@ export default function ProfileScreen() {
     if (error) {
       Alert.alert("Error", error.message);
     } else {
-      Alert.alert("Email Sent", "Check your inbox for a password reset link.");
+      showAppToast("Check your inbox for a reset link.");
     }
   };
 
@@ -168,6 +170,14 @@ export default function ProfileScreen() {
       { text: "Sign Out", style: "destructive", onPress: signOut },
     ]);
   };
+
+  if (configurationMissing) {
+    return (
+      <ScreenWrapper withLogo withScroll edges={["top", "left", "right"]}>
+        <ConfigurationRequired onRetry={() => void load()} />
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper withLogo withScroll edges={["top", "left", "right"]}>

@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getSafeRedirect } from "@/lib/safe-redirect";
+import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import type {
   ProjectRow,
   ScopeRow,
@@ -13,6 +14,8 @@ import type {
 export function useDashboardData() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scopeItems, setScopeItems] = useState<ScopeRow[]>([]);
@@ -24,20 +27,20 @@ export function useDashboardData() {
   const [hasProjectPass, setHasProjectPass] = useState(false);
   const lastFetchedProjectId = useRef<string | null>(null);
 
+  const clearLoadError = useCallback(() => setLoadError(null), []);
+
   const load = useCallback(async () => {
+    setLoadError(null);
+
     if (!isSupabaseConfigured()) {
       setLoading(false);
+      setRefreshing(false);
       return;
     }
 
-    // Ensure the skeleton is visible for at least 1.2s
-    const minDelay = new Promise((resolve) => setTimeout(resolve, 1200));
-
-    const [
-      {
-        data: { session },
-      },
-    ] = await Promise.all([supabase.auth.getSession(), minDelay]);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     if (!session) {
       const returnTo = getSafeRedirect(
@@ -51,21 +54,36 @@ export function useDashboardData() {
     }
 
     const cacheKey = `bluprnt_dash_${session.user.id}`;
-    const cachedData = sessionStorage.getItem(cacheKey);
-    if (cachedData) {
+    const cachedRaw = sessionStorage.getItem(cacheKey);
+    let hadCache = false;
+    if (cachedRaw) {
       try {
-        const c = JSON.parse(cachedData);
-        if (c.projects) setProjects(c.projects);
-        if (c.project) setProject(c.project);
-        if (c.scopeItems) setScopeItems(c.scopeItems);
-        if (c.invoices) setInvoices(c.invoices);
-        if (c.isArchitect !== undefined) setIsArchitect(c.isArchitect);
-        if (c.subscription !== undefined) setSubscription(c.subscription);
-        if (c.hasProjectPass !== undefined) setHasProjectPass(c.hasProjectPass);
-        setLoading(false);
+        const c = JSON.parse(cachedRaw) as Record<string, unknown>;
+        if (c && typeof c === "object" && Array.isArray(c.projects)) {
+          hadCache = true;
+          setProjects(c.projects as ProjectRow[]);
+          if (c.project) setProject(c.project as ProjectRow);
+          if (c.scopeItems) setScopeItems(c.scopeItems as ScopeRow[]);
+          if (c.invoices) setInvoices(c.invoices as InvoiceRow[]);
+          if (c.isArchitect !== undefined)
+            setIsArchitect(Boolean(c.isArchitect));
+          if (c.subscription !== undefined)
+            setSubscription(c.subscription as UserSubscriptionRow | null);
+          if (c.hasProjectPass !== undefined)
+            setHasProjectPass(Boolean(c.hasProjectPass));
+          setLoading(false);
+          setRefreshing(true);
+        }
       } catch {
-        // ignore cache decode errors
+        /* ignore */
       }
+    }
+
+    if (!hadCache) {
+      setLoading(true);
+      setRefreshing(false);
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 1200));
+      await minDelay;
     }
 
     let projectId: string | null = null;
@@ -75,18 +93,17 @@ export function useDashboardData() {
       /* ignore */
     }
 
-    // P3B: Prefer DB-synced active project for cross-platform context.
-    // Runs in parallel with the project list fetch for zero latency cost.
-    const { data: prefData } = await supabase
+    const prefRes = await supabase
       .from("user_preferences")
       .select("last_active_project_id")
       .eq("user_id", session.user.id)
       .maybeSingle();
-    if (prefData?.last_active_project_id) {
-      projectId = prefData.last_active_project_id;
+
+    if (!prefRes.error && prefRes.data?.last_active_project_id) {
+      projectId = prefRes.data.last_active_project_id;
     }
 
-    const { data: allProjects } = await supabase
+    const projRes = await supabase
       .from("projects")
       .select(
         "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id)",
@@ -94,7 +111,14 @@ export function useDashboardData() {
       .eq("properties.owner_user_id", session.user.id)
       .order("created_at", { ascending: false });
 
-    const rows = (allProjects ?? []) as ProjectRow[];
+    if (projRes.error) {
+      setLoadError(friendlyDashboardLoadError(projRes.error));
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    const rows = (projRes.data ?? []) as ProjectRow[];
     setProjects(rows);
 
     if (rows.length > 0) {
@@ -152,6 +176,14 @@ export function useDashboardData() {
           .maybeSingle(),
       ]);
 
+      const detailErr =
+        scopesRes.error || invRes.error || subRes.error || subRes2.error;
+      if (detailErr) {
+        setLoadError(
+          "Some details couldn’t load. Your summary may be incomplete — try refreshing.",
+        );
+      }
+
       const newScopes = (scopesRes.data ?? []) as ScopeRow[];
       const newInvoices = (invRes.data ?? []) as InvoiceRow[];
       const sub = subRes.data as UserSubscriptionRow | null;
@@ -182,11 +214,8 @@ export function useDashboardData() {
       sessionStorage.removeItem(cacheKey);
     }
 
-    if (projectId === lastFetchedProjectId.current) {
-      setLoading(false);
-      return;
-    }
     lastFetchedProjectId.current = projectId;
+    setRefreshing(false);
     setLoading(false);
   }, [navigate]);
 
@@ -209,7 +238,6 @@ export function useDashboardData() {
       } catch {
         /* ignore */
       }
-      // Sync to DB so mobile picks up the same project on next load.
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -227,6 +255,9 @@ export function useDashboardData() {
 
   return {
     loading,
+    refreshing,
+    loadError,
+    clearLoadError,
     projects,
     project,
     scopeItems,
