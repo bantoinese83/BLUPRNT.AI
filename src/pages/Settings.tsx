@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { useLogout } from "@/hooks/use-logout";
@@ -272,6 +273,11 @@ export default function Settings() {
     <div className="min-h-screen bg-slate-50">
       <Helmet>
         <title>Settings — BLUPRNT.AI</title>
+        <meta
+          name="description"
+          content="Manage your BLUPRNT account, billing, privacy, and security settings."
+        />
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
       </Helmet>
 
       <header className="bg-white border-b border-slate-200">

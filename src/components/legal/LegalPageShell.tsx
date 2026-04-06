@@ -51,6 +51,18 @@ export function LegalPageShell({
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content={`${title} — BLUPRNT`} />
         <meta name="twitter:description" content={metaDescription} />
+        <meta
+          property="og:image"
+          content={`${base.replace(/\/$/, "")}/og-image.png`}
+        />
+        <meta
+          property="og:image:alt"
+          content="BLUPRNT — home renovation financial planning"
+        />
+        <meta
+          name="twitter:image"
+          content={`${base.replace(/\/$/, "")}/og-image.png`}
+        />
       </Helmet>
 
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">

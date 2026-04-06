@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { ensureUserHasWorkspace } from "@/lib/ensure-user-workspace";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
+import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 
 /**
  * OAuth (Google) and magic-link redirects land here. PKCE: ?code=…
  */
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [message, setMessage] = useState("Signing you in…");
 
   useEffect(() => {
@@ -93,17 +96,24 @@ export default function AuthCallback() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-slate-600">
-      <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <Loader2
-          className="h-10 w-10 animate-spin text-slate-900"
-          aria-hidden
-        />
-        <p aria-live="polite" className="text-center text-sm font-medium">
-          {message}
-        </p>
+    <>
+      <Helmet>
+        <title>Signing in — BLUPRNT.AI</title>
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
+        <link rel="canonical" href={seoAbsoluteUrl(pathname)} />
+      </Helmet>
+      <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-slate-600">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <Loader2
+            className="h-10 w-10 animate-spin text-slate-900"
+            aria-hidden
+          />
+          <p aria-live="polite" className="text-center text-sm font-medium">
+            {message}
+          </p>
+        </div>
+        <AppSlimFooter className="shrink-0 bg-slate-100/70" />
       </div>
-      <AppSlimFooter className="shrink-0 bg-slate-100/70" />
-    </div>
+    </>
   );
 }

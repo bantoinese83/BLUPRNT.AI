@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import {
   AlertCircle,
   Loader2,
@@ -21,11 +26,13 @@ import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
+import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 
 type Mode = "password" | "magic";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
@@ -123,6 +130,8 @@ export default function Login() {
           name="description"
           content="Access your renovation financial plan, track invoices, and manage your property improvements."
         />
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
+        <link rel="canonical" href={seoAbsoluteUrl(pathname)} />
       </Helmet>
 
       <AppSimpleHeader showHome />

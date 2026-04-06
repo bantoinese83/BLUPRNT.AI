@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Mail, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,10 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { Loader } from "@/components/ui/Loader";
+import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 
 export default function ForgotPassword() {
+  const { pathname } = useLocation();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -66,6 +68,12 @@ export default function ForgotPassword() {
     <>
       <Helmet>
         <title>Forgot Password — BLUPRNT.AI</title>
+        <meta
+          name="description"
+          content="Reset your BLUPRNT password securely. We’ll email you a link to choose a new password."
+        />
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
+        <link rel="canonical" href={seoAbsoluteUrl(pathname)} />
       </Helmet>
       <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white p-4">
         <div className="flex flex-1 flex-col items-center justify-center">

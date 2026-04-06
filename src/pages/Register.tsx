@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   AlertCircle,
@@ -25,11 +25,13 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { useEffect } from "react";
+import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 
 type Mode = "password" | "magic";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const redirectParam = searchParams.get("redirect");
   const loginHref =
@@ -190,6 +192,8 @@ export default function Register() {
           name="description"
           content="Start your property journey by creating a free account. Get instant estimates and track your renovation."
         />
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
+        <link rel="canonical" href={seoAbsoluteUrl(pathname)} />
       </Helmet>
 
       <AppSimpleHeader showHome />

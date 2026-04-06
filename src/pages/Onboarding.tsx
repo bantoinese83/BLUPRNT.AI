@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { AnimatePresence, motion } from "motion/react";
 import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
 import { ProjectTypeScreen } from "@/components/onboarding/ProjectTypeScreen";
@@ -120,6 +121,7 @@ export default function Onboarding() {
           name="description"
           content="Get a real-world renovation cost estimate in minutes. Start your home project with the right financial baseline."
         />
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
       </Helmet>
 
       <AppSimpleHeader showSignIn={isWelcome} />

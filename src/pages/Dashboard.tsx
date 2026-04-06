@@ -60,6 +60,7 @@ import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { PlanVsActualCard } from "@/components/dashboard/PlanVsActualCard";
+import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 
 export default function Dashboard() {
   const {
@@ -87,6 +88,7 @@ export default function Dashboard() {
       <>
         <Helmet>
           <title>Can&apos;t connect — BLUPRNT.AI</title>
+          <meta name="robots" content={META_ROBOTS_NOINDEX} />
         </Helmet>
         <div className="flex min-h-screen flex-col bg-slate-50">
           <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
@@ -132,6 +134,7 @@ export default function Dashboard() {
       <>
         <Helmet>
           <title>Loading dashboard — BLUPRNT.AI</title>
+          <meta name="robots" content={META_ROBOTS_NOINDEX} />
         </Helmet>
         <DashboardSkeleton />
         <AppSlimFooter className="border-slate-200/70 bg-white/50" />
@@ -144,6 +147,7 @@ export default function Dashboard() {
       <>
         <Helmet>
           <title>Couldn&apos;t load dashboard — BLUPRNT.AI</title>
+          <meta name="robots" content={META_ROBOTS_NOINDEX} />
         </Helmet>
         <div className="flex min-h-screen flex-col bg-slate-50">
           <div className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
@@ -189,6 +193,7 @@ export default function Dashboard() {
       <>
         <Helmet>
           <title>Get started — BLUPRNT.AI</title>
+          <meta name="robots" content={META_ROBOTS_NOINDEX} />
         </Helmet>
         <div className="flex min-h-screen flex-col bg-slate-50">
           <div className="flex flex-1 flex-col items-center justify-center p-6">
@@ -490,6 +495,11 @@ function DashboardContent({
             ? `${project.name} — BLUPRNT.AI`
             : "Dashboard — BLUPRNT.AI"}
         </title>
+        <meta
+          name="description"
+          content="Your BLUPRNT dashboard: renovation estimates, invoices and receipts, plan vs documented spend, and project health."
+        />
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
       </Helmet>
 
       <DashboardHeader

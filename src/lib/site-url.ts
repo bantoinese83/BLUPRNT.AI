@@ -65,7 +65,7 @@ export function buildLandingJsonLd(siteUrl: string) {
         url: siteUrl,
         name: "BLUPRNT",
         description:
-          "Home value management system: grounded cost estimates, project tracking, and a property value record for homeowners.",
+          "Renovation cost estimates, invoice tracking, plan vs actual clarity, and resale-ready property ledgers for US homeowners.",
         publisher: { "@id": orgId },
         inLanguage: "en-US",
       },
@@ -75,10 +75,13 @@ export function buildLandingJsonLd(siteUrl: string) {
         name: "BLUPRNT",
         alternateName: "BLUPRNT.AI",
         url: siteUrl,
+        description:
+          "Homeowner-first renovation financial OS: regional estimates, plan vs documented spend, and seller-ready exports.",
         logo: {
           "@type": "ImageObject",
           url: `${siteUrl}/bluprnt_logo.svg`,
         },
+        image: `${siteUrl}/og-image.png`,
       },
       {
         "@type": "BreadcrumbList",
@@ -111,7 +114,7 @@ export function buildLandingJsonLd(siteUrl: string) {
           name: "Home renovation cost estimation, budgeting, and resale documentation",
         },
         description:
-          "Every upgrade should pay you back. BLUPRNT helps homeowners estimate costs, track projects, and understand how renovations impact home value.",
+          "Grounded remodel cost ranges, plan vs documented spend, and a clear improvement history for buyers and agents.",
       },
       {
         "@type": "SoftwareApplication",
@@ -127,7 +130,7 @@ export function buildLandingJsonLd(siteUrl: string) {
           description: "Free tier and trial; paid plans available.",
         },
         description:
-          "AI home renovation cost estimator and remodel budget tracker. Plan kitchen and bathroom renovations with location-based pricing and photo analysis.",
+          "AI renovation cost estimator, remodel budget tracker, and seller packet PDFs. Compare estimates to invoices and quotes with regional pricing.",
         provider: { "@id": orgId },
       },
       {

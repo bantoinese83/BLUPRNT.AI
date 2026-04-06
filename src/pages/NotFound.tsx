@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { supabase } from "@/lib/supabase";
+import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 
 export default function NotFound() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,6 +20,7 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-center page-fade-in">
       <Helmet>
         <title>Page Not Found — BLUPRNT.AI</title>
+        <meta name="robots" content={META_ROBOTS_NOINDEX} />
       </Helmet>
 
       <div className="flex flex-1 flex-col items-center justify-center">

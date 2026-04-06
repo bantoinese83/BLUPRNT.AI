@@ -1,4 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
+
+# App and auth surfaces (prefer noindex on pages; disallow reduces crawler budget on private URLs)
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /auth/
+Disallow: /project/
+Disallow: /onboarding
 
 Sitemap: https://bluprntai.com/sitemap.xml

@@ -127,6 +127,9 @@ export default function Landing() {
         />
         <meta property="og:site_name" content="BLUPRNT" />
         <meta property="og:image" content={`${metaBase}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
         <meta
           property="og:image:alt"
           content="BLUPRNT — home renovation financial planning for homeowners"
