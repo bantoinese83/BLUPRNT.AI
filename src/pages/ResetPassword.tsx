@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 import { AlertCircle, CheckCircle2, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 export default function ResetPassword() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const postLoginPath = getSafeRedirect(searchParams.get("redirect"));
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +77,9 @@ export default function ResetPassword() {
 
     setSuccess(true);
     window.setTimeout(() => {
-      navigate("/login", { replace: true });
+      navigate(`/login?redirect=${encodeURIComponent(postLoginPath)}`, {
+        replace: true,
+      });
     }, 3000);
   }
 

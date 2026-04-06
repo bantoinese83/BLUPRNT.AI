@@ -12,6 +12,9 @@ interface EmptyStateProps {
   description: string;
   actionTitle?: string;
   onAction?: () => void;
+  /** Calmer second path (e.g. explore the flow before committing). */
+  secondaryTitle?: string;
+  onSecondary?: () => void;
   style?: ViewStyle;
   withRoadmap?: boolean;
 }
@@ -22,6 +25,8 @@ export function EmptyState({
   description,
   actionTitle,
   onAction,
+  secondaryTitle,
+  onSecondary,
   style,
   withRoadmap = false,
 }: EmptyStateProps) {
@@ -48,6 +53,15 @@ export function EmptyState({
             title={actionTitle}
             onPress={onAction}
             style={styles.button}
+          />
+        )}
+
+        {secondaryTitle && onSecondary && (
+          <Button
+            title={secondaryTitle}
+            onPress={onSecondary}
+            variant="outline"
+            style={styles.secondaryButton}
           />
         )}
 
@@ -123,6 +137,11 @@ const styles = StyleSheet.create({
   button: {
     width: "100%",
     height: 56,
+  },
+  secondaryButton: {
+    width: "100%",
+    height: 52,
+    marginTop: 12,
   },
   roadmapContainer: {
     flexDirection: "row",

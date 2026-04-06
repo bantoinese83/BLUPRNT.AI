@@ -1,4 +1,14 @@
 import "../global.css";
+import { QueryClientProvider } from "@tanstack/react-query";
+import {
+  initMobileSentry,
+  isSentryConfigured,
+  Sentry,
+} from "../src/lib/sentry";
+import { queryClient } from "../src/lib/query-client";
+
+initMobileSentry();
+
 import {
   DarkTheme,
   DefaultTheme,
@@ -25,7 +35,7 @@ import { BrandedSplash } from "../src/components/BrandedSplash";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, LogBox } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "../src/constants/Theme";
 import { WifiOff } from "lucide-react-native";
@@ -44,7 +54,15 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+if (__DEV__) {
+  // RN still mounts deprecated SafeAreaView inside LogBox / dev tooling; our UI uses
+  // `react-native-safe-area-context` only. Mutes noisy false-positive in dev.
+  LogBox.ignoreLogs([
+    "SafeAreaView has been deprecated and will be removed in a future release",
+  ]);
+}
+
+function RootLayout() {
   const [loaded, error] = useFonts({
     Outfit_400Regular,
     Outfit_500Medium,
@@ -69,17 +87,21 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <RootLayoutNav />
-          <AppToastHost />
-          <OfflineBannerHost />
-        </AuthProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <RootLayoutNav />
+            <AppToastHost />
+            <OfflineBannerHost />
+          </AuthProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }
+
+export default isSentryConfigured() ? Sentry.wrap(RootLayout) : RootLayout;
 
 const styles = StyleSheet.create({
   offlineBanner: {

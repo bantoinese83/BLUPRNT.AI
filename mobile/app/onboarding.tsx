@@ -34,6 +34,7 @@ import * as ImagePicker from "expo-image-picker";
 import { money } from "../src/lib/formatters";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
+import { Logo } from "../src/components/ui/Logo";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
 import {
   ProjectTypeOption,
@@ -602,48 +603,74 @@ export default function OnboardingScreen() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             key="step4"
-            style={styles.centerContainer}
+            style={styles.analysisStepRoot}
           >
+            <View style={styles.analysisBrandMark} accessibilityLabel="BLUPRNT">
+              <Logo size={20} />
+              <Text style={styles.analysisBrandText}>BLUPRNT</Text>
+            </View>
+
             <View style={styles.analysisCircle}>
               <MotiView
-                from={{ scale: 0.8, opacity: 0.3 }}
-                animate={{ scale: 1.5, opacity: 0 }}
-                transition={{ loop: true, duration: 2000, type: "timing" }}
-                style={[styles.pulseCircle, { backgroundColor: "#818cf8" }]}
+                from={{ scale: 0.8, opacity: 0.22 }}
+                animate={{ scale: 1.55, opacity: 0 }}
+                transition={{ loop: true, duration: 2200, type: "timing" }}
+                style={[styles.pulseCircle, styles.pulseCircleOuter]}
               />
               <MotiView
-                from={{ scale: 0.8, opacity: 0.5 }}
-                animate={{ scale: 1.2, opacity: 0 }}
+                from={{ scale: 0.85, opacity: 0.35 }}
+                animate={{ scale: 1.28, opacity: 0 }}
                 transition={{
                   loop: true,
-                  duration: 1500,
+                  duration: 1700,
                   type: "timing",
-                  delay: 500,
+                  delay: 400,
                 }}
-                style={[
-                  styles.pulseCircle,
-                  { backgroundColor: Theme.colors.brand.primary },
-                ]}
+                style={[styles.pulseCircle, styles.pulseCircleInner]}
               />
-              <GlassCard intensity={40} style={styles.iconCircle}>
-                <ProjectIcon
-                  name={projectType || ""}
-                  size={40}
-                  color={Theme.colors.brand.primary}
-                />
-              </GlassCard>
+              <View style={styles.analysisIconDisk}>
+                <MotiView
+                  from={{ scale: 1, opacity: 0.88 }}
+                  animate={{ scale: 1.06, opacity: 1 }}
+                  transition={{
+                    loop: true,
+                    type: "timing",
+                    duration: 1600,
+                    repeatReverse: true,
+                  }}
+                >
+                  <Sparkles size={34} color={Theme.colors.brand.primary} />
+                </MotiView>
+              </View>
             </View>
-            <Text style={styles.analysisTitle}>Analyzing Blueprint</Text>
+
+            <Text style={styles.analysisTitle}>Analyzing your blueprint</Text>
             <MotiView
               key={analysisIndex}
-              from={{ opacity: 0, translateY: 10 }}
+              from={{ opacity: 0, translateY: 8 }}
               animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: "timing", duration: 500 }}
+              transition={{ type: "timing", duration: 450 }}
+              style={styles.analysisMessageWrap}
             >
               <Text style={styles.analysisSubtitle}>
                 {ANALYSIS_MESSAGES[analysisIndex]}
               </Text>
             </MotiView>
+
+            <View
+              style={styles.analysisPhaseDots}
+              accessibilityRole="progressbar"
+            >
+              {ANALYSIS_MESSAGES.map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.analysisPhaseDot,
+                    i === analysisIndex && styles.analysisPhaseDotActive,
+                  ]}
+                />
+              ))}
+            </View>
           </MotiView>
         );
       case 5:
@@ -1192,40 +1219,99 @@ const styles = StyleSheet.create({
   loadingSpinner: {
     marginBottom: 32,
   },
+  analysisStepRoot: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 48,
+    paddingHorizontal: 28,
+    width: "100%",
+  },
+  analysisBrandMark: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 28,
+    opacity: 0.42,
+  },
+  analysisBrandText: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
+    letterSpacing: 3,
+  },
   analysisTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
-    marginBottom: 8,
+    marginBottom: 10,
+    letterSpacing: -0.5,
+    textAlign: "center",
   },
   analysisSubtitle: {
     fontSize: 16,
-    fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
+    fontFamily: Theme.typography.family.medium,
+    color: "#475569",
     textAlign: "center",
-    marginTop: 8,
+    lineHeight: 24,
+    maxWidth: 300,
   },
-  analysisCircle: {
-    width: 120,
-    height: 120,
+  analysisMessageWrap: {
+    minHeight: 56,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 40,
+    paddingHorizontal: 8,
+  },
+  analysisPhaseDots: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 28,
+  },
+  analysisPhaseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(15, 23, 42, 0.12)",
+  },
+  analysisPhaseDotActive: {
+    width: 18,
+    borderRadius: 3,
+    backgroundColor: Theme.colors.brand.primary,
+  },
+  analysisCircle: {
+    width: 132,
+    height: 132,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 36,
   },
   pulseCircle: {
     position: "absolute",
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 104,
+    height: 104,
+    borderRadius: 52,
   },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  pulseCircleOuter: {
+    backgroundColor: "rgba(99, 102, 241, 0.35)",
+  },
+  pulseCircleInner: {
+    backgroundColor: "rgba(79, 70, 229, 0.45)",
+  },
+  analysisIconDisk: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "rgba(15, 23, 42, 0.06)",
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 6,
   },
   skipContainer: {
     marginTop: 32,

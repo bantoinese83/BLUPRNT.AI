@@ -13,6 +13,10 @@ import {
   Zap,
   LogOut,
   ChevronRight,
+  ListTree,
+  Scale,
+  BookMarked,
+  ScanLine,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
@@ -137,6 +141,54 @@ export function CommandPalette() {
                     label="Account Settings"
                     shortcut="S"
                     onSelect={() => runCommand(() => navigate("/settings"))}
+                  />
+                </Command.Group>
+
+                <Command.Group
+                  heading="Workspace"
+                  className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-3 py-2"
+                >
+                  <Item
+                    icon={<LayoutDashboard />}
+                    label="Plan & documents"
+                    onSelect={() =>
+                      runCommand(() => navigate("/dashboard/plan"))
+                    }
+                  />
+                  <Item
+                    icon={<ListTree />}
+                    label="Scope line items"
+                    onSelect={() =>
+                      runCommand(() => navigate("/dashboard/scope"))
+                    }
+                  />
+                  <Item
+                    icon={<Scale />}
+                    label="Budget vs actual"
+                    onSelect={() =>
+                      runCommand(() => navigate("/dashboard/execute"))
+                    }
+                  />
+                  <Item
+                    icon={<BookMarked />}
+                    label="Property record"
+                    onSelect={() =>
+                      runCommand(() => navigate("/dashboard/record"))
+                    }
+                  />
+                  <Item
+                    icon={<ScanLine />}
+                    label="Jump to invoice upload"
+                    onSelect={() =>
+                      runCommand(() => {
+                        navigate("/dashboard/plan");
+                        window.requestAnimationFrame(() => {
+                          document
+                            .getElementById("invoice-upload-anchor")
+                            ?.scrollIntoView({ behavior: "smooth" });
+                        });
+                      })
+                    }
                   />
                 </Command.Group>
 

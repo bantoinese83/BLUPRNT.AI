@@ -39,6 +39,10 @@ import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { InvoiceRow, ProjectRow, ScopeRow } from "../../src/types/database";
 import { Theme } from "../../src/constants/Theme";
 
+type BillOfMaterialItem = NonNullable<
+  NonNullable<ScopeRow["metadata"]>["materials"]
+>[number];
+
 function MaterialDetailList({
   materials,
 }: {
@@ -53,7 +57,7 @@ function MaterialDetailList({
         <Text style={styles.materialHeaderText}>Bill of Materials</Text>
       </View>
       <View style={styles.materialGrid}>
-        {materials.map((m, idx: number) => (
+        {materials.map((m: BillOfMaterialItem, idx: number) => (
           <View key={idx} style={styles.materialCard}>
             <View style={styles.materialIconBg}>
               <Boxes size={14} color={Theme.colors.text.muted} />

@@ -200,10 +200,16 @@ export default function Dashboard() {
             <EmptyState
               variant="projects"
               currentStep={1}
-              title="No projects tracked yet"
-              description="Create your first project to start tracking benchmarks and managing your budget like a pro."
+              title="Your workspace is ready"
+              description="Add a renovation project to see your estimate, scope, and document ledger in one place. Jump straight in, or start from the short intro if you prefer a quick tour first."
               action={{
-                label: "Create Your First Project",
+                label: "Start a project",
+                onClick: () => {
+                  window.location.href = "/onboarding/type";
+                },
+              }}
+              secondaryAction={{
+                label: "Begin with the intro",
                 onClick: () => {
                   window.location.href = "/onboarding";
                 },

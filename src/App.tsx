@@ -4,6 +4,7 @@
  */
 
 import { lazy, Suspense } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthProvider";
@@ -33,73 +34,87 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+    },
+  },
+});
+
 export default function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
         <ErrorBoundary>
-          <BrowserRouter>
-            <a
-              href="#main-content"
-              className="fixed left-4 top-4 z-[100] -translate-y-[130%] rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition-transform focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-            >
-              Skip to main content
-            </a>
-            <AuthListener />
-            <div
-              id="main-content"
-              tabIndex={-1}
-              className="min-h-0 outline-none focus:outline-none"
-            >
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route
-                    path="/onboarding/*"
-                    element={
-                      <OnboardingProvider>
-                        <Onboarding />
-                      </OnboardingProvider>
-                    }
-                  />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route
-                    path="/auth/reset-password"
-                    element={<ResetPassword />}
-                  />
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <a
+                href="#main-content"
+                className="fixed left-4 top-4 z-[100] -translate-y-[130%] rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition-transform focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+              >
+                Skip to main content
+              </a>
+              <AuthListener />
+              <div
+                id="main-content"
+                tabIndex={-1}
+                className="min-h-0 outline-none focus:outline-none"
+              >
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Landing />} />
+                    <Route
+                      path="/onboarding/*"
+                      element={
+                        <OnboardingProvider>
+                          <Onboarding />
+                        </OnboardingProvider>
+                      }
+                    />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/auth/reset-password"
+                      element={<ResetPassword />}
+                    />
 
-                  <Route
-                    path="/dashboard/*"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/project/:token" element={<ProjectView />} />
-                  <Route
-                    path="/settings"
-                    element={
-                      <ProtectedRoute>
-                        <Settings />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/terms" element={<TermsOfService />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </div>
-            <Toaster position="top-right" expand={false} richColors />
-            <CommandPalette />
-            <CookieConsent />
-            <HelpWidget />
-            <Analytics />
-          </BrowserRouter>
+                    <Route
+                      path="/dashboard/*"
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/project/:token" element={<ProjectView />} />
+                    <Route
+                      path="/settings"
+                      element={
+                        <ProtectedRoute>
+                          <Settings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsOfService />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </div>
+              <Toaster position="top-right" expand={false} richColors />
+              <CommandPalette />
+              <CookieConsent />
+              <HelpWidget />
+              <Analytics />
+            </BrowserRouter>
+          </QueryClientProvider>
         </ErrorBoundary>
       </AuthProvider>
     </HelmetProvider>

@@ -1,0 +1,5 @@
+# Run on a device or simulator: `maestro test mobile/maestro/app-smoke.yaml`
+# Extend this flow for login → project → export when you have test credentials.
+appId: ai.bluprnt.mobile
+---
+- launchApp

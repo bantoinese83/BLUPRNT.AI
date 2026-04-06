@@ -13,6 +13,9 @@
     "check": "npm run lint && npm run test:run && npm run build",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "db:types": "bash scripts/gen-db-types.sh",
+    "db:types:check": "bash scripts/check-db-types.sh",
+    "test:e2e": "playwright test",
     "functions:check": "bash scripts/check-edge-functions.sh",
     "postdeploy:verify": "bash scripts/post-deploy-verify.sh",
     "test:ui": "vitest --ui",
@@ -25,11 +28,14 @@
     "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:checkout": "supabase functions deploy create-checkout --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "functions:deploy:send-email": "supabase functions deploy send-email --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
+    "functions:deploy:rate-limited": "supabase functions deploy photo-to-scope get-document-signed-url send-email upload-invoice delete-account get-invoice create-checkout get-project-view --project-ref elucgaegaihkklnfoasm --no-verify-jwt",
     "prepare": "husky"
   },
   "dependencies": {
+    "@sentry/react": "^9.47.1",
     "@supabase/supabase-js": "^2.100.1",
     "@tailwindcss/vite": "^4.1.14",
+    "@tanstack/react-query": "^5.96.2",
     "@vercel/analytics": "^2.0.1",
     "@vitejs/plugin-react": "^5.0.4",
     "canvas-confetti": "^1.9.4",
@@ -54,6 +60,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@google/generative-ai": "^0.24.1",
+    "@playwright/test": "^1.59.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

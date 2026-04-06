@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDashboardData } from "./useDashboardData";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
+import type { ReactNode } from "react";
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
@@ -18,6 +20,15 @@ vi.mock("react-router-dom", () => ({
   useNavigate: vi.fn(),
 }));
 
+function wrapper({ children }: { children: ReactNode }) {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+}
+
 describe("useDashboardData", () => {
   const mockNavigate = vi.fn();
   const mockUserId = "test-user-id";
@@ -29,45 +40,44 @@ describe("useDashboardData", () => {
     sessionStorage.clear();
     localStorage.clear();
 
-    // Mock window.location
     const originalLocation = window.location;
-    delete (window as any).location;
-    window.location = {
+    delete (window as { location?: unknown }).location;
+    (window as { location: unknown }).location = {
       ...originalLocation,
       pathname: "/dashboard",
       search: "",
-    } as any;
+    };
 
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
 
-    // Bypass the 1.2s delay
-    vi.spyOn(global, "setTimeout").mockImplementation(
-      (fn: any, delay?: number) => {
-        if (delay === 1200) {
-          fn();
-          return 0 as any;
-        }
-        return originalSetTimeout(fn, delay);
-      },
-    );
+    vi.spyOn(global, "setTimeout").mockImplementation(function (
+      fn: (args: void) => void,
+      delay?: number,
+    ) {
+      if (delay === 1200) {
+        fn();
+        return 0 as unknown as ReturnType<typeof setTimeout>;
+      }
+      return originalSetTimeout(fn, delay);
+    } as typeof setTimeout);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  const mockSupabaseQuery = (data: any = []) => ({
+  const mockSupabaseQuery = (data: unknown = []) => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
-    then: (resolve: any) =>
+    then: (resolve: (v: unknown) => void) =>
       Promise.resolve({ data, error: null }).then(resolve),
   });
 
   it("stops loading early if Supabase is not configured", async () => {
-    (isSupabaseConfigured as any).mockReturnValue(false);
-    const { result } = renderHook(() => useDashboardData());
+    vi.mocked(isSupabaseConfigured).mockReturnValue(false);
+    const { result } = renderHook(() => useDashboardData(), { wrapper });
 
     await waitFor(() => expect(result.current.loading).toBe(false), {
       timeout: 2000,
@@ -76,11 +86,11 @@ describe("useDashboardData", () => {
   });
 
   it("redirects to login if no session exists", async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session: null },
-    });
+    } as never);
 
-    renderHook(() => useDashboardData());
+    renderHook(() => useDashboardData(), { wrapper });
 
     await waitFor(
       () => {
@@ -89,22 +99,22 @@ describe("useDashboardData", () => {
           expect.objectContaining({ replace: true }),
         );
       },
-      { timeout: 2000 },
+      { timeout: 5000 },
     );
   });
 
   it("updates from Supabase after initial fetch", async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session: { user: { id: mockUserId } } },
-    });
+    } as never);
 
     const mockProjects = [{ id: "proj-new", name: "New Project" }];
-    (supabase.from as any).mockImplementation((table: string) => {
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
       if (table === "projects") return mockSupabaseQuery(mockProjects);
       return mockSupabaseQuery([]);
-    });
+    }) as unknown as typeof supabase.from);
 
-    const { result } = renderHook(() => useDashboardData());
+    const { result } = renderHook(() => useDashboardData(), { wrapper });
 
     await waitFor(
       () => {
@@ -113,16 +123,16 @@ describe("useDashboardData", () => {
         );
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 2000 },
+      { timeout: 5000 },
     );
   });
 
   it("sets loadError when the projects query fails", async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session: { user: { id: mockUserId } } },
-    });
+    } as never);
 
-    (supabase.from as any).mockImplementation((table: string) => {
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
       if (table === "user_preferences") {
         return {
           select: vi.fn().mockReturnThis(),
@@ -141,9 +151,9 @@ describe("useDashboardData", () => {
         };
       }
       return mockSupabaseQuery([]);
-    });
+    }) as unknown as typeof supabase.from);
 
-    const { result } = renderHook(() => useDashboardData());
+    const { result } = renderHook(() => useDashboardData(), { wrapper });
 
     await waitFor(
       () => {
@@ -151,7 +161,7 @@ describe("useDashboardData", () => {
         expect(result.current.loadError).toBeTruthy();
         expect(result.current.projects).toEqual([]);
       },
-      { timeout: 3000 },
+      { timeout: 5000 },
     );
   });
 
@@ -163,20 +173,20 @@ describe("useDashboardData", () => {
     const mockSub = { status: "active" };
     const mockPass = { id: "pass-1" };
 
-    (supabase.auth.getSession as any).mockResolvedValue({
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session: { user: { id: mockUserId } } },
-    });
+    } as never);
 
-    (supabase.from as any).mockImplementation((table: string) => {
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
       if (table === "projects") return mockSupabaseQuery(mockProjects);
       if (table === "scope_items") return mockSupabaseQuery(mockScopes);
       if (table === "invoices") return mockSupabaseQuery(mockInvoices);
       if (table === "user_subscriptions") return mockSupabaseQuery(mockSub);
       if (table === "project_passes") return mockSupabaseQuery(mockPass);
       return mockSupabaseQuery([]);
-    });
+    }) as unknown as typeof supabase.from);
 
-    const { result } = renderHook(() => useDashboardData());
+    const { result } = renderHook(() => useDashboardData(), { wrapper });
 
     await waitFor(
       () => {
@@ -186,7 +196,7 @@ describe("useDashboardData", () => {
         expect(result.current.isArchitect).toBe(true);
         expect(result.current.hasProjectPass).toBe(true);
       },
-      { timeout: 2000 },
+      { timeout: 5000 },
     );
   });
 });

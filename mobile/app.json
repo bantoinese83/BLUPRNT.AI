@@ -42,7 +42,6 @@
       ],
       "expo-router",
       "expo-font",
-      "expo-secure-store",
       "expo-web-browser",
       [
         "expo-camera",
@@ -55,7 +54,8 @@
         {
           "photosPermission": "Allow BlueprintAI to access your photo library to select renovation photos for estimation."
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true

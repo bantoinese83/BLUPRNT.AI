@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 import { AlertCircle, ArrowLeft, Mail, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,13 @@ import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 
 export default function ForgotPassword() {
   const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const returnTo = getSafeRedirect(redirectParam);
+  const loginHref =
+    redirectParam != null && redirectParam.trim() !== ""
+      ? `/login?redirect=${encodeURIComponent(getSafeRedirect(redirectParam))}`
+      : "/login";
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,10 +44,11 @@ export default function ForgotPassword() {
     }
 
     setLoading(true);
+    const afterReset = `${window.location.origin}/auth/reset-password?redirect=${encodeURIComponent(returnTo)}`;
     const { error: err } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
       {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: afterReset,
       },
     );
     setLoading(false);
@@ -169,7 +178,7 @@ export default function ForgotPassword() {
 
             <div className="text-center">
               <Link
-                to="/login"
+                to={loginHref}
                 className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-slate-900"
               >
                 <ArrowLeft className="w-4 h-4" />

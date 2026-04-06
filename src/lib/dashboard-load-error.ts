@@ -14,6 +14,13 @@ export function friendlyDashboardLoadError(
     return "Check your internet connection and try again.";
   }
   if (
+    m.includes("429") ||
+    m.includes("too many requests") ||
+    m.includes("rate limit")
+  ) {
+    return "You’re moving a little fast. Take a short break, then try again.";
+  }
+  if (
     c === "PGRST301" ||
     m.includes("jwt") ||
     m.includes("permission denied") ||

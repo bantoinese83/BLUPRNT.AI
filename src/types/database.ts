@@ -1,84 +1,54 @@
-export type ProjectRow = {
-  id: string;
-  name: string;
-  property_id?: string;
-  estimated_min_total: number | null;
-  estimated_max_total: number | null;
-  confidence_score: number | null;
-  stage: string | null;
-  created_at?: string;
-  metadata?: {
-    value_engineering_tips?: string[];
-    regional_context?: string;
-    regional_signal?: string;
-  };
-};
+import type { Database } from "./supabase.gen";
 
-export type ScopeRow = {
-  id: string;
-  category: string;
-  description: string;
-  finish_tier: string | null;
-  quantity: number | null;
-  unit: string | null;
-  unit_cost_min: number | null;
-  unit_cost_max: number | null;
-  total_cost_min: number | null;
-  total_cost_max: number | null;
-  confidence_score: number | null;
-  confidence_reason?: string;
-  source?: "text" | "photo";
-  justification?: string;
-  priority?: "high" | "medium" | "low";
-  phase?: string;
-  maintenance_tips?: string;
-  metadata?: {
-    justification?: string;
-    priority?: "high" | "medium" | "low";
-    phase?: string;
-    maintenance_tips?: string;
-    confidence_reason?: string;
-    materials?: Array<{
-      name: string;
-      brand?: string;
-      model?: string;
-      quantity?: number;
-      unit?: string;
-      estimated_cost?: number;
-    }>;
-  };
-};
+type PublicSchema = Database["public"];
 
-export type InvoiceRow = {
-  id: string;
-  vendor_name: string | null;
-  total: number | null;
-  created_at: string;
-  payment_status: string;
-  document_type?: string | null;
-  /** Present when an upload exists in Storage; used for View original / export appendix. */
-  document_id?: string | null;
-};
+/** Subset of `projects` row fields commonly selected in the dashboard (joined selects may omit columns). */
+export type ProjectRow = Pick<
+  PublicSchema["Tables"]["projects"]["Row"],
+  | "id"
+  | "name"
+  | "property_id"
+  | "estimated_min_total"
+  | "estimated_max_total"
+  | "confidence_score"
+  | "stage"
+  | "created_at"
+  | "metadata"
+>;
 
-export type UserSubscriptionRow = {
-  id: string;
-  user_id: string;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
-  plan: "architect";
-  status: "active" | "canceled" | "past_due" | "trialing";
-  current_period_end: string | null;
-  invoice_uploads_count: number;
-  invoice_uploads_reset_at: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-};
+export type ScopeRow = Pick<
+  PublicSchema["Tables"]["scope_items"]["Row"],
+  | "id"
+  | "category"
+  | "description"
+  | "finish_tier"
+  | "quantity"
+  | "unit"
+  | "unit_cost_min"
+  | "unit_cost_max"
+  | "total_cost_min"
+  | "total_cost_max"
+  | "confidence_score"
+  | "confidence_reason"
+  | "source"
+  | "justification"
+  | "priority"
+  | "phase"
+  | "maintenance_tips"
+  | "metadata"
+>;
 
-export type ProjectPassRow = {
-  id: string;
-  project_id: string;
-  stripe_checkout_session_id: string | null;
-  purchased_at: string;
-  expires_at: string;
-  created_at: string | null;
-};
+export type InvoiceRow = Pick<
+  PublicSchema["Tables"]["invoices"]["Row"],
+  | "id"
+  | "vendor_name"
+  | "total"
+  | "created_at"
+  | "payment_status"
+  | "document_type"
+  | "document_id"
+>;
+
+export type UserSubscriptionRow =
+  PublicSchema["Tables"]["user_subscriptions"]["Row"];
+export type ProjectPassRow = PublicSchema["Tables"]["project_passes"]["Row"];

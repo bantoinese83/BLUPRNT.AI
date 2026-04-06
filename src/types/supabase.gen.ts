@@ -1,0 +1,135 @@
+/**
+ * Supabase `Database` types for PostgREST.
+ *
+ * Regenerate from the linked project (requires `SUPABASE_ACCESS_TOKEN`):
+ *   npm run db:types
+ *
+ * When the token is unavailable, this file remains the schema snapshot; CI can
+ * verify it matches `npm run db:types` when secrets are configured.
+ */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+type TableRow<T> = {
+  Row: T;
+  Insert: Partial<T>;
+  Update: Partial<T>;
+  Relationships: [];
+};
+
+type ProjectsRow = {
+  id: string;
+  name: string;
+  property_id?: string;
+  estimated_min_total: number | null;
+  estimated_max_total: number | null;
+  confidence_score: number | null;
+  stage: string | null;
+  created_at?: string;
+  updated_at?: string | null;
+  metadata?: {
+    value_engineering_tips?: string[];
+    regional_context?: string;
+    regional_signal?: string;
+  };
+};
+
+type ScopeItemsRow = {
+  id: string;
+  project_id: string;
+  category: string;
+  description: string;
+  finish_tier: string | null;
+  quantity: number | null;
+  unit: string | null;
+  unit_cost_min: number | null;
+  unit_cost_max: number | null;
+  total_cost_min: number | null;
+  total_cost_max: number | null;
+  confidence_score: number | null;
+  confidence_reason?: string;
+  source?: "text" | "photo";
+  justification?: string;
+  priority?: "high" | "medium" | "low";
+  phase?: string;
+  maintenance_tips?: string;
+  metadata?: {
+    justification?: string;
+    priority?: "high" | "medium" | "low";
+    phase?: string;
+    maintenance_tips?: string;
+    confidence_reason?: string;
+    materials?: Array<{
+      name: string;
+      brand?: string;
+      model?: string;
+      quantity?: number;
+      unit?: string;
+      estimated_cost?: number;
+    }>;
+  };
+};
+
+type InvoicesRow = {
+  id: string;
+  project_id: string;
+  vendor_name: string | null;
+  total: number | null;
+  created_at: string;
+  payment_status: string;
+  document_type?: string | null;
+  document_id?: string | null;
+};
+
+type UserSubscriptionsRow = {
+  id: string;
+  user_id: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan: "architect";
+  status: "active" | "canceled" | "past_due" | "trialing";
+  current_period_end: string | null;
+  invoice_uploads_count: number;
+  invoice_uploads_reset_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+type ProjectPassesRow = {
+  id: string;
+  project_id: string;
+  stripe_checkout_session_id: string | null;
+  purchased_at: string;
+  expires_at: string;
+  created_at: string | null;
+};
+
+type UserPreferencesRow = {
+  user_id: string;
+  last_active_project_id: string | null;
+  updated_at: string | null;
+};
+
+export type Database = {
+  public: {
+    Tables: {
+      projects: TableRow<ProjectsRow>;
+      scope_items: TableRow<ScopeItemsRow>;
+      invoices: TableRow<InvoicesRow>;
+      user_subscriptions: TableRow<UserSubscriptionsRow>;
+      project_passes: TableRow<ProjectPassesRow>;
+      user_preferences: TableRow<UserPreferencesRow>;
+    };
+    Views: Record<string, never>;
+    Functions: {
+      recalc_project_totals: { Args: { p_id: string }; Returns: undefined };
+    };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+};

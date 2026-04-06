@@ -9,7 +9,7 @@ export DENO_NO_PROMPT=1
 
 DENO_BIN=(deno)
 if ! command -v deno &>/dev/null; then
-  DENO_BIN=(npx --yes deno@2.1.4)
+  DENO_BIN=(npx --yes deno@2.7.11)
 fi
 
 CONFIG="$ROOT/supabase/functions/deno.json"
@@ -19,6 +19,7 @@ FILES=(
   supabase/functions/create-checkout/index.ts
   supabase/functions/delete-account/index.ts
   supabase/functions/get-invoice/index.ts
+  supabase/functions/get-document-signed-url/index.ts
   supabase/functions/get-project-view/index.ts
   supabase/functions/photo-to-scope/index.ts
   supabase/functions/send-email/index.ts

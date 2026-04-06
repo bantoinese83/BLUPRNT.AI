@@ -1,7 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { initBrowserSentry } from "./lib/sentry";
 import App from "./App.tsx";
 import "./index.css";
+
+initBrowserSentry();
 
 /** Recover from chunk load failures after deployment by forcing a reload to get the latest index.html/manifest. */
 window.addEventListener(

@@ -33,8 +33,9 @@ export default function LoginScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!email.trim() || !password) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setErrorMsg("Enter the email and password for your account.");
       return;
     }
 
@@ -90,7 +91,7 @@ export default function LoginScreen() {
                 tint="light"
                 style={StyleSheet.absoluteFill}
               />
-              <ChevronLeft size={24} color="white" />
+              <ChevronLeft size={24} color={Theme.colors.text.primary} />
             </TouchableOpacity>
 
             <MotiView
@@ -116,14 +117,17 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   error={
-                    errorMsg && email === "" ? "Email is required" : undefined
+                    errorMsg && !email.trim() ? "Add your email" : undefined
                   }
                 />
 
                 <TextField
                   label="Password"
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   placeholder="Enter your password"
                   secureTextEntry
                 />

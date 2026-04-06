@@ -11,6 +11,11 @@ interface EmptyStateProps {
     label: string;
     onClick: () => void;
   };
+  /** Lower-emphasis path (e.g. try an estimate before committing to a full project). */
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
   variant?: "projects" | "invoices" | "error";
   className?: string;
   currentStep?: number;
@@ -54,6 +59,7 @@ export function EmptyState({
   title,
   description,
   action,
+  secondaryAction,
   variant = "projects",
   className,
   currentStep = 1,
@@ -105,24 +111,37 @@ export function EmptyState({
         </p>
       </div>
 
-      {action && (
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={action.onClick}
-          className="group relative px-10 h-14 text-sm font-black rounded-2xl liquid-metal-button shadow-xl shadow-indigo-200/50"
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            {action.label}
-            <motion.span
-              animate={{ x: [0, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              <FilePlus className="w-4 h-4" />
-            </motion.span>
-          </span>
-        </Button>
-      )}
+      <div className="flex w-full max-w-sm flex-col items-stretch gap-3">
+        {action && (
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={action.onClick}
+            className="group relative px-10 h-14 text-sm font-black rounded-2xl liquid-metal-button shadow-xl shadow-indigo-200/50"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              {action.label}
+              <motion.span
+                animate={{ x: [0, 4, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <FilePlus className="w-4 h-4" />
+              </motion.span>
+            </span>
+          </Button>
+        )}
+        {secondaryAction && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={secondaryAction.onClick}
+            className="h-12 rounded-2xl border-slate-200 bg-white/80 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          >
+            {secondaryAction.label}
+          </Button>
+        )}
+      </div>
 
       {/* Help Link & Getting Started */}
       <div className="mt-12 space-y-6 flex flex-col items-center">

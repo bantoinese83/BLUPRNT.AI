@@ -13,4 +13,10 @@ describe("friendlyDashboardLoadError", () => {
       "session",
     );
   });
+
+  it("maps rate limit hints", () => {
+    expect(
+      friendlyDashboardLoadError({ message: "429 Too Many Requests" }),
+    ).toMatch(/fast|break/i);
+  });
 });

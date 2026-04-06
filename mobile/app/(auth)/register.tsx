@@ -22,6 +22,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { GoogleIcon } from "../../src/components/auth/GoogleIcon";
 import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
+import { Theme } from "../../src/constants/Theme";
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();
@@ -100,7 +101,7 @@ export default function RegisterScreen() {
                 tint="light"
                 style={StyleSheet.absoluteFill}
               />
-              <ChevronLeft size={24} color="white" />
+              <ChevronLeft size={24} color={Theme.colors.text.primary} />
             </TouchableOpacity>
 
             <MotiView

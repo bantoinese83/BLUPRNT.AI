@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { captureEdgeInvokeFailure } from "@/lib/sentry";
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -88,6 +89,9 @@ export async function invokeFunction<T = unknown>(
         continue;
       }
 
+      if (lastResult.error) {
+        captureEdgeInvokeFailure(name, lastResult.error);
+      }
       return lastResult;
     } catch (err) {
       lastResult = { data: null, error: err as Error };
@@ -103,5 +107,8 @@ export async function invokeFunction<T = unknown>(
     }
   }
 
+  if (lastResult.error) {
+    captureEdgeInvokeFailure(name, lastResult.error);
+  }
   return lastResult;
 }

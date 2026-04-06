@@ -247,7 +247,11 @@ export default function Login() {
                     Password
                   </label>
                   <Link
-                    to="/forgot-password"
+                    to={
+                      redirectParam != null && redirectParam.trim() !== ""
+                        ? `/forgot-password?redirect=${encodeURIComponent(redirectParam)}`
+                        : "/forgot-password"
+                    }
                     className="text-xs font-bold text-indigo-600 hover:text-indigo-500 transition-colors"
                   >
                     Forgot?

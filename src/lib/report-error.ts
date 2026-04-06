@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/react";
+
 /**
  * Structured client-side error line for production debugging and support (correlate with user reports via eventId).
  */
@@ -6,7 +8,13 @@ export function reportClientError(
   error: Error,
   extra?: Record<string, unknown>,
 ): string {
-  const eventId = crypto.randomUUID();
+  if (Sentry.getClient()) {
+    Sentry.captureException(error, { tags: { source }, extra });
+  }
+
+  const eventId = Sentry.getClient()
+    ? (Sentry.lastEventId() ?? crypto.randomUUID())
+    : crypto.randomUUID();
   const line = {
     ts: new Date().toISOString(),
     level: "error" as const,

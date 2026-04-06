@@ -10,6 +10,7 @@ import {
 import { Eye, EyeOff } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
+import { Theme } from "../../constants/Theme";
 
 interface Props {
   label: string;
@@ -52,13 +53,13 @@ export function TextField({
       <MotiView
         animate={{
           borderColor: error
-            ? "#f43f5e"
+            ? Theme.colors.status.error
             : isFocused
-              ? "#818cf8"
-              : "rgba(255, 255, 255, 0.1)",
+              ? Theme.colors.brand.primary
+              : Theme.colors.border,
           backgroundColor: isFocused
-            ? "rgba(129, 140, 248, 0.05)"
-            : "rgba(255, 255, 255, 0.05)",
+            ? "rgba(79, 70, 229, 0.06)"
+            : Theme.colors.inputBg,
         }}
         transition={{ type: "timing", duration: 200 }}
         style={[styles.inputContainer, error ? styles.inputError : {}]}
@@ -68,7 +69,7 @@ export function TextField({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#475569"
+          placeholderTextColor={Theme.colors.text.muted}
           secureTextEntry={isPassword}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
@@ -77,6 +78,7 @@ export function TextField({
           accessibilityLabel={label}
           accessibilityHint={placeholder}
           accessibilityRole="text"
+          selectionColor={Theme.colors.brand.primary}
         />
         {secureTextEntry && (
           <TouchableOpacity
@@ -89,9 +91,9 @@ export function TextField({
             accessibilityRole="button"
           >
             {showPassword ? (
-              <EyeOff size={20} color="#94a3b8" />
+              <EyeOff size={20} color={Theme.colors.text.secondary} />
             ) : (
-              <Eye size={20} color="#94a3b8" />
+              <Eye size={20} color={Theme.colors.text.secondary} />
             )}
           </TouchableOpacity>
         )}
@@ -107,16 +109,16 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   label: {
-    fontSize: 12, // More compact label
+    fontSize: 12,
     fontFamily: "Outfit_700Bold",
-    color: "#64748b",
+    color: Theme.colors.text.secondary,
     marginBottom: 8,
     marginLeft: 4,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   labelFocused: {
-    color: "#818cf8",
+    color: Theme.colors.brand.primary,
   },
   inputContainer: {
     height: 56,
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: "white",
+    color: Theme.colors.text.primary,
     fontSize: 16,
     fontFamily: "Outfit_500Medium",
     height: "100%",
@@ -137,10 +139,10 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
   },
   inputError: {
-    borderColor: "#f43f5e",
+    borderColor: Theme.colors.status.error,
   },
   errorText: {
-    color: "#f43f5e",
+    color: Theme.colors.status.error,
     fontSize: 12,
     marginTop: 6,
     marginLeft: 4,
