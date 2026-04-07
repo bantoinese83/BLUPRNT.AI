@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/supabase";
+import { PRICING } from "@/lib/pricing";
 
 const FREE_INVOICE_LIMIT = 3;
 const ARCHITECT_INVOICE_LIMIT = 10;
@@ -147,10 +148,13 @@ export function UpgradeModal({
                 </p>
               )}
               {showDiscount && (
-                <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 shadow-sm shadow-slate-200">
-                  <span className="animate-pulse">✨</span> Promo Active:
-                  BLUEPRINT35
-                </div>
+                <p className="text-sm text-indigo-900 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
+                  Use promo code <strong>BLUEPRINT35</strong> on the Stripe
+                  checkout page if you have one. List prices:{" "}
+                  <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect,{" "}
+                  <strong>${PRICING.projectPassUsdOneTime}</strong> Project
+                  Pass.
+                </p>
               )}
 
               {openReason === "invoice_limit" && isArchitect && (
@@ -224,12 +228,6 @@ export function UpgradeModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Door A */}
                 <Card className="border-slate-200 shadow-md shadow-slate-100/50 relative overflow-hidden flex flex-col">
-                  {showDiscount && (
-                    <div className="absolute top-3 right-3 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded animate-bounce">
-                      -35%
-                    </div>
-                  )}
-
                   <div className="absolute top-0 inset-x-0 h-1 bg-slate-900"></div>
 
                   <CardHeader>
@@ -238,20 +236,9 @@ export function UpgradeModal({
                     </CardTitle>
 
                     <div className="mt-2 flex items-baseline text-slate-900">
-                      {showDiscount ? (
-                        <>
-                          <span className="text-4xl font-bold tracking-tight">
-                            $7.80
-                          </span>
-                          <span className="text-slate-400 line-through text-lg ml-2">
-                            $12
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-4xl font-bold tracking-tight">
-                          $12
-                        </span>
-                      )}
+                      <span className="text-4xl font-bold tracking-tight">
+                        ${PRICING.architectUsdPerMonth}
+                      </span>
                       <span className="text-slate-500 ml-1">/mo</span>
                     </div>
                   </CardHeader>
@@ -300,32 +287,15 @@ export function UpgradeModal({
                 </Card>
 
                 {/* Door B */}
-                <Card className="border-slate-200 shadow-sm flex flex-col">
-                  {showDiscount && (
-                    <div className="absolute top-3 right-3 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded animate-bounce">
-                      -35%
-                    </div>
-                  )}
-
+                <Card className="border-slate-200 shadow-sm flex flex-col relative">
                   <CardHeader>
                     <CardTitle className="text-xl text-slate-900">
                       Project Pass
                     </CardTitle>
                     <div className="mt-2 flex items-baseline text-slate-900">
-                      {showDiscount ? (
-                        <>
-                          <span className="text-4xl font-bold tracking-tight">
-                            $5.85
-                          </span>
-                          <span className="text-slate-400 line-through text-lg ml-2">
-                            $9
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-4xl font-bold tracking-tight">
-                          $9
-                        </span>
-                      )}
+                      <span className="text-4xl font-bold tracking-tight">
+                        ${PRICING.projectPassUsdOneTime}
+                      </span>
                       <span className="text-slate-500 ml-1">/project</span>
                     </div>
                   </CardHeader>

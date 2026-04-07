@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Hammer as HammerIcon, CheckCircle2, Hammer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PRICING } from "@/lib/pricing";
 
 interface PricingRow {
   feature: string;
@@ -69,7 +70,7 @@ export function LandingPricing({
               </h3>
               <div className="flex items-baseline gap-1">
                 <span className="text-5xl font-black tracking-tight text-slate-900">
-                  $12
+                  ${PRICING.architectUsdPerMonth}
                 </span>
                 <span className="text-slate-500 font-bold">/mo</span>
               </div>
@@ -123,7 +124,7 @@ export function LandingPricing({
               </h3>
               <div className="flex items-baseline gap-1">
                 <span className="text-5xl font-black tracking-tight text-slate-900">
-                  $9
+                  ${PRICING.projectPassUsdOneTime}
                 </span>
                 <span className="text-slate-500 font-bold">/project</span>
               </div>
@@ -215,7 +216,8 @@ export function LandingPricing({
                           Most flexible
                         </span>
                         <span className="text-sm font-bold tabular-nums text-slate-700">
-                          $12<span className="text-slate-500">/mo</span>
+                          ${PRICING.architectUsdPerMonth}
+                          <span className="text-slate-500">/mo</span>
                         </span>
                       </div>
                     </th>
@@ -231,7 +233,8 @@ export function LandingPricing({
                           One project
                         </span>
                         <span className="text-sm font-bold tabular-nums text-slate-700">
-                          $9<span className="text-slate-500"> once</span>
+                          ${PRICING.projectPassUsdOneTime}
+                          <span className="text-slate-500"> once</span>
                         </span>
                       </div>
                     </th>

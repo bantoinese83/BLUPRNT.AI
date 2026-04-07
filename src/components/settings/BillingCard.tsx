@@ -1,6 +1,7 @@
 import { CreditCard, Crown, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PRICING } from "@/lib/pricing";
 
 interface BillingCardProps {
   isArchitect: boolean;
@@ -57,9 +58,13 @@ export function BillingCard({ isArchitect, onUpgradeClick }: BillingCardProps) {
 
         {!isArchitect && (
           <p className="text-xs text-slate-500 leading-relaxed px-1 font-medium">
-            Upgrade to Architect for{" "}
+            Architect is{" "}
             <span className="text-slate-900">
-              Advanced AI Project Strategies
+              ${PRICING.architectUsdPerMonth}/mo
+            </span>{" "}
+            with{" "}
+            <span className="text-slate-900">
+              advanced AI project strategies
             </span>
             , 10 smart invoice scans per billing period, and priority support.
           </p>

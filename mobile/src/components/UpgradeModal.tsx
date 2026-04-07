@@ -3,12 +3,14 @@ import {
   Modal,
   StyleSheet,
   View,
+  Text,
   Platform,
   TouchableOpacity,
 } from "react-native";
 import RevenueCatUI from "react-native-purchases-ui";
 import { X } from "lucide-react-native";
 import { Theme } from "../constants/Theme";
+import { PRICING } from "../constants/pricing";
 import * as Haptics from "expo-haptics";
 
 interface Props {
@@ -53,6 +55,11 @@ export function UpgradeModal({ isOpen, onClose }: Props) {
           </TouchableOpacity>
         )}
 
+        <Text style={styles.priceHint} accessibilityRole="text">
+          Architect ${PRICING.architectUsdPerMonth}/mo · Project Pass $
+          {PRICING.projectPassUsdOneTime} one-time. Apple/Google show the final
+          price in checkout.
+        </Text>
         <RevenueCatUI.Paywall
           onPurchaseCompleted={handlePurchaseCompleted}
           onRestoreCompleted={handleRestoreCompleted}
@@ -64,6 +71,16 @@ export function UpgradeModal({ isOpen, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
+  priceHint: {
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 10 : 16,
+    paddingBottom: 8,
+    textAlign: "center",
+    fontSize: 13,
+    lineHeight: 18,
+    color: Theme.colors.text.secondary,
+    fontFamily: Theme.typography.family.medium,
+  },
   container: {
     flex: 1,
     backgroundColor: Theme.colors.background,

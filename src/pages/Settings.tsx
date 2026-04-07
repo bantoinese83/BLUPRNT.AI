@@ -26,6 +26,7 @@ import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { useLogout } from "@/hooks/use-logout";
+import { PRICING } from "@/lib/pricing";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -513,12 +514,17 @@ export default function Settings() {
             <div className="px-2">
               {!isArchitect ? (
                 <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                  Unlock{" "}
+                  Architect is{" "}
                   <span className="text-slate-900 font-bold">
-                    Professional AI Generation
+                    ${PRICING.architectUsdPerMonth}/mo
+                  </span>{" "}
+                  with{" "}
+                  <span className="text-slate-900 font-bold">
+                    professional AI generation
                   </span>
                   , 10 smart document scans per month, and priority project
-                  strategy consultations.
+                  strategy. Project Pass is ${PRICING.projectPassUsdOneTime}{" "}
+                  one-time per project.
                 </p>
               ) : (
                 <p className="text-sm text-slate-500 leading-relaxed font-medium">
