@@ -11,6 +11,7 @@
     "lint": "eslint . --max-warnings 0 && tsc --noEmit && npm run lint --prefix mobile",
     "test": "vitest",
     "check": "npm run lint && npm run test:run && npm run build",
+    "test:all": "npm run check && npm run test:coverage && npm run test:e2e",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "db:types": "bash scripts/gen-db-types.sh",
