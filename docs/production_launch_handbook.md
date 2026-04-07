@@ -4,7 +4,7 @@ This document serves as the master record of the production hardening process co
 
 ---
 
-## 1. App Store Connect & RevenueCat (Monetization)
+## 1. App Store Connect & RevenueCat (Mobile Monetization)
 
 We successfully connected the mobile app to Apple's In-App Purchase system to handle subscriptions.
 
@@ -27,27 +27,32 @@ We successfully connected the mobile app to Apple's In-App Purchase system to ha
 
 ---
 
-## 2. Supabase Backend Sync & Hardening
+## 2. Stripe Integration (Web Monetization)
+
+We ensured the Web Application's checkout flow is identically synced with the native mobile app subscriptions.
+
+### What was done:
+
+- **Pricing Ties**: Set the `VITE_STRIPE_ARCHITECT_PRICE_ID` in the root `.env` to map directly to the "Bluprntai Pro" tier.
+- **Backend Secrets**: Required `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` to be deployed to the Supabase Edge Functions (`create-checkout` and `stripe-webhook`).
+- **Webhooks**: Ensured Stripe securely broadcasts subscription upgrades and cancellations directly to the user's row in `user_subscriptions` via Edge Functions.
+
+---
+
+## 3. Supabase Backend Sync & Hardening
 
 We ensured the local database schema and edge functions exactly match the live production environment.
 
 ### What was done:
 
 - **Edge Functions**: Deployed all 11 Edge Functions to `elucgaegaihkklnfoasm`.
-- **Database Sync**: Pushed all custom RPCs (e.g., `recalc_project_totals`) and SQL migrations to production.
-- **Secure Storage**: Created two new private storage buckets:
-  1. `project-documents` (for PDF invoices/quotes)
-  2. `project-photos` (for Gemini vision processing)
+- **Database Sync**: Pushed all custom RPCs and SQL migrations to production, including TypeScript `supabase.gen.ts` typings for Web and Mobile.
+- **Secure Storage**: Created two new private storage buckets: `project-documents` (for PDF invoices/quotes) and `project-photos` (for Gemini vision processing).
 - **Storage RLS**: Enabled strict Row Level Security on the storage buckets so users can only read/write files located inside their own `project_id` folder.
-
-### Troubleshooting:
-
-> [!NOTE]
-> If users cannot upload invoices, check the Supabase Storage logs. Ensure the user is authenticated and the RLS policy is correctly parsing their `auth.uid()`.
 
 ---
 
-## 3. RevenueCat Database Sync (Webhooks)
+## 4. RevenueCat Database Sync (Webhooks)
 
 We configured RevenueCat to tell the Supabase database whenever someone buys or cancels a subscription on their phone.
 
@@ -55,33 +60,28 @@ We configured RevenueCat to tell the Supabase database whenever someone buys or 
 
 - Implemented the `revenuecat-webhook` Edge Function.
 - Registered the Webhook URL in the RevenueCat dashboard.
+- **Security Lockdown**: Implemented an Authorization bearer token requirement (`REVENUECAT_WEBHOOK_AUTH_TOKEN`) inside the webhook function to prevent unauthenticated POST requests from upgrading user accounts for free.
 - When a user buys "Bluprntai Pro", the webhook maps it to the `architect` plan and sets their `user_subscriptions` row to `active`.
 
 ### Troubleshooting:
 
 > [!WARNING]
-> If mobile users upgrade but their Web Dashboard still says "Free", the webhook failed. Check the [RevenueCat Webhook Logs](https://app.revenuecat.com) and the Supabase Edge Function logs for `revenuecat-webhook`.
+> If mobile users upgrade but their Web Dashboard still says "Free", the webhook failed. Check the [RevenueCat Webhook Logs](https://app.revenuecat.com) and the Supabase Edge Function logs for `revenuecat-webhook` and verify `REVENUECAT_WEBHOOK_AUTH_TOKEN` is synced properly.
 
 ---
 
-## 4. Brevo Email Migration (Transactional Emails)
+## 5. Brevo Email Migration (Transactional Emails)
 
-We replaced Resend with Brevo to take advantage of their generous 300 free emails/day tier.
+We replaced Resend with Brevo for scalable transactional email processing.
 
 ### What was done:
 
-- Stripped the heavy `resend` NPM package.
 - Rewrote `supabase/functions/send-email/index.ts` to use a lightweight `fetch` request calling `https://api.brevo.com/v3/smtp/email`.
 - Generated a secure API Key in the Brevo Dashboard and injected it into Supabase as `BREVO_API_KEY`.
 
-### Troubleshooting:
-
-> [!CAUTION]
-> If emails are not arriving or landing in spam, verify your Domain Authentication settings in the Brevo dashboard. Ensure the `connect@monarch-labs.com` sender identity is approved.
-
 ---
 
-## 5. Upstash Redis (Global Rate Limiting)
+## 6. Upstash Redis (Global Rate Limiting)
 
 We established global DDoS protection for your AI and Email endpoints.
 
@@ -91,38 +91,34 @@ We established global DDoS protection for your AI and Email endpoints.
 - Injected `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` into Supabase Edge Function secrets.
 - The `_shared/rate-limit.ts` utility automatically detected these keys and switched from "Per-Server In-Memory limit" to a **Global Shared limit**.
 
-### Troubleshooting:
-
-> [!TIP]
-> If users hit "Too many requests" errors constantly on the AI estimation tool, you can raise the global limit by using the Supabase CLI:
-> `supabase secrets set RATE_LIMIT_REQUESTS=100`
-
 ---
 
-## 6. Error Monitoring (Sentry)
+## 7. Error Monitoring & Telemetry (Sentry)
 
 We verified the Sentry setup for both Web and Mobile to ensure production crashes are captured and readable.
 
 ### What was done:
 
-- **Project Verification**: Verified DSNs and project slugs for `bluprntai-mobile` and `bluprntai-web` in the `base83` Sentry organization.
-- **Sourcemap Configuration**:
-  - Updated `mobile/app.json` to include the Sentry Expo plugin with the correct `organization` and `project` slugs. This is required for EAS Build to upload sourcemaps so you can see the exact line of code that crashed.
-  - Verified `vite.config.ts` has the `sentryVitePlugin` configured for the web build.
+- **Web Verification**: Web is fully instrumented via `src/instrument.ts` routing to the `bluprntai-web` project using `VITE_SENTRY_DSN`.
+- **Mobile Verification**: Updated `mobile/app.json` to include the Sentry Expo plugin with the correct `organization` and `project` slugs.
 - **Identity Linking**: Confirmed that `Purchases.logIn(userId)` and `Sentry.setUser({ id: userId })` are called together in the mobile layout to link purchase history with crash reports.
-
-### Troubleshooting:
-
-> [!IMPORTANT]
-> **Build Authentication**: You MUST provide a **`SENTRY_AUTH_TOKEN`** to your build environment (EAS Secret or Vercel Env) before running a production build, otherwise the sourcemap upload will fail.
-
-> [!TIP]
-> If you see "Minified" code in Sentry instead of your actual TypeScript, your SENTRY_AUTH_TOKEN was likely missing during the build process.
 
 ---
 
-## 🚀 Final Steps Before Launch
+## 8. Expo EAS Build Pipeline
 
-1. Supply the final Test Account credentials in App Store Connect for Apple Reviewers.
-2. Upload screenshots to the App Store listing.
-3. Run `eas build --platform ios --profile production`.
+The final step was automating App Store submission directly from the developer environment.
+
+### What was done:
+
+- **EAS Config**: Built the `mobile/eas.json` schema to govern development, preview, and production builds.
+- **App Store Connect Keys**: Generated an `AscApiKey.p8` with Admin permissions in App Store Connect and safely uploaded it into Expo Settings to automate code signing, certificates, and TestFlight submissions.
+- **Project Linkage**: Assigned `"owner": "mlabs83"` to `mobile/app.json` to guarantee all EAS CLI commands correctly target the production cloud dashboard.
+
+---
+
+## 🚀 Final Release Pipeline
+
+1. Add final `EXPO_PUBLIC_*` secrets directly into the Expo Web Dashboard Settings (Supabase URLs, RevenueCat Appl Keys).
+2. Ensure Supabase Secrets holds `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `GEMINI_API_KEY`.
+3. Run `npx eas-cli build --profile production --platform ios` to initiate the final App Store drop!

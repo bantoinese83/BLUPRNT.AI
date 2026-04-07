@@ -8,6 +8,14 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 serve(async (req) => {
   try {
+    const authHeader = req.headers.get("Authorization");
+    const secretToken = Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN");
+
+    if (!secretToken || authHeader !== `Bearer ${secretToken}`) {
+      console.warn("Unauthorized webhook attempt.");
+      return new Response("Unauthorized", { status: 401 });
+    }
+
     const { event } = await req.json();
 
     const userId = event.app_user_id;
@@ -56,9 +64,14 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Webhook processing error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { "Content-Type": "application/json" },
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 400,
+      },
+    );
   }
 });
