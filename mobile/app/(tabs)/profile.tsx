@@ -30,6 +30,7 @@ import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { useAwareness } from "../../src/contexts/AwarenessContext";
 import { usePremium } from "../../src/hooks/usePremium";
 import { supabase, invokeFunction } from "../../src/lib/supabase";
+import { getPasswordRecoveryRedirectUrl } from "../../src/lib/auth-linking";
 import { router } from "expo-router";
 import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
@@ -79,7 +80,9 @@ export default function ProfileScreen() {
     Haptics.selectionAsync();
     if (!user?.email) return;
 
-    const { error } = await supabase.auth.resetPasswordForEmail(user.email);
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: getPasswordRecoveryRedirectUrl(),
+    });
     if (error) {
       Alert.alert("Error", error.message);
     } else {

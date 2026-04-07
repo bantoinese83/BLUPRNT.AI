@@ -206,7 +206,8 @@ function RootLayoutNav() {
       return;
     }
 
-    if (inAuthGroup || isLanding) {
+    const onRecoveryScreen = pathname.includes("reset-password");
+    if ((inAuthGroup || isLanding) && !onRecoveryScreen) {
       router.replace("/(tabs)");
     }
   }, [session, loading, segments, pathname]);
@@ -256,6 +257,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)/login" />
         <Stack.Screen name="(auth)/register" />
         <Stack.Screen name="(auth)/forgot-password" />
+        <Stack.Screen name="(auth)/reset-password" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="project/[id]" />
         <Stack.Screen name="privacy" />

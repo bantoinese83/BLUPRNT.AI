@@ -19,6 +19,7 @@ import { Button } from "../../src/components/ui/Button";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { TextField } from "../../src/components/ui/TextField";
 import { supabase } from "../../src/lib/supabase";
+import { getPasswordRecoveryRedirectUrl } from "../../src/lib/auth-linking";
 import { Theme } from "../../src/constants/Theme";
 
 export default function ForgotPasswordScreen() {
@@ -48,7 +49,7 @@ export default function ForgotPasswordScreen() {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
         {
-          redirectTo: "mobile://reset-password",
+          redirectTo: getPasswordRecoveryRedirectUrl(),
         },
       );
 

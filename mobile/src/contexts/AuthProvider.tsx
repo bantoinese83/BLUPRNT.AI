@@ -3,7 +3,9 @@ import { Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
+import * as Linking from "expo-linking";
 import { supabase } from "../lib/supabase";
+import { extractPkceCodeFromUrl } from "../lib/auth-linking";
 import { AuthContext } from "./auth-context";
 
 // Tell the browser to complete the session when redirected back
@@ -38,6 +40,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       subscription.unsubscribe();
+    };
+  }, []);
+
+  /** PKCE recovery / magic links: exchange `?code=` when the app opens from a deep link. */
+  useEffect(() => {
+    let active = true;
+
+    const exchange = async (url: string) => {
+      const code = extractPkceCodeFromUrl(url);
+      if (!code) return;
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error && __DEV__) {
+        console.warn("[AuthProvider] exchangeCodeForSession:", error.message);
+      }
+    };
+
+    void Linking.getInitialURL().then((url) => {
+      if (url && active) void exchange(url);
+    });
+
+    const sub = Linking.addEventListener("url", ({ url }) => {
+      void exchange(url);
+    });
+
+    return () => {
+      active = false;
+      sub.remove();
     };
   }, []);
 
