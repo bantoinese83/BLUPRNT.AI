@@ -30,7 +30,8 @@ verify_jwt = false
 
 [functions.revenuecat-webhook]
 enabled = true
-verify_jwt = true
+# External webhook (RevenueCat servers) — no Supabase user JWT on the request
+verify_jwt = false
 import_map = "./functions/revenuecat-webhook/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

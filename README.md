@@ -76,15 +76,16 @@ BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.
 
 ## Edge Functions (backend)
 
-| Function           | JWT   | Purpose                                                                                                                                     |
-| ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `create-checkout`  | Off\* | Generate secure Stripe Checkout session (user validated in-function via `getUserIdFromRequest`)                                             |
-| `stripe-webhook`   | Off   | Receive Stripe events (provisioning)                                                                                                        |
-| `photo-to-scope`   | Off\* | Build estimate from ZIP, room type, optional photos (Gemini + optional Google Search grounding)                                             |
-| `upload-invoice`   | Off\* | Upload PDF/image → Storage + `documents` + `invoices` (Gemini vision OCR when `GEMINI_API_KEY` is set)                                      |
-| `get-invoice`      | Off\* | Load invoice + line items                                                                                                                   |
-| `get-project-view` | Off   | Public: fetch project + scope by share token                                                                                                |
-| `delete-account`   | On    | Delete user data, Storage files in `project-documents`, Stripe subscription/customer when `STRIPE_SECRET_KEY` is set, then remove auth user |
+| Function             | JWT   | Purpose                                                                                                                             |
+| -------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `create-checkout`    | Off\* | Generate secure Stripe Checkout session (user validated in-function via `getUserIdFromRequest`)                                     |
+| `stripe-webhook`     | Off   | Receive Stripe events (provisioning)                                                                                                |
+| `revenuecat-webhook` | Off   | Receive RevenueCat subscription events → `user_subscriptions` (no Supabase JWT on incoming requests)                                |
+| `photo-to-scope`     | Off\* | Build estimate from ZIP, room type, optional photos (Gemini + optional Google Search grounding)                                     |
+| `upload-invoice`     | Off\* | Upload PDF/image → Storage + `documents` + `invoices` (Gemini vision OCR when `GEMINI_API_KEY` is set)                              |
+| `get-invoice`        | Off\* | Load invoice + line items                                                                                                           |
+| `get-project-view`   | Off   | Public: fetch project + scope by share token                                                                                        |
+| `delete-account`     | Off\* | Delete user data (caller JWT validated in-function), Storage, Stripe cleanup when `STRIPE_SECRET_KEY` is set, then remove auth user |
 
 \*Gateway JWT verification is off in [`supabase/config.toml`](supabase/config.toml) for these functions so requests reach Deno without spurious edge `Invalid JWT`. `photo-to-scope` still allows guest estimates; saving to a project uses a user token. `create-checkout`, `upload-invoice`, and `get-invoice` require a valid `Authorization` bearer token and validate the user inside the handler.
 
@@ -121,6 +122,9 @@ Set via Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 | `STRIPE_ARCHITECT_PRICE_ID` | Optional on Edge. If set, that price id is forced to subscription mode; otherwise mode comes from Stripe (`recurring` → subscription, `one_time` → payment). |
 | `GEMINI_API_KEY`            | Google Gemini API key for **invoice OCR** and **photo-to-scope** estimates (Edge only; never expose in Vite).                                                |
 | `GEMINI_MODEL`              | Optional. Gemini model id (default `gemini-2.5-flash`). Override per [Gemini models](https://ai.google.dev/gemini-api/docs/models).                          |
+| `BREVO_API_KEY`             | Brevo API key for `send-email` (transactional mail).                                                                                                         |
+| `UPSTASH_REDIS_REST_URL`    | Optional. With `UPSTASH_REDIS_REST_TOKEN`, enables shared rate limits in `_shared/rate-limit.ts`.                                                            |
+| `UPSTASH_REDIS_REST_TOKEN`  | Optional. Upstash Redis REST token.                                                                                                                          |
 
 #### Gemini API (Edge)
 
