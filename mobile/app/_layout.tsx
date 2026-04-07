@@ -6,6 +6,8 @@ import {
   Sentry,
 } from "../src/lib/sentry";
 import { queryClient } from "../src/lib/query-client";
+import Purchases from "react-native-purchases";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 
 initMobileSentry();
 
@@ -24,7 +26,7 @@ import {
 } from "@expo-google-fonts/outfit";
 import { Stack, router, useSegments, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "../src/components/useColorScheme";
@@ -35,7 +37,7 @@ import { BrandedSplash } from "../src/components/BrandedSplash";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
-import { View, Text, StyleSheet, LogBox } from "react-native";
+import { View, Text, StyleSheet, LogBox, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "../src/constants/Theme";
 import { WifiOff } from "lucide-react-native";
@@ -80,6 +82,26 @@ function RootLayout() {
   // shows immediately. Expo Go may still flash its default for a moment before JS.
   useEffect(() => {
     void SplashScreen.hideAsync();
+
+    // Initialize RevenueCat
+    const isExpoGo =
+      Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+    const testKey = process.env.EXPO_PUBLIC_REVENUECAT_TEST_STORE_KEY || "";
+
+    if (isExpoGo) {
+      console.log("Expo Go detected. Using RevenueCat Test Store Key.");
+      Purchases.configure({ apiKey: testKey });
+    } else {
+      if (Platform.OS === "ios") {
+        Purchases.configure({
+          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY || "",
+        });
+      } else if (Platform.OS === "android") {
+        Purchases.configure({
+          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY || "",
+        });
+      }
+    }
   }, []);
 
   if (!loaded) {
@@ -188,6 +210,39 @@ function RootLayoutNav() {
       router.replace("/(tabs)");
     }
   }, [session, loading, segments, pathname]);
+
+  // Sync RevenueCat & Sentry Identity
+  const lastSyncedId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const currentId = session?.user?.id || null;
+
+    // Prevent redundant syncs to avoid RevenueCat 429 "request in flight" errors
+    if (currentId === lastSyncedId.current) return;
+    lastSyncedId.current = currentId;
+
+    if (currentId) {
+      // Sentry
+      Sentry.setUser({ id: currentId, email: session?.user?.email });
+
+      // RevenueCat
+      Purchases.logIn(currentId).catch((e) => {
+        // Silently handle 429s as they are often transient during HMR/fast reloads
+        if (e.code === 16 || e.message?.includes("429")) return;
+        console.error("RevenueCat Login Error:", e);
+      });
+    } else {
+      // Sentry
+      Sentry.setUser(null);
+
+      // RevenueCat
+      Purchases.logOut().catch((e) => {
+        console.error("RevenueCat Logout Error:", e);
+      });
+    }
+  }, [session, loading]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

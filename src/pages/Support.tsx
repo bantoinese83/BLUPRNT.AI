@@ -1,0 +1,132 @@
+import { Link } from "react-router-dom";
+import { Mail, MessageCircle, HelpCircle, ArrowLeft } from "lucide-react";
+
+export default function Support() {
+  return (
+    <div className="min-h-screen bg-[#07090D] text-white selection:bg-indigo-500/30">
+      {/* Navigation */}
+      <nav className="border-b border-white/5 bg-white/2 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Back to Home</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <span className="text-white font-black text-xs">B.</span>
+            </div>
+            <span className="font-bold tracking-tight">BLUPRNT.AI Support</span>
+          </div>
+          <div className="w-20" /> {/* Spacer */}
+        </div>
+      </nav>
+
+      <main className="max-w-4xl mx-auto px-4 py-20">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
+            How can we help?
+          </h1>
+          <p className="text-lg text-slate-400 max-w-xl mx-auto">
+            Our team of project architects is ready to assist you with AI
+            analysis, account issues, or blueprint optimization.
+          </p>
+        </div>
+
+        {/* Quick Help Grid */}
+        <div className="grid md:grid-cols-2 gap-6 mb-20">
+          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-indigo-500/30 transition-all group">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Mail className="w-6 h-6 text-indigo-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Email Support</h3>
+            <p className="text-slate-400 mb-6 italic">
+              Response time: &lt; 24h
+            </p>
+            <a
+              href="mailto:support@monarchlabs.co"
+              className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors inline-flex items-center gap-2"
+            >
+              support@monarchlabs.co
+            </a>
+          </div>
+
+          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-purple-500/30 transition-all group">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <HelpCircle className="w-6 h-6 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Knowledge Base</h3>
+            <p className="text-slate-400 mb-6 italic">Self-service help docs</p>
+            <button
+              onClick={() => alert("Knowledge Base coming soon!")}
+              className="text-purple-400 font-semibold hover:text-purple-300 transition-colors"
+            >
+              Browse Articles
+            </button>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mb-20">
+          <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+            <MessageCircle className="text-indigo-400" />
+            Common Questions
+          </h2>
+          <div className="space-y-4">
+            {[
+              {
+                q: "How does the AI analysis work?",
+                a: "Our AI model 'Visionary-1' processes your project photos and descriptions to identify scope items and cross-reference them with regional pricing benchmarks.",
+              },
+              {
+                q: "Can I use Bluprnt Pro on multiple devices?",
+                a: "Yes! Your 'Bluprnt Pro' subscription synced via RevenueCat works across both iOS, Android, and Web automatically.",
+              },
+              {
+                q: "How do I request a refund?",
+                a: "For App Store purchases, please use the Apple Report a Problem page. For Web purchases, contact our support email directly.",
+              },
+            ].map((faq, i) => (
+              <details
+                key={i}
+                className="group p-6 rounded-2xl bg-white/2 border border-white/5 [&_summary::-webkit-details-marker]:hidden"
+              >
+                <summary className="flex items-center justify-between cursor-pointer">
+                  <h4 className="font-semibold text-lg">{faq.q}</h4>
+                  <span className="text-indigo-400 group-open:rotate-180 transition-transform font-bold text-xl">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-4 text-slate-400 leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* Closing */}
+        <div className="p-12 rounded-[2rem] bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-white/10 text-center">
+          <h3 className="text-2xl font-bold mb-4">Still stuck?</h3>
+          <p className="text-slate-300 mb-8 max-w-md mx-auto">
+            Drop us a line and one of our human architects will get back to you
+            personally.
+          </p>
+          <a
+            href="mailto:support@monarchlabs.co"
+            className="inline-flex h-12 items-center justify-center px-8 rounded-xl bg-white text-[#07090D] font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10"
+          >
+            Contact Support
+          </a>
+        </div>
+      </main>
+
+      <footer className="max-w-7xl mx-auto px-4 py-20 border-t border-white/5 text-center">
+        <p className="text-slate-500 text-sm italic">
+          BLUPRNT.AI is a project by Monarch Labs Inc. All rights reserved.
+        </p>
+      </footer>
+    </div>
+  );
+}

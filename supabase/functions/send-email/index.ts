@@ -1,12 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { Resend } from "npm:resend";
 import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 import { getServiceClient } from "../_shared/auth.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
+const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
 
 const MAX_SUBJECT_LEN = 200;
 const MAX_HTML_LEN = 50_000;
@@ -63,17 +62,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data, error } = await resend.emails.send({
-      from: "BLUPRNT.AI Notifications <connect@monarch-labs.com>",
-      to: userEmail,
-      subject,
-      html,
+    const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "BLUPRNT.AI Notifications",
+          email: "connect@monarch-labs.com",
+        },
+        to: [{ email: userEmail }],
+        subject: subject,
+        htmlContent: html,
+      }),
     });
 
-    if (error) {
-      logEdge("error", "send-email Resend failed", {
-        detail:
-          error instanceof Error ? (error as Error).message : String(error),
+    if (!brevoResponse.ok) {
+      const errorData = await brevoResponse.text();
+      logEdge("error", "send-email Brevo failed", {
+        detail: errorData,
       });
       return jsonResponse(
         { error: "Could not send email. Please try again." },
@@ -82,6 +91,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const data = await brevoResponse.json();
     return jsonResponse({ data }, 200, req);
   } catch (error) {
     logEdge("error", "send-email unexpected", {

@@ -20,6 +20,7 @@ import { TextField } from "../../src/components/ui/TextField";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { ChevronLeft } from "lucide-react-native";
 import { GoogleIcon } from "../../src/components/auth/GoogleIcon";
+import { AppleSignIn } from "../../src/components/auth/AppleSignIn";
 import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Theme } from "../../src/constants/Theme";
@@ -172,6 +173,15 @@ export default function RegisterScreen() {
                   variant="outline"
                   icon={<GoogleIcon />}
                   style={{ marginTop: 0 }}
+                />
+
+                <AppleSignIn
+                  onStart={() => setGoogleLoading(true)}
+                  onSuccess={() => setGoogleLoading(false)}
+                  onError={(err) => {
+                    setGoogleLoading(false);
+                    Alert.alert("Apple Auth Failed", err.message);
+                  }}
                 />
               </View>
             </GlassCard>

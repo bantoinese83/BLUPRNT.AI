@@ -1,4 +1,11 @@
 import * as Sentry from "@sentry/react";
+import { useEffect } from "react";
+import {
+  createRoutesFromChildren,
+  matchRoutes,
+  useLocation,
+  useNavigationType,
+} from "react-router-dom";
 
 const dsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 
@@ -19,8 +26,25 @@ export function initBrowserSentry(): void {
     dsn,
     environment: import.meta.env.MODE,
     sendDefaultPii: false,
-    integrations: [Sentry.browserTracingIntegration()],
-    tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.reactRouterV6BrowserTracingIntegration({
+        useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes,
+      }),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+    // Tracing
+    tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
+    // Session Replay
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
     beforeSend(event) {
       if (event.request?.headers) {
         const h = { ...event.request.headers };
@@ -76,5 +100,8 @@ export function captureEdgeInvokeFailure(
     },
   );
 }
+
+// Initialize immediately
+initBrowserSentry();
 
 export { Sentry };

@@ -234,7 +234,7 @@ export async function generateSellerPacketPDF(
         await supabase.from("seller_packets").upsert(
           {
             project_id: project.id,
-            property_id: project.property_id || null,
+            property_id: project.property_id || "",
             storage_path: storagePath,
             generated_at: new Date().toISOString(),
           },

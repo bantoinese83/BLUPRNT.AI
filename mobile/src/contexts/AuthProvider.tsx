@@ -2,6 +2,7 @@ import React, { useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { supabase } from "../lib/supabase";
 import { AuthContext } from "./auth-context";
 
@@ -91,10 +92,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   };
+  const signInWithApple = async () => {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (credential.identityToken) {
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: "apple",
+          token: credential.identityToken,
+        });
+        if (error) throw error;
+      } else {
+        throw new Error("No identity token returned from Apple.");
+      }
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "ERR_REQUEST_CANCELED"
+      ) {
+        // user cancelled
+        return;
+      }
+      console.error("Apple sign in error:", error);
+      throw error;
+    }
+  };
 
   return (
     <AuthContext.Provider
-      value={{ session, user, loading, signOut, signInWithGoogle }}
+      value={{
+        session,
+        user,
+        loading,
+        signOut,
+        signInWithGoogle,
+        signInWithApple,
+      }}
     >
       {children}
     </AuthContext.Provider>

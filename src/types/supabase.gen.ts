@@ -17,7 +17,9 @@ export type Json =
 
 type TableRow<T> = {
   Row: T;
-  Insert: Partial<T>;
+  Insert: T extends { id: string }
+    ? Omit<Partial<T>, "id"> & { id?: string }
+    : Partial<T>;
   Update: Partial<T>;
   Relationships: [];
 };
@@ -25,18 +27,30 @@ type TableRow<T> = {
 type ProjectsRow = {
   id: string;
   name: string;
-  property_id?: string;
+  property_id: string;
   estimated_min_total: number | null;
   estimated_max_total: number | null;
   confidence_score: number | null;
   stage: string | null;
-  created_at?: string;
-  updated_at?: string | null;
-  metadata?: {
+  type: string | null;
+  created_at: string;
+  updated_at: string | null;
+  metadata: {
     value_engineering_tips?: string[];
     regional_context?: string;
     regional_signal?: string;
-  };
+  } | null;
+};
+
+type PropertiesRow = {
+  id: string;
+  owner_user_id: string;
+  postal_code: string;
+  city: string;
+  state: string;
+  country: string;
+  approximate_location: string | null;
+  created_at: string;
 };
 
 type ScopeItemsRow = {
@@ -52,13 +66,13 @@ type ScopeItemsRow = {
   total_cost_min: number | null;
   total_cost_max: number | null;
   confidence_score: number | null;
-  confidence_reason?: string;
-  source?: "text" | "photo";
-  justification?: string;
-  priority?: "high" | "medium" | "low";
-  phase?: string;
-  maintenance_tips?: string;
-  metadata?: {
+  confidence_reason: string | null;
+  source: "text" | "photo" | null;
+  justification: string | null;
+  priority: "high" | "medium" | "low" | null;
+  phase: string | null;
+  maintenance_tips: string | null;
+  metadata: {
     justification?: string;
     priority?: "high" | "medium" | "low";
     phase?: string;
@@ -72,7 +86,7 @@ type ScopeItemsRow = {
       unit?: string;
       estimated_cost?: number;
     }>;
-  };
+  } | null;
 };
 
 type InvoicesRow = {
@@ -82,8 +96,20 @@ type InvoicesRow = {
   total: number | null;
   created_at: string;
   payment_status: string;
-  document_type?: string | null;
-  document_id?: string | null;
+  document_type: string | null;
+  document_id: string | null;
+};
+
+type InvoiceLineItemsRow = {
+  id: string;
+  invoice_id: string;
+  description: string;
+  quantity: number | null;
+  unit_price: number | null;
+  line_total: number | null;
+  category: string | null;
+  scope_item_id: string | null;
+  created_at: string;
 };
 
 type UserSubscriptionsRow = {
@@ -115,15 +141,44 @@ type UserPreferencesRow = {
   updated_at: string | null;
 };
 
+type MarketingLeadsRow = {
+  id: string;
+  email: string;
+  source: string;
+  created_at: string;
+};
+
+type SellerPacketsRow = {
+  id: string;
+  project_id: string;
+  property_id: string;
+  created_at: string;
+  generated_at: string | null;
+  storage_path: string | null;
+};
+
+type ProjectViewTokensRow = {
+  id: string;
+  project_id: string;
+  token: string;
+  created_at: string;
+  expires_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
       projects: TableRow<ProjectsRow>;
+      properties: TableRow<PropertiesRow>;
       scope_items: TableRow<ScopeItemsRow>;
       invoices: TableRow<InvoicesRow>;
+      invoice_line_items: TableRow<InvoiceLineItemsRow>;
       user_subscriptions: TableRow<UserSubscriptionsRow>;
       project_passes: TableRow<ProjectPassesRow>;
       user_preferences: TableRow<UserPreferencesRow>;
+      marketing_leads: TableRow<MarketingLeadsRow>;
+      seller_packets: TableRow<SellerPacketsRow>;
+      project_view_tokens: TableRow<ProjectViewTokensRow>;
     };
     Views: Record<string, never>;
     Functions: {

@@ -111,6 +111,14 @@ export function LandingFooter() {
                   </Link>
                 </li>
                 <li>
+                  <Link
+                    to="/support"
+                    className="font-medium hover:text-slate-900"
+                  >
+                    Support center
+                  </Link>
+                </li>
+                <li>
                   <button
                     type="button"
                     onClick={() => openCookieSettings()}

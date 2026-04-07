@@ -55,7 +55,13 @@
           "photosPermission": "Allow BlueprintAI to access your photo library to select renovation photos for estimation."
         }
       ],
-      "@sentry/react-native"
+      [
+        "@sentry/react-native",
+        {
+          "organization": "base83",
+          "project": "bluprntai-mobile"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

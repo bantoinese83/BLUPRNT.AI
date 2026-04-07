@@ -1,77 +1,67 @@
-import React from "react";
+import React, { useMemo, useEffect } from "react";
 import {
-  View,
   StyleSheet,
   Animated,
-  ViewStyle,
-  DimensionValue,
+  type DimensionValue,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Theme } from "../../constants/Theme";
 
 interface Props {
-  width?: number | string;
-  height?: number | string;
+  width?: DimensionValue;
+  height?: DimensionValue;
   borderRadius?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function SkeletonLoader({
-  width = "100%",
-  height = 20,
-  borderRadius = 16,
+  width,
+  height,
+  borderRadius = 8,
   style,
 }: Props) {
-  const animatedValue = React.useMemo(() => new Animated.Value(0), []);
-  const [layoutWidth, setLayoutWidth] = React.useState(0);
+  const animatedValue = useMemo(() => new Animated.Value(0), []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.loop(
-      Animated.timing(animatedValue, {
-        toValue: 1,
-        duration: 1500,
-        useNativeDriver: true,
-      }),
+      Animated.sequence([
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
     ).start();
   }, [animatedValue]);
 
-  const translateX = animatedValue.interpolate({
+  const opacity = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [-layoutWidth || -300, layoutWidth || 300],
+    outputRange: [0.3, 0.7],
   });
 
   return (
-    <View
+    <Animated.View
       style={[
-        styles.container,
+        styles.skeleton,
         {
-          width: width as DimensionValue,
-          height: height as DimensionValue,
+          width: width || "100%",
+          height: height || 20,
           borderRadius,
+          opacity,
         },
         style,
       ]}
-      onLayout={(e) => setLayoutWidth(e.nativeEvent.layout.width)}
-    >
-      <Animated.View
-        style={[StyleSheet.absoluteFill, { transform: [{ translateX }] }]}
-      >
-        <LinearGradient
-          colors={["transparent", "rgba(255, 255, 255, 0.08)", "transparent"]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
-    </View>
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Theme.colors.background,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
+  skeleton: {
+    backgroundColor: "rgba(15, 23, 42, 0.1)",
   },
 });

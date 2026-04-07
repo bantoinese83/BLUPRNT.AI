@@ -1,10 +1,9 @@
+import "./lib/sentry";
+import { reactErrorHandler } from "@sentry/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { initBrowserSentry } from "./lib/sentry";
 import App from "./App.tsx";
 import "./index.css";
-
-initBrowserSentry();
 
 /** Recover from chunk load failures after deployment by forcing a reload to get the latest index.html/manifest. */
 window.addEventListener(
@@ -50,7 +49,11 @@ async function clearServiceWorkerAndCaches(): Promise<void> {
 }
 
 function mount() {
-  createRoot(document.getElementById("root")!).render(
+  createRoot(document.getElementById("root")!, {
+    onUncaughtError: reactErrorHandler(),
+    onCaughtError: reactErrorHandler(),
+    onRecoverableError: reactErrorHandler(),
+  }).render(
     <StrictMode>
       <App />
     </StrictMode>,

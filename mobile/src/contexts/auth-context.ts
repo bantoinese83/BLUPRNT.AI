@@ -7,6 +7,7 @@ export interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(

@@ -28,8 +28,10 @@ import { GlassCard } from "../../src/components/ui/GlassCard";
 import { Button } from "../../src/components/ui/Button";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { useAwareness } from "../../src/contexts/AwarenessContext";
+import { usePremium } from "../../src/hooks/usePremium";
 import { supabase, invokeFunction } from "../../src/lib/supabase";
 import { router } from "expo-router";
+import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
 import { Theme } from "../../src/constants/Theme";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
@@ -40,8 +42,9 @@ const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { isPro } = usePremium();
 
-  const { isArchitect, configurationMissing, load } = useDashboardData();
+  const { configurationMissing, load } = useDashboardData();
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
 
   const [displayName, setDisplayName] = useState(
@@ -92,7 +95,7 @@ export default function ProfileScreen() {
       const { data: props } = await supabase
         .from("properties")
         .select("*")
-        .eq("owner_user_id", user?.id);
+        .eq("owner_user_id", user?.id || "");
 
       const propIds = (props || []).map((p: { id: string }) => p.id);
       const { data: projs } =
@@ -248,16 +251,12 @@ export default function ProfileScreen() {
         >
           <GlassCard style={styles.sectionCard}>
             <Text style={styles.sectionHeader}>Membership</Text>
-            <View
-              style={[styles.planCard, isArchitect && styles.architectPlanCard]}
-            >
-              <View
-                style={[styles.planIcon, isArchitect && styles.architectIcon]}
-              >
+            <View style={[styles.planCard, isPro && styles.architectPlanCard]}>
+              <View style={[styles.planIcon, isPro && styles.architectIcon]}>
                 <Crown
                   size={24}
                   color={
-                    isArchitect
+                    isPro
                       ? Theme.colors.status.warning
                       : Theme.colors.text.muted
                   }
@@ -265,15 +264,32 @@ export default function ProfileScreen() {
               </View>
               <View style={styles.planInfo}>
                 <Text style={styles.planName}>
-                  {isArchitect ? "Architect Member" : "Free Explorer"}
+                  {isPro ? "Bluprntai Pro" : "Free Explorer"}
                 </Text>
                 <Text style={styles.planStatus}>
-                  {isArchitect
+                  {isPro
                     ? "Premium AI insights enabled"
                     : "Standard benchmarks active"}
                 </Text>
               </View>
-              {!isArchitect && (
+              {isPro ? (
+                <TouchableOpacity
+                  style={[
+                    styles.upgradeBtn,
+                    { backgroundColor: Theme.colors.card },
+                  ]}
+                  onPress={() => RevenueCatUI.presentCustomerCenter()}
+                >
+                  <Text
+                    style={[
+                      styles.upgradeText,
+                      { color: Theme.colors.text.primary },
+                    ]}
+                  >
+                    Manage
+                  </Text>
+                </TouchableOpacity>
+              ) : (
                 <TouchableOpacity
                   style={styles.upgradeBtn}
                   onPress={handleUpgrade}

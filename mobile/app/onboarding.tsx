@@ -245,10 +245,18 @@ export default function OnboardingScreen() {
 
     let cancelled = false;
     void (async () => {
+      const { data: props } = await supabase
+        .from("properties")
+        .select("id")
+        .eq("owner_user_id", user.id);
+
+      const propIds = (props || []).map((p) => p.id);
+      if (propIds.length === 0) return;
+
       const { count, error } = await supabase
         .from("projects")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .in("property_id", propIds);
 
       if (cancelled) return;
       if (!error && count && count > 0) {

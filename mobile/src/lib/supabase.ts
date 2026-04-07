@@ -2,6 +2,7 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { captureEdgeInvokeFailure } from "./sentry";
+import type { Database } from "../types/database";
 
 /**
  * AsyncStorage holds the full Supabase session (JWT + metadata). Expo SecureStore
@@ -22,7 +23,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: asyncStorageAdapter,
     flowType: "pkce",
