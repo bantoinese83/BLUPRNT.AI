@@ -12,6 +12,7 @@ import { ConfigurationRequired } from "../../src/components/ConfigurationRequire
 import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 import { ProjectsTabSkeleton } from "../../src/components/TabLoadingSkeletons";
+import { Theme } from "../../src/constants/Theme";
 
 export default function ProjectsScreen() {
   const {
@@ -89,7 +90,7 @@ export default function ProjectsScreen() {
               <GlassCard style={styles.projectCard}>
                 <View style={styles.cardHeader}>
                   <View style={styles.iconContainer}>
-                    <Folder size={20} color="#4f46e5" />
+                    <Folder size={20} color={Theme.colors.brand.primary} />
                   </View>
                   <View style={styles.info}>
                     <Text style={styles.projectName}>{p.name}</Text>
@@ -97,7 +98,7 @@ export default function ProjectsScreen() {
                       {p.stage || "Planning"}
                     </Text>
                   </View>
-                  <ArrowRight size={20} color="#64748b" />
+                  <ArrowRight size={20} color={Theme.colors.text.secondary} />
                 </View>
               </GlassCard>
             </TouchableOpacity>
@@ -115,14 +116,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: "Outfit_800ExtraBold",
-    color: "white",
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
-    fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
     marginTop: 6,
     letterSpacing: 0.5,
   },
@@ -141,7 +142,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -151,14 +154,14 @@ const styles = StyleSheet.create({
   },
   projectName: {
     fontSize: 16,
-    fontFamily: "Outfit_700Bold",
-    color: "white",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
     letterSpacing: -0.2,
   },
   projectMeta: {
     fontSize: 12,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
     marginTop: 2,
     textTransform: "uppercase",
     letterSpacing: 1,

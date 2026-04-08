@@ -93,7 +93,12 @@ export function Button({
                     {title}
                   </Text>
                   {icon && (
-                    <View style={[styles.icon, title ? { marginLeft: 8 } : {}]}>
+                    <View
+                      style={[
+                        styles.icon,
+                        title ? { marginLeft: Theme.spacing.xs } : {},
+                      ]}
+                    >
                       {icon}
                     </View>
                   )}
@@ -128,9 +133,11 @@ export function Button({
             <Text
               style={[
                 styles.text,
-                variant === "outline" || variant === "ghost"
-                  ? styles.textBrand
-                  : {},
+                variant === "outline"
+                  ? styles.textOutline
+                  : variant === "ghost"
+                    ? styles.textGhost
+                    : {},
                 isInteractionDisabled ? { opacity: 0.5 } : {},
                 textSize ? { fontSize: textSize } : {},
               ]}
@@ -140,7 +147,12 @@ export function Button({
               {title}
             </Text>
             {icon && (
-              <View style={[styles.icon, title ? { marginLeft: 8 } : {}]}>
+              <View
+                style={[
+                  styles.icon,
+                  title ? { marginLeft: Theme.spacing.xs } : {},
+                ]}
+              >
                 {icon}
               </View>
             )}
@@ -187,8 +199,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  textBrand: {
+  /** Secondary control — visible but subservient to primary CTA */
+  textOutline: {
     color: Theme.colors.text.primary,
+    fontFamily: Theme.typography.family.semibold,
+  },
+  /** Lowest priority — steps back (muted, lighter weight) */
+  textGhost: {
+    color: Theme.colors.text.muted,
+    fontFamily: Theme.typography.family.medium,
   },
   icon: {
     // No margin if there's no text to separate from

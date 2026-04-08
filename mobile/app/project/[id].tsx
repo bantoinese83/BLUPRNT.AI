@@ -284,7 +284,7 @@ function ProjectDetailScreenInner() {
   if (loading) {
     return (
       <ScreenWrapper style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="white" />
+        <ActivityIndicator size="large" color={Theme.colors.brand.primary} />
       </ScreenWrapper>
     );
   }
@@ -558,7 +558,7 @@ function ProjectDetailScreenInner() {
                 false: "rgba(148,163,184,0.35)",
                 true: Theme.colors.brand.primary,
               }}
-              thumbColor="#f8fafc"
+              thumbColor={Theme.colors.inputBg}
             />
           </View>
           <View style={styles.globalActionRow}>
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 22, // Increased for impact
-    fontFamily: "Outfit_800ExtraBold",
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
     letterSpacing: -0.5,
   },
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
     marginLeft: 12,
   },
@@ -701,31 +701,31 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     fontSize: 10,
-    fontFamily: "Outfit_700Bold",
-    color: "#4f46e5",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 2,
     marginBottom: 12,
     marginLeft: 4,
   },
   tierBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: Theme.colors.inputBg,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: Theme.colors.divider,
   },
   tierText: {
     fontSize: 10,
-    fontFamily: "Outfit_600SemiBold",
-    color: "#94a3b8",
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.muted,
     textTransform: "capitalize",
   },
   scopeDescription: {
     flex: 1,
     fontSize: 14,
-    fontFamily: "Outfit_600SemiBold",
+    fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.text.primary,
     marginRight: 12,
   },
@@ -740,17 +740,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.05)",
+    borderTopColor: Theme.colors.divider,
     paddingTop: 8,
   },
   scopeMeta: {
     fontSize: 12,
-    fontFamily: "Outfit_400Regular",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
   },
   scopePrice: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
   },
   headerActions: {
@@ -815,16 +815,16 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 14,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
   },
   shareBtn: {
-    backgroundColor: "#ffffff",
-    borderColor: "rgba(15, 23, 42, 0.1)",
+    backgroundColor: Theme.colors.card,
+    borderColor: Theme.colors.glass.border,
   },
   exportBtn: {
-    backgroundColor: "#ffffff",
-    borderColor: "rgba(15, 23, 42, 0.1)",
+    backgroundColor: Theme.colors.card,
+    borderColor: Theme.colors.glass.border,
   },
   materialContainer: {
     marginTop: 16,
@@ -852,10 +852,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: Theme.colors.card,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(15, 23, 42, 0.04)",
+    borderColor: Theme.colors.glass.border,
   },
   materialIconBg: {
     width: 28,

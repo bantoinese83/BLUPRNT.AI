@@ -1,6 +1,14 @@
 @import "tailwindcss";
+
+/*
+ * BLUPRNT web tokens — align with mobile `Theme` & readable UI defaults:
+ * — No pure #000 for body ink; neutral field + surfaces + one accent (60/30/10).
+ * — Prefer Tailwind spacing that lands on an 8px rhythm (e.g. 2=8px, 4=16px, 6=24px, 8=32px).
+ * — Long copy: use `max-th` (65ch) / `max-w-prose` so line length stays comfortable.
+ */
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  /** Primary chrome / CTA base (slate) — distinct from body ink */
   --color-primary: #0f172a;
   --color-primary-hover: #020617;
   --color-primary-muted: #f8fafc;
@@ -14,7 +22,8 @@
   --color-slate-200: #e2e8f0;
   --color-slate-400: #94a3b8;
   --color-slate-500: #64748b;
-  --color-slate-900: #0f172a;
+  /* Ink for body copy — gray-900, easier long reads than harsher slate-900 */
+  --color-slate-900: #111827;
 
   --shadow-card:
     0 1px 3px 0 rgb(0 0 0 / 0.02), 0 1px 2px -1px rgb(0 0 0 / 0.02);
@@ -56,7 +65,7 @@
   body {
     font-family: var(--font-sans);
     background-color: var(--color-surface);
-    color: #0f172a;
+    color: var(--color-slate-900);
     line-height: 1.6;
     @apply selection:bg-slate-200 selection:text-slate-900;
   }
@@ -106,7 +115,7 @@
   }
 
   .mesh-bg {
-    background-color: #ffffff;
+    background-color: var(--color-surface);
     background-image:
       radial-gradient(at 0% 0%, hsla(215, 15%, 97%, 1) 0, transparent 50%),
       radial-gradient(at 50% 0%, hsla(220, 10%, 94%, 1) 0, transparent 50%),
@@ -174,12 +183,17 @@
   .dashboard-side {
     @apply space-y-6;
   }
+
+  /** Long-form column (~65ch) — pair with `mx-auto w-full` where needed */
+  .max-th {
+    max-width: min(65ch, 100%);
+  }
 }
 
 /* Dashboard Enhancement */
 .dashboard-bg {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   background-image:
     radial-gradient(at 0% 0%, hsla(215, 15%, 97%, 1) 0, transparent 50%),
     radial-gradient(at 50% 0%, hsla(220, 10%, 94%, 1) 0, transparent 50%),
@@ -245,11 +259,11 @@
   @apply bg-clip-text text-transparent;
   background-image: linear-gradient(
     -45deg,
-    #0f172a 0%,
+    #111827 0%,
     #1e293b 25%,
     #94a3b8 50%,
     #1e293b 75%,
-    #0f172a 100%
+    #111827 100%
   );
   background-size: 200% auto;
   animation: liquid-shine 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
@@ -513,17 +527,18 @@
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3 {
-  @apply font-black tracking-tight text-white mt-4 mb-2;
+  @apply font-bold tracking-tight text-white mt-4 mb-2;
 }
 
+/* Clear step between levels (largest → smallest) for AI / chat markdown */
 .markdown-content h1 {
-  @apply text-base;
+  @apply text-xl font-black;
 }
 .markdown-content h2 {
-  @apply text-sm;
+  @apply text-lg font-semibold;
 }
 .markdown-content h3 {
-  @apply text-xs;
+  @apply text-base font-semibold;
 }
 
 .markdown-content a {

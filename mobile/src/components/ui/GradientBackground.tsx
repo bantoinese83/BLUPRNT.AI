@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, View, ViewStyle, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
+import { Theme } from "../../constants/Theme";
 
 const { width, height } = Dimensions.get("window");
 
@@ -15,7 +16,11 @@ export function GradientBackground({ children, style }: Props) {
     <View style={[styles.container, style]}>
       {/* Base Light Liquid Gradient */}
       <LinearGradient
-        colors={["#f8fafc", "#f1f5f9", "#e2e8f0"]}
+        colors={[
+          Theme.colors.inputBg,
+          Theme.colors.divider,
+          Theme.colors.border,
+        ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -74,7 +79,7 @@ export function GradientBackground({ children, style }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: Theme.colors.background,
   },
   gradient: {
     position: "absolute",

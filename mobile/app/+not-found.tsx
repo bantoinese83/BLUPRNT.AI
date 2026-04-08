@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: Theme.radius.lg,
   },
   buttonText: {
-    color: "#ffffff",
+    color: Theme.colors.header,
     fontSize: 16,
     fontFamily: Theme.typography.family.bold,
   },

@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
   badgeText: {
     color: Theme.colors.brand.primary,
     fontSize: 10,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     letterSpacing: 2,
   },
   title: {
     fontSize: 32,
-    fontFamily: "Outfit_800ExtraBold",
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
     textAlign: "center",
     lineHeight: 40,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   highlightTitle: {
     fontSize: 24,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: Theme.colors.brand.primary,
     textAlign: "center",
     lineHeight: 32,
@@ -215,10 +215,10 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: "#475569",
+    color: Theme.colors.text.secondary,
     textAlign: "center",
     lineHeight: 24,
-    fontFamily: "Outfit_400Regular",
+    fontFamily: Theme.typography.family.regular,
     marginBottom: 40,
     paddingHorizontal: 10,
   },
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: "white",
+    backgroundColor: Theme.colors.card,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   signInText: {
     fontSize: 14,
-    fontFamily: "Outfit_600SemiBold",
+    fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.text.secondary,
   },
 });

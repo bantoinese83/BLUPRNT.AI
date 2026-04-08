@@ -14,7 +14,7 @@ import { Theme } from "../src/constants/Theme";
 
 export default function PrivacyScreen() {
   return (
-    <ScreenWrapper style={styles.container}>
+    <ScreenWrapper withTabBar={false} style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 24,
+    padding: Theme.spacing.margin,
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: Theme.colors.divider,
@@ -90,11 +90,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    gap: 8,
-    marginBottom: 20,
+    gap: Theme.spacing.xs,
+    marginBottom: Theme.spacing.lg,
   },
   backText: {
-    fontSize: 14,
+    fontSize: Theme.typography.size.md,
     fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.text.primary,
   },
@@ -105,16 +105,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(79, 70, 229, 0.08)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: Theme.spacing.md,
   },
   title: {
-    fontSize: 24,
+    fontSize: Theme.typography.size.xxl,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
-    marginBottom: 4,
+    marginBottom: Theme.spacing.xs / 2,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: Theme.typography.size.sm,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
   },
@@ -122,22 +122,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 24,
+    padding: Theme.spacing.margin,
     paddingBottom: 40,
+    maxWidth: Theme.layout.readingMaxWidth,
+    width: "100%",
+    alignSelf: "center",
   },
   section: {
-    marginBottom: 24,
+    marginBottom: Theme.spacing.margin,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: Theme.typography.size.lg,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
-    marginBottom: 8,
+    marginBottom: Theme.spacing.xs,
   },
   sectionContent: {
-    fontSize: 14,
+    fontSize: Theme.typography.size.md,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
-    lineHeight: 22,
+    lineHeight: 24,
   },
 });

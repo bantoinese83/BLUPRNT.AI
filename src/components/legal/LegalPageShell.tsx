@@ -84,7 +84,7 @@ export function LegalPageShell({
           </Link>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <Link to="/login" className="hidden sm:block">
-              <Button variant="ghost" size="sm" className="text-slate-600">
+              <Button variant="ghost" size="sm">
                 Sign in
               </Button>
             </Link>
@@ -102,7 +102,7 @@ export function LegalPageShell({
         </nav>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14 lg:py-16">
+      <main className="mx-auto w-full max-th px-4 py-10 sm:px-6 sm:py-14 lg:py-16">
         <article
           className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 shadow-xl shadow-slate-300/25 ring-1 ring-white/60 backdrop-blur-sm"
           style={{
@@ -114,7 +114,7 @@ export function LegalPageShell({
             <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
               Legal
             </p>
-            <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
               {title}
             </h1>
             <p className="mt-3 text-sm font-medium text-slate-500">
@@ -197,17 +197,13 @@ export function LegalSectionTitle({ children }: { children: ReactNode }) {
 
 /** Paragraph for legal body */
 export function LegalParagraph({ children }: { children: ReactNode }) {
-  return (
-    <p className="text-[15px] leading-relaxed text-slate-600 sm:text-base">
-      {children}
-    </p>
-  );
+  return <p className="text-base leading-[1.7] text-slate-600">{children}</p>;
 }
 
 /** Bulleted list for legal body */
 export function LegalList({ children }: { children: ReactNode }) {
   return (
-    <ul className="ml-1 mt-4 list-none space-y-2.5 border-l border-slate-200 pl-5 text-[15px] text-slate-600 sm:text-base">
+    <ul className="ml-1 mt-4 list-none space-y-3 border-l border-slate-200 pl-5 text-base leading-[1.7] text-slate-600">
       {children}
     </ul>
   );

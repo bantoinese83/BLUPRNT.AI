@@ -3,7 +3,7 @@ import { Mail, MessageCircle, HelpCircle, ArrowLeft } from "lucide-react";
 
 export default function Support() {
   return (
-    <div className="min-h-screen bg-[#07090D] text-white selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500/30">
       {/* Navigation */}
       <nav className="border-b border-white/5 bg-white/2 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -24,13 +24,13 @@ export default function Support() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-4 py-20">
+      <main className="mx-auto w-full max-w-4xl px-4 py-20">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
             How can we help?
           </h1>
-          <p className="text-lg text-slate-400 max-w-xl mx-auto">
+          <p className="mx-auto max-th text-lg leading-relaxed text-slate-400">
             Our team of project architects is ready to assist you with AI
             analysis, account issues, or blueprint optimization.
           </p>
@@ -71,11 +71,11 @@ export default function Support() {
 
         {/* FAQ Section */}
         <div className="mb-20">
-          <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+          <h2 className="mb-8 flex items-center gap-3 text-2xl font-bold">
             <MessageCircle className="text-indigo-400" />
             Common Questions
           </h2>
-          <div className="space-y-4">
+          <div className="mx-auto w-full max-th space-y-4">
             {[
               {
                 q: "How does the AI analysis work?",
@@ -100,7 +100,9 @@ export default function Support() {
                     +
                   </span>
                 </summary>
-                <p className="mt-4 text-slate-400 leading-relaxed">{faq.a}</p>
+                <p className="mt-4 text-base leading-[1.7] text-slate-400">
+                  {faq.a}
+                </p>
               </details>
             ))}
           </div>
@@ -109,13 +111,13 @@ export default function Support() {
         {/* Closing */}
         <div className="p-12 rounded-[2rem] bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-white/10 text-center">
           <h3 className="text-2xl font-bold mb-4">Still stuck?</h3>
-          <p className="text-slate-300 mb-8 max-w-md mx-auto">
+          <p className="mx-auto mb-8 max-th text-slate-300 leading-relaxed">
             Drop us a line and one of our human architects will get back to you
             personally.
           </p>
           <a
             href="mailto:support@monarchlabs.co"
-            className="inline-flex h-12 items-center justify-center px-8 rounded-xl bg-white text-[#07090D] font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10"
+            className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 font-bold text-slate-900 shadow-xl shadow-white/10 transition-all hover:scale-105 active:scale-95"
           >
             Contact Support
           </a>

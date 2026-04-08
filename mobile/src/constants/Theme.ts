@@ -1,15 +1,22 @@
 /**
  * BLUPRNT design tokens — keep in sync with web `src/index.css` `@theme` block
  * (surface, accent indigo, slate text, primary CTA slate-900).
+ *
+ * Layout principles (spacing / type / color):
+ * — Avoid pure #000 for text; use slate/gray-900-scale inks for comfortable contrast.
+ * — Spacing: 8px grid (multiples of 8 only in `spacing`).
+ * — Color: ~60% dominant neutrals (background), ~30% surfaces (cards/header), ~10% accent (brand CTAs).
+ * — Type: one family (Outfit), distinct steps (~1.25×+) between body → subhead → display.
  */
 export const Theme = {
   colors: {
-    // Light shell — matches web `--color-surface`
+    /** ~60% — page field */
     background: "#f9fafb",
+    /** ~30% — elevated surfaces */
     header: "#ffffff",
     card: "#ffffff",
 
-    // Accent (indigo) — matches web `--color-accent` / EmptyState highlights
+    // Accent (~10%) — matches web `--color-accent` / EmptyState highlights
     brand: {
       light: "#6366f1", // Indigo 500
       primary: "#4f46e5", // Indigo 600
@@ -22,9 +29,9 @@ export const Theme = {
       to: "#1e293b",
     },
 
-    // Text Palette
+    // Text — ink tones (never pure black #000 for primary body copy)
     text: {
-      primary: "#0f172a", // Slate 900
+      primary: "#111827", // Gray 900 — readable without harsh #000
       secondary: "#64748b", // Slate 500
       /** Strong body on soft backgrounds (e.g. Slate 50) — better than secondary at small sizes */
       onSoft: "#334155", // Slate 700
@@ -54,15 +61,23 @@ export const Theme = {
     },
   },
 
+  /** All values are multiples of 8 (8px grid). `sm` & `md` are both 16 — use `sm` for tight clusters, `md` for default insets. */
   spacing: {
     xs: 8,
-    sm: 12,
+    sm: 16,
     md: 16,
-    lg: 20,
-    xl: 24,
-    xxl: 32,
+    lg: 24,
+    xl: 32,
+    xxl: 48,
+    /** Standard horizontal screen gutter */
     margin: 24,
+    /** Default button / block horizontal padding */
     padding: 24,
+  },
+
+  layout: {
+    /** ≈65ch at ~16px body — long-form copy on phones (full width) vs tablets */
+    readingMaxWidth: 560,
   },
 
   radius: {
@@ -86,16 +101,20 @@ export const Theme = {
       sm: 12,
       md: 14,
       lg: 16,
-      xl: 18,
-      xxl: 22,
-      display: 28,
-      hero: 36,
+      /** Subhead / emphasized UI — ~1.25× body */
+      xl: 20,
+      /** Section titles — ~1.2× xl */
+      xxl: 24,
+      /** Major headings — ~1.33× xxl */
+      display: 32,
+      /** Hero / marketing headline — ~1.25× display */
+      hero: 40,
     },
   },
 
   shadows: {
     soft: {
-      shadowColor: "#000",
+      shadowColor: "#0f172a",
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.15,
       shadowRadius: 16,

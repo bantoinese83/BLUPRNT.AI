@@ -690,7 +690,7 @@ export default function OnboardingScreen() {
               <TextInput
                 style={styles.scopeInput}
                 placeholder="Add project details (optional)..."
-                placeholderTextColor="#64748b"
+                placeholderTextColor={Theme.colors.text.secondary}
                 multiline
                 value={scopeDescription}
                 onChangeText={setScopeDescription}
@@ -1025,7 +1025,7 @@ export default function OnboardingScreen() {
       <StatusBar style="dark" />
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <ChevronLeft size={24} color="#0f172a" />
+          <ChevronLeft size={24} color={Theme.colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.progressHeader}>
           <View style={styles.progressContainer}>

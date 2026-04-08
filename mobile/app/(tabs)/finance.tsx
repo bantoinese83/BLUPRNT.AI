@@ -375,14 +375,14 @@ export default function FinanceScreen() {
             <View style={styles.statsGrid}>
               <View style={styles.statRow}>
                 <View style={styles.statLabelContainer}>
-                  <Wrench size={14} color="#818cf8" />
+                  <Wrench size={14} color={Theme.colors.brand.light} />
                   <Text style={styles.statLabel}>Capital</Text>
                 </View>
                 <Text style={styles.statValue}>{money(stats.capital)}</Text>
               </View>
               <View style={styles.statRow}>
                 <View style={styles.statLabelContainer}>
-                  <ShieldCheck size={14} color="#10b981" />
+                  <ShieldCheck size={14} color={Theme.colors.status.success} />
                   <Text style={styles.statLabel}>Maintenance</Text>
                 </View>
                 <Text style={styles.statValue}>{money(stats.maintenance)}</Text>
@@ -406,7 +406,7 @@ export default function FinanceScreen() {
                   false: "rgba(148,163,184,0.35)",
                   true: Theme.colors.brand.primary,
                 }}
-                thumbColor="#f8fafc"
+                thumbColor={Theme.colors.inputBg}
               />
             </View>
 
@@ -459,7 +459,7 @@ export default function FinanceScreen() {
         stickySectionHeadersEnabled={false}
         ListEmptyComponent={
           <View style={styles.emptyList}>
-            <Receipt size={40} color="#334155" />
+            <Receipt size={40} color={Theme.colors.text.onSoft} />
             <Text style={styles.emptyListText}>No documents found.</Text>
           </View>
         }
@@ -491,9 +491,12 @@ export default function FinanceScreen() {
                     <View style={styles.invoiceIcon}>
                       {(inv.document_type || "invoice").toLowerCase() ===
                       "invoice" ? (
-                        <Wrench size={18} color="#94a3b8" />
+                        <Wrench size={18} color={Theme.colors.text.muted} />
                       ) : (
-                        <ShieldCheck size={18} color="#94a3b8" />
+                        <ShieldCheck
+                          size={18}
+                          color={Theme.colors.text.muted}
+                        />
                       )}
                     </View>
                     <View style={styles.invoiceText}>
@@ -701,16 +704,16 @@ const styles = StyleSheet.create({
     borderColor: "rgba(15, 23, 42, 0.08)",
   },
   filterTabActive: {
-    backgroundColor: "#4f46e5",
-    borderColor: "#4f46e5",
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: Theme.colors.brand.primary,
   },
   filterText: {
     fontSize: 13,
-    fontFamily: "Outfit_700Bold",
-    color: "#64748b",
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
   },
   filterTextActive: {
-    color: "white",
+    color: Theme.colors.header,
   },
   listContainer: {
     gap: 12,
@@ -783,8 +786,8 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.divider,
   },
   emptyText: {
-    color: "#94a3b8",
-    fontFamily: "Outfit_400Regular",
+    color: Theme.colors.text.muted,
+    fontFamily: Theme.typography.family.regular,
   },
   fab: {
     position: "absolute",
