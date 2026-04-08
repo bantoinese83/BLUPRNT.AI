@@ -268,11 +268,9 @@ export default function DashboardScreen() {
         <EmptyState
           icon={PlusCircle}
           title="Your home hub is ready"
-          description="Add a project to see estimates, scope, and documents together. Start fresh, or walk through the intro first if you like a quick tour."
-          actionTitle="Start a new project"
+          description="Set up one renovation and we’ll guide you through vision, an estimate, and your document ledger. Everything starts from the same quick flow below."
+          actionTitle="Set up your project"
           onAction={() => router.push("/onboarding?newProject=1")}
-          secondaryTitle="Begin with the intro"
-          onSecondary={() => router.push("/onboarding")}
           withRoadmap
         />
       </ScreenWrapper>

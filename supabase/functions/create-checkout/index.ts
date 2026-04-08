@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "https://esm.sh/stripe@14?target=denonext";
-import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
@@ -22,9 +22,8 @@ function getSafeOrigin(req: Request): string {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
-  }
+  const opt = handleOptions(req);
+  if (opt) return opt;
 
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405, req);

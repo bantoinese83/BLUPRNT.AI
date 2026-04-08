@@ -1,15 +1,15 @@
 import * as ImageManipulator from "expo-image-manipulator";
 
 /**
- * Compresses an image to a reasonable size for AI analysis (~1500px max dimension).
- * Reduces payload size and prevents server timeouts.
+ * Compresses images for `photo-to-scope` (Edge ~150s wall clock on free tier).
+ * ~1200px max edge + JPEG 0.65 keeps payloads small so Gemini finishes in time.
  */
 export async function compressImageForAnalysis(uri: string) {
   try {
     const result = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 1500 } }], // Maintain aspect ratio
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG },
+      [{ resize: { width: 1200 } }],
+      { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG },
     );
     return result.uri;
   } catch (error) {

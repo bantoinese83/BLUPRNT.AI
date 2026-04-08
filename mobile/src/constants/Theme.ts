@@ -26,6 +26,8 @@ export const Theme = {
     text: {
       primary: "#0f172a", // Slate 900
       secondary: "#64748b", // Slate 500
+      /** Strong body on soft backgrounds (e.g. Slate 50) — better than secondary at small sizes */
+      onSoft: "#334155", // Slate 700
       muted: "#94a3b8", // Slate 400
       disabled: "#cbd5e1", // Slate 300
     },

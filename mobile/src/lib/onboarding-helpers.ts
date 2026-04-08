@@ -1,4 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { compressImageForAnalysis } from "./image-utils";
 import { invokeFunction } from "./supabase";
 
 export type ProjectTypeOption =
@@ -88,6 +89,17 @@ export interface PhotoAsset {
   uri: string;
 }
 
+/** DB `scope_items.source` check allows only text | photo; API may send `fallback`. */
+function normalizeScopeSourceForDb(
+  source: string | undefined | null,
+): "text" | "photo" {
+  if (source === "photo") return "photo";
+  return "text";
+}
+
+/** Thrown when JWT exists locally but auth.users row is gone (e.g. account deleted server-side). */
+export const ONBOARDING_SESSION_INVALID = "ONBOARDING_SESSION_INVALID";
+
 export async function saveOnboardingProject(params: {
   supabase: SupabaseClient;
   userId: string;
@@ -108,6 +120,15 @@ export async function saveOnboardingProject(params: {
     estimate,
     photos,
   } = params;
+
+  // Reconcile with server: stale AsyncStorage sessions survive auth.users deletion (FK errors otherwise).
+  const {
+    data: { user: verifiedUser },
+    error: verifyErr,
+  } = await supabase.auth.getUser();
+  if (verifyErr || !verifiedUser || verifiedUser.id !== userId) {
+    throw new Error(ONBOARDING_SESSION_INVALID);
+  }
 
   // 1. Resolve or create property
   let propertyId: string;
@@ -161,46 +182,134 @@ export async function saveOnboardingProject(params: {
     throw new Error(jErr?.message || "Couldn't save your project.");
   }
 
-  // 3. Insert scope items
+  // 3. Insert scope items (align with Edge + DB: BOM lives in metadata.materials)
   if (estimate?.scope_items?.length) {
-    const rows = estimate.scope_items.map((s) => ({
-      project_id: proj.id,
-      category: s.category || "General",
-      description: s.description || "",
-      finish_tier: s.finish_tier || "mid",
+    type ScopeRowIn = (typeof estimate.scope_items)[number] & {
+      justification?: string | null;
+      priority?: string | null;
+      phase?: string | null;
+      maintenance_tips?: string | null;
+      confidence_reason?: string | null;
+      verification_required?: boolean | null;
+    };
 
-      quantity: Number.isFinite(s.quantity) ? s.quantity : 0,
-      unit: s.unit || "unit",
-      unit_cost_min: Number.isFinite(s.unit_cost_min) ? s.unit_cost_min : 0,
-      unit_cost_max: Number.isFinite(s.unit_cost_max) ? s.unit_cost_max : 0,
-      total_cost_min: Number.isFinite(s.total_cost_min) ? s.total_cost_min : 0,
-      total_cost_max: Number.isFinite(s.total_cost_max) ? s.total_cost_max : 0,
-      confidence_score: Number.isFinite(s.confidence_score)
-        ? s.confidence_score
-        : 3,
-      source: s.source === "photo" ? "photo" : "text",
-    }));
-    await supabase.from("scope_items").insert(rows);
+    const normalizePriority = (
+      p: string | null | undefined,
+    ): "high" | "medium" | "low" => {
+      if (p === "high" || p === "low" || p === "medium") return p;
+      return "medium";
+    };
+
+    const rows = estimate.scope_items.map((raw) => {
+      const s = raw as ScopeRowIn;
+      const nested = s.metadata as Record<string, unknown> | undefined;
+      const fromNested = nested?.materials;
+      const fromShallow = s.metadata?.materials;
+      const materials = Array.isArray(fromNested)
+        ? fromNested
+        : Array.isArray(fromShallow)
+          ? fromShallow
+          : [];
+
+      const justification =
+        (
+          s.justification ??
+          (typeof nested?.justification === "string"
+            ? nested.justification
+            : "") ??
+          ""
+        ).trim() || null;
+      const priority = normalizePriority(
+        s.priority ??
+          (typeof nested?.priority === "string" ? nested.priority : undefined),
+      );
+      const phase =
+        (
+          s.phase ??
+          (typeof nested?.phase === "string" ? nested.phase : "") ??
+          ""
+        ).trim() || null;
+      const maintenanceTips =
+        (
+          s.maintenance_tips ??
+          (typeof nested?.maintenance_tips === "string"
+            ? nested.maintenance_tips
+            : "") ??
+          ""
+        ).trim() || null;
+      const confidenceReason =
+        (
+          s.confidence_reason ??
+          (typeof nested?.confidence_reason === "string"
+            ? nested.confidence_reason
+            : "") ??
+          ""
+        ).trim() || null;
+
+      return {
+        project_id: proj.id,
+        category: s.category || "General",
+        description: s.description || "",
+        finish_tier: s.finish_tier || "mid",
+        justification,
+        priority,
+        phase,
+        maintenance_tips: maintenanceTips,
+        confidence_reason: confidenceReason,
+        verification_required: Boolean(s.verification_required),
+        quantity: Number.isFinite(s.quantity) ? s.quantity : 0,
+        unit: s.unit || "unit",
+        unit_cost_min: Number.isFinite(s.unit_cost_min) ? s.unit_cost_min : 0,
+        unit_cost_max: Number.isFinite(s.unit_cost_max) ? s.unit_cost_max : 0,
+        total_cost_min: Number.isFinite(s.total_cost_min)
+          ? s.total_cost_min
+          : 0,
+        total_cost_max: Number.isFinite(s.total_cost_max)
+          ? s.total_cost_max
+          : 0,
+        confidence_score: Number.isFinite(s.confidence_score)
+          ? s.confidence_score
+          : 3,
+        source: normalizeScopeSourceForDb(s.source),
+        metadata: {
+          justification: justification ?? "",
+          priority,
+          phase: phase ?? "",
+          maintenance_tips: maintenanceTips ?? "",
+          confidence_reason: confidenceReason ?? "",
+          materials,
+        },
+      };
+    });
+    const { error: scopeErr } = await supabase.from("scope_items").insert(rows);
+    if (scopeErr) {
+      throw new Error(
+        scopeErr.message || "Couldn't save your scope. Please try again.",
+      );
+    }
   }
 
-  // 4. Photos (handled via background Edge Function)
-  if (photos.length > 0) {
+  // 4. Background vision only when onboarding did not persist line items (avoids
+  // wiping scope via photo-to-scope is_initial_analysis default + duplicate Gemini).
+  if (photos.length > 0 && !estimate?.scope_items?.length) {
+    const compressedUris = await Promise.all(
+      photos.map((p) => compressImageForAnalysis(p.uri)),
+    );
+
     const fd = new FormData();
     fd.append("project_id", proj.id);
     fd.append("zip_code", zipCode);
     fd.append("room_type", projectTypeToRoomType(projectType));
     fd.append("finish_preference", "mid");
 
-    photos.forEach((photo, index) => {
-      // In React Native, we need an object for FormData file upload
+    compressedUris.forEach((uri, index) => {
       fd.append("photos[]", {
-        uri: photo.uri,
+        uri,
         name: `photo_${index}.jpg`,
         type: "image/jpeg",
       } as unknown as string);
     });
 
-    // Fire-and-forget background re-estimate with photos
     invokeFunction("photo-to-scope", { body: fd }).catch((err) => {
       console.error("[saveOnboardingProject] Background analysis failed:", err);
     });

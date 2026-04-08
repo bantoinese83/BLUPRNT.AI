@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { handleOptions, jsonResponse } from "../_shared/cors.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 import {
   getServiceClient,
   getUserIdFromRequest,
@@ -8,8 +9,21 @@ import {
 import { callGemini } from "../_shared/gemini.ts";
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: getCorsHeaders(req) });
+  const opt = handleOptions(req);
+  if (opt) return opt;
+
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405, req);
+  }
+
+  const { ok, retryAfter } = await checkRateLimit(req, "ai");
+  if (!ok) {
+    return jsonResponse(
+      { error: "Too many requests. Please try again later." },
+      429,
+      req,
+      retryAfter ?? 60,
+    );
   }
 
   try {
@@ -19,19 +33,22 @@ Deno.serve(async (req: Request) => {
     }
 
     const { query, projectId } = await req.json();
-    if (!projectId || !query) {
+    if (!projectId || !query || typeof query !== "string") {
       return jsonResponse({ error: "Missing projectId or query" }, 400, req);
     }
 
     const admin = getServiceClient();
     await assertProjectOwner(admin, projectId, userId);
 
-    // 1. Fetch Project Context
     const [projectRes, scopeRes, invoiceRes] = await Promise.all([
       admin.from("projects").select("*").eq("id", projectId).single(),
       admin.from("scope_items").select("*").eq("project_id", projectId),
       admin.from("invoices").select("*").eq("project_id", projectId),
     ]);
+
+    if (projectRes.error || !projectRes.data) {
+      return jsonResponse({ error: "Project not found" }, 404, req);
+    }
 
     const project = projectRes.data;
     const scope = scopeRes.data || [];
@@ -79,6 +96,12 @@ Deno.serve(async (req: Request) => {
   } catch (e: unknown) {
     const error = e as Error;
     console.error(error);
+    if (error.message === "not_found") {
+      return jsonResponse({ error: "Project not found" }, 404, req);
+    }
+    if (error.message === "forbidden") {
+      return jsonResponse({ error: "Access denied" }, 403, req);
+    }
     return jsonResponse(
       { error: error.message || "Internal server error" },
       500,

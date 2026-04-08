@@ -40,6 +40,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { View, Text, StyleSheet, LogBox, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "../src/constants/Theme";
+import { getPostAuthRedirectHref } from "../src/lib/onboarding-draft";
 import { WifiOff } from "lucide-react-native";
 
 export {
@@ -208,7 +209,10 @@ function RootLayoutNav() {
 
     const onRecoveryScreen = pathname.includes("reset-password");
     if ((inAuthGroup || isLanding) && !onRecoveryScreen) {
-      router.replace("/(tabs)");
+      void (async () => {
+        const href = await getPostAuthRedirectHref();
+        router.replace(href);
+      })();
     }
   }, [session, loading, segments, pathname]);
 

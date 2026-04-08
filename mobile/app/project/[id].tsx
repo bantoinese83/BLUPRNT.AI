@@ -43,6 +43,16 @@ type BillOfMaterialItem = NonNullable<
   NonNullable<ScopeRow["metadata"]>["materials"]
 >[number];
 
+function projectHasEstimateTotals(p: ProjectRow | null): boolean {
+  if (!p) return false;
+  const min = p.estimated_min_total;
+  const max = p.estimated_max_total;
+  return (
+    (typeof min === "number" && Number.isFinite(min) && min > 0) ||
+    (typeof max === "number" && Number.isFinite(max) && max > 0)
+  );
+}
+
 function MaterialDetailList({
   materials,
 }: {
@@ -96,6 +106,8 @@ function ProjectDetailScreenInner() {
   const { isArchitect, hasProjectPass, addItem } = useDashboardData();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  /** After brief polling, true means we stop showing "syncing" when DB has totals but no scope rows. */
+  const [scopePollDone, setScopePollDone] = useState(false);
 
   const invoiceTotal = detailInvoices.reduce(
     (sum, inv) => sum + (inv.total || 0),
@@ -136,6 +148,9 @@ function ProjectDetailScreenInner() {
     async function fetchProject() {
       if (!id) return;
 
+      setLoading(true);
+      queueMicrotask(() => setScopePollDone(false));
+
       const [projRes, scopeRes, invRes] = await Promise.all([
         supabase.from("projects").select("*").eq("id", id).single(),
         supabase
@@ -153,7 +168,10 @@ function ProjectDetailScreenInner() {
       ]);
 
       if (projRes.data) setProject(projRes.data);
-      if (scopeRes.data) setScope(scopeRes.data);
+      setScope(scopeRes.data ?? []);
+      if (scopeRes.error) {
+        console.warn("[project] scope_items", scopeRes.error.message);
+      }
       setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
       setLoading(false);
     }
@@ -161,8 +179,83 @@ function ProjectDetailScreenInner() {
     fetchProject();
   }, [id]);
 
+  // When totals exist but scope rows are still empty (e.g. edge still writing rows),
+  // poll briefly; then show a non-loading "range only" state so the screen never looks stuck.
+  useEffect(() => {
+    if (!id || loading) return;
+
+    if (scope.length > 0) {
+      queueMicrotask(() => setScopePollDone(true));
+      return;
+    }
+
+    if (!projectHasEstimateTotals(project)) {
+      queueMicrotask(() => setScopePollDone(true));
+      return;
+    }
+
+    queueMicrotask(() => setScopePollDone(false));
+    let attempts = 0;
+    const maxAttempts = 8;
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const fetchScopeOnly = async () => {
+      const { data, error } = await supabase
+        .from("scope_items")
+        .select("*")
+        .eq("project_id", id)
+        .order("created_at", { ascending: true });
+      if (cancelled) return false;
+      if (error) {
+        console.warn("[project] scope_items poll", error.message);
+        return false;
+      }
+      if (data?.length) {
+        setScope(data);
+        return true;
+      }
+      return false;
+    };
+
+    const finish = () => {
+      if (interval) clearInterval(interval);
+      interval = null;
+      if (!cancelled) setScopePollDone(true);
+    };
+
+    void (async () => {
+      const immediate = await fetchScopeOnly();
+      if (immediate || cancelled) {
+        if (immediate) finish();
+        else if (!cancelled) queueMicrotask(() => setScopePollDone(true));
+        return;
+      }
+      interval = setInterval(async () => {
+        attempts += 1;
+        const done = await fetchScopeOnly();
+        if (done || attempts >= maxAttempts) finish();
+      }, 2500);
+    })();
+
+    return () => {
+      cancelled = true;
+      if (interval) clearInterval(interval);
+    };
+    // Intentionally omit `project`: use estimate totals primitives to avoid
+    // re-running polling on unrelated project field updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
+  }, [
+    id,
+    loading,
+    project?.estimated_min_total,
+    project?.estimated_max_total,
+    scope.length,
+  ]);
+
   const handleRefresh = async () => {
     setLoading(true);
+    setScopePollDone(false);
     const [projRes, scopeRes, invRes] = await Promise.all([
       supabase.from("projects").select("*").eq("id", id).single(),
       supabase
@@ -180,7 +273,10 @@ function ProjectDetailScreenInner() {
     ]);
 
     if (projRes.data) setProject(projRes.data);
-    if (scopeRes.data) setScope(scopeRes.data);
+    setScope(scopeRes.data ?? []);
+    if (scopeRes.error) {
+      console.warn("[project] scope_items refresh", scopeRes.error.message);
+    }
     setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
     setLoading(false);
   };
@@ -394,22 +490,46 @@ function ProjectDetailScreenInner() {
             animate={{ opacity: 1, translateY: 0 }}
             style={styles.generatingContainer}
           >
-            <View style={styles.generatingIcon}>
-              <ActivityIndicator
-                size="small"
-                color={Theme.colors.brand.primary}
-              />
-            </View>
-            <Text style={styles.generatingTitle}>Generating Blueprint...</Text>
-            <Text style={styles.generatingText}>
-              Our AI is currently estimating materials and costs for your
-              project. This usually takes 30-45 seconds.
-            </Text>
+            {projectHasEstimateTotals(project) ? (
+              !scopePollDone ? (
+                <>
+                  <View style={styles.generatingIcon}>
+                    <ActivityIndicator
+                      size="small"
+                      color={Theme.colors.brand.primary}
+                    />
+                  </View>
+                  <Text style={styles.generatingTitle}>Loading line items</Text>
+                  <Text style={styles.generatingText}>
+                    Your totals are saved. If you had a full breakdown during
+                    setup, it should show up in a moment. Pull down to refresh
+                    if it does not.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.generatingTitle}>No line items yet</Text>
+                  <Text style={styles.generatingText}>
+                    You still have your estimate totals, but there is no
+                    itemized list in your project yet. Tap + to add lines, or
+                    pull down to refresh.
+                  </Text>
+                </>
+              )
+            ) : (
+              <>
+                <Text style={styles.generatingTitle}>No breakdown yet</Text>
+                <Text style={styles.generatingText}>
+                  Add line items with the + button, or start from onboarding
+                  with photos for an AI-powered scope.
+                </Text>
+              </>
+            )}
             <TouchableOpacity
               style={styles.refreshButton}
               onPress={handleRefresh}
             >
-              <Text style={styles.refreshButtonText}>Check Status</Text>
+              <Text style={styles.refreshButtonText}>Refresh</Text>
             </TouchableOpacity>
           </MotiView>
         )}

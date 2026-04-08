@@ -14,7 +14,7 @@ export default function AIScreen() {
 
   if (configurationMissing) {
     return (
-      <ScreenWrapper withLogo>
+      <ScreenWrapper withLogo edges={["top", "left", "right"]}>
         <ConfigurationRequired onRetry={() => void load()} />
       </ScreenWrapper>
     );
@@ -22,7 +22,7 @@ export default function AIScreen() {
 
   if (loadError && !project && projects.length === 0 && !loading) {
     return (
-      <ScreenWrapper withLogo>
+      <ScreenWrapper withLogo edges={["top", "left", "right"]}>
         <DataLoadErrorFullScreen
           message={loadError}
           onRetry={() => void load()}
@@ -32,10 +32,10 @@ export default function AIScreen() {
   }
 
   return (
-    <ScreenWrapper withLogo>
+    <ScreenWrapper withLogo edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Project Assistant</Text>
-        <Text style={styles.subtitle}>
+        <Text style={styles.subtitle} numberOfLines={2}>
           {project ? `Chatting about ${project.name}` : "AI Guidance"}
         </Text>
       </View>
@@ -70,23 +70,25 @@ export default function AIScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    padding: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderColor: Theme.colors.divider,
-    backgroundColor: "white",
+    paddingHorizontal: Theme.spacing.xl,
+    paddingTop: Theme.spacing.sm,
+    paddingBottom: Theme.spacing.md,
+    backgroundColor: "transparent",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Theme.colors.border,
   },
   title: {
-    fontSize: 32,
+    fontSize: Theme.typography.size.display,
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
-    letterSpacing: -1,
+    letterSpacing: -0.8,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: Theme.typography.size.md,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 20,
   },
   assistantContainer: {
     flex: 1,
@@ -110,10 +112,10 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.bold,
   },
   emptyText: {
-    color: "#94a3b8",
+    color: Theme.colors.text.muted,
     textAlign: "center",
-    fontFamily: "Outfit_400Regular",
-    fontSize: 16,
+    fontFamily: Theme.typography.family.regular,
+    fontSize: Theme.typography.size.lg,
     lineHeight: 24,
   },
 });

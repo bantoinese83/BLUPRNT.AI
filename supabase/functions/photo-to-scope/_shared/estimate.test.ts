@@ -1,5 +1,13 @@
 import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
-import { sanitizeEstimate } from "./estimate.ts";
+import { normalizeScopeSourceForDb, sanitizeEstimate } from "./estimate.ts";
+
+Deno.test("normalizeScopeSourceForDb - DB only allows text | photo", () => {
+  assertEquals(normalizeScopeSourceForDb("photo"), "photo");
+  assertEquals(normalizeScopeSourceForDb("fallback"), "text");
+  assertEquals(normalizeScopeSourceForDb("text"), "text");
+  assertEquals(normalizeScopeSourceForDb(undefined), "text");
+  assertEquals(normalizeScopeSourceForDb("vision"), "text");
+});
 
 Deno.test("sanitizeEstimate - enforces itemized math", () => {
   const input = {

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Lock, Sparkles, ArrowRight } from "lucide-react-native";
 import { GlassCard } from "./ui/GlassCard";
 import { Button } from "./ui/Button";
+import { Theme } from "../constants/Theme";
 
 interface Props {
   projectName: string;
@@ -14,11 +15,15 @@ export function InsightTeaser({ projectName, onUpgradePress }: Props) {
     <GlassCard style={styles.container} intensity={25}>
       <View style={styles.headerRow}>
         <View style={styles.iconContainer}>
-          <Lock size={18} color="#4f46e5" />
+          <Lock size={18} color={Theme.colors.brand.primary} />
         </View>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>Architect Insight</Text>
-          <Sparkles size={12} color="#4f46e5" style={{ marginLeft: 4 }} />
+          <Sparkles
+            size={12}
+            color={Theme.colors.brand.primary}
+            style={{ marginLeft: 4 }}
+          />
         </View>
       </View>
 
@@ -32,7 +37,6 @@ export function InsightTeaser({ projectName, onUpgradePress }: Props) {
           choosing Grade-B quartz over entry-level granite. Use our regional
           breakdown to...
         </Text>
-        <View style={styles.overlay} />
       </View>
 
       <Button
@@ -59,7 +63,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(79, 70, 229, 0.12)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
@@ -75,32 +79,29 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontFamily: "Outfit_700Bold",
-    color: "#4f46e5",
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   title: {
     fontSize: 18,
     fontFamily: "Outfit_700Bold",
-    color: "white",
+    color: Theme.colors.text.primary,
     marginBottom: 8,
   },
   blurContainer: {
     position: "relative",
+    backgroundColor: Theme.colors.inputBg,
+    borderRadius: Theme.radius.md,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    padding: 12,
+    overflow: "hidden",
   },
   blurText: {
     fontSize: 14,
     fontFamily: "Outfit_400Regular",
-    color: "rgba(255, 255, 255, 0.4)",
+    color: Theme.colors.text.secondary,
     lineHeight: 20,
-    // Note: React Native doesn't have native 'blur' style for text, so we use opacity/overlay
-  },
-  overlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 20,
-    backgroundColor: "transparent", // Custom gradient would be better but let's keep it simple
   },
 });

@@ -1,47 +1,98 @@
 /**
- * Rate limiting for Edge Functions.
+ * Rate limiting for Edge Functions (Upstash Redis when configured, else in-memory per isolate).
  *
- * When `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set (e.g. Vercel /
- * Supabase secrets), limits are enforced in a shared Redis store (Upstash) so abuse
- * cannot fan out across isolates or regions.
- *
- * Otherwise falls back to an in-memory map (per-isolate, resets when isolates recycle).
- *
- * Set `RATE_LIMIT_REQUESTS` (default 60) and `RATE_LIMIT_WINDOW_MS` (default 60000).
+ * Kinds:
+ * - `default` — RATE_LIMIT_REQUESTS / RATE_LIMIT_WINDOW_MS (default 60/min)
+ * - `marketing` — stricter for public lead capture (default 10/hour)
+ * - `ai` — chat / LLM endpoints (default 20/min)
  */
 import { Redis } from "npm:@upstash/redis@1.34.3";
 import { Ratelimit } from "npm:@upstash/ratelimit@2.0.5";
 
-const store = new Map<string, { count: number; resetAt: number }>();
+export type RateLimitKind = "default" | "marketing" | "ai";
 
-const REQUESTS =
-  parseInt(Deno.env.get("RATE_LIMIT_REQUESTS") ?? "60", 10) || 60;
-const WINDOW_MS =
-  parseInt(Deno.env.get("RATE_LIMIT_WINDOW_MS") ?? "60000", 10) || 60000;
-
-let sharedLimit: Ratelimit | null | undefined;
-
-function getSharedLimit(): Ratelimit | null {
-  if (sharedLimit !== undefined) {
-    return sharedLimit;
+function specFor(kind: RateLimitKind): {
+  requests: number;
+  windowMs: number;
+  prefix: string;
+} {
+  switch (kind) {
+    case "marketing":
+      return {
+        requests:
+          parseInt(Deno.env.get("RATE_LIMIT_MARKETING_REQUESTS") ?? "10", 10) ||
+          10,
+        windowMs:
+          parseInt(
+            Deno.env.get("RATE_LIMIT_MARKETING_WINDOW_MS") ?? "3600000",
+            10,
+          ) || 3_600_000,
+        prefix: "blueprint-edge-marketing",
+      };
+    case "ai":
+      return {
+        requests:
+          parseInt(Deno.env.get("RATE_LIMIT_AI_REQUESTS") ?? "20", 10) || 20,
+        windowMs:
+          parseInt(Deno.env.get("RATE_LIMIT_AI_WINDOW_MS") ?? "60000", 10) ||
+          60_000,
+        prefix: "blueprint-edge-ai",
+      };
+    default:
+      return {
+        requests:
+          parseInt(Deno.env.get("RATE_LIMIT_REQUESTS") ?? "60", 10) || 60,
+        windowMs:
+          parseInt(Deno.env.get("RATE_LIMIT_WINDOW_MS") ?? "60000", 10) ||
+          60_000,
+        prefix: "blueprint-edge",
+      };
   }
-  const url = Deno.env.get("UPSTASH_REDIS_REST_URL");
-  const token = Deno.env.get("UPSTASH_REDIS_REST_TOKEN");
-  if (!url || !token) {
-    sharedLimit = null;
-    return sharedLimit;
-  }
-  const redis = new Redis({ url, token });
-  const windowSeconds = Math.max(1, Math.ceil(WINDOW_MS / 1000));
-  sharedLimit = new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(REQUESTS, `${windowSeconds} s`),
-    prefix: "blueprint-edge",
-  });
-  return sharedLimit;
 }
 
-function getClientId(req: Request): string {
+const memoryStores = new Map<
+  RateLimitKind,
+  Map<string, { count: number; resetAt: number }>
+>();
+
+const redisLimits = new Map<RateLimitKind, Ratelimit | null | undefined>();
+
+function getMemoryStore(kind: RateLimitKind) {
+  if (!memoryStores.has(kind)) {
+    memoryStores.set(kind, new Map());
+  }
+  return memoryStores.get(kind)!;
+}
+
+function getRedisLimit(kind: RateLimitKind): Ratelimit | null {
+  if (redisLimits.has(kind)) {
+    return redisLimits.get(kind)!;
+  }
+  try {
+    const url = Deno.env.get("UPSTASH_REDIS_REST_URL");
+    const token = Deno.env.get("UPSTASH_REDIS_REST_TOKEN");
+    const spec = specFor(kind);
+    if (!url || !token) {
+      redisLimits.set(kind, null);
+      return null;
+    }
+    const redis = new Redis({ url, token });
+    const windowSeconds = Math.max(1, Math.ceil(spec.windowMs / 1000));
+    const rl = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(spec.requests, `${windowSeconds} s`),
+      prefix: spec.prefix,
+    });
+    redisLimits.set(kind, rl);
+    return rl;
+  } catch (e) {
+    console.error("[rate-limit] Redis client init failed:", e);
+    redisLimits.set(kind, null);
+    return null;
+  }
+}
+
+export function getClientId(req: Request): string {
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("cf-connecting-ip") ??
@@ -50,44 +101,53 @@ function getClientId(req: Request): string {
   );
 }
 
-function checkRateLimitInMemory(req: Request): {
-  ok: boolean;
-  retryAfter?: number;
-} {
+function checkRateLimitInMemory(
+  req: Request,
+  kind: RateLimitKind,
+): { ok: boolean; retryAfter?: number } {
+  const spec = specFor(kind);
+  const store = getMemoryStore(kind);
   const id = getClientId(req);
   const now = Date.now();
   const entry = store.get(id);
 
   if (!entry) {
-    store.set(id, { count: 1, resetAt: now + WINDOW_MS });
+    store.set(id, { count: 1, resetAt: now + spec.windowMs });
     return { ok: true };
   }
 
   if (now > entry.resetAt) {
-    store.set(id, { count: 1, resetAt: now + WINDOW_MS });
+    store.set(id, { count: 1, resetAt: now + spec.windowMs });
     return { ok: true };
   }
 
   entry.count++;
-  if (entry.count > REQUESTS) {
+  if (entry.count > spec.requests) {
     return { ok: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
   }
   return { ok: true };
 }
 
-export async function checkRateLimit(req: Request): Promise<{
-  ok: boolean;
-  retryAfter?: number;
-}> {
-  const rl = getSharedLimit();
-  if (rl) {
-    const id = getClientId(req);
-    const { success, reset } = await rl.limit(id);
-    if (!success) {
-      const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
-      return { ok: false, retryAfter };
+export async function checkRateLimit(
+  req: Request,
+  kind: RateLimitKind = "default",
+): Promise<{ ok: boolean; retryAfter?: number }> {
+  try {
+    const rl = getRedisLimit(kind);
+    if (rl) {
+      const id = getClientId(req);
+      const { success, reset } = await rl.limit(id);
+      if (!success) {
+        const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+        return { ok: false, retryAfter };
+      }
+      return { ok: true };
     }
-    return { ok: true };
+  } catch (e) {
+    console.error(
+      "[rate-limit] Redis path failed; using in-memory limiter:",
+      e,
+    );
   }
-  return checkRateLimitInMemory(req);
+  return checkRateLimitInMemory(req, kind);
 }

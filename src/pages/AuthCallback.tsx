@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { ensureUserHasWorkspace } from "@/lib/ensure-user-workspace";
 import { getSafeRedirect } from "@/lib/safe-redirect";
+import { getOnboardingResumeIfPending } from "@/lib/onboarding-post-auth-redirect";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 
@@ -67,14 +68,20 @@ export default function AuthCallback() {
       await ensureUserHasWorkspace(session.user.id);
       if (cancelled) return;
       let redirectTo = "/dashboard";
+      let usedStoredRedirect = false;
       try {
         const stored = sessionStorage.getItem("bluprnt_auth_redirect");
         if (stored) {
           sessionStorage.removeItem("bluprnt_auth_redirect");
           redirectTo = getSafeRedirect(stored);
+          usedStoredRedirect = true;
         }
       } catch {
         /* ignore */
+      }
+      if (!usedStoredRedirect) {
+        const resume = getOnboardingResumeIfPending();
+        if (resume) redirectTo = resume;
       }
       if (cancelled) return;
       navigate(redirectTo, { replace: true });

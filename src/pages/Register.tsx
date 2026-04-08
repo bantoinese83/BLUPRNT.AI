@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
-import { getSafeRedirect } from "@/lib/safe-redirect";
+import { resolvePostLoginHref } from "@/lib/onboarding-post-auth-redirect";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
@@ -50,10 +50,7 @@ export default function Register() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      const redirectTo = getSafeRedirect(
-        searchParams.get("redirect"),
-        "/dashboard",
-      );
+      const redirectTo = resolvePostLoginHref(searchParams.get("redirect"));
       navigate(redirectTo, { replace: true });
     }
   }, [user, authLoading, navigate, searchParams]);
@@ -141,7 +138,7 @@ export default function Register() {
       } catch {
         /* ignore */
       }
-      const next = getSafeRedirect(redirectParam, "/dashboard");
+      const next = resolvePostLoginHref(redirectParam);
       navigate(next, { replace: true });
     } catch {
       setError("Sign-up failed. Try again.");

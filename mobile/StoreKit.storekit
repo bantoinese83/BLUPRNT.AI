@@ -1,0 +1,57 @@
+{
+  "identifier" : "BluprntStore",
+  "non_renewing_subscriptions" : [ ],
+  "products" : [
+    {
+      "displayPrice" : "8.99",
+      "familyShareable" : false,
+      "internalID" : "PROJECT_PASS",
+      "localizations" : [
+        {
+          "description" : "Full architectural AI insights for one specific project.",
+          "displayName" : "Project Pass",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "lifetime",
+      "referenceName" : "Project Pass",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "PRO_GROUP",
+      "localizations" : [ ],
+      "name" : "Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [ ],
+          "displayPrice" : "11.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "ARCHITECT_SUBSCRIPTION",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlock premium AI insights and budget tracking.",
+              "displayName" : "Architect",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "monthly",
+          "recurrenceDuration" : "P1M",
+          "referenceName" : "Architect",
+          "subscriptionPeriod" : "P1M",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

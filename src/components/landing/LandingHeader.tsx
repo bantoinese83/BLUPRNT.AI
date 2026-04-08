@@ -133,8 +133,7 @@ export function LandingHeader() {
             <Link to="/onboarding" className="hidden lg:block">
               <Button
                 size="sm"
-                variant="primary"
-                className="rounded-xl shadow-md shadow-indigo-500/20"
+                className="rounded-xl premium-gradient border-0 px-5 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 Get started
                 <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden />

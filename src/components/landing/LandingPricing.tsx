@@ -102,7 +102,7 @@ export function LandingPricing({
               className={`w-full h-14 rounded-2xl text-lg font-black ${
                 isArchitect
                   ? "bg-slate-50 border-slate-200 text-slate-400 group-hover:scale-100 cursor-default"
-                  : "liquid-metal-button border-0 shadow-lg shadow-slate-100 group-hover:scale-[1.02] transition-transform"
+                  : "premium-gradient border-0 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-[1.02] active:scale-[0.98] transition-all"
               }`}
               onClick={() => !isArchitect && onPlanSelect("architect")}
             >

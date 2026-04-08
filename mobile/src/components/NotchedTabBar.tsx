@@ -5,8 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
-  Dimensions,
-  type LayoutChangeEvent,
+  useWindowDimensions,
 } from "react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,8 +14,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Svg, { Path } from "react-native-svg";
 import { Theme } from "../constants/Theme";
-
-const { width: SCREEN_W } = Dimensions.get("window");
 
 const CORNER = 22;
 /** Visible white bar height (icons sit here). */
@@ -65,11 +62,8 @@ export function NotchedTabBar({
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const [barW, setBarW] = React.useState(SCREEN_W);
-
-  const onLayoutBar = (e: LayoutChangeEvent) => {
-    setBarW(e.nativeEvent.layout.width);
-  };
+  const { width: windowWidth } = useWindowDimensions();
+  const barW = windowWidth;
 
   const routes = state.routes.filter((r) => r.name !== "projects");
   const leftRoutes = routes.filter(
@@ -114,12 +108,17 @@ export function NotchedTabBar({
     }
   };
 
-  const bottomPad = Math.max(insets.bottom, 10);
+  const bottomPad = Math.max(insets.bottom, Platform.OS === "android" ? 8 : 0);
 
   return (
     <View
-      style={[styles.wrap, { paddingBottom: bottomPad }]}
-      onLayout={onLayoutBar}
+      style={[
+        styles.wrap,
+        {
+          paddingBottom: bottomPad,
+          backgroundColor: Theme.colors.header,
+        },
+      ]}
     >
       <View style={styles.barStack} pointerEvents="box-none">
         <Svg width={barW} height={BAR_BODY} style={styles.svg}>
@@ -226,20 +225,22 @@ export function NotchedTabBar({
 
 const styles = StyleSheet.create({
   wrap: {
-    backgroundColor: "transparent",
+    width: "100%",
+    alignSelf: "stretch",
     overflow: "visible",
   },
   barStack: {
-    alignItems: "center",
+    width: "100%",
+    alignItems: "stretch",
     overflow: "visible",
     ...Platform.select({
       ios: {
         shadowColor: "#0f172a",
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.07,
-        shadowRadius: 14,
+        shadowOffset: { width: 0, height: -1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
       },
-      android: { elevation: 12 },
+      android: { elevation: 8 },
     }),
   },
   svg: {},

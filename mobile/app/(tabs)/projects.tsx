@@ -68,11 +68,9 @@ export default function ProjectsScreen() {
           <EmptyState
             icon={FolderOpen}
             title="No projects here yet"
-            description="When you add a renovation, it shows up in this list so you can open details anytime."
+            description="Add a renovation from the guided flow—photos, estimate, and line items—then it appears here."
             actionTitle="Add a project"
             onAction={() => router.push("/onboarding?newProject=1")}
-            secondaryTitle="See the intro first"
-            onSecondary={() => router.push("/onboarding")}
           />
         )}
         {projects.map((p, idx) => (

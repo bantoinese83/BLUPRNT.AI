@@ -1,40 +1,67 @@
 /**
- * CORS headers – restricts to allowed origins for security.
- * Set ALLOWED_ORIGINS env (comma-separated) or falls back to * for dev.
+ * CORS — set ALLOWED_ORIGINS (comma-separated) in production.
+ * When unset, allows `*` (local / backwards compatibility).
+ * When set, only listed origins get Access-Control-Allow-Origin (no implicit domain bypass).
+ * Non-browser clients often omit Origin; we then echo the first allowlisted host.
  */
-function getAllowedOrigin(requestOrigin: string | null): string {
-  const allowed = Deno.env.get("ALLOWED_ORIGINS");
-  if (!allowed?.trim()) {
+function resolveAccessControlAllowOrigin(req: Request): string | null {
+  const requestOrigin = req.headers.get("Origin");
+  const raw = Deno.env.get("ALLOWED_ORIGINS");
+
+  if (!raw?.trim()) {
     return "*";
   }
-  const origins = allowed
+
+  const origins = raw
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
-  if (origins.length === 0) return "*";
-
-  if (requestOrigin) {
-    if (origins.includes(requestOrigin) || origins.includes("*")) {
-      return requestOrigin;
-    }
-    // Specific fix for production domain if not explicitly in env
-    if (requestOrigin.includes("bluprntai.com")) {
-      return requestOrigin;
-    }
+  if (origins.length === 0) {
+    return "*";
+  }
+  if (origins.includes("*")) {
+    return "*";
   }
 
-  return origins[0] || "*";
+  if (!requestOrigin) {
+    return origins[0] ?? null;
+  }
+
+  if (origins.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+
+  console.warn("[cors] Blocked Origin:", requestOrigin);
+  return null;
 }
 
+const BASE_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+  "Access-Control-Max-Age": "86400",
+};
+
 export function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin");
+  const acao = resolveAccessControlAllowOrigin(req);
+  if (!acao) {
+    return { ...BASE_HEADERS };
+  }
   return {
-    "Access-Control-Allow-Origin": getAllowedOrigin(origin),
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Max-Age": "86400",
+    ...BASE_HEADERS,
+    "Access-Control-Allow-Origin": acao,
   };
+}
+
+/** Returns a Response for OPTIONS, or null if not an OPTIONS request. */
+export function handleOptions(req: Request): Response | null {
+  if (req.method !== "OPTIONS") return null;
+  const headers = getCorsHeaders(req);
+  const allowed = Boolean(headers["Access-Control-Allow-Origin"]);
+  return new Response(null, {
+    status: allowed ? 204 : 403,
+    headers,
+  });
 }
 
 export function jsonResponse(

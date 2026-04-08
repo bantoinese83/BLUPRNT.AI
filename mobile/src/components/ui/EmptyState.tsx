@@ -12,7 +12,7 @@ interface EmptyStateProps {
   description: string;
   actionTitle?: string;
   onAction?: () => void;
-  /** Calmer second path (e.g. explore the flow before committing). */
+  /** Optional second action (prefer a single primary CTA unless paths are truly different). */
   secondaryTitle?: string;
   onSecondary?: () => void;
   style?: ViewStyle;

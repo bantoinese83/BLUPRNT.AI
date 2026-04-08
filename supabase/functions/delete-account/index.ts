@@ -1,13 +1,63 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 
 const PROJECT_DOCUMENTS_BUCKET = "project-documents";
+const PROJECT_PHOTOS_BUCKET = "project-photos";
 const STORAGE_REMOVE_BATCH = 100;
+
+async function removeBucketPrefixRecursive(
+  admin: SupabaseClient,
+  bucketId: string,
+  prefix: string,
+): Promise<void> {
+  const { data: items, error } = await admin.storage
+    .from(bucketId)
+    .list(prefix, { limit: 500 });
+  if (error) {
+    logEdge("warn", "delete-account storage list", {
+      bucket: bucketId,
+      prefix,
+      detail: String(error.message),
+    });
+    return;
+  }
+  if (!items?.length) return;
+
+  const filePaths: string[] = [];
+  for (const item of items) {
+    const path = prefix ? `${prefix}/${item.name}` : item.name;
+    if (item.metadata == null) {
+      await removeBucketPrefixRecursive(admin, bucketId, path);
+    } else {
+      filePaths.push(path);
+    }
+  }
+  if (filePaths.length === 0) return;
+  for (let i = 0; i < filePaths.length; i += STORAGE_REMOVE_BATCH) {
+    const batch = filePaths.slice(i, i + STORAGE_REMOVE_BATCH);
+    const { error: rmErr } = await admin.storage.from(bucketId).remove(batch);
+    if (rmErr) {
+      logEdge("warn", "delete-account storage remove", {
+        bucket: bucketId,
+        detail: String(rmErr.message),
+      });
+    }
+  }
+}
+
+async function removePhotosForProjects(
+  admin: SupabaseClient,
+  projectIds: string[],
+): Promise<void> {
+  for (const pid of projectIds) {
+    await removeBucketPrefixRecursive(admin, PROJECT_PHOTOS_BUCKET, pid);
+  }
+}
 
 /**
  * Deletes the authenticated user's account and associated data: Postgres rows,
@@ -87,9 +137,8 @@ async function cancelStripeForUser(
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
-  }
+  const opt = handleOptions(req);
+  if (opt) return opt;
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405, req);
   }
@@ -132,6 +181,7 @@ Deno.serve(async (req: Request) => {
       const projectIds = (projs ?? []).map((p) => p.id);
 
       await removeStorageForProjects(admin, projectIds);
+      await removePhotosForProjects(admin, projectIds);
 
       for (const pid of projectIds) {
         const { data: invs } = await admin

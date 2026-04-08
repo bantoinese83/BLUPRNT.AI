@@ -91,6 +91,17 @@ export async function cityFromZipUniversal(zip: string): Promise<string> {
   }
 }
 
+/**
+ * Persisted `scope_items.source` must satisfy DB check (e.g. text | photo only).
+ * Runtime payloads may use `fallback`; map those to `text` on insert.
+ */
+export function normalizeScopeSourceForDb(
+  source: string | undefined | null,
+): "text" | "photo" {
+  if (source === "photo") return "photo";
+  return "text";
+}
+
 export interface EstimatePayload {
   summary: {
     estimated_min_total: number;
@@ -297,26 +308,17 @@ export async function extractScopeWithGemini(input: {
     month: "long",
   });
 
-  const systemInstruction = `You are a Senior Residential Construction Estimator with 20+ years of experience in the ${area}.
-Your goal is to provide an ultra-detailed, high-value "Project Blueprint" that justifies its cost and helps the homeowner plan their budget.
+  const systemInstruction = `You are a Senior Residential Construction Estimator for ${area}.
+Produce a concise, accurate renovation scope-budget JSON. Speed matters: be thorough but avoid unnecessary verbosity.
 
-Expert Guidelines:
-1. Provide exactly 6 highly detailed line items (instead of 8). Focus on extreme depth (brands, models, counts) over quantity. Group them by construction phase.
-2. For each item, provide a "Justification" explaining why this cost is necessary (e.g., "Standard for high-moisture kitchen areas", "Requires specialized labor for large-format tiles").
-3. Assign a "Priority" (high: essential for code/safety, medium: standard functionality, low: aesthetic upgrade).
-4. For each item, provide a "Confidence Reason" if the score is less than 5 (e.g., "Estimated as mid-range hardwood based on color/grain visible", "Assuming standard 8ft ceiling height").
-5. Provide "Maintenance Tips" for long-term value (e.g., "Seal grout every 6 months to prevent staining").
-6. In the summary, provide "Value Engineering Tips" on how to save 10-15% without sacrificing major quality.
-7. Provide a "Regional Signal" regarding specific local data points (e.g., "Matched to Q1 2026 Labor Rates in ${area}").
-8. Provide "Regional Context" regarding ${area} labor markets, permit expectations, or material availability in ${dateStr}.
-9. Ensure all math is perfect: total_cost_min = quantity * unit_cost_min.
-10. If photos are provided, identify specific brands, damage, or structural constraints visible.
-11. **Text-Only Mode**: If no photos are provided, you MUST generate the most plausible scope for a standard US home based ONLY on the user's description and the regional building codes for ${area}.
-12. **FORCE: Bill of Materials**: For every single line item, you MUST provide a massive, exhaustive "Materials" list that details every specific component required down to the manufacturer brand, model name, and precise quantities. This is the MOST IMPORTANT part of the response.
-13. **Brand Logic**: Suggest real-world, high-value brands that match the Target Finish Tier (e.g. Kohler/Sub-Zero for Premium, Delta/Whirlpool for Mid, Glacier Bay/Amana for Economy).
-14. **CRITICAL**: The 'materials' array is NOT OPTIONAL. If you return an empty materials array for a standard construction task, you have failed the mission.
-15. **Verification**: Set 'verification_required' to true if exact counts or materials are hard to confirm from photos alone.
-16. **Execution Window**: 120 seconds. Use this time to ensure ultra-deep "down to the nail" detail for every item without rushing.`;
+Rules:
+1. Exactly **4** line items, grouped by phase (prep → rough → finish). Each item: clear description, justification, priority (high/medium/low), confidence_reason, maintenance_tips, phase.
+2. **Materials**: 3–8 key SKUs per line item (name, brand optional, quantity, unit). Match finish tier (${finish_preference}). No empty materials arrays.
+3. Summary: estimated_min_total, estimated_max_total, confidence_score (1–5), value_engineering_tips (2–4 strings), regional_context (${area}, ${dateStr}), regional_signal (one concrete line).
+4. Math: total_cost_min = quantity * unit_cost_min (same for max).
+5. Photos: call out only what you can see; set verification_required true if unsure.
+6. Text-only (no photos): infer a plausible scope from the user description + ${area} norms.
+7. Prefer shorter sentences so the model finishes within a tight latency budget.`;
 
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
@@ -423,9 +425,11 @@ Please generate the detailed blueprint.`;
       systemInstruction,
       responseSchema,
       temperature: 0.1,
+      maxOutputTokens: 4096,
+      timeoutMs: 95_000,
     });
 
-    if (!result) {
+    if (!result?.text) {
       console.error("[extractScopeWithGemini] No output from Gemini.");
       return null;
     }

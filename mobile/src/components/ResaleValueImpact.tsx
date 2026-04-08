@@ -225,9 +225,9 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
+    color: Theme.colors.text.onSoft,
     lineHeight: 18,
   },
   bold: {

@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { getCorsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { getInvoiceSchema } from "../_shared/validation.ts";
 import {
@@ -11,9 +11,8 @@ import {
 const SIGNED_URL_TTL_SEC = 3600;
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: getCorsHeaders(req) });
-  }
+  const opt = handleOptions(req);
+  if (opt) return opt;
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405, req);
   }

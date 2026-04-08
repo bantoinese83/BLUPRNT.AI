@@ -22,22 +22,55 @@ import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { cn } from "@/lib/utils";
 
+/** Aligned with mobile: three phases, same internal routes. */
+const ONBOARDING_PHASES = [
+  {
+    label: "About project",
+    paths: [
+      "/onboarding/type",
+      "/onboarding/location",
+      "/onboarding/stage",
+      "/onboarding/photo",
+      "/onboarding/text-scope",
+    ],
+  },
+  {
+    label: "Your estimate",
+    paths: ["/onboarding/loading", "/onboarding/estimate"],
+  },
+  { label: "Save", paths: ["/onboarding/signup"] },
+] as const;
+
 const ONBOARDING_STEPS = [
   { path: "/onboarding/type", label: "Project" },
   { path: "/onboarding/location", label: "Location" },
   { path: "/onboarding/stage", label: "Stage" },
   { path: "/onboarding/photo", label: "Photos" },
+  { path: "/onboarding/text-scope", label: "Details" },
   { path: "/onboarding/loading", label: "Analysis" },
   { path: "/onboarding/estimate", label: "Estimate" },
   { path: "/onboarding/signup", label: "Account" },
 ];
 
+function phaseIndexForPath(pathname: string): number {
+  for (let i = ONBOARDING_PHASES.length - 1; i >= 0; i--) {
+    for (const p of ONBOARDING_PHASES[i].paths) {
+      if (p === pathname) return i;
+    }
+  }
+  return 0;
+}
+
 function StepProgress({ currentPath }: { currentPath: string }) {
   const navigate = useNavigate();
+  const stepMeta = ONBOARDING_STEPS.find((s) => s.path === currentPath);
+  if (!stepMeta) return null;
+
   const currentIndex = ONBOARDING_STEPS.findIndex(
     (s) => s.path === currentPath,
   );
-  if (currentIndex === -1) return null;
+  const phaseIndex = phaseIndexForPath(currentPath);
+  const phasesTotal = ONBOARDING_PHASES.length;
 
   const remainingSteps = ONBOARDING_STEPS.length - currentIndex - 1;
   const timeLabel =
@@ -49,16 +82,17 @@ function StepProgress({ currentPath }: { currentPath: string }) {
 
   return (
     <div className="w-full flex flex-col items-center space-y-4 mb-8 sm:mb-12">
-      <div className="flex w-full justify-between items-end px-1">
-        <div className="space-y-1">
+      <div className="flex w-full justify-between items-end px-1 gap-3">
+        <div className="space-y-1 min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600/60 leading-none">
-            Progress — {currentIndex + 1} of {ONBOARDING_STEPS.length}
+            {ONBOARDING_PHASES[phaseIndex].label} — {phaseIndex + 1} of{" "}
+            {phasesTotal}
           </p>
-          <h1 className="text-lg sm:text-xl font-black italic tracking-tighter text-slate-900 leading-none">
-            {ONBOARDING_STEPS[currentIndex].label}
+          <h1 className="text-lg sm:text-xl font-black italic tracking-tighter text-slate-900 leading-none truncate">
+            {stepMeta.label}
           </h1>
         </div>
-        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
+        <div className="flex shrink-0 items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
             {timeLabel}
@@ -66,39 +100,53 @@ function StepProgress({ currentPath }: { currentPath: string }) {
         </div>
       </div>
 
-      <div className="relative w-full px-1">
-        {/* Progress Track */}
-        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-indigo-600 origin-left"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: (currentIndex + 1) / ONBOARDING_STEPS.length }}
-            transition={{ type: "spring", stiffness: 50, damping: 20 }}
-          />
+      <div className="relative w-full px-1 space-y-2">
+        <div className="flex w-full gap-2">
+          {ONBOARDING_PHASES.map((_, i) => (
+            <div
+              key={i}
+              className="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden"
+            >
+              <motion.div
+                className="h-full bg-indigo-600 origin-left"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: i <= phaseIndex ? 1 : 0 }}
+                transition={{ type: "spring", stiffness: 50, damping: 20 }}
+              />
+            </div>
+          ))}
         </div>
 
-        {/* Clickable Step Markers (Desktop only for full list, or dot-only for mobile) */}
-        <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 z-10 flex justify-between px-1 pointer-events-none">
-          {ONBOARDING_STEPS.map((step, idx) => {
-            const isCompleted = idx < currentIndex;
-            const isActive = idx === currentIndex;
+        <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 z-10 flex justify-between px-1 pointer-events-none gap-2">
+          {ONBOARDING_PHASES.map((phase, idx) => {
+            const isCompleted = idx < phaseIndex;
+            const isActive = idx === phaseIndex;
+            const firstPathInPhase = phase.paths[0];
             return (
               <button
-                key={step.path}
+                key={phase.label}
                 type="button"
-                onClick={() => idx < currentIndex && navigate(step.path)}
-                disabled={idx >= currentIndex}
+                onClick={() =>
+                  isCompleted && firstPathInPhase && navigate(firstPathInPhase)
+                }
+                disabled={!isCompleted}
                 className={cn(
-                  "pointer-events-auto h-3 w-3 rounded-full border-2 transition-all duration-300",
-                  idx > currentIndex
-                    ? "bg-white border-slate-200"
-                    : "bg-white border-transparent",
-                  isCompleted && "bg-indigo-600 border-indigo-600",
-                  isActive &&
-                    "bg-indigo-600 border-indigo-100 ring-2 ring-indigo-600/20 scale-125",
+                  "pointer-events-auto flex-1 flex justify-center",
+                  !isCompleted && "cursor-default",
                 )}
-                aria-label={`Go to step ${idx + 1}: ${step.label}`}
-              />
+                aria-label={`Phase ${idx + 1}: ${phase.label}`}
+              >
+                <span
+                  className={cn(
+                    "h-3 w-3 rounded-full border-2 transition-all duration-300 bg-white",
+                    idx > phaseIndex && "border-slate-200",
+                    idx <= phaseIndex && "border-transparent",
+                    isCompleted && "bg-indigo-600 border-indigo-600",
+                    isActive &&
+                      "bg-indigo-600 border-indigo-100 ring-2 ring-indigo-600/20 scale-125",
+                  )}
+                />
+              </button>
             );
           })}
         </div>

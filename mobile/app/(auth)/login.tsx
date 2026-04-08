@@ -24,6 +24,7 @@ import { AppleSignIn } from "../../src/components/auth/AppleSignIn";
 import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Theme } from "../../src/constants/Theme";
+import { getPostAuthRedirectHref } from "../../src/lib/onboarding-draft";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
@@ -53,7 +54,8 @@ export default function LoginScreen() {
       setLoading(false);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/(tabs)");
+      const href = await getPostAuthRedirectHref();
+      router.replace(href);
     }
   };
 

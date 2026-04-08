@@ -32,6 +32,7 @@ import {
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import { money } from "../src/lib/formatters";
+import { compressImageForAnalysis } from "../src/lib/image-utils";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
 import { Logo } from "../src/components/ui/Logo";
@@ -42,23 +43,35 @@ import {
   saveOnboardingProject,
   projectTypeToRoomType,
   PhotoToScopeResult,
+  DEFAULT_ESTIMATE_CONFIDENCE,
+  ONBOARDING_SESSION_INVALID,
   type ScopeItem,
 } from "../src/lib/onboarding-helpers";
+import {
+  persistOnboardingDraft,
+  loadOnboardingDraft,
+  clearOnboardingDraft,
+} from "../src/lib/onboarding-draft";
 import { ProjectIcon } from "../src/lib/project-icons";
-import { supabase } from "../src/lib/supabase";
+import { supabase, invokeFunction } from "../src/lib/supabase";
 import { useAuth } from "../src/contexts/auth-context";
 import { Theme } from "../src/constants/Theme";
 import { getRangeForType } from "../src/constants/estimateRanges";
 
-const STEPS = [
-  "Type",
-  "Location",
-  "Stage",
-  "Vision",
-  "Analysis",
-  "Estimate",
-  "Account",
-];
+/** Seven internal steps; progress UI is grouped into three phases below. */
+const ONBOARDING_LAST_STEP_INDEX = 6;
+
+const ONBOARDING_PHASES = [
+  { label: "About project" },
+  { label: "Your estimate" },
+  { label: "Save" },
+] as const;
+
+function phaseIndexForStep(step: number): number {
+  if (step <= 3) return 0;
+  if (step <= 5) return 1;
+  return 2;
+}
 
 const ANALYSIS_MESSAGES = [
   "Comparing local labor indices...",
@@ -154,10 +167,12 @@ function MaterialDetailList({
 }
 
 export default function OnboardingScreen() {
-  const { user, session } = useAuth();
-  const { newProject: newProjectParam } = useLocalSearchParams<{
-    newProject?: string;
-  }>();
+  const { user, session, signOut } = useAuth();
+  const { newProject: newProjectParam, restoreOnboarding } =
+    useLocalSearchParams<{
+      newProject?: string;
+      restoreOnboarding?: string;
+    }>();
   /** From Add tab / “new project” CTAs — skip fast-track so existing users can add another project. */
   const isAddingAnotherProject =
     newProjectParam === "1" ||
@@ -178,8 +193,12 @@ export default function OnboardingScreen() {
     min: number;
     max: number;
     scope: PhotoToScopeResult["scope_items"];
+    confidence: number;
   } | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
+
+  /** Step 4: ignore late analysis results if the user left analysis. */
+  const analysisStepActiveRef = React.useRef(false);
 
   const runAnalysis = React.useCallback(async () => {
     try {
@@ -196,7 +215,11 @@ export default function OnboardingScreen() {
         fd.append("scope_description", scopeDescription.trim());
       }
 
-      photos.forEach((uri, index) => {
+      const compressedUris = await Promise.all(
+        photos.map((uri) => compressImageForAnalysis(uri)),
+      );
+
+      compressedUris.forEach((uri, index) => {
         // @ts-expect-error: React Native FormData needs this object format
         fd.append("photos[]", {
           uri,
@@ -205,30 +228,42 @@ export default function OnboardingScreen() {
         });
       });
 
-      const { data, error } = await supabase.functions.invoke(
+      const { data, error } = await invokeFunction<PhotoToScopeResult>(
         "photo-to-scope",
-        {
-          body: fd,
-        },
+        { body: fd },
       );
 
       if (error || !data) {
-        throw new Error(error?.message || "AI Analysis failed");
+        throw new Error(
+          error && "message" in error
+            ? String((error as { message: string }).message)
+            : "AI Analysis failed",
+        );
       }
 
-      const result = data as PhotoToScopeResult;
+      const result = data;
+      if (!analysisStepActiveRef.current) return;
       setEstimate({
         min: result.summary.estimated_min_total,
         max: result.summary.estimated_max_total,
         scope: result.scope_items,
+        confidence: Number.isFinite(result.summary.confidence_score)
+          ? result.summary.confidence_score
+          : DEFAULT_ESTIMATE_CONFIDENCE,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setStep(5);
     } catch (err) {
       console.error("Analysis Error:", err);
+      if (!analysisStepActiveRef.current) return;
       // Fallback to a type-based range if AI fails, but mark it clearly
       const range = getRangeForType(projectType);
-      setEstimate({ min: range.min, max: range.max, scope: [] });
+      setEstimate({
+        min: range.min,
+        max: range.max,
+        scope: [],
+        confidence: DEFAULT_ESTIMATE_CONFIDENCE,
+      });
       setStep(5);
       Alert.alert(
         "Regional Estimation",
@@ -270,8 +305,46 @@ export default function OnboardingScreen() {
   }, [user?.id, isAddingAnotherProject]);
 
   useEffect(() => {
+    if (isAddingAnotherProject) {
+      void clearOnboardingDraft();
+    }
+  }, [isAddingAnotherProject]);
+
+  useEffect(() => {
+    if (restoreOnboarding !== "1" || !session?.user?.id) return;
+
+    let cancelled = false;
+    void (async () => {
+      const draft = await loadOnboardingDraft();
+      if (cancelled || !draft) return;
+      setProjectType(draft.projectType);
+      setLocation(draft.location);
+      setStage(draft.stage);
+      setPhotos(draft.photos);
+      setScopeDescription(draft.scopeDescription);
+      setEstimate(
+        draft.estimate
+          ? {
+              min: draft.estimate.min,
+              max: draft.estimate.max,
+              scope: draft.estimate.scope,
+              confidence: draft.estimate.confidence,
+            }
+          : null,
+      );
+      setStep(6);
+      await clearOnboardingDraft();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [restoreOnboarding, session?.user?.id]);
+
+  useEffect(() => {
     if (step !== 4) return;
 
+    analysisStepActiveRef.current = true;
     let current = 0;
     const messageInterval = setInterval(() => {
       current = (current + 1) % ANALYSIS_MESSAGES.length;
@@ -280,7 +353,10 @@ export default function OnboardingScreen() {
 
     void runAnalysisRef.current();
 
-    return () => clearInterval(messageInterval);
+    return () => {
+      analysisStepActiveRef.current = false;
+      clearInterval(messageInterval);
+    };
   }, [step]);
 
   const handleNext = () => {
@@ -289,7 +365,7 @@ export default function OnboardingScreen() {
       setStep(4);
     } else if (step === 4) {
       // Analysis is automated
-    } else if (step < STEPS.length - 1) {
+    } else if (step < ONBOARDING_LAST_STEP_INDEX) {
       setStep(step + 1);
     } else {
       handleComplete();
@@ -339,7 +415,7 @@ export default function OnboardingScreen() {
               summary: {
                 estimated_min_total: estimate.min,
                 estimated_max_total: estimate.max,
-                confidence_score: 4.8,
+                confidence_score: estimate.confidence,
               },
               // Pass full AI-generated scope so BOM is persisted to DB
               scope_items: estimate.scope ?? [],
@@ -347,12 +423,30 @@ export default function OnboardingScreen() {
           : null,
         photos: photos.map((p) => ({ uri: p })),
       });
+      await clearOnboardingDraft();
       setLoading(false);
       router.replace("/(tabs)");
     } catch (err) {
       const error = err as Error;
+      const msg = error.message || "";
       setLoading(false);
-      Alert.alert("Error", error.message || "Failed to save project");
+
+      const authRowMissing =
+        msg === ONBOARDING_SESSION_INVALID ||
+        msg.includes("properties_owner_user_id_fkey") ||
+        /owner_user_id_fkey/i.test(msg);
+
+      if (authRowMissing) {
+        await signOut();
+        Alert.alert(
+          "Sign in again",
+          "We couldn’t verify your account on the server. If your profile was reset or removed, sign in again—then you can finish saving your project.",
+          [{ text: "OK", onPress: () => router.replace("/(auth)/login") }],
+        );
+        return;
+      }
+
+      Alert.alert("Error", msg || "Failed to save project");
     }
   };
 
@@ -732,8 +826,9 @@ export default function OnboardingScreen() {
               </MotiView>
 
               <Text style={styles.estimateDisclaimer}>
-                Based on your project type. Your exact AI-powered estimate is
-                generated after photo analysis.
+                {estimate?.scope && estimate.scope.length > 0
+                  ? "Based on your photos and project details. Totals reflect the line-item scope below."
+                  : "Based on your project type and location. Add photos on the Vision step for a deeper AI scope when you try again."}
               </Text>
 
               <View style={styles.estimateDivider} />
@@ -850,6 +945,22 @@ export default function OnboardingScreen() {
                     title="Create Free Account"
                     onPress={() => {
                       Haptics.selectionAsync();
+                      void persistOnboardingDraft({
+                        v: 1,
+                        projectType,
+                        location,
+                        stage,
+                        photos,
+                        scopeDescription,
+                        estimate: estimate
+                          ? {
+                              min: estimate.min,
+                              max: estimate.max,
+                              scope: estimate.scope,
+                              confidence: estimate.confidence,
+                            }
+                          : null,
+                      });
                       router.push("/(auth)/register");
                     }}
                     icon={<UserPlus size={20} color="white" />}
@@ -859,6 +970,22 @@ export default function OnboardingScreen() {
                     variant="outline"
                     onPress={() => {
                       Haptics.selectionAsync();
+                      void persistOnboardingDraft({
+                        v: 1,
+                        projectType,
+                        location,
+                        stage,
+                        photos,
+                        scopeDescription,
+                        estimate: estimate
+                          ? {
+                              min: estimate.min,
+                              max: estimate.max,
+                              scope: estimate.scope,
+                              confidence: estimate.confidence,
+                            }
+                          : null,
+                      });
                       router.push("/(auth)/login");
                     }}
                     icon={<LogIn size={20} color="white" />}
@@ -900,17 +1027,26 @@ export default function OnboardingScreen() {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <ChevronLeft size={24} color="#0f172a" />
         </TouchableOpacity>
-        <View style={styles.progressContainer}>
-          {STEPS.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.progressBar,
-                i <= step && styles.progressBarActive,
-                { width: `${100 / STEPS.length - 5}%` },
-              ]}
-            />
-          ))}
+        <View style={styles.progressHeader}>
+          <View style={styles.progressContainer}>
+            {ONBOARDING_PHASES.map((_, i) => {
+              const phaseNow = phaseIndexForStep(step);
+              return (
+                <View
+                  key={i}
+                  style={[
+                    styles.progressBar,
+                    { flex: 1 },
+                    i > 0 && { marginLeft: 8 },
+                    i <= phaseNow && styles.progressBarActive,
+                  ]}
+                />
+              );
+            })}
+          </View>
+          <Text style={styles.phaseLabel} numberOfLines={1}>
+            {ONBOARDING_PHASES[phaseIndexForStep(step)].label}
+          </Text>
         </View>
       </View>
 
@@ -918,7 +1054,7 @@ export default function OnboardingScreen() {
         <AnimatePresence exitBeforeEnter>{renderStep()}</AnimatePresence>
       </View>
 
-      {step < STEPS.length - 1 && (
+      {step < ONBOARDING_LAST_STEP_INDEX && (
         <View style={styles.footer}>
           <Button
             title="Continue"
@@ -1044,10 +1180,21 @@ const styles = StyleSheet.create({
   stageTextActive: {
     color: Theme.colors.brand.primary,
   },
-  progressContainer: {
+  progressHeader: {
     flex: 1,
+    minWidth: 0,
+  },
+  progressContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+  },
+  phaseLabel: {
+    marginTop: 8,
+    fontSize: 12,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
   },
   progressBar: {
     height: 4,

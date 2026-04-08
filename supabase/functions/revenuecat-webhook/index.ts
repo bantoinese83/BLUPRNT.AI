@@ -1,12 +1,15 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { getServiceClient } from "../_shared/auth.ts";
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+/**
+ * RevenueCat server webhook. Secured with Bearer REVENUECAT_WEBHOOK_AUTH_TOKEN.
+ * Idempotent per event.id via revenuecat_webhook_events.
+ */
+Deno.serve(async (req: Request) => {
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     const secretToken = Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN");
@@ -16,28 +19,76 @@ serve(async (req) => {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { event } = await req.json();
+    const payload = (await req.json()) as { event?: Record<string, unknown> };
+    const event = payload.event;
+    if (!event || typeof event !== "object") {
+      return new Response(JSON.stringify({ error: "Missing event" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-    const userId = event.app_user_id;
-    const type = event.type;
+    const userId = event.app_user_id as string | undefined;
+    const type = event.type as string | undefined;
     const expirationAt = event.expiration_at_ms
-      ? new Date(event.expiration_at_ms).toISOString()
+      ? new Date(Number(event.expiration_at_ms)).toISOString()
       : null;
 
-    // We care about "Bluprntai Pro" entitlement
-    const hasPro = event.entitlement_ids?.includes("Bluprntai Pro");
+    const entitlementIds = event.entitlement_ids as string[] | undefined;
+    const hasPro = entitlementIds?.includes("Bluprntai Pro") ?? false;
+
+    const eventId =
+      typeof event.id === "string" && event.id.length > 0 ? event.id : null;
+
+    const admin = getServiceClient();
+
+    if (eventId) {
+      const { data: existing } = await admin
+        .from("revenuecat_webhook_events")
+        .select("id")
+        .eq("id", eventId)
+        .maybeSingle();
+      if (existing) {
+        return new Response(
+          JSON.stringify({ success: true, duplicate: true }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+      const { error: insErr } = await admin
+        .from("revenuecat_webhook_events")
+        .insert({ id: eventId });
+      if (insErr) {
+        const { data: race } = await admin
+          .from("revenuecat_webhook_events")
+          .select("id")
+          .eq("id", eventId)
+          .maybeSingle();
+        if (race) {
+          return new Response(
+            JSON.stringify({ success: true, duplicate: true }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+        throw insErr;
+      }
+    }
 
     console.log(`Processing RevenueCat event ${type} for user ${userId}`);
 
     if (userId) {
       if (hasPro) {
-        // Upsert subscription status
-        const { error } = await supabase.from("user_subscriptions").upsert(
+        const { error } = await admin.from("user_subscriptions").upsert(
           {
             user_id: userId,
             status: type === "CANCELLATION" ? "canceled" : "active",
             current_period_end: expirationAt,
-            plan: "architect", // Mapping 'Bluprntai Pro' to the internal 'architect' plan
+            plan: "architect",
             updated_at: new Date().toISOString(),
           },
           { onConflict: "user_id" },
@@ -45,8 +96,7 @@ serve(async (req) => {
 
         if (error) throw error;
       } else if (type === "EXPIRATION" || type === "CANCELLATION") {
-        // Mark as canceled/expired
-        const { error } = await supabase
+        const { error } = await admin
           .from("user_subscriptions")
           .update({
             status: "canceled",

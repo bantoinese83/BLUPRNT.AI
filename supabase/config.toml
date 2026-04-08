@@ -1,41 +1,46 @@
 # Local Supabase (optional). Deploy functions with:
 # npx supabase functions deploy <name> --project-ref YOUR_REF
+#
+# JWT verification: enabled for user-invoked functions; disabled for webhooks,
+# public token endpoints, and submit-marketing-lead (anon).
 
+# Multipart + RN/Expo clients: gateway JWT verify often 401s even with a valid session.
+# Auth is enforced in-handler when `project_id` is present (assertProjectOwner).
 [functions.photo-to-scope]
 verify_jwt = false
 
 [functions.upload-invoice]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-invoice]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-document-signed-url]
-verify_jwt = false
+verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
 
 [functions.create-checkout]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-project-view]
 verify_jwt = false
 
 [functions.delete-account]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-email]
-verify_jwt = false
+verify_jwt = true
 
 [functions.revenuecat-webhook]
 enabled = true
-# External webhook (RevenueCat servers) — no Supabase user JWT on the request
 verify_jwt = false
 import_map = "./functions/revenuecat-webhook/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/revenuecat-webhook/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/revenuecat-webhook/*.html" ]
+
+[functions.chat-with-project]
+verify_jwt = true
+
+[functions.submit-marketing-lead]
+verify_jwt = false

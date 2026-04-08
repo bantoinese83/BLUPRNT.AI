@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -9,20 +9,33 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
 } from "react-native";
 import { Send, Bot, Sparkles } from "lucide-react-native";
 import Markdown from "react-native-markdown-display";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { invokeFunction } from "../lib/supabase";
 import { Theme } from "../constants/Theme";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
 
-const TAB_BAR_BUFFER = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 32;
+/** Space above the notched tab bar + FAB (matches scroll clearance scale). */
+const TAB_BAR_BUFFER = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 28;
+
+type Role = "user" | "assistant";
 
 interface Message {
-  role: "user" | "assistant";
+  id: string;
+  role: Role;
   content: string;
+}
+
+let messageIdSeq = 0;
+function nextMessageId(): string {
+  messageIdSeq += 1;
+  return `msg-${messageIdSeq}`;
 }
 
 interface Props {
@@ -30,9 +43,11 @@ interface Props {
 }
 
 export function AIAssistant({ projectId }: Props) {
+  const insets = useSafeAreaInsets();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
+      id: nextMessageId(),
       role: "assistant",
       content:
         "Hi! I'm your Project Assistant. Ask me anything about your renovation budget, scope, or next steps.",
@@ -40,6 +55,7 @@ export function AIAssistant({ projectId }: Props) {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const nearBottomRef = useRef(true);
 
   const SUGGESTIONS = [
     "Analyze my budget",
@@ -48,14 +64,33 @@ export function AIAssistant({ projectId }: Props) {
     "Maintenance tips for this stage",
   ];
 
+  const scrollToEnd = useCallback(() => {
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    });
+  }, []);
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+    const padding = 48;
+    nearBottomRef.current =
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - padding;
+  }, []);
+
   const handleSend = async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || isTyping) return;
 
     setInput("");
+    nearBottomRef.current = true;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setMessages((prev) => [...prev, { role: "user", content: msg }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: nextMessageId(), role: "user", content: msg },
+    ]);
     setIsTyping(true);
+    scrollToEnd();
 
     try {
       const { data, error } = await invokeFunction<{ reply?: string }>(
@@ -70,6 +105,7 @@ export function AIAssistant({ projectId }: Props) {
       setMessages((prev) => [
         ...prev,
         {
+          id: nextMessageId(),
           role: "assistant",
           content: data?.reply || "Sorry, I couldn't process that right now.",
         },
@@ -79,8 +115,9 @@ export function AIAssistant({ projectId }: Props) {
       setMessages((prev) => [
         ...prev,
         {
+          id: nextMessageId(),
           role: "assistant",
-          content: "Something went wrong. Please try again later.",
+          content: "Something went wrong. Please try again in a moment.",
         },
       ]);
     } finally {
@@ -88,29 +125,36 @@ export function AIAssistant({ projectId }: Props) {
     }
   };
 
+  /** Logo row (~56) + title block (~84) — iOS keyboard offset above tab system. */
+  const keyboardOffset =
+    Platform.OS === "ios" ? insets.top + 128 : insets.top + 24;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      keyboardVerticalOffset={keyboardOffset}
       style={styles.container}
     >
       <ScrollView
         ref={scrollViewRef}
-        onContentSizeChange={() =>
-          scrollViewRef.current?.scrollToEnd({ animated: true })
-        }
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onContentSizeChange={() => {
+          if (nearBottomRef.current) scrollToEnd();
+        }}
         contentContainerStyle={styles.messagesContainer}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
       >
-        {messages.map((m, i) => (
+        {messages.map((m) => (
           <MotiView
-            key={i}
-            from={{ opacity: 0, scale: 0.9, translateY: 10 }}
+            key={m.id}
+            from={{ opacity: 0, scale: 0.97, translateY: 8 }}
             animate={{ opacity: 1, scale: 1, translateY: 0 }}
             transition={{
               type: "timing",
-              duration: 300,
-              delay: 0,
+              duration: 280,
             }}
             style={[
               styles.messageWrapper,
@@ -118,8 +162,12 @@ export function AIAssistant({ projectId }: Props) {
             ]}
           >
             {m.role === "assistant" && (
-              <View style={styles.botAvatar}>
-                <Sparkles size={14} color="#6366f1" />
+              <View style={styles.botAvatar} accessibilityLabel="Assistant">
+                <Sparkles
+                  size={14}
+                  color={Theme.colors.brand.primary}
+                  strokeWidth={2}
+                />
               </View>
             )}
             <View
@@ -143,61 +191,77 @@ export function AIAssistant({ projectId }: Props) {
           <MotiView
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            style={styles.assistantWrapper}
+            style={[styles.messageWrapper, styles.assistantWrapper]}
           >
-            <View style={styles.botAvatar}>
-              <Bot size={14} color="#6366f1" />
+            <View style={styles.botAvatar} accessibilityLabel="Assistant">
+              <Bot size={14} color={Theme.colors.brand.primary} />
             </View>
             <View
               style={[
                 styles.messageBubble,
                 styles.assistantBubble,
                 styles.assistantBubbleShape,
-                { paddingVertical: 12, paddingHorizontal: 16 },
+                styles.typingBubble,
               ]}
             >
-              <ActivityIndicator size="small" color="#818cf8" />
+              <ActivityIndicator
+                size="small"
+                color={Theme.colors.brand.light}
+              />
             </View>
           </MotiView>
         )}
       </ScrollView>
 
-      <View style={styles.inputArea}>
+      <View style={styles.inputDock}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.suggestionsScroll}
           contentContainerStyle={styles.suggestionsContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          {SUGGESTIONS.map((s, i) => (
+          {SUGGESTIONS.map((label) => (
             <TouchableOpacity
-              key={i}
+              key={label}
               style={styles.chip}
-              onPress={() => handleSend(s)}
+              onPress={() => handleSend(label)}
+              disabled={isTyping}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={label}
             >
-              <Text style={styles.chipText}>{s}</Text>
+              <Text style={styles.chipText} numberOfLines={1}>
+                {label}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <View style={styles.inputContainer}>
+        <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
             value={input}
             onChangeText={setInput}
-            placeholder="Ask about your project..."
-            placeholderTextColor="#64748b"
+            placeholder="Ask about your project…"
+            placeholderTextColor={Theme.colors.text.muted}
             multiline
+            editable={!isTyping}
+            accessibilityLabel="Message"
+            accessibilityHint="Type a question about your project"
+            maxLength={4000}
           />
           <TouchableOpacity
-            onPress={() => handleSend()}
+            onPress={() => void handleSend()}
             disabled={!input.trim() || isTyping}
             style={[
               styles.sendButton,
               (!input.trim() || isTyping) && styles.sendButtonDisabled,
             ]}
+            accessibilityRole="button"
+            accessibilityLabel="Send message"
           >
-            <Send size={20} color="white" />
+            <Send size={20} color="#ffffff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -208,15 +272,15 @@ export function AIAssistant({ projectId }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: Theme.colors.background,
   },
   messagesContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingHorizontal: Theme.spacing.xl,
+    paddingTop: Theme.spacing.md,
+    paddingBottom: Theme.spacing.xl,
   },
   messageWrapper: {
-    marginBottom: 20,
+    marginBottom: Theme.spacing.lg,
     flexDirection: "row",
     alignItems: "flex-end",
   },
@@ -229,87 +293,104 @@ const styles = StyleSheet.create({
   botAvatar: {
     width: 32,
     height: 32,
-    borderRadius: 12,
-    backgroundColor: "#f5f3ff",
+    borderRadius: Theme.radius.md,
+    backgroundColor: "rgba(79, 70, 229, 0.08)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
     marginBottom: 2,
-    borderWidth: 1,
-    borderColor: "#e0e7ff",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(79, 70, 229, 0.15)",
   },
   messageBubble: {
     maxWidth: "85%",
-    padding: 18,
-    borderRadius: 22,
+    paddingVertical: Theme.spacing.md,
+    paddingHorizontal: Theme.spacing.lg,
+    borderRadius: Theme.radius.xl,
   },
   userBubble: {
     backgroundColor: Theme.colors.brand.primary,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255, 255, 255, 0.12)",
   },
   userBubbleShape: {
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: Theme.radius.sm,
   },
   assistantBubble: {
-    backgroundColor: "#f8fafc",
-    borderWidth: 1,
-    borderColor: "#f1f5f9",
+    backgroundColor: Theme.colors.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Theme.colors.border,
   },
   assistantBubbleShape: {
-    borderBottomLeftRadius: 4,
+    borderBottomLeftRadius: Theme.radius.sm,
+  },
+  typingBubble: {
+    paddingVertical: 14,
+    paddingHorizontal: Theme.spacing.lg,
   },
   userText: {
-    color: "white",
-    fontSize: 16,
+    color: "#ffffff",
+    fontSize: Theme.typography.size.lg,
     fontFamily: Theme.typography.family.medium,
     lineHeight: 24,
   },
-  inputArea: {
-    backgroundColor: "#ffffff",
-    borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
-    paddingBottom: Platform.OS === "ios" ? TAB_BAR_BUFFER : 20,
+  inputDock: {
+    backgroundColor: Theme.colors.header,
+    paddingBottom: Platform.OS === "ios" ? TAB_BAR_BUFFER : TAB_BAR_BUFFER - 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0f172a",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+      },
+      android: { elevation: 10 },
+    }),
   },
   suggestionsScroll: {
-    maxHeight: 50,
+    maxHeight: 52,
   },
   suggestionsContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    gap: 8,
+    paddingHorizontal: Theme.spacing.xl,
+    paddingTop: Theme.spacing.sm,
+    paddingBottom: Theme.spacing.xs,
+    gap: Theme.spacing.sm,
+    alignItems: "center",
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 100,
-    backgroundColor: "#f1f5f9",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
+    paddingHorizontal: Theme.spacing.lg,
+    paddingVertical: 10,
+    borderRadius: Theme.radius.full,
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Theme.colors.inputBorder,
   },
   chipText: {
     color: Theme.colors.text.secondary,
-    fontSize: 13,
+    fontSize: Theme.typography.size.sm,
     fontFamily: Theme.typography.family.semibold,
   },
-  inputContainer: {
+  inputRow: {
     flexDirection: "row",
     alignItems: "flex-end",
-    paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingHorizontal: Theme.spacing.xl,
+    paddingTop: Theme.spacing.sm,
+    paddingBottom: Theme.spacing.sm,
   },
   input: {
     flex: 1,
-    backgroundColor: "#f8fafc",
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    backgroundColor: Theme.colors.inputBg,
+    borderRadius: Theme.radius.lg,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingTop: 14,
+    paddingBottom: 14,
     color: Theme.colors.text.primary,
     fontFamily: Theme.typography.family.regular,
-    fontSize: 16,
+    fontSize: Theme.typography.size.lg,
     maxHeight: 120,
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Theme.colors.inputBorder,
+    lineHeight: 22,
   },
   sendButton: {
     width: 52,
@@ -318,18 +399,23 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.brand.primary,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 12,
+    marginLeft: Theme.spacing.sm,
   },
   sendButtonDisabled: {
-    backgroundColor: "rgba(79, 70, 229, 0.3)",
+    backgroundColor: "rgba(79, 70, 229, 0.35)",
   },
 });
 
 const markdownStyles = {
   body: {
     color: Theme.colors.text.secondary,
-    fontSize: 14,
+    fontSize: Theme.typography.size.lg,
     fontFamily: Theme.typography.family.regular,
+    lineHeight: 24,
+  },
+  paragraph: {
+    marginTop: 0,
+    marginBottom: 0,
   },
   strong: {
     color: Theme.colors.text.primary,
@@ -338,13 +424,13 @@ const markdownStyles = {
   heading1: {
     color: Theme.colors.text.primary,
     fontFamily: Theme.typography.family.bold,
-    fontSize: 18,
-    marginVertical: 8,
+    fontSize: Theme.typography.size.xxl,
+    marginVertical: 6,
   },
   heading2: {
     color: Theme.colors.text.primary,
     fontFamily: Theme.typography.family.bold,
-    fontSize: 16,
+    fontSize: Theme.typography.size.lg,
     marginVertical: 4,
   },
   bullet_list: {
@@ -355,9 +441,9 @@ const markdownStyles = {
     color: Theme.colors.text.secondary,
   },
   code_inline: {
-    backgroundColor: "#f1f5f9",
-    color: "#0f172a",
-    borderRadius: 4,
+    backgroundColor: Theme.colors.inputBg,
+    color: Theme.colors.text.primary,
+    borderRadius: Theme.radius.sm,
     paddingHorizontal: 4,
   },
 };

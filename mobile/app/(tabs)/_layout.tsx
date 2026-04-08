@@ -9,10 +9,12 @@ import { UpgradeModal } from "../../src/components/UpgradeModal";
 import { NotchedTabBar } from "../../src/components/NotchedTabBar";
 
 /**
- * Bottom clearance for scroll content (notched bar + FAB overlap + margin).
+ * Bottom clearance for scroll content (notched bar + FAB overlap).
+ * Dock is flush to screen edges; `TAB_BAR_HEIGHT` includes former floating margin
+ * so scroll padding still clears the center FAB.
  */
-export const TAB_BAR_HEIGHT = 72;
-export const TAB_BAR_MARGIN = 18;
+export const TAB_BAR_HEIGHT = 90;
+export const TAB_BAR_MARGIN = 0;
 
 function TabShell() {
   return (
@@ -20,6 +22,20 @@ function TabShell() {
       tabBar={(props) => <NotchedTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+          paddingHorizontal: 0,
+          marginHorizontal: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+        },
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
