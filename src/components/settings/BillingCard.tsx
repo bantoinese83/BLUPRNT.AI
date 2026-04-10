@@ -1,7 +1,11 @@
-import { CreditCard, Crown, User } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PRICING } from "@shared/constants/pricing";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "@/components/icons/PlanMarks";
 
 interface BillingCardProps {
   isArchitect: boolean;
@@ -28,9 +32,9 @@ export function BillingCard({ isArchitect, onUpgradeClick }: BillingCardProps) {
               }`}
             >
               {isArchitect ? (
-                <Crown className="w-5 h-5" />
+                <ArchitectPlanIcon className="w-7 h-7" />
               ) : (
-                <User className="w-5 h-5" />
+                <ProjectPassIcon className="w-7 h-7" />
               )}
             </div>
 

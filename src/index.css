@@ -14,6 +14,10 @@
   --color-primary-muted: #f8fafc;
   --color-surface: #f9fafb;
   --color-accent: #0d9488;
+  /** Marketing Highlighter / rough-notation — same values as `landing-content.ts` */
+  --color-highlight-wash: rgba(13, 148, 136, 0.22);
+  --color-highlight-underline: #14b8a6;
+  --color-highlight-soft: rgba(45, 212, 191, 0.32);
   --breakpoint-xs: 375px;
   --color-border: #f1f5f9;
   --color-border-focus: #334155;
@@ -180,6 +184,56 @@
     );
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;
+  }
+
+  /** CodePen-style “Snurra” stroke loader — teal gradient matches BLUPRNT tokens */
+  @keyframes bluprnt-snurra-spin {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -403px;
+    }
+  }
+
+  .bluprnt-snurra-stop-a {
+    stop-color: #2dd4bf;
+  }
+  .bluprnt-snurra-stop-b {
+    stop-color: #134e4a;
+  }
+  .dark .bluprnt-snurra-stop-a {
+    stop-color: #5eead4;
+  }
+  .dark .bluprnt-snurra-stop-b {
+    stop-color: #0f766e;
+  }
+
+  .bluprnt-snurra-halvan {
+    animation: bluprnt-snurra-spin 10s linear infinite;
+  }
+  .bluprnt-snurra-strecken {
+    animation: bluprnt-snurra-spin 3s linear infinite;
+  }
+  .bluprnt-snurra-halvan-path {
+    stroke-dasharray: 180 800;
+    fill: none;
+    stroke-width: 23;
+    stroke-linecap: round;
+  }
+  .bluprnt-snurra-strecken-path {
+    stroke-dasharray: 26 54;
+    fill: none;
+    stroke-width: 23;
+    stroke-linecap: round;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bluprnt-snurra-halvan,
+    .bluprnt-snurra-strecken,
+    .animate-float {
+      animation: none;
+    }
   }
 
   .dashboard-grid {

@@ -68,13 +68,14 @@ function TabOverlays() {
 }
 
 export default function TabLayout() {
-  const { project, scopeItems, invoices } = useDashboardData();
+  const { project, scopeItems, invoices, spendByCategory } = useDashboardData();
 
   return (
     <AwarenessProvider
       project={project}
       scopeItems={scopeItems}
       invoices={invoices}
+      spendByCategory={spendByCategory}
     >
       <TabShell />
       <TabOverlays />

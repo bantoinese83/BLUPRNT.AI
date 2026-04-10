@@ -69,6 +69,7 @@ describe("useDashboardData", () => {
   const mockSupabaseQuery = (data: unknown = []) => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
     then: (resolve: (v: unknown) => void) =>
@@ -193,6 +194,7 @@ describe("useDashboardData", () => {
         expect(result.current.project?.id).toBe(mockProjectId);
         expect(result.current.scopeItems).toEqual(mockScopes);
         expect(result.current.invoices).toEqual(mockInvoices);
+        expect(result.current.spendByCategory).toEqual({});
         expect(result.current.isArchitect).toBe(true);
         expect(result.current.hasProjectPass).toBe(true);
       },

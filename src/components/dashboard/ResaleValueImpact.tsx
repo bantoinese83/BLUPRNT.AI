@@ -120,10 +120,11 @@ export function ResaleValueImpact({
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
           <Info className="w-4 h-4 text-slate-400 mt-0.5" />
           <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-            Based on current renovation data for{" "}
+            Illustrative example only—not an appraisal, guarantee, or financial
+            advice. Based on rough inputs for{" "}
             <span className="text-slate-900 font-bold">{projectName}</span>.
-            Quality finishes and professional documentation (like your Property
-            Ledger) typically yield higher appraisal values.
+            Well-documented improvements can be easier for buyers and appraisers
+            to understand; actual value depends on many factors.
           </p>
         </div>
       </CardContent>

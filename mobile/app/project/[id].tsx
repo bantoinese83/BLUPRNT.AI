@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   Share,
   Alert,
   Switch,
@@ -45,6 +44,7 @@ import {
   ScopeRow,
 } from "../../../shared/types/database";
 import { Theme } from "../../src/constants/Theme";
+import { SnurraLoader, SnurraSize } from "../../src/components/ui/SnurraLoader";
 
 type BillOfMaterialItem = NonNullable<
   NonNullable<ScopeRow["metadata"]>["materials"]
@@ -317,7 +317,10 @@ function ProjectDetailScreenInner() {
   if (loading) {
     return (
       <ScreenWrapper style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={Theme.colors.brand.primary} />
+        <SnurraLoader
+          size={SnurraSize.screen}
+          accessibilityLabel="Loading project"
+        />
       </ScreenWrapper>
     );
   }
@@ -537,10 +540,7 @@ function ProjectDetailScreenInner() {
               !scopePollDone ? (
                 <>
                   <View style={styles.generatingIcon}>
-                    <ActivityIndicator
-                      size="small"
-                      color={Theme.colors.brand.primary}
-                    />
+                    <SnurraLoader size={SnurraSize.compact} />
                   </View>
                   <Text style={styles.generatingTitle}>Loading line items</Text>
                   <Text style={styles.generatingText}>

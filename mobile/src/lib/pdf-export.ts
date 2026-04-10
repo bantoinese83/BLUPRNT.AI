@@ -97,7 +97,7 @@ export async function generateSellerPacketPDF(
       </head>
       <body>
         <div class="header">
-          <p class="subtitle">BLUPRNT.AI — VERIFIED RECORD</p>
+          <p class="subtitle">BLUPRNT.AI — PROPERTY LEDGER</p>
           <h1 class="title">Property Improvement Ledger</h1>
           <p class="subtitle">Project: ${project.name} | Generated: ${formatDate(new Date().toISOString())}</p>
         </div>

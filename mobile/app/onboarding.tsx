@@ -8,7 +8,6 @@ import {
   Alert,
   Image,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
@@ -18,7 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Sparkles,
+  TrendingUp,
   AlertCircle,
   ArrowRight,
   UserPlus,
@@ -36,7 +35,7 @@ import { money } from "../../shared/lib/formatters";
 import { compressImageForAnalysis } from "../src/lib/image-utils";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
-import { Logo } from "../src/components/ui/Logo";
+import { SnurraLoader, SnurraSize } from "../src/components/ui/SnurraLoader";
 import { ScreenWrapper } from "../src/components/ScreenWrapper";
 import {
   ProjectTypeOption,
@@ -89,13 +88,30 @@ function onboardingZipCode(locationInput: string): string {
   return hasValidOnboardingZip(locationInput) ? locationInput.trim() : digits;
 }
 
-const ANALYSIS_MESSAGES = [
-  "Comparing local labor indices...",
-  "Analyzing material cost trends...",
-  "Identifying scope benchmarks...",
-  "Calculating regional cost baseline...",
-  "Reviewing permit requirements...",
-];
+/** Matches web `LoadingScreen` status copy (rotating lines under the loader). */
+function loadingScreenMessages(
+  projectType: ProjectTypeOption | null,
+  locationInput: string,
+): string[] {
+  const kind =
+    projectType === "Kitchen"
+      ? "kitchen"
+      : projectType === "Bathroom"
+        ? "bathroom"
+        : "project";
+  const zipLabel = hasValidOnboardingZip(locationInput)
+    ? locationInput.trim()
+    : "";
+  return [
+    `Building your ${kind} estimate...`,
+    zipLabel
+      ? `Pulling typical costs near ${zipLabel}...`
+      : "Checking what remodels cost near you...",
+    `Matching materials people actually use on ${kind} jobs...`,
+    "Layering in labor for your area...",
+    "Almost there—tidying the numbers...",
+  ];
+}
 
 /** Line-item costs from AI scope — always shown when the user opens “Breakdown”. */
 function ScopeEstimateBreakdown({ items }: { items: ScopeItem[] }) {
@@ -206,6 +222,7 @@ export default function OnboardingScreen() {
   const [scopeDescription, setScopeDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisIndex, setAnalysisIndex] = useState(0);
+  const [analysisBarW, setAnalysisBarW] = useState(0);
   const [estimate, setEstimate] = useState<{
     min: number;
     max: number;
@@ -256,6 +273,11 @@ export default function OnboardingScreen() {
       setLocatingZip(false);
     }
   }, []);
+
+  const analysisMessages = useMemo(
+    () => loadingScreenMessages(projectType, location),
+    [projectType, location],
+  );
 
   const canContinue = useMemo(() => {
     switch (step) {
@@ -432,11 +454,12 @@ export default function OnboardingScreen() {
     if (step !== 4) return;
 
     analysisStepActiveRef.current = true;
+    setAnalysisIndex(0);
     let current = 0;
     const messageInterval = setInterval(() => {
-      current = (current + 1) % ANALYSIS_MESSAGES.length;
+      current = (current + 1) % analysisMessages.length;
       setAnalysisIndex(current);
-    }, 2000);
+    }, 2500);
 
     void runAnalysisRef.current();
 
@@ -444,7 +467,9 @@ export default function OnboardingScreen() {
       analysisStepActiveRef.current = false;
       clearInterval(messageInterval);
     };
-  }, [step]);
+  }, [step, analysisMessages.length]);
+
+  const analysisBarTargetW = analysisBarW > 0 ? analysisBarW : 280;
 
   const handleNext = () => {
     if (step <= 3 && !canContinue) return;
@@ -642,10 +667,7 @@ export default function OnboardingScreen() {
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 >
                   {locatingZip ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={Theme.colors.brand.primary}
-                    />
+                    <SnurraLoader size={22} />
                   ) : (
                     <MapPin
                       size={22}
@@ -848,46 +870,30 @@ export default function OnboardingScreen() {
             key="step4"
             style={styles.analysisStepRoot}
           >
-            <View style={styles.analysisBrandMark} accessibilityLabel="BLUPRNT">
-              <Logo size={20} />
-              <Text style={styles.analysisBrandText}>BLUPRNT</Text>
-            </View>
-
-            <View style={styles.analysisCircle}>
+            <View style={styles.analysisLoaderCluster}>
               <MotiView
-                from={{ scale: 0.8, opacity: 0.22 }}
-                animate={{ scale: 1.55, opacity: 0 }}
-                transition={{ loop: true, duration: 2200, type: "timing" }}
-                style={[styles.pulseCircle, styles.pulseCircleOuter]}
-              />
-              <MotiView
-                from={{ scale: 0.85, opacity: 0.35 }}
-                animate={{ scale: 1.28, opacity: 0 }}
+                from={{ opacity: 0.4, scale: 0.92 }}
+                animate={{ opacity: 0.75, scale: 1 }}
                 transition={{
-                  loop: true,
-                  duration: 1700,
                   type: "timing",
-                  delay: 400,
+                  duration: 2800,
+                  loop: true,
+                  repeatReverse: true,
                 }}
-                style={[styles.pulseCircle, styles.pulseCircleInner]}
+                style={styles.analysisLoaderGlow}
               />
-              <View style={styles.analysisIconDisk}>
-                <MotiView
-                  from={{ scale: 1, opacity: 0.88 }}
-                  animate={{ scale: 1.06, opacity: 1 }}
-                  transition={{
-                    loop: true,
-                    type: "timing",
-                    duration: 1600,
-                    repeatReverse: true,
-                  }}
-                >
-                  <Sparkles size={34} color={Theme.colors.brand.primary} />
-                </MotiView>
-              </View>
+              <SnurraLoader
+                size={SnurraSize.hero}
+                showLogo
+                accessibilityLabel="Building your estimate"
+              />
             </View>
 
             <Text style={styles.analysisTitle}>Building your BLUPRNT</Text>
+            <Text style={styles.analysisLeadSubtitle}>
+              Generating real-world market data
+            </Text>
+
             <MotiView
               key={analysisIndex}
               from={{ opacity: 0, translateY: 8 }}
@@ -896,7 +902,7 @@ export default function OnboardingScreen() {
               style={styles.analysisMessageWrap}
             >
               <Text style={styles.analysisSubtitle}>
-                {ANALYSIS_MESSAGES[analysisIndex]}
+                {analysisMessages[analysisIndex]}
               </Text>
             </MotiView>
 
@@ -904,20 +910,21 @@ export default function OnboardingScreen() {
               style={styles.analysisProgressTrack}
               accessibilityRole="progressbar"
               accessibilityLabel="Analysis in progress"
+              onLayout={(e) => setAnalysisBarW(e.nativeEvent.layout.width)}
             >
               <MotiView
-                style={styles.analysisProgressChunk}
-                from={{ left: "-40%" }}
-                animate={{ left: "100%" }}
-                transition={{
-                  type: "timing",
-                  duration: 1800,
-                  loop: true,
-                }}
+                key={Math.round(analysisBarTargetW)}
+                style={[
+                  styles.analysisProgressFill,
+                  { width: analysisBarTargetW * 0.02 },
+                ]}
+                from={{ width: analysisBarTargetW * 0.02 }}
+                animate={{ width: analysisBarTargetW * 0.92 }}
+                transition={{ type: "timing", duration: 20_000 }}
               />
             </View>
-            <Text style={styles.analysisProgressCaption}>
-              This usually takes a few seconds
+            <Text style={styles.analysisFooterMicro}>
+              Scanning Database Assets
             </Text>
           </MotiView>
         );
@@ -942,7 +949,7 @@ export default function OnboardingScreen() {
                   <ProjectIcon name={projectType || ""} size={36} />
                 </View>
                 <View style={styles.confidenceBadge}>
-                  <Sparkles size={12} color={Theme.colors.brand.light} />
+                  <TrendingUp size={12} color={Theme.colors.brand.light} />
                   <Text style={styles.confidenceText}>Refined Range</Text>
                 </View>
               </View>
@@ -970,8 +977,8 @@ export default function OnboardingScreen() {
 
               <Text style={styles.estimateDisclaimer}>
                 {estimate?.scope && estimate.scope.length > 0
-                  ? "Based on your photos and project details. Totals reflect the line-item scope below."
-                  : "Based on your project type and location. Add photos on the Vision step for a deeper AI scope when you try again."}
+                  ? "From your photos and notes—not a contractor bid. The line-by-line list below is what we used for the total."
+                  : "From your project type and zip for now. Add photos on the Vision step next time for a richer breakdown."}
               </Text>
 
               <View style={styles.estimateDivider} />
@@ -979,7 +986,9 @@ export default function OnboardingScreen() {
               <View style={styles.breakdown}>
                 <View style={styles.breakdownItem}>
                   <Check size={14} color="#2dd4bf" />
-                  <Text style={styles.breakdownText}>National Labor Data</Text>
+                  <Text style={styles.breakdownText}>
+                    Typical labor near you
+                  </Text>
                 </View>
                 {estimate?.scope && estimate.scope.length > 0 ? (
                   <>
@@ -1033,7 +1042,7 @@ export default function OnboardingScreen() {
                 ) : (
                   <View style={styles.breakdownItem}>
                     <Check size={14} color="#2dd4bf" />
-                    <Text style={styles.breakdownText}>Material Indices</Text>
+                    <Text style={styles.breakdownText}>Material cost cues</Text>
                   </View>
                 )}
               </View>
@@ -1615,30 +1624,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 48,
+    paddingVertical: 40,
     paddingHorizontal: 28,
     width: "100%",
   },
-  analysisBrandMark: {
-    flexDirection: "row",
+  analysisLoaderCluster: {
+    position: "relative",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 28,
-    opacity: 0.42,
+    justifyContent: "center",
+    width: "100%",
+    minHeight: SnurraSize.hero + 24,
+    marginBottom: 8,
   },
-  analysisBrandText: {
-    fontSize: 11,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.secondary,
-    letterSpacing: 3,
+  analysisLoaderGlow: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: "rgba(13, 148, 136, 0.07)",
   },
   analysisTitle: {
     fontSize: 26,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
-    marginBottom: 10,
+    marginBottom: 6,
     letterSpacing: -0.5,
     textAlign: "center",
+  },
+  analysisLeadSubtitle: {
+    fontSize: 16,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+    lineHeight: 24,
+    maxWidth: 320,
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   analysisSubtitle: {
     fontSize: 16,
@@ -1646,71 +1667,45 @@ const styles = StyleSheet.create({
     color: "#475569",
     textAlign: "center",
     lineHeight: 24,
-    maxWidth: 300,
+    maxWidth: 320,
   },
   analysisMessageWrap: {
-    minHeight: 56,
+    minHeight: 52,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 8,
   },
   analysisProgressTrack: {
     position: "relative",
-    marginTop: 28,
+    marginTop: 20,
     width: "72%",
     maxWidth: 280,
-    height: 4,
-    borderRadius: 2,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: "rgba(15, 23, 42, 0.08)",
     overflow: "hidden",
   },
-  analysisProgressChunk: {
+  analysisProgressFill: {
     position: "absolute",
+    left: 0,
     top: 0,
     bottom: 0,
-    width: "42%",
-    borderRadius: 2,
+    borderRadius: 3,
     backgroundColor: Theme.colors.brand.primary,
+    shadowColor: "rgba(13, 148, 136, 0.45)",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.85,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  analysisProgressCaption: {
-    marginTop: 10,
-    fontSize: 12,
-    fontFamily: Theme.typography.family.medium,
-    color: Theme.colors.text.secondary,
-  },
-  analysisCircle: {
-    width: 132,
-    height: 132,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 36,
-  },
-  pulseCircle: {
-    position: "absolute",
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-  },
-  pulseCircleOuter: {
-    backgroundColor: "rgba(13, 148, 136, 0.28)",
-  },
-  pulseCircleInner: {
-    backgroundColor: "rgba(13, 148, 136, 0.45)",
-  },
-  analysisIconDisk: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "rgba(15, 23, 42, 0.06)",
-    shadowColor: "#042f2e",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 6,
+  analysisFooterMicro: {
+    marginTop: 12,
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.muted,
+    letterSpacing: 2,
+    textAlign: "center",
+    textTransform: "uppercase",
   },
   skipContainer: {
     marginTop: 32,

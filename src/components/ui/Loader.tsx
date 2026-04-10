@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,161 @@ interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
   subtitle?: string;
   size?: "sm" | "md" | "lg" | "xl";
   showLogo?: boolean;
+}
+
+const SNU_PATH =
+  "m 164,100 c 0,-35.346224 -28.65378,-64 -64,-64 -35.346224,0 -64,28.653776 -64,64 0,35.34622 28.653776,64 64,64 35.34622,0 64,-26.21502 64,-64 0,-37.784981 -26.92058,-64 -64,-64 -37.079421,0 -65.267479,26.922736 -64,64 1.267479,37.07726 26.703171,65.05317 64,64 37.29683,-1.05317 64,-64 64,-64";
+
+function SnurraSpinner({
+  sizePx,
+  showLogo,
+  logoSizeClass,
+  reduceMotion,
+}: {
+  sizePx: number;
+  showLogo: boolean;
+  logoSizeClass: string;
+  reduceMotion: boolean;
+}) {
+  const safeId = useId().replace(/:/g, "");
+  const filterId = `bluprnt-snurra-f-${safeId}`;
+  const gradMainId = `bluprnt-snurra-g-${safeId}`;
+  const gradShadowId = `bluprnt-snurra-gs-${safeId}`;
+
+  const shadowBlur = Math.max(2, Math.round(sizePx * 0.025));
+  const shadowOffset = Math.max(1, Math.round(sizePx * 0.015));
+
+  const pathMotionClass = cn(
+    "bluprnt-snurra-halvan bluprnt-snurra-halvan-path",
+    reduceMotion && "[animation:none]",
+  );
+  const circleMotionClass = cn(
+    "bluprnt-snurra-strecken bluprnt-snurra-strecken-path",
+    reduceMotion && "[animation:none]",
+  );
+
+  const gradientStops = (
+    <>
+      <stop offset="0" className="bluprnt-snurra-stop-a" />
+      <stop offset="1" className="bluprnt-snurra-stop-b" />
+    </>
+  );
+
+  return (
+    <div className="relative isolate" style={{ width: sizePx, height: sizePx }}>
+      <svg
+        className="pointer-events-none absolute h-0 w-0 overflow-hidden"
+        aria-hidden
+      >
+        <defs>
+          <filter id={filterId} colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -10"
+              result="inreGegga"
+            />
+            <feComposite in="SourceGraphic" in2="inreGegga" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
+
+      <svg
+        className="absolute inset-0"
+        viewBox="0 0 200 200"
+        width={sizePx}
+        height={sizePx}
+        style={{
+          opacity: 0.28,
+          filter: `blur(${shadowBlur}px)`,
+          transform: `translate(${shadowOffset}px, ${shadowOffset}px)`,
+        }}
+        aria-hidden
+      >
+        <defs>
+          <linearGradient
+            id={gradShadowId}
+            x1="40"
+            y1="40"
+            x2="160"
+            y2="160"
+            gradientUnits="userSpaceOnUse"
+          >
+            {gradientStops}
+          </linearGradient>
+        </defs>
+        <path
+          className={pathMotionClass}
+          style={{ stroke: `url(#${gradShadowId})` }}
+          d={SNU_PATH}
+        />
+        <circle
+          className={circleMotionClass}
+          style={{ stroke: `url(#${gradShadowId})` }}
+          cx="100"
+          cy="100"
+          r="64"
+        />
+      </svg>
+
+      <svg
+        className="relative z-[1] size-full"
+        viewBox="0 0 200 200"
+        width={sizePx}
+        height={sizePx}
+        style={{ filter: `url(#${filterId})` }}
+        aria-hidden
+      >
+        <defs>
+          <linearGradient
+            id={gradMainId}
+            x1="40"
+            y1="40"
+            x2="160"
+            y2="160"
+            gradientUnits="userSpaceOnUse"
+          >
+            {gradientStops}
+          </linearGradient>
+        </defs>
+        <path
+          className={pathMotionClass}
+          style={{ stroke: `url(#${gradMainId})` }}
+          d={SNU_PATH}
+        />
+        <circle
+          className={circleMotionClass}
+          style={{ stroke: `url(#${gradMainId})` }}
+          cx="100"
+          cy="100"
+          r="64"
+        />
+      </svg>
+
+      {showLogo ? (
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div
+            className={cn(
+              "relative flex items-center justify-center p-4",
+              logoSizeClass,
+            )}
+          >
+            <img
+              src="/bluprnt_logo.svg"
+              alt="BLUPRNT"
+              className="h-full w-full object-contain"
+            />
+          </div>
+        </motion.div>
+      ) : null}
+    </div>
+  );
 }
 
 export function Loader({
@@ -23,36 +178,36 @@ export function Loader({
 
   const sizeConfig = {
     sm: {
-      container: "w-20 h-20",
+      sizePx: 80,
       titleClass: "text-sm/tight font-medium",
       subtitleClass: "text-xs/relaxed",
       spacing: "space-y-2",
       maxWidth: "max-w-48",
-      logoSize: "w-8 h-8",
+      logoSize: "h-8 w-8",
     },
     md: {
-      container: "w-32 h-32",
+      sizePx: 128,
       titleClass: "text-base/snug font-medium",
       subtitleClass: "text-sm/relaxed",
       spacing: "space-y-3",
       maxWidth: "max-w-56",
-      logoSize: "w-12 h-12",
+      logoSize: "h-12 w-12",
     },
     lg: {
-      container: "w-56 h-56",
+      sizePx: 224,
       titleClass: "text-xl font-bold",
       subtitleClass: "text-base/relaxed",
       spacing: "space-y-4",
       maxWidth: "max-w-xs",
-      logoSize: "w-20 h-20",
+      logoSize: "h-20 w-20",
     },
     xl: {
-      container: "w-72 h-72",
+      sizePx: 288,
       titleClass: "text-2xl font-bold",
       subtitleClass: "text-lg/relaxed",
       spacing: "space-y-6",
       maxWidth: "max-w-sm",
-      logoSize: "w-28 h-28",
+      logoSize: "h-28 w-28",
     },
   };
 
@@ -66,213 +221,13 @@ export function Loader({
       )}
       {...props}
     >
-      {/* Enhanced Monochrome Loader */}
-      <motion.div
-        className={cn(
-          "relative isolate [filter:drop-shadow(0_0_20px_rgba(13,148,136,0.22))] dark:[filter:none]",
-          config.container,
-        )}
-        animate={reduceMotion ? { scale: 1 } : { scale: [1, 1.02, 1] }}
-        transition={
-          reduceMotion
-            ? { duration: 0 }
-            : {
-                duration: 4,
-                repeat: Infinity,
-                ease: [0.4, 0, 0.6, 1],
-              }
-        }
-      >
-        {/* Outer ring — deep teal read on white (avoid low-contrast gray rings) */}
-        <motion.div
-          className="absolute inset-0 rounded-full dark:hidden"
-          style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(15, 118, 110) 95deg, rgb(13, 148, 136) 155deg, transparent 255deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 30%, black 34%, black 46%, transparent 50%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 30%, black 34%, black 46%, transparent 50%)`,
-            opacity: 1,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-          }
-        />
+      <SnurraSpinner
+        sizePx={config.sizePx}
+        showLogo={showLogo}
+        logoSizeClass={config.logoSize}
+        reduceMotion={!!reduceMotion}
+      />
 
-        {/* Primary ring — bright teal arc */}
-        <motion.div
-          className="absolute inset-0 rounded-full dark:hidden"
-          style={{
-            background: `conic-gradient(from 40deg, transparent 0deg, rgb(20, 184, 166) 110deg, rgb(13, 148, 136) 200deg, rgba(13, 148, 136, 0.25) 280deg, transparent 360deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 38%, black 41%, black 49%, transparent 52%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 38%, black 41%, black 49%, transparent 52%)`,
-            opacity: 1,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: [0.4, 0, 0.6, 1],
-                }
-          }
-        />
-
-        {/* Secondary ring — counter rotation, slate for depth */}
-        <motion.div
-          className="absolute inset-0 rounded-full dark:hidden"
-          style={{
-            background: `conic-gradient(from 180deg, transparent 0deg, rgb(71, 85, 105) 70deg, rgb(100, 116, 139) 130deg, transparent 220deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 50%, black 53%, black 58%, transparent 62%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 50%, black 53%, black 58%, transparent 62%)`,
-            opacity: 0.72,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, -360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: [0.4, 0, 0.6, 1],
-                }
-          }
-        />
-
-        {/* Accent — thin outer glint */}
-        <motion.div
-          className="absolute inset-0 rounded-full dark:hidden"
-          style={{
-            background: `conic-gradient(from 270deg, transparent 0deg, rgb(45, 212, 191) 55deg, transparent 100deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 56%, black 58%, black 62%, transparent 66%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 56%, black 58%, black 62%, transparent 66%)`,
-            opacity: 0.85,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-          }
-        />
-
-        {/* Dark mode variants */}
-        <motion.div
-          className="absolute inset-0 rounded-full dark:block hidden"
-          style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(255, 255, 255) 90deg, transparent 180deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
-            opacity: 0.8,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-          }
-        />
-
-        <motion.div
-          className="absolute inset-0 rounded-full dark:block hidden"
-          style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(255, 255, 255) 120deg, rgba(255, 255, 255, 0.5) 240deg, transparent 360deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
-            opacity: 0.9,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: [0.4, 0, 0.6, 1],
-                }
-          }
-        />
-
-        <motion.div
-          className="absolute inset-0 rounded-full dark:block hidden"
-          style={{
-            background: `conic-gradient(from 180deg, transparent 0deg, rgba(255, 255, 255, 0.6) 45deg, transparent 90deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
-            opacity: 0.35,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, -360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: [0.4, 0, 0.6, 1],
-                }
-          }
-        />
-
-        <motion.div
-          className="absolute inset-0 rounded-full dark:block hidden"
-          style={{
-            background: `conic-gradient(from 270deg, transparent 0deg, rgba(255, 255, 255, 0.4) 20deg, transparent 40deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
-            opacity: 0.5,
-          }}
-          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : {
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-          }
-        />
-
-        {/* Centered Logo */}
-        {showLogo && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <div
-              className={cn(
-                "relative flex items-center justify-center p-4",
-                config.logoSize,
-              )}
-            >
-              <img
-                src="/bluprnt_logo.svg"
-                alt="BLUPRNT"
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </motion.div>
-        )}
-      </motion.div>
-
-      {/* Enhanced Typography with Breathing Animation */}
       <motion.div
         className={cn("text-center", config.spacing, config.maxWidth)}
         initial={{ opacity: 0, y: 12 }}
@@ -286,11 +241,10 @@ export function Loader({
           ease: [0.4, 0, 0.2, 1],
         }}
       >
-        {/* Clean title with subtle animation */}
         <motion.h1
           className={cn(
             config.titleClass,
-            "text-slate-900 font-bold tracking-tight leading-[1.15] antialiased",
+            "font-bold leading-[1.15] tracking-tight text-slate-900 antialiased",
           )}
           initial={{ opacity: 0, y: 12 }}
           animate={{
@@ -321,12 +275,11 @@ export function Loader({
           </motion.span>
         </motion.h1>
 
-        {/* Clean subtitle with subtle animation */}
-        {subtitle && (
+        {subtitle ? (
           <motion.p
             className={cn(
               config.subtitleClass,
-              "text-slate-400 font-medium tracking-tight leading-[1.45] antialiased",
+              "font-medium leading-[1.45] tracking-tight text-slate-400 antialiased",
             )}
             initial={{ opacity: 0, y: 8 }}
             animate={{
@@ -356,7 +309,7 @@ export function Loader({
               {subtitle}
             </motion.span>
           </motion.p>
-        )}
+        ) : null}
       </motion.div>
     </div>
   );

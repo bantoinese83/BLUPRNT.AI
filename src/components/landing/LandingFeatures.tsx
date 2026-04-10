@@ -1,5 +1,9 @@
 import { BarChart3, Shield, Landmark, TrendingUp } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
+import {
+  LANDING_HIGHLIGHT_SOFT,
+  LANDING_HIGHLIGHT_UNDERLINE,
+} from "./landing-content";
 
 export function LandingFeatures() {
   return (
@@ -18,7 +22,7 @@ export function LandingFeatures() {
         <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
           <Highlighter
             action="underline"
-            color="#14b8a6"
+            color={LANDING_HIGHLIGHT_UNDERLINE}
             strokeWidth={2}
             padding={0}
             iterations={1}
@@ -39,19 +43,23 @@ export function LandingFeatures() {
             />
             <div>
               <h3 className="font-semibold text-slate-900">
-                AI Photo Analysis
+                Room photos → rough budget
               </h3>
               <p className="mt-1 text-sm text-slate-600">
-                Snap photos, get a "hardened" cost range and BOM in seconds.
+                Point the camera, get a starter range and what’s in the job—no
+                spreadsheet required.
               </p>
             </div>
           </li>
           <li className="flex items-start gap-4">
             <Landmark className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
             <div>
-              <h3 className="font-semibold text-slate-900">Lender ready</h3>
+              <h3 className="font-semibold text-slate-900">
+                Share-ready detail
+              </h3>
               <p className="mt-1 text-sm text-slate-600">
-                AI-validated data that bankers and appraisers actually trust.
+                Your to-do list, checks you wrote, and files—together, not
+                scattered across apps. They still make the final call.
               </p>
             </div>
           </li>
@@ -61,7 +69,7 @@ export function LandingFeatures() {
               <h3 className="font-semibold text-slate-900">
                 <Highlighter
                   action="highlight"
-                  color="#ffd1dc"
+                  color={LANDING_HIGHLIGHT_SOFT}
                   padding={2}
                   isView={true}
                 >
@@ -69,7 +77,8 @@ export function LandingFeatures() {
                 </Highlighter>
               </h3>
               <p className="mt-1 text-sm text-slate-600">
-                Document your improvements and capture every dollar of equity.
+                Summarize improvements and documented spend in one export—not a
+                valuation or guarantee.
               </p>
             </div>
           </li>
@@ -79,9 +88,12 @@ export function LandingFeatures() {
               aria-hidden
             />
             <div>
-              <h3 className="font-semibold text-slate-900">Equity Analytics</h3>
+              <h3 className="font-semibold text-slate-900">
+                Where did the money go?
+              </h3>
               <p className="mt-1 text-sm text-slate-600">
-                Track how every renovation impacts your long-term home value.
+                Watch planned vs. actual spend so surprises don’t arrive in a
+                lump at the end.
               </p>
             </div>
           </li>

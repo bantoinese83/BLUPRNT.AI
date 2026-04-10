@@ -1,4 +1,4 @@
-import { Lock, Sparkles, ArrowRight } from "lucide-react";
+import { Lock, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface InsightTeaserProps {
@@ -25,7 +25,7 @@ export function InsightTeaser({
               <span className="text-[10px] font-black uppercase tracking-widest text-teal-600 bg-teal-100/50 px-2 py-0.5 rounded">
                 Architect Insight
               </span>
-              <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+              <Lightbulb className="w-3.5 h-3.5 text-teal-400" />
             </div>
             <h4 className="font-bold text-slate-900 group-hover:text-teal-950 transition-colors">
               Unlock strategic savings for {projectName}

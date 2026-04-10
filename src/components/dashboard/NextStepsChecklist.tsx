@@ -45,7 +45,7 @@ export function NextStepsChecklist({
       {
         id: "upload-invoice",
         label: "Track an invoice",
-        description: "Start building your verified property ledger.",
+        description: "Start building your property ledger.",
         icon: FileText,
       },
       {

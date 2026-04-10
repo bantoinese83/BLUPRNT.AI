@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   Share,
   Platform,
 } from "react-native";
@@ -30,6 +29,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { uploadDocumentWithType } from "../../src/lib/upload-document";
 import { EmptyState } from "../../src/components/ui/EmptyState";
 import { Theme } from "../../src/constants/Theme";
+import { SnurraLoader, SnurraSize } from "../../src/components/ui/SnurraLoader";
 import { DashboardStats } from "../../src/components/DashboardStats";
 import { DashboardWelcomeBanner } from "../../src/components/DashboardWelcomeBanner";
 import { DashboardSkeleton } from "../../src/components/DashboardSkeleton";
@@ -315,6 +315,8 @@ export default function DashboardScreen() {
               setIsInsightsOpen(true);
             }}
             style={styles.headerBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Smart insights"
           >
             <MessageCircle size={22} color={Theme.colors.brand.primary} />
             <View
@@ -330,7 +332,7 @@ export default function DashboardScreen() {
             style={[styles.headerBtn, styles.captureBtn]}
           >
             {isUploading ? (
-              <ActivityIndicator size="small" color="white" />
+              <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
             ) : (
               <Plus size={22} color="white" />
             )}

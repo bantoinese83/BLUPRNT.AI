@@ -11,6 +11,7 @@ import * as Haptics from "expo-haptics";
 import { MotiView, AnimatePresence } from "moti";
 import { Theme } from "../constants/Theme";
 import { GlassCard } from "./ui/GlassCard";
+import { WelcomeActionOrb } from "./WelcomeActionOrb";
 
 interface Props {
   onAction: (id: string) => void;
@@ -48,50 +49,58 @@ export function DashboardWelcomeBanner({ onAction }: Props) {
             </View>
 
             <View style={styles.actions}>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Upload an invoice"
-                activeOpacity={0.88}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  onAction("upload");
-                }}
-                style={[styles.circleBtn, styles.circlePrimary]}
-              >
-                <Upload size={20} color="#ffffff" strokeWidth={2} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="See line-by-line scope"
-                activeOpacity={0.88}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onAction("scope");
-                }}
-                style={[styles.circleBtn, styles.circleOutline]}
-              >
-                <ListTree
-                  size={20}
-                  color={Theme.colors.brand.primary}
-                  strokeWidth={2}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Export seller packet"
-                activeOpacity={0.88}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onAction("export");
-                }}
-                style={[styles.circleBtn, styles.circleOutline]}
-              >
-                <FileDown
-                  size={20}
-                  color={Theme.colors.brand.primary}
-                  strokeWidth={2}
-                />
-              </TouchableOpacity>
+              <WelcomeActionOrb label="Upload invoice">
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Upload an invoice"
+                  activeOpacity={0.88}
+                  onPress={() => {
+                    void Haptics.impactAsync(
+                      Haptics.ImpactFeedbackStyle.Medium,
+                    );
+                    onAction("upload");
+                  }}
+                  style={[styles.circleBtn, styles.circlePrimary]}
+                >
+                  <Upload size={20} color="#ffffff" strokeWidth={2} />
+                </TouchableOpacity>
+              </WelcomeActionOrb>
+              <WelcomeActionOrb label="View scope">
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="See line-by-line scope"
+                  activeOpacity={0.88}
+                  onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    onAction("scope");
+                  }}
+                  style={[styles.circleBtn, styles.circleOutline]}
+                >
+                  <ListTree
+                    size={20}
+                    color={Theme.colors.brand.primary}
+                    strokeWidth={2}
+                  />
+                </TouchableOpacity>
+              </WelcomeActionOrb>
+              <WelcomeActionOrb label="Export packet">
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Export seller packet"
+                  activeOpacity={0.88}
+                  onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    onAction("export");
+                  }}
+                  style={[styles.circleBtn, styles.circleOutline]}
+                >
+                  <FileDown
+                    size={20}
+                    color={Theme.colors.brand.primary}
+                    strokeWidth={2}
+                  />
+                </TouchableOpacity>
+              </WelcomeActionOrb>
             </View>
           </GlassCard>
         </MotiView>
@@ -137,11 +146,12 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     justifyContent: "space-between",
     width: "100%",
-    marginTop: 8,
-    paddingHorizontal: 4,
+    marginTop: 4,
+    paddingHorizontal: 0,
+    gap: 4,
   },
   /**
    * RN + iOS often fail to paint dotted/dashed borders on circles; fills can disappear.

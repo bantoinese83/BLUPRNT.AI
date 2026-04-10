@@ -136,7 +136,7 @@ export function PropertyLedger({
                 Property Ledger
               </CardTitle>
               <p className="text-[12px] font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block">
-                Verified Record
+                Property record
               </p>
             </div>
           </div>

@@ -3,7 +3,6 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  ActivityIndicator,
   View,
   ViewStyle,
 } from "react-native";
@@ -11,6 +10,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
 import { Theme } from "../../constants/Theme";
+import { SnurraLoader, SnurraSize } from "./SnurraLoader";
 
 interface Props {
   onPress: () => Promise<void> | void;
@@ -84,7 +84,7 @@ export function Button({
             />
             <View style={styles.content}>
               {loading ? (
-                <ActivityIndicator color="white" />
+                <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
               ) : (
                 <>
                   <Text
@@ -132,7 +132,7 @@ export function Button({
     >
       <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator color={Theme.colors.cta.from} />
+          <SnurraLoader size={SnurraSize.inline} tone="brand" />
         ) : (
           <>
             <Text

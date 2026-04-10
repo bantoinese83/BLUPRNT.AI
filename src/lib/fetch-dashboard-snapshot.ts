@@ -8,6 +8,7 @@ import type {
   UserSubscriptionRow,
   ProjectPassRow,
 } from "@shared/types/database";
+import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 
 export type DashboardSnapshot = {
   configured: boolean;
@@ -18,6 +19,8 @@ export type DashboardSnapshot = {
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
+  /** Documented spend by scope category (from invoice line items). */
+  spendByCategory: Record<string, number>;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
@@ -33,6 +36,7 @@ const emptySnapshot = (): DashboardSnapshot => ({
   project: null,
   scopeItems: [],
   invoices: [],
+  spendByCategory: {},
   isArchitect: false,
   subscription: null,
   hasProjectPass: false,
@@ -197,6 +201,18 @@ export async function fetchDashboardSnapshot(options?: {
     const newIsArchitect = sub?.status === "active";
     const newHasProjectPass = !!pass;
 
+    const invoiceIds = newInvoices.map((i) => i.id).filter(Boolean);
+    let spendByCategory: Record<string, number> = {};
+    if (invoiceIds.length > 0) {
+      const linesRes = await supabase
+        .from("invoice_line_items")
+        .select("category, line_total, scope_item_id")
+        .in("invoice_id", invoiceIds);
+      if (!linesRes.error) {
+        spendByCategory = buildSpendByCategory(linesRes.data ?? [], newScopes);
+      }
+    }
+
     if (typeof window !== "undefined") {
       sessionStorage.setItem(
         cacheKey,
@@ -205,6 +221,7 @@ export async function fetchDashboardSnapshot(options?: {
           project: rows.find((p) => p.id === projectId) ?? rows[0] ?? null,
           scopeItems: newScopes,
           invoices: newInvoices,
+          spendByCategory,
           isArchitect: newIsArchitect,
           subscription: sub,
           hasProjectPass: newHasProjectPass,
@@ -220,6 +237,7 @@ export async function fetchDashboardSnapshot(options?: {
       project,
       scopeItems: newScopes,
       invoices: newInvoices,
+      spendByCategory,
       isArchitect: newIsArchitect,
       subscription: sub,
       hasProjectPass: newHasProjectPass,

@@ -14,6 +14,7 @@ export type DashboardSnapshot = {
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
+  spendByCategory: Record<string, number>;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;

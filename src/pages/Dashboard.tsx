@@ -72,6 +72,7 @@ export default function Dashboard() {
     project,
     scopeItems,
     invoices,
+    spendByCategory,
     isArchitect,
     subscription,
     hasProjectPass,
@@ -228,6 +229,7 @@ export default function Dashboard() {
       project={project}
       scopeItems={scopeItems}
       invoices={invoices}
+      spendByCategory={spendByCategory}
     >
       <DashboardContent
         projects={projects}

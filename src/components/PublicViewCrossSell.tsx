@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { ProjectPassIcon } from "@/components/icons/PlanMarks";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -18,7 +19,7 @@ export function PublicViewCrossSell() {
       <div className="relative space-y-6">
         <div className="flex justify-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-            <Sparkles className="h-6 w-6 text-teal-300" />
+            <ProjectPassIcon className="h-8 w-8 brightness-110 contrast-95" />
           </div>
         </div>
 

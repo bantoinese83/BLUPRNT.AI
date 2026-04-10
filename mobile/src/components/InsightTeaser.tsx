@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Lock, Sparkles, ArrowRight } from "lucide-react-native";
+import { Lock, Lightbulb, ArrowRight } from "lucide-react-native";
 import { GlassCard } from "./ui/GlassCard";
 import { Button } from "./ui/Button";
 import { Theme } from "../constants/Theme";
@@ -20,7 +20,7 @@ export function InsightTeaser({ projectName, onUpgradePress }: Props) {
           </View>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>Architect Insight</Text>
-            <Sparkles
+            <Lightbulb
               size={12}
               color={Theme.colors.brand.primary}
               style={styles.badgeSparkle}

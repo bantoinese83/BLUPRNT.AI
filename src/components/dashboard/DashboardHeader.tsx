@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  LogOut,
-  Settings2,
-  FileDown,
-  LifeBuoy,
-  Plus,
-  Crown,
-} from "lucide-react";
+import { LogOut, Settings2, FileDown, LifeBuoy, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { cn } from "@/lib/utils";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "@/components/icons/PlanMarks";
 
 type DashboardHeaderProps = {
   onSignOut: () => void;
@@ -70,11 +67,13 @@ export function DashboardHeader({
                 BLUPRNT<span className="text-teal-600">.AI</span>
               </Link>
               {isArchitect ? (
-                <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-teal-700 ring-1 ring-teal-100">
+                <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-teal-700 ring-1 ring-teal-100">
+                  <ArchitectPlanIcon className="h-4 w-4" />
                   Architect
                 </span>
               ) : hasProjectPass ? (
-                <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-100">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-100">
+                  <ProjectPassIcon className="h-4 w-4" />
                   Project Pass
                 </span>
               ) : null}
@@ -161,16 +160,19 @@ export function DashboardHeader({
           ) : null}
 
           {!isArchitect && onUpgradeClick ? (
-            <Button
-              variant="primary"
-              size="sm"
-              className="h-9 rounded-xl px-3 text-xs font-bold shadow-md shadow-teal-500/15 sm:text-sm premium-gradient"
-              onClick={onUpgradeClick}
+            <button
               type="button"
+              onClick={onUpgradeClick}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-slate-900 transition-colors hover:bg-teal-50/80 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-14 sm:w-14"
+              aria-label="Upgrade plan"
             >
-              <Crown className="mr-1 hidden h-3.5 w-3.5 sm:inline" />
-              Upgrade
-            </Button>
+              <img
+                src="/upgrade-icon.svg"
+                alt=""
+                className="h-10 w-10 shrink-0 object-contain sm:h-12 sm:w-12"
+                aria-hidden
+              />
+            </button>
           ) : null}
 
           {isArchitect && onUpgradeClick ? (

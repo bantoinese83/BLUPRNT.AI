@@ -9,18 +9,12 @@ import {
   ScrollView,
 } from "react-native";
 import RevenueCatUI from "react-native-purchases-ui";
-import {
-  X,
-  Sparkles,
-  ShieldCheck,
-  FileDown,
-  Crown,
-  Check,
-} from "lucide-react-native";
+import { X, Bot, ShieldCheck, FileDown, Check } from "lucide-react-native";
 import { Theme } from "../constants/Theme";
 import { PRICING } from "../../../shared/constants/pricing";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
+import { ArchitectPlanIcon, ProjectPassIcon } from "./icons/PlanMarks";
 
 interface Props {
   isOpen: boolean;
@@ -34,7 +28,7 @@ interface Props {
  * as the functional layer for production builds.
  */
 export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "lifetime">(
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">(
     "monthly",
   );
 
@@ -50,19 +44,19 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
 
   const features = [
     {
-      icon: <Sparkles size={20} color={Theme.colors.brand.primary} />,
-      title: "Advanced AI Assistant",
-      desc: "Instant answers for budget anomalies and stage guidance.",
+      icon: <Bot size={20} color={Theme.colors.brand.primary} />,
+      title: "Renovation copilot",
+      desc: "Ask why the numbers moved and what to tackle next—in plain English.",
     },
     {
       icon: <ShieldCheck size={20} color={Theme.colors.status.success} />,
-      title: "Verified Property Ledger",
-      desc: "Unlimited receipt logging with OCR verification.",
+      title: "Living home file",
+      desc: "Photo your invoices and quotes; we read the amounts (limits vary by plan).",
     },
     {
       icon: <FileDown size={20} color="#4F46E5" />,
-      title: "Pro Seller Packets",
-      desc: "Export high-resolution PDF ledgers for resale value.",
+      title: "Listing-ready PDF",
+      desc: "Download a polished packet for agents, buyers, or your own records.",
     },
   ];
 
@@ -85,16 +79,20 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
             transition={{ type: "timing", duration: 800 }}
             style={styles.hero}
           >
-            <View style={styles.crownIcon}>
-              <Crown size={32} color={Theme.colors.brand.primary} />
+            <View style={styles.heroIconBadge}>
+              {selectedPlan === "monthly" ? (
+                <ArchitectPlanIcon size={40} />
+              ) : (
+                <ProjectPassIcon size={40} />
+              )}
             </View>
-            <Text style={styles.heroTitle}>Unlock Full Potential</Text>
+            <Text style={styles.heroTitle}>Level up your remodel file</Text>
             <Text style={styles.heroSubtitle}>
               {reason === "invoice_limit"
-                ? "You've reached the free ledger limit. Upgrade to keep tracking your property equity."
+                ? "You’ve used the free invoice slots for this project. Upgrade to keep snapping receipts without hitting a wall."
                 : reason === "export"
-                  ? "Upgrade to Architect to generate high-fidelity PDF packets and resale ledgers."
-                  : "Join thousands of homeowners building equity with AI-guided renovations."}
+                  ? "Upgrade to Architect to build full PDF packets and the complete home file."
+                  : "Keep budgets, photos of bills, and one-tap exports in a single place—built for homeowners."}
             </Text>
             {reason === "invoice_limit" ? (
               <Text style={styles.invoiceLimitHint}>
@@ -140,7 +138,10 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               }}
             >
               <View style={styles.planHeader}>
-                <Text style={styles.planName}>Architect Monthly</Text>
+                <View style={styles.planTitleRow}>
+                  <ArchitectPlanIcon size={22} />
+                  <Text style={styles.planName}>Architect Monthly</Text>
+                </View>
                 {selectedPlan === "monthly" && (
                   <Check size={18} color={Theme.colors.brand.primary} />
                 )}
@@ -157,16 +158,19 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
             <TouchableOpacity
               style={[
                 styles.planCard,
-                selectedPlan === "lifetime" && styles.planCardActive,
+                selectedPlan === "projectPass" && styles.planCardActive,
               ]}
               onPress={() => {
                 Haptics.selectionAsync();
-                setSelectedPlan("lifetime");
+                setSelectedPlan("projectPass");
               }}
             >
               <View style={styles.planHeader}>
-                <Text style={styles.planName}>Project Pass</Text>
-                {selectedPlan === "lifetime" && (
+                <View style={styles.planTitleRow}>
+                  <ProjectPassIcon size={22} />
+                  <Text style={styles.planName}>Project Pass</Text>
+                </View>
+                {selectedPlan === "projectPass" && (
                   <Check size={18} color={Theme.colors.brand.primary} />
                 )}
               </View>
@@ -175,7 +179,7 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
                 <Text style={styles.planPeriod}> once</Text>
               </Text>
               <Text style={styles.planTagline}>
-                Lifetime access for one property
+                6 months of full tools for one job · then view-only forever
               </Text>
               <View style={styles.popularBadge}>
                 <Text style={styles.popularText}>POPULAR</Text>
@@ -221,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
-  crownIcon: {
+  heroIconBadge: {
     width: 64,
     height: 64,
     borderRadius: 24,
@@ -311,6 +315,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 4,
+  },
+  planTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+    marginRight: 8,
   },
   planName: {
     fontSize: 15,

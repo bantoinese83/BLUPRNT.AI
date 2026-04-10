@@ -2,6 +2,10 @@ import { motion } from "motion/react";
 import { Hammer as HammerIcon, CheckCircle2, Hammer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRICING } from "@shared/constants/pricing";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "@/components/icons/PlanMarks";
 
 interface PricingRow {
   feature: string;
@@ -38,8 +42,8 @@ export function LandingPricing({
           </h2>
 
           <p className="mx-auto max-w-xl text-slate-600 text-lg">
-            Protect your renovation investment with the right plan for your
-            project.
+            Pick monthly if you’re always fixing something, or a one-time pass
+            for one big remodel.
           </p>
         </div>
 
@@ -52,20 +56,15 @@ export function LandingPricing({
             className="relative group p-8 rounded-3xl bg-white border border-slate-200 shadow-xl shadow-slate-100/50 flex flex-col"
           >
             <div className="absolute -top-6 -right-4 z-20 rotate-[14deg]">
-              <div className="relative h-20 w-20 rounded-full border-2 border-slate-900/10 bg-white/90 shadow-[0_14px_30px_rgba(15,23,42,0.18)] ring-4 ring-slate-100/80 backdrop-blur-sm sm:h-24 sm:w-24">
-                <img
-                  src="/upgrade-icon.svg"
-                  alt="Premium upgrade badge"
-                  className="h-full w-full object-contain p-2 drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)]"
-                  loading="lazy"
-                  decoding="async"
-                />
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-900/10 bg-white/90 shadow-[0_14px_30px_rgba(15,23,42,0.18)] ring-4 ring-slate-100/80 backdrop-blur-sm sm:h-24 sm:w-24">
+                <ArchitectPlanIcon className="h-14 w-14 sm:h-16 sm:w-16" />
               </div>
             </div>
 
             <div className="absolute top-0 inset-x-0 h-1.5 bg-slate-900 rounded-t-3xl" />
             <div className="mb-8">
-              <h3 className="text-2xl font-black text-slate-900 mb-2">
+              <h3 className="flex items-center gap-2 text-2xl font-black text-slate-900 mb-2">
+                <ArchitectPlanIcon className="h-8 w-8" />
                 Architect
               </h3>
               <div className="flex items-baseline gap-1">
@@ -75,16 +74,16 @@ export function LandingPricing({
                 <span className="text-slate-500 font-bold">/mo</span>
               </div>
               <p className="mt-4 text-slate-600 font-medium">
-                Professional grade project tracking for active renovators.
+                For people juggling more than one job or always mid-project.
               </p>
             </div>
             <ul className="space-y-4 mb-10 flex-1">
               {[
-                "Expert AI Insights & Project Strategy",
-                "Up to 10 smart invoice scans per billing period",
-                "Track up to 2 active projects",
-                "Full property ledger & seller packet",
-                "Cloud-backed Seller Records (PDF)",
+                "AI coach for budgets, stages, and “wait—what did we pay?”",
+                "Up to 10 invoice photo reads per billing cycle",
+                "Up to 2 remodels at the same time",
+                "Full home file + listing-ready PDF export",
+                "Cloud backup of your packet (PDF)",
               ].map((feature, i) => (
                 <li
                   key={i}
@@ -118,8 +117,14 @@ export function LandingPricing({
             transition={{ delay: 0.1 }}
             className="relative group p-8 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col"
           >
+            <div className="absolute -top-6 -right-4 z-20 -rotate-[10deg]">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-200 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.12)] ring-4 ring-white/90 sm:h-24 sm:w-24">
+                <ProjectPassIcon className="h-14 w-14 sm:h-16 sm:w-16" />
+              </div>
+            </div>
             <div className="mb-8">
-              <h3 className="text-2xl font-black text-slate-900 mb-2">
+              <h3 className="flex items-center gap-2 text-2xl font-black text-slate-900 mb-2">
+                <ProjectPassIcon className="h-8 w-8" />
                 Project Pass
               </h3>
               <div className="flex items-baseline gap-1">
@@ -129,16 +134,17 @@ export function LandingPricing({
                 <span className="text-slate-500 font-bold">/project</span>
               </div>
               <p className="mt-4 text-slate-600 font-medium">
-                One-time purchase for a single major remodel.
+                Pay once for one kitchen, bath, or whole-house gut—then keep
+                viewing forever.
               </p>
             </div>
             <ul className="space-y-4 mb-10 flex-1">
               {[
-                "6 months of Architect features",
-                "Unlimited invoices (this project)",
-                "Expert AI Insights included",
-                "Lifetime read-access to ledger",
-                "Perfect for one major remodel",
+                "6 months of everything Architect includes",
+                "Unlimited invoice reads on that one job",
+                "Same AI help as Architect during those 6 months",
+                "After 6 months: your project stays readable forever (view-only)",
+                "Best when you’re not a “forever renovating” household",
               ].map((feature, i) => (
                 <li
                   key={i}

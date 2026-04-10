@@ -2,7 +2,10 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Highlighter } from "@/components/ui/Highlighter";
-import { LANDING_HIGHLIGHT_COLOR } from "./landing-content";
+import {
+  LANDING_HIGHLIGHT_COLOR,
+  LANDING_HIGHLIGHT_UNDERLINE,
+} from "./landing-content";
 
 export function LandingFinalCta() {
   return (
@@ -29,7 +32,7 @@ export function LandingFinalCta() {
           Get your first estimate in{" "}
           <Highlighter
             action="underline"
-            color="#14b8a6"
+            color={LANDING_HIGHLIGHT_UNDERLINE}
             strokeWidth={2}
             padding={0}
             iterations={1}

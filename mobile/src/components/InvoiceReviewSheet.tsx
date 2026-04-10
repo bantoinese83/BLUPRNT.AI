@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Pressable,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import {
   X,
@@ -27,6 +26,7 @@ import { supabase } from "../lib/supabase";
 import { openOriginalDocumentForInvoice } from "../lib/open-original-document";
 import { money } from "../../../shared/lib/formatters";
 import type { InvoiceRow } from "../types/database";
+import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
 
 interface Props {
   invoice: InvoiceRow | null;
@@ -177,7 +177,7 @@ export function InvoiceReviewSheet({
             disabled={deleting}
           >
             {deleting ? (
-              <ActivityIndicator size="small" color="#f43f5e" />
+              <SnurraLoader size={SnurraSize.inline} tone="destructive" />
             ) : (
               <Trash2 size={18} color="#f43f5e" />
             )}

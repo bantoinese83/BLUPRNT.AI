@@ -18,7 +18,6 @@ import {
   Trash2,
   ChevronRight,
   Mail,
-  Crown,
   FileText,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
@@ -40,6 +39,10 @@ import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
 import { showAppToast } from "../../src/lib/app-toast";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "../../src/components/icons/PlanMarks";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
@@ -270,14 +273,11 @@ export default function ProfileScreen() {
             <Text style={styles.sectionHeader}>Membership</Text>
             <View style={[styles.planCard, isPro && styles.architectPlanCard]}>
               <View style={[styles.planIcon, isPro && styles.architectIcon]}>
-                <Crown
-                  size={24}
-                  color={
-                    isPro
-                      ? Theme.colors.status.warning
-                      : Theme.colors.text.muted
-                  }
-                />
+                {isPro ? (
+                  <ArchitectPlanIcon size={26} />
+                ) : (
+                  <ProjectPassIcon size={26} />
+                )}
               </View>
               <View style={styles.planInfo}>
                 <Text style={styles.planName}>

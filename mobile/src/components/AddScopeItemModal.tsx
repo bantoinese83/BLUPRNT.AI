@@ -10,12 +10,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ActivityIndicator,
 } from "react-native";
 import { X, Plus } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { Theme } from "../constants/Theme";
+import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
 
 const PHASE_ORDER = [
   "Site Prep",
@@ -209,7 +209,7 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
                   ]}
                 >
                   {saving ? (
-                    <ActivityIndicator color="white" />
+                    <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
                   ) : (
                     <>
                       <Plus size={20} color="white" />

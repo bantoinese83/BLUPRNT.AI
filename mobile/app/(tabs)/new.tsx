@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { Text, ActivityIndicator, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Logo } from "../../src/components/ui/Logo";
 import { Theme } from "../../src/constants/Theme";
+import { SnurraLoader, SnurraSize } from "../../src/components/ui/SnurraLoader";
 
 /**
  * Center tab: send users into onboarding for another project, with clear feedback
@@ -31,10 +32,10 @@ export default function NewProjectRedirect() {
         <Text style={styles.subtitle}>
           Opening the builder so you can add another renovation.
         </Text>
-        <ActivityIndicator
-          size="small"
-          color={Theme.colors.brand.primary}
+        <SnurraLoader
+          size={SnurraSize.compact}
           style={styles.spinner}
+          accessibilityLabel="Loading"
         />
       </MotiView>
     </ScreenWrapper>

@@ -13,7 +13,6 @@ import {
   Loader2,
   CreditCard,
   HelpCircle,
-  Crown,
 } from "lucide-react";
 
 import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
@@ -27,6 +26,10 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { useLogout } from "@/hooks/use-logout";
 import { PRICING } from "@shared/constants/pricing";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "@/components/icons/PlanMarks";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -483,9 +486,9 @@ export default function Settings() {
                   className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${isArchitect ? "bg-slate-900 text-white shadow-slate-700/50" : "bg-white text-slate-400 shadow-slate-200/50 border border-slate-100"}`}
                 >
                   {isArchitect ? (
-                    <Crown className="w-7 h-7" />
+                    <ArchitectPlanIcon className="w-8 h-8" />
                   ) : (
-                    <User className="w-7 h-7" />
+                    <ProjectPassIcon className="w-8 h-8" />
                   )}
                 </div>
 

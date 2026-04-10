@@ -5,6 +5,10 @@ import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/supabase";
 import { PRICING } from "@shared/constants/pricing";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "@/components/icons/PlanMarks";
 
 const FREE_INVOICE_LIMIT = 3;
 const ARCHITECT_INVOICE_LIMIT = 10;
@@ -237,7 +241,8 @@ export function UpgradeModal({
                   <div className="absolute top-0 inset-x-0 h-1 bg-slate-900"></div>
 
                   <CardHeader>
-                    <CardTitle className="text-xl text-slate-900">
+                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                      <ArchitectPlanIcon className="h-8 w-8" />
                       Architect
                     </CardTitle>
 
@@ -295,7 +300,8 @@ export function UpgradeModal({
                 {/* Door B */}
                 <Card className="border-slate-200 shadow-sm flex flex-col relative">
                   <CardHeader>
-                    <CardTitle className="text-xl text-slate-900">
+                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                      <ProjectPassIcon className="h-8 w-8" />
                       Project Pass
                     </CardTitle>
                     <div className="mt-2 flex items-baseline text-slate-900">

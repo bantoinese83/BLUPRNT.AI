@@ -1,32 +1,41 @@
-export const LANDING_HIGHLIGHT_COLOR = "rgba(99, 102, 241, 0.2)";
+/**
+ * Highlighter colors for marketing — match web `src/index.css` `--color-accent` (#0d9488)
+ * and mobile `Theme.colors.brand` (teal 500/600). Replaces former indigo highlight.
+ */
+/** Soft wash for highlight/box/circle (teal-600) */
+export const LANDING_HIGHLIGHT_COLOR = "rgba(13, 148, 136, 0.22)";
+/** Underlines & strong emphasis (teal-500, same as mobile `brand.light`) */
+export const LANDING_HIGHLIGHT_UNDERLINE = "#14b8a6";
+/** Alternate emphasis blocks — mint teal (teal-400 tint) */
+export const LANDING_HIGHLIGHT_SOFT = "rgba(45, 212, 191, 0.32)";
 
 export const LANDING_HERO_COPY = {
-  badge: "AI Home Renovation Financial Operating System",
-  titlePrefix: "Every upgrade should pay you back.",
-  titleHighlight: "BLUPRNT makes sure it does.",
-  body: "Know what your remodel should cost in your area, see what you actually paid on every invoice and quote, and explain the gap in plain language—with a seller-ready export when you list.",
-  primaryCta: "Build Your Asset",
-  secondaryCta: "Create Free Account",
+  badge: "Renovation money—finally in one place",
+  titlePrefix: "Stop guessing what your remodel costs.",
+  titleHighlight: "See a local ballpark. Track every receipt.",
+  body: "Before you hire, get a realistic range for your zip code. While work is underway, snap invoices and quotes so “what we planned” and “what we paid” stay clear—then wrap it into one neat PDF when you list or refinance.",
+  primaryCta: "Start planning free",
+  secondaryCta: "Create free account",
 } as const;
 
 /** Trust & distribution — short pills below the hero */
 export const LANDING_TRUST_PILLS = [
-  { label: "Built for homeowners first" },
-  { label: "Export your ledger anytime" },
-  { label: "Clear plan vs documented spend" },
+  { label: "For homeowners—not contractor ads" },
+  { label: "Export your file anytime" },
+  { label: "Planned budget vs. real spending" },
 ] as const;
 
 export const LANDING_HOW_INTRO =
-  "Regional estimate, real receipts, one story you can hand to an agent or buyer.";
+  "Local price range, photos of receipts, one clear story for your agent or buyer.";
 
 export const LANDING_STORY_COPY = {
-  heading: "Property Intelligence for the Modern Owner.",
+  heading: "You own the house. Own the paperwork too.",
   paragraphs: [
-    "We created BLUPRNT because most renovation tools aren't built for you—they're built to sell your contact info to contractors at a premium.",
-    "Your home is your largest financial asset. You deserve a professional-grade ledger to track that investment from the first photo scan to the final sale.",
-    "BLUPRNT uses Gemini-powered vision to provide 'hardened' cost estimates before you even talk to a contractor. Once the work begins, it acts as your financial control tower, extracting data from quotes and receipts to keep your budget on track.",
-    "By maintaining an AI-verified improvement record—including warranties, permits, and a detailed Bill of Materials—you're not just 'renovating'; you're building a verifiable financial passport for your home.",
-    "When you're ready to sell or refinance, BLUPRNT provides a clean, professional Seller Packet that proves every dollar of equity you've built. Stop using messy folders and lost emails—use the system built for owners.",
+    "We built BLUPRNT because most “renovation apps” want to sell your phone number—not help you sleep at night.",
+    "Your home is probably your biggest investment. You deserve a simple running total: what you planned, what you paid, and proof in the drawer.",
+    "Snap a room photo for a starting budget in your area—not a bid from a pro, but a sane number for the conversation. When trucks roll up, photograph invoices and quotes so the math doesn’t live in your head.",
+    "Keep warranties, permits, and your materials list next to the real costs. When someone asks “what did you do here?” you have an answer that isn’t a shoebox.",
+    "Selling or refinancing? One export pulls your story together—less digging through email, more time for everything else.",
   ],
 } as const;
 
@@ -39,81 +48,81 @@ export interface PricingRow {
 
 export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
   {
-    feature: "Renovation AI",
-    architect: "Grounded Insights",
-    pass: "Included (6mo)",
-    hint: "Regional labor & material signals",
+    feature: "AI renovation help",
+    architect: "Full access",
+    pass: "6 months included",
+    hint: "Ideas tuned to your area—not a contractor quote",
   },
   {
-    feature: "Smart Receipts",
-    architect: "10 scans / mo",
-    pass: "Unlimited",
-    hint: "OCR extraction & categorization",
+    feature: "Invoice & receipt reads",
+    architect: "10 invoice photos / mo",
+    pass: "Unlimited (this job)",
+    hint: "We read amounts & dates from what you upload",
   },
   {
-    feature: "Active Projects",
+    feature: "Jobs at once",
     architect: "Up to 2",
     pass: "1",
-    hint: "Concurrent tracking",
+    hint: "How many remodels you can track side by side",
   },
   {
-    feature: "Seller Packet",
+    feature: "Listing-ready PDF",
     architect: "Included",
     pass: "Included",
-    hint: "PDF export for resale",
+    hint: "One tidy file for agents or buyers",
   },
   {
-    feature: "Lender-Ready Data",
-    architect: "AI Verified BOM",
-    pass: "AI Verified BOM",
-    hint: "Granular data for bank appraisals",
+    feature: "Materials list",
+    architect: "Tied to your receipts",
+    pass: "Tied to your receipts",
+    hint: "What you bought, next to each line item",
   },
   {
-    feature: "Record Access",
-    architect: "Always",
-    pass: "Lifetime",
-    hint: "Read-only after pass expiry",
+    feature: "Open your records later",
+    architect: "Anytime",
+    pass: "Forever (view only)",
+    hint: "Pass: full editing for 6 mo, then read-only for good",
   },
 ] as const;
 
 export const COMPARISON_FEATURES = [
   {
-    name: "AI Photo Analysis",
+    name: "Photo → rough budget",
     bluprnt: true,
     visualizers: true,
     proTools: false,
     static: false,
   },
   {
-    name: "Granular BOM Output",
+    name: "Itemized materials list",
     bluprnt: true,
     visualizers: false,
     proTools: true,
     static: false,
   },
   {
-    name: "Regional Labor Index",
+    name: "Local labor cost signals",
     bluprnt: true,
     visualizers: false,
     proTools: true,
     static: false,
   },
   {
-    name: "Property Ledger",
+    name: "Home renovation file (ledger)",
     bluprnt: true,
     visualizers: false,
     proTools: false,
     static: true,
   },
   {
-    name: "Public View Token",
+    name: "Share link (read-only)",
     bluprnt: true,
     visualizers: false,
     proTools: false,
     static: false,
   },
   {
-    name: "Consumer-First UX",
+    name: "Built for homeowners",
     bluprnt: true,
     visualizers: true,
     proTools: false,

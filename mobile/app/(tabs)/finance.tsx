@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   Alert,
   SectionList,
   Switch,
@@ -37,6 +36,7 @@ import type { InvoiceRow } from "../../../shared/types/database";
 import { EmptyState } from "../../src/components/ui/EmptyState";
 import { useAwareness } from "../../src/contexts/AwarenessContext";
 import { Theme } from "../../src/constants/Theme";
+import { SnurraLoader, SnurraSize } from "../../src/components/ui/SnurraLoader";
 import { SegmentedControl } from "../../src/components/ui/SegmentedControl";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
@@ -339,7 +339,7 @@ export default function FinanceScreen() {
             disabled={isUploading}
           >
             {isUploading ? (
-              <ActivityIndicator size="small" color="white" />
+              <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
             ) : (
               <Plus size={22} color="white" />
             )}
@@ -366,7 +366,7 @@ export default function FinanceScreen() {
                 <BookOpen size={24} color={Theme.colors.brand.primary} />
               </View>
               <View>
-                <Text style={styles.ledgerTitle}>Verified Record</Text>
+                <Text style={styles.ledgerTitle}>Property record</Text>
                 <Text style={styles.ledgerSubtitle}>
                   Property equity tracking
                 </Text>
@@ -418,7 +418,7 @@ export default function FinanceScreen() {
               style={styles.exportButton}
               icon={
                 exporting ? (
-                  <ActivityIndicator size="small" color="white" />
+                  <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
                 ) : (
                   <FileDown size={18} color="white" />
                 )

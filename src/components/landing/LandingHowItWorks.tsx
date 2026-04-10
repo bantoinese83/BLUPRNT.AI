@@ -1,7 +1,53 @@
 import { motion } from "motion/react";
 import { Camera, Receipt, FileCheck } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
-import { LANDING_HIGHLIGHT_COLOR, LANDING_HOW_INTRO } from "./landing-content";
+import {
+  LANDING_HIGHLIGHT_COLOR,
+  LANDING_HIGHLIGHT_UNDERLINE,
+  LANDING_HOW_INTRO,
+} from "./landing-content";
+
+const PLAN_DELIVERABLES = [
+  { label: "Photos & notes", tag: "Starter budget" },
+  { label: "Your zip code", tag: "Local cost range" },
+  { label: "The work list", tag: "Line-by-line detail" },
+] as const;
+
+const EXECUTE_DELIVERABLES = [
+  { label: "Bids & quotes", tag: "Side by side" },
+  { label: "Receipt snaps", tag: "We read totals" },
+  { label: "Paid invoices", tag: "Plan vs. spent" },
+] as const;
+
+const TRANSFER_DELIVERABLES = [
+  { label: "For Buyers", tag: "PDF Packet" },
+  { label: "For Agents", tag: "One-pager" },
+  { label: "For Lenders", tag: "Ledger export" },
+] as const;
+
+function DeliverableList({
+  rows,
+}: {
+  rows: readonly { label: string; tag: string }[];
+}) {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-[280px]">
+      {rows.map((row) => (
+        <div
+          key={row.label}
+          className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors"
+        >
+          <span className="text-xs font-bold text-slate-900 text-left">
+            {row.label}
+          </span>
+          <span className="shrink-0 text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
+            {row.tag}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function LandingHowItWorks() {
   return (
@@ -21,7 +67,7 @@ export function LandingHowItWorks() {
           {LANDING_HOW_INTRO}{" "}
           <Highlighter
             action="underline"
-            color="#14b8a6"
+            color={LANDING_HIGHLIGHT_UNDERLINE}
             strokeWidth={2}
             padding={0}
             iterations={1}
@@ -62,10 +108,12 @@ export function LandingHowItWorks() {
               </Highlighter>
             </h3>
 
-            <p className="text-slate-500 text-lg leading-relaxed font-medium">
-              Turn fuzzy ideas and photos into a realistic, regionally grounded
-              budget.
+            <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
+              Turn “we should redo this” into a number that matches your zip
+              code—not a fantasy from TV.
             </p>
+
+            <DeliverableList rows={PLAN_DELIVERABLES} />
           </motion.article>
 
           <motion.article
@@ -85,7 +133,7 @@ export function LandingHowItWorks() {
               <div className="absolute bottom-4 left-4 right-4 text-left">
                 <div className="flex gap-2 mb-2">
                   <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
-                    Verified OCR
+                    Auto-read receipts
                   </span>
                   <span className="bg-slate-500/20 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
                     Smart Sorting
@@ -100,7 +148,7 @@ export function LandingHowItWorks() {
             <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
               <Highlighter
                 action="circle"
-                color="#14b8a6"
+                color={LANDING_HIGHLIGHT_UNDERLINE}
                 strokeWidth={2}
                 padding={10}
                 isView={true}
@@ -109,10 +157,12 @@ export function LandingHowItWorks() {
               </Highlighter>
             </h3>
 
-            <p className="text-slate-500 text-lg leading-relaxed font-medium">
-              Track quotes, actuals, and invoices against that budget with
-              minimal manual work.
+            <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
+              Stack bids, receipts, and paid invoices next to that budget—most
+              of the typing is on us.
             </p>
+
+            <DeliverableList rows={EXECUTE_DELIVERABLES} />
           </motion.article>
 
           <motion.article
@@ -147,35 +197,11 @@ export function LandingHowItWorks() {
             </h3>
 
             <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
-              Export that history into formats optimized for every stakeholder.
+              Turn your history into downloads people can actually open—not
+              another zip of photos.
             </p>
 
-            <div className="flex flex-col gap-3 w-full max-w-[280px]">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors">
-                <span className="text-xs font-bold text-slate-900">
-                  For Buyers
-                </span>
-                <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
-                  PDF Packet
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors">
-                <span className="text-xs font-bold text-slate-900">
-                  For Agents
-                </span>
-                <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
-                  MLS-Ready
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition-colors">
-                <span className="text-xs font-bold text-slate-900">
-                  For Lenders
-                </span>
-                <span className="text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
-                  Verified Ledger
-                </span>
-              </div>
-            </div>
+            <DeliverableList rows={TRANSFER_DELIVERABLES} />
           </motion.article>
         </div>
       </div>

@@ -9,6 +9,7 @@ import type {
   UserSubscriptionRow,
   ProjectPassRow,
 } from "../../../shared/types/database";
+import { buildSpendByCategory } from "../../../shared/lib/spend-by-category";
 
 const emptySnapshot = (): DashboardSnapshot => ({
   configured: true,
@@ -18,6 +19,7 @@ const emptySnapshot = (): DashboardSnapshot => ({
   project: null,
   scopeItems: [],
   invoices: [],
+  spendByCategory: {},
   isArchitect: false,
   subscription: null,
   hasProjectPass: false,
@@ -131,6 +133,18 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
     const newIsArchitect = sub?.status === "active";
     const newHasProjectPass = !!pass;
 
+    const invoiceIds = newInvoices.map((i) => i.id).filter(Boolean);
+    let spendByCategory: Record<string, number> = {};
+    if (invoiceIds.length > 0) {
+      const linesRes = await supabase
+        .from("invoice_line_items")
+        .select("category, line_total, scope_item_id")
+        .in("invoice_id", invoiceIds);
+      if (!linesRes.error) {
+        spendByCategory = buildSpendByCategory(linesRes.data ?? [], newScopes);
+      }
+    }
+
     await AsyncStorage.setItem(
       cacheKey,
       JSON.stringify({
@@ -138,6 +152,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
         project: rows.find((p) => p.id === projectId) ?? rows[0] ?? null,
         scopeItems: newScopes,
         invoices: newInvoices,
+        spendByCategory,
         isArchitect: newIsArchitect,
         subscription: sub,
         hasProjectPass: newHasProjectPass,
@@ -152,6 +167,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
       project,
       scopeItems: newScopes,
       invoices: newInvoices,
+      spendByCategory,
       isArchitect: newIsArchitect,
       subscription: sub,
       hasProjectPass: newHasProjectPass,

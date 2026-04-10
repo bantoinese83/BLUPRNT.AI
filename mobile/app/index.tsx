@@ -25,36 +25,36 @@ export default function LandingScreen() {
 
   const slides = [
     {
-      title: "Scan. See. Save.",
-      highlight: "Professional AI Analysis",
+      title: "Snap the room. Get the number.",
+      highlight: "A budget before the contractor shows up",
       subtitle:
-        "Snap a photo of any room. Our AI extracts a bill of materials and regional labor costs in seconds. Stop guessing, start building.",
+        "One photo helps build a starter cost range for your area—so the first bid isn’t your only data point.",
       icon: <Hammer size={32} color={Theme.colors.brand.primary} />,
-      badge: "AI VISION",
+      badge: "SMART ESTIMATE",
     },
     {
-      title: "The Property Ledger",
-      highlight: "Every Quote, Verified.",
+      title: "Your home file",
+      highlight: "Planned vs. paid, side by side",
       subtitle:
-        "Track invoices and receipts against your AI-hardened budget. We extract the data so you can see your project health at a glance.",
+        "Drop in invoices and quotes; we pull the totals so you can see if the job is still on track.",
       icon: <ShieldCheck size={32} color={Theme.colors.status.success} />,
-      badge: "FINANCIAL CONTROL",
+      badge: "STAY ON BUDGET",
     },
     {
-      title: "Lender Ready.",
-      highlight: "Data Bankers Trust.",
+      title: "Paperwork, packaged.",
+      highlight: "One PDF when they ask",
       subtitle:
-        "Export professional reports that accelerate loan approvals and permits. AI-validated data gives you immediate credibility.",
+        "Bundle what you spent and what you changed into a clean download—handy for lenders or agents, not a promise they’ll say yes.",
       icon: <ShieldCheck size={32} color={Theme.colors.brand.primary} />,
-      badge: "PROFESSIONAL GRADE",
+      badge: "SHARE READY",
     },
     {
-      title: "Sold for More.",
-      highlight: "Capture Every Dollar.",
+      title: "Time to move on?",
+      highlight: "Show what you improved",
       subtitle:
-        "When you're ready to move, generate a professional Seller Packet that proves every dollar of equity you've built to buyers.",
+        "Export a simple packet that tells the story of your remodel—buyers still do their own homework.",
       icon: <TrendingUp size={32} color={Theme.colors.status.warning} />,
-      badge: "EQUITY BUILDING",
+      badge: "LIST SMARTER",
     },
   ];
 

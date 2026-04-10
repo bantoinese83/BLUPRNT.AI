@@ -8,17 +8,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from "react-native";
-import { Send, Bot, Sparkles } from "lucide-react-native";
+import { Send, Bot } from "lucide-react-native";
 import Markdown from "react-native-markdown-display";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { invokeFunction } from "../lib/supabase";
 import { Theme } from "../constants/Theme";
+import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
 
 /** Space above the notched tab bar + FAB (matches scroll clearance scale). */
@@ -163,7 +163,7 @@ export function AIAssistant({ projectId }: Props) {
           >
             {m.role === "assistant" && (
               <View style={styles.botAvatar} accessibilityLabel="Assistant">
-                <Sparkles
+                <Bot
                   size={14}
                   color={Theme.colors.brand.primary}
                   strokeWidth={2}
@@ -204,10 +204,7 @@ export function AIAssistant({ projectId }: Props) {
                 styles.typingBubble,
               ]}
             >
-              <ActivityIndicator
-                size="small"
-                color={Theme.colors.brand.light}
-              />
+              <SnurraLoader size={SnurraSize.inline} />
             </View>
           </MotiView>
         )}

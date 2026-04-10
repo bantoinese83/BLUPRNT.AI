@@ -9,7 +9,6 @@ import {
   Loader2,
   Radar,
   SkipForward,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -189,7 +188,7 @@ export function LocationScreen() {
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles
+                    <Radar
                       className="h-4 w-4 shrink-0 text-teal-600"
                       aria-hidden
                     />

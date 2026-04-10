@@ -7,32 +7,28 @@ export function AwarenessProvider({
   project,
   scopeItems,
   invoices,
+  spendByCategory,
 }: {
   children: React.ReactNode;
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
+  spendByCategory: Record<string, number>;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const awarenessData = useMemo(() => {
     if (!project)
       return {
-        insights: [],
+        insights: [] as SmartInsight[],
         projectHealth: "optimal" as const,
-        nextBestAction: null,
+        nextBestAction: null as string | null,
       };
 
     const newInsights: SmartInsight[] = [];
     let health: "optimal" | "warning" | "critical" = "optimal";
 
-    // 1. Budget Deviation Analysis
-    const categoryTotals: Record<string, number> = {};
-    invoices.forEach((inv) => {
-      // @ts-expect-error: category added via migration
-      const cat = inv.category || "Uncategorized";
-      categoryTotals[cat] = (categoryTotals[cat] || 0) + (inv.total || 0);
-    });
+    const categoryTotals = spendByCategory;
 
     scopeItems.forEach((item) => {
       const actual = categoryTotals[item.category] || 0;
@@ -50,7 +46,30 @@ export function AwarenessProvider({
       }
     });
 
-    // 2. Project Stage Awareness
+    const lineBackedTotal = Object.values(categoryTotals).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    const invoiceGrandTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+    const scopeMaxSum = scopeItems.reduce(
+      (s, it) => s + (it.total_cost_max ?? 0),
+      0,
+    );
+    if (
+      scopeItems.length > 0 &&
+      scopeMaxSum > 0 &&
+      invoiceGrandTotal > scopeMaxSum &&
+      lineBackedTotal < invoiceGrandTotal * 0.85
+    ) {
+      newInsights.push({
+        id: "budget-aggregate-over",
+        type: "anomaly",
+        title: "Spend above total scope",
+        description: `Invoices total about $${invoiceGrandTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
+      });
+      health = health === "optimal" ? "warning" : health;
+    }
+
     if (project.stage === "planning" && scopeItems.length === 0) {
       newInsights.push({
         id: "missing-scope",
@@ -63,30 +82,48 @@ export function AwarenessProvider({
       });
     }
 
-    if (project.stage === "construction" && invoices.length === 0) {
+    const stage = project.stage ?? "";
+    if (
+      (stage === "in_progress" ||
+        stage === "collecting_quotes" ||
+        stage === "construction") &&
+      invoices.length === 0
+    ) {
       newInsights.push({
         id: "no-invoices",
         type: "tip",
         title: "Track your spending",
         description:
-          "You're in the construction phase but haven't uploaded any invoices yet. Start tracking to stay on budget.",
+          "You’re past the planning stage but haven’t uploaded invoices yet. Add documents to stay on budget and sharpen these insights.",
         actionLabel: "Upload Invoice",
         actionKind: "execute",
       });
     }
 
-    // 3. Next Best Action
-    let nextAction = null;
-    if (newInsights.length > 0) {
-      nextAction = newInsights[0].actionLabel || "Review Insights";
+    const invoiceTotal = invoices.reduce((s, i) => s + (i.total || 0), 0);
+    if (invoiceTotal > 5000 && scopeItems.length > 0) {
+      newInsights.push({
+        id: "resale-opportunity",
+        type: "opportunity",
+        title: "Seller Packet Ready",
+        description:
+          "Your investment is substantial enough to generate a compelling Seller Packet. Export it to maximize your property value.",
+        actionLabel: "Export Packet",
+        actionKind: "record",
+      });
     }
+
+    const nextAction =
+      newInsights.length > 0
+        ? newInsights[0].actionLabel || "Review Insights"
+        : null;
 
     return {
       insights: newInsights,
       projectHealth: health,
       nextBestAction: nextAction,
     };
-  }, [project, scopeItems, invoices]);
+  }, [project, scopeItems, invoices, spendByCategory]);
 
   return (
     <AwarenessContext.Provider

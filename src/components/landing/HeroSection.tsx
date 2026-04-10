@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ArrowRight, UserPlus, Hammer } from "lucide-react";
+import { ArrowRight, UserPlus } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
 import { LANDING_HERO_COPY, LANDING_HIGHLIGHT_COLOR } from "./landing-content";
@@ -102,35 +102,49 @@ export function HeroSection({
         </div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="relative mx-auto w-full max-w-lg lg:max-w-none"
+          initial={{ opacity: 0, scale: 0.94, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mx-auto flex w-full max-w-[min(100%,280px)] flex-col items-center sm:max-w-[300px] lg:mx-0 lg:ml-auto lg:max-w-[320px] lg:items-end"
         >
-          <div className="absolute -inset-3 rounded-[1.75rem] bg-linear-to-r from-slate-500/15 to-slate-400/15 blur-2xl lg:-inset-2" />
-          <div className="relative glass-card overflow-hidden rounded-[1.75rem] p-1.5 shadow-xl sm:rounded-[2rem] sm:p-2">
-            <img
-              src="/images/renovation_hero.png"
-              alt="Modern home renovation cost estimator dashboard showing AI-driven budget analysis"
-              className="max-h-[min(38vh,340px)] w-full rounded-[1.25rem] object-cover object-center shadow-inner sm:max-h-[min(42vh,380px)] sm:rounded-[1.75rem] lg:max-h-[min(48vh,420px)]"
-            />
+          <div
+            className="pointer-events-none absolute left-1/2 top-[42%] h-[min(420px,52vh)] w-[140%] max-w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-[40%] bg-[radial-gradient(ellipse_at_center,rgba(13,148,136,0.35),transparent_68%)] blur-3xl"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -right-6 top-8 hidden h-28 w-28 rounded-full bg-teal-400/15 blur-2xl sm:block"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -left-8 bottom-24 h-24 w-24 rounded-full bg-slate-400/20 blur-2xl"
+            aria-hidden
+          />
 
-            <div className="absolute bottom-3 left-3 right-3 glass-card animate-float rounded-xl p-3 sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white shadow-md sm:h-11 sm:w-11 sm:rounded-xl">
-                  <Hammer className="h-5 w-5" aria-hidden />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-black text-slate-900 leading-tight sm:text-sm">
-                    AI Cost Analysis
-                  </p>
-                  <p className="text-[11px] font-bold text-slate-500 sm:text-xs">
-                    Regionally grounded pricing
-                  </p>
-                </div>
+          <div className="animate-float relative z-[1] w-full">
+            <div className="relative rotate-[0.5deg] rounded-[2.4rem] border-[10px] border-slate-900/92 bg-slate-900 p-[3px] shadow-[0_40px_80px_-20px_rgba(15,23,42,0.55),0_0_0_1px_rgba(255,255,255,0.08)_inset] sm:rounded-[2.55rem] sm:border-[11px] sm:p-1">
+              <div
+                className="pointer-events-none absolute inset-[3px] rounded-[2rem] ring-1 ring-white/12 sm:inset-1 sm:rounded-[2.1rem]"
+                aria-hidden
+              />
+              <div className="relative overflow-hidden rounded-[1.85rem] bg-slate-950 shadow-inner sm:rounded-[2rem]">
+                <img
+                  src="/images/mobile-app-hero.png"
+                  alt="BLUPRNT iPhone app: bathroom project with estimate range, documents count, and plan vs documented spend"
+                  className="h-auto w-full object-cover object-top"
+                  loading="eager"
+                  decoding="async"
+                />
               </div>
             </div>
+            <div
+              className="mx-auto -mt-1 h-4 w-[42%] rounded-[100%] bg-slate-900/18 blur-lg"
+              aria-hidden
+            />
           </div>
+
+          <p className="relative z-[1] mt-4 w-full text-center text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 sm:text-xs lg:pr-1 lg:text-right">
+            Real app preview · iOS
+          </p>
         </motion.div>
       </div>
     </section>

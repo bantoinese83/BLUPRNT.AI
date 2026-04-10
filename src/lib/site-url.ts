@@ -14,7 +14,7 @@ export const LANDING_FAQ = [
   {
     question: "What is BLUPRNT?",
     answer:
-      "BLUPRNT is a financial operating system for homeowners planning or doing renovations. It helps you turn rough ideas and photos into grounded cost ranges, track invoices and quotes against that plan, and keep a clear record you can share with buyers, agents, or lenders.",
+      "BLUPRNT is an app for homeowners planning or mid-renovation. It turns rough ideas and photos into a local cost range, helps you log invoices and quotes against that plan, and keeps one clear file you can share with buyers, agents, or lenders.",
   },
   {
     question: "How does home renovation cost estimation work?",
@@ -65,7 +65,7 @@ export function buildLandingJsonLd(siteUrl: string) {
         url: siteUrl,
         name: "BLUPRNT",
         description:
-          "Renovation cost estimates, invoice tracking, plan vs actual clarity, and resale-ready property ledgers for US homeowners.",
+          "Renovation cost estimates, invoice tracking, planned vs. actual spending, and resale-ready home files for US homeowners.",
         publisher: { "@id": orgId },
         inLanguage: "en-US",
       },
@@ -76,7 +76,7 @@ export function buildLandingJsonLd(siteUrl: string) {
         alternateName: "BLUPRNT.AI",
         url: siteUrl,
         description:
-          "Homeowner-first renovation financial OS: regional estimates, plan vs documented spend, and seller-ready exports.",
+          "Homeowner-first renovation app: local estimates, planned vs. documented spend, and seller-ready exports.",
         logo: {
           "@type": "ImageObject",
           url: `${siteUrl}/bluprnt_logo.svg`,

@@ -101,9 +101,10 @@ export function ResaleValueImpact({ investment, projectName }: Props) {
         <View style={styles.infoBox}>
           <Info size={14} color="#64748b" />
           <Text style={styles.infoText}>
-            Based on current renovation data for{" "}
-            <Text style={styles.bold}>{projectName}</Text>. Professional
-            documentation typically yields higher appraisal values.
+            Illustrative example only—not an appraisal or guarantee. Based on
+            rough inputs for <Text style={styles.bold}>{projectName}</Text>.
+            Clear documentation can help others understand your improvements;
+            actual value depends on many factors.
           </Text>
         </View>
       </View>

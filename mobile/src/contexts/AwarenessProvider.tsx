@@ -7,11 +7,13 @@ export function AwarenessProvider({
   project,
   scopeItems,
   invoices,
+  spendByCategory,
 }: {
   children: React.ReactNode;
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
+  spendByCategory: Record<string, number>;
 }) {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -31,12 +33,8 @@ export function AwarenessProvider({
     const newInsights: SmartInsight[] = [];
     let health: "optimal" | "warning" | "critical" = "optimal";
 
-    // 1. Budget Deviation Analysis
-    const categoryTotals: Record<string, number> = {};
-    invoices.forEach((inv) => {
-      const cat = (inv as { category?: string }).category || "Uncategorized";
-      categoryTotals[cat] = (categoryTotals[cat] || 0) + (inv.total || 0);
-    });
+    // 1. Budget deviation — `spendByCategory` comes from invoice line items (see dashboard snapshot).
+    const categoryTotals = spendByCategory;
 
     scopeItems.forEach((item) => {
       const actual = categoryTotals[item.category] || 0;
@@ -54,6 +52,30 @@ export function AwarenessProvider({
       }
     });
 
+    const lineBackedTotal = Object.values(categoryTotals).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    const invoiceGrandTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+    const scopeMaxSum = scopeItems.reduce(
+      (s, it) => s + (it.total_cost_max ?? 0),
+      0,
+    );
+    if (
+      scopeItems.length > 0 &&
+      scopeMaxSum > 0 &&
+      invoiceGrandTotal > scopeMaxSum &&
+      lineBackedTotal < invoiceGrandTotal * 0.85
+    ) {
+      newInsights.push({
+        id: "budget-aggregate-over",
+        type: "anomaly",
+        title: "Spend above total scope",
+        description: `Invoices total about $${invoiceGrandTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
+      });
+      health = health === "optimal" ? "warning" : health;
+    }
+
     // 2. Project Stage Awareness
     if (project.stage === "planning" && scopeItems.length === 0) {
       newInsights.push({
@@ -67,13 +89,19 @@ export function AwarenessProvider({
       });
     }
 
-    if (project.stage === "construction" && invoices.length === 0) {
+    const stage = project.stage ?? "";
+    if (
+      (stage === "in_progress" ||
+        stage === "collecting_quotes" ||
+        stage === "construction") &&
+      invoices.length === 0
+    ) {
       newInsights.push({
         id: "no-invoices",
         type: "tip",
         title: "Track your spending",
         description:
-          "You're in the construction phase but haven't uploaded any invoices yet. Start tracking to stay on budget.",
+          "You’re past the planning stage but haven’t uploaded invoices yet. Add documents to stay on budget and sharpen these insights.",
         actionLabel: "Upload Invoice",
         actionKind: "execute",
       });
@@ -104,7 +132,7 @@ export function AwarenessProvider({
       projectHealth: health,
       nextBestAction: nextAction,
     };
-  }, [project, scopeItems, invoices]);
+  }, [project, scopeItems, invoices, spendByCategory]);
 
   const value = useMemo(
     () => ({
