@@ -42,7 +42,7 @@
     "functions:deploy:marketing-lead": "supabase functions deploy submit-marketing-lead --project-ref elucgaegaihkklnfoasm",
     "functions:deploy:chat": "supabase functions deploy chat-with-project --project-ref elucgaegaihkklnfoasm",
     "functions:deploy:rate-limited": "supabase functions deploy photo-to-scope get-document-signed-url send-email upload-invoice delete-account get-invoice create-checkout get-project-view submit-marketing-lead chat-with-project --project-ref elucgaegaihkklnfoasm",
-    "prepare": "husky"
+    "prepare": "node -e \"if (process.env.VERCEL || process.env.CI) process.exit(0); const { spawnSync } = require('child_process'); const r = spawnSync('husky', { shell: true, stdio: 'inherit' }); process.exit(r.status ?? 1);\""
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
