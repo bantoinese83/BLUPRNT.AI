@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "check-types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "check": "npm run lint",
     "lint": "eslint . --max-warnings 0 && tsc --noEmit"
   },

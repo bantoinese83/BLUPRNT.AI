@@ -143,6 +143,7 @@ type ProjectPassesRow = {
 type UserPreferencesRow = {
   user_id: string;
   last_active_project_id: string | null;
+  push_token: string | null;
   updated_at: string | null;
 };
 

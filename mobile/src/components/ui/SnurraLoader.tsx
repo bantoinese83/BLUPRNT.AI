@@ -91,7 +91,6 @@ export function SnurraLoader({
 
   useEffect(() => {
     /* Reanimated: shared values update via `.value` (not React state). */
-    /* eslint-disable react-hooks/immutability */
     if (reduceMotion) {
       cancelAnimation(slow);
       cancelAnimation(fast);
@@ -117,7 +116,6 @@ export function SnurraLoader({
       cancelAnimation(slow);
       cancelAnimation(fast);
     };
-    /* eslint-enable react-hooks/immutability */
     return cleanup;
   }, [reduceMotion, slow, fast]);
 

@@ -16,10 +16,9 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: mobile/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install mobile deps
-        working-directory: mobile
+      - name: Install workspaces (root lockfile)
         run: npm ci
 
       - name: Install EAS CLI

@@ -8,9 +8,11 @@ import prettier from "eslint-config-prettier";
 export default tseslint.config(
   {
     ignores: [
-      "coverage",
-      "dist",
-      "node_modules",
+      "**/coverage/**",
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
       "supabase/functions",
       "mobile/.expo",
       ".expo",
@@ -18,7 +20,13 @@ export default tseslint.config(
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettier],
-    files: ["**/*.{ts,tsx}"],
+    files: [
+      "web/**/*.ts",
+      "web/**/*.tsx",
+      "mobile/**/*.ts",
+      "mobile/**/*.tsx",
+      "shared/**/*.ts",
+    ],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -45,7 +53,14 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.test.ts", "**/*.test.tsx", "**/tests/**/*"],
+    files: [
+      "web/**/*.test.ts",
+      "web/**/*.test.tsx",
+      "web/**/tests/**/*.ts",
+      "web/**/tests/**/*.tsx",
+      "mobile/**/*.test.ts",
+      "mobile/**/*.test.tsx",
+    ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },

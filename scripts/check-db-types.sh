@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT_REF="${SUPABASE_PROJECT_ID:-elucgaegaihkklnfoasm}"
-OUT="$ROOT/src/types/supabase.gen.ts"
+OUT="$ROOT/web/src/types/supabase.gen.ts"
 
 if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
   echo "db:types:check skipped (no SUPABASE_ACCESS_TOKEN); cannot verify drift."
@@ -21,7 +21,7 @@ npx --yes supabase@latest gen types typescript \
   >"$TMP"
 
 if ! cmp -s "$TMP" "$OUT"; then
-  echo "Supabase types are out of date. Run 'npm run db:types' with SUPABASE_ACCESS_TOKEN and commit src/types/supabase.gen.ts"
+  echo "Supabase types are out of date. Run 'npm run db:types' with SUPABASE_ACCESS_TOKEN and commit web/src/types/supabase.gen.ts"
   diff -u "$OUT" "$TMP" || true
   exit 1
 fi

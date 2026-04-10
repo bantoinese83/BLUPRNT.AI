@@ -1,0 +1,7 @@
+{
+  "name": "@bluprnt/shared",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Shared TypeScript modules for web and mobile"
+}

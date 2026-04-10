@@ -6,6 +6,8 @@ import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 export default defineConfig(() => {
   return {
+    /** Load `.env` from monorepo root (one file for web + tooling). */
+    envDir: path.resolve(__dirname, ".."),
     plugins: [
       react(),
       tailwindcss(),
@@ -17,7 +19,7 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@shared": path.resolve(__dirname, "./shared"),
+        "@shared": path.resolve(__dirname, "../shared"),
       },
     },
     server: {

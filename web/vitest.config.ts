@@ -4,12 +4,14 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 export default defineConfig({
+  /** Same as Vite app — load `.env` from monorepo root for tests. */
+  envDir: path.resolve(__dirname, ".."),
   plugins: [react(), tailwindcss()],
   test: {
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}", "mobile/src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -22,7 +24,7 @@ export default defineConfig({
         "**/*.config.*",
         "src/main.tsx",
         "src/vite-env.d.ts",
-        "**/*.test.{ts,tsx}",
+        "**/*.{test,spec}.{ts,tsx}",
       ],
       thresholds: {
         lines: 20,
@@ -35,7 +37,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@shared": path.resolve(__dirname, "./shared"),
+      "@shared": path.resolve(__dirname, "../shared"),
     },
   },
 });

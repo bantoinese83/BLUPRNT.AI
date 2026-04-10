@@ -54,6 +54,10 @@ The location step **auto-fills** an approximate area from your network (IP → r
    npm run dev
    ```
 
+   **Monorepo layout**: `web/` (Vite + React), `mobile/` (Expo), `shared/` (types & helpers). Keep `.env` at the **repository root**; the web app loads it automatically. Other useful commands: `npm run dev:mobile`, `npm run build`, `npm run check` (lint, tests, production build).
+
+   **Vercel**: set the project **Root Directory** to `web` (this repo’s `vercel.json` lives in `web/`).
+
 ## Stripe (paid plans)
 
 BLUPRNT.AI uses dynamic Stripe Checkout via Supabase Edge Functions.

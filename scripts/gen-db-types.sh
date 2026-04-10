@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Generate src/types/supabase.gen.ts from the Supabase project (requires CLI auth).
+# Generate web/src/types/supabase.gen.ts from the Supabase project (requires CLI auth).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="$ROOT/src/types/supabase.gen.ts"
+OUT="$ROOT/web/src/types/supabase.gen.ts"
 PROJECT_REF="${SUPABASE_PROJECT_ID:-elucgaegaihkklnfoasm}"
 
 if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
