@@ -36,7 +36,7 @@ export function AppSimpleHeader({
             />
           </div>
           <span className="text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
-            BLUPRNT<span className="text-indigo-600">.AI</span>
+            BLUPRNT<span className="text-teal-600">.AI</span>
           </span>
         </Link>
 
@@ -48,7 +48,7 @@ export function AppSimpleHeader({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2 font-bold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                    className="gap-2 font-bold text-teal-600 hover:bg-teal-50 hover:text-teal-700"
                   >
                     <LayoutDashboard className="h-4 w-4" aria-hidden />
                     Dashboard

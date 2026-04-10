@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     pointerEvents: "box-none",
   },
   fabTouchable: {
-    shadowColor: "#312e81",
+    shadowColor: "#134e4a",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.38,
     shadowRadius: 14,

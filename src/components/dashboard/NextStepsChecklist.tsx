@@ -72,10 +72,10 @@ export function NextStepsChecklist({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
           onClick={() => onAction(step.id)}
-          className="group flex flex-col items-start p-5 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all text-left"
+          className="group flex flex-col items-start p-5 rounded-3xl bg-white border border-slate-200 shadow-drop-sm hover:border-teal-200 hover:shadow-drop-md transition-all text-left"
         >
-          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-indigo-50 transition-colors">
-            <step.icon className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-teal-50 transition-colors">
+            <step.icon className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />
           </div>
           <h4 className="font-bold text-slate-900 text-sm mb-1 flex items-center gap-2">
             {step.label}

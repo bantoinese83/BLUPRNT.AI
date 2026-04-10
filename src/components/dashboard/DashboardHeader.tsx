@@ -51,7 +51,7 @@ export function DashboardHeader({
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-3.5">
           <Link
             to="/dashboard"
-            className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:h-11 sm:w-11"
+            className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-11 sm:w-11"
             aria-label="BLUPRNT — Dashboard home"
           >
             <img
@@ -67,10 +67,10 @@ export function DashboardHeader({
                 to="/dashboard"
                 className="text-base font-black italic tracking-tight text-slate-900 sm:text-lg"
               >
-                BLUPRNT<span className="text-indigo-600">.AI</span>
+                BLUPRNT<span className="text-teal-600">.AI</span>
               </Link>
               {isArchitect ? (
-                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-700 ring-1 ring-indigo-100">
+                <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-teal-700 ring-1 ring-teal-100">
                   Architect
                 </span>
               ) : hasProjectPass ? (
@@ -106,7 +106,7 @@ export function DashboardHeader({
             aria-label="Start a BLUPRNT"
             title="Start a BLUPRNT"
           >
-            <span className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-2.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50/90 hover:text-indigo-900 sm:px-3">
+            <span className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-2.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-teal-200 hover:bg-teal-50/90 hover:text-teal-900 sm:px-3">
               <Plus className="h-4 w-4 shrink-0" aria-hidden />
               <span className="hidden sm:inline">Start a BLUPRNT</span>
             </span>
@@ -116,7 +116,7 @@ export function DashboardHeader({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 rounded-xl px-2 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 sm:px-3"
+              className="h-9 rounded-xl px-2 text-slate-600 hover:bg-teal-50 hover:text-teal-600 sm:px-3"
               onClick={onOpenInsights}
               type="button"
             >
@@ -164,7 +164,7 @@ export function DashboardHeader({
             <Button
               variant="primary"
               size="sm"
-              className="h-9 rounded-xl px-3 text-xs font-bold shadow-md shadow-indigo-500/15 sm:text-sm premium-gradient"
+              className="h-9 rounded-xl px-3 text-xs font-bold shadow-md shadow-teal-500/15 sm:text-sm premium-gradient"
               onClick={onUpgradeClick}
               type="button"
             >
@@ -220,7 +220,7 @@ export function DashboardHeader({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 rounded-xl px-2.5 text-slate-600 hover:bg-slate-100/90 hover:text-indigo-600"
+              className="h-9 rounded-xl px-2.5 text-slate-600 hover:bg-slate-100/90 hover:text-teal-600"
               type="button"
             >
               <LifeBuoy className="h-4 w-4 lg:mr-1.5" aria-hidden />

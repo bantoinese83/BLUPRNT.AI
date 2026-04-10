@@ -4,5 +4,5 @@ export type {
   InvoiceRow,
   UserSubscriptionRow,
   ProjectPassRow,
-} from "../../../src/types/database";
-export type { Database } from "../../../src/types/supabase.gen";
+} from "../../../shared/types/database";
+export type { Database } from "../../../shared/types/supabase.gen";

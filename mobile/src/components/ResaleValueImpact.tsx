@@ -73,13 +73,13 @@ export function ResaleValueImpact({ investment, projectName }: Props) {
           </View>
         )}
 
-        {/* ROI Visualization */}
+        {/* ROI Visualization — badge below chart so it never covers the line/dot */}
         <View style={styles.chartContainer}>
-          <Svg width="100%" height="60" viewBox="0 0 300 60">
+          <Svg width="100%" height="56" viewBox="0 0 300 56">
             <Defs>
               <LinearGradient id="grad" x1="0" y1="0" x2="300" y2="0">
                 <Stop offset="0" stopColor="transparent" />
-                <Stop offset="100" stopColor="#4f46e5" />
+                <Stop offset="100" stopColor="#0d9488" />
               </LinearGradient>
             </Defs>
             <Path
@@ -89,10 +89,12 @@ export function ResaleValueImpact({ investment, projectName }: Props) {
               strokeWidth="4"
               strokeLinecap="round"
             />
-            <Circle cx="300" cy="10" r="5" fill="#4f46e5" />
+            <Circle cx="300" cy="10" r="5" fill="#0d9488" />
           </Svg>
-          <View style={styles.peakBadge}>
-            <Text style={styles.peakText}>PEAK ROI</Text>
+          <View style={styles.peakBadgeRow}>
+            <View style={styles.peakBadge}>
+              <Text style={styles.peakText}>PEAK ROI</Text>
+            </View>
           </View>
         </View>
 
@@ -191,23 +193,26 @@ const styles = StyleSheet.create({
     color: Theme.colors.brand.primary,
   },
   chartContainer: {
-    height: 70,
     marginTop: 8,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
+  peakBadgeRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 6,
+    paddingRight: 2,
+  },
   peakBadge: {
-    position: "absolute",
-    top: 0,
-    right: 4,
     backgroundColor: Theme.colors.brand.primary,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     shadowColor: Theme.colors.brand.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.22,
+    shadowRadius: 5,
+    elevation: 3,
   },
   peakText: {
     fontSize: 9,

@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { X, Upload, ListTree, FileDown } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 import { MotiView, AnimatePresence } from "moti";
 import { Theme } from "../constants/Theme";
 import { GlassCard } from "./ui/GlassCard";
-import { Button } from "./ui/Button";
 
 interface Props {
   onAction: (id: string) => void;
@@ -42,27 +48,50 @@ export function DashboardWelcomeBanner({ onAction }: Props) {
             </View>
 
             <View style={styles.actions}>
-              <Button
-                title=""
-                onPress={() => onAction("upload")}
-                style={styles.actionBtn}
-                icon={<Upload size={20} color="white" />}
-                variant="primary"
-              />
-              <Button
-                title=""
-                onPress={() => onAction("scope")}
-                style={styles.actionBtn}
-                icon={<ListTree size={20} color={Theme.colors.brand.primary} />}
-                variant="outline"
-              />
-              <Button
-                title=""
-                onPress={() => onAction("export")}
-                style={styles.actionBtn}
-                icon={<FileDown size={20} color={Theme.colors.brand.primary} />}
-                variant="outline"
-              />
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Upload an invoice"
+                activeOpacity={0.88}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  onAction("upload");
+                }}
+                style={[styles.circleBtn, styles.circlePrimary]}
+              >
+                <Upload size={20} color="#ffffff" strokeWidth={2} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="See line-by-line scope"
+                activeOpacity={0.88}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onAction("scope");
+                }}
+                style={[styles.circleBtn, styles.circleOutline]}
+              >
+                <ListTree
+                  size={20}
+                  color={Theme.colors.brand.primary}
+                  strokeWidth={2}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Export seller packet"
+                activeOpacity={0.88}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onAction("export");
+                }}
+                style={[styles.circleBtn, styles.circleOutline]}
+              >
+                <FileDown
+                  size={20}
+                  color={Theme.colors.brand.primary}
+                  strokeWidth={2}
+                />
+              </TouchableOpacity>
             </View>
           </GlassCard>
         </MotiView>
@@ -108,11 +137,43 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
-    gap: 4,
-  },
-  actionBtn: {
-    flex: 1,
-    height: 40,
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 8,
     paddingHorizontal: 4,
+  },
+  /**
+   * RN + iOS often fail to paint dotted/dashed borders on circles; fills can disappear.
+   * Solid rings + elevation read clearly on GlassCard / blur.
+   */
+  circleBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderStyle: "solid",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0f172a",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.14,
+        shadowRadius: 5,
+      },
+      android: {
+        elevation: 3,
+      },
+      default: {},
+    }),
+  },
+  circlePrimary: {
+    backgroundColor: Theme.colors.cta.from,
+    borderColor: "rgba(255, 255, 255, 0.55)",
+  },
+  circleOutline: {
+    backgroundColor: "#ffffff",
+    borderColor: Theme.colors.brand.primary,
   },
 });

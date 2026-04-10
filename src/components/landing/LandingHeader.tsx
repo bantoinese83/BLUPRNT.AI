@@ -58,7 +58,7 @@ export function LandingHeader() {
           >
             <Link
               to="/"
-              className="flex min-w-0 items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 sm:gap-3"
+              className="flex min-w-0 items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500 sm:gap-3"
               aria-label="BLUPRNT — Home"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/40 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-1.5">
@@ -69,7 +69,7 @@ export function LandingHeader() {
                 />
               </div>
               <span className="truncate pr-1 text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
-                BLUPRNT<span className="text-indigo-600">.AI</span>
+                BLUPRNT<span className="text-teal-600">.AI</span>
               </span>
             </Link>
           </motion.div>
@@ -101,7 +101,7 @@ export function LandingHeader() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-xl gap-2 font-bold text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition-all shadow-sm"
+                  className="rounded-xl gap-2 font-bold text-teal-600 hover:bg-teal-50 hover:text-teal-700 transition-all shadow-sm"
                 >
                   <LayoutDashboard className="h-4 w-4" aria-hidden />
                   Dashboard
@@ -124,7 +124,7 @@ export function LandingHeader() {
               <Button
                 size="sm"
                 variant="primary"
-                className="rounded-xl px-3.5 text-xs font-bold shadow-md shadow-indigo-500/15"
+                className="rounded-xl px-3.5 text-xs font-bold shadow-md shadow-teal-500/15"
               >
                 Start
               </Button>
@@ -133,7 +133,7 @@ export function LandingHeader() {
             <Link to="/onboarding" className="hidden lg:block">
               <Button
                 size="sm"
-                className="rounded-xl premium-gradient border-0 px-5 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="rounded-xl premium-gradient border-0 px-5 shadow-lg shadow-teal-500/30 hover:shadow-teal-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 Get started
                 <ArrowRight className="ml-1.5 h-4 w-4" aria-hidden />
@@ -182,7 +182,7 @@ export function LandingHeader() {
                 {user ? (
                   <Link
                     to="/dashboard"
-                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold text-indigo-600 hover:bg-indigo-50"
+                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold text-teal-600 hover:bg-teal-50"
                     onClick={() => setMobileNavOpen(false)}
                   >
                     <LayoutDashboard className="h-4 w-4" aria-hidden />
@@ -218,7 +218,7 @@ export function LandingHeader() {
                 >
                   <Button
                     variant="primary"
-                    className="h-11 w-full rounded-xl font-bold shadow-md shadow-indigo-500/20"
+                    className="h-11 w-full rounded-xl font-bold shadow-md shadow-teal-500/20"
                   >
                     Get started
                     <ArrowRight className="ml-2 h-4 w-4" aria-hidden />

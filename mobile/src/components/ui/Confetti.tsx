@@ -4,7 +4,7 @@ import { MotiView } from "moti";
 
 const { width, height } = Dimensions.get("window");
 
-const COLORS = ["#6366f1", "#818cf8", "#4f46e5", "#c7d2fe", "#1e1b4b"];
+const COLORS = ["#14b8a6", "#2dd4bf", "#0d9488", "#99f6e4", "#042f2e"];
 const PARTICLE_COUNT = 40;
 
 interface ParticleProps {

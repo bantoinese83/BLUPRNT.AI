@@ -13,25 +13,35 @@
   --color-primary-hover: #020617;
   --color-primary-muted: #f8fafc;
   --color-surface: #f9fafb;
-  --color-accent: #4f46e5;
+  --color-accent: #0d9488;
   --breakpoint-xs: 375px;
   --color-border: #f1f5f9;
   --color-border-focus: #334155;
   --color-slate-950: #020617;
-  --color-indigo-600: #4f46e5;
+  /** Brand accent — teal-600 (replaces former indigo) */
+  --color-teal-600: #0d9488;
   --color-slate-200: #e2e8f0;
   --color-slate-400: #94a3b8;
   --color-slate-500: #64748b;
   /* Ink for body copy — gray-900, easier long reads than harsher slate-900 */
   --color-slate-900: #111827;
 
+  /* Layered slate-tinted drops — reads on light gray dashboards */
   --shadow-card:
-    0 1px 3px 0 rgb(0 0 0 / 0.02), 0 1px 2px -1px rgb(0 0 0 / 0.02);
+    0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px rgba(15, 23, 42, 0.07);
   --shadow-card-hover:
-    0 12px 24px -6px rgb(0 0 0 / 0.04), 0 4px 12px -4px rgb(0 0 0 / 0.02);
+    0 2px 6px rgba(15, 23, 42, 0.06), 0 12px 28px rgba(15, 23, 42, 0.11);
   --shadow-elevated:
-    0 20px 25px -5px rgb(0 0 0 / 0.03), 0 8px 10px -6px rgb(0 0 0 / 0.03);
-  --shadow-glass: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
+    0 8px 20px rgba(15, 23, 42, 0.08), 0 24px 48px rgba(15, 23, 42, 0.1);
+  --shadow-glass:
+    0 2px 8px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.09);
+  /** Explicit utilities: `shadow-drop-sm` | `shadow-drop-md` | `shadow-drop-lg` */
+  --shadow-drop-sm:
+    0 1px 2px rgba(15, 23, 42, 0.04), 0 3px 10px rgba(15, 23, 42, 0.06);
+  --shadow-drop-md:
+    0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.08);
+  --shadow-drop-lg:
+    0 4px 8px rgba(15, 23, 42, 0.06), 0 16px 40px rgba(15, 23, 42, 0.12);
   --glass-border: rgba(15, 23, 42, 0.08);
   --glow-color: rgba(148, 163, 184, 0.1);
 
@@ -187,6 +197,17 @@
   /** Long-form column (~65ch) — pair with `mx-auto w-full` where needed */
   .max-th {
     max-width: min(65ch, 100%);
+  }
+
+  /** Default floating surface on dashboard — token-backed drop */
+  .shadow-surface {
+    box-shadow: var(--shadow-drop-md);
+  }
+  .shadow-surface-hover {
+    @apply transition-shadow duration-300;
+  }
+  .shadow-surface-hover:hover {
+    box-shadow: var(--shadow-drop-lg);
   }
 }
 
@@ -509,7 +530,7 @@
 }
 
 .markdown-content li strong {
-  @apply text-indigo-300;
+  @apply text-teal-300;
 }
 
 .markdown-content code {
@@ -542,7 +563,7 @@
 }
 
 .markdown-content a {
-  @apply text-indigo-400 hover:text-indigo-300 underline underline-offset-4 decoration-indigo-400/30 transition-colors;
+  @apply text-teal-400 hover:text-teal-300 underline underline-offset-4 decoration-teal-400/30 transition-colors;
 }
 
 .markdown-content hr {
@@ -550,5 +571,5 @@
 }
 
 .markdown-content blockquote {
-  @apply pl-4 border-l-2 border-indigo-500/30 text-slate-400 italic;
+  @apply pl-4 border-l-2 border-teal-500/30 text-slate-400 italic;
 }

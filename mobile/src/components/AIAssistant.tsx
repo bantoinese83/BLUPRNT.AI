@@ -127,7 +127,7 @@ export function AIAssistant({ projectId }: Props) {
 
   /** Logo row (~56) + title block (~84) — iOS keyboard offset above tab system. */
   const keyboardOffset =
-    Platform.OS === "ios" ? insets.top + 128 : insets.top + 24;
+    Platform.OS === "ios" ? insets.top + 132 : insets.top + 24;
 
   return (
     <KeyboardAvoidingView
@@ -213,7 +213,17 @@ export function AIAssistant({ projectId }: Props) {
         )}
       </ScrollView>
 
-      <View style={styles.inputDock}>
+      <View
+        style={[
+          styles.inputDock,
+          {
+            paddingBottom:
+              Platform.OS === "ios"
+                ? TAB_BAR_BUFFER + insets.bottom
+                : TAB_BAR_BUFFER,
+          },
+        ]}
+      >
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -294,13 +304,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: Theme.radius.md,
-    backgroundColor: "rgba(79, 70, 229, 0.08)",
+    backgroundColor: "rgba(13, 148, 136, 0.08)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
     marginBottom: 2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(79, 70, 229, 0.15)",
+    borderColor: "rgba(13, 148, 136, 0.15)",
   },
   messageBubble: {
     maxWidth: "85%",
@@ -336,45 +346,53 @@ const styles = StyleSheet.create({
   },
   inputDock: {
     backgroundColor: Theme.colors.header,
-    paddingBottom: Platform.OS === "ios" ? TAB_BAR_BUFFER : TAB_BAR_BUFFER - 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Theme.colors.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#0f172a",
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
       },
       android: { elevation: 10 },
     }),
   },
   suggestionsScroll: {
-    maxHeight: 52,
+    height: 64,
+    flexGrow: 0,
   },
   suggestionsContainer: {
     paddingHorizontal: Theme.spacing.xl,
     paddingTop: Theme.spacing.sm,
     paddingBottom: Theme.spacing.xs,
-    gap: Theme.spacing.sm,
+    gap: Theme.spacing.md,
     alignItems: "center",
   },
   chip: {
     paddingHorizontal: Theme.spacing.lg,
-    paddingVertical: 10,
+    paddingVertical: 11,
     borderRadius: Theme.radius.full,
     backgroundColor: Theme.colors.inputBg,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: Theme.colors.inputBorder,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   chipText: {
-    color: Theme.colors.text.secondary,
+    color: Theme.colors.brand.light,
     fontSize: Theme.typography.size.sm,
     fontFamily: Theme.typography.family.semibold,
+    includeFontPadding: false,
   },
   inputRow: {
     flexDirection: "row",
     alignItems: "flex-end",
     paddingHorizontal: Theme.spacing.xl,
-    paddingTop: Theme.spacing.sm,
+    paddingTop: Theme.spacing.xs,
     paddingBottom: Theme.spacing.sm,
   },
   input: {
@@ -402,7 +420,7 @@ const styles = StyleSheet.create({
     marginLeft: Theme.spacing.sm,
   },
   sendButtonDisabled: {
-    backgroundColor: "rgba(79, 70, 229, 0.35)",
+    backgroundColor: "rgba(13, 148, 136, 0.35)",
   },
 });
 

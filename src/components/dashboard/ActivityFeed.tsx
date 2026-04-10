@@ -49,7 +49,7 @@ export function ActivityFeed({ events, className }: ActivityFeedProps) {
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           <Highlighter
             action="underline"
-            color="#6366f1"
+            color="#14b8a6"
             strokeWidth={2}
             padding={0}
             isView={true}

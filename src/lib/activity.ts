@@ -1,4 +1,4 @@
-import type { InvoiceRow, ProjectRow } from "@/types/database";
+import type { InvoiceRow, ProjectRow } from "@shared/types/database";
 import type { ActivityEvent } from "@/components/dashboard/ActivityFeed";
 
 /**

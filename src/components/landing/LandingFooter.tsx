@@ -12,7 +12,7 @@ export function LandingFooter() {
           <div className="flex flex-col items-center gap-3 sm:items-start">
             <Link
               to="/"
-              className="flex items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+              className="flex items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-sm">
                 <img
@@ -22,7 +22,7 @@ export function LandingFooter() {
                 />
               </div>
               <span className="font-black italic tracking-tighter text-slate-900">
-                BLUPRNT<span className="text-indigo-600">.AI</span>
+                BLUPRNT<span className="text-teal-600">.AI</span>
               </span>
             </Link>
             <p className="max-w-xs text-center text-sm text-slate-600 sm:text-left">
@@ -142,7 +142,7 @@ export function LandingFooter() {
               href="https://www.monarch-labs.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-bold text-slate-900 hover:text-indigo-600 transition-colors"
+              className="font-bold text-slate-900 hover:text-teal-600 transition-colors"
             >
               Monarch Labs
             </a>

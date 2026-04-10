@@ -1,11 +1,14 @@
 import { createContext, useContext } from "react";
 
+export type SmartInsightActionKind = "scope" | "execute" | "record";
+
 export interface SmartInsight {
   id: string;
   type: "anomaly" | "tip" | "opportunity";
   title: string;
   description: string;
   actionLabel?: string;
+  actionKind?: SmartInsightActionKind;
   category?: string;
 }
 
@@ -19,6 +22,7 @@ export interface AwarenessState {
   setShowUpgrade: (show: boolean) => void;
   upgradeReason: "export" | "invoice_limit" | "general";
   setUpgradeReason: (reason: "export" | "invoice_limit" | "general") => void;
+  activeProjectId: string | null;
 }
 
 export const AwarenessContext = createContext<AwarenessState | undefined>(

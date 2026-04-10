@@ -38,7 +38,7 @@ export function EstimateScreen() {
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#6366f1", "#818cf8", "#4f46e5"],
+        colors: ["#14b8a6", "#2dd4bf", "#0d9488"],
       });
     }
   }, [estimate]);
@@ -78,9 +78,9 @@ export function EstimateScreen() {
               damping: 20,
               delay: 0.1,
             }}
-            className="inline-flex items-center justify-center p-2 bg-indigo-50 rounded-full mb-2"
+            className="inline-flex items-center justify-center p-2 bg-teal-50 rounded-full mb-2"
           >
-            <Wrench className="w-5 h-5 text-indigo-600" />
+            <Wrench className="w-5 h-5 text-teal-600" />
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 10 }}
@@ -111,19 +111,19 @@ export function EstimateScreen() {
           }}
           className="relative"
         >
-          <div className="absolute -inset-4 bg-indigo-500/10 blur-2xl rounded-[3rem] -z-10 animate-pulse" />
-          <Card className="border-indigo-100 shadow-[0_20px_50px_rgba(79,70,229,0.1)] overflow-hidden bg-white/80 backdrop-blur-xl ring-1 ring-white/50">
-            <div className="bg-gradient-to-b from-indigo-50/50 to-transparent p-8 flex flex-col items-center text-center space-y-4">
+          <div className="absolute -inset-4 bg-teal-500/10 blur-2xl rounded-[3rem] -z-10 animate-pulse" />
+          <Card className="border-teal-100 shadow-[0_20px_50px_rgba(79,70,229,0.1)] overflow-hidden bg-white/80 backdrop-blur-xl ring-1 ring-white/50">
+            <div className="bg-gradient-to-b from-teal-50/50 to-transparent p-8 flex flex-col items-center text-center space-y-4">
               <Badge
                 variant="secondary"
-                className="bg-indigo-600 text-white hover:bg-indigo-700 h-7 px-3 gap-1.5 shadow-md shadow-indigo-200 border-none transition-transform hover:scale-105"
+                className="bg-teal-600 text-white hover:bg-teal-700 h-7 px-3 gap-1.5 shadow-md shadow-teal-200 border-none transition-transform hover:scale-105"
               >
                 <BadgeCheck className="w-4 h-4" aria-hidden />
                 Confidence: {conf} / 5
               </Badge>
 
               <div className="space-y-1">
-                <p className="text-xs text-indigo-600 font-black uppercase tracking-[0.2em]">
+                <p className="text-xs text-teal-600 font-black uppercase tracking-[0.2em]">
                   Investment Range
                 </p>
                 <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter py-2">
@@ -146,7 +146,7 @@ export function EstimateScreen() {
               <div className="h-px bg-slate-100 w-full" />
               <div className="space-y-4">
                 <h4 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-indigo-500" />
+                  <CheckCircle2 className="w-4 h-4 text-teal-500" />
                   Analysis Breakdown
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
@@ -158,7 +158,7 @@ export function EstimateScreen() {
                       key={`${item}-${i}`}
                       className="flex items-center space-x-2 text-sm text-slate-600 font-medium"
                     >
-                      <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                      <div className="h-1.5 w-1.5 rounded-full bg-teal-400" />
                       <span>{item}</span>
                     </motion.div>
                   ))}
@@ -169,8 +169,8 @@ export function EstimateScreen() {
             {summary?.value_engineering_tips &&
               summary.value_engineering_tips.length > 0 && (
                 <div className="px-8 pb-8 space-y-4">
-                  <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100/50 p-5 space-y-3">
-                    <h5 className="text-xs font-black text-indigo-700 uppercase tracking-widest flex items-center gap-2">
+                  <div className="rounded-2xl bg-teal-50/50 border border-teal-100/50 p-5 space-y-3">
+                    <h5 className="text-xs font-black text-teal-700 uppercase tracking-widest flex items-center gap-2">
                       <Wrench className="w-3.5 h-3.5" />
                       AI Project Strategy
                     </h5>
@@ -180,7 +180,7 @@ export function EstimateScreen() {
                           key={i}
                           className="text-sm text-slate-700 leading-snug flex gap-2"
                         >
-                          <span className="text-indigo-400 font-bold">•</span>
+                          <span className="text-teal-400 font-bold">•</span>
                           {tip}
                         </li>
                       ))}
@@ -268,7 +268,7 @@ export function EstimateScreen() {
           <Button
             size="lg"
             variant="primary"
-            className="w-full h-14 text-base shadow-lg shadow-indigo-500/20 group animate-bounce-subtle"
+            className="w-full h-14 text-base shadow-lg shadow-teal-500/20 group animate-bounce-subtle"
             onClick={() => {
               try {
                 sessionStorage.setItem("bluprnt_redirect", "/dashboard/scope");
@@ -292,7 +292,7 @@ export function EstimateScreen() {
           <Button
             size="lg"
             variant="ghost"
-            className="w-full h-14 text-base font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all"
+            className="w-full h-14 text-base font-bold text-slate-500 hover:text-teal-600 hover:bg-teal-50/50 transition-all"
             onClick={() => {
               try {
                 sessionStorage.setItem("bluprnt_redirect", "/dashboard/plan");

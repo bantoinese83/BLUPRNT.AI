@@ -10,7 +10,7 @@ import { Loader2, FileText, Upload } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { InvoiceRow, UserSubscriptionRow } from "@/types/database";
+import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 
 type InvoicesSectionProps = {
   projectId: string;
@@ -126,7 +126,7 @@ export function InvoicesSection({
           "space-y-5 rounded-2xl transition-[box-shadow,background-color,border-color] duration-200",
           dropActive &&
             !dropDisabled &&
-            "bg-indigo-50/40 ring-2 ring-indigo-400/80 ring-offset-2 ring-offset-slate-50",
+            "bg-teal-50/40 ring-2 ring-teal-400/80 ring-offset-2 ring-offset-slate-50",
         )}
       >
         <InvoiceUploadHeader

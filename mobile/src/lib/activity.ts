@@ -1,5 +1,5 @@
 import type { Href } from "expo-router";
-import type { InvoiceRow, ProjectRow } from "../types/database";
+import type { InvoiceRow, ProjectRow } from "../../../shared/types/database";
 
 export type ActivityEvent = {
   id: string;

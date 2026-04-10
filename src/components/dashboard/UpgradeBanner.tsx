@@ -20,7 +20,7 @@ export function UpgradeBanner({
   if (invoiceCount < FREE_INVOICE_LIMIT) return null;
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-drop-md">
       <div className="flex items-center space-x-4">
         <div className="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
           <AlertCircle className="w-5 h-5 text-slate-900" />

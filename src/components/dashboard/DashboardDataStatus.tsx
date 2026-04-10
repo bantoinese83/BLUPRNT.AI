@@ -21,7 +21,7 @@ export function DashboardDataStatus({
           className="pointer-events-none fixed left-0 right-0 top-0 z-[60] h-0.5 overflow-hidden bg-slate-200/90"
           aria-hidden
         >
-          <div className="h-full w-2/5 min-w-[120px] animate-pulse bg-indigo-500" />
+          <div className="h-full w-2/5 min-w-[120px] animate-pulse bg-teal-500" />
         </div>
       )}
       {loadError && (

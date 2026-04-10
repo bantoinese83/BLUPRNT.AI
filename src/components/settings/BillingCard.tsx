@@ -1,7 +1,7 @@
 import { CreditCard, Crown, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PRICING } from "@/lib/pricing";
+import { PRICING } from "@shared/constants/pricing";
 
 interface BillingCardProps {
   isArchitect: boolean;

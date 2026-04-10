@@ -12,13 +12,13 @@ export function PublicViewCrossSell() {
       className="relative mt-12 mb-8 overflow-hidden rounded-3xl bg-slate-900 p-8 text-center text-white shadow-2xl"
     >
       {/* Decorative background blast */}
-      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
+      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal-500/20 blur-3xl" />
       <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-slate-500/10 blur-3xl" />
 
       <div className="relative space-y-6">
         <div className="flex justify-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-            <Sparkles className="h-6 w-6 text-indigo-300" />
+            <Sparkles className="h-6 w-6 text-teal-300" />
           </div>
         </div>
 

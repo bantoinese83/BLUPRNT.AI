@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
-import type { ScopeRow } from "@/types/database";
+import type { ScopeRow } from "@shared/types/database";
 
 interface UseScopeManagementProps {
   projectId: string;

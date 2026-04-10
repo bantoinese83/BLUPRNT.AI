@@ -63,6 +63,7 @@ export function AwarenessProvider({
         description:
           "Your project is in the planning stage. Adding scope items will help you track costs more accurately.",
         actionLabel: "Review Scope",
+        actionKind: "scope",
       });
     }
 
@@ -74,6 +75,7 @@ export function AwarenessProvider({
         description:
           "You're in the construction phase but haven't uploaded any invoices yet. Start tracking to stay on budget.",
         actionLabel: "Upload Invoice",
+        actionKind: "execute",
       });
     }
 
@@ -87,6 +89,7 @@ export function AwarenessProvider({
         description:
           "Your investment is substantial enough to generate a compelling Seller Packet. Export it to maximize your property value.",
         actionLabel: "Export Packet",
+        actionKind: "record",
       });
     }
 
@@ -112,8 +115,9 @@ export function AwarenessProvider({
       setShowUpgrade,
       upgradeReason,
       setUpgradeReason,
+      activeProjectId: project?.id ?? null,
     }),
-    [awarenessData, isInsightsOpen, showUpgrade, upgradeReason],
+    [awarenessData, isInsightsOpen, showUpgrade, upgradeReason, project?.id],
   );
 
   return (

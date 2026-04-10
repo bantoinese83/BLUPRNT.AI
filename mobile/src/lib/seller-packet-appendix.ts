@@ -1,5 +1,5 @@
 import { invokeFunction } from "./supabase";
-import type { InvoiceRow } from "../types/database";
+import type { InvoiceRow } from "../../../shared/types/database";
 
 const MAX_BYTES_PER_FILE = 2_500_000;
 

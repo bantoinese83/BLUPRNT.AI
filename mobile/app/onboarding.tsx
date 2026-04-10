@@ -31,7 +31,7 @@ import {
   Layers,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
-import { money } from "../src/lib/formatters";
+import { money } from "../../shared/lib/formatters";
 import { compressImageForAnalysis } from "../src/lib/image-utils";
 import { GlassCard } from "../src/components/ui/GlassCard";
 import { Button } from "../src/components/ui/Button";
@@ -835,7 +835,7 @@ export default function OnboardingScreen() {
 
               <View style={styles.breakdown}>
                 <View style={styles.breakdownItem}>
-                  <Check size={14} color="#818cf8" />
+                  <Check size={14} color="#2dd4bf" />
                   <Text style={styles.breakdownText}>National Labor Data</Text>
                 </View>
                 {estimate?.scope && estimate.scope.length > 0 ? (
@@ -889,7 +889,7 @@ export default function OnboardingScreen() {
                   </>
                 ) : (
                   <View style={styles.breakdownItem}>
-                    <Check size={14} color="#818cf8" />
+                    <Check size={14} color="#2dd4bf" />
                     <Text style={styles.breakdownText}>Material Indices</Text>
                   </View>
                 )}
@@ -1241,7 +1241,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   optionButtonActive: {
-    backgroundColor: "rgba(79, 70, 229, 0.05)",
+    backgroundColor: "rgba(13, 148, 136, 0.05)",
     borderColor: Theme.colors.brand.primary,
   },
   optionText: {
@@ -1451,7 +1451,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(99, 102, 241, 0.35)",
   },
   pulseCircleInner: {
-    backgroundColor: "rgba(79, 70, 229, 0.45)",
+    backgroundColor: "rgba(13, 148, 136, 0.45)",
   },
   analysisIconDisk: {
     width: 88,
@@ -1520,13 +1520,13 @@ const styles = StyleSheet.create({
   confidenceText: {
     fontSize: 12,
     fontFamily: Theme.typography.family.bold,
-    color: "#818cf8",
+    color: "#2dd4bf",
     textTransform: "uppercase",
   },
   estimateLabel: {
     fontSize: 12,
     fontFamily: Theme.typography.family.bold,
-    color: "#6366f1",
+    color: "#14b8a6",
     textTransform: "uppercase",
     letterSpacing: 2,
     marginBottom: 8,

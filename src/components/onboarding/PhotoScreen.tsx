@@ -66,11 +66,11 @@ export function PhotoScreen() {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-indigo-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
+            className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-teal-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
-              <ImagePlus className="w-8 h-8 text-indigo-600" />
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+              <ImagePlus className="w-8 h-8 text-teal-600" />
             </div>
             <span className="text-slate-900 font-bold">Gallery</span>
             <span className="text-slate-400 text-xs mt-1 font-medium">
@@ -90,11 +90,11 @@ export function PhotoScreen() {
                 onFiles((e.target as HTMLInputElement).files);
               camInput.click();
             }}
-            className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-purple-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
+            className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-teal-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
-              <Camera className="w-8 h-8 text-purple-600" />
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+              <Camera className="w-8 h-8 text-teal-600" />
             </div>
             <span className="text-slate-900 font-bold">Camera</span>
             <span className="text-slate-400 text-xs mt-1 font-medium">
@@ -115,15 +115,15 @@ export function PhotoScreen() {
             </p>
             <ul className="text-[13px] text-slate-500 space-y-1.5 font-medium leading-relaxed">
               <li className="flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0" />
+                <span className="w-1 h-1 rounded-full bg-teal-500 shrink-0" />
                 Capture floor-to-ceiling in each shot
               </li>
               <li className="flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0" />
+                <span className="w-1 h-1 rounded-full bg-teal-500 shrink-0" />
                 Ensure the space is well-lit
               </li>
               <li className="flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0" />
+                <span className="w-1 h-1 rounded-full bg-teal-500 shrink-0" />
                 Include multiple angles of the room
               </li>
             </ul>
@@ -135,7 +135,7 @@ export function PhotoScreen() {
             htmlFor="scope-text"
             className="flex items-center gap-2 text-sm font-black text-slate-900 uppercase tracking-wider ml-1"
           >
-            <FileText className="w-4 h-4 text-indigo-500" />
+            <FileText className="w-4 h-4 text-teal-500" />
             Add project details (optional)
           </label>
           <Textarea
@@ -184,7 +184,7 @@ export function PhotoScreen() {
           <Button
             size="lg"
             variant="primary"
-            className="w-full h-16 text-lg font-bold shadow-xl shadow-indigo-500/10 group"
+            className="w-full h-16 text-lg font-bold shadow-xl shadow-teal-500/10 group"
             onClick={() => {
               navigate("/onboarding/loading");
             }}
@@ -201,7 +201,7 @@ export function PhotoScreen() {
             <Button
               size="lg"
               variant="ghost"
-              className="w-full text-slate-500 hover:text-indigo-600 font-medium h-12"
+              className="w-full text-slate-500 hover:text-teal-600 font-medium h-12"
               onClick={() => {
                 setPhotos([]);
               }}

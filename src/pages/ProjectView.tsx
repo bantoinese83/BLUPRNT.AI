@@ -31,7 +31,7 @@ const itemVariants = {
 } as const;
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
-import { ProjectRow, ScopeRow } from "@/types/database";
+import { ProjectRow, ScopeRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
 import { PublicViewCrossSell } from "@/components/PublicViewCrossSell";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
@@ -181,7 +181,7 @@ export default function ProjectView() {
             <div className="mt-2">
               <a
                 href="mailto:connect@monarch-labs.com"
-                className="text-xs font-semibold text-slate-400 transition-colors hover:text-indigo-600"
+                className="text-xs font-semibold text-slate-400 transition-colors hover:text-teal-600"
               >
                 Still have issues? Contact us
               </a>
@@ -261,7 +261,7 @@ export default function ProjectView() {
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
-                        className={`w-3 h-3 rounded-full ${i < Math.floor(conf) ? "bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]" : "bg-slate-700"}`}
+                        className={`w-3 h-3 rounded-full ${i < Math.floor(conf) ? "bg-teal-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]" : "bg-slate-700"}`}
                       />
                     ))}
                   </div>

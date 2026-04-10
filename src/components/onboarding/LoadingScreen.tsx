@@ -60,7 +60,7 @@ export function LoadingScreen() {
             size="xl"
             showLogo={true}
           />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-500/5 blur-[80px] rounded-full -z-10 animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-teal-500/5 blur-[80px] rounded-full -z-10 animate-pulse" />
         </div>
 
         <div className="h-12 flex flex-col items-center justify-center">
@@ -80,7 +80,7 @@ export function LoadingScreen() {
 
         <div className="mt-12 w-full max-w-[240px] h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
           <motion.div
-            className="absolute inset-y-0 left-0 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"
+            className="absolute inset-y-0 left-0 bg-teal-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"
             initial={{ width: "2%" }}
             animate={{ width: estimateError ? "100%" : "92%" }}
             transition={{

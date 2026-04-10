@@ -25,7 +25,7 @@ import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { supabase } from "../lib/supabase";
 import { openOriginalDocumentForInvoice } from "../lib/open-original-document";
-import { money } from "../lib/formatters";
+import { money } from "../../../shared/lib/formatters";
 import type { InvoiceRow } from "../types/database";
 
 interface Props {
@@ -117,7 +117,7 @@ export function InvoiceReviewSheet({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.docIconContainer}>
-              <Icon size={28} color="#818cf8" />
+              <Icon size={28} color="#2dd4bf" />
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
               <X size={20} color="#64748b" />
@@ -165,7 +165,7 @@ export function InvoiceReviewSheet({
                 void openOriginalDocumentForInvoice(invoice.id);
               }}
             >
-              <ExternalLink size={18} color="#818cf8" />
+              <ExternalLink size={18} color="#2dd4bf" />
               <Text style={styles.viewOriginalBtnText}>View original</Text>
             </TouchableOpacity>
           ) : null}
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 36,
     fontFamily: "Outfit_800ExtraBold",
-    color: "#818cf8",
+    color: "#2dd4bf",
     letterSpacing: -1,
     marginBottom: 28,
   },

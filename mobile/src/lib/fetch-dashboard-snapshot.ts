@@ -8,7 +8,7 @@ import type {
   InvoiceRow,
   UserSubscriptionRow,
   ProjectPassRow,
-} from "../types/database";
+} from "../../../shared/types/database";
 
 const emptySnapshot = (): DashboardSnapshot => ({
   configured: true,

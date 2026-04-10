@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { captureEdgeInvokeFailure } from "@/lib/sentry";
-import type { Database } from "@/types/supabase.gen";
+import type { Database } from "@shared/types/supabase.gen";
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;

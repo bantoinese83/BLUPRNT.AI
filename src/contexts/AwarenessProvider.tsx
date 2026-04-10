@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
+import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
 import { AwarenessContext, SmartInsight } from "./AwarenessContext";
 
 export function AwarenessProvider({
@@ -59,6 +59,7 @@ export function AwarenessProvider({
         description:
           "Your project is in the planning stage. Adding scope items will help you track costs more accurately.",
         actionLabel: "Add Items",
+        actionKind: "scope",
       });
     }
 
@@ -70,6 +71,7 @@ export function AwarenessProvider({
         description:
           "You're in the construction phase but haven't uploaded any invoices yet. Start tracking to stay on budget.",
         actionLabel: "Upload Invoice",
+        actionKind: "execute",
       });
     }
 
@@ -92,6 +94,7 @@ export function AwarenessProvider({
         ...awarenessData,
         isSidebarOpen,
         setIsSidebarOpen,
+        activeProjectId: project?.id ?? null,
       }}
     >
       {children}

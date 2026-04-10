@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { GlassCard } from "./ui/GlassCard";
 import { Theme } from "../constants/Theme";
-import { money } from "../lib/formatters";
+import { money } from "../../../shared/lib/formatters";
 import {
   capitalImprovementTotal,
   planVsActualNarrative,
@@ -29,9 +29,9 @@ const toneForKind: Record<
     iconBg: "rgba(148, 163, 184, 0.2)",
   },
   no_documents: {
-    border: "rgba(99, 102, 241, 0.45)",
-    headline: "#a5b4fc",
-    iconBg: "rgba(99, 102, 241, 0.25)",
+    border: "rgba(13, 148, 136, 0.45)",
+    headline: "#5eead4",
+    iconBg: "rgba(13, 148, 136, 0.22)",
   },
   within: {
     border: "rgba(52, 211, 153, 0.45)",
@@ -66,7 +66,11 @@ export function PlanVsActualCard({
 
   return (
     <GlassCard
-      style={[styles.card, { borderColor: tone.border, borderWidth: 1.5 }]}
+      style={[
+        Theme.shadows.cardElevated,
+        styles.card,
+        { borderColor: tone.border, borderWidth: 1.5 },
+      ]}
     >
       <View style={styles.row}>
         <View style={[styles.iconWrap, { backgroundColor: tone.iconBg }]}>

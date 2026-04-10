@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "Y7UF88A4UM.ai.bluprnt.mobile",
+        "paths": ["/onboarding", "/onboarding/*", "/reset-password", "/reset-password/*"]
+      }
+    ]
+  }
+}

@@ -24,7 +24,7 @@ import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { GlassCard } from "../../src/components/ui/GlassCard";
 import { Button } from "../../src/components/ui/Button";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
-import { money } from "../../src/lib/formatters";
+import { money } from "../../../shared/lib/formatters";
 import { ProjectSwitcher } from "../../src/components/ProjectSwitcher";
 import { generateSellerPacketPDF } from "../../src/lib/pdf-export";
 import * as ImagePicker from "expo-image-picker";
@@ -32,7 +32,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { uploadDocumentWithType } from "../../src/lib/upload-document";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
 import { InvoiceReviewSheet } from "../../src/components/InvoiceReviewSheet";
-import type { InvoiceRow } from "../../src/types/database";
+import type { InvoiceRow } from "../../../shared/types/database";
 
 import { EmptyState } from "../../src/components/ui/EmptyState";
 import { useAwareness } from "../../src/contexts/AwarenessContext";

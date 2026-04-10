@@ -58,7 +58,7 @@ export function HelpWidget() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className={`fixed bottom-20 ${location.pathname.startsWith('/dashboard') ? 'left-6 sm:left-8' : 'right-6 sm:right-8'} z-40 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden`}
+            className={`fixed bottom-20 ${location.pathname.startsWith("/dashboard") ? "left-6 sm:left-8" : "right-6 sm:right-8"} z-40 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden`}
           >
             <div className="bg-slate-900 p-4 text-white relative">
               <div className="flex items-center gap-2 mb-1">
@@ -109,33 +109,33 @@ export function HelpWidget() {
                   setIsOpen(false);
                   navigate("/#faq");
                 }}
-                className="flex items-center justify-between w-full p-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group text-left"
+                className="flex items-center justify-between w-full p-3 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-100 transition-colors group text-left"
               >
                 <div>
-                  <h5 className="font-semibold text-indigo-900 text-sm">
+                  <h5 className="font-semibold text-teal-900 text-sm">
                     Visit FAQ
                   </h5>
-                  <p className="text-xs text-indigo-600/70 mt-0.5">
+                  <p className="text-xs text-teal-600/70 mt-0.5">
                     Common questions answered
                   </p>
                 </div>
-                <HelpCircle className="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
+                <HelpCircle className="w-4 h-4 text-teal-400 group-hover:text-teal-600 transition-colors" />
               </button>
 
               <a
                 href="mailto:connect@monarch-labs.com?subject=Need%20Help%20with%20BLUPRNT"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-100 transition-colors group"
                 onClick={() => setIsOpen(false)}
               >
                 <div>
-                  <h5 className="font-semibold text-slate-900 group-hover:text-indigo-900 text-sm">
+                  <h5 className="font-semibold text-slate-900 group-hover:text-teal-900 text-sm">
                     Contact Support
                   </h5>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Email our friendly team
                   </p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors group-hover:translate-x-0.5" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 transition-colors group-hover:translate-x-0.5" />
               </a>
 
               <a
@@ -165,12 +165,12 @@ export function HelpWidget() {
           setIsOpen(!isOpen);
           setShowPulse(false);
         }}
-        className={`fixed bottom-6 ${location.pathname.startsWith('/dashboard') ? 'left-6 sm:left-8' : 'right-6 sm:right-8'} z-40 flex items-center justify-center w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 hover:bg-indigo-600 transition-colors duration-300`}
+        className={`fixed bottom-6 ${location.pathname.startsWith("/dashboard") ? "left-6 sm:left-8" : "right-6 sm:right-8"} z-40 flex items-center justify-center w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 hover:bg-teal-600 transition-colors duration-300`}
         aria-label="Help and Support"
       >
         <MessageCircle className="w-6 h-6" />
         {showPulse && !isOpen && (
-          <div className="absolute -top-1 -right-1 bg-indigo-500 text-white rounded-full p-0.5 shadow-sm border-2 border-slate-900 ring-1 ring-indigo-400/20">
+          <div className="absolute -top-1 -right-1 bg-teal-500 text-white rounded-full p-0.5 shadow-sm border-2 border-slate-900 ring-1 ring-teal-400/20">
             <HelpCircle className="w-2.5 h-2.5" />
           </div>
         )}

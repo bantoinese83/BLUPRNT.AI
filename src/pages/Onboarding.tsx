@@ -84,7 +84,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
     <div className="w-full flex flex-col items-center space-y-4 mb-8 sm:mb-12">
       <div className="flex w-full justify-between items-end px-1 gap-3">
         <div className="space-y-1 min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600/60 leading-none">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600/60 leading-none">
             {ONBOARDING_PHASES[phaseIndex].label} — {phaseIndex + 1} of{" "}
             {phasesTotal}
           </p>
@@ -93,7 +93,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
-          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
             {timeLabel}
           </span>
@@ -108,7 +108,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
               className="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden"
             >
               <motion.div
-                className="h-full bg-indigo-600 origin-left"
+                className="h-full bg-teal-600 origin-left"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: i <= phaseIndex ? 1 : 0 }}
                 transition={{ type: "spring", stiffness: 50, damping: 20 }}
@@ -141,9 +141,9 @@ function StepProgress({ currentPath }: { currentPath: string }) {
                     "h-3 w-3 rounded-full border-2 transition-all duration-300 bg-white",
                     idx > phaseIndex && "border-slate-200",
                     idx <= phaseIndex && "border-transparent",
-                    isCompleted && "bg-indigo-600 border-indigo-600",
+                    isCompleted && "bg-teal-600 border-teal-600",
                     isActive &&
-                      "bg-indigo-600 border-indigo-100 ring-2 ring-indigo-600/20 scale-125",
+                      "bg-teal-600 border-teal-100 ring-2 ring-teal-600/20 scale-125",
                   )}
                 />
               </button>

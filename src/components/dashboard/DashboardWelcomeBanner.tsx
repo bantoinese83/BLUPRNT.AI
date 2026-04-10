@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Upload, FileDown, Share2, ListTree } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   clearDashboardWelcomeFlag,
   readDashboardWelcomeFlag,
@@ -23,10 +22,10 @@ export function DashboardWelcomeBanner() {
     <div
       role="region"
       aria-label="Getting started"
-      className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50 to-slate-100/80 p-5 sm:p-6 shadow-sm"
+      className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50 to-slate-100/80 p-5 sm:p-6 shadow-drop-md transition-shadow duration-300 hover:shadow-drop-lg"
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-3 min-w-0">
+        <div className="space-y-3 min-w-0 flex-1">
           <h2 className="text-lg font-bold text-slate-900">
             <Highlighter
               action="highlight"
@@ -43,46 +42,43 @@ export function DashboardWelcomeBanner() {
             Here&apos;s what to do next—pick one to get the most from
             BLUPRNT.AI.
           </p>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Button
+          <div className="flex w-full max-w-full flex-row items-center justify-between gap-2 pt-2 sm:justify-evenly sm:gap-3">
+            <button
               type="button"
-              size="sm"
-              variant="primary"
-              className="gap-2 rounded-xl"
+              title="Upload an invoice"
+              aria-label="Upload an invoice"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-600 bg-slate-900 text-white shadow-sm transition-colors hover:bg-slate-800 hover:border-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/execute");
               }}
             >
-              <Upload className="w-4 h-4 shrink-0" aria-hidden />
-              Upload an invoice
-            </Button>
-            <Button
+              <Upload className="w-5 h-5" strokeWidth={2} aria-hidden />
+            </button>
+            <button
               type="button"
-              size="sm"
-              variant="outline"
-              className="gap-2 rounded-xl border-slate-200 bg-white"
+              title="See line-by-line scope"
+              aria-label="See line-by-line scope"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-colors hover:border-teal-400 hover:bg-teal-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/scope");
               }}
             >
-              <ListTree className="w-4 h-4 shrink-0" aria-hidden />
-              See line-by-line scope
-            </Button>
-            <Button
+              <ListTree className="w-5 h-5" strokeWidth={2} aria-hidden />
+            </button>
+            <button
               type="button"
-              size="sm"
-              variant="outline"
-              className="gap-2 rounded-xl border-slate-200 bg-white"
+              title="Export seller packet"
+              aria-label="Export seller packet"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-colors hover:border-teal-400 hover:bg-teal-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/record");
               }}
             >
-              <FileDown className="w-4 h-4 shrink-0" aria-hidden />
-              Export seller packet
-            </Button>
+              <FileDown className="w-5 h-5" strokeWidth={2} aria-hidden />
+            </button>
           </div>
           <p className="text-xs text-slate-500 pt-1">
             You can also use{" "}

@@ -57,7 +57,7 @@ export function TextScopeScreen() {
           </h2>
           <div className="rounded-2xl bg-slate-50 p-3 sm:p-4 border border-slate-100 space-y-1.5 sm:space-y-2 mt-3 sm:mt-4">
             <p className="text-[10px] font-black text-slate-900 leading-tight uppercase tracking-wider flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
               Why details matter
             </p>
             <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-medium">
@@ -119,7 +119,7 @@ export function TextScopeScreen() {
           <Button
             size="lg"
             variant="primary"
-            className="flex-[2] h-14 font-bold shadow-lg shadow-indigo-500/10"
+            className="flex-[2] h-14 font-bold shadow-lg shadow-teal-500/10"
             onClick={() => navigate("/onboarding/loading")}
             type="button"
           >

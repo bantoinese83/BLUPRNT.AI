@@ -39,7 +39,7 @@ export function GradientBackground({ children, style }: Props) {
         style={styles.absolute}
       >
         <LinearGradient
-          colors={["rgba(79, 70, 229, 0.08)", "transparent"]}
+          colors={["rgba(13, 148, 136, 0.08)", "transparent"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.6, y: 0.6 }}
           style={styles.glow}
@@ -59,7 +59,7 @@ export function GradientBackground({ children, style }: Props) {
         style={styles.absolute}
       >
         <LinearGradient
-          colors={["transparent", "rgba(79, 70, 229, 0.05)"]}
+          colors={["transparent", "rgba(13, 148, 136, 0.05)"]}
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 1 }}
           style={styles.glow}

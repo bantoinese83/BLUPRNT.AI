@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
       }
       return (
         <div
-          className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 page-fade-in"
+          className="mesh-bg min-h-screen flex flex-col items-center justify-center p-6 page-fade-in"
           role="alert"
         >
           <div className="max-w-md w-full text-center space-y-6">
@@ -87,7 +87,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <a
               href="mailto:connect@monarch-labs.com?subject=BLUPRNT%20Error%20Report"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-teal-600 transition-colors"
             >
               <Mail className="w-3.5 h-3.5" />
               Contact support

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ShareModal } from "./ShareModal";
 import { Input } from "@/components/ui/input";
 
-import type { ProjectRow } from "@/types/database";
+import type { ProjectRow } from "@shared/types/database";
 
 interface ProjectHeaderProps {
   project: ProjectRow;

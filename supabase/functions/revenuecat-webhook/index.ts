@@ -1,127 +1,70 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { getServiceClient } from "../_shared/auth.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const webhookSecret = Deno.env.get("REVENUECAT_WEBHOOK_SECRET") || "";
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
- * RevenueCat server webhook. Secured with Bearer REVENUECAT_WEBHOOK_AUTH_TOKEN.
- * Idempotent per event.id via revenuecat_webhook_events.
+ * RevenueCat Webhook Handler
+ * Syncs App Store/Play Store entitlements to the internal `user_subscriptions` table.
  */
-Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
+serve(async (req) => {
   try {
-    const authHeader = req.headers.get("Authorization");
-    const secretToken = Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN");
-
-    if (!secretToken || authHeader !== `Bearer ${secretToken}`) {
-      console.warn("Unauthorized webhook attempt.");
-      return new Response("Unauthorized", { status: 401 });
+    // 1. Authentication (Optional Header check)
+    if (webhookSecret) {
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader !== `Bearer ${webhookSecret}`) {
+        return new Response("Unauthorized", { status: 401 });
+      }
     }
 
-    const payload = (await req.json()) as { event?: Record<string, unknown> };
-    const event = payload.event;
-    if (!event || typeof event !== "object") {
-      return new Response(JSON.stringify({ error: "Missing event" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    const { event } = await req.json();
+    const { type, app_user_id, product_id, expiration_at_ms, period_type } =
+      event;
+
+    if (!app_user_id) {
+      return new Response("No app_user_id provided", { status: 400 });
     }
 
-    const userId = event.app_user_id as string | undefined;
-    const type = event.type as string | undefined;
-    const expirationAt = event.expiration_at_ms
-      ? new Date(Number(event.expiration_at_ms)).toISOString()
+    console.log(`[RevenueCat] Event: ${type} for User: ${app_user_id}`);
+
+    // 2. Map RevenueCat status to internal DB status
+    let status = "active";
+    if (type === "EXPIRATION" || type === "CANCELLATION") {
+      status = "canceled";
+    } else if (type === "BILLING_ISSUE") {
+      status = "past_due";
+    }
+
+    const periodEnd = expiration_at_ms
+      ? new Date(expiration_at_ms).toISOString()
       : null;
 
-    const entitlementIds = event.entitlement_ids as string[] | undefined;
-    const hasPro = entitlementIds?.includes("Bluprntai Pro") ?? false;
-
-    const eventId =
-      typeof event.id === "string" && event.id.length > 0 ? event.id : null;
-
-    const admin = getServiceClient();
-
-    if (eventId) {
-      const { data: existing } = await admin
-        .from("revenuecat_webhook_events")
-        .select("id")
-        .eq("id", eventId)
-        .maybeSingle();
-      if (existing) {
-        return new Response(
-          JSON.stringify({ success: true, duplicate: true }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      }
-      const { error: insErr } = await admin
-        .from("revenuecat_webhook_events")
-        .insert({ id: eventId });
-      if (insErr) {
-        const { data: race } = await admin
-          .from("revenuecat_webhook_events")
-          .select("id")
-          .eq("id", eventId)
-          .maybeSingle();
-        if (race) {
-          return new Response(
-            JSON.stringify({ success: true, duplicate: true }),
-            {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            },
-          );
-        }
-        throw insErr;
-      }
-    }
-
-    console.log(`Processing RevenueCat event ${type} for user ${userId}`);
-
-    if (userId) {
-      if (hasPro) {
-        const { error } = await admin.from("user_subscriptions").upsert(
-          {
-            user_id: userId,
-            status: type === "CANCELLATION" ? "canceled" : "active",
-            current_period_end: expirationAt,
-            plan: "architect",
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id" },
-        );
-
-        if (error) throw error;
-      } else if (type === "EXPIRATION" || type === "CANCELLATION") {
-        const { error } = await admin
-          .from("user_subscriptions")
-          .update({
-            status: "canceled",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", userId);
-
-        if (error) throw error;
-      }
-    }
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
-  } catch (error) {
-    console.error("Webhook processing error:", error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
+    // 3. Sync to `user_subscriptions`
+    // We use a service role client to bypass RLS for administrative sync.
+    const { error } = await supabase.from("user_subscriptions").upsert(
       {
-        headers: { "Content-Type": "application/json" },
-        status: 400,
+        user_id: app_user_id,
+        status: status,
+        current_period_end: periodEnd,
+        // product_id can be mapped to our 'architect' plan if needed
+        plan: "architect",
+        updated_at: new Date().toISOString(),
       },
+      { onConflict: "user_id" },
     );
+
+    if (error) {
+      console.error("[RevenueCat] Sync Error:", error);
+      return new Response("Internal Error", { status: 500 });
+    }
+
+    return new Response("OK", { status: 200 });
+  } catch (err) {
+    console.error("[RevenueCat] Unexpected error:", err);
+    return new Response("Bad Request", { status: 400 });
   }
 });

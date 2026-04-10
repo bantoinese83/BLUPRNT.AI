@@ -7,7 +7,7 @@ import type {
   InvoiceRow,
   UserSubscriptionRow,
   ProjectPassRow,
-} from "@/types/database";
+} from "@shared/types/database";
 
 export type DashboardSnapshot = {
   configured: boolean;

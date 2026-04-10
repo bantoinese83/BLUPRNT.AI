@@ -1,5 +1,5 @@
 import { invokeFunction } from "@/lib/supabase";
-import type { InvoiceRow } from "@/types/database";
+import type { InvoiceRow } from "@shared/types/database";
 
 export type SellerPacketAppendixItem =
   | {

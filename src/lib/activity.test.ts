@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateActivityEvents } from "./activity";
-import type { ProjectRow, InvoiceRow } from "@/types/database";
+import type { ProjectRow, InvoiceRow } from "@shared/types/database";
 
 describe("generateActivityEvents", () => {
   const mockProject: Partial<ProjectRow> = {

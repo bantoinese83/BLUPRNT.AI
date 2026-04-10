@@ -51,6 +51,7 @@ type PropertiesRow = {
   country: string;
   approximate_location: string | null;
   created_at: string;
+  updated_at: string | null;
 };
 
 type ScopeItemsRow = {
@@ -87,6 +88,7 @@ type ScopeItemsRow = {
       estimated_cost?: number;
     }>;
   } | null;
+  updated_at: string | null;
 };
 
 type InvoicesRow = {
@@ -98,6 +100,7 @@ type InvoicesRow = {
   payment_status: string;
   document_type: string | null;
   document_id: string | null;
+  updated_at: string | null;
 };
 
 type InvoiceLineItemsRow = {
@@ -110,6 +113,7 @@ type InvoiceLineItemsRow = {
   category: string | null;
   scope_item_id: string | null;
   created_at: string;
+  updated_at: string | null;
 };
 
 type UserSubscriptionsRow = {
@@ -133,6 +137,7 @@ type ProjectPassesRow = {
   purchased_at: string;
   expires_at: string;
   created_at: string | null;
+  updated_at: string | null;
 };
 
 type UserPreferencesRow = {
@@ -155,6 +160,7 @@ type SellerPacketsRow = {
   created_at: string;
   generated_at: string | null;
   storage_path: string | null;
+  updated_at: string | null;
 };
 
 type ProjectViewTokensRow = {

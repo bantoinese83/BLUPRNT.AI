@@ -1,6 +1,6 @@
 /**
  * BLUPRNT design tokens — keep in sync with web `src/index.css` `@theme` block
- * (surface, accent indigo, slate text, primary CTA slate-900).
+ * (surface, accent teal, slate text, primary CTA slate-900).
  *
  * Layout principles (spacing / type / color):
  * — Avoid pure #000 for text; use slate/gray-900-scale inks for comfortable contrast.
@@ -18,9 +18,9 @@ export const Theme = {
 
     // Accent (~10%) — matches web `--color-accent` / EmptyState highlights
     brand: {
-      light: "#6366f1", // Indigo 500
-      primary: "#4f46e5", // Indigo 600
-      deep: "#3730a3", // Indigo 800
+      light: "#14b8a6", // Teal 500
+      primary: "#0d9488", // Teal 600
+      deep: "#115e59", // Teal 800
     },
 
     // Primary CTA gradient — matches web `.liquid-metal-button` (slate-900 base)
@@ -121,11 +121,26 @@ export const Theme = {
       elevation: 8,
     },
     brand: {
-      shadowColor: "#4f46e5",
+      shadowColor: "#0d9488",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 12,
       elevation: 6,
+    },
+    /** Neutral card drop — matches web `--shadow-drop-md` */
+    card: {
+      shadowColor: "#0f172a",
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.1,
+      shadowRadius: 18,
+      elevation: 5,
+    },
+    cardElevated: {
+      shadowColor: "#0f172a",
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.12,
+      shadowRadius: 28,
+      elevation: 8,
     },
   },
 };

@@ -7,7 +7,7 @@ import {
   fetchDashboardSnapshot,
   type DashboardSnapshot,
 } from "@/lib/fetch-dashboard-snapshot";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
+import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
 
 function applyPatch(
   prev: DashboardSnapshot | undefined,

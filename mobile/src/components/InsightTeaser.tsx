@@ -12,82 +12,90 @@ interface Props {
 
 export function InsightTeaser({ projectName, onUpgradePress }: Props) {
   return (
-    <GlassCard style={styles.container} intensity={25}>
-      <View style={styles.headerRow}>
-        <View style={styles.iconContainer}>
-          <Lock size={18} color={Theme.colors.brand.primary} />
+    <GlassCard style={styles.cardOuter} intensity={25}>
+      <View style={styles.content}>
+        <View style={styles.headerRow}>
+          <View style={styles.iconContainer}>
+            <Lock size={18} color={Theme.colors.brand.primary} />
+          </View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>Architect Insight</Text>
+            <Sparkles
+              size={12}
+              color={Theme.colors.brand.primary}
+              style={styles.badgeSparkle}
+            />
+          </View>
         </View>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>Architect Insight</Text>
-          <Sparkles
-            size={12}
-            color={Theme.colors.brand.primary}
-            style={{ marginLeft: 4 }}
-          />
-        </View>
-      </View>
 
-      <Text style={styles.title}>
-        Unlock strategic savings for {projectName}
-      </Text>
-
-      <View style={styles.blurContainer}>
-        <Text style={styles.blurText}>
-          Kitchen remodels in this area usually save 12% on materials by
-          choosing Grade-B quartz over entry-level granite. Use our regional
-          breakdown to...
+        <Text style={styles.title}>
+          Unlock strategic savings for {projectName}
         </Text>
-      </View>
 
-      <Button
-        title="See AI Insights"
-        onPress={onUpgradePress}
-        variant="primary"
-        icon={<ArrowRight size={18} color="white" />}
-        style={{ marginTop: 16 }}
-      />
+        <View style={styles.blurContainer}>
+          <Text style={styles.blurText}>
+            Kitchen remodels in this area usually save 12% on materials by
+            choosing Grade-B quartz over entry-level granite. Use our regional
+            breakdown to...
+          </Text>
+        </View>
+
+        <Button
+          title="See AI Insights"
+          onPress={onUpgradePress}
+          variant="primary"
+          icon={<ArrowRight size={18} color="white" />}
+          style={styles.cta}
+        />
+      </View>
     </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
+  cardOuter: {
+    marginBottom: Theme.spacing.margin,
+  },
+  content: {
+    padding: Theme.spacing.lg,
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: Theme.spacing.sm,
   },
   iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: "rgba(79, 70, 229, 0.12)",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(13, 148, 136, 0.12)",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    marginRight: Theme.spacing.sm,
   },
   badge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(79, 70, 229, 0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    backgroundColor: "rgba(13, 148, 136, 0.1)",
+    paddingHorizontal: Theme.spacing.xs,
+    paddingVertical: Theme.spacing.xs / 2,
+    borderRadius: Theme.radius.sm,
+  },
+  badgeSparkle: {
+    marginLeft: Theme.spacing.xs / 2,
   },
   badgeText: {
     fontSize: 10,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: Theme.colors.brand.primary,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   title: {
     fontSize: 18,
-    fontFamily: "Outfit_700Bold",
+    fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
-    marginBottom: 8,
+    marginBottom: Theme.spacing.xs,
   },
   blurContainer: {
     position: "relative",
@@ -95,13 +103,16 @@ const styles = StyleSheet.create({
     borderRadius: Theme.radius.md,
     borderWidth: 1,
     borderColor: Theme.colors.border,
-    padding: 12,
+    padding: Theme.spacing.sm,
     overflow: "hidden",
   },
   blurText: {
-    fontSize: 14,
-    fontFamily: "Outfit_400Regular",
+    fontSize: Theme.typography.size.md,
+    fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
-    lineHeight: 20,
+    lineHeight: 22,
+  },
+  cta: {
+    marginTop: Theme.spacing.md,
   },
 });

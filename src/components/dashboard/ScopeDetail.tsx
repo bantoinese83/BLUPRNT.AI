@@ -7,7 +7,7 @@ import { ScopeHeader } from "./ScopeHeader";
 import { ScopeSummary } from "./ScopeSummary";
 import { ScopeItemRow } from "./ScopeItemRow";
 import { AddScopeItemModal } from "./AddScopeItemModal";
-import type { ProjectRow, ScopeRow } from "@/types/database";
+import type { ProjectRow, ScopeRow } from "@shared/types/database";
 
 const PHASE_ORDER = [
   "Site Prep",

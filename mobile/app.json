@@ -16,12 +16,32 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ai.bluprnt.mobile",
+      "associatedDomains": ["applinks:blurprnt.ai"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "ai.bluprnt.mobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "blurprnt.ai",
+              "pathPrefix": "/onboarding"
+            },
+            {
+              "scheme": "https",
+              "host": "blurprnt.ai",
+              "pathPrefix": "/reset-password"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#f9fafb",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

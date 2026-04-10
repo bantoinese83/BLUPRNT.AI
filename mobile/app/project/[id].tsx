@@ -36,7 +36,11 @@ import { ResaleValueImpact } from "../../src/components/ResaleValueImpact";
 import { AddScopeItemModal } from "../../src/components/AddScopeItemModal";
 import { useDashboardData } from "../../src/hooks/useDashboardData";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { InvoiceRow, ProjectRow, ScopeRow } from "../../src/types/database";
+import {
+  InvoiceRow,
+  ProjectRow,
+  ScopeRow,
+} from "../../../shared/types/database";
 import { Theme } from "../../src/constants/Theme";
 
 type BillOfMaterialItem = NonNullable<
@@ -916,7 +920,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   expandedScopeCard: {
-    borderColor: "rgba(79, 70, 229, 0.2)",
+    borderColor: "rgba(13, 148, 136, 0.2)",
     borderWidth: 1,
   },
   generatingContainer: {
@@ -933,7 +937,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(79, 70, 229, 0.1)",
+    backgroundColor: "rgba(13, 148, 136, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,

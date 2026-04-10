@@ -3,7 +3,7 @@ import type {
   ScopeRow,
   InvoiceRow,
   UserSubscriptionRow,
-} from "./database";
+} from "../../../shared/types/database";
 
 /** Shared dashboard cache shape for the mobile data layer (mirrors web). */
 export type DashboardSnapshot = {

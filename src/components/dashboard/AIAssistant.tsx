@@ -81,8 +81,8 @@ export function AIAssistant({ projectId }: { projectId: string }) {
             {/* Header */}
             <div className="p-4 border-b border-slate-100 flex items-center justify-between relative z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
-                  <Bot className="w-6 h-6 text-indigo-600" />
+                <div className="w-10 h-10 rounded-2xl bg-teal-50 flex items-center justify-center border border-teal-100">
+                  <Bot className="w-6 h-6 text-teal-600" />
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-slate-900">
@@ -120,7 +120,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
                   <div
                     className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${
                       m.role === "user"
-                        ? "bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-100"
+                        ? "bg-teal-600 text-white rounded-tr-none shadow-lg shadow-teal-100"
                         : "bg-slate-100 text-slate-700 border border-slate-200 rounded-tl-none"
                     }`}
                   >
@@ -169,13 +169,13 @@ export function AIAssistant({ projectId }: { projectId: string }) {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask about your project..."
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-teal-500 transition-colors"
                 />
                 <Button
                   type="submit"
                   size="icon"
                   disabled={!input.trim() || isTyping}
-                  className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shrink-0 shadow-lg"
+                  className="rounded-xl bg-teal-600 hover:bg-teal-500 text-white shrink-0 shadow-lg"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
@@ -189,7 +189,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-2xl bg-indigo-600 border border-indigo-500 flex items-center justify-center text-white shadow-2xl relative overflow-hidden group"
+        className="w-14 h-14 rounded-2xl bg-teal-600 border border-teal-500 flex items-center justify-center text-white shadow-2xl relative overflow-hidden group"
       >
         <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
         <div className="absolute inset-0 noise-overlay opacity-10" />

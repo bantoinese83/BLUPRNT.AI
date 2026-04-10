@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
   X,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useAwareness } from "@/contexts/AwarenessContext";
+import { useAwareness, type SmartInsight } from "@/contexts/AwarenessContext";
 import { Button } from "@/components/ui/button";
 
 export function SmartSidebar({
@@ -19,7 +20,19 @@ export function SmartSidebar({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const navigate = useNavigate();
   const { insights, projectHealth } = useAwareness();
+
+  const runInsightAction = useCallback(
+    (insight: SmartInsight) => {
+      if (!insight.actionKind) return;
+      onClose();
+      if (insight.actionKind === "scope") navigate("/dashboard/scope");
+      else if (insight.actionKind === "execute") navigate("/dashboard/execute");
+      else if (insight.actionKind === "record") navigate("/dashboard/record");
+    },
+    [navigate, onClose],
+  );
 
   return (
     <AnimatePresence>
@@ -96,7 +109,7 @@ export function SmartSidebar({
                           insight.type === "anomaly"
                             ? "bg-rose-500/10 text-rose-400"
                             : insight.type === "opportunity"
-                              ? "bg-indigo-500/10 text-indigo-400"
+                              ? "bg-teal-500/10 text-teal-400"
                               : "bg-amber-500/10 text-amber-400"
                         }`}
                       >
@@ -109,7 +122,7 @@ export function SmartSidebar({
                         )}
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-600 transition-colors">
                           {insight.title}
                         </h4>
                         <div className="text-xs text-slate-500 leading-relaxed markdown-content">
@@ -117,10 +130,14 @@ export function SmartSidebar({
                             {insight.description}
                           </ReactMarkdown>
                         </div>
-                        {insight.actionLabel && (
-                          <button className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-indigo-400 mt-2 hover:text-indigo-300 transition-colors">
+                        {insight.actionLabel && insight.actionKind && (
+                          <button
+                            type="button"
+                            className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-teal-600 mt-2 hover:text-teal-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 rounded-md"
+                            onClick={() => runInsightAction(insight)}
+                          >
                             {insight.actionLabel}
-                            <ChevronRight className="w-3 h-3" />
+                            <ChevronRight className="w-3 h-3" aria-hidden />
                           </button>
                         )}
                       </div>
@@ -131,8 +148,8 @@ export function SmartSidebar({
             </div>
 
             <div className="mt-auto pt-6 border-t border-slate-100 relative z-10">
-              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
-                <p className="text-[10px] text-indigo-600 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-teal-50 border border-teal-100">
+                <p className="text-[10px] text-teal-600 leading-relaxed">
                   <span className="font-bold font-black">Pro Tip:</span> Keeping
                   your project data up to date ensures these insights remain
                   accurate and actionable.

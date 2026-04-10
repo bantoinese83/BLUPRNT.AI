@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import type { ProjectRow, ScopeRow } from "@/types/database";
+import type { ProjectRow, ScopeRow } from "@shared/types/database";
 
 import { money, getStars as stars } from "@/lib/formatters";
 import { InsightTeaser } from "./InsightTeaser";
@@ -31,7 +31,7 @@ function MaterialDetailList({
   return (
     <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="flex items-center gap-2 mb-2">
-        <Package className="w-4 h-4 text-indigo-500" />
+        <Package className="w-4 h-4 text-teal-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           Detailed Bill of Materials
         </span>
@@ -40,10 +40,10 @@ function MaterialDetailList({
         {materials.map((m, idx) => (
           <div
             key={idx}
-            className="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:border-indigo-100 group"
+            className="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:border-teal-100 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 transition-colors">
-              <Boxes className="w-4 h-4 text-slate-400 group-hover:text-indigo-500" />
+            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-teal-50 transition-colors">
+              <Boxes className="w-4 h-4 text-slate-400 group-hover:text-teal-500" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-bold text-slate-900 leading-tight">
@@ -51,7 +51,7 @@ function MaterialDetailList({
               </p>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                 {m.brand && (
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-teal-600 uppercase tracking-wider">
                     <Tag className="w-3 h-3" />
                     {m.brand}
                   </span>
@@ -114,7 +114,7 @@ export function EstimateSummary({
               Projected Investment
             </p>
             {regionalSignal && (
-              <Badge className="bg-indigo-500/20 text-indigo-300 border-none text-[9px] font-black uppercase tracking-widest py-0.5 px-2">
+              <Badge className="bg-teal-500/20 text-teal-300 border-none text-[9px] font-black uppercase tracking-widest py-0.5 px-2">
                 {regionalSignal}
               </Badge>
             )}
@@ -137,7 +137,7 @@ export function EstimateSummary({
                 onClick={onUpgradeClick}
                 className="group flex items-center gap-3 text-left hover:bg-slate-800/50 p-3 rounded-2xl transition-all"
               >
-                <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                   <Hammer className="w-4 h-4" />
                 </div>
                 <div>
@@ -213,7 +213,7 @@ export function EstimateSummary({
                   className={cn(
                     "group p-5 sm:p-7 flex flex-col hover:bg-slate-50/30 transition-all duration-300 border-l-4 border-l-transparent",
                     isExpanded &&
-                      "bg-slate-50/50 border-l-indigo-500 shadow-inner",
+                      "bg-slate-50/50 border-l-teal-500 shadow-inner",
                   )}
                 >
                   <div className="flex flex-col sm:flex-row items-start justify-between gap-6">

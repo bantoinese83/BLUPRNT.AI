@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Modal,
   View,
@@ -8,12 +8,14 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
+import { router } from "expo-router";
 import { X, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { useAwareness, SmartInsight } from "../contexts/AwarenessContext";
 import { GlassCard } from "./ui/GlassCard";
 import { Theme } from "../constants/Theme";
+import { showAppToast } from "../lib/app-toast";
 
 const HEALTH_COLORS = {
   optimal: {
@@ -36,9 +38,11 @@ const HEALTH_COLORS = {
 function InsightCard({
   insight,
   index,
+  onActionPress,
 }: {
   insight: SmartInsight;
   index: number;
+  onActionPress: (insight: SmartInsight) => void;
 }) {
   const iconColor =
     insight.type === "anomaly"
@@ -88,11 +92,19 @@ function InsightCard({
         <View style={styles.insightBody}>
           <Text style={styles.insightTitle}>{insight.title}</Text>
           <Text style={styles.insightDesc}>{insight.description}</Text>
-          {insight.actionLabel && (
-            <Text style={[styles.insightAction, { color: iconColor }]}>
-              {insight.actionLabel} →
-            </Text>
-          )}
+          {insight.actionLabel && insight.actionKind ? (
+            <TouchableOpacity
+              onPress={() => onActionPress(insight)}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel={insight.actionLabel}
+              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+            >
+              <Text style={[styles.insightAction, { color: iconColor }]}>
+                {insight.actionLabel} →
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </MotiView>
@@ -100,14 +112,45 @@ function InsightCard({
 }
 
 export function InsightsDrawer() {
-  const { insights, projectHealth, isInsightsOpen, setIsInsightsOpen } =
-    useAwareness();
+  const {
+    insights,
+    projectHealth,
+    isInsightsOpen,
+    setIsInsightsOpen,
+    activeProjectId,
+  } = useAwareness();
   const health = HEALTH_COLORS[projectHealth];
 
   const handleClose = () => {
     Haptics.selectionAsync();
     setIsInsightsOpen(false);
   };
+
+  const handleInsightAction = useCallback(
+    (insight: SmartInsight) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setIsInsightsOpen(false);
+      const { actionKind } = insight;
+      if (!actionKind) return;
+
+      if (actionKind === "scope") {
+        if (activeProjectId) router.push(`/project/${activeProjectId}`);
+        else
+          showAppToast("Select a project on Home, then open insights again.");
+        return;
+      }
+      if (actionKind === "execute") {
+        router.push("/(tabs)");
+        showAppToast("Tap + to upload an invoice or document.");
+        return;
+      }
+      if (actionKind === "record") {
+        if (activeProjectId) router.push(`/project/${activeProjectId}`);
+        else showAppToast("Open your project to export or share.");
+      }
+    },
+    [activeProjectId, setIsInsightsOpen],
+  );
 
   return (
     <Modal
@@ -163,7 +206,12 @@ export function InsightsDrawer() {
             </View>
           ) : (
             insights.map((insight, i) => (
-              <InsightCard key={insight.id} insight={insight} index={i} />
+              <InsightCard
+                key={insight.id}
+                insight={insight}
+                index={i}
+                onActionPress={handleInsightAction}
+              />
             ))
           )}
         </ScrollView>

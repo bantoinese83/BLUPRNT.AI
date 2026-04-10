@@ -1,4 +1,4 @@
-import type { Database } from "./supabase.gen";
+import type { Database } from "@shared/types/supabase.gen";
 
 type PublicSchema = Database["public"];
 

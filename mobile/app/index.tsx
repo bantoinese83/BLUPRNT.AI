@@ -182,13 +182,13 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   badgeContainer: {
-    backgroundColor: "rgba(79, 70, 229, 0.08)",
+    backgroundColor: "rgba(13, 148, 136, 0.08)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 99,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(79, 70, 229, 0.1)",
+    borderColor: "rgba(13, 148, 136, 0.1)",
   },
   badgeText: {
     color: Theme.colors.brand.primary,

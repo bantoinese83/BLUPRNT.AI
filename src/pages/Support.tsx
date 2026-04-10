@@ -3,7 +3,7 @@ import { Mail, MessageCircle, HelpCircle, ArrowLeft } from "lucide-react";
 
 export default function Support() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-950 text-white selection:bg-teal-500/30">
       {/* Navigation */}
       <nav className="border-b border-white/5 bg-white/2 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -15,7 +15,7 @@ export default function Support() {
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center shadow-lg shadow-teal-500/20">
               <span className="text-white font-black text-xs">B.</span>
             </div>
             <span className="font-bold tracking-tight">BLUPRNT.AI Support</span>
@@ -38,9 +38,9 @@ export default function Support() {
 
         {/* Quick Help Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-20">
-          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-indigo-500/30 transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Mail className="w-6 h-6 text-indigo-400" />
+          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-teal-500/30 transition-all group">
+            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Mail className="w-6 h-6 text-teal-400" />
             </div>
             <h3 className="text-xl font-bold mb-2">Email Support</h3>
             <p className="text-slate-400 mb-6 italic">
@@ -48,21 +48,21 @@ export default function Support() {
             </p>
             <a
               href="mailto:support@monarchlabs.co"
-              className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors inline-flex items-center gap-2"
+              className="text-teal-400 font-semibold hover:text-teal-300 transition-colors inline-flex items-center gap-2"
             >
               support@monarchlabs.co
             </a>
           </div>
 
-          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-purple-500/30 transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <HelpCircle className="w-6 h-6 text-purple-400" />
+          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-teal-500/30 transition-all group">
+            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <HelpCircle className="w-6 h-6 text-teal-400" />
             </div>
             <h3 className="text-xl font-bold mb-2">Knowledge Base</h3>
             <p className="text-slate-400 mb-6 italic">Self-service help docs</p>
             <button
               onClick={() => alert("Knowledge Base coming soon!")}
-              className="text-purple-400 font-semibold hover:text-purple-300 transition-colors"
+              className="text-teal-400 font-semibold hover:text-teal-300 transition-colors"
             >
               Browse Articles
             </button>
@@ -72,7 +72,7 @@ export default function Support() {
         {/* FAQ Section */}
         <div className="mb-20">
           <h2 className="mb-8 flex items-center gap-3 text-2xl font-bold">
-            <MessageCircle className="text-indigo-400" />
+            <MessageCircle className="text-teal-400" />
             Common Questions
           </h2>
           <div className="mx-auto w-full max-th space-y-4">
@@ -96,7 +96,7 @@ export default function Support() {
               >
                 <summary className="flex items-center justify-between cursor-pointer">
                   <h4 className="font-semibold text-lg">{faq.q}</h4>
-                  <span className="text-indigo-400 group-open:rotate-180 transition-transform font-bold text-xl">
+                  <span className="text-teal-400 group-open:rotate-180 transition-transform font-bold text-xl">
                     +
                   </span>
                 </summary>
@@ -109,7 +109,7 @@ export default function Support() {
         </div>
 
         {/* Closing */}
-        <div className="p-12 rounded-[2rem] bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-white/10 text-center">
+        <div className="p-12 rounded-[2rem] bg-gradient-to-br from-teal-600/20 to-teal-800/20 border border-white/10 text-center">
           <h3 className="text-2xl font-bold mb-4">Still stuck?</h3>
           <p className="mx-auto mb-8 max-th text-slate-300 leading-relaxed">
             Drop us a line and one of our human architects will get back to you

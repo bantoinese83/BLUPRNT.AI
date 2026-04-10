@@ -39,7 +39,7 @@ import type {
   ScopeRow,
   InvoiceRow,
   UserSubscriptionRow,
-} from "@/types/database";
+} from "@shared/types/database";
 
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
@@ -329,7 +329,7 @@ function DashboardContent({
         particleCount: 200,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#6366f1", "#020617", "#94a3b8"],
+        colors: ["#14b8a6", "#020617", "#94a3b8"],
       });
     }
   }, [location.search]);
@@ -348,7 +348,7 @@ function DashboardContent({
           particleCount: 200,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ["#6366f1", "#020617", "#94a3b8"],
+          colors: ["#14b8a6", "#020617", "#94a3b8"],
         });
         setTimeout(() => setHasCelebrated(true), 100);
       }

@@ -79,7 +79,7 @@ export function LegalPageShell({
               />
             </div>
             <span className="truncate text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
-              BLUPRNT<span className="text-indigo-600">.AI</span>
+              BLUPRNT<span className="text-teal-600">.AI</span>
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -111,7 +111,7 @@ export function LegalPageShell({
           }}
         >
           <div className="border-b border-slate-100 bg-gradient-to-b from-slate-50/80 to-transparent px-6 py-8 sm:px-10 sm:py-10">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
               Legal
             </p>
             <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
@@ -132,7 +132,7 @@ export function LegalPageShell({
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
             <span className="font-black italic tracking-tighter text-slate-900">
-              BLUPRNT<span className="text-indigo-600">.AI</span>
+              BLUPRNT<span className="text-teal-600">.AI</span>
             </span>
             <span className="text-slate-300" aria-hidden>
               ·
@@ -189,7 +189,7 @@ export function LegalPageShell({
 /** Section heading for legal body copy */
 export function LegalSectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-3 mt-10 border-l-2 border-indigo-500 pl-4 text-lg font-black tracking-tight text-slate-900 first:mt-0 sm:text-xl">
+    <h2 className="mb-3 mt-10 border-l-2 border-teal-500 pl-4 text-lg font-black tracking-tight text-slate-900 first:mt-0 sm:text-xl">
       {children}
     </h2>
   );
@@ -211,7 +211,7 @@ export function LegalList({ children }: { children: ReactNode }) {
 
 export function LegalListItem({ children }: { children: ReactNode }) {
   return (
-    <li className="relative pl-2 before:absolute before:-left-5 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-indigo-400">
+    <li className="relative pl-2 before:absolute before:-left-5 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-teal-400">
       {children}
     </li>
   );

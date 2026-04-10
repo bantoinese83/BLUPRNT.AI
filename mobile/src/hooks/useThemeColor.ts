@@ -1,5 +1,5 @@
 import { useColorScheme } from "../components/useColorScheme";
-import Colors from "@/constants/Colors";
+import Colors from "../../constants/Colors";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },

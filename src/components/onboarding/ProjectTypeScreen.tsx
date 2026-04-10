@@ -85,7 +85,7 @@ export function ProjectTypeScreen() {
                   }}
                   className={`relative cursor-pointer overflow-hidden border-2 transition-all duration-300 h-full ${
                     selected
-                      ? "border-indigo-600 ring-4 ring-indigo-50 shadow-lg bg-indigo-50/10 scale-[1.02]"
+                      ? "border-teal-600 ring-4 ring-teal-50 shadow-lg bg-teal-50/10 scale-[1.02]"
                       : "border-slate-100 hover:border-slate-200 hover:shadow-md bg-white shadow-sm"
                   }`}
                   onClick={() => setProjectType(opt)}
@@ -94,7 +94,7 @@ export function ProjectTypeScreen() {
                     <div
                       className={`rounded-xl sm:rounded-2xl p-2.5 sm:p-3 transition-all duration-300 ${
                         selected
-                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                          ? "bg-teal-600 text-white shadow-lg shadow-teal-200"
                           : "bg-slate-50 text-slate-500"
                       }`}
                     >
@@ -106,7 +106,7 @@ export function ProjectTypeScreen() {
                     </div>
                     <span
                       className={`font-bold text-xs sm:text-sm leading-tight transition-colors ${
-                        selected ? "text-indigo-950" : "text-slate-600"
+                        selected ? "text-teal-950" : "text-slate-600"
                       }`}
                     >
                       {opt}
@@ -116,7 +116,7 @@ export function ProjectTypeScreen() {
                   {selected && (
                     <motion.div
                       layoutId="active-bg"
-                      className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none"
+                      className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent pointer-events-none"
                     />
                   )}
                 </Card>
@@ -133,7 +133,7 @@ export function ProjectTypeScreen() {
           <Button
             size="lg"
             variant="primary"
-            className="w-full h-14 text-base shadow-lg shadow-indigo-500/10 group"
+            className="w-full h-14 text-base shadow-lg shadow-teal-500/10 group"
             disabled={!projectType}
             onClick={() => navigate("/onboarding/location")}
           >

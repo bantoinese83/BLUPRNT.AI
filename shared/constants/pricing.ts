@@ -1,5 +1,6 @@
 /**
- * List prices for in-app copy. Must match Stripe (web) and App Store / RevenueCat.
+ * List prices shown in product UI.
+ * Must match Stripe (web), App Store, and RevenueCat (mobile).
  */
 export const PRICING = {
   architectUsdPerMonth: 12,

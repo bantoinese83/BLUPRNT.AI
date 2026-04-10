@@ -18,7 +18,7 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
     >
       <div className="mx-auto max-w-3xl">
         <div className="mb-10 text-center">
-          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
             Questions
           </p>
           <h2
@@ -39,7 +39,7 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
             >
               <div className="flex gap-3">
                 <MessageCircleQuestion
-                  className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-500"
                   aria-hidden
                 />
                 <div className="min-w-0 space-y-2">

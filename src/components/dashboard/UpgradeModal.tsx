@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/supabase";
-import { PRICING } from "@/lib/pricing";
+import { PRICING } from "@shared/constants/pricing";
 
 const FREE_INVOICE_LIMIT = 3;
 const ARCHITECT_INVOICE_LIMIT = 10;
@@ -148,7 +148,7 @@ export function UpgradeModal({
                 </p>
               )}
               {showDiscount && (
-                <p className="text-sm text-indigo-900 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
+                <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
                   Use promo code <strong>BLUEPRINT35</strong> on the Stripe
                   checkout page if you have one. List prices:{" "}
                   <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect,{" "}

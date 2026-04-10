@@ -3,7 +3,7 @@ import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
-import type { InvoiceRow } from "@/types/database";
+import type { InvoiceRow } from "@shared/types/database";
 
 interface InvoiceCardProps {
   invoice: InvoiceRow;
@@ -19,7 +19,7 @@ export function InvoiceCard({ invoice, index, onClick }: InvoiceCardProps) {
       transition={{ delay: index * 0.05 }}
     >
       <Card
-        className="border-slate-200/80 shadow-sm hover:shadow-lg hover:border-slate-400 transition-all cursor-pointer overflow-hidden group relative"
+        className="border-slate-200/80 shadow-drop-sm hover:shadow-drop-lg hover:border-slate-400 transition-all duration-300 cursor-pointer overflow-hidden group relative"
         onClick={() => onClick(invoice.id)}
       >
         <div className="absolute top-0 left-0 w-1 h-full bg-slate-900 opacity-0 group-hover:opacity-100 transition-opacity" />

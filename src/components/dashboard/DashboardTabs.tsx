@@ -29,7 +29,7 @@ export function DashboardTabs() {
     <nav
       role="tablist"
       aria-label="Project phases"
-      className="glass flex rounded-2xl p-1.5 gap-1 shadow-sm border-white/40 mb-2 relative"
+      className="glass flex rounded-2xl p-1.5 gap-1 shadow-drop-sm border-white/40 mb-2 relative"
     >
       {tabs.map(({ to, label, subtitle, icon: Icon }) => {
         const isActive =

@@ -2,7 +2,7 @@ import { Pencil, Trash2, Hammer, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { money, getStars as stars } from "@/lib/formatters";
-import type { ScopeRow } from "@/types/database";
+import type { ScopeRow } from "@shared/types/database";
 
 const TIERS = ["economy", "mid", "premium"] as const;
 
@@ -171,13 +171,13 @@ export function ScopeItemRow({
           </p>
           {(isArchitect || hasProjectPass) && justification && (
             <p className="text-xs text-slate-400 flex items-start gap-1.5">
-              <Hammer className="w-3.5 h-3.5 mt-0.5 shrink-0 text-indigo-400" />
+              <Hammer className="w-3.5 h-3.5 mt-0.5 shrink-0 text-teal-400" />
               <span>{justification}</span>
             </p>
           )}
           {(isArchitect || hasProjectPass) && maintenance && (
-            <div className="pt-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-600/70 uppercase tracking-tight">
-              <div className="h-1 w-1 rounded-full bg-indigo-300" />
+            <div className="pt-1 flex items-center gap-1.5 text-[10px] font-bold text-teal-600/70 uppercase tracking-tight">
+              <div className="h-1 w-1 rounded-full bg-teal-300" />
               Care Tip: {maintenance}
             </div>
           )}

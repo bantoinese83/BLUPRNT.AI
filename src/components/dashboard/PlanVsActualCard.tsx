@@ -27,9 +27,9 @@ const toneStyles: Record<
     accent: "text-slate-600",
   },
   no_documents: {
-    border: "border-indigo-200/70",
-    iconBg: "bg-indigo-50 text-indigo-700",
-    accent: "text-indigo-700",
+    border: "border-teal-200/70",
+    iconBg: "bg-teal-50 text-teal-700",
+    accent: "text-teal-700",
   },
   within: {
     border: "border-emerald-200/80",
@@ -70,7 +70,7 @@ export function PlanVsActualCard({
     >
       <Card
         className={cn(
-          "overflow-hidden rounded-3xl border-2 bg-white/90 shadow-md shadow-slate-100/40 backdrop-blur-sm",
+          "overflow-hidden rounded-3xl border-2 bg-white/90 shadow-drop-lg backdrop-blur-sm transition-shadow duration-300 hover:shadow-elevated",
           tone.border,
         )}
       >

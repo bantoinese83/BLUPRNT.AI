@@ -29,7 +29,7 @@ export function LandingFinalCta() {
           Get your first estimate in{" "}
           <Highlighter
             action="underline"
-            color="#6366f1"
+            color="#14b8a6"
             strokeWidth={2}
             padding={0}
             iterations={1}

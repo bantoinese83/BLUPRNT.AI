@@ -185,13 +185,13 @@ export function LocationScreen() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-200/50 relative overflow-hidden group metal-surface"
+                className="p-4 rounded-2xl bg-teal-600 text-white shadow-xl shadow-teal-200/50 relative overflow-hidden group metal-surface"
               >
                 <div className="absolute inset-0 noise-overlay opacity-10" />
                 <div className="relative z-10 space-y-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-indigo-300 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-200">
+                    <Sparkles className="w-4 h-4 text-teal-300 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-teal-200">
                       Market Insight
                     </span>
                   </div>
@@ -203,7 +203,7 @@ export function LocationScreen() {
                     , Kitchen & Bath remodels are seeing a 12% higher ROI this
                     quarter due to low inventory.
                   </p>
-                  <p className="text-[10px] text-indigo-200 font-medium">
+                  <p className="text-[10px] text-teal-200 font-medium">
                     Our AI is grounding your estimate in recent local material
                     surges.
                   </p>

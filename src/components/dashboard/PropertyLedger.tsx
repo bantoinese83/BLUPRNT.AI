@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { downloadSellerPacket } from "@/lib/seller-packet-download";
-import type { InvoiceRow } from "@/types/database";
+import type { InvoiceRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
 
 type ScopeItem = {

@@ -21,7 +21,7 @@ export function LandingHowItWorks() {
           {LANDING_HOW_INTRO}{" "}
           <Highlighter
             action="underline"
-            color="#6366f1"
+            color="#14b8a6"
             strokeWidth={2}
             padding={0}
             iterations={1}
@@ -100,7 +100,7 @@ export function LandingHowItWorks() {
             <h3 className="text-2xl font-black mb-4 group-hover:text-slate-950 transition-colors">
               <Highlighter
                 action="circle"
-                color="#6366f1"
+                color="#14b8a6"
                 strokeWidth={2}
                 padding={10}
                 isView={true}

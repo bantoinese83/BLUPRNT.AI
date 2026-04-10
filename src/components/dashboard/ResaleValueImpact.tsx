@@ -49,16 +49,16 @@ export function ResaleValueImpact({
         </div>
 
         {ledgerPremium > 0 && (
-          <div className="bg-indigo-50/50 border border-indigo-100/50 rounded-xl p-3 flex items-center justify-between">
+          <div className="bg-teal-50/50 border border-teal-100/50 rounded-xl p-3 flex items-center justify-between">
             <div className="space-y-0.5">
-              <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">
+              <p className="text-[10px] font-black text-teal-900 uppercase tracking-widest">
                 Ledger Premium
               </p>
-              <p className="text-xs text-indigo-600 font-medium">
+              <p className="text-xs text-teal-600 font-medium">
                 Earned through documentation
               </p>
             </div>
-            <div className="text-indigo-900 font-black text-sm">
+            <div className="text-teal-900 font-black text-sm">
               +
               {new Intl.NumberFormat("en-US", {
                 style: "currency",
@@ -69,47 +69,51 @@ export function ResaleValueImpact({
           </div>
         )}
 
-        <div className="relative h-24 mt-4">
-          <svg
-            className="w-full h-full overflow-visible"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <linearGradient
-                id="growthGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="transparent" />
-                <stop offset="100%" stopColor="#0f172a" />
-              </linearGradient>
-            </defs>
-            <motion.path
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              d="M0 80 Q 50 70, 100 60 T 200 40 T 300 10"
-              fill="none"
-              stroke="url(#growthGradient)"
-              strokeWidth="4"
-              strokeLinecap="round"
-              className="w-full"
-            />
-            <motion.circle
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 1.2, duration: 0.5 }}
-              cx="300"
-              cy="10"
-              r="6"
-              fill="#0f172a"
-              className="drop-shadow-[0_0_8px_rgba(15,23,42,0.5)]"
-            />
-          </svg>
-          <div className="absolute top-0 right-0 py-1 px-2 rounded-lg bg-slate-900 text-[10px] font-black text-white uppercase tracking-wider animate-pulse">
-            Peak ROI
+        <div className="mt-4 space-y-2">
+          <div className="relative h-24">
+            <svg
+              className="h-full w-full overflow-visible"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient
+                  id="growthGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="transparent" />
+                  <stop offset="100%" stopColor="#0f172a" />
+                </linearGradient>
+              </defs>
+              <motion.path
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                d="M0 80 Q 50 70, 100 60 T 200 40 T 300 10"
+                fill="none"
+                stroke="url(#growthGradient)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                className="w-full"
+              />
+              <motion.circle
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1.2, duration: 0.5 }}
+                cx="300"
+                cy="10"
+                r="6"
+                fill="#0f172a"
+                className="drop-shadow-[0_0_8px_rgba(15,23,42,0.5)]"
+              />
+            </svg>
+          </div>
+          <div className="flex justify-end">
+            <div className="rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white animate-pulse">
+              Peak ROI
+            </div>
           </div>
         </div>
 

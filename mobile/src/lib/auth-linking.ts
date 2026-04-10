@@ -9,6 +9,13 @@ export function getPasswordRecoveryRedirectUrl(): string {
 }
 
 /**
+ * OAuth and email link returns. Must match Supabase Dashboard → Redirect URLs.
+ */
+export function getAuthRedirectUrl(): string {
+  return Linking.createURL("/auth/callback");
+}
+
+/**
  * PKCE email links and OAuth returns often include `?code=…` on the deep link URL.
  */
 export function extractPkceCodeFromUrl(url: string): string | null {

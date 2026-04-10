@@ -72,8 +72,8 @@ function calculateHealthScore(
   return {
     score: 88,
     status: "Healthy",
-    color: "from-indigo-500 to-blue-600",
-    stop1: "#6366f1",
+    color: "from-teal-500 to-blue-600",
+    stop1: "#14b8a6",
     stop2: "#2563eb",
     message: "Your project spending is pacing well against estimates.",
   };

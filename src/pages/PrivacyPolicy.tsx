@@ -59,7 +59,7 @@ export default function PrivacyPolicy() {
           your data, contact us at{" "}
           <a
             href="mailto:connect@monarch-labs.com"
-            className="text-indigo-600 hover:text-indigo-500 font-medium"
+            className="text-teal-600 hover:text-teal-500 font-medium"
           >
             connect@monarch-labs.com
           </a>

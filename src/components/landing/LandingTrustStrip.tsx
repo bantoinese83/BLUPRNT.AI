@@ -17,7 +17,7 @@ export function LandingTrustStrip() {
               key={pill.label}
               className="flex items-center justify-center gap-3 text-center sm:justify-start sm:text-left"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-indigo-600">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-teal-600">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
               <span className="text-sm font-semibold text-slate-700">

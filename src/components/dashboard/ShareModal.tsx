@@ -77,8 +77,8 @@ export function ShareModal({ isOpen, onClose, projectId }: ShareModalProps) {
         {shareLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-5">
             <div className="relative">
-              <div className="absolute inset-0 bg-indigo-500/10 blur-2xl rounded-full scale-150 animate-pulse" />
-              <Loader2 className="w-12 h-12 text-indigo-600 animate-spin relative" />
+              <div className="absolute inset-0 bg-teal-500/10 blur-2xl rounded-full scale-150 animate-pulse" />
+              <Loader2 className="w-12 h-12 text-teal-600 animate-spin relative" />
             </div>
             <p className="font-black text-slate-400 animate-pulse tracking-widest uppercase text-[9px]">
               Generating Secure View...

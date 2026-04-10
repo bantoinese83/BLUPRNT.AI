@@ -50,7 +50,7 @@ export function ProjectSwitcher({
   const newProjectButton = (
     <Link
       to="/onboarding"
-      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:border-indigo-200 hover:bg-indigo-50/80 hover:text-indigo-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:px-4"
+      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:border-teal-200 hover:bg-teal-50/80 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:px-4"
     >
       <Plus className="h-4 w-4 shrink-0" aria-hidden />
       <span>Start a BLUPRNT</span>
@@ -144,7 +144,7 @@ export function ProjectSwitcher({
                       <div className="flex flex-col min-w-0 pr-6">
                         <span className="truncate">{p.name}</span>
                         <span
-                          className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-indigo-200" : "text-slate-400"}`}
+                          className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-teal-200" : "text-slate-400"}`}
                         >
                           {p.created_at
                             ? new Date(p.created_at).toLocaleDateString(
@@ -187,7 +187,7 @@ export function ProjectSwitcher({
             <div className="border-t border-slate-100 px-2 pt-2">
               <Link
                 to="/onboarding"
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold text-indigo-700 transition-colors hover:bg-indigo-50"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold text-teal-700 transition-colors hover:bg-teal-50"
                 onClick={() => setOpen(false)}
               >
                 <Plus className="h-4 w-4 shrink-0" aria-hidden />

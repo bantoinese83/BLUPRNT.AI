@@ -97,13 +97,13 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.glass.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#1e293b",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
+        shadowColor: "#0f172a",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
       },
       android: {
-        elevation: 4,
+        elevation: 6,
       },
     }),
   },
@@ -117,6 +117,8 @@ const styles = StyleSheet.create({
   },
   childContainer: {
     width: "100%",
+    position: "relative",
+    zIndex: 1,
   },
   content: {
     padding: 20,

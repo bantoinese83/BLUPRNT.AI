@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { generateSellerPacketBlob } from "@/lib/pdf-export";
 import { buildSellerPacketAppendixItems } from "@/lib/seller-packet-appendix";
-import type { InvoiceRow } from "@/types/database";
+import type { InvoiceRow } from "@shared/types/database";
 
 export type SellerPacketScopeInput = {
   category: string;

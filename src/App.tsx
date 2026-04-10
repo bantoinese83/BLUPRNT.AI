@@ -53,7 +53,7 @@ export default function App() {
             <BrowserRouter>
               <a
                 href="#main-content"
-                className="fixed left-4 top-4 z-[100] -translate-y-[130%] rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition-transform focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                className="fixed left-4 top-4 z-[100] -translate-y-[130%] rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition-transform focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-teal-300"
               >
                 Skip to main content
               </a>

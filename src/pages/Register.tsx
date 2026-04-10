@@ -354,7 +354,7 @@ export default function Register() {
                 type="submit"
                 size="lg"
                 variant="primary"
-                className="w-full h-14 font-black text-base shadow-xl shadow-indigo-500/10"
+                className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
                 disabled={loading}
               >
                 {loading ? (
@@ -368,8 +368,8 @@ export default function Register() {
           ) : (
             <div className="space-y-4">
               {magicSent ? (
-                <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 px-5 py-5 text-sm text-slate-900 space-y-3">
-                  <p className="font-black flex items-center gap-2 text-indigo-900 uppercase tracking-wider text-xs">
+                <div className="rounded-2xl border border-teal-100 bg-teal-50/30 px-5 py-5 text-sm text-slate-900 space-y-3">
+                  <p className="font-black flex items-center gap-2 text-teal-900 uppercase tracking-wider text-xs">
                     <Mail className="w-4 h-4 shrink-0" aria-hidden />
                     Check your inbox
                   </p>
@@ -380,7 +380,7 @@ export default function Register() {
                   </p>
                   <button
                     type="button"
-                    className="text-indigo-600 font-bold hover:text-indigo-500 text-sm transition-colors"
+                    className="text-teal-600 font-bold hover:text-teal-500 text-sm transition-colors"
                     onClick={() => setMagicSent(false)}
                   >
                     ← Use a different email
@@ -443,7 +443,7 @@ export default function Register() {
                     type="button"
                     size="lg"
                     variant="primary"
-                    className="w-full h-14 font-black text-base shadow-xl shadow-indigo-500/10"
+                    className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
                     disabled={loading}
                     onClick={sendMagicLink}
                   >

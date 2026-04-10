@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Hammer as HammerIcon, CheckCircle2, Hammer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PRICING } from "@/lib/pricing";
+import { PRICING } from "@shared/constants/pricing";
 
 interface PricingRow {
   feature: string;
@@ -102,7 +102,7 @@ export function LandingPricing({
               className={`w-full h-14 rounded-2xl text-lg font-black ${
                 isArchitect
                   ? "bg-slate-50 border-slate-200 text-slate-400 group-hover:scale-100 cursor-default"
-                  : "premium-gradient border-0 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/40 group-hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  : "premium-gradient border-0 shadow-lg shadow-teal-500/30 group-hover:shadow-teal-500/40 group-hover:scale-[1.02] active:scale-[0.98] transition-all"
               }`}
               onClick={() => !isArchitect && onPlanSelect("architect")}
             >
@@ -144,7 +144,7 @@ export function LandingPricing({
                   key={i}
                   className="flex items-center gap-3 text-slate-700 font-medium"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-indigo-600 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-teal-600 shrink-0" />
                   {feature}
                 </li>
               ))}
@@ -174,7 +174,7 @@ export function LandingPricing({
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="mb-8 text-center sm:mb-10">
-            <p className="mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 sm:text-[11px]">
+            <p className="mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
               <Hammer className="h-3.5 w-3.5" aria-hidden />
               Plans
             </p>
@@ -206,13 +206,13 @@ export function LandingPricing({
                     </th>
                     <th
                       scope="col"
-                      className="bg-gradient-to-b from-indigo-50 to-indigo-50/80 px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
+                      className="bg-gradient-to-b from-teal-50 to-teal-50/80 px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
                     >
                       <div className="flex flex-col items-center gap-1.5">
-                        <span className="text-xs font-black uppercase tracking-[0.14em] text-indigo-900">
+                        <span className="text-xs font-black uppercase tracking-[0.14em] text-teal-900">
                           Architect
                         </span>
-                        <span className="rounded-full bg-indigo-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm shadow-indigo-900/20">
+                        <span className="rounded-full bg-teal-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm shadow-teal-900/20">
                           Most flexible
                         </span>
                         <span className="text-sm font-bold tabular-nums text-slate-700">
@@ -257,8 +257,8 @@ export function LandingPricing({
                           {row.hint}
                         </span>
                       </th>
-                      <td className="bg-indigo-50/35 px-4 py-4 text-center align-top transition-colors group-hover:bg-indigo-50/55 sm:px-6 sm:py-5">
-                        <span className="inline-block text-sm font-semibold tabular-nums text-indigo-950">
+                      <td className="bg-teal-50/35 px-4 py-4 text-center align-top transition-colors group-hover:bg-teal-50/55 sm:px-6 sm:py-5">
+                        <span className="inline-block text-sm font-semibold tabular-nums text-teal-950">
                           {row.architect}
                         </span>
                       </td>

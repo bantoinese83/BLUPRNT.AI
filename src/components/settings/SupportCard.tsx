@@ -19,7 +19,7 @@ export function SupportCard() {
         <a href="mailto:connect@monarch-labs.com" className="inline-block">
           <Button
             variant="outline"
-            className="gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+            className="gap-2 text-teal-600 border-teal-200 hover:bg-teal-50 hover:text-teal-700"
             type="button"
           >
             Message our support team

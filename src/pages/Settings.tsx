@@ -26,7 +26,7 @@ import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { useLogout } from "@/hooks/use-logout";
-import { PRICING } from "@/lib/pricing";
+import { PRICING } from "@shared/constants/pricing";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -301,7 +301,7 @@ export default function Settings() {
         <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
           <CardHeader className="border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-              <User className="w-5 h-5 text-indigo-500" />
+              <User className="w-5 h-5 text-teal-500" />
               Account Profile
             </CardTitle>
           </CardHeader>
@@ -345,13 +345,13 @@ export default function Settings() {
                   placeholder="Your name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="rounded-xl border-slate-200 focus:ring-indigo-500/20"
+                  className="rounded-xl border-slate-200 focus:ring-teal-500/20"
                   autoComplete="name"
                 />
               </div>
               {profileMessage && (
                 <p
-                  className={`text-sm ${profileMessage === "Saved." ? "text-indigo-600 font-bold" : "text-amber-600 font-medium"}`}
+                  className={`text-sm ${profileMessage === "Saved." ? "text-teal-600 font-bold" : "text-amber-600 font-medium"}`}
                 >
                   {profileMessage}
                 </p>
@@ -359,7 +359,7 @@ export default function Settings() {
               <Button
                 variant="primary"
                 size="lg"
-                className="w-full sm:w-auto rounded-xl liquid-metal-button shadow-indigo-200/50"
+                className="w-full sm:w-auto rounded-xl liquid-metal-button shadow-teal-200/50"
                 disabled={profileSaving}
                 type="submit"
               >
@@ -376,7 +376,7 @@ export default function Settings() {
           <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
             <CardHeader className="border-b border-slate-100 bg-slate-50/50">
               <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-                <Shield className="w-5 h-5 text-indigo-500" />
+                <Shield className="w-5 h-5 text-teal-500" />
                 Security & Password
               </CardTitle>
             </CardHeader>
@@ -446,7 +446,7 @@ export default function Settings() {
 
                 {passwordMessage && (
                   <p
-                    className={`text-sm ${passwordMessage.includes("Success") ? "text-indigo-600 font-bold" : "text-amber-600 font-medium"}`}
+                    className={`text-sm ${passwordMessage.includes("Success") ? "text-teal-600 font-bold" : "text-amber-600 font-medium"}`}
                   >
                     {passwordMessage}
                   </p>
@@ -472,7 +472,7 @@ export default function Settings() {
         <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
           <CardHeader className="border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-              <CreditCard className="w-5 h-5 text-indigo-500" />
+              <CreditCard className="w-5 h-5 text-teal-500" />
               Plan & Billing
             </CardTitle>
           </CardHeader>
@@ -503,7 +503,7 @@ export default function Settings() {
               <Button
                 variant={isArchitect ? "outline" : "primary"}
                 size="lg"
-                className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-indigo-200/50" : "border-slate-200"}`}
+                className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-teal-200/50" : "border-slate-200"}`}
                 onClick={() => setShowUpgrade(true)}
                 type="button"
               >
@@ -539,7 +539,7 @@ export default function Settings() {
         <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
           <CardHeader className="border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-              <Shield className="w-5 h-5 text-indigo-500" />
+              <Shield className="w-5 h-5 text-teal-500" />
               Data & Privacy
             </CardTitle>
           </CardHeader>
@@ -556,7 +556,7 @@ export default function Settings() {
               </div>
               {exportMessage && (
                 <p
-                  className={`text-sm ${exportMessage === "Download started." ? "text-indigo-600 font-bold" : "text-amber-600 font-medium"}`}
+                  className={`text-sm ${exportMessage === "Download started." ? "text-teal-600 font-bold" : "text-amber-600 font-medium"}`}
                 >
                   {exportMessage}
                 </p>
@@ -594,7 +594,7 @@ export default function Settings() {
                   type="checkbox"
                   checked={deleteConfirm}
                   onChange={(e) => setDeleteConfirm(e.target.checked)}
-                  className="w-4 h-4 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  className="w-4 h-4 rounded-lg border-slate-300 text-teal-600 focus:ring-teal-500"
                 />
                 <label
                   htmlFor="delete-confirm"
@@ -630,7 +630,7 @@ export default function Settings() {
         <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
           <CardHeader className="border-b border-slate-100 bg-slate-50/50">
             <CardTitle className="flex items-center gap-2 text-slate-900">
-              <HelpCircle className="w-5 h-5 text-indigo-500" />
+              <HelpCircle className="w-5 h-5 text-teal-500" />
               Support & Feedback
             </CardTitle>
           </CardHeader>
@@ -645,7 +645,7 @@ export default function Settings() {
             >
               <Button
                 variant="outline"
-                className="w-full gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-xl"
+                className="w-full gap-2 text-teal-600 border-teal-200 hover:bg-teal-50 hover:border-teal-300 rounded-xl"
                 type="button"
               >
                 Contact Concierge Support

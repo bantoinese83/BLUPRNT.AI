@@ -117,7 +117,7 @@ export function AddScopeItemModal({
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     placeholder="e.g. Custom Cabinetry, Smart Lighting..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                   />
                 </div>
 
@@ -129,7 +129,7 @@ export function AddScopeItemModal({
                     <select
                       value={phase}
                       onChange={(e) => setPhase(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
                     >
                       {PHASE_ORDER.map((p) => (
                         <option key={p} value={p}>
@@ -149,7 +149,7 @@ export function AddScopeItemModal({
                       value={cost}
                       onChange={(e) => setCost(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                     />
                   </div>
                 </div>
@@ -163,7 +163,7 @@ export function AddScopeItemModal({
                       type="number"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -174,7 +174,7 @@ export function AddScopeItemModal({
                       value={unit}
                       onChange={(e) => setUnit(e.target.value)}
                       placeholder="ea, sqft..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                     />
                   </div>
                 </div>
@@ -188,7 +188,7 @@ export function AddScopeItemModal({
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Add more detail here..."
                     rows={2}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all resize-none"
                   />
                 </div>
 
@@ -196,7 +196,7 @@ export function AddScopeItemModal({
                   <Button
                     type="submit"
                     disabled={saving || !category.trim() || !cost}
-                    className="w-full h-auto py-4 rounded-2xl premium-gradient text-white font-bold text-base shadow-xl shadow-indigo-200 gap-2"
+                    className="w-full h-auto py-4 rounded-2xl premium-gradient text-white font-bold text-base shadow-xl shadow-teal-200 gap-2"
                   >
                     {saving ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

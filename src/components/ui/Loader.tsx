@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -19,6 +19,8 @@ export function Loader({
   className,
   ...props
 }: LoaderProps) {
+  const reduceMotion = useReducedMotion();
+
   const sizeConfig = {
     sm: {
       container: "w-20 h-20",
@@ -67,89 +69,99 @@ export function Loader({
       {/* Enhanced Monochrome Loader */}
       <motion.div
         className={cn("relative", config.container)}
-        animate={{
-          scale: [1, 1.02, 1],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: [0.4, 0, 0.6, 1],
-        }}
+        animate={reduceMotion ? { scale: 1 } : { scale: [1, 1.02, 1] }}
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : {
+                duration: 4,
+                repeat: Infinity,
+                ease: [0.4, 0, 0.6, 1],
+              }
+        }
       >
-        {/* Outer elegant ring with shimmer */}
+        {/* Outer ring — slate ink (matches --color-slate-900); hidden in dark — white rings below */}
         <motion.div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(0, 0, 0) 90deg, transparent 180deg)`,
+            background: `conic-gradient(from 0deg, transparent 0deg, rgb(17, 24, 39) 90deg, transparent 180deg)`,
             mask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
-            opacity: 0.8,
+            opacity: 0.75,
           }}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear",
+                }
+          }
         />
 
-        {/* Primary animated ring with gradient */}
+        {/* Primary ring — brand accent (--color-teal-600) */}
         <motion.div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(0, 0, 0) 120deg, rgba(0, 0, 0, 0.5) 240deg, transparent 360deg)`,
+            background: `conic-gradient(from 0deg, transparent 0deg, rgb(13, 148, 136) 120deg, rgba(13, 148, 136, 0.35) 240deg, transparent 360deg)`,
             mask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
-            opacity: 0.9,
+            opacity: 0.92,
           }}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            ease: [0.4, 0, 0.6, 1],
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: [0.4, 0, 0.6, 1],
+                }
+          }
         />
 
-        {/* Secondary elegant ring - counter rotation */}
+        {/* Secondary ring — counter rotation */}
         <motion.div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 180deg, transparent 0deg, rgba(0, 0, 0, 0.6) 45deg, transparent 90deg)`,
+            background: `conic-gradient(from 180deg, transparent 0deg, rgba(17, 24, 39, 0.45) 45deg, transparent 90deg)`,
             mask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
             opacity: 0.35,
           }}
-          animate={{
-            rotate: [0, -360],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: [0.4, 0, 0.6, 1],
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, -360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: [0.4, 0, 0.6, 1],
+                }
+          }
         />
 
-        {/* Accent particles */}
+        {/* Accent highlight */}
         <motion.div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 270deg, transparent 0deg, rgba(0, 0, 0, 0.4) 20deg, transparent 40deg)`,
+            background: `conic-gradient(from 270deg, transparent 0deg, rgba(13, 148, 136, 0.4) 20deg, transparent 40deg)`,
             mask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
             opacity: 0.5,
           }}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 3.5,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 3.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                }
+          }
         />
 
         {/* Dark mode variants */}
@@ -161,14 +173,16 @@ export function Loader({
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
             opacity: 0.8,
           }}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear",
+                }
+          }
         />
 
         <motion.div
@@ -179,14 +193,16 @@ export function Loader({
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
             opacity: 0.9,
           }}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            ease: [0.4, 0, 0.6, 1],
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: [0.4, 0, 0.6, 1],
+                }
+          }
         />
 
         <motion.div
@@ -197,14 +213,16 @@ export function Loader({
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
             opacity: 0.35,
           }}
-          animate={{
-            rotate: [0, -360],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: [0.4, 0, 0.6, 1],
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, -360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: [0.4, 0, 0.6, 1],
+                }
+          }
         />
 
         <motion.div
@@ -215,14 +233,16 @@ export function Loader({
             WebkitMask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
             opacity: 0.5,
           }}
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 3.5,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : {
+                  duration: 3.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                }
+          }
         />
 
         {/* Centered Logo */}
@@ -281,14 +301,18 @@ export function Loader({
           }}
         >
           <motion.span
-            animate={{
-              opacity: [0.95, 0.8, 0.95],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: [0.4, 0, 0.6, 1],
-            }}
+            animate={
+              reduceMotion ? { opacity: 1 } : { opacity: [0.95, 0.8, 0.95] }
+            }
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : {
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: [0.4, 0, 0.6, 1],
+                  }
+            }
           >
             {title}
           </motion.span>
@@ -313,14 +337,18 @@ export function Loader({
             }}
           >
             <motion.span
-              animate={{
-                opacity: [0.6, 0.4, 0.6],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: [0.4, 0, 0.6, 1],
-              }}
+              animate={
+                reduceMotion ? { opacity: 1 } : { opacity: [0.6, 0.4, 0.6] }
+              }
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : {
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: [0.4, 0, 0.6, 1],
+                    }
+              }
             >
               {subtitle}
             </motion.span>

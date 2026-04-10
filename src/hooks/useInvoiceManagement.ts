@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/supabase";
-import type { InvoiceRow, UserSubscriptionRow } from "@/types/database";
+import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 
 interface UseInvoiceManagementProps {
   projectId: string;

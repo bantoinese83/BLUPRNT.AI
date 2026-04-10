@@ -52,7 +52,7 @@ export function ScopeHeader({
 
         <Button
           onClick={onAddClick}
-          className="gap-2 rounded-2xl h-12 px-6 premium-gradient text-white font-bold shadow-lg shadow-indigo-100 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+          className="gap-2 rounded-2xl h-12 px-6 premium-gradient text-white font-bold shadow-lg shadow-teal-100 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
         >
           <Plus className="w-5 h-5" />
           Add Item

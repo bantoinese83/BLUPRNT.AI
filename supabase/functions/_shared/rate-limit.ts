@@ -73,20 +73,29 @@ function getRedisLimit(kind: RateLimitKind): Ratelimit | null {
     const token = Deno.env.get("UPSTASH_REDIS_REST_TOKEN");
     const spec = specFor(kind);
     if (!url || !token) {
+      console.warn(
+        `[rate-limit] Upstash secrets missing for ${kind}. Falling back to in-memory.`,
+      );
       redisLimits.set(kind, null);
       return null;
     }
+
+    console.log(
+      `[rate-limit] Initializing Upstash Redis for ${kind} (URL: ${url.substring(0, 15)}...)`,
+    );
+
     const redis = new Redis({ url, token });
     const windowSeconds = Math.max(1, Math.ceil(spec.windowMs / 1000));
     const rl = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(spec.requests, `${windowSeconds} s`),
       prefix: spec.prefix,
+      analytics: true,
     });
     redisLimits.set(kind, rl);
     return rl;
   } catch (e) {
-    console.error("[rate-limit] Redis client init failed:", e);
+    console.error(`[rate-limit] Redis client init failed for ${kind}:`, e);
     redisLimits.set(kind, null);
     return null;
   }
@@ -136,16 +145,20 @@ export async function checkRateLimit(
     const rl = getRedisLimit(kind);
     if (rl) {
       const id = getClientId(req);
-      const { success, reset } = await rl.limit(id);
+      const { success, reset, limit, remaining } = await rl.limit(id);
+
       if (!success) {
         const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+        console.warn(
+          `[rate-limit] ${kind} EXCEEDED for ${id}. Limit: ${limit}. Retry after: ${retryAfter}s`,
+        );
         return { ok: false, retryAfter };
       }
       return { ok: true };
     }
   } catch (e) {
     console.error(
-      "[rate-limit] Redis path failed; using in-memory limiter:",
+      `[rate-limit] Redis call failed for ${kind}; falling back to memory:`,
       e,
     );
   }

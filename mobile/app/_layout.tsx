@@ -1,4 +1,9 @@
 import "../global.css";
+import { LogBox } from "react-native";
+LogBox.ignoreLogs([
+  "SafeAreaView has been deprecated and will be removed in a future release",
+]);
+
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   initMobileSentry,
@@ -36,8 +41,9 @@ import { AppToastHost } from "../src/components/AppToastHost";
 import { BrandedSplash } from "../src/components/BrandedSplash";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useVersionCheck } from "../src/hooks/useVersionCheck";
 import NetInfo from "@react-native-community/netinfo";
-import { View, Text, StyleSheet, LogBox, Platform } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "../src/constants/Theme";
 import { getPostAuthRedirectHref } from "../src/lib/onboarding-draft";
@@ -57,13 +63,7 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-if (__DEV__) {
-  // RN still mounts deprecated SafeAreaView inside LogBox / dev tooling; our UI uses
-  // `react-native-safe-area-context` only. Mutes noisy false-positive in dev.
-  LogBox.ignoreLogs([
-    "SafeAreaView has been deprecated and will be removed in a future release",
-  ]);
-}
+// SplashScreen hide logic handled inside RootLayout hook
 
 function RootLayout() {
   const [loaded, error] = useFonts({
@@ -73,6 +73,8 @@ function RootLayout() {
     Outfit_700Bold,
     Outfit_800ExtraBold,
   });
+
+  const { isOutdated } = useVersionCheck();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -105,7 +107,7 @@ function RootLayout() {
     }
   }, []);
 
-  if (!loaded) {
+  if (!loaded || isOutdated) {
     return <BrandedSplash />;
   }
 

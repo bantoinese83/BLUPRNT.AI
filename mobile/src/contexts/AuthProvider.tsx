@@ -1,11 +1,14 @@
 import React, { useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
-import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Linking from "expo-linking";
 import { supabase } from "../lib/supabase";
-import { extractPkceCodeFromUrl } from "../lib/auth-linking";
+import {
+  extractPkceCodeFromUrl,
+  getAuthRedirectUrl,
+} from "../lib/auth-linking";
+import { registerForPushNotificationsAsync } from "../lib/push";
 import { AuthContext } from "./auth-context";
 
 // Tell the browser to complete the session when redirected back
@@ -24,6 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        if (session?.user?.id) {
+          void registerForPushNotificationsAsync(session.user.id);
+        }
       })
       .catch(() => {
         setLoading(false);
@@ -36,6 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (session?.user?.id) {
+        void registerForPushNotificationsAsync(session.user.id);
+      }
     });
 
     return () => {
@@ -80,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectUri = AuthSession.makeRedirectUri();
+      const redirectUri = getAuthRedirectUrl();
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -98,22 +109,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (res.type === "success" && res.url) {
-        // Extract params from URL fragment (#access_token=...)
-        const hash = res.url.split("#")[1];
-        if (!hash) return;
-
-        const params = Object.fromEntries(
-          hash.split("&").map((pair) => pair.split("=")),
-        );
-
-        const access_token = params.access_token;
-        const refresh_token = params.refresh_token;
-
-        if (access_token && refresh_token) {
-          await supabase.auth.setSession({
-            access_token,
-            refresh_token,
-          });
+        const code = extractPkceCodeFromUrl(res.url);
+        if (code) {
+          const { error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
         }
       }
     } catch (error) {

@@ -1,10 +1,10 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { money } from "./formatters";
+import { money } from "../../../shared/lib/formatters";
 import { supabase } from "./supabase";
 import { planVsActualPdfLines } from "./plan-vs-actual";
 import { buildSellerPacketAppendixHtml } from "./seller-packet-appendix";
-import type { InvoiceRow } from "../types/database";
+import type { InvoiceRow } from "../../../shared/types/database";
 
 type ScopeItem = {
   category: string;
@@ -82,7 +82,7 @@ export async function generateSellerPacketPDF(
           .title { font-size: 24px; font-weight: bold; margin: 0; }
           .subtitle { font-size: 14px; color: #64748b; margin-top: 5px; }
           .section { margin-bottom: 30px; }
-          .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; color: #4f46e5; }
+          .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; color: #0d9488; }
           .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
           .stat-card { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
           .stat-label { font-size: 12px; color: #64748b; font-weight: bold; margin-bottom: 5px; }

@@ -7,7 +7,7 @@ export function LandingStory() {
     <section className="bg-slate-50 py-24 px-4 sm:px-6">
       <div className="mx-auto max-w-4xl text-center">
         <div className="inline-block p-3 rounded-2xl bg-white shadow-sm border border-slate-100 mb-6">
-          <Shield className="w-8 h-8 text-indigo-600" />
+          <Shield className="w-8 h-8 text-teal-600" />
         </div>
         <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">
           <Highlighter

@@ -35,7 +35,7 @@ import { router } from "expo-router";
 import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
 import { Theme } from "../../src/constants/Theme";
-import { PRICING } from "../../src/constants/pricing";
+import { PRICING } from "../../../shared/constants/pricing";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
 import { showAppToast } from "../../src/lib/app-toast";

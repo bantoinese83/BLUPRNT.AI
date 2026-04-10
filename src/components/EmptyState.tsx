@@ -36,7 +36,7 @@ function RoadmapStep({
         className={cn(
           "w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-500",
           isActive
-            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110"
+            ? "bg-teal-600 text-white shadow-lg shadow-teal-200 scale-110"
             : "bg-slate-100 text-slate-400",
         )}
       >
@@ -45,7 +45,7 @@ function RoadmapStep({
       <span
         className={cn(
           "text-[9px] font-black uppercase tracking-widest transition-colors duration-500",
-          isActive ? "text-indigo-600" : "text-slate-400",
+          isActive ? "text-teal-600" : "text-slate-400",
         )}
       >
         {label}
@@ -98,7 +98,7 @@ export function EmptyState({
         </motion.div>
 
         {/* Decorative elements */}
-        <div className="absolute -top-4 -right-4 w-12 h-12 bg-indigo-500 rounded-2xl -rotate-12 opacity-20 blur-xl animate-pulse" />
+        <div className="absolute -top-4 -right-4 w-12 h-12 bg-teal-500 rounded-2xl -rotate-12 opacity-20 blur-xl animate-pulse" />
         <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-10 blur-xl" />
       </div>
 
@@ -117,7 +117,7 @@ export function EmptyState({
             variant="primary"
             size="lg"
             onClick={action.onClick}
-            className="group relative px-10 h-14 text-sm font-black rounded-2xl liquid-metal-button shadow-xl shadow-indigo-200/50"
+            className="group relative px-10 h-14 text-sm font-black rounded-2xl liquid-metal-button shadow-xl shadow-teal-200/50"
           >
             <span className="relative z-10 flex items-center gap-2">
               {action.label}
@@ -169,7 +169,7 @@ export function EmptyState({
 
         <a
           href="mailto:connect@monarch-labs.com"
-          className="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1.5"
+          className="text-xs font-semibold text-slate-400 hover:text-teal-600 transition-colors flex items-center gap-1.5"
         >
           Need help? Contact support
         </a>

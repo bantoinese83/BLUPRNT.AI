@@ -58,7 +58,7 @@ export function TextField({
               ? Theme.colors.brand.primary
               : Theme.colors.border,
           backgroundColor: isFocused
-            ? "rgba(79, 70, 229, 0.06)"
+            ? "rgba(13, 148, 136, 0.06)"
             : Theme.colors.inputBg,
         }}
         transition={{ type: "timing", duration: 200 }}

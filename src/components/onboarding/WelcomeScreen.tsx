@@ -64,7 +64,7 @@ export function WelcomeScreen() {
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="mb-4"
           >
-            <div className="h-6 w-6 border-2 border-slate-200 border-t-indigo-600 rounded-full" />
+            <div className="h-6 w-6 border-2 border-slate-200 border-t-teal-600 rounded-full" />
           </motion.div>
           Checking your account…
         </div>
@@ -85,7 +85,7 @@ export function WelcomeScreen() {
             <span className="liquid-metal-text leading-[1.1] block">
               Transform your renovation
             </span>
-            <span className="text-indigo-600">into a financial plan</span>
+            <span className="text-teal-600">into a financial plan</span>
           </motion.h1>
 
           <motion.p
@@ -114,7 +114,7 @@ export function WelcomeScreen() {
                 <Button
                   size="lg"
                   variant="primary"
-                  className="w-full gap-2 group h-14 text-base shadow-xl shadow-indigo-500/20"
+                  className="w-full gap-2 group h-14 text-base shadow-xl shadow-teal-500/20"
                   onClick={() => navigate("/dashboard")}
                   type="button"
                 >
@@ -140,7 +140,7 @@ export function WelcomeScreen() {
                 <Button
                   size="lg"
                   variant="primary"
-                  className="w-full h-14 text-base shadow-xl shadow-indigo-500/20 group"
+                  className="w-full h-14 text-base shadow-xl shadow-teal-500/20 group"
                   onClick={() => navigate("/onboarding/type")}
                   type="button"
                 >
@@ -175,7 +175,7 @@ export function WelcomeScreen() {
             <Button
               size="lg"
               variant="primary"
-              className="w-full h-14 text-base shadow-xl shadow-indigo-500/20 group"
+              className="w-full h-14 text-base shadow-xl shadow-teal-500/20 group"
               onClick={() => navigate("/onboarding/type")}
               type="button"
             >
