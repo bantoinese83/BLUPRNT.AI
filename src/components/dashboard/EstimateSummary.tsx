@@ -103,9 +103,9 @@ export function EstimateSummary({
 
   return (
     <Card className="overflow-hidden border-slate-200/60 shadow-md shadow-slate-100/20 rounded-3xl">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-teal-950 via-teal-900 to-teal-950 text-white p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
         {/* Abstract background highlight */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-teal-400/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
 
         <div className="space-y-3 relative z-10">
           <div className="flex flex-wrap items-center gap-3">
@@ -131,11 +131,11 @@ export function EstimateSummary({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 pt-6 border-t border-slate-700/50"
+              className="mt-6 pt-6 border-t border-teal-800/50"
             >
               <button
                 onClick={onUpgradeClick}
-                className="group flex items-center gap-3 text-left hover:bg-slate-800/50 p-3 rounded-2xl transition-all"
+                className="group flex items-center gap-3 text-left hover:bg-teal-900/50 p-3 rounded-2xl transition-all"
               >
                 <div className="w-8 h-8 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                   <Hammer className="w-4 h-4" />
@@ -155,7 +155,7 @@ export function EstimateSummary({
 
         <div className="flex flex-col items-start md:items-end gap-3 relative z-10">
           <Badge
-            className="bg-slate-800 text-slate-300 border-slate-700 font-bold px-3 py-1 rounded-lg"
+            className="bg-teal-950/90 text-teal-100 border-teal-800 font-bold px-3 py-1 rounded-lg"
             title="How well our estimate matches similar projects in your area"
           >
             {conf * 20}% Confidence

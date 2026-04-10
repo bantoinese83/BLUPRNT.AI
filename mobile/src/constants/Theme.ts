@@ -1,6 +1,6 @@
 /**
  * BLUPRNT design tokens — keep in sync with web `src/index.css` `@theme` block
- * (surface, accent teal, slate text, primary CTA slate-900).
+ * (surface, accent teal, neutral text ink, primary CTA deep teal — matches web tokens).
  *
  * Layout principles (spacing / type / color):
  * — Avoid pure #000 for text; use slate/gray-900-scale inks for comfortable contrast.
@@ -23,10 +23,10 @@ export const Theme = {
       deep: "#115e59", // Teal 800
     },
 
-    // Primary CTA gradient — matches web `.liquid-metal-button` (slate-900 base)
+    // Primary CTA gradient — matches web `.premium-gradient` / `.liquid-metal-button`
     cta: {
-      from: "#0f172a",
-      to: "#1e293b",
+      from: "#042f2e",
+      to: "#134e4a",
     },
 
     // Text — ink tones (never pure black #000 for primary body copy)
@@ -114,7 +114,7 @@ export const Theme = {
 
   shadows: {
     soft: {
-      shadowColor: "#0f172a",
+      shadowColor: "#042f2e",
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.15,
       shadowRadius: 16,
@@ -129,14 +129,14 @@ export const Theme = {
     },
     /** Neutral card drop — matches web `--shadow-drop-md` */
     card: {
-      shadowColor: "#0f172a",
+      shadowColor: "#042f2e",
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.1,
       shadowRadius: 18,
       elevation: 5,
     },
     cardElevated: {
-      shadowColor: "#0f172a",
+      shadowColor: "#042f2e",
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.12,
       shadowRadius: 28,

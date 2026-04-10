@@ -20,7 +20,7 @@ export function ScopeSummary({
           {money(minTotal, maxTotal)}
         </div>
       </div>
-      <Badge className="bg-slate-800 text-slate-300 border-slate-700">
+      <Badge className="bg-teal-950/90 text-teal-100 border-teal-800">
         Confidence: {confidenceScore}/5
       </Badge>
     </div>

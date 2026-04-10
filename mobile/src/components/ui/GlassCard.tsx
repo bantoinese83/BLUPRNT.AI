@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.glass.border,
     ...Platform.select({
       ios: {
-        shadowColor: "#0f172a",
+        shadowColor: "#042f2e",
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.1,
         shadowRadius: 20,

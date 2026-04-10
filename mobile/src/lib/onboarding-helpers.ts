@@ -10,9 +10,23 @@ export type ProjectTypeOption =
   | "Flooring"
   | "Something else";
 export type StageOption =
-  | "Planning & budgeting"
+  | "Just planning"
   | "Collecting quotes"
   | "Already started work";
+
+/** Migrate drafts saved before stage labels were aligned with web. */
+export function normalizeStageFromDraft(
+  raw: string | null | undefined,
+): StageOption | null {
+  if (!raw) return null;
+  if (raw === "Planning & budgeting") return "Just planning";
+  const valid: StageOption[] = [
+    "Just planning",
+    "Collecting quotes",
+    "Already started work",
+  ];
+  return valid.includes(raw as StageOption) ? (raw as StageOption) : null;
+}
 
 export const DEFAULT_ESTIMATE_MIN = 24000;
 export const DEFAULT_ESTIMATE_MAX = 31000;

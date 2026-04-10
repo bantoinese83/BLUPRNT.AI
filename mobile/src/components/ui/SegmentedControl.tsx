@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
+import { Theme } from "../../constants/Theme";
 
 interface Option {
   label: string;
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
     fontFamily: "Outfit_700Bold",
   },
   activeLabel: {
-    color: "#0f172a", // Deep Slate-900 for readability
+    color: Theme.colors.text.primary,
   },
   inactiveLabel: {
     color: "#64748b", // Slate-500

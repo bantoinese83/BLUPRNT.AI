@@ -99,13 +99,7 @@ export function ProjectSwitcher({
                   p.id === currentId && styles.activeIconContainer,
                 ]}
               >
-                <ProjectIcon
-                  name={p.name}
-                  size={14}
-                  color={
-                    p.id === currentId ? "white" : Theme.colors.brand.primary
-                  }
-                />
+                <ProjectIcon name={p.name} size={14} />
               </MotiView>
               <View style={styles.textContainer}>
                 <Text

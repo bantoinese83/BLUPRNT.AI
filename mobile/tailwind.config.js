@@ -13,8 +13,8 @@ module.exports = {
         // Grocery-style OLED tokens (optional; use with dark mode surfaces)
         element: "#18181A",
         selected: "#2E3135",
-        primary: "#0f172a",
-        "primary-hover": "#020617",
+        primary: "#134e4a",
+        "primary-hover": "#115e59",
         "primary-muted": "#f8fafc",
         surface: "#f9fafb",
         accent: "#4f46e5",

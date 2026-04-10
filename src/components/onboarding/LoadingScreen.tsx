@@ -80,7 +80,7 @@ export function LoadingScreen() {
 
         <div className="mt-12 w-full max-w-[240px] h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
           <motion.div
-            className="absolute inset-y-0 left-0 bg-teal-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"
+            className="absolute inset-y-0 left-0 bg-teal-600 rounded-full shadow-[0_0_12px_rgba(13,148,136,0.35)]"
             initial={{ width: "2%" }}
             animate={{ width: estimateError ? "100%" : "92%" }}
             transition={{

@@ -94,15 +94,11 @@ export function ProjectTypeScreen() {
                     <div
                       className={`rounded-xl sm:rounded-2xl p-2.5 sm:p-3 transition-all duration-300 ${
                         selected
-                          ? "bg-teal-600 text-white shadow-lg shadow-teal-200"
-                          : "bg-slate-50 text-slate-500"
+                          ? "bg-white/95 shadow-md shadow-teal-900/10 ring-1 ring-white/60"
+                          : "bg-white ring-1 ring-slate-100 shadow-sm"
                       }`}
                     >
-                      <Icon
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        strokeWidth={2.5}
-                        aria-hidden
-                      />
+                      <Icon className="w-8 h-8 sm:w-9 sm:h-9" aria-hidden />
                     </div>
                     <span
                       className={`font-bold text-xs sm:text-sm leading-tight transition-colors ${

@@ -127,7 +127,7 @@ export function PropertyLedger({
 
         <CardHeader className="pb-5 pt-7 px-6 sm:px-8 relative">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-900 to-slate-800 p-3 text-white shadow-2xl shadow-slate-200 ring-4 ring-white/50 flex items-center justify-center shrink-0 animate-float">
+            <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-teal-950 to-teal-900 p-3 text-white shadow-2xl shadow-teal-900/20 ring-4 ring-white/50 flex items-center justify-center shrink-0 animate-float">
               <BookOpen className="w-7 h-7" strokeWidth={2} aria-hidden />
             </div>
 

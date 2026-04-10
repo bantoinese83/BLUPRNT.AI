@@ -84,7 +84,7 @@ export function ResaleValueImpact({
                   y2="0%"
                 >
                   <stop offset="0%" stopColor="transparent" />
-                  <stop offset="100%" stopColor="#0f172a" />
+                  <stop offset="100%" stopColor="#134e4a" />
                 </linearGradient>
               </defs>
               <motion.path
@@ -105,13 +105,13 @@ export function ResaleValueImpact({
                 cx="300"
                 cy="10"
                 r="6"
-                fill="#0f172a"
-                className="drop-shadow-[0_0_8px_rgba(15,23,42,0.5)]"
+                fill="#134e4a"
+                className="drop-shadow-[0_0_8px_rgba(19,78,74,0.45)]"
               />
             </svg>
           </div>
           <div className="flex justify-end">
-            <div className="rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white animate-pulse">
+            <div className="rounded-lg bg-teal-950 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white animate-pulse">
               Peak ROI
             </div>
           </div>

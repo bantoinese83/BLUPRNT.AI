@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontFamily: "Outfit_800ExtraBold",
-    color: "#0f172a",
+    color: Theme.colors.text.primary,
     textAlign: "center",
     marginBottom: 12,
   },

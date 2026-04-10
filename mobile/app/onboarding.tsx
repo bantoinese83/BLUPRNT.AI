@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -7,6 +7,8 @@ import {
   TextInput,
   Alert,
   Image,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
@@ -16,8 +18,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Camera,
-  Image as ImageIcon,
   Sparkles,
   AlertCircle,
   ArrowRight,
@@ -29,6 +29,7 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
+  MapPin,
 } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import { money } from "../../shared/lib/formatters";
@@ -45,6 +46,7 @@ import {
   PhotoToScopeResult,
   DEFAULT_ESTIMATE_CONFIDENCE,
   ONBOARDING_SESSION_INVALID,
+  normalizeStageFromDraft,
   type ScopeItem,
 } from "../src/lib/onboarding-helpers";
 import {
@@ -53,10 +55,15 @@ import {
   clearOnboardingDraft,
 } from "../src/lib/onboarding-draft";
 import { ProjectIcon } from "../src/lib/project-icons";
+import { Image as ExpoImage } from "expo-image";
+import galleryAsset from "../assets/onboarding/gallery.svg";
+import cameraAsset from "../assets/onboarding/camera.svg";
 import { supabase, invokeFunction } from "../src/lib/supabase";
 import { useAuth } from "../src/contexts/auth-context";
 import { Theme } from "../src/constants/Theme";
 import { getRangeForType } from "../src/constants/estimateRanges";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { resolveZipFromCurrentLocation } from "../src/lib/zip-from-location";
 
 /** Seven internal steps; progress UI is grouped into three phases below. */
 const ONBOARDING_LAST_STEP_INDEX = 6;
@@ -71,6 +78,15 @@ function phaseIndexForStep(step: number): number {
   if (step <= 3) return 0;
   if (step <= 5) return 1;
   return 2;
+}
+
+function hasValidOnboardingZip(locationInput: string): boolean {
+  return /^\d{5}$/.test(locationInput.trim());
+}
+
+function onboardingZipCode(locationInput: string): string {
+  const digits = locationInput.replace(/\D/g, "").slice(0, 5);
+  return hasValidOnboardingZip(locationInput) ? locationInput.trim() : digits;
 }
 
 const ANALYSIS_MESSAGES = [
@@ -167,6 +183,7 @@ function MaterialDetailList({
 }
 
 export default function OnboardingScreen() {
+  const insets = useSafeAreaInsets();
   const { user, session, signOut } = useAuth();
   const { newProject: newProjectParam, restoreOnboarding } =
     useLocalSearchParams<{
@@ -196,16 +213,84 @@ export default function OnboardingScreen() {
     confidence: number;
   } | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [locatingZip, setLocatingZip] = useState(false);
 
   /** Step 4: ignore late analysis results if the user left analysis. */
   const analysisStepActiveRef = React.useRef(false);
 
+  const handleFillZipFromLocation = React.useCallback(async () => {
+    try {
+      setLocatingZip(true);
+      const result = await resolveZipFromCurrentLocation();
+      if (result.ok) {
+        setLocation(result.zip);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        );
+        return;
+      }
+      if (result.reason === "denied") {
+        Alert.alert(
+          "Location access needed",
+          "Allow location for this app in Settings to suggest your ZIP—or type it in.",
+        );
+        return;
+      }
+      if (result.reason === "unavailable") {
+        Alert.alert(
+          "Location is off",
+          "Turn on location services to use this, or enter your ZIP manually.",
+        );
+        return;
+      }
+      Alert.alert(
+        "Couldn’t find your ZIP",
+        "We couldn’t match this area to a ZIP code. Please enter it manually.",
+      );
+    } catch {
+      Alert.alert(
+        "Something went wrong",
+        "Try again in a moment, or type your ZIP code.",
+      );
+    } finally {
+      setLocatingZip(false);
+    }
+  }, []);
+
+  const canContinue = useMemo(() => {
+    switch (step) {
+      case 0:
+        return projectType != null;
+      case 1:
+        return hasValidOnboardingZip(location);
+      case 2:
+        return stage != null;
+      case 3:
+        return photos.length > 0 || scopeDescription.trim().length > 0;
+      case 5:
+        return true;
+      default:
+        return true;
+    }
+  }, [step, projectType, location, stage, photos, scopeDescription]);
+
   const runAnalysis = React.useCallback(async () => {
     try {
+      if (photos.length === 0 && !scopeDescription?.trim()) {
+        if (!analysisStepActiveRef.current) return;
+        const range = getRangeForType(projectType);
+        setEstimate({
+          min: range.min,
+          max: range.max,
+          scope: [],
+          confidence: DEFAULT_ESTIMATE_CONFIDENCE,
+        });
+        setStep(5);
+        return;
+      }
+
       const fd = new FormData();
-      // Extract zip from location string (simple 5-digit match)
-      const zipMatch = location.match(/\d{5}/);
-      const zip = zipMatch ? zipMatch[0] : "00000";
+      const zip = onboardingZipCode(location) || "00000";
 
       fd.append("zip_code", zip);
       fd.append("room_type", projectTypeToRoomType(projectType));
@@ -254,7 +339,9 @@ export default function OnboardingScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setStep(5);
     } catch (err) {
-      console.error("Analysis Error:", err);
+      if (__DEV__) {
+        console.warn("Onboarding analysis used fallback:", err);
+      }
       if (!analysisStepActiveRef.current) return;
       // Fallback to a type-based range if AI fails, but mark it clearly
       const range = getRangeForType(projectType);
@@ -319,7 +406,7 @@ export default function OnboardingScreen() {
       if (cancelled || !draft) return;
       setProjectType(draft.projectType);
       setLocation(draft.location);
-      setStage(draft.stage);
+      setStage(normalizeStageFromDraft(String(draft.stage ?? "")));
       setPhotos(draft.photos);
       setScopeDescription(draft.scopeDescription);
       setEstimate(
@@ -360,6 +447,7 @@ export default function OnboardingScreen() {
   }, [step]);
 
   const handleNext = () => {
+    if (step <= 3 && !canContinue) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (step === 3) {
       setStep(4);
@@ -463,7 +551,10 @@ export default function OnboardingScreen() {
             exit={{ opacity: 0, translateX: -50 }}
             key="step0"
           >
-            <Text style={styles.stepTitle}>What are you planning?</Text>
+            <Text style={styles.stepTitle}>What are you working on first?</Text>
+            <Text style={styles.stepSubtitle}>
+              You can add more projects later.
+            </Text>
             <View style={styles.iconGrid}>
               {[
                 { name: "Kitchen" },
@@ -490,15 +581,7 @@ export default function OnboardingScreen() {
                       projectType === opt.name && styles.iconCircleBigActive,
                     ]}
                   >
-                    <ProjectIcon
-                      name={opt.name}
-                      size={32}
-                      color={
-                        projectType === opt.name
-                          ? Theme.colors.brand.primary
-                          : Theme.colors.text.secondary
-                      }
-                    />
+                    <ProjectIcon name={opt.name} size={36} />
                   </View>
                   <Text
                     style={[
@@ -526,21 +609,56 @@ export default function OnboardingScreen() {
             exit={{ opacity: 0, translateX: -50 }}
             key="step1"
           >
-            <Text style={styles.stepTitle}>Where is the project?</Text>
+            <Text style={styles.stepTitle}>Where is this home?</Text>
             <Text style={styles.stepSubtitle}>
-              ZIP code helps us ground labor costs.
+              We use your area to ground costs in real numbers, not guesses.
             </Text>
             <GlassCard intensity={20} style={styles.inputCard}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter ZIP code"
-                placeholderTextColor={Theme.colors.text.muted}
-                value={location}
-                onChangeText={setLocation}
-                keyboardType="numeric"
-                maxLength={5}
-              />
+              <View style={styles.zipInputRow}>
+                <TextInput
+                  style={styles.zipTextInput}
+                  placeholder="Enter ZIP code"
+                  placeholderTextColor={Theme.colors.text.muted}
+                  value={location}
+                  onChangeText={setLocation}
+                  keyboardType="number-pad"
+                  inputMode="numeric"
+                  maxLength={5}
+                  editable={!locatingZip}
+                  accessibilityLabel="ZIP code"
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.zipLocateButton,
+                    locatingZip && styles.zipLocateButtonDisabled,
+                  ]}
+                  onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void handleFillZipFromLocation();
+                  }}
+                  disabled={locatingZip}
+                  accessibilityRole="button"
+                  accessibilityLabel="Use current location to fill ZIP code"
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                >
+                  {locatingZip ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={Theme.colors.brand.primary}
+                    />
+                  ) : (
+                    <MapPin
+                      size={22}
+                      color={Theme.colors.brand.primary}
+                      strokeWidth={2}
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
             </GlassCard>
+            <Text style={styles.zipLocateHint}>
+              Tap the pin to use this device’s location once for your ZIP.
+            </Text>
           </MotiView>
         );
       case 2:
@@ -551,13 +669,27 @@ export default function OnboardingScreen() {
             exit={{ opacity: 0, translateX: -50 }}
             key="step2"
           >
-            <Text style={styles.stepTitle}>Project stage?</Text>
+            <Text style={styles.stepTitle}>Where are you in the process?</Text>
             <View style={{ gap: 12, marginTop: 20 }}>
-              {[
-                { name: "Planning & budgeting" },
-                { name: "Collecting quotes" },
-                { name: "Already started work" },
-              ].map((s) => (
+              {(
+                [
+                  {
+                    name: "Just planning" as const,
+                    description:
+                      "Exploring possibilities and getting a rough idea of costs.",
+                  },
+                  {
+                    name: "Collecting quotes" as const,
+                    description:
+                      "Actively talking to contractors and comparing estimates.",
+                  },
+                  {
+                    name: "Already started work" as const,
+                    description:
+                      "Managing an ongoing project and tracking expenses.",
+                  },
+                ] as const
+              ).map((s) => (
                 <TouchableOpacity
                   key={s.name}
                   style={[
@@ -566,7 +698,7 @@ export default function OnboardingScreen() {
                   ]}
                   onPress={() => {
                     Haptics.selectionAsync();
-                    setStage(s.name as StageOption);
+                    setStage(s.name);
                   }}
                 >
                   <View
@@ -575,24 +707,19 @@ export default function OnboardingScreen() {
                       stage === s.name && styles.stageIconContainerActive,
                     ]}
                   >
-                    <ProjectIcon
-                      name={s.name}
-                      size={24}
-                      color={
-                        stage === s.name
-                          ? Theme.colors.brand.primary
-                          : Theme.colors.text.secondary
-                      }
-                    />
+                    <ProjectIcon name={s.name} size={28} />
                   </View>
-                  <Text
-                    style={[
-                      styles.stageText,
-                      stage === s.name && styles.stageTextActive,
-                    ]}
-                  >
-                    {s.name}
-                  </Text>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text
+                      style={[
+                        styles.stageText,
+                        stage === s.name && styles.stageTextActive,
+                      ]}
+                    >
+                      {s.name}
+                    </Text>
+                    <Text style={styles.stageDescription}>{s.description}</Text>
+                  </View>
                   {stage === s.name && (
                     <Check size={20} color={Theme.colors.brand.primary} />
                   )}
@@ -610,12 +737,42 @@ export default function OnboardingScreen() {
             key="step3"
             style={styles.visionContainer}
           >
-            <Text style={styles.stepTitle}>Vision-Match</Text>
+            <Text style={styles.stepTitle}>Vision-Match your room</Text>
             <Text style={styles.stepSubtitle}>
-              Snap a photo or upload for a high-fidelity estimate.
+              Add at least one photo or a short description so we can tailor
+              your estimate.
             </Text>
 
             <View style={styles.visionActions}>
+              <TouchableOpacity
+                style={styles.visionButton}
+                onPress={async () => {
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: "images",
+                    quality: 0.8,
+                    allowsMultipleSelection: true,
+                  });
+                  if (!result.canceled) {
+                    setPhotos([...photos, ...result.assets.map((a) => a.uri)]);
+                  }
+                }}
+              >
+                <View
+                  style={[
+                    styles.visionIcon,
+                    { backgroundColor: Theme.colors.brand.primary + "18" },
+                  ]}
+                >
+                  <ExpoImage
+                    source={galleryAsset}
+                    style={styles.visionAsset}
+                    contentFit="contain"
+                  />
+                </View>
+                <Text style={styles.visionLabel}>Gallery</Text>
+                <Text style={styles.visionHint}>Upload photos</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.visionButton}
                 onPress={async () => {
@@ -633,36 +790,17 @@ export default function OnboardingScreen() {
                 <View
                   style={[
                     styles.visionIcon,
-                    { backgroundColor: Theme.colors.brand.primary + "20" },
+                    { backgroundColor: Theme.colors.brand.primary + "18" },
                   ]}
                 >
-                  <Camera size={24} color={Theme.colors.brand.light} />
+                  <ExpoImage
+                    source={cameraAsset}
+                    style={styles.visionAsset}
+                    contentFit="contain"
+                  />
                 </View>
                 <Text style={styles.visionLabel}>Camera</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.visionButton}
-                onPress={async () => {
-                  const result = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: "images",
-                    quality: 0.8,
-                    allowsMultipleSelection: true,
-                  });
-                  if (!result.canceled) {
-                    setPhotos([...photos, ...result.assets.map((a) => a.uri)]);
-                  }
-                }}
-              >
-                <View
-                  style={[
-                    styles.visionIcon,
-                    { backgroundColor: "rgba(167, 139, 250, 0.15)" },
-                  ]}
-                >
-                  <ImageIcon size={24} color={Theme.colors.brand.light} />
-                </View>
-                <Text style={styles.visionLabel}>Gallery</Text>
+                <Text style={styles.visionHint}>Snap your space</Text>
               </TouchableOpacity>
             </View>
 
@@ -692,7 +830,7 @@ export default function OnboardingScreen() {
             <GlassCard intensity={15} style={styles.scopeInputCard}>
               <TextInput
                 style={styles.scopeInput}
-                placeholder="Add project details (optional)..."
+                placeholder="Or describe the project here…"
                 placeholderTextColor={Theme.colors.text.secondary}
                 multiline
                 value={scopeDescription}
@@ -749,7 +887,7 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            <Text style={styles.analysisTitle}>Analyzing your blueprint</Text>
+            <Text style={styles.analysisTitle}>Building your BLUPRNT</Text>
             <MotiView
               key={analysisIndex}
               from={{ opacity: 0, translateY: 8 }}
@@ -763,19 +901,24 @@ export default function OnboardingScreen() {
             </MotiView>
 
             <View
-              style={styles.analysisPhaseDots}
+              style={styles.analysisProgressTrack}
               accessibilityRole="progressbar"
+              accessibilityLabel="Analysis in progress"
             >
-              {ANALYSIS_MESSAGES.map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.analysisPhaseDot,
-                    i === analysisIndex && styles.analysisPhaseDotActive,
-                  ]}
-                />
-              ))}
+              <MotiView
+                style={styles.analysisProgressChunk}
+                from={{ left: "-40%" }}
+                animate={{ left: "100%" }}
+                transition={{
+                  type: "timing",
+                  duration: 1800,
+                  loop: true,
+                }}
+              />
             </View>
+            <Text style={styles.analysisProgressCaption}>
+              This usually takes a few seconds
+            </Text>
           </MotiView>
         );
       case 5:
@@ -787,19 +930,16 @@ export default function OnboardingScreen() {
             key="step5"
             style={styles.step5Column}
           >
-            <Text style={styles.stepTitle}>You're Ready</Text>
+            <Text style={styles.stepTitle}>Your BLUPRNT is ready</Text>
             <Text style={styles.stepSubtitle}>
-              Based on market data for {location}.
+              Based on market data for{" "}
+              {hasValidOnboardingZip(location) ? location.trim() : "your area"}.
             </Text>
 
             <GlassCard intensity={30} style={styles.estimateCard}>
               <View style={styles.estimateHeader}>
                 <View style={styles.estimateIconCircle}>
-                  <ProjectIcon
-                    name={projectType || ""}
-                    size={32}
-                    color={Theme.colors.brand.primary}
-                  />
+                  <ProjectIcon name={projectType || ""} size={36} />
                 </View>
                 <View style={styles.confidenceBadge}>
                   <Sparkles size={12} color={Theme.colors.brand.light} />
@@ -945,7 +1085,8 @@ export default function OnboardingScreen() {
               ) : (
                 <View style={{ gap: 16 }}>
                   <Button
-                    title="Create Free Account"
+                    title="Create free account"
+                    titleCase="sentence"
                     onPress={() => {
                       Haptics.selectionAsync();
                       void persistOnboardingDraft({
@@ -969,7 +1110,8 @@ export default function OnboardingScreen() {
                     icon={<UserPlus size={20} color="white" />}
                   />
                   <Button
-                    title="Sign In"
+                    title="Sign in"
+                    titleCase="sentence"
                     variant="outline"
                     onPress={() => {
                       Haptics.selectionAsync();
@@ -1020,63 +1162,99 @@ export default function OnboardingScreen() {
 
   return (
     <ScreenWrapper
-      withScroll
+      withScroll={false}
       withTabBar={false}
       withKeyboard
       edges={["top", "bottom", "left", "right"]}
     >
       <StatusBar style="dark" />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <ChevronLeft size={24} color={Theme.colors.text.primary} />
-        </TouchableOpacity>
-        <View style={styles.progressHeader}>
-          <View style={styles.progressContainer}>
-            {ONBOARDING_PHASES.map((_, i) => {
-              const phaseNow = phaseIndexForStep(step);
-              return (
-                <View
-                  key={i}
-                  style={[
-                    styles.progressBar,
-                    { flex: 1 },
-                    i > 0 && { marginLeft: 8 },
-                    i <= phaseNow && styles.progressBarActive,
-                  ]}
-                />
-              );
-            })}
+      <View style={styles.screenColumn}>
+        <View style={styles.header}>
+          <View style={styles.headerNavRow}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <ChevronLeft size={24} color={Theme.colors.text.primary} />
+            </TouchableOpacity>
           </View>
-          <Text style={styles.phaseLabel} numberOfLines={1}>
-            {ONBOARDING_PHASES[phaseIndexForStep(step)].label}
-          </Text>
+          <View style={styles.progressSection}>
+            <View style={styles.progressContainer}>
+              {ONBOARDING_PHASES.map((_, i) => {
+                const phaseNow = phaseIndexForStep(step);
+                return (
+                  <View
+                    key={i}
+                    style={[
+                      styles.progressBar,
+                      { flex: 1 },
+                      i > 0 && { marginLeft: 8 },
+                      i <= phaseNow && styles.progressBarActive,
+                    ]}
+                  />
+                );
+              })}
+            </View>
+            <Text style={styles.phaseLabel} numberOfLines={1}>
+              {ONBOARDING_PHASES[phaseIndexForStep(step)].label}
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.content}>
-        <AnimatePresence exitBeforeEnter>{renderStep()}</AnimatePresence>
-      </View>
+        <ScrollView
+          style={styles.stepScroll}
+          contentContainerStyle={styles.stepScrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <AnimatePresence exitBeforeEnter>{renderStep()}</AnimatePresence>
+        </ScrollView>
 
-      {step < ONBOARDING_LAST_STEP_INDEX && (
-        <View style={styles.footer}>
-          <Button
-            title="Continue"
-            onPress={handleNext}
-            loading={loading}
-            icon={<ChevronRight size={20} color="white" />}
-          />
-        </View>
-      )}
+        {step < ONBOARDING_LAST_STEP_INDEX && step !== 4 && (
+          <View
+            style={[
+              styles.footer,
+              { paddingBottom: Math.max(insets.bottom, 14) },
+            ]}
+          >
+            <Button
+              title="Continue"
+              titleCase="sentence"
+              onPress={handleNext}
+              loading={loading}
+              disabled={step <= 3 && !canContinue}
+              accessibilityLabel={
+                step <= 3 && !canContinue
+                  ? "Continue, complete this step first"
+                  : "Continue"
+              }
+              icon={<ChevronRight size={20} color="white" />}
+            />
+          </View>
+        )}
+      </View>
     </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
+  screenColumn: {
+    flex: 1,
+  },
+  stepScroll: {
+    flex: 1,
+  },
+  stepScrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 0,
+    paddingBottom: 16,
+  },
   header: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  headerNavRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
-    marginTop: 10,
   },
   iconGrid: {
     flexDirection: "row",
@@ -1183,9 +1361,16 @@ const styles = StyleSheet.create({
   stageTextActive: {
     color: Theme.colors.brand.primary,
   },
-  progressHeader: {
-    flex: 1,
-    minWidth: 0,
+  stageDescription: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  progressSection: {
+    marginTop: 16,
+    width: "100%",
   },
   progressContainer: {
     flexDirection: "row",
@@ -1193,7 +1378,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   phaseLabel: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 12,
     fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.text.secondary,
@@ -1206,11 +1391,6 @@ const styles = StyleSheet.create({
   },
   progressBarActive: {
     backgroundColor: Theme.colors.brand.primary,
-  },
-  content: {
-    padding: 24,
-    flex: 1,
-    width: "100%",
   },
   step5Column: {
     width: "100%",
@@ -1282,6 +1462,45 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.primary,
     letterSpacing: 2,
   },
+  zipInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 64,
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    overflow: "hidden",
+  },
+  zipTextInput: {
+    flex: 1,
+    minHeight: 64,
+    paddingLeft: 20,
+    paddingRight: 8,
+    fontSize: 28,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    letterSpacing: 2,
+  },
+  zipLocateButton: {
+    width: 52,
+    height: 52,
+    marginRight: 8,
+    borderRadius: 16,
+    backgroundColor: "rgba(13, 148, 136, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  zipLocateButtonDisabled: {
+    opacity: 0.65,
+  },
+  zipLocateHint: {
+    marginTop: 12,
+    fontSize: 13,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 18,
+  },
   reviewCard: {
     padding: 24,
     borderRadius: 24,
@@ -1302,7 +1521,12 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.primary,
   },
   footer: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(15, 23, 42, 0.08)",
+    backgroundColor: "rgba(255, 255, 255, 0.72)",
   },
   visionContainer: {
     flex: 1,
@@ -1333,6 +1557,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
+  },
+  visionHint: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    marginTop: 4,
+  },
+  visionAsset: {
+    width: 32,
+    height: 32,
   },
   photoGrid: {
     flexDirection: "row",
@@ -1420,22 +1654,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 8,
   },
-  analysisPhaseDots: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+  analysisProgressTrack: {
+    position: "relative",
     marginTop: 28,
+    width: "72%",
+    maxWidth: 280,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(15, 23, 42, 0.08)",
+    overflow: "hidden",
   },
-  analysisPhaseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(15, 23, 42, 0.12)",
-  },
-  analysisPhaseDotActive: {
-    width: 18,
-    borderRadius: 3,
+  analysisProgressChunk: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: "42%",
+    borderRadius: 2,
     backgroundColor: Theme.colors.brand.primary,
+  },
+  analysisProgressCaption: {
+    marginTop: 10,
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
   },
   analysisCircle: {
     width: 132,
@@ -1451,7 +1692,7 @@ const styles = StyleSheet.create({
     borderRadius: 52,
   },
   pulseCircleOuter: {
-    backgroundColor: "rgba(99, 102, 241, 0.35)",
+    backgroundColor: "rgba(13, 148, 136, 0.28)",
   },
   pulseCircleInner: {
     backgroundColor: "rgba(13, 148, 136, 0.45)",
@@ -1465,7 +1706,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderWidth: 1,
     borderColor: "rgba(15, 23, 42, 0.06)",
-    shadowColor: "#0f172a",
+    shadowColor: "#042f2e",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
     shadowRadius: 20,
@@ -1764,7 +2005,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   activeViewDetailsBtn: {
-    backgroundColor: Theme.colors.text.primary,
+    backgroundColor: "#134e4a",
   },
   viewDetailsText: {
     fontSize: 11,

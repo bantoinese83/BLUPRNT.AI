@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, ImagePlus, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
@@ -69,8 +69,12 @@ export function PhotoScreen() {
             className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-teal-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
-              <ImagePlus className="w-8 h-8 text-teal-600" />
+            <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 p-3">
+              <img
+                src="/assets/icons/home-improvements/032-ideas.svg"
+                alt=""
+                className="h-full w-full object-contain"
+              />
             </div>
             <span className="text-slate-900 font-bold">Gallery</span>
             <span className="text-slate-400 text-xs mt-1 font-medium">
@@ -93,8 +97,12 @@ export function PhotoScreen() {
             className="group relative flex flex-col items-center justify-center p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-teal-200 hover:bg-slate-50/50 transition-all duration-300 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
-              <Camera className="w-8 h-8 text-teal-600" />
+            <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 p-3">
+              <img
+                src="/assets/icons/home-improvements/071-security camera.svg"
+                alt=""
+                className="h-full w-full object-contain"
+              />
             </div>
             <span className="text-slate-900 font-bold">Camera</span>
             <span className="text-slate-400 text-xs mt-1 font-medium">
@@ -104,10 +112,12 @@ export function PhotoScreen() {
         </div>
 
         <div className="rounded-3xl bg-slate-50/80 p-5 border border-slate-100 flex gap-4 items-start shadow-sm ring-1 ring-slate-200/40">
-          <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0 ring-1 ring-slate-100">
-            <span className="text-xl" role="img" aria-label="light bulb">
-              💡
-            </span>
+          <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0 ring-1 ring-slate-100 p-1.5">
+            <img
+              src="/assets/icons/home-improvements/048-light bulb.svg"
+              alt=""
+              className="h-full w-full object-contain"
+            />
           </div>
           <div className="space-y-1.5 pt-0.5">
             <p className="text-sm font-black text-slate-900 leading-tight uppercase tracking-wider">

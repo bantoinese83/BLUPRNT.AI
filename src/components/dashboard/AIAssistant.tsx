@@ -189,7 +189,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-2xl bg-teal-600 border border-teal-500 flex items-center justify-center text-white shadow-2xl relative overflow-hidden group"
+        className="w-14 h-14 rounded-2xl bg-teal-950 border border-teal-800 flex items-center justify-center text-white shadow-2xl shadow-teal-950/30 relative overflow-hidden group hover:bg-teal-900 transition-colors"
       >
         <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
         <div className="absolute inset-0 noise-overlay opacity-10" />

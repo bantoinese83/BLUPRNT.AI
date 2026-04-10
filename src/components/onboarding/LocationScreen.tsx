@@ -185,27 +185,29 @@ export function LocationScreen() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-2xl bg-teal-600 text-white shadow-xl shadow-teal-200/50 relative overflow-hidden group metal-surface"
+                className="relative overflow-hidden rounded-2xl border border-teal-200/90 bg-white p-4 shadow-md shadow-slate-200/40"
               >
-                <div className="absolute inset-0 noise-overlay opacity-10" />
-                <div className="relative z-10 space-y-2">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-teal-300 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-teal-200">
-                      Market Insight
+                    <Sparkles
+                      className="h-4 w-4 shrink-0 text-teal-600"
+                      aria-hidden
+                    />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-teal-800">
+                      Market insight
                     </span>
                   </div>
-                  <p className="text-sm font-bold leading-tight">
+                  <p className="text-sm font-semibold leading-snug text-slate-800">
                     In{" "}
                     {locationInput.includes(",")
                       ? locationInput.split(",")[0]
                       : "this area"}
-                    , Kitchen & Bath remodels are seeing a 12% higher ROI this
-                    quarter due to low inventory.
+                    , kitchen and bath remodels are seeing stronger resale
+                    interest this quarter as inventory stays tight.
                   </p>
-                  <p className="text-[10px] text-teal-200 font-medium">
-                    Our AI is grounding your estimate in recent local material
-                    surges.
+                  <p className="text-xs font-medium leading-relaxed text-slate-600">
+                    We use this signal to anchor labor and material baselines—
+                    not to replace a walk-through quote.
                   </p>
                 </div>
               </motion.div>

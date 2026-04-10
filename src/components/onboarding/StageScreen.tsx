@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "./PageTransition";
@@ -43,10 +43,10 @@ export function StageScreen() {
                 key={opt.id}
                 role="button"
                 tabIndex={0}
-                className={`cursor-pointer transition-all ${
+                className={`cursor-pointer border-2 transition-all ${
                   selected
-                    ? "border-slate-900 ring-2 ring-slate-100"
-                    : "hover:border-slate-300 hover:shadow-md"
+                    ? "border-teal-600 ring-4 ring-teal-50 shadow-lg bg-teal-50/20"
+                    : "border-slate-100 hover:border-slate-200 hover:shadow-md bg-white"
                 }`}
                 onClick={() => setStage(opt.id)}
                 onKeyDown={(e) => {
@@ -56,20 +56,20 @@ export function StageScreen() {
                   }
                 }}
               >
-                <CardContent className="p-5 flex items-center gap-4">
+                <CardContent className="p-5 flex items-center gap-4 relative">
                   <div
-                    className={`rounded-xl p-3 shrink-0 ${
+                    className={`rounded-xl p-3 shrink-0 ring-1 transition-all ${
                       selected
-                        ? "bg-slate-900 text-white"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-white shadow-sm ring-teal-100"
+                        : "bg-white ring-slate-100"
                     }`}
                   >
-                    <Icon className="w-5 h-5" strokeWidth={1.75} aria-hidden />
+                    <Icon className="w-8 h-8" aria-hidden />
                   </div>
-                  <div className="flex-1 text-left space-y-1">
+                  <div className="flex-1 text-left space-y-1 min-w-0">
                     <p
                       className={`font-bold transition-colors ${
-                        selected ? "text-slate-900" : "text-slate-800"
+                        selected ? "text-teal-950" : "text-slate-800"
                       }`}
                     >
                       {opt.id}
@@ -78,10 +78,15 @@ export function StageScreen() {
                       {opt.description}
                     </p>
                   </div>
-                  <ChevronRight
-                    className="w-5 h-5 text-slate-400 shrink-0"
-                    aria-hidden
-                  />
+                  {selected ? (
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600 text-white shadow-md shadow-teal-200">
+                      <Check
+                        className="w-5 h-5"
+                        strokeWidth={2.5}
+                        aria-hidden
+                      />
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
             );

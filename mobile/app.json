@@ -81,6 +81,12 @@
         }
       ],
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "BLUPRNT uses your location once to suggest your ZIP code for local cost estimates."
+        }
+      ],
+      [
         "@sentry/react-native",
         {
           "organization": "base83",

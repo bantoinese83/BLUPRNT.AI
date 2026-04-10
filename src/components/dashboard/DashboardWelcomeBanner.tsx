@@ -47,7 +47,7 @@ export function DashboardWelcomeBanner() {
               type="button"
               title="Upload an invoice"
               aria-label="Upload an invoice"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-600 bg-slate-900 text-white shadow-sm transition-colors hover:bg-slate-800 hover:border-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-teal-700 bg-teal-950 text-white shadow-sm transition-colors hover:bg-teal-900 hover:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/execute");

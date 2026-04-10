@@ -68,7 +68,10 @@ export function Loader({
     >
       {/* Enhanced Monochrome Loader */}
       <motion.div
-        className={cn("relative", config.container)}
+        className={cn(
+          "relative isolate [filter:drop-shadow(0_0_20px_rgba(13,148,136,0.22))] dark:[filter:none]",
+          config.container,
+        )}
         animate={reduceMotion ? { scale: 1 } : { scale: [1, 1.02, 1] }}
         transition={
           reduceMotion
@@ -80,14 +83,14 @@ export function Loader({
               }
         }
       >
-        {/* Outer ring — slate ink (matches --color-slate-900); hidden in dark — white rings below */}
+        {/* Outer ring — deep teal read on white (avoid low-contrast gray rings) */}
         <motion.div
           className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(17, 24, 39) 90deg, transparent 180deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 35%, black 37%, black 39%, transparent 41%)`,
-            opacity: 0.75,
+            background: `conic-gradient(from 0deg, transparent 0deg, rgb(15, 118, 110) 95deg, rgb(13, 148, 136) 155deg, transparent 255deg)`,
+            mask: `radial-gradient(circle at 50% 50%, transparent 30%, black 34%, black 46%, transparent 50%)`,
+            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 30%, black 34%, black 46%, transparent 50%)`,
+            opacity: 1,
           }}
           animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
           transition={
@@ -101,14 +104,14 @@ export function Loader({
           }
         />
 
-        {/* Primary ring — brand accent (--color-teal-600) */}
+        {/* Primary ring — bright teal arc */}
         <motion.div
           className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, rgb(13, 148, 136) 120deg, rgba(13, 148, 136, 0.35) 240deg, transparent 360deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 42%, black 44%, black 48%, transparent 50%)`,
-            opacity: 0.92,
+            background: `conic-gradient(from 40deg, transparent 0deg, rgb(20, 184, 166) 110deg, rgb(13, 148, 136) 200deg, rgba(13, 148, 136, 0.25) 280deg, transparent 360deg)`,
+            mask: `radial-gradient(circle at 50% 50%, transparent 38%, black 41%, black 49%, transparent 52%)`,
+            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 38%, black 41%, black 49%, transparent 52%)`,
+            opacity: 1,
           }}
           animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
           transition={
@@ -122,14 +125,14 @@ export function Loader({
           }
         />
 
-        {/* Secondary ring — counter rotation */}
+        {/* Secondary ring — counter rotation, slate for depth */}
         <motion.div
           className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 180deg, transparent 0deg, rgba(17, 24, 39, 0.45) 45deg, transparent 90deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 52%, black 54%, black 56%, transparent 58%)`,
-            opacity: 0.35,
+            background: `conic-gradient(from 180deg, transparent 0deg, rgb(71, 85, 105) 70deg, rgb(100, 116, 139) 130deg, transparent 220deg)`,
+            mask: `radial-gradient(circle at 50% 50%, transparent 50%, black 53%, black 58%, transparent 62%)`,
+            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 50%, black 53%, black 58%, transparent 62%)`,
+            opacity: 0.72,
           }}
           animate={reduceMotion ? { rotate: 0 } : { rotate: [0, -360] }}
           transition={
@@ -143,14 +146,14 @@ export function Loader({
           }
         />
 
-        {/* Accent highlight */}
+        {/* Accent — thin outer glint */}
         <motion.div
           className="absolute inset-0 rounded-full dark:hidden"
           style={{
-            background: `conic-gradient(from 270deg, transparent 0deg, rgba(13, 148, 136, 0.4) 20deg, transparent 40deg)`,
-            mask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
-            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 61%, black 62%, black 63%, transparent 64%)`,
-            opacity: 0.5,
+            background: `conic-gradient(from 270deg, transparent 0deg, rgb(45, 212, 191) 55deg, transparent 100deg)`,
+            mask: `radial-gradient(circle at 50% 50%, transparent 56%, black 58%, black 62%, transparent 66%)`,
+            WebkitMask: `radial-gradient(circle at 50% 50%, transparent 56%, black 58%, black 62%, transparent 66%)`,
+            opacity: 0.85,
           }}
           animate={reduceMotion ? { rotate: 0 } : { rotate: [0, 360] }}
           transition={

@@ -100,7 +100,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
             </button>
 
             {/* Left side: The Hook / visual */}
-            <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 text-white relative flex flex-col justify-center overflow-hidden">
+            <div className="md:w-5/12 bg-gradient-to-br from-teal-950 via-teal-900 to-teal-950 p-8 text-white relative flex flex-col justify-center overflow-hidden">
               {/* Decorative background elements */}
               <div className="absolute top-0 left-0 w-full h-full opacity-10">
                 <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white/20 flex items-center justify-center p-6 grayscale brightness-[10]">
@@ -235,7 +235,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                   <div className="space-y-3">
                     <Button
                       variant="primary"
-                      className="w-full py-6 rounded-2xl font-bold bg-slate-900 hover:bg-slate-800 text-white"
+                      className="w-full py-6 rounded-2xl font-bold bg-teal-950 hover:bg-teal-900 text-white"
                       onClick={() => onPlanSelect?.("architect")}
                     >
                       Use discount for Architect Plan

@@ -165,7 +165,7 @@ export function HelpWidget() {
           setIsOpen(!isOpen);
           setShowPulse(false);
         }}
-        className={`fixed bottom-6 ${location.pathname.startsWith("/dashboard") ? "left-6 sm:left-8" : "right-6 sm:right-8"} z-40 flex items-center justify-center w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 hover:bg-teal-600 transition-colors duration-300`}
+        className={`fixed bottom-6 ${location.pathname.startsWith("/dashboard") ? "left-6 sm:left-8" : "right-6 sm:right-8"} z-40 flex items-center justify-center w-12 h-12 bg-teal-950 text-white rounded-full shadow-lg shadow-teal-950/25 hover:bg-teal-800 transition-colors duration-300`}
         aria-label="Help and Support"
       >
         <MessageCircle className="w-6 h-6" />

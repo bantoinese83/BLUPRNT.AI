@@ -153,7 +153,7 @@ export function DashboardHeader({
                 Export packet
               </span>
               {!isArchitect && (
-                <span className="ml-1.5 hidden rounded-md bg-slate-900 px-1 py-0.5 text-[8px] font-black uppercase tracking-tighter text-white sm:inline">
+                <span className="ml-1.5 hidden rounded-md bg-teal-950 px-1 py-0.5 text-[8px] font-black uppercase tracking-tighter text-white sm:inline">
                   Pro
                 </span>
               )}

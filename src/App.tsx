@@ -54,7 +54,22 @@ export default function App() {
             <BrowserRouter>
               <a
                 href="#main-content"
-                className="fixed left-4 top-4 z-[100] -translate-y-[130%] rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition-transform focus:translate-y-0 focus:outline-none focus:ring-4 focus:ring-teal-300"
+                className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-24 focus-visible:z-[100] focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-xl focus-visible:bg-teal-950 focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white focus-visible:shadow-lg focus-visible:shadow-teal-950/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+                onClick={(e) => {
+                  const main = document.getElementById("main-content");
+                  if (!main) return;
+                  e.preventDefault();
+                  main.focus({ preventScroll: true });
+                  main.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== " ") return;
+                  const main = document.getElementById("main-content");
+                  if (!main) return;
+                  e.preventDefault();
+                  main.focus({ preventScroll: true });
+                  main.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
               >
                 Skip to main content
               </a>

@@ -112,7 +112,7 @@ export function EstimateScreen() {
           className="relative"
         >
           <div className="absolute -inset-4 bg-teal-500/10 blur-2xl rounded-[3rem] -z-10 animate-pulse" />
-          <Card className="border-teal-100 shadow-[0_20px_50px_rgba(79,70,229,0.1)] overflow-hidden bg-white/80 backdrop-blur-xl ring-1 ring-white/50">
+          <Card className="border-teal-100 shadow-[0_20px_50px_rgba(13,148,136,0.12)] overflow-hidden bg-white/80 backdrop-blur-xl ring-1 ring-white/50">
             <div className="bg-gradient-to-b from-teal-50/50 to-transparent p-8 flex flex-col items-center text-center space-y-4">
               <Badge
                 variant="secondary"
@@ -128,7 +128,7 @@ export function EstimateScreen() {
                 </p>
                 <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter py-2">
                   <Highlighter
-                    color="rgba(99, 102, 241, 0.15)"
+                    color="rgba(13, 148, 136, 0.14)"
                     strokeWidth={12}
                     delay={1}
                   >

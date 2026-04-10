@@ -23,6 +23,8 @@ interface Props {
   textSize?: number;
   /** Overrides visible title for screen readers when needed */
   accessibilityLabel?: string;
+  /** Primary buttons default to uppercase; use `sentence` to match web-style labels (e.g. “Continue”). */
+  titleCase?: "uppercase" | "sentence";
 }
 
 export function Button({
@@ -35,8 +37,11 @@ export function Button({
   disabled = false,
   textSize,
   accessibilityLabel,
+  titleCase = "uppercase",
 }: Props) {
   const a11yLabel = accessibilityLabel ?? title;
+  const primaryTextStyle =
+    titleCase === "sentence" ? styles.textPrimarySentence : styles.text;
   const isInteractionDisabled = loading || disabled;
 
   const handlePress = () => {
@@ -84,7 +89,7 @@ export function Button({
                 <>
                   <Text
                     style={[
-                      styles.text,
+                      primaryTextStyle,
                       textSize ? { fontSize: textSize } : {},
                     ]}
                     numberOfLines={1}
@@ -138,6 +143,7 @@ export function Button({
                   : variant === "ghost"
                     ? styles.textGhost
                     : {},
+                titleCase === "sentence" && styles.titleSentenceMixin,
                 isInteractionDisabled ? { opacity: 0.5 } : {},
                 textSize ? { fontSize: textSize } : {},
               ]}
@@ -198,6 +204,18 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.black,
     letterSpacing: 0.8,
     textTransform: "uppercase",
+  },
+  textPrimarySentence: {
+    color: "white",
+    fontSize: Theme.typography.size.lg,
+    fontFamily: Theme.typography.family.bold,
+    letterSpacing: 0.2,
+    textTransform: "none",
+  },
+  /** Outline/ghost: strip uppercase while keeping their color + weight from textOutline/textGhost */
+  titleSentenceMixin: {
+    textTransform: "none",
+    letterSpacing: 0.2,
   },
   /** Secondary control — visible but subservient to primary CTA */
   textOutline: {

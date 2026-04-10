@@ -8,9 +8,9 @@
  */
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  /** Primary chrome / CTA base (slate) — distinct from body ink */
-  --color-primary: #0f172a;
-  --color-primary-hover: #020617;
+  /** Primary chrome / CTA base — deep teal (pairs with --color-accent, not cool slate-navy) */
+  --color-primary: #134e4a;
+  --color-primary-hover: #115e59;
   --color-primary-muted: #f8fafc;
   --color-surface: #f9fafb;
   --color-accent: #0d9488;
@@ -100,7 +100,7 @@
   }
 
   .premium-gradient {
-    @apply bg-linear-to-br from-slate-900 via-slate-800 to-slate-950;
+    @apply bg-linear-to-br from-teal-950 via-teal-900 to-teal-950;
     position: relative;
     overflow: hidden;
   }
@@ -243,7 +243,7 @@
 
 /* Premium UI Elements */
 .premium-gradient {
-  @apply bg-linear-to-br from-slate-900 via-slate-800 to-slate-950 text-white border-0 shadow-lg transition-all duration-300;
+  @apply bg-linear-to-br from-teal-950 via-teal-900 to-teal-950 text-white border-0 shadow-lg transition-all duration-300;
   position: relative;
   overflow: hidden;
 }
@@ -300,7 +300,7 @@
 }
 
 .liquid-metal-button {
-  @apply relative overflow-hidden bg-slate-900 border border-slate-700/50 shadow-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98];
+  @apply relative overflow-hidden bg-teal-950 border border-teal-800/50 shadow-xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98];
 }
 
 .liquid-metal-button::after {
