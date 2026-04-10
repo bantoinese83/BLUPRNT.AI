@@ -141,10 +141,6 @@ export function HeroSection({
               aria-hidden
             />
           </div>
-
-          <p className="relative z-[1] mt-4 w-full text-center text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 sm:text-xs lg:pr-1 lg:text-right">
-            Real app preview · iOS
-          </p>
         </motion.div>
       </div>
     </section>
