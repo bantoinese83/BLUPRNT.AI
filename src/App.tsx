@@ -17,7 +17,8 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { Toaster } from "sonner";
 import { CommandPalette } from "@/components/CommandPalette";
 import { HelpWidget } from "@/components/HelpWidget";
-import { Analytics } from "@vercel/analytics/react";
+import { WebOfflineBanner } from "@/components/WebOfflineBanner";
+import { ConsentAwareAnalytics } from "@/components/ConsentAwareAnalytics";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -39,7 +40,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30_000,
-      retry: 1,
+      retry: 2,
     },
   },
 });
@@ -58,6 +59,7 @@ export default function App() {
                 Skip to main content
               </a>
               <AuthListener />
+              <WebOfflineBanner />
               <div
                 id="main-content"
                 tabIndex={-1}
@@ -114,7 +116,7 @@ export default function App() {
               <CommandPalette />
               <CookieConsent />
               <HelpWidget />
-              <Analytics />
+              <ConsentAwareAnalytics />
             </BrowserRouter>
           </QueryClientProvider>
         </ErrorBoundary>

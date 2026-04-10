@@ -35,16 +35,9 @@ export function initBrowserSentry(): void {
         createRoutesFromChildren,
         matchRoutes,
       }),
-      Sentry.replayIntegration({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
     ],
-    // Tracing
+    // Tracing (session replay disabled: requires explicit consent in many jurisdictions)
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
-    // Session Replay
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
     beforeSend(event) {
       if (event.request?.headers) {
         const h = { ...event.request.headers };

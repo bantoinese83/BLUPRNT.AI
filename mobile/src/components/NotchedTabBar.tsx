@@ -9,11 +9,17 @@ import {
 } from "react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Svg, { Path } from "react-native-svg";
 import { Theme } from "../constants/Theme";
+
+import assetManagementSvg from "../../assets/asset-management.svg";
+import assistantSvg from "../../assets/assistant.svg";
+import mansionSvg from "../../assets/mansion.svg";
+import userSvg from "../../assets/user.svg";
+import fileSvg from "../../assets/file.svg";
 
 const CORNER = 22;
 /** Visible white bar height (icons sit here). */
@@ -25,15 +31,13 @@ const NOTCH_DEPTH = 20;
 
 type RouteName = "index" | "finance" | "new" | "ai" | "profile";
 
-const TAB_ICONS: Record<
-  RouteName,
-  React.ComponentProps<typeof MaterialIcons>["name"]
-> = {
-  index: "home",
-  finance: "account-balance-wallet",
-  new: "add",
-  ai: "auto-awesome",
-  profile: "person",
+type TabIconRoute = Exclude<RouteName, "new">;
+
+const TAB_ASSETS: Record<TabIconRoute, number> = {
+  index: mansionSvg,
+  finance: assetManagementSvg,
+  ai: assistantSvg,
+  profile: userSvg,
 };
 
 /**
@@ -139,6 +143,7 @@ export function NotchedTabBar({
               const color = focused
                 ? Theme.colors.brand.primary
                 : Theme.colors.text.muted;
+              const asset = TAB_ASSETS[route.name as TabIconRoute];
               return (
                 <TouchableOpacity
                   key={route.key}
@@ -149,11 +154,14 @@ export function NotchedTabBar({
                   onPress={() => pressTab(route.key, route.name, focused)}
                   activeOpacity={0.75}
                 >
-                  <MaterialIcons
-                    name={TAB_ICONS[route.name as RouteName] ?? "circle"}
-                    size={24}
-                    color={color}
-                  />
+                  {asset != null ? (
+                    <Image
+                      source={asset}
+                      style={[styles.tabIcon, { opacity: focused ? 1 : 0.48 }]}
+                      contentFit="contain"
+                      accessibilityIgnoresInvertColors
+                    />
+                  ) : null}
                   <Text style={[styles.tabLabel, { color }]} numberOfLines={1}>
                     {label}
                   </Text>
@@ -172,6 +180,7 @@ export function NotchedTabBar({
               const color = focused
                 ? Theme.colors.brand.primary
                 : Theme.colors.text.muted;
+              const asset = TAB_ASSETS[route.name as TabIconRoute];
               return (
                 <TouchableOpacity
                   key={route.key}
@@ -182,11 +191,14 @@ export function NotchedTabBar({
                   onPress={() => pressTab(route.key, route.name, focused)}
                   activeOpacity={0.75}
                 >
-                  <MaterialIcons
-                    name={TAB_ICONS[route.name as RouteName] ?? "circle"}
-                    size={24}
-                    color={color}
-                  />
+                  {asset != null ? (
+                    <Image
+                      source={asset}
+                      style={[styles.tabIcon, { opacity: focused ? 1 : 0.48 }]}
+                      contentFit="contain"
+                      accessibilityIgnoresInvertColors
+                    />
+                  ) : null}
                   <Text style={[styles.tabLabel, { color }]} numberOfLines={1}>
                     {label}
                   </Text>
@@ -214,7 +226,13 @@ export function NotchedTabBar({
               end={{ x: 0.85, y: 1 }}
               style={styles.fabGradient}
             >
-              <MaterialIcons name="add" size={30} color="#ffffff" />
+              <Image
+                source={fileSvg}
+                style={styles.fabIcon}
+                contentFit="contain"
+                tintColor="#ffffff"
+                accessibilityIgnoresInvertColors
+              />
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -270,6 +288,10 @@ const styles = StyleSheet.create({
     minWidth: 52,
     paddingVertical: 4,
   },
+  tabIcon: {
+    width: 26,
+    height: 26,
+  },
   tabLabel: {
     fontSize: 10,
     fontFamily: Theme.typography.family.bold,
@@ -299,5 +321,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "rgba(255,255,255,0.98)",
+  },
+  fabIcon: {
+    width: 30,
+    height: 30,
   },
 });

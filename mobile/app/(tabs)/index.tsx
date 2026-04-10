@@ -39,6 +39,7 @@ import { ConfigurationRequired } from "../../src/components/ConfigurationRequire
 import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 import { showAppToast } from "../../src/lib/app-toast";
+import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { PlanVsActualCard } from "../../src/components/PlanVsActualCard";
 
 export default function DashboardScreen() {
@@ -227,8 +228,8 @@ export default function DashboardScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showAppToast("Document added — your dashboard is updated.");
       load();
-    } catch (_) {
-      Alert.alert("Error", "Failed to process document. Please try again.");
+    } catch (err) {
+      Alert.alert("Upload issue", friendlyDocumentUploadError(err));
     } finally {
       setIsUploading(false);
     }

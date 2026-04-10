@@ -7,6 +7,7 @@ export async function generateProjectShareLink(projectId: string): Promise<{
   ok: boolean;
   url?: string;
   message?: string;
+  code?: string;
 }> {
   // Simple UUID generator for mobile environment
   const token = Array.from({ length: 32 }, (_, i) => {
@@ -26,6 +27,7 @@ export async function generateProjectShareLink(projectId: string): Promise<{
     return {
       ok: false,
       message: error.message || "Couldn't create share link.",
+      code: error.code,
     };
   }
 

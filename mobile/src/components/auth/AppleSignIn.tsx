@@ -1,6 +1,7 @@
 import {
   StyleSheet,
   Platform,
+  Alert,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
@@ -13,12 +14,26 @@ interface Props {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
   style?: StyleProp<ViewStyle>;
+  disabled?: boolean;
 }
 
-export function AppleSignIn({ onStart, onSuccess, onError, style }: Props) {
+export function AppleSignIn({
+  onStart,
+  onSuccess,
+  onError,
+  style,
+  disabled = false,
+}: Props) {
   const { signInWithApple } = useAuth();
 
   const handleAppleSignIn = async () => {
+    if (disabled) {
+      Alert.alert(
+        "Terms and privacy",
+        "Please agree to the Terms and Privacy Policy first.",
+      );
+      return;
+    }
     onStart?.();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 

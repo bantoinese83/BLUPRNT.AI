@@ -9,6 +9,7 @@ import {
   Keyboard,
   Alert,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
@@ -25,6 +26,7 @@ import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Theme } from "../../src/constants/Theme";
 import { getPostAuthRedirectHref } from "../../src/lib/onboarding-draft";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
@@ -50,7 +52,12 @@ export default function LoginScreen() {
 
     if (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setErrorMsg(error.message);
+      setErrorMsg(
+        friendlyAuthError(
+          error.message || "",
+          "status" in error ? (error as { status?: number }).status : undefined,
+        ),
+      );
       setLoading(false);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -65,10 +72,7 @@ export default function LoginScreen() {
       await signInWithGoogle();
     } catch (err) {
       const error = err as Error;
-      Alert.alert(
-        "Google Auth Failed",
-        error.message || "Could not sign in with Google",
-      );
+      Alert.alert("Google sign-in", friendlyAuthError(error.message || ""));
     } finally {
       setGoogleLoading(false);
     }
@@ -77,123 +81,134 @@ export default function LoginScreen() {
   return (
     <ScreenWrapper edges={["top", "bottom", "left", "right"]}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.container}>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.selectionAsync();
-                router.back();
-              }}
-              style={styles.backButton}
-            >
-              <BlurView
-                intensity={20}
-                tint="light"
-                style={StyleSheet.absoluteFill}
-              />
-              <ChevronLeft size={24} color={Theme.colors.text.primary} />
-            </TouchableOpacity>
-
-            <MotiView
-              from={{ opacity: 0, scale: 0.9, translateY: 20 }}
-              animate={{ opacity: 1, scale: 1, translateY: 0 }}
-              transition={{ type: "timing", duration: 800 }}
-              style={styles.header}
-            >
-              <Text style={styles.title}>Welcome back</Text>
-              <Text style={styles.subtitle}>Sign in to your account</Text>
-            </MotiView>
-
-            <GlassCard intensity={8} style={styles.formCard}>
-              <View style={styles.form}>
-                <TextField
-                  label="Email address"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (errorMsg) setErrorMsg(null);
-                  }}
-                  placeholder="Enter your email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  error={
-                    errorMsg && !email.trim() ? "Add your email" : undefined
-                  }
-                />
-
-                <TextField
-                  label="Password"
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    if (errorMsg) setErrorMsg(null);
-                  }}
-                  placeholder="Enter your password"
-                  secureTextEntry
-                />
-
-                <TouchableOpacity
-                  style={styles.forgotPassword}
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    router.push("/(auth)/forgot-password");
-                  }}
-                >
-                  <Text style={styles.forgotPasswordText}>
-                    Forgot password?
-                  </Text>
-                </TouchableOpacity>
-
-                {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-
-                <Button
-                  title="Sign In"
-                  onPress={handleLogin}
-                  loading={loading}
-                  style={{ marginTop: 8 }}
-                />
-
-                <View style={styles.divider}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>or</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-
-                <Button
-                  title="Continue with Google"
-                  onPress={handleGoogleLogin}
-                  loading={googleLoading}
-                  variant="outline"
-                  icon={<GoogleIcon />}
-                  style={{ marginTop: 0 }}
-                />
-
-                <AppleSignIn
-                  onStart={() => setGoogleLoading(true)}
-                  onSuccess={() => setGoogleLoading(false)}
-                  onError={(err) => {
-                    setGoogleLoading(false);
-                    Alert.alert("Apple Auth Failed", err.message);
-                  }}
-                />
-              </View>
-            </GlassCard>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <View style={styles.container}>
               <TouchableOpacity
                 onPress={() => {
                   Haptics.selectionAsync();
-                  router.push("/(auth)/register");
+                  router.back();
                 }}
+                style={styles.backButton}
               >
-                <Text style={styles.linkText}>Create one</Text>
+                <BlurView
+                  intensity={20}
+                  tint="light"
+                  style={StyleSheet.absoluteFill}
+                />
+                <ChevronLeft size={24} color={Theme.colors.text.primary} />
               </TouchableOpacity>
+
+              <MotiView
+                from={{ opacity: 0, scale: 0.9, translateY: 20 }}
+                animate={{ opacity: 1, scale: 1, translateY: 0 }}
+                transition={{ type: "timing", duration: 800 }}
+                style={styles.header}
+              >
+                <Text style={styles.title}>Welcome back</Text>
+                <Text style={styles.subtitle}>Sign in to your account</Text>
+              </MotiView>
+
+              <GlassCard intensity={8} style={styles.formCard}>
+                <View style={styles.form}>
+                  <TextField
+                    label="Email address"
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
+                    placeholder="Enter your email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    error={
+                      errorMsg && !email.trim() ? "Add your email" : undefined
+                    }
+                  />
+
+                  <TextField
+                    label="Password"
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
+                    placeholder="Enter your password"
+                    secureTextEntry
+                  />
+
+                  <TouchableOpacity
+                    style={styles.forgotPassword}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      router.push("/(auth)/forgot-password");
+                    }}
+                  >
+                    <Text style={styles.forgotPasswordText}>
+                      Forgot password?
+                    </Text>
+                  </TouchableOpacity>
+
+                  {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+
+                  <Button
+                    title="Sign In"
+                    onPress={handleLogin}
+                    loading={loading}
+                    style={{ marginTop: 8 }}
+                  />
+
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>or</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+
+                  <Button
+                    title="Continue with Google"
+                    onPress={handleGoogleLogin}
+                    loading={googleLoading}
+                    variant="outline"
+                    icon={<GoogleIcon />}
+                    style={{ marginTop: 0 }}
+                  />
+
+                  <AppleSignIn
+                    onStart={() => setGoogleLoading(true)}
+                    onSuccess={() => setGoogleLoading(false)}
+                    onError={(err) => {
+                      setGoogleLoading(false);
+                      Alert.alert(
+                        "Apple sign-in",
+                        friendlyAuthError(err.message || ""),
+                      );
+                    }}
+                  />
+                </View>
+              </GlassCard>
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Don't have an account? </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    router.push("/(auth)/register");
+                  }}
+                >
+                  <Text style={styles.linkText}>Create one</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ScreenWrapper>
@@ -201,6 +216,11 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingVertical: 24,
+  },
   container: {
     flex: 1,
     padding: 24,

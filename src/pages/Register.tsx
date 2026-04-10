@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 import {
   AlertCircle,
@@ -18,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { resolvePostLoginHref } from "@/lib/onboarding-post-auth-redirect";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
@@ -46,6 +52,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
@@ -58,6 +65,10 @@ export default function Register() {
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!acceptedPolicies) {
+      setError("Agree to the Terms and Privacy Policy to create an account.");
+      return;
+    }
     if (!isSupabaseConfigured()) {
       setError("Sign-up isn't available right now. Please try again later.");
       return;
@@ -74,7 +85,14 @@ export default function Register() {
         password,
       });
       if (signErr) {
-        setError(signErr.message || "Couldn’t create your account.");
+        setError(
+          friendlyAuthError(
+            signErr.message || "",
+            "status" in signErr
+              ? (signErr as { status?: number }).status
+              : undefined,
+          ),
+        );
         return;
       }
 
@@ -150,6 +168,10 @@ export default function Register() {
   async function sendMagicLink() {
     setError(null);
     setMagicSent(false);
+    if (!acceptedPolicies) {
+      setError("Agree to the Terms and Privacy Policy to continue.");
+      return;
+    }
     if (!email.trim() || !zip.trim()) {
       setError("Email and ZIP are required.");
       return;
@@ -175,7 +197,12 @@ export default function Register() {
     });
     setLoading(false);
     if (err) {
-      setError(err.message || "Couldn’t send the link. Try again.");
+      setError(
+        friendlyAuthError(
+          err.message || "",
+          "status" in err ? (err as { status?: number }).status : undefined,
+        ),
+      );
       return;
     }
     setMagicSent(true);
@@ -210,10 +237,44 @@ export default function Register() {
             </p>
           </div>
 
+          <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
+            <input
+              id="register-policies"
+              type="checkbox"
+              checked={acceptedPolicies}
+              onChange={(e) => {
+                setAcceptedPolicies(e.target.checked);
+                if (error?.includes("Agree to")) setError(null);
+              }}
+              className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            />
+            <label
+              htmlFor="register-policies"
+              className="text-sm font-medium text-slate-600 leading-snug cursor-pointer"
+            >
+              I agree to the{" "}
+              <Link
+                to="/terms"
+                className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
+              >
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link
+                to="/privacy"
+                className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </label>
+          </div>
+
           <AuthSocialButtons
-            onError={setError}
+            onError={(msg) => setError(friendlyAuthError(msg))}
             googleLoading={googleLoading}
             setGoogleLoading={setGoogleLoading}
+            disabled={!acceptedPolicies}
           />
 
           <div className="relative">
@@ -355,7 +416,7 @@ export default function Register() {
                 size="lg"
                 variant="primary"
                 className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
-                disabled={loading}
+                disabled={loading || !acceptedPolicies}
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
@@ -444,7 +505,7 @@ export default function Register() {
                     size="lg"
                     variant="primary"
                     className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
-                    disabled={loading}
+                    disabled={loading || !acceptedPolicies}
                     onClick={sendMagicLink}
                   >
                     {loading ? (

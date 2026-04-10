@@ -5,6 +5,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { ArrowLeft, FileText } from "lucide-react-native";
@@ -28,7 +29,9 @@ export default function TermsScreen() {
           <FileText size={32} color={Theme.colors.brand.primary} />
         </View>
         <Text style={styles.title}>Terms of Service</Text>
-        <Text style={styles.subtitle}>Effective: October 2023</Text>
+        <Text style={styles.subtitle}>
+          Summary — see website for full terms
+        </Text>
       </View>
 
       <ScrollView
@@ -69,6 +72,18 @@ export default function TermsScreen() {
             title="7. Data rights (GDPR & CCPA)"
             content="Under various global privacy regulations, including GDPR and CCPA, users have specific rights regarding their personal data, including access, export, and deletion of project records."
           />
+          <TouchableOpacity
+            style={styles.externalLink}
+            onPress={() =>
+              Linking.openURL("https://bluprnt.ai/terms").catch(() => {})
+            }
+            accessibilityRole="link"
+            accessibilityLabel="Open full terms of service on bluprnt.ai"
+          >
+            <Text style={styles.externalLinkText}>
+              Read the full Terms on bluprnt.ai →
+            </Text>
+          </TouchableOpacity>
         </MotiView>
       </ScrollView>
     </ScreenWrapper>
@@ -150,5 +165,20 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
     lineHeight: 24,
+  },
+  externalLink: {
+    marginTop: Theme.spacing.lg,
+    paddingVertical: Theme.spacing.md,
+    paddingHorizontal: Theme.spacing.md,
+    borderRadius: Theme.radius.lg,
+    backgroundColor: "rgba(13, 148, 136, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(13, 148, 136, 0.25)",
+  },
+  externalLinkText: {
+    fontSize: Theme.typography.size.sm,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.brand.primary,
+    textAlign: "center",
   },
 });

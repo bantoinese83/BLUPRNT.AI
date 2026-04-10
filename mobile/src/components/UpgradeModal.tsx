@@ -96,6 +96,12 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
                   ? "Upgrade to Architect to generate high-fidelity PDF packets and resale ledgers."
                   : "Join thousands of homeowners building equity with AI-guided renovations."}
             </Text>
+            {reason === "invoice_limit" ? (
+              <Text style={styles.invoiceLimitHint}>
+                Only invoice uploads count toward this limit—not quotes,
+                warranties, or permits.
+              </Text>
+            ) : null}
           </MotiView>
 
           {/* Features */}
@@ -240,6 +246,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
     paddingHorizontal: 20,
+  },
+  invoiceLimitHint: {
+    marginTop: 12,
+    fontSize: 13,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.muted,
+    textAlign: "center",
+    lineHeight: 18,
+    paddingHorizontal: 24,
   },
   featuresList: {
     gap: 24,

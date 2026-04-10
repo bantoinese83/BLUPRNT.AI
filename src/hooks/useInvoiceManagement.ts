@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/supabase";
 import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
+import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 
 interface UseInvoiceManagementProps {
   projectId: string;
@@ -16,29 +17,6 @@ interface UseInvoiceManagementProps {
 
 const FREE_LIMIT = 3;
 const GUIDE_KEY = "bluprnt_invoice_guide_collapsed";
-
-function friendlyUploadError(err: unknown, body?: { error?: string }): string {
-  const msg =
-    body?.error ??
-    (typeof err === "object" && err && "message" in err
-      ? String((err as { message?: string }).message)
-      : "");
-  if (
-    msg.includes("Free plan") ||
-    msg.includes("Free limit") ||
-    msg.includes("10 invoice") ||
-    msg.includes("Architect plan")
-  ) {
-    return msg;
-  }
-  if (msg.includes("403") || msg.toLowerCase().includes("access denied")) {
-    return "We couldn’t verify access to this project. Refresh the page and try again.";
-  }
-  if (msg.includes("401")) {
-    return "Your session expired. Sign in again, then try uploading.";
-  }
-  return "That didn’t go through. Check your connection and try again—or try a smaller PDF or image.";
-}
 
 export function useInvoiceManagement({
   projectId,
@@ -146,7 +124,7 @@ export function useInvoiceManagement({
       }>("upload-invoice", { body: fd });
 
       if (fnErr) {
-        setError(friendlyUploadError(fnErr, data ?? undefined));
+        setError(friendlyDocumentUploadError(fnErr, data ?? undefined));
         return;
       }
 
@@ -164,7 +142,7 @@ export function useInvoiceManagement({
         setError(
           e.includes("limit") || e.includes("Architect")
             ? e
-            : friendlyUploadError(null, data),
+            : friendlyDocumentUploadError(null, data),
         );
         return;
       }
@@ -179,7 +157,7 @@ export function useInvoiceManagement({
         `${documentType === "invoice" ? "Invoice" : "Document"} uploaded successfully`,
       );
     } catch {
-      const msg = friendlyUploadError(null);
+      const msg = friendlyDocumentUploadError(null);
       setError(msg);
       toast.error(msg);
     } finally {

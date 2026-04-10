@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ai.bluprnt.mobile",
-      "associatedDomains": ["applinks:blurprnt.ai"],
+      "associatedDomains": ["applinks:bluprnt.ai"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -30,12 +30,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "blurprnt.ai",
+              "host": "bluprnt.ai",
               "pathPrefix": "/onboarding"
             },
             {
               "scheme": "https",
-              "host": "blurprnt.ai",
+              "host": "bluprnt.ai",
               "pathPrefix": "/reset-password"
             }
           ],
@@ -49,10 +49,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "bundler": "metro",

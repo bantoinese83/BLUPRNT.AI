@@ -27,6 +27,7 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 type Mode = "password" | "magic";
 
@@ -80,7 +81,12 @@ export default function Login() {
     });
     setLoading(false);
     if (err) {
-      setError(err.message || "Couldn’t sign in. Check your details.");
+      setError(
+        friendlyAuthError(
+          err.message || "",
+          "status" in err ? (err as { status?: number }).status : undefined,
+        ),
+      );
       return;
     }
     const redirectTo = resolvePostLoginHref(searchParams.get("redirect"));
@@ -116,7 +122,12 @@ export default function Login() {
     });
     setLoading(false);
     if (err) {
-      setError(err.message || "Couldn’t send the link. Try again.");
+      setError(
+        friendlyAuthError(
+          err.message || "",
+          "status" in err ? (err as { status?: number }).status : undefined,
+        ),
+      );
       return;
     }
     setMagicSent(true);
@@ -152,7 +163,7 @@ export default function Login() {
           </div>
 
           <AuthSocialButtons
-            onError={setError}
+            onError={(msg) => setError(friendlyAuthError(msg))}
             googleLoading={googleLoading}
             setGoogleLoading={setGoogleLoading}
           />

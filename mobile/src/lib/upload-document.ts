@@ -1,4 +1,5 @@
 import { Alert } from "react-native";
+import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { invokeFunction } from "./supabase";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
@@ -82,42 +83,26 @@ async function doUpload(
     );
 
     if (error) {
-      const msg = friendlyUploadError(error);
-      resolve({ success: false, error: msg });
+      resolve({
+        success: false,
+        error: friendlyDocumentUploadError(error),
+      });
       return;
     }
 
     if (data?.error) {
-      resolve({ success: false, error: data.error });
+      resolve({
+        success: false,
+        error: friendlyDocumentUploadError(null, { error: data.error }),
+      });
       return;
     }
 
     resolve({ success: true, invoice_id: data?.invoice_id });
-  } catch (_err) {
+  } catch (err) {
     resolve({
       success: false,
-      error: "Upload failed. Check your connection and try again.",
+      error: friendlyDocumentUploadError(err),
     });
   }
-}
-
-function friendlyUploadError(err: unknown): string {
-  const msg =
-    typeof err === "object" && err && "message" in err
-      ? String((err as { message?: string }).message)
-      : "";
-  if (
-    msg.includes("Free plan") ||
-    msg.includes("limit") ||
-    msg.includes("Architect")
-  ) {
-    return msg;
-  }
-  if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) {
-    return "Your session expired. Please sign in again.";
-  }
-  if (msg.includes("403") || msg.toLowerCase().includes("access denied")) {
-    return "Access denied. Please refresh and try again.";
-  }
-  return "Upload failed. Check your connection and try a smaller file.";
 }

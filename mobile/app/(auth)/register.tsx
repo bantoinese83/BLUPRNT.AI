@@ -9,6 +9,8 @@ import {
   Keyboard,
   Alert,
   TouchableOpacity,
+  ScrollView,
+  Pressable,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
@@ -18,12 +20,13 @@ import { supabase } from "../../src/lib/supabase";
 import { Button } from "../../src/components/ui/Button";
 import { TextField } from "../../src/components/ui/TextField";
 import { GlassCard } from "../../src/components/ui/GlassCard";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft, Check } from "lucide-react-native";
 import { GoogleIcon } from "../../src/components/auth/GoogleIcon";
 import { AppleSignIn } from "../../src/components/auth/AppleSignIn";
 import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Theme } from "../../src/constants/Theme";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();
@@ -33,8 +36,16 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   const handleRegister = async () => {
+    if (!acceptedPolicies) {
+      Alert.alert(
+        "Terms and privacy",
+        "Please agree to the Terms and Privacy Policy to create an account.",
+      );
+      return;
+    }
     if (!email || !password || !name) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -53,7 +64,12 @@ export default function RegisterScreen() {
 
     if (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setErrorMsg(error.message);
+      setErrorMsg(
+        friendlyAuthError(
+          error.message || "",
+          "status" in error ? (error as { status?: number }).status : undefined,
+        ),
+      );
       setLoading(false);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -64,15 +80,19 @@ export default function RegisterScreen() {
   };
 
   const handleGoogleLogin = async () => {
+    if (!acceptedPolicies) {
+      Alert.alert(
+        "Terms and privacy",
+        "Please agree to the Terms and Privacy Policy first.",
+      );
+      return;
+    }
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
     } catch (err) {
       const error = err as Error;
-      Alert.alert(
-        "Google Auth Failed",
-        error.message || "Could not sign in with Google",
-      );
+      Alert.alert("Google sign-in", friendlyAuthError(error.message || ""));
     } finally {
       setGoogleLoading(false);
     }
@@ -85,119 +105,179 @@ export default function RegisterScreen() {
       edges={["top", "bottom", "left", "right"]}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.container}>
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.selectionAsync();
-                router.back();
-              }}
-              style={styles.backButton}
-            >
-              <BlurView
-                intensity={20}
-                tint="light"
-                style={StyleSheet.absoluteFill}
-              />
-              <ChevronLeft size={24} color={Theme.colors.text.primary} />
-            </TouchableOpacity>
-
-            <MotiView
-              from={{ opacity: 0, scale: 0.9, translateY: 20 }}
-              animate={{ opacity: 1, scale: 1, translateY: 0 }}
-              transition={{ type: "timing", duration: 800 }}
-              style={styles.header}
-            >
-              <Text style={styles.title}>Create account</Text>
-              <Text style={styles.subtitle}>Join BLUPRNT today</Text>
-            </MotiView>
-
-            <GlassCard intensity={10} style={styles.formCard}>
-              <View style={styles.form}>
-                <TextField
-                  label="Full Name"
-                  value={name}
-                  onChangeText={(text) => {
-                    setName(text);
-                    if (errorMsg) setErrorMsg(null);
-                  }}
-                  placeholder="Enter your name"
-                  autoCapitalize="words"
-                />
-
-                <TextField
-                  label="Email address"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (errorMsg) setErrorMsg(null);
-                  }}
-                  placeholder="Enter your email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-
-                <TextField
-                  label="Password"
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    if (errorMsg) setErrorMsg(null);
-                  }}
-                  placeholder="Create a password"
-                  secureTextEntry
-                />
-
-                {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-
-                <Button
-                  title="Sign Up"
-                  onPress={handleRegister}
-                  loading={loading}
-                  style={{ marginTop: 8 }}
-                />
-
-                <View style={styles.divider}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>or</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-
-                <Button
-                  title="Continue with Google"
-                  onPress={handleGoogleLogin}
-                  loading={googleLoading}
-                  variant="outline"
-                  icon={<GoogleIcon />}
-                  style={{ marginTop: 0 }}
-                />
-
-                <AppleSignIn
-                  onStart={() => setGoogleLoading(true)}
-                  onSuccess={() => setGoogleLoading(false)}
-                  onError={(err) => {
-                    setGoogleLoading(false);
-                    Alert.alert("Apple Auth Failed", err.message);
-                  }}
-                />
-              </View>
-            </GlassCard>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account? </Text>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <View style={styles.container}>
               <TouchableOpacity
                 onPress={() => {
                   Haptics.selectionAsync();
-                  router.push("/(auth)/login");
+                  router.back();
                 }}
+                style={styles.backButton}
               >
-                <Text style={styles.linkText}>Sign In</Text>
+                <BlurView
+                  intensity={20}
+                  tint="light"
+                  style={StyleSheet.absoluteFill}
+                />
+                <ChevronLeft size={24} color={Theme.colors.text.primary} />
               </TouchableOpacity>
+
+              <MotiView
+                from={{ opacity: 0, scale: 0.9, translateY: 20 }}
+                animate={{ opacity: 1, scale: 1, translateY: 0 }}
+                transition={{ type: "timing", duration: 800 }}
+                style={styles.header}
+              >
+                <Text style={styles.title}>Create account</Text>
+                <Text style={styles.subtitle}>Join BLUPRNT today</Text>
+              </MotiView>
+
+              <GlassCard intensity={10} style={styles.formCard}>
+                <View style={styles.form}>
+                  <View style={styles.policyRow}>
+                    <Pressable
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        setAcceptedPolicies((v) => !v);
+                      }}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: acceptedPolicies }}
+                      hitSlop={8}
+                    >
+                      <View
+                        style={[
+                          styles.policyCheck,
+                          acceptedPolicies && styles.policyCheckOn,
+                        ]}
+                      >
+                        {acceptedPolicies ? (
+                          <Check size={14} color="#fff" strokeWidth={3} />
+                        ) : null}
+                      </View>
+                    </Pressable>
+                    <Text style={styles.policyText}>
+                      I agree to the{" "}
+                      <Text
+                        style={styles.policyLink}
+                        onPress={() => {
+                          Haptics.selectionAsync();
+                          router.push("/terms");
+                        }}
+                      >
+                        Terms
+                      </Text>{" "}
+                      and{" "}
+                      <Text
+                        style={styles.policyLink}
+                        onPress={() => {
+                          Haptics.selectionAsync();
+                          router.push("/privacy");
+                        }}
+                      >
+                        Privacy Policy
+                      </Text>
+                      .
+                    </Text>
+                  </View>
+
+                  <TextField
+                    label="Full Name"
+                    value={name}
+                    onChangeText={(text) => {
+                      setName(text);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
+                    placeholder="Enter your name"
+                    autoCapitalize="words"
+                  />
+
+                  <TextField
+                    label="Email address"
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
+                    placeholder="Enter your email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+
+                  <TextField
+                    label="Password"
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
+                    placeholder="Create a password"
+                    secureTextEntry
+                  />
+
+                  {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+
+                  <Button
+                    title="Sign Up"
+                    onPress={handleRegister}
+                    loading={loading}
+                    disabled={!acceptedPolicies}
+                    style={{ marginTop: 8 }}
+                  />
+
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>or</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+
+                  <Button
+                    title="Continue with Google"
+                    onPress={handleGoogleLogin}
+                    loading={googleLoading}
+                    variant="outline"
+                    icon={<GoogleIcon />}
+                    disabled={!acceptedPolicies}
+                    style={{ marginTop: 0 }}
+                  />
+
+                  <AppleSignIn
+                    disabled={!acceptedPolicies}
+                    onStart={() => setGoogleLoading(true)}
+                    onSuccess={() => setGoogleLoading(false)}
+                    onError={(err) => {
+                      setGoogleLoading(false);
+                      Alert.alert(
+                        "Apple sign-in",
+                        friendlyAuthError(err.message || ""),
+                      );
+                    }}
+                  />
+                </View>
+              </GlassCard>
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Already have an account? </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    router.push("/(auth)/login");
+                  }}
+                >
+                  <Text style={styles.linkText}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ScreenWrapper>
@@ -205,6 +285,11 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingVertical: 24,
+  },
   container: {
     flex: 1,
     padding: 24,
@@ -249,6 +334,43 @@ const styles = StyleSheet.create({
   },
   form: {
     width: "100%",
+  },
+  policyRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+  },
+  policyCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  policyCheckOn: {
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: Theme.colors.brand.primary,
+  },
+  policyText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: "Outfit_500Medium",
+    color: "#94a3b8",
+    lineHeight: 20,
+  },
+  policyLink: {
+    color: "#5eead4",
+    fontFamily: "Outfit_700Bold",
+    textDecorationLine: "underline",
   },
   divider: {
     flexDirection: "row",

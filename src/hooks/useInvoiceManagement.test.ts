@@ -225,7 +225,7 @@ describe("useInvoiceManagement", () => {
       );
     });
 
-    it("handles invokeFunction error using friendlyUploadError", async () => {
+    it("handles invokeFunction error using friendlyDocumentUploadError", async () => {
       vi.mocked(invokeFunction as any).mockResolvedValueOnce({
         data: null,
         error: { status: 500, message: "Server Error" },

@@ -446,7 +446,10 @@ export default function OnboardingScreen() {
         return;
       }
 
-      Alert.alert("Error", msg || "Failed to save project");
+      Alert.alert(
+        "Couldn’t save yet",
+        "We couldn’t finish saving. Check your connection and tap Save again—your project details are still on this screen.",
+      );
     }
   };
 

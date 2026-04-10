@@ -44,6 +44,7 @@ import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullS
 import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 import { FinanceTabSkeleton } from "../../src/components/TabLoadingSkeletons";
 import { showAppToast } from "../../src/lib/app-toast";
+import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { openOriginalDocumentForInvoice } from "../../src/lib/open-original-document";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
@@ -269,8 +270,8 @@ export default function FinanceScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showAppToast("Document added — your ledger is updated.");
       load();
-    } catch (_) {
-      Alert.alert("Error", "Failed to process document. Please try again.");
+    } catch (err) {
+      Alert.alert("Upload issue", friendlyDocumentUploadError(err));
     } finally {
       setIsUploading(false);
     }

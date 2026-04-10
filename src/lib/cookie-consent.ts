@@ -2,6 +2,10 @@
 export const OPEN_COOKIE_SETTINGS_EVENT =
   "bluprnt:open-cookie-settings" as const;
 
+/** Fired when consent is saved so analytics and similar can update without a full reload */
+export const COOKIE_CONSENT_CHANGED_EVENT =
+  "bluprnt:cookie-consent-changed" as const;
+
 export const CONSENT_KEY = "bluprnt_cookie_consent_v1";
 
 export interface CookieConsentData {
@@ -36,4 +40,15 @@ export function setCookieConsent(
     timestamp: new Date().toISOString(),
   };
   localStorage.setItem(CONSENT_KEY, JSON.stringify(data));
+}
+
+export function dispatchCookieConsentChanged(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(COOKIE_CONSENT_CHANGED_EVENT));
+}
+
+/** True only after the user has stored a choice and opted into analytics. */
+export function isAnalyticsConsentGranted(): boolean {
+  const c = getCookieConsent();
+  return c != null && c.analytics === true;
 }

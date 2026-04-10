@@ -3,8 +3,11 @@ import {
   getCookieConsent,
   setCookieConsent,
   openCookieSettings,
+  isAnalyticsConsentGranted,
+  dispatchCookieConsentChanged,
   CONSENT_KEY,
   OPEN_COOKIE_SETTINGS_EVENT,
+  COOKIE_CONSENT_CHANGED_EVENT,
 } from "./cookie-consent";
 
 describe("cookie-consent lib", () => {
@@ -101,6 +104,48 @@ describe("cookie-consent lib", () => {
       } finally {
         global.window = originalWindow;
       }
+    });
+  });
+
+  describe("isAnalyticsConsentGranted", () => {
+    it("is false when nothing is stored", () => {
+      expect(isAnalyticsConsentGranted()).toBe(false);
+    });
+
+    it("is false when analytics is not explicitly true", () => {
+      window.localStorage.setItem(
+        CONSENT_KEY,
+        JSON.stringify({
+          essential: true,
+          analytics: false,
+          marketing: false,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      expect(isAnalyticsConsentGranted()).toBe(false);
+    });
+
+    it("is true only when analytics is true", () => {
+      window.localStorage.setItem(
+        CONSENT_KEY,
+        JSON.stringify({
+          essential: true,
+          analytics: true,
+          marketing: false,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      expect(isAnalyticsConsentGranted()).toBe(true);
+    });
+  });
+
+  describe("dispatchCookieConsentChanged", () => {
+    it("dispatches the consent-changed event", () => {
+      const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+      dispatchCookieConsentChanged();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ type: COOKIE_CONSENT_CHANGED_EVENT }),
+      );
     });
   });
 });

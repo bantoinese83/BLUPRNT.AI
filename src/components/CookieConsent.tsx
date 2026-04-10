@@ -12,18 +12,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { OPEN_COOKIE_SETTINGS_EVENT } from "@/lib/cookie-consent";
-
-const CONSENT_KEY = "bluprnt_cookie_consent_v1";
+import {
+  CONSENT_KEY,
+  OPEN_COOKIE_SETTINGS_EVENT,
+  dispatchCookieConsentChanged,
+} from "@/lib/cookie-consent";
 
 export function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Custom settings state
+  // Custom settings state (analytics off until the user opts in)
   const [settings, setSettings] = useState({
     essential: true, // Always true
-    analytics: true,
+    analytics: false,
     marketing: false,
   });
 
@@ -50,12 +52,14 @@ export function CookieConsent() {
           };
           setSettings((s) => ({
             ...s,
-            analytics: parsed.analytics !== false,
+            analytics: parsed.analytics === true,
             marketing: Boolean(parsed.marketing),
           }));
         } catch {
           /* keep defaults */
         }
+      } else {
+        setSettings((s) => ({ ...s, analytics: false, marketing: false }));
       }
       setShowModal(true);
     };
@@ -74,6 +78,7 @@ export function CookieConsent() {
         timestamp: new Date().toISOString(),
       }),
     );
+    dispatchCookieConsentChanged();
     setIsVisible(false);
   };
 
@@ -87,6 +92,7 @@ export function CookieConsent() {
         timestamp: new Date().toISOString(),
       }),
     );
+    dispatchCookieConsentChanged();
     setIsVisible(false);
   };
 
@@ -98,6 +104,7 @@ export function CookieConsent() {
         timestamp: new Date().toISOString(),
       }),
     );
+    dispatchCookieConsentChanged();
     setShowModal(false);
     setIsVisible(false);
   };
@@ -124,9 +131,16 @@ export function CookieConsent() {
                         Privacy Preferences
                       </h3>
                       <p className="text-sm text-slate-600 leading-relaxed">
-                        We use cookies to personalize your experience and
-                        analyze our traffic. By clicking "Accept All", you
-                        consent to our use of cookies.
+                        We use essential cookies to run the site. Optional
+                        analytics load only if you accept them. Choose{" "}
+                        <span className="font-semibold text-slate-800">
+                          Reject Optional
+                        </span>{" "}
+                        to skip analytics, or{" "}
+                        <span className="font-semibold text-slate-800">
+                          Accept All
+                        </span>{" "}
+                        to allow analytics cookies.
                       </p>
                     </div>
 

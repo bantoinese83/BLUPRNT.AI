@@ -147,6 +147,12 @@ export function UpgradeModal({
                   {checkoutError}
                 </p>
               )}
+              {openReason === "invoice_limit" && (
+                <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
+                  Only <strong>invoice</strong> uploads count toward this limit.
+                  Quotes, warranties, and permits don&apos;t.
+                </p>
+              )}
               {showDiscount && (
                 <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
                   Use promo code <strong>BLUEPRINT35</strong> on the Stripe

@@ -40,8 +40,8 @@ export function InvoiceGuide({
         <>
           <ol className="text-sm text-slate-900/90 space-y-2 list-decimal list-inside pl-1">
             <li>
-              <strong>Pick a type</strong> above (invoice, quote, warranty, or
-              permit).
+              <strong>Pick a type</strong> above (invoice—including store
+              receipts—quote, warranty, or permit).
             </li>
             <li>
               <strong>Upload</strong> a PDF or photo—we&apos;ll open it next so

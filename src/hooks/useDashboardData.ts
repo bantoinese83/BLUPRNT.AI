@@ -45,7 +45,7 @@ export function useDashboardData() {
       }),
     staleTime: 30_000,
     enabled: isSupabaseConfigured(),
-    retry: 1,
+    retry: 2,
   });
 
   const data = query.data;

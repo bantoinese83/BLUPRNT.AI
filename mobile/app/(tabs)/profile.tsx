@@ -39,6 +39,7 @@ import { PRICING } from "../../../shared/constants/pricing";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "./_layout";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
 import { showAppToast } from "../../src/lib/app-toast";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
@@ -71,7 +72,13 @@ export default function ProfileScreen() {
 
     setSaving(false);
     if (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert(
+        "Couldn’t update profile",
+        friendlyAuthError(
+          error.message || "",
+          "status" in error ? (error as { status?: number }).status : undefined,
+        ),
+      );
     } else {
       showAppToast("Profile updated.");
     }
@@ -85,7 +92,13 @@ export default function ProfileScreen() {
       redirectTo: getPasswordRecoveryRedirectUrl(),
     });
     if (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert(
+        "Couldn’t send reset email",
+        friendlyAuthError(
+          error.message || "",
+          "status" in error ? (error as { status?: number }).status : undefined,
+        ),
+      );
     } else {
       showAppToast("Check your inbox for a reset link.");
     }

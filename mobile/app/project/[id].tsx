@@ -27,6 +27,9 @@ import { AnimatePresence } from "moti";
 import { BlurView } from "expo-blur";
 import { generateSellerPacketPDF } from "../../src/lib/pdf-export";
 import { generateProjectShareLink } from "../../src/lib/share-project";
+import { friendlyProjectShareError } from "@shared/lib/user-friendly-errors";
+import { friendlyDashboardLoadError } from "../../src/lib/dashboard-load-error";
+import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
 import { UpgradeModal } from "../../src/components/UpgradeModal";
 import { supabase, isSupabaseConfigured } from "../../src/lib/supabase";
 import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
@@ -112,6 +115,7 @@ function ProjectDetailScreenInner() {
   const [showAddModal, setShowAddModal] = useState(false);
   /** After brief polling, true means we stop showing "syncing" when DB has totals but no scope rows. */
   const [scopePollDone, setScopePollDone] = useState(false);
+  const [scopeLoadWarning, setScopeLoadWarning] = useState<string | null>(null);
 
   const invoiceTotal = detailInvoices.reduce(
     (sum, inv) => sum + (inv.total || 0),
@@ -141,10 +145,19 @@ function ProjectDetailScreenInner() {
           title: project.name,
         });
       } else {
-        Alert.alert("Error", res.message || "Could not generate share link.");
+        Alert.alert(
+          "Couldn’t share",
+          friendlyProjectShareError(res.message, res.code),
+        );
       }
     } catch (err) {
       console.error("Share error:", err);
+      Alert.alert(
+        "Couldn’t share",
+        friendlyProjectShareError(
+          err instanceof Error ? err.message : undefined,
+        ),
+      );
     }
   };
 
@@ -175,6 +188,14 @@ function ProjectDetailScreenInner() {
       setScope(scopeRes.data ?? []);
       if (scopeRes.error) {
         console.warn("[project] scope_items", scopeRes.error.message);
+        setScopeLoadWarning(
+          friendlyDashboardLoadError({
+            message: scopeRes.error.message,
+            code: scopeRes.error.code,
+          }),
+        );
+      } else {
+        setScopeLoadWarning(null);
       }
       setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
       setLoading(false);
@@ -280,6 +301,14 @@ function ProjectDetailScreenInner() {
     setScope(scopeRes.data ?? []);
     if (scopeRes.error) {
       console.warn("[project] scope_items refresh", scopeRes.error.message);
+      setScopeLoadWarning(
+        friendlyDashboardLoadError({
+          message: scopeRes.error.message,
+          code: scopeRes.error.code,
+        }),
+      );
+    } else {
+      setScopeLoadWarning(null);
     }
     setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
     setLoading(false);
@@ -348,6 +377,16 @@ function ProjectDetailScreenInner() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {scopeLoadWarning ? (
+        <View style={{ paddingHorizontal: 24, paddingBottom: 8 }}>
+          <DashboardLoadErrorBanner
+            message={scopeLoadWarning}
+            onRetry={handleRefresh}
+            onDismiss={() => setScopeLoadWarning(null)}
+          />
+        </View>
+      ) : null}
 
       <View style={styles.content}>
         <MotiView

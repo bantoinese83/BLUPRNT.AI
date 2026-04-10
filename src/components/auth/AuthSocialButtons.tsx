@@ -9,12 +9,15 @@ type AuthSocialButtonsProps = {
   onError: (message: string) => void;
   googleLoading: boolean;
   setGoogleLoading: (v: boolean) => void;
+  /** When false, Google sign-in is blocked (e.g. until terms are accepted). */
+  disabled?: boolean;
 };
 
 export function AuthSocialButtons({
   onError,
   googleLoading,
   setGoogleLoading,
+  disabled = false,
 }: AuthSocialButtonsProps) {
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get("redirect");
@@ -50,7 +53,7 @@ export function AuthSocialButtons({
       size="lg"
       className="w-full h-12 gap-3 bg-white border-slate-200 text-slate-800 hover:bg-slate-50"
       onClick={signInWithGoogle}
-      disabled={googleLoading}
+      disabled={googleLoading || disabled}
     >
       {googleLoading ? (
         <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
