@@ -8,7 +8,7 @@ vi.mock("./supabase", () => ({
   },
 }));
 
-import { registerForPushNotificationsAsync } from "./push";
+import { registerForPushNotificationsAsync } from "@/lib/push";
 
 vi.mock("expo-notifications", () => ({
   setNotificationHandler: vi.fn(),

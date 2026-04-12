@@ -1,13 +1,13 @@
 import { Image } from "expo-image";
-import kitchen from "../../assets/onboarding/kitchen.svg";
-import bathroom from "../../assets/onboarding/bathroom.svg";
-import paint from "../../assets/onboarding/paint.svg";
-import roof from "../../assets/onboarding/roof.svg";
-import flooring from "../../assets/onboarding/flooring.svg";
-import other from "../../assets/onboarding/other.svg";
-import stagePlanning from "../../assets/onboarding/stage-planning.svg";
-import stageQuotes from "../../assets/onboarding/stage-quotes.svg";
-import stageWork from "../../assets/onboarding/stage-work.svg";
+import kitchen from "@assets/onboarding/kitchen.svg";
+import bathroom from "@assets/onboarding/bathroom.svg";
+import paint from "@assets/onboarding/paint.svg";
+import roof from "@assets/onboarding/roof.svg";
+import flooring from "@assets/onboarding/flooring.svg";
+import other from "@assets/onboarding/other.svg";
+import stagePlanning from "@assets/onboarding/stage-planning.svg";
+import stageQuotes from "@assets/onboarding/stage-quotes.svg";
+import stageWork from "@assets/onboarding/stage-work.svg";
 
 const TYPE_SOURCES: Record<string, number> = {
   kitchen,

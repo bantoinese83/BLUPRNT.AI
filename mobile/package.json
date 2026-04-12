@@ -15,7 +15,8 @@
     "lint": "eslint . --max-warnings 0 && tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "knip": "knip --exclude types,nsTypes,enumMembers,duplicates"
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",

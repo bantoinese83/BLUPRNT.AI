@@ -3,13 +3,10 @@ import { Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Linking from "expo-linking";
-import { supabase } from "../lib/supabase";
-import {
-  extractPkceCodeFromUrl,
-  getAuthRedirectUrl,
-} from "../lib/auth-linking";
-import { registerForPushNotificationsAsync } from "../lib/push";
-import { AuthContext } from "./auth-context";
+import { supabase } from "@/lib/supabase";
+import { extractPkceCodeFromUrl, getAuthRedirectUrl } from "@/lib/auth-linking";
+import { registerForPushNotificationsAsync } from "@/lib/push";
+import { AuthContext } from "@/contexts/auth-context";
 
 // Tell the browser to complete the session when redirected back
 WebBrowser.maybeCompleteAuthSession();

@@ -5,7 +5,7 @@ import {
   loadOnboardingDraft,
   clearOnboardingDraft,
   getPostAuthRedirectHref,
-} from "./onboarding-draft";
+} from "@/lib/onboarding-draft";
 
 vi.mock("@react-native-async-storage/async-storage", () => ({
   default: {

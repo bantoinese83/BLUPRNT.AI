@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { fetchMobileDashboardSnapshot } from "./fetch-dashboard-snapshot";
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { fetchMobileDashboardSnapshot } from "@/lib/fetch-dashboard-snapshot";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 vi.mock("@react-native-async-storage/async-storage", () => ({
   default: {

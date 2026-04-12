@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Haptics from "expo-haptics";
-import { useAuth } from "../../contexts/auth-context";
+import { useAuth } from "@/contexts/auth-context";
 
 interface Props {
   onStart?: () => void;

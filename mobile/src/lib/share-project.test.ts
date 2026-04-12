@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { generateProjectShareLink } from "./share-project";
-import { supabase } from "./supabase";
+import { generateProjectShareLink } from "@/lib/share-project";
+import { supabase } from "@/lib/supabase";
 
 vi.mock("./supabase", () => ({
   supabase: {

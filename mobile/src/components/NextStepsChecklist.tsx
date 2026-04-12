@@ -15,8 +15,8 @@ import {
 } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { GlassCard } from "./ui/GlassCard";
-import { Theme } from "../constants/Theme";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
 
 type Step = {
   id: string;

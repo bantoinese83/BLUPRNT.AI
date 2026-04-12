@@ -3,7 +3,7 @@ import {
   capitalImprovementTotal,
   planVsActualNarrative,
   planVsActualPdfLines,
-} from "./plan-vs-actual";
+} from "@/lib/plan-vs-actual";
 
 describe("capitalImprovementTotal", () => {
   it("sums invoices and quotes only", () => {

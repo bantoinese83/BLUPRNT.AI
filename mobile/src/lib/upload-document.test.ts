@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { alertMock } from "../test/react-native-mock";
-import { uploadDocumentWithType } from "./upload-document";
-import { invokeFunction } from "./supabase";
+import { alertMock } from "@/test/react-native-mock";
+import { uploadDocumentWithType } from "@/lib/upload-document";
+import { invokeFunction } from "@/lib/supabase";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),

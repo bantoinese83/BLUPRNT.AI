@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import * as Haptics from "expo-haptics";
-import { compressImageForAnalysis } from "../../../lib/image-utils";
-import { invokeFunction } from "../../../lib/supabase";
-import { getRangeForType } from "../../../constants/estimateRanges";
+import { compressImageForAnalysis } from "@/lib/image-utils";
+import { invokeFunction } from "@/lib/supabase";
+import { getRangeForType } from "@/constants/estimateRanges";
 import {
   projectTypeToRoomType,
   type PhotoToScopeResult,
   DEFAULT_ESTIMATE_CONFIDENCE,
   type ProjectTypeOption,
-} from "../../../lib/onboarding-helpers";
+} from "@/lib/onboarding-helpers";
 import {
   loadingScreenMessages,
   onboardingZipCode,
-} from "../onboarding-constants";
+} from "@/features/onboarding/onboarding-constants";
 
 export type OnboardingEstimateState = {
   min: number;

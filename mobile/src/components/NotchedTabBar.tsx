@@ -13,13 +13,13 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Svg, { Path } from "react-native-svg";
-import { Theme } from "../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
-import assetManagementSvg from "../../assets/asset-management.svg";
-import assistantSvg from "../../assets/assistant.svg";
-import mansionSvg from "../../assets/mansion.svg";
-import userSvg from "../../assets/user.svg";
-import fileSvg from "../../assets/file.svg";
+import assetManagementSvg from "@assets/asset-management.svg";
+import assistantSvg from "@assets/assistant.svg";
+import mansionSvg from "@assets/mansion.svg";
+import userSvg from "@assets/user.svg";
+import fileSvg from "@assets/file.svg";
 
 const CORNER = 22;
 /** Visible white bar height (icons sit here). */

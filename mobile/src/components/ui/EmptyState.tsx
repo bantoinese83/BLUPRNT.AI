@@ -2,9 +2,9 @@ import React from "react";
 import { StyleSheet, View, Text, ViewStyle } from "react-native";
 import { LucideIcon } from "lucide-react-native";
 import { MotiView } from "moti";
-import { Theme } from "../../constants/Theme";
-import { Button } from "./Button";
-import { GlassCard } from "./GlassCard";
+import { Theme } from "@/constants/Theme";
+import { Button } from "@/components/ui/Button";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 interface EmptyStateProps {
   icon: LucideIcon;

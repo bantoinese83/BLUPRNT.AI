@@ -1,16 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase, isSupabaseConfigured } from "./supabase";
-import { friendlyDashboardLoadError } from "./dashboard-load-error";
-import type { DashboardSnapshot } from "../types/dashboard-snapshot";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
+import type { DashboardSnapshot } from "@/types/dashboard-snapshot";
 import type {
   ProjectRow,
   ScopeRow,
   InvoiceRow,
   UserSubscriptionRow,
   ProjectPassRow,
-} from "../../../shared/types/database";
-import { buildSpendByCategory } from "../../../shared/lib/spend-by-category";
-import { partialDashboardLoadMessage } from "../../../shared/lib/dashboard-partial-load";
+} from "@shared/types/database";
+import { buildSpendByCategory } from "@shared/lib/spend-by-category";
+import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
 
 const emptySnapshot = (): DashboardSnapshot => ({
   configured: true,

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { buildSellerPacketAppendixHtml } from "./seller-packet-appendix";
-import { invokeFunction } from "./supabase";
-import type { InvoiceRow } from "../../../shared/types/database";
+import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
+import { invokeFunction } from "@/lib/supabase";
+import type { InvoiceRow } from "@shared/types/database";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),

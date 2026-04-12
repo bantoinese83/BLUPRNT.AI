@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as ImageManipulator from "expo-image-manipulator";
-import { compressImageForAnalysis } from "./image-utils";
+import { compressImageForAnalysis } from "@/lib/image-utils";
 
 vi.mock("expo-image-manipulator", () => ({
   manipulateAsync: vi.fn(),

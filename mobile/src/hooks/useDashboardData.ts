@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase, isSupabaseConfigured } from "../lib/supabase";
-import { dashboardQueryKey } from "../lib/query-client";
-import { fetchMobileDashboardSnapshot } from "../lib/fetch-dashboard-snapshot";
-import type { DashboardSnapshot } from "../types/dashboard-snapshot";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "../types/database";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { dashboardQueryKey } from "@/lib/query-client";
+import { fetchMobileDashboardSnapshot } from "@/lib/fetch-dashboard-snapshot";
+import type { DashboardSnapshot } from "@/types/dashboard-snapshot";
+import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
 
 function applyPatch(
   prev: DashboardSnapshot | undefined,

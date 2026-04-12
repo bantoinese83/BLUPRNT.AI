@@ -1,47 +1,27 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { invokeFunction } from "./supabase";
 import type { PhotoToScopeResult } from "@/types/estimate";
-import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
+import {
+  DEFAULT_ESTIMATE_MIN,
+  DEFAULT_ESTIMATE_MAX,
+  DEFAULT_ESTIMATE_CONFIDENCE,
+  projectTypeToRoomType,
+  projectTypeToDb,
+  stageToDb,
+  projectDisplayName,
+  type ProjectTypeOption,
+  type StageOption,
+} from "@shared/lib/onboarding-helpers";
 
-export const DEFAULT_ESTIMATE_MIN = 24000;
-export const DEFAULT_ESTIMATE_MAX = 31000;
-export const DEFAULT_ESTIMATE_CONFIDENCE = 4.5;
-
-export function projectTypeToRoomType(t: ProjectTypeOption | null): string {
-  if (t === "Kitchen") return "kitchen";
-  if (t === "Bathroom") return "bathroom";
-  return "other";
-}
-
-export function projectTypeToDb(
-  t: ProjectTypeOption | null,
-): "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other" {
-  const m: Record<
-    string,
-    "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other"
-  > = {
-    Kitchen: "kitchen",
-    Bathroom: "bath",
-    Painting: "paint",
-    Roof: "roof",
-    Flooring: "flooring",
-    "Something else": "other",
-  };
-  return t ? (m[t] ?? "other") : "other";
-}
-
-export function stageToDb(
-  s: StageOption | null,
-): "planning" | "collecting_quotes" | "in_progress" | "completed" {
-  if (s === "Collecting quotes") return "collecting_quotes";
-  if (s === "Already started work") return "in_progress";
-  return "planning";
-}
-
-export function projectDisplayName(t: ProjectTypeOption | null): string {
-  if (!t || t === "Something else") return "My project";
-  return `${t} project`;
-}
+export {
+  DEFAULT_ESTIMATE_MIN,
+  DEFAULT_ESTIMATE_MAX,
+  DEFAULT_ESTIMATE_CONFIDENCE,
+  projectTypeToRoomType,
+  projectTypeToDb,
+  stageToDb,
+  projectDisplayName,
+};
 
 export async function saveOnboardingProject(params: {
   supabase: SupabaseClient;

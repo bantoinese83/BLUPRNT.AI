@@ -51,8 +51,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "."),
+      "@": path.resolve(__dirname, "src"),
       "@shared": path.resolve(__dirname, "../shared"),
+      "@app": path.resolve(__dirname, "app"),
+      "@assets": path.resolve(__dirname, "assets"),
       /** Real `react-native` entry uses Flow; Vite cannot parse it. */
       "react-native": path.resolve(__dirname, "src/test/react-native-mock.ts"),
     },

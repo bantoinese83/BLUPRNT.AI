@@ -14,10 +14,10 @@ import {
   ShieldCheck,
   TrendingUp,
 } from "lucide-react-native";
-import { Button } from "../src/components/ui/Button";
-import { ScreenWrapper } from "../src/components/ScreenWrapper";
-import { Logo } from "../src/components/ui/Logo";
-import { Theme } from "../src/constants/Theme";
+import { Button } from "@/components/ui/Button";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Logo } from "@/components/ui/Logo";
+import { Theme } from "@/constants/Theme";
 import * as Haptics from "expo-haptics";
 
 export default function LandingScreen() {

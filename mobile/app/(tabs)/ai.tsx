@@ -1,12 +1,12 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
-import { AIAssistant } from "../../src/components/AIAssistant";
-import { useDashboardData } from "../../src/hooks/useDashboardData";
-import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { Theme } from "../../src/constants/Theme";
-import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
-import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
+import { AIAssistant } from "@/components/AIAssistant";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Theme } from "@/constants/Theme";
+import { ConfigurationRequired } from "@/components/ConfigurationRequired";
+import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 
 export default function AIScreen() {
   const { project, loading, projects, load, loadError, configurationMissing } =

@@ -1,0 +1,262 @@
+import { StyleSheet } from "react-native";
+import { Theme } from "@/constants/Theme";
+import { FINANCE_TAB_BAR_OFFSET } from "@/features/finance-tab/constants";
+
+export const financeTabStyles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+    padding: 24,
+    gap: 16,
+  },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  headerCaptureBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Theme.colors.brand.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    letterSpacing: -1,
+  },
+  content: {
+    paddingHorizontal: 24,
+  },
+  mainCard: {
+    padding: 24,
+    borderRadius: 32,
+  },
+  ledgerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 24,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: Theme.colors.inputBg,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+  },
+  ledgerTitle: {
+    fontSize: 18,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    letterSpacing: -0.3,
+  },
+  ledgerSubtitle: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  statsGrid: {
+    gap: 12,
+    marginBottom: 24,
+  },
+  statRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Theme.colors.inputBg,
+    padding: 12,
+    borderRadius: 12,
+  },
+  statLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  statDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statLabel: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
+  },
+  statValue: {
+    fontSize: 15,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+  },
+  exportButton: {
+    height: 52,
+    borderRadius: 16,
+  },
+  appendixRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+  },
+  appendixTextCol: {
+    flex: 1,
+    gap: 4,
+  },
+  appendixLabel: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
+  },
+  appendixHint: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 15,
+  },
+  viewOriginalBtn: {
+    marginTop: 10,
+    paddingVertical: 8,
+    alignSelf: "flex-start",
+  },
+  viewOriginalText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.brand.primary,
+    textDecorationLine: "underline",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 32,
+    marginBottom: 16,
+  },
+  filterTab: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 99,
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.08)",
+  },
+  filterTabActive: {
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: Theme.colors.brand.primary,
+  },
+  filterText: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
+  },
+  filterTextActive: {
+    color: Theme.colors.header,
+  },
+  listContainer: {
+    gap: 12,
+  },
+  invoiceCard: {
+    padding: 12,
+  },
+  invoiceMain: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  invoiceIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Theme.colors.inputBg,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  invoiceText: {
+    flex: 1,
+    gap: 2,
+  },
+  vendorName: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    letterSpacing: -0.2,
+  },
+  invoiceDate: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+  },
+  invoiceAmount: {
+    fontSize: 15,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+  },
+  emptyList: {
+    padding: 60,
+    alignItems: "center",
+    gap: 12,
+  },
+  emptyListText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+  },
+  monthGroup: {
+    marginBottom: 24,
+  },
+  monthHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 12,
+  },
+  monthHeaderText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.muted,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+  },
+  monthHeaderLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Theme.colors.divider,
+  },
+  emptyText: {
+    color: Theme.colors.text.muted,
+    fontFamily: Theme.typography.family.regular,
+  },
+  fab: {
+    position: "absolute",
+    bottom: FINANCE_TAB_BAR_OFFSET,
+    right: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Theme.colors.brand.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: Theme.colors.brand.primary,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+});

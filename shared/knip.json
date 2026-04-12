@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["lib/**/*.ts", "types/**/*.ts", "constants/**/*.ts"],
+  "ignore": ["**/*.test.ts"],
+  "ignoreBinaries": ["tsc", "knip"]
+}

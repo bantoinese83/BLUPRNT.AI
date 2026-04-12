@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Linking, Platform } from "react-native";
 import Constants from "expo-constants";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 /**
  * Hook to enforce a minimum required app version.

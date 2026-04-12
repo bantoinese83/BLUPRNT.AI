@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as Location from "expo-location";
-import { resolveZipFromCurrentLocation } from "./zip-from-location";
+import { resolveZipFromCurrentLocation } from "@/lib/zip-from-location";
 
 vi.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: vi.fn(),

@@ -11,18 +11,11 @@ import {
 import { MotiView } from "moti";
 import { router, Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { formatRelativeTime } from "../lib/activity";
-import { Theme } from "../constants/Theme";
+import { formatRelativeTime, type ActivityEvent } from "@/lib/activity";
+import { Theme } from "@/constants/Theme";
 import { LinearGradient } from "expo-linear-gradient";
 
-export type ActivityEvent = {
-  id: string;
-  type: "upload" | "status_change" | "project_created" | "goal_reached";
-  title: string;
-  description: string;
-  timestamp: string;
-  link?: Href;
-};
+export type { ActivityEvent };
 
 interface Props {
   events: ActivityEvent[];

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { friendlyDashboardLoadError } from "./dashboard-load-error";
+import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 
 describe("friendlyDashboardLoadError", () => {
   it("returns default when err is empty", () => {

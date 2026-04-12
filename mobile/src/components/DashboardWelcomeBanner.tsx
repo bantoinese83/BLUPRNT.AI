@@ -9,9 +9,9 @@ import {
 import { X, Upload, ListTree, FileDown } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView, AnimatePresence } from "moti";
-import { Theme } from "../constants/Theme";
-import { GlassCard } from "./ui/GlassCard";
-import { WelcomeActionOrb } from "./WelcomeActionOrb";
+import { Theme } from "@/constants/Theme";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { WelcomeActionOrb } from "@/components/WelcomeActionOrb";
 
 interface Props {
   onAction: (id: string) => void;

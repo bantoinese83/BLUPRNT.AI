@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, ViewStyle, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
-import { Theme } from "../../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
 const { width, height } = Dimensions.get("window");
 

@@ -16,11 +16,11 @@ import Markdown from "react-native-markdown-display";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { invokeFunction } from "../lib/supabase";
+import { invokeFunction } from "@/lib/supabase";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
-import { Theme } from "../constants/Theme";
-import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
-import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
+import { Theme } from "@/constants/Theme";
+import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "@app/(tabs)/_layout";
 
 /** Space above the notched tab bar + FAB (matches scroll clearance scale). */
 const TAB_BAR_BUFFER = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 28;

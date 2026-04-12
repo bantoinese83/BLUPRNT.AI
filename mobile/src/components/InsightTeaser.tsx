@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Lock, Lightbulb, ArrowRight } from "lucide-react-native";
-import { GlassCard } from "./ui/GlassCard";
-import { Button } from "./ui/Button";
-import { Theme } from "../constants/Theme";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Button } from "@/components/ui/Button";
+import { Theme } from "@/constants/Theme";
 
 interface Props {
   projectName: string;

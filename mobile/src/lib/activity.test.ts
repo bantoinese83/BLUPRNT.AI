@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { generateActivityEvents, formatRelativeTime } from "./activity";
+import { generateActivityEvents, formatRelativeTime } from "@/lib/activity";
 import type { InvoiceRow, ProjectRow } from "@shared/types/database";
 
 describe("generateActivityEvents", () => {

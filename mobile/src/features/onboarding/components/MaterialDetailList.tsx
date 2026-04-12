@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Package, Boxes, Tag } from "lucide-react-native";
-import { Theme } from "../../../constants/Theme";
-import { onboardingStyles as styles } from "../onboarding-screen.styles";
+import { Theme } from "@/constants/Theme";
+import { onboardingStyles as styles } from "@/features/onboarding/onboarding-screen.styles";
 
 export function MaterialDetailList({
   materials,

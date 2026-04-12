@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Theme } from "../../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
 interface Option {
   label: string;

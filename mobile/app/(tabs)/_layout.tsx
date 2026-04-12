@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
 import { Tabs } from "expo-router/tabs";
 
-import { useDashboardData } from "../../src/hooks/useDashboardData";
-import { AwarenessProvider } from "../../src/contexts/AwarenessProvider";
-import { useAwareness } from "../../src/contexts/AwarenessContext";
-import { InsightsDrawer } from "../../src/components/InsightsDrawer";
-import { UpgradeModal } from "../../src/components/UpgradeModal";
-import { NotchedTabBar } from "../../src/components/NotchedTabBar";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { AwarenessProvider } from "@/contexts/AwarenessProvider";
+import { useAwareness } from "@/contexts/AwarenessContext";
+import { InsightsDrawer } from "@/components/InsightsDrawer";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { NotchedTabBar } from "@/components/NotchedTabBar";
 
 /**
  * Bottom clearance for scroll content (notched bar + FAB overlap).

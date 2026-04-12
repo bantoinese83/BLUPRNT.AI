@@ -10,11 +10,11 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GradientBackground } from "./ui/GradientBackground";
+import { GradientBackground } from "@/components/ui/GradientBackground";
 import { StatusBar } from "expo-status-bar";
-import { Logo } from "./ui/Logo";
-import { Theme } from "../constants/Theme";
-import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
+import { Logo } from "@/components/ui/Logo";
+import { Theme } from "@/constants/Theme";
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "@app/(tabs)/_layout";
 
 const TAB_BAR_CLEARANCE = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 8;
 

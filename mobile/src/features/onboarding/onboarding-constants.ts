@@ -1,4 +1,4 @@
-import type { ProjectTypeOption } from "../../lib/onboarding-helpers";
+import type { ProjectTypeOption } from "@/lib/onboarding-helpers";
 
 /** Seven internal steps; progress UI is grouped into three phases. */
 export const ONBOARDING_LAST_STEP_INDEX = 6;

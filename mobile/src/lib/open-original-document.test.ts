@@ -3,9 +3,9 @@ import {
   alertMock,
   canOpenURLMock,
   openURLMock,
-} from "../test/react-native-mock";
-import { openOriginalDocumentForInvoice } from "./open-original-document";
-import { invokeFunction } from "./supabase";
+} from "@/test/react-native-mock";
+import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
+import { invokeFunction } from "@/lib/supabase";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),

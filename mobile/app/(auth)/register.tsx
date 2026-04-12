@@ -16,18 +16,18 @@ import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { MotiView } from "moti";
-import { supabase } from "../../src/lib/supabase";
-import { Button } from "../../src/components/ui/Button";
-import { TextField } from "../../src/components/ui/TextField";
-import { GlassCard } from "../../src/components/ui/GlassCard";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
+import { GlassCard } from "@/components/ui/GlassCard";
 import { ChevronLeft, Check } from "lucide-react-native";
-import { GoogleIcon } from "../../src/components/auth/GoogleIcon";
-import { AppleSignIn } from "../../src/components/auth/AppleSignIn";
-import { useAuth } from "../../src/contexts/auth-context";
-import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { Theme } from "../../src/constants/Theme";
+import { GoogleIcon } from "@/components/auth/GoogleIcon";
+import { AppleSignIn } from "@/components/auth/AppleSignIn";
+import { useAuth } from "@/contexts/auth-context";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Theme } from "@/constants/Theme";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
-import { getPostAuthRedirectHref } from "../../src/lib/onboarding-draft";
+import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();

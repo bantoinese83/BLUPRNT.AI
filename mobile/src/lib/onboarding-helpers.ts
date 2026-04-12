@@ -1,72 +1,31 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { compressImageForAnalysis } from "./image-utils";
-import { invokeFunction } from "./supabase";
+import { compressImageForAnalysis } from "@/lib/image-utils";
+import { invokeFunction } from "@/lib/supabase";
+import {
+  DEFAULT_ESTIMATE_MIN,
+  DEFAULT_ESTIMATE_MAX,
+  DEFAULT_ESTIMATE_CONFIDENCE,
+  normalizeStageFromDraft,
+  projectTypeToRoomType,
+  projectTypeToDb,
+  stageToDb,
+  projectDisplayName,
+  type ProjectTypeOption,
+  type StageOption,
+} from "@shared/lib/onboarding-helpers";
 
-export type ProjectTypeOption =
-  | "Kitchen"
-  | "Bathroom"
-  | "Painting"
-  | "Roof"
-  | "Flooring"
-  | "Something else";
-export type StageOption =
-  | "Just planning"
-  | "Collecting quotes"
-  | "Already started work";
-
-/** Migrate drafts saved before stage labels were aligned with web. */
-export function normalizeStageFromDraft(
-  raw: string | null | undefined,
-): StageOption | null {
-  if (!raw) return null;
-  if (raw === "Planning & budgeting") return "Just planning";
-  const valid: StageOption[] = [
-    "Just planning",
-    "Collecting quotes",
-    "Already started work",
-  ];
-  return valid.includes(raw as StageOption) ? (raw as StageOption) : null;
-}
-
-export const DEFAULT_ESTIMATE_MIN = 24000;
-export const DEFAULT_ESTIMATE_MAX = 31000;
-export const DEFAULT_ESTIMATE_CONFIDENCE = 4.5;
-
-export function projectTypeToRoomType(t: ProjectTypeOption | null): string {
-  if (t === "Kitchen") return "kitchen";
-  if (t === "Bathroom") return "bathroom";
-  return "other";
-}
-
-export function projectTypeToDb(
-  t: ProjectTypeOption | null,
-): "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other" {
-  const m: Record<
-    string,
-    "kitchen" | "bath" | "paint" | "roof" | "flooring" | "other"
-  > = {
-    Kitchen: "kitchen",
-    Bathroom: "bath",
-    Painting: "paint",
-    Roof: "roof",
-    Flooring: "flooring",
-    "Something else": "other",
-  };
-  return t ? (m[t] ?? "other") : "other";
-}
-
-export function stageToDb(
-  s: StageOption | null,
-): "planning" | "collecting_quotes" | "in_progress" | "completed" {
-  if (s === "Collecting quotes") return "collecting_quotes";
-  if (s === "Already started work") return "in_progress";
-  return "planning";
-}
-
-export function projectDisplayName(t: ProjectTypeOption | null): string {
-  if (!t || t === "Something else") return "My project";
-  return `${t} project`;
-}
+export {
+  DEFAULT_ESTIMATE_MIN,
+  DEFAULT_ESTIMATE_MAX,
+  DEFAULT_ESTIMATE_CONFIDENCE,
+  normalizeStageFromDraft,
+  projectTypeToRoomType,
+  projectTypeToDb,
+  stageToDb,
+  projectDisplayName,
+  type ProjectTypeOption,
+  type StageOption,
+};
 
 export interface ScopeItem {
   category: string;
@@ -80,6 +39,13 @@ export interface ScopeItem {
   total_cost_max: number;
   confidence_score: number;
   source?: "text" | "photo" | "fallback";
+  /** Present on raw photo-to-scope payloads; merged into `metadata.materials` in API responses. */
+  materials?: Array<{
+    name: string;
+    brand?: string;
+    quantity?: number | string;
+    unit?: string;
+  }>;
   metadata?: {
     materials?: Array<{
       name: string;
@@ -217,13 +183,11 @@ export async function saveOnboardingProject(params: {
     const rows = estimate.scope_items.map((raw) => {
       const s = raw as ScopeRowIn;
       const nested = s.metadata as Record<string, unknown> | undefined;
-      const fromNested = nested?.materials;
-      const fromShallow = s.metadata?.materials;
-      const materials = Array.isArray(fromNested)
-        ? fromNested
-        : Array.isArray(fromShallow)
-          ? fromShallow
-          : [];
+      const fromMeta = Array.isArray(nested?.materials) ? nested.materials : [];
+      const fromTop = Array.isArray((s as { materials?: unknown[] }).materials)
+        ? (s as { materials: unknown[] }).materials
+        : [];
+      const materials = fromMeta.length > 0 ? fromMeta : fromTop;
 
       const justification =
         (

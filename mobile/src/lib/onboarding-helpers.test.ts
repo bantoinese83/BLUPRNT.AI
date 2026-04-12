@@ -12,7 +12,7 @@ import {
   projectTypeToDb,
   stageToDb,
   projectDisplayName,
-} from "./onboarding-helpers";
+} from "@/lib/onboarding-helpers";
 
 describe("onboarding-helpers (pure)", () => {
   it("normalizes legacy stage labels", () => {

@@ -1,0 +1,143 @@
+import React from "react";
+import type { Dispatch, SetStateAction } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  StyleSheet,
+} from "react-native";
+import { MotiView } from "moti";
+import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
+import { AlertCircle } from "lucide-react-native";
+import { Image as ExpoImage } from "expo-image";
+import galleryAsset from "@assets/onboarding/gallery.svg";
+import cameraAsset from "@assets/onboarding/camera.svg";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
+import type { OnboardingStyles } from "@/features/onboarding/onboarding-step-types";
+
+interface VisionCaptureProps {
+  styles: OnboardingStyles;
+  photos: string[];
+  setPhotos: Dispatch<SetStateAction<string[]>>;
+  scopeDescription: string;
+  setScopeDescription: (desc: string) => void;
+}
+
+export function VisionCapture({
+  styles,
+  photos,
+  setPhotos,
+  scopeDescription,
+  setScopeDescription,
+}: VisionCaptureProps) {
+  return (
+    <MotiView
+      from={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      key="step3"
+      style={styles.visionContainer}
+    >
+      <Text style={styles.stepTitle}>Vision-Match your room</Text>
+      <Text style={styles.stepSubtitle}>
+        Add at least one photo or a short description so we can tailor your
+        estimate.
+      </Text>
+
+      <View style={styles.visionActions}>
+        <TouchableOpacity
+          style={styles.visionButton}
+          onPress={async () => {
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: "images",
+              quality: 0.8,
+              allowsMultipleSelection: true,
+            });
+            if (!result.canceled) {
+              setPhotos([...photos, ...result.assets.map((a) => a.uri)]);
+            }
+          }}
+        >
+          <View
+            style={[
+              styles.visionIcon,
+              { backgroundColor: Theme.colors.brand.primary + "18" },
+            ]}
+          >
+            <ExpoImage
+              source={galleryAsset}
+              style={styles.visionAsset}
+              contentFit="contain"
+            />
+          </View>
+          <Text style={styles.visionLabel}>Gallery</Text>
+          <Text style={styles.visionHint}>Upload photos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.visionButton}
+          onPress={async () => {
+            const { status } =
+              await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== "granted") return;
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ["images"],
+              quality: 0.8,
+            });
+            if (!result.canceled) setPhotos([...photos, result.assets[0].uri]);
+          }}
+        >
+          <View
+            style={[
+              styles.visionIcon,
+              { backgroundColor: Theme.colors.brand.primary + "18" },
+            ]}
+          >
+            <ExpoImage
+              source={cameraAsset}
+              style={styles.visionAsset}
+              contentFit="contain"
+            />
+          </View>
+          <Text style={styles.visionLabel}>Camera</Text>
+          <Text style={styles.visionHint}>Snap your space</Text>
+        </TouchableOpacity>
+      </View>
+
+      {photos.length > 0 && (
+        <View style={styles.photoGrid}>
+          {photos.map((p, i) => (
+            <TouchableOpacity
+              key={i}
+              style={styles.photoThumb}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setPhotos(photos.filter((_, idx) => idx !== i));
+              }}
+            >
+              <Image source={{ uri: p }} style={StyleSheet.absoluteFill} />
+              <View style={styles.photoRemoveOverlay}>
+                <AlertCircle size={10} color="white" />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <GlassCard intensity={15} style={styles.scopeInputCard}>
+        <TextInput
+          style={styles.scopeInput}
+          placeholder="Or describe the project here…"
+          placeholderTextColor={Theme.colors.text.secondary}
+          multiline
+          value={scopeDescription}
+          onChangeText={setScopeDescription}
+        />
+      </GlassCard>
+    </MotiView>
+  );
+}

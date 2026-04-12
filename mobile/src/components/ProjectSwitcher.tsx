@@ -10,11 +10,11 @@ import {
 import { PlusCircle } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { supabase } from "../lib/supabase";
-import { GlassCard } from "./ui/GlassCard";
-import { Theme } from "../constants/Theme";
-import type { ProjectRow } from "../types/database";
-import { ProjectIcon } from "../lib/project-icons";
+import { supabase } from "@/lib/supabase";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
+import type { ProjectRow } from "@/types/database";
+import { ProjectIcon } from "@/lib/project-icons";
 
 type ProjectSwitcherProps = {
   projects: ProjectRow[];

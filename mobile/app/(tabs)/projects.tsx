@@ -4,15 +4,15 @@ import { router } from "expo-router";
 import { Folder, ArrowRight, FolderOpen } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { GlassCard } from "../../src/components/ui/GlassCard";
-import { useDashboardData } from "../../src/hooks/useDashboardData";
-import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { EmptyState } from "../../src/components/ui/EmptyState";
-import { ConfigurationRequired } from "../../src/components/ConfigurationRequired";
-import { DataLoadErrorFullScreen } from "../../src/components/DataLoadErrorFullScreen";
-import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErrorBanner";
-import { ProjectsTabSkeleton } from "../../src/components/TabLoadingSkeletons";
-import { Theme } from "../../src/constants/Theme";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfigurationRequired } from "@/components/ConfigurationRequired";
+import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
+import { DashboardLoadErrorBanner } from "@/components/DashboardLoadErrorBanner";
+import { ProjectsTabSkeleton } from "@/components/TabLoadingSkeletons";
+import { Theme } from "@/constants/Theme";
 
 export default function ProjectsScreen() {
   const {

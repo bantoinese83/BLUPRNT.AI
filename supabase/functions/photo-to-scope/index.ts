@@ -177,6 +177,15 @@ Deno.serve(async (req: Request) => {
         items.map((r: any, i: number) => {
           const metadata = r.metadata || {};
           const isFromDB = !!r.id && String(r.id).includes("-"); // UUID check
+          /** Gemini returns `materials` on each line item; DB rows use `metadata.materials`. */
+          const materialsFromMeta = Array.isArray(metadata.materials)
+            ? metadata.materials
+            : [];
+          const materialsFromItem = Array.isArray(r.materials)
+            ? r.materials
+            : [];
+          const materials =
+            materialsFromMeta.length > 0 ? materialsFromMeta : materialsFromItem;
 
           return {
             id: isFromDB ? r.id : `scope_${i + 1}`,
@@ -197,9 +206,7 @@ Deno.serve(async (req: Request) => {
               priority: metadata.priority || "medium",
               phase: metadata.phase || "standard",
               maintenance_tips: metadata.maintenance_tips || "",
-              materials: Array.isArray(metadata.materials)
-                ? metadata.materials
-                : [],
+              materials,
             },
           };
         });

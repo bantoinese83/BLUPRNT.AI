@@ -9,8 +9,8 @@ import {
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
-import { Theme } from "../../constants/Theme";
-import { SnurraLoader, SnurraSize } from "./SnurraLoader";
+import { Theme } from "@/constants/Theme";
+import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 
 interface Props {
   onPress: () => Promise<void> | void;

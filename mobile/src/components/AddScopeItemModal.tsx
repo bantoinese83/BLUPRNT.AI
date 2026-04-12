@@ -14,8 +14,8 @@ import {
 import { X, Plus } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Theme } from "../constants/Theme";
-import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
+import { Theme } from "@/constants/Theme";
+import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 
 const PHASE_ORDER = [
   "Site Prep",

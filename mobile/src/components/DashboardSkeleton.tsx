@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
-import { SkeletonLoader } from "./ui/SkeletonLoader";
-import { ScreenWrapper } from "./ScreenWrapper";
+import { SkeletonLoader } from "@/components/ui/SkeletonLoader";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
 
 export function DashboardSkeleton() {
   return (

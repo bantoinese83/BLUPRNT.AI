@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Layers } from "lucide-react-native";
-import { money } from "../../../../../shared/lib/formatters";
-import { Theme } from "../../../constants/Theme";
-import type { ScopeItem } from "../../../lib/onboarding-helpers";
-import { onboardingStyles as styles } from "../onboarding-screen.styles";
+import { money } from "@shared/lib/formatters";
+import { Theme } from "@/constants/Theme";
+import type { ScopeItem } from "@/lib/onboarding-helpers";
+import { onboardingStyles as styles } from "@/features/onboarding/onboarding-screen.styles";
 
 /** Line-item costs from AI scope — shown when the user opens “Breakdown”. */
 export function ScopeEstimateBreakdown({ items }: { items: ScopeItem[] }) {

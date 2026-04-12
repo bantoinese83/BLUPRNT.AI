@@ -3,8 +3,8 @@ import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { Shield, TrendingUp } from "lucide-react-native";
 import { MotiView } from "moti";
-import { GlassCard } from "./ui/GlassCard";
-import { Theme } from "../constants/Theme";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
 
 type Props = {
   estimatedMin?: number | null;

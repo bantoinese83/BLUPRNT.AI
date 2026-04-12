@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
-import { Theme } from "../../constants/Theme";
-import { SnurraSize } from "../../components/ui/SnurraLoader";
+import { Theme } from "@/constants/Theme";
+import { SnurraSize } from "@/components/ui/SnurraLoader";
 
 export const onboardingStyles = StyleSheet.create({
   screenColumn: {

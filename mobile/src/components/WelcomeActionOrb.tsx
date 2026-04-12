@@ -6,7 +6,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { Theme } from "../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
 type Props = {
   label: string;

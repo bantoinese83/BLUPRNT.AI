@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
-import { invokeFunction } from "./supabase";
+import { invokeFunction } from "@/lib/supabase";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
 
@@ -31,21 +31,46 @@ export async function uploadDocumentWithType(
       {
         text: "Invoice",
         onPress: () =>
-          doUpload(fileUri, mimeType, "invoice", projectId, resolve),
+          postDocumentToUploadInvoice(
+            fileUri,
+            mimeType,
+            "invoice",
+            projectId,
+            resolve,
+          ),
       },
       {
         text: "Quote",
-        onPress: () => doUpload(fileUri, mimeType, "quote", projectId, resolve),
+        onPress: () =>
+          postDocumentToUploadInvoice(
+            fileUri,
+            mimeType,
+            "quote",
+            projectId,
+            resolve,
+          ),
       },
       {
         text: "Warranty",
         onPress: () =>
-          doUpload(fileUri, mimeType, "warranty", projectId, resolve),
+          postDocumentToUploadInvoice(
+            fileUri,
+            mimeType,
+            "warranty",
+            projectId,
+            resolve,
+          ),
       },
       {
         text: "Permit",
         onPress: () =>
-          doUpload(fileUri, mimeType, "permit", projectId, resolve),
+          postDocumentToUploadInvoice(
+            fileUri,
+            mimeType,
+            "permit",
+            projectId,
+            resolve,
+          ),
       },
       {
         text: "Cancel",
@@ -56,7 +81,8 @@ export async function uploadDocumentWithType(
   });
 }
 
-async function doUpload(
+/** Sends multipart form to the `upload-invoice` edge function for one document type. */
+async function postDocumentToUploadInvoice(
   uri: string,
   mimeType: string,
   documentType: DocumentType,

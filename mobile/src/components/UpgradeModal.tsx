@@ -10,11 +10,14 @@ import {
 } from "react-native";
 import RevenueCatUI from "react-native-purchases-ui";
 import { X, Bot, ShieldCheck, FileDown, Check } from "lucide-react-native";
-import { Theme } from "../constants/Theme";
-import { PRICING } from "../../../shared/constants/pricing";
+import { Theme } from "@/constants/Theme";
+import { PRICING } from "@shared/constants/pricing";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
-import { ArchitectPlanIcon, ProjectPassIcon } from "./icons/PlanMarks";
+import {
+  ArchitectPlanIcon,
+  ProjectPassIcon,
+} from "@/components/icons/PlanMarks";
 
 interface Props {
   isOpen: boolean;

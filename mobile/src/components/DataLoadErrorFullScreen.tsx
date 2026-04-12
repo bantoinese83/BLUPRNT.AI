@@ -1,8 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AlertTriangle } from "lucide-react-native";
-import { Theme } from "../constants/Theme";
-import { Button } from "./ui/Button";
+import { Theme } from "@/constants/Theme";
+import { Button } from "@/components/ui/Button";
 
 type Props = {
   message: string;

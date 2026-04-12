@@ -3,7 +3,7 @@ import * as Linking from "expo-linking";
 import {
   extractPkceCodeFromUrl,
   getPasswordRecoveryRedirectUrl,
-} from "./auth-linking";
+} from "@/lib/auth-linking";
 
 vi.mock("expo-linking", () => ({
   createURL: vi.fn((path: string) => `ai.bluprnt.mobile:///--${path}`),

@@ -3,7 +3,7 @@ import type {
   PhotoToScopeResult,
   ProjectTypeOption,
   StageOption,
-} from "./onboarding-helpers";
+} from "@/lib/onboarding-helpers";
 
 const STORAGE_KEY = "@bluprnt/onboarding_draft_v1";
 /** Discard stale drafts so an old save never hijacks a new session. */

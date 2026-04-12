@@ -1,8 +1,8 @@
 import React from "react";
 import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
 
-import { Theme } from "../constants/Theme";
-import iconMark from "../../assets/images/icon.png";
+import { Theme } from "@/constants/Theme";
+import iconMark from "@assets/images/icon.png";
 
 /**
  * Shown while fonts load. Uses the real app icon + wordmark so this never depends

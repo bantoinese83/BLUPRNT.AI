@@ -9,8 +9,8 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-import { GlassCard } from "./ui/GlassCard";
-import { Theme } from "../constants/Theme";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
 
 interface Props {
   investment: number;

@@ -1,10 +1,10 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { money } from "../../../shared/lib/formatters";
-import { supabase } from "./supabase";
-import { planVsActualPdfLines } from "./plan-vs-actual";
-import { buildSellerPacketAppendixHtml } from "./seller-packet-appendix";
-import type { InvoiceRow } from "../../../shared/types/database";
+import { money } from "@shared/lib/formatters";
+import { supabase } from "@/lib/supabase";
+import { planVsActualPdfLines } from "@/lib/plan-vs-actual";
+import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
+import type { InvoiceRow } from "@shared/types/database";
 
 type ScopeItem = {
   category: string;

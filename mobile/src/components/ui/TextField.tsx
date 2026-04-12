@@ -10,7 +10,7 @@ import {
 import { Eye, EyeOff } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
-import { Theme } from "../../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
 interface Props {
   label: string;

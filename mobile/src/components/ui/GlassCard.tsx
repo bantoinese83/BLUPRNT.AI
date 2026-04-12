@@ -10,7 +10,7 @@ import * as Haptics from "expo-haptics";
 import { BlurView } from "expo-blur";
 import { MotiView } from "moti";
 import { LinearGradient } from "expo-linear-gradient";
-import { Theme } from "../../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
 interface Props {
   children: React.ReactNode;

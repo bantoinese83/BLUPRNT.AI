@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ScreenWrapper } from "./ScreenWrapper";
-import { SkeletonLoader } from "./ui/SkeletonLoader";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { SkeletonLoader } from "@/components/ui/SkeletonLoader";
 
 /** Matches projects tab header + list cards while data loads */
 export function ProjectsTabSkeleton() {

@@ -6,32 +6,32 @@ import { router, useLocalSearchParams } from "expo-router";
 import { AnimatePresence } from "moti";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../contexts/auth-context";
-import { ScreenWrapper } from "../../components/ScreenWrapper";
-import { Button } from "../../components/ui/Button";
-import { Theme } from "../../constants/Theme";
-import { supabase } from "../../lib/supabase";
+import { useAuth } from "@/contexts/auth-context";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Button } from "@/components/ui/Button";
+import { Theme } from "@/constants/Theme";
+import { supabase } from "@/lib/supabase";
 import {
   saveOnboardingProject,
   ONBOARDING_SESSION_INVALID,
   type ProjectTypeOption,
   type StageOption,
-} from "../../lib/onboarding-helpers";
-import { clearOnboardingDraft } from "../../lib/onboarding-draft";
-import { resolveZipFromCurrentLocation } from "../../lib/zip-from-location";
-import { onboardingStyles } from "./onboarding-screen.styles";
+} from "@/lib/onboarding-helpers";
+import { clearOnboardingDraft } from "@/lib/onboarding-draft";
+import { resolveZipFromCurrentLocation } from "@/lib/zip-from-location";
+import { onboardingStyles } from "@/features/onboarding/onboarding-screen.styles";
 import {
   ONBOARDING_LAST_STEP_INDEX,
   ONBOARDING_PHASES,
   phaseIndexForStep,
   hasValidOnboardingZip,
-} from "./onboarding-constants";
+} from "@/features/onboarding/onboarding-constants";
 import {
   useOnboardingAnalysis,
   type OnboardingEstimateState,
-} from "./hooks/useOnboardingAnalysis";
-import { useOnboardingLifecycle } from "./hooks/useOnboardingLifecycle";
-import { OnboardingStepContent } from "./OnboardingStepContent";
+} from "@/features/onboarding/hooks/useOnboardingAnalysis";
+import { useOnboardingLifecycle } from "@/features/onboarding/hooks/useOnboardingLifecycle";
+import { OnboardingStepContent } from "@/features/onboarding/OnboardingStepContent";
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();

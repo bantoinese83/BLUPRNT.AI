@@ -1,5 +1,5 @@
 import { Linking, Alert } from "react-native";
-import { invokeFunction } from "./supabase";
+import { invokeFunction } from "@/lib/supabase";
 
 type SignedUrlResponse = {
   signed_url?: string;

@@ -1,16 +1,16 @@
 import { useEffect } from "react";
 import { router } from "expo-router";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
 import {
   loadOnboardingDraft,
   clearOnboardingDraft,
-} from "../../../lib/onboarding-draft";
+} from "@/lib/onboarding-draft";
 import {
   normalizeStageFromDraft,
   type ProjectTypeOption,
   type StageOption,
-} from "../../../lib/onboarding-helpers";
-import type { OnboardingEstimateState } from "./useOnboardingAnalysis";
+} from "@/lib/onboarding-helpers";
+import type { OnboardingEstimateState } from "@/features/onboarding/hooks/useOnboardingAnalysis";
 
 /**
  * Fast-track existing users with projects, draft clearing for “new project”,

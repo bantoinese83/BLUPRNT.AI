@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AlertTriangle, RefreshCw, X } from "lucide-react-native";
-import { Theme } from "../constants/Theme";
+import { Theme } from "@/constants/Theme";
 
 type Props = {
   message: string;

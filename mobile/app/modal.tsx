@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
-import { Theme } from "../src/constants/Theme";
-import { ScreenWrapper } from "../src/components/ScreenWrapper";
+import { Theme } from "@/constants/Theme";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
 
 export default function ModalScreen() {
   return (

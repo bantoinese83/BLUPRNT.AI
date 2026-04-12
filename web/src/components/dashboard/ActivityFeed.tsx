@@ -10,16 +10,9 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Highlighter } from "@/components/ui/Highlighter";
+import type { ActivityEvent } from "@/lib/activity";
 
-// For now we'll use a mocked structure that could be easily wired to a DB table
-export type ActivityEvent = {
-  id: string;
-  type: "upload" | "status_change" | "project_created" | "goal_reached";
-  title: string;
-  description: string;
-  timestamp: string;
-  link?: string;
-};
+export type { ActivityEvent };
 
 interface ActivityFeedProps {
   events: ActivityEvent[];

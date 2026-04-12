@@ -6,7 +6,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { MotiView } from "moti";
-import { Logo } from "./Logo";
+import { Logo } from "@/components/ui/Logo";
 import Svg, {
   Circle,
   Defs,
@@ -232,4 +232,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { SnurraSize } from "./snurra-sizes";
+export { SnurraSize } from "@/components/ui/snurra-sizes";

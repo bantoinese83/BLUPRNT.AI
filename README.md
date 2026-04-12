@@ -4,6 +4,88 @@
 
 Monorepo: **Vite + React** (`web/`), **Expo** (`mobile/`), and **shared TypeScript** (`shared/`) on **Supabase** (Postgres, Auth, Storage) with **Edge Functions** for estimates, invoice OCR, billing, and resale analytics.
 
+## Architecture
+
+### System overview
+
+Clients talk to **Supabase** for authentication, row-level–secured Postgres, and Storage. Heavy or privileged work runs in **Supabase Edge Functions** (Deno): AI estimates, invoice OCR, Stripe/RevenueCat webhooks, email, and rate-limited APIs. **`@bluprnt/shared`** holds types, formatters, pricing, and other modules so web and mobile stay consistent.
+
+```mermaid
+flowchart TB
+  subgraph clients[Clients]
+    Web["Web: Vite + React + React Router"]
+    Mobile["Mobile: Expo + Expo Router"]
+  end
+
+  subgraph shared_pkg["Monorepo package"]
+    SH["@bluprnt/shared — types, formatters, pricing, activity helpers"]
+  end
+
+  subgraph supabase[Supabase project]
+    Auth[GoTrue Auth]
+    DB["Postgres + RLS"]
+    Stor[Storage — project-documents]
+    Edge[Edge Functions — Deno]
+  end
+
+  subgraph external[External services]
+    Stripe[Stripe]
+    RC[RevenueCat]
+    Gemini[Google Gemini API]
+    Brevo[Brevo email]
+    Upstash[Upstash Redis — optional rate limits]
+    Sentry[Sentry — web + mobile]
+  end
+
+  Web --> SH
+  Mobile --> SH
+  Web --> Auth
+  Web --> DB
+  Web --> Stor
+  Web --> Edge
+  Mobile --> Auth
+  Mobile --> DB
+  Mobile --> Stor
+  Mobile --> Edge
+  Edge --> DB
+  Edge --> Stor
+  Edge --> Stripe
+  Edge --> Gemini
+  Edge --> Brevo
+  Edge --> Upstash
+  Stripe -.->|webhooks| Edge
+  RC -.->|webhooks| Edge
+  Web --> Sentry
+  Mobile --> Sentry
+  Mobile --> RC
+```
+
+### Client applications
+
+| Layer                 | Web (`web/`)                                                        | Mobile (`mobile/`)                                                               |
+| --------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **UI**                | React 18+, Tailwind / design system, lazy route chunks              | React Native, Expo Router file-based routes, Moti animations                     |
+| **Routing**           | `react-router-dom` (`BrowserRouter`)                                | `expo-router` (stacks, tabs, modals)                                             |
+| **Server state**      | TanStack Query (`QueryClientProvider` in `App.tsx`)                 | TanStack Query (`query-client` + providers in `app/_layout.tsx`)                 |
+| **Auth session**      | `AuthProvider` + Supabase JS (`PKCE`, `persistSession`)             | Same Supabase session model; deep links / associated domains for `bluprnt.ai`    |
+| **Payments (in-app)** | Stripe Checkout via `functions.invoke('create-checkout', …)`        | **RevenueCat** (`react-native-purchases`) + server sync via `revenuecat-webhook` |
+| **Errors / perf**     | Sentry (`src/lib/sentry.ts`, Vite plugin for uploads)               | Sentry RN SDK (`src/lib/sentry.ts`)                                              |
+| **Build / deploy**    | Vite → static assets; **Vercel** root `web/` with `shared/` in repo | **EAS Build** / `expo export`; env via `EXPO_PUBLIC_*`                           |
+
+### Backend and data
+
+- **Postgres** is the source of truth for projects, scope, invoices, documents metadata, sharing tokens, and subscription-related rows. Access from clients uses the **anon key** and **RLS**; Edge Functions use the **service role** only where necessary.
+- **Storage** holds uploaded PDFs/images (e.g. `project-documents`); Edge helpers issue signed URLs where needed (`get-document-signed-url`).
+- **Edge Functions** are the only place for secrets such as `STRIPE_SECRET_KEY`, `GEMINI_API_KEY`, `BREVO_API_KEY`. Clients call them with the user’s JWT (`supabase.functions.invoke`) or they run as webhooks (Stripe, RevenueCat). See the **Edge Functions** table below for JWT/CORS notes.
+- **Generated types**: `shared/types/supabase.gen.ts` (and `shared/types/database.ts`) mirror the live schema; regenerate with `npm run db:types` after migrations.
+
+### Request paths (conceptual)
+
+1. **CRUD & reads**: App → Supabase PostgREST (authenticated) → RLS → Postgres.
+2. **AI estimate / OCR / chat**: App → Edge Function → Gemini (and optional Google Search grounding for estimates) → writes to Postgres/Storage.
+3. **Web billing**: App → `create-checkout` → Stripe Checkout → `stripe-webhook` → updates subscription tables.
+4. **Mobile billing**: App → RevenueCat SDK → Apple/Google → RevenueCat servers → `revenuecat-webhook` → `user_subscriptions` / entitlements.
+
 ## Repository layout
 
 | Path        | Purpose                                                                                                               |
@@ -14,6 +96,10 @@ Monorepo: **Vite + React** (`web/`), **Expo** (`mobile/`), and **shared TypeScri
 | `supabase/` | Migrations, Edge Functions, local config.                                                                             |
 
 Root **`package.json`** defines npm workspaces. Run installs and most scripts from the **repository root** unless noted.
+
+### Mobile feature modules
+
+Screen-sized flows live under **`mobile/src/features/<name>/`** (for example **`onboarding/`**, **`project-detail/`**). When a folder has an **`index.ts`** barrel, **routes** import from **`@/features/<name>`**; files inside the same feature prefer **relative** imports (`./Component`, `./helpers`) so aliases stay short at boundaries. **`npm run knip`** helps catch unused exports in the web workspace (see [`knip.json`](knip.json)).
 
 ## Location (onboarding)
 
@@ -94,6 +180,8 @@ npm run dev:mobile
 ```
 
 Use **EAS** and project env for store builds; see [`.env.example`](.env.example) for `EXPO_PUBLIC_*` and RevenueCat keys. CI for mobile builds may use root `npm ci` and the single root lockfile — see [`.github/workflows/`](.github/workflows/) if present.
+
+**Path aliases** ([`mobile/tsconfig.json`](mobile/tsconfig.json)): `@/*` → `mobile/src/*`, `@shared/*` → repo `shared/*`, `@app/*` → `mobile/app/*`, `@assets/*` → `mobile/assets/*`. Enable Metro resolution with **`experiments.tsconfigPaths`: true** in [`mobile/app.json`](mobile/app.json). Vitest mirrors these in [`mobile/vitest.config.ts`](mobile/vitest.config.ts). Optional maintenance: [`scripts/rewrite-mobile-imports.mjs`](scripts/rewrite-mobile-imports.mjs) rewrites relative imports to aliases.
 
 ## Stripe (paid plans)
 
@@ -184,7 +272,7 @@ Shared client: `supabase/functions/_shared/gemini.ts` (`callGemini`).
 
 Core tables include: `properties`, `projects`, `scope_items`, `documents`, `invoices`, `invoice_line_items`, `project_view_tokens`, `seller_packets`, `user_preferences`, plus Storage bucket `project-documents`. Apply migrations in lexicographic (timestamp) order from [`supabase/migrations/`](supabase/migrations/).
 
-**Generate TypeScript types** after schema changes (writes **`web/src/types/supabase.gen.ts`**; requires `SUPABASE_ACCESS_TOKEN` and uses `SUPABASE_PROJECT_ID` if set — see [`scripts/gen-db-types.sh`](scripts/gen-db-types.sh)):
+**Generate TypeScript types** after schema changes (output is committed as **`shared/types/supabase.gen.ts`**; the generator script path is defined in [`scripts/gen-db-types.sh`](scripts/gen-db-types.sh); requires `SUPABASE_ACCESS_TOKEN` and uses `SUPABASE_PROJECT_ID` if set):
 
 ```bash
 npm run db:types

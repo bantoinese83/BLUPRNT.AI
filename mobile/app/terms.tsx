@@ -10,8 +10,8 @@ import {
 import { router } from "expo-router";
 import { ArrowLeft, FileText } from "lucide-react-native";
 import { MotiView } from "moti";
-import { ScreenWrapper } from "../src/components/ScreenWrapper";
-import { Theme } from "../src/constants/Theme";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Theme } from "@/constants/Theme";
 
 export default function TermsScreen() {
   return (

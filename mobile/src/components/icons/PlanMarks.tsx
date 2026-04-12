@@ -1,8 +1,8 @@
 import React from "react";
 import { Image } from "expo-image";
 import type { ImageStyle, StyleProp } from "react-native";
-import SRC_ARCHITECT from "../../../assets/plan-architect.svg";
-import SRC_PASS from "../../../assets/plan-pass.svg";
+import SRC_ARCHITECT from "@assets/plan-architect.svg";
+import SRC_PASS from "@assets/plan-pass.svg";
 
 type Props = {
   size?: number;

@@ -1,8 +1,8 @@
 import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
-import { captureEdgeInvokeFailure } from "./sentry";
-import type { Database } from "../../../shared/types/supabase.gen";
+import { captureEdgeInvokeFailure } from "@/lib/sentry";
+import type { Database } from "@shared/types/supabase.gen";
 
 /**
  * AsyncStorage holds the full Supabase session (JWT + metadata). Expo SecureStore

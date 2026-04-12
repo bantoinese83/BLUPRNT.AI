@@ -14,13 +14,13 @@ import { router } from "expo-router";
 import { ChevronLeft, Wand2, CheckCircle2 } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { Button } from "../../src/components/ui/Button";
-import { GlassCard } from "../../src/components/ui/GlassCard";
-import { TextField } from "../../src/components/ui/TextField";
-import { supabase } from "../../src/lib/supabase";
-import { getPasswordRecoveryRedirectUrl } from "../../src/lib/auth-linking";
-import { Theme } from "../../src/constants/Theme";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Button } from "@/components/ui/Button";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { TextField } from "@/components/ui/TextField";
+import { supabase } from "@/lib/supabase";
+import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
+import { Theme } from "@/constants/Theme";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");

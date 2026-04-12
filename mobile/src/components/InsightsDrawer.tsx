@@ -12,10 +12,10 @@ import { router } from "expo-router";
 import { X, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { useAwareness, SmartInsight } from "../contexts/AwarenessContext";
-import { GlassCard } from "./ui/GlassCard";
-import { Theme } from "../constants/Theme";
-import { showAppToast } from "../lib/app-toast";
+import { useAwareness, SmartInsight } from "@/contexts/AwarenessContext";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
+import { showAppToast } from "@/lib/app-toast";
 
 const HEALTH_COLORS = {
   optimal: {

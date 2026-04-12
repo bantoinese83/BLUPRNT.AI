@@ -22,11 +22,11 @@ import {
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
-import { supabase } from "../lib/supabase";
-import { openOriginalDocumentForInvoice } from "../lib/open-original-document";
-import { money } from "../../../shared/lib/formatters";
-import type { InvoiceRow } from "../types/database";
-import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
+import { supabase } from "@/lib/supabase";
+import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
+import { money } from "@shared/lib/formatters";
+import type { InvoiceRow } from "@/types/database";
+import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 
 interface Props {
   invoice: InvoiceRow | null;

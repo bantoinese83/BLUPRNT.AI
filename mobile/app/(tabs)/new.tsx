@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import { Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
-import { ScreenWrapper } from "../../src/components/ScreenWrapper";
-import { Logo } from "../../src/components/ui/Logo";
-import { Theme } from "../../src/constants/Theme";
-import { SnurraLoader, SnurraSize } from "../../src/components/ui/SnurraLoader";
+import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { Logo } from "@/components/ui/Logo";
+import { Theme } from "@/constants/Theme";
+import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 
 /**
  * Center tab: send users into onboarding for another project, with clear feedback

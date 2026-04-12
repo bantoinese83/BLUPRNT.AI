@@ -5,12 +5,8 @@ LogBox.ignoreLogs([
 ]);
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import {
-  initMobileSentry,
-  isSentryConfigured,
-  Sentry,
-} from "../src/lib/sentry";
-import { queryClient } from "../src/lib/query-client";
+import { initMobileSentry, isSentryConfigured, Sentry } from "@/lib/sentry";
+import { queryClient } from "@/lib/query-client";
 import Purchases from "react-native-purchases";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 
@@ -34,19 +30,19 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "../src/components/useColorScheme";
-import { AuthProvider } from "../src/contexts/AuthProvider";
-import { useAuth } from "../src/contexts/auth-context";
-import { AppToastHost } from "../src/components/AppToastHost";
-import { BrandedSplash } from "../src/components/BrandedSplash";
+import { useColorScheme } from "@/components/useColorScheme";
+import { AuthProvider } from "@/contexts/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
+import { AppToastHost } from "@/components/AppToastHost";
+import { BrandedSplash } from "@/components/BrandedSplash";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useVersionCheck } from "../src/hooks/useVersionCheck";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
 import NetInfo from "@react-native-community/netinfo";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Theme } from "../src/constants/Theme";
-import { getPostAuthRedirectHref } from "../src/lib/onboarding-draft";
+import { Theme } from "@/constants/Theme";
+import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 import { WifiOff } from "lucide-react-native";
 
 export {

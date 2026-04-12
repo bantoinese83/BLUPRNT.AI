@@ -3,14 +3,14 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Scale, ChevronRight } from "lucide-react-native";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { GlassCard } from "./ui/GlassCard";
-import { Theme } from "../constants/Theme";
-import { money } from "../../../shared/lib/formatters";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { Theme } from "@/constants/Theme";
+import { money } from "@shared/lib/formatters";
 import {
   capitalImprovementTotal,
   planVsActualNarrative,
   type InvoiceLike,
-} from "../lib/plan-vs-actual";
+} from "@/lib/plan-vs-actual";
 
 type Props = {
   estimatedMin: number | null;
