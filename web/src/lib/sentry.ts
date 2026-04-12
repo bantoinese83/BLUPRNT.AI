@@ -17,7 +17,7 @@ function scrubSensitive(input: string): string {
 
 let initialized = false;
 
-export function initBrowserSentry(): void {
+function initBrowserSentry(): void {
   if (initialized || !dsn || typeof window === "undefined") {
     return;
   }
@@ -96,5 +96,3 @@ export function captureEdgeInvokeFailure(
 
 // Initialize immediately
 initBrowserSentry();
-
-export { Sentry };

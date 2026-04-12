@@ -4,10 +4,7 @@
 
 import { getPublicSiteUrl } from "@/lib/site-url";
 
-export const SEO_FALLBACK_ORIGIN = "https://bluprntai.com";
-
-/** Default OG / Twitter image path (served from site root). */
-export const SEO_DEFAULT_OG_IMAGE_PATH = "/og-image.png";
+const SEO_FALLBACK_ORIGIN = "https://bluprntai.com";
 
 /**
  * Stable origin for canonical and absolute OG URLs. Prefer VITE_SITE_URL in production.

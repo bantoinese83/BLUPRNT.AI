@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreWorkspaces": ["mobile", "shared"],
+  "ignore": ["supabase/**", "scripts/**"],
+  "ignoreDependencies": ["dotenv", "husky", "vitest"],
+  "ignoreBinaries": ["supabase"],
+  "metro": false,
+  "expo": false
+}
