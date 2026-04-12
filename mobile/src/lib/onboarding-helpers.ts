@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { compressImageForAnalysis } from "@/lib/image-utils";
 import { invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import {
   DEFAULT_ESTIMATE_MIN,
   DEFAULT_ESTIMATE_MAX,
@@ -288,8 +289,8 @@ export async function saveOnboardingProject(params: {
       } as unknown as string);
     });
 
-    invokeFunction("photo-to-scope", { body: fd }).catch((err) => {
-      console.error("[saveOnboardingProject] Background analysis failed:", err);
+    invokeFunction("photo-to-scope", { body: fd }).catch((err: unknown) => {
+      reportClientError("onboarding_photo_to_scope_background", err);
     });
   }
 

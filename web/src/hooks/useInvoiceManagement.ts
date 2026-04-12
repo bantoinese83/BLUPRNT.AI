@@ -6,7 +6,7 @@ import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
-import { addUserFlowBreadcrumb } from "@/lib/sentry";
+import { addUserFlowBreadcrumb, reportClientError } from "@/lib/sentry";
 
 interface UseInvoiceManagementProps {
   projectId: string;
@@ -176,11 +176,12 @@ export function useInvoiceManagement({
         document_type: documentType,
         opens_review: Boolean(newId && documentType === "invoice"),
       });
-    } catch {
+    } catch (err: unknown) {
+      reportClientError("invoice_upload", err);
       addUserFlowBreadcrumb("invoice_upload_exception", {
         document_type: documentType,
       });
-      const msg = friendlyDocumentUploadError(null);
+      const msg = friendlyDocumentUploadError(err);
       setError(msg);
       toast.error(msg);
     } finally {

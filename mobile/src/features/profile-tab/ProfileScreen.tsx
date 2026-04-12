@@ -27,6 +27,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { usePremium } from "@/hooks/usePremium";
 import { supabase, invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
 import { router } from "expo-router";
 import RevenueCatUI from "react-native-purchases-ui";
@@ -139,7 +140,8 @@ export default function ProfileScreen() {
         message: json,
         title: "BLUPRNT Data Export",
       });
-    } catch (_) {
+    } catch (err: unknown) {
+      reportClientError("profile_data_export", err);
       Alert.alert("Export Failed", "Couldn't generate data archive.");
     } finally {
       setExporting(false);
@@ -172,7 +174,8 @@ export default function ProfileScreen() {
                       });
                       if (error) throw error;
                       await signOut();
-                    } catch (_err) {
+                    } catch (err: unknown) {
+                      reportClientError("profile_delete_account", err);
                       Alert.alert(
                         "Deletion Failed",
                         "We couldn't delete your account. Please try again or contact support.",

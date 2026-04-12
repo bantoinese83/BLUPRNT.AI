@@ -30,6 +30,23 @@ export function initMobileSentry(): void {
   });
 }
 
+/**
+ * Surfaces unexpected client errors in dev (always) and in Sentry when configured.
+ * Use for catch blocks that still show friendly UI — avoids silent production failures.
+ */
+export function reportClientError(scope: string, error: unknown): void {
+  if (__DEV__) {
+    console.error(`[${scope}]`, error);
+  }
+  if (!initialized) {
+    return;
+  }
+  Sentry.captureException(
+    error instanceof Error ? error : new Error(`${scope}: ${String(error)}`),
+    { tags: { client_flow: scope } },
+  );
+}
+
 export function captureEdgeInvokeFailure(
   functionName: string,
   error: unknown,

@@ -3,6 +3,7 @@ import { type Session, type User } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { AuthContext } from "./auth-context";
 import * as Sentry from "@sentry/react";
+import { reportClientError } from "@/lib/sentry";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -23,7 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        reportClientError("auth_initial_session", err);
         setLoading(false);
       });
 

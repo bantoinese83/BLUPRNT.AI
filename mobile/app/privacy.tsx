@@ -12,6 +12,7 @@ import { ArrowLeft, Shield } from "lucide-react-native";
 import { MotiView } from "moti";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
+import { reportClientError } from "@/lib/sentry";
 
 export default function PrivacyScreen() {
   return (
@@ -67,7 +68,10 @@ export default function PrivacyScreen() {
           <TouchableOpacity
             style={styles.externalLink}
             onPress={() =>
-              Linking.openURL("https://bluprnt.ai/privacy").catch(() => {})
+              void Linking.openURL("https://bluprnt.ai/privacy").catch(
+                (err: unknown) =>
+                  reportClientError("open_external_privacy_policy", err),
+              )
             }
             accessibilityRole="link"
             accessibilityLabel="Open full privacy policy on bluprnt.ai"

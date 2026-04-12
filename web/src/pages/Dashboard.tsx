@@ -47,6 +47,7 @@ import { DashboardDataStatus } from "@/components/dashboard/DashboardDataStatus"
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
 import {
@@ -537,7 +538,8 @@ function DashboardContent({
       if (error) throw error;
       toast.success("Project renamed successfully.");
       load();
-    } catch (_e) {
+    } catch (err: unknown) {
+      reportClientError("dashboard_rename_project", err);
       toast.error("Failed to rename project.");
     }
   };

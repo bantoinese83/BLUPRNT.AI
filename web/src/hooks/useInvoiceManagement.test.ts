@@ -7,6 +7,7 @@ import { useSearchParams } from "react-router-dom";
 
 vi.mock("@/lib/sentry", () => ({
   addUserFlowBreadcrumb: vi.fn(),
+  reportClientError: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase", () => ({

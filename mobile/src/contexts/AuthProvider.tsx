@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { extractPkceCodeFromUrl, getAuthRedirectUrl } from "@/lib/auth-linking";
 import { registerForPushNotificationsAsync } from "@/lib/push";
 import { AuthContext } from "@/contexts/auth-context";
+import { reportClientError } from "@/lib/sentry";
 
 // Tell the browser to complete the session when redirected back
 WebBrowser.maybeCompleteAuthSession();
@@ -29,7 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           void registerForPushNotificationsAsync(session.user.id);
         }
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        reportClientError("auth_initial_session", err);
         setLoading(false);
       });
 

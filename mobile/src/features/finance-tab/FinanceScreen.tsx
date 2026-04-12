@@ -32,6 +32,7 @@ import {
   type InvoiceLedgerFilter,
 } from "@/features/finance-tab/ledger-helpers";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
+import { reportClientError } from "@/lib/sentry";
 import { FinanceLedgerHeader } from "@/features/finance-tab/FinanceLedgerHeader";
 import { FinanceInvoiceRow } from "@/features/finance-tab/FinanceInvoiceRow";
 
@@ -111,7 +112,8 @@ export default function FinanceScreen() {
         invoices,
         { includeAppendix },
       );
-    } catch (_error) {
+    } catch (err: unknown) {
+      reportClientError("finance_seller_packet_pdf", err);
       Alert.alert(
         "Export Failed",
         "We couldn't generate the PDF. Please check your connection.",

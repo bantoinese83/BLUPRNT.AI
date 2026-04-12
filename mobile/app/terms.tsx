@@ -12,6 +12,7 @@ import { ArrowLeft, FileText } from "lucide-react-native";
 import { MotiView } from "moti";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
+import { reportClientError } from "@/lib/sentry";
 
 export default function TermsScreen() {
   return (
@@ -75,7 +76,9 @@ export default function TermsScreen() {
           <TouchableOpacity
             style={styles.externalLink}
             onPress={() =>
-              Linking.openURL("https://bluprnt.ai/terms").catch(() => {})
+              void Linking.openURL("https://bluprnt.ai/terms").catch(
+                (err: unknown) => reportClientError("open_external_terms", err),
+              )
             }
             accessibilityRole="link"
             accessibilityLabel="Open full terms of service on bluprnt.ai"

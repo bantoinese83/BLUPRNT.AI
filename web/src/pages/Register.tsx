@@ -32,6 +32,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { useEffect } from "react";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
+import { reportClientError } from "@/lib/sentry";
 
 type Mode = "password" | "magic";
 
@@ -158,7 +159,8 @@ export default function Register() {
       }
       const next = resolvePostLoginHref(redirectParam);
       navigate(next, { replace: true });
-    } catch {
+    } catch (err: unknown) {
+      reportClientError("register_password_submit", err);
       setError("Sign-up failed. Try again.");
     } finally {
       setLoading(false);

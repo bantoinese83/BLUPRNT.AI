@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { invokeFunction } from "./supabase";
+import { reportClientError } from "@/lib/sentry";
 import type { PhotoToScopeResult } from "@/types/estimate";
 import {
   DEFAULT_ESTIMATE_MIN,
@@ -136,8 +137,8 @@ export async function saveOnboardingProject(params: {
     photos.forEach((f) => fd.append("photos[]", f));
 
     // Fire-and-forget background re-estimate with photos
-    invokeFunction("photo-to-scope", { body: fd }).catch((err) => {
-      console.error("[saveOnboardingProject] Background analysis failed:", err);
+    invokeFunction("photo-to-scope", { body: fd }).catch((err: unknown) => {
+      reportClientError("onboarding_photo_to_scope_background", err);
     });
   }
 

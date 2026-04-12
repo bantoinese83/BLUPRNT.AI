@@ -12,6 +12,7 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { Loader } from "@/components/ui/Loader";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
+import { reportClientError } from "@/lib/sentry";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -36,7 +37,8 @@ export default function ResetPassword() {
           );
         }
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        reportClientError("reset_password_session", err);
         if (!cancelled)
           setError("Could not verify your session. Please try again.");
       });

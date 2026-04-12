@@ -8,6 +8,7 @@ import { getSafeRedirect } from "@/lib/safe-redirect";
 import { getOnboardingResumeIfPending } from "@/lib/onboarding-post-auth-redirect";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
+import { reportClientError } from "@/lib/sentry";
 
 /**
  * OAuth (Google) and magic-link redirects land here. PKCE: ?code=…
@@ -87,7 +88,8 @@ export default function AuthCallback() {
       navigate(redirectTo, { replace: true });
     }
 
-    run().catch(() => {
+    run().catch((err: unknown) => {
+      reportClientError("auth_callback", err);
       if (!cancelled) {
         navigate(
           "/login?error=" +

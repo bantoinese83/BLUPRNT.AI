@@ -4,6 +4,10 @@ import { useContext } from "react";
 import { AuthProvider } from "./AuthProvider";
 import { AuthContext } from "./auth-context";
 
+vi.mock("@/lib/sentry", () => ({
+  reportClientError: vi.fn(),
+}));
+
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     auth: {

@@ -1,4 +1,5 @@
 import "./lib/sentry";
+import { reportClientError } from "@/lib/sentry";
 import { reactErrorHandler } from "@sentry/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -62,6 +63,7 @@ function mount() {
 
 void clearServiceWorkerAndCaches()
   .then(mount)
-  .catch(() => {
+  .catch((err: unknown) => {
+    reportClientError("pwa_cache_cleanup", err);
     mount();
   });
