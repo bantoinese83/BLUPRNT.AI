@@ -171,7 +171,9 @@ function OfflineBannerHost() {
   return (
     <View style={[styles.offlineBanner, { top: insets.top + 8 }]}>
       <WifiOff size={16} color="white" />
-      <Text style={styles.offlineText}>No internet connection</Text>
+      <Text style={styles.offlineText}>
+        No connection — updates pause until you’re back online
+      </Text>
     </View>
   );
 }

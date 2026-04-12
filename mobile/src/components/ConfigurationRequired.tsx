@@ -20,6 +20,10 @@ export function ConfigurationRequired({ onRetry }: Props) {
           "This build isn't reaching BLUPRNT yet. Check your connection, try again, or contact support if it continues."
         }
       </Text>
+      <Text style={styles.hint}>
+        This usually means the app wasn’t configured with backend settings, or
+        something on your network is blocking the connection.
+      </Text>
       {__DEV__ && (
         <Text style={styles.dev}>
           Development: set EXPO_PUBLIC_SUPABASE_URL and
@@ -63,6 +67,14 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textAlign: "center",
     lineHeight: 22,
+    maxWidth: 320,
+  },
+  hint: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.muted,
+    textAlign: "center",
+    lineHeight: 20,
     maxWidth: 320,
   },
   dev: {

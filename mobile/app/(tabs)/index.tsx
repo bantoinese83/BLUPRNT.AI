@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   Share,
-  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
@@ -41,6 +40,9 @@ import { DashboardLoadErrorBanner } from "../../src/components/DashboardLoadErro
 import { showAppToast } from "../../src/lib/app-toast";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { PlanVsActualCard } from "../../src/components/PlanVsActualCard";
+import { RenameProjectModal } from "../../src/components/RenameProjectModal";
+import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
+import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -88,6 +90,7 @@ export default function DashboardScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [isCelebrating, setIsCelebrating] = useState(false);
+  const [renameVisible, setRenameVisible] = useState(false);
 
   // Budget Completion Celebration
   useEffect(() => {
@@ -108,40 +111,21 @@ export default function DashboardScreen() {
   const handleRenameProject = () => {
     if (!project) return;
     Haptics.selectionAsync();
+    setRenameVisible(true);
+  };
 
-    if (Platform.OS === "ios") {
-      Alert.prompt(
-        "Rename Project",
-        "Enter a new name for your renovation project.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Save",
-            onPress: async (newName?: string) => {
-              if (!newName?.trim()) return;
-              try {
-                const { error } = await supabase
-                  .from("projects")
-                  .update({ name: newName.trim() })
-                  .eq("id", project.id);
-                if (error) throw error;
-                load();
-              } catch (_e) {
-                Alert.alert("Error", "Could not rename project.");
-              }
-            },
-          },
-        ],
-        "plain-text",
-        project.name,
-      );
-    } else {
-      // Android / Fallback: Simple prompt isn't built-in, so we use a standard alert for now
-      // (Future: Custom Modal)
-      Alert.alert(
-        "Rename project",
-        "Feature available in Profile -> Managed Projects.",
-      );
+  const handleRenameSave = async (newName: string) => {
+    if (!project) return;
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ name: newName })
+        .eq("id", project.id);
+      if (error) throw error;
+      setRenameVisible(false);
+      load();
+    } catch (e) {
+      Alert.alert("Couldn't rename project", friendlyPostgrestMutationError(e));
     }
   };
 
@@ -166,7 +150,13 @@ export default function DashboardScreen() {
           onPress: async () => {
             const { status } =
               await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== "granted") return;
+            if (status !== "granted") {
+              Alert.alert(
+                "Camera access needed",
+                "Allow camera access in your device settings to snap receipts and documents. You can still upload with Choose Files.",
+              );
+              return;
+            }
 
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: ["images"],
@@ -212,9 +202,10 @@ export default function DashboardScreen() {
       if (!result.success) {
         if (result.error) {
           if (
-            result.error.includes("limit") ||
-            result.error.includes("Architect") ||
-            result.error.includes("Free")
+            shouldPromptUpgradeAfterUploadFailure(
+              result.errorCode,
+              result.error,
+            )
           ) {
             setUpgradeReason("invoice_limit");
             setShowUpgrade(true);
@@ -447,6 +438,13 @@ export default function DashboardScreen() {
         <View style={{ height: 120 }} />
       </View>
 
+      <RenameProjectModal
+        key={`${project.id}-${renameVisible ? "open" : "closed"}`}
+        visible={renameVisible}
+        initialName={project.name}
+        onClose={() => setRenameVisible(false)}
+        onSave={handleRenameSave}
+      />
       <UpgradeModal
         isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}

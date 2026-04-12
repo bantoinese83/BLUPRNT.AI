@@ -137,6 +137,28 @@ export function friendlyDocumentUploadError(
   return "That didn’t go through. Check your connection and try again—or try a smaller PDF or image.";
 }
 
+/** Postgrest / Supabase client errors from table updates (rename, etc.). */
+export function friendlyPostgrestMutationError(err: unknown): string {
+  if (!err || typeof err !== "object") {
+    return "Something went wrong. Please try again.";
+  }
+  const e = err as { message?: string; code?: string };
+  const m = (e.message || "").toLowerCase();
+  if (
+    e.code === "PGRST301" ||
+    m.includes("jwt") ||
+    m.includes("jwt expired") ||
+    m.includes("permission denied") ||
+    m.includes("not authorized")
+  ) {
+    return "Your session may have expired. Sign out, sign in again, then try once more.";
+  }
+  if (m.includes("network") || m.includes("failed to fetch")) {
+    return "Check your internet connection and try again.";
+  }
+  return "We couldn’t complete that. Try again in a moment.";
+}
+
 export function friendlyProjectShareError(
   message?: string,
   code?: string,

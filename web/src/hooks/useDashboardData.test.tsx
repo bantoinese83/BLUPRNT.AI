@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDashboardData } from "./useDashboardData";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -200,5 +200,60 @@ describe("useDashboardData", () => {
       },
       { timeout: 5000 },
     );
+  });
+
+  it("persists project selection and invalidates dashboard query", async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: mockUserId } } },
+    } as never);
+
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
+      if (table === "user_preferences") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+          upsert,
+        };
+      }
+      return mockSupabaseQuery([]);
+    }) as unknown as typeof supabase.from);
+
+    const { result } = renderHook(() => useDashboardData(), { wrapper });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.handleProjectSelect("proj-xyz");
+    });
+
+    expect(localStorage.getItem("bluprnt_project_id")).toBe("proj-xyz");
+    expect(upsert).toHaveBeenCalled();
+  });
+
+  it("exposes load and clearLoadError", async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: mockUserId } } },
+    } as never);
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
+      if (table === "user_preferences") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }
+      return mockSupabaseQuery([]);
+    }) as unknown as typeof supabase.from);
+
+    const { result } = renderHook(() => useDashboardData(), { wrapper });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      result.current.clearLoadError();
+      await result.current.load();
+    });
   });
 });

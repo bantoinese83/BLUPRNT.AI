@@ -10,6 +10,7 @@ import type {
   ProjectPassRow,
 } from "../../../shared/types/database";
 import { buildSpendByCategory } from "../../../shared/lib/spend-by-category";
+import { partialDashboardLoadMessage } from "../../../shared/lib/dashboard-partial-load";
 
 const emptySnapshot = (): DashboardSnapshot => ({
   configured: true,
@@ -120,11 +121,15 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
         .maybeSingle(),
     ]);
 
-    const detailErr =
-      scopesRes.error || invRes.error || subRes.error || subRes2.error;
-    const loadErrorPartial = detailErr
-      ? "Some details couldn’t load. Your summary may be incomplete — pull to refresh."
-      : null;
+    const loadErrorPartial = partialDashboardLoadMessage(
+      {
+        scopeFailed: !!scopesRes.error,
+        invoicesFailed: !!invRes.error,
+        subscriptionFailed: !!subRes.error,
+        projectPassFailed: !!subRes2.error,
+      },
+      { variant: "mobile" },
+    );
 
     const newScopes = (scopesRes.data ?? []) as ScopeRow[];
     const newInvoices = (invRes.data ?? []) as InvoiceRow[];

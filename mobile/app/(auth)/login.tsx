@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { MotiView } from "moti";
 import { supabase } from "../../src/lib/supabase";
 import { Button } from "../../src/components/ui/Button";
@@ -30,11 +30,23 @@ import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
+  const params = useLocalSearchParams<{ email?: string | string[] }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    const raw = params.email;
+    const e = Array.isArray(raw) ? raw[0] : raw;
+    if (!e || typeof e !== "string") return;
+    try {
+      setEmail(decodeURIComponent(e.trim()));
+    } catch {
+      setEmail(e.trim());
+    }
+  }, [params.email]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {

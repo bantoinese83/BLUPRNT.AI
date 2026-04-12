@@ -8,10 +8,14 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build": "expo export --platform ios --platform android",
     "check-types": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "check": "npm run lint",
-    "lint": "eslint . --max-warnings 0 && tsc --noEmit"
+    "lint": "eslint . --max-warnings 0 && tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",
@@ -71,7 +75,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
-    "typescript": "~5.9.2"
+    "@vitest/coverage-v8": "^4.1.4",
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.4"
   },
   "private": true
 }

@@ -217,39 +217,46 @@ npm run db:types:check   # CI-friendly: fail if generated file drifts
 
 All commands run from the **repository root** unless you use `npm run <script> -w web` explicitly.
 
-| Script                                        | Description                                                                     |
-| --------------------------------------------- | ------------------------------------------------------------------------------- |
-| `npm run dev` / `dev:web`                     | Vite dev server (`web`, port 3000)                                              |
-| `npm run dev:mobile`                          | Expo (`mobile`)                                                                 |
-| `npm run build` / `build:web`                 | Production build (`web`)                                                        |
-| `npm run preview`                             | Preview production build locally                                                |
-| `npm run clean`                               | Remove `web/dist`                                                               |
-| `npm run lint`                                | ESLint + `tsc` for `web` and `mobile`                                           |
-| `npm run typecheck`                           | Typecheck `web` and `mobile`                                                    |
-| `npm run test`                                | Vitest watch (`web`)                                                            |
-| `npm run test:run`                            | Vitest once (`web`)                                                             |
-| `npm run test:coverage`                       | Vitest with coverage (`web`)                                                    |
-| `npm run test:ui`                             | Vitest UI (`web`)                                                               |
-| `npm run test:e2e`                            | Playwright (`playwright.config.ts` at repo root)                                |
-| `npm run check`                               | `lint` + `test:run` + `build`                                                   |
-| `npm run test:all`                            | `check` + coverage + e2e                                                        |
-| `npm run db:types`                            | Regenerate Supabase TS types (`scripts/gen-db-types.sh`)                        |
-| `npm run db:types:check`                      | Verify generated types match (`scripts/check-db-types.sh`)                      |
-| `npm run format`                              | Prettier for web, mobile, shared sources                                        |
-| `npm run functions:check`                     | Validate Edge Function layout (`scripts/check-edge-functions.sh`)               |
-| `npm run postdeploy:verify`                   | Post-deploy smoke script (`scripts/post-deploy-verify.sh`)                      |
-| `npm run functions:deploy:photo`              | Deploy `photo-to-scope`                                                         |
-| `npm run functions:deploy:invoices`           | Deploy `upload-invoice`, `get-invoice`                                          |
-| `npm run functions:deploy:project-view`       | Deploy `get-project-view`                                                       |
-| `npm run functions:deploy:checkout`           | Deploy `create-checkout`                                                        |
-| `npm run functions:deploy:stripe-webhook`     | Deploy `stripe-webhook`                                                         |
-| `npm run functions:deploy:revenuecat-webhook` | Deploy `revenuecat-webhook`                                                     |
-| `npm run functions:deploy:delete-account`     | Deploy `delete-account`                                                         |
-| `npm run functions:deploy:send-email`         | Deploy `send-email`                                                             |
-| `npm run functions:deploy:marketing-lead`     | Deploy `submit-marketing-lead`                                                  |
-| `npm run functions:deploy:chat`               | Deploy `chat-with-project`                                                      |
-| `npm run functions:deploy`                    | Deploy all Edge Functions via Supabase CLI (project ref in root `package.json`) |
-| `npm run functions:deploy:rate-limited`       | Batch deploy of rate-limited / public surface                                   |
+| Script                                        | Description                                                                                                                 |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev` / `dev:web`                     | Vite dev server (`web`, port 3000)                                                                                          |
+| `npm run dev:mobile`                          | Expo (`mobile`)                                                                                                             |
+| `npm run build`                               | `vite build` (`web`) + `expo export` iOS & Android JS bundles (`mobile`; no Xcode/Android SDK)                              |
+| `npm run build:web` / `build:mobile`          | Build only `web` or only `mobile`                                                                                           |
+| `npm run preview`                             | Preview production build locally                                                                                            |
+| `npm run clean`                               | Remove `web/dist`                                                                                                           |
+| `npm run lint`                                | ESLint + `tsc` for `web` and `mobile`                                                                                       |
+| `npm run typecheck`                           | Typecheck `web` and `mobile`                                                                                                |
+| `npm run test`                                | Vitest watch (`web`)                                                                                                        |
+| `npm run test:run`                            | Vitest once — **`web` then `mobile`**                                                                                       |
+| `npm run test:coverage`                       | Vitest coverage — **`web`** (lib/hooks/services) **+ `mobile`** (tested `src/lib` modules); see `vitest.config` in each app |
+| `npm run test:ui`                             | Vitest UI (`web`)                                                                                                           |
+| `npm run test:e2e`                            | Playwright — web app (`playwright.config.ts` at repo root; runs in CI)                                                      |
+| `npm run test:e2e:mobile`                     | Maestro smoke — Expo app ([`scripts/e2e-mobile-maestro.sh`](scripts/e2e-mobile-maestro.sh); local only — see below)         |
+| `npm run check`                               | `lint` + `test:run` + `build`                                                                                               |
+| `npm run test:all`                            | `check` + coverage + e2e                                                                                                    |
+| `npm run db:types`                            | Regenerate Supabase TS types (`scripts/gen-db-types.sh`)                                                                    |
+| `npm run db:types:check`                      | Verify generated types match (`scripts/check-db-types.sh`)                                                                  |
+| `npm run format`                              | Prettier for web, mobile, shared sources                                                                                    |
+| `npm run functions:check`                     | Validate Edge Function layout (`scripts/check-edge-functions.sh`)                                                           |
+| `npm run postdeploy:verify`                   | Post-deploy smoke script (`scripts/post-deploy-verify.sh`)                                                                  |
+| `npm run functions:deploy:photo`              | Deploy `photo-to-scope`                                                                                                     |
+| `npm run functions:deploy:invoices`           | Deploy `upload-invoice`, `get-invoice`                                                                                      |
+| `npm run functions:deploy:project-view`       | Deploy `get-project-view`                                                                                                   |
+| `npm run functions:deploy:checkout`           | Deploy `create-checkout`                                                                                                    |
+| `npm run functions:deploy:stripe-webhook`     | Deploy `stripe-webhook`                                                                                                     |
+| `npm run functions:deploy:revenuecat-webhook` | Deploy `revenuecat-webhook`                                                                                                 |
+| `npm run functions:deploy:delete-account`     | Deploy `delete-account`                                                                                                     |
+| `npm run functions:deploy:send-email`         | Deploy `send-email`                                                                                                         |
+| `npm run functions:deploy:marketing-lead`     | Deploy `submit-marketing-lead`                                                                                              |
+| `npm run functions:deploy:chat`               | Deploy `chat-with-project`                                                                                                  |
+| `npm run functions:deploy`                    | Deploy all Edge Functions via Supabase CLI (project ref in root `package.json`)                                             |
+| `npm run functions:deploy:rate-limited`       | Batch deploy of rate-limited / public surface                                                                               |
+
+### End-to-end tests
+
+- **Web**: `npm run test:e2e` starts a production preview and runs Playwright under [`e2e/`](e2e/). The web server injects minimal `VITE_*` defaults when unset so builds work in CI without a root `.env`.
+- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/app-smoke.yaml`](mobile/maestro/app-smoke.yaml). You need the [Maestro CLI](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli), an iOS Simulator or Android emulator, and the **dev client** installed for bundle id `ai.bluprnt.mobile` (for example `npx expo run:ios` or `run:android` from `mobile/`). This is **not** part of the default Ubuntu CI job; add a separate **macOS** workflow with Xcode if you want Maestro in CI.
 
 ---
 

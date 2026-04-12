@@ -1,5 +1,6 @@
 import { Alert } from "react-native";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
+import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { invokeFunction } from "./supabase";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
@@ -8,6 +9,7 @@ interface UploadResult {
   invoice_id?: string;
   ocr_status?: string;
   error?: string;
+  error_code?: string;
 }
 
 /**
@@ -18,7 +20,12 @@ export async function uploadDocumentWithType(
   fileUri: string,
   mimeType: string,
   projectId: string,
-): Promise<{ success: boolean; invoice_id?: string; error?: string }> {
+): Promise<{
+  success: boolean;
+  invoice_id?: string;
+  error?: string;
+  errorCode?: string;
+}> {
   return new Promise((resolve) => {
     Alert.alert("Document Type", "What type of document are you uploading?", [
       {
@@ -58,6 +65,7 @@ async function doUpload(
     success: boolean;
     invoice_id?: string;
     error?: string;
+    errorCode?: string;
   }) => void,
 ) {
   try {
@@ -82,18 +90,12 @@ async function doUpload(
       },
     );
 
-    if (error) {
+    const failure = extractUploadFailureFromInvokeResult(data, error);
+    if (failure) {
       resolve({
         success: false,
-        error: friendlyDocumentUploadError(error),
-      });
-      return;
-    }
-
-    if (data?.error) {
-      resolve({
-        success: false,
-        error: friendlyDocumentUploadError(null, { error: data.error }),
+        error: failure.message,
+        errorCode: failure.errorCode,
       });
       return;
     }

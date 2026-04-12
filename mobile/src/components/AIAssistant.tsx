@@ -17,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { invokeFunction } from "../lib/supabase";
+import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 import { Theme } from "../constants/Theme";
 import { SnurraLoader, SnurraSize } from "./ui/SnurraLoader";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "../../app/(tabs)/_layout";
@@ -117,7 +118,7 @@ export function AIAssistant({ projectId }: Props) {
         {
           id: nextMessageId(),
           role: "assistant",
-          content: "Something went wrong. Please try again in a moment.",
+          content: friendlyPostgrestMutationError(err),
         },
       ]);
     } finally {

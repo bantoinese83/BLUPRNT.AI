@@ -1,5 +1,9 @@
-# Run on a device or simulator: `maestro test mobile/maestro/app-smoke.yaml`
-# Extend this flow for login → project → export when you have test credentials.
+# Run from repo root: npm run test:e2e:mobile
+# Requires: Maestro CLI, iOS Simulator or Android emulator, dev build installed (ai.bluprnt.mobile).
+# Extend for login → project → export when you have test credentials.
 appId: ai.bluprnt.mobile
 ---
 - launchApp
+- extendedWaitUntil:
+    visible: "Snap the room"
+    timeout: 60000

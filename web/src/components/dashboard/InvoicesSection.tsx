@@ -42,6 +42,7 @@ export function InvoicesSection({
     error,
     reviewInvoiceId,
     setReviewInvoiceId,
+    closeReviewModal,
     documentType,
     setDocumentType,
     guideDismissed,
@@ -268,7 +269,7 @@ export function InvoicesSection({
         <InvoiceReviewModal
           invoiceId={reviewInvoiceId}
           projectId={projectId}
-          onClose={() => setReviewInvoiceId(null)}
+          onClose={closeReviewModal}
           onSaved={onUploaded}
         />
       )}

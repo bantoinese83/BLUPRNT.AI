@@ -30,6 +30,11 @@ import {
   ArchitectPlanIcon,
   ProjectPassIcon,
 } from "@/components/icons/PlanMarks";
+import type { UserSubscriptionRow } from "@shared/types/database";
+import {
+  architectBillingChannel,
+  hasDuplicateWebAndStoreSubscriptions,
+} from "@shared/lib/subscription-billing";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -49,6 +54,8 @@ export default function Settings() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [userLoading, setUserLoading] = useState(true);
   const [isArchitect, setIsArchitect] = useState(false);
+  const [subscriptionRow, setSubscriptionRow] =
+    useState<UserSubscriptionRow | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   /** Used for Project Pass checkout from Settings (Stripe metadata). */
   const [upgradeProjectId, setUpgradeProjectId] = useState<string | null>(null);
@@ -72,9 +79,10 @@ export default function Settings() {
       if (u) {
         const { data: sub } = await supabase
           .from("user_subscriptions")
-          .select("status")
+          .select("*")
           .eq("user_id", u.id)
           .maybeSingle();
+        setSubscriptionRow(sub as UserSubscriptionRow | null);
         setIsArchitect(sub?.status === "active");
 
         const { data: owned } = await supabase
@@ -95,6 +103,8 @@ export default function Settings() {
         }
       } else {
         setUpgradeProjectId(null);
+        setSubscriptionRow(null);
+        setIsArchitect(false);
       }
 
       setUserLoading(false);
@@ -480,6 +490,24 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
+            {isArchitect &&
+              subscriptionRow &&
+              hasDuplicateWebAndStoreSubscriptions(subscriptionRow) && (
+                <div
+                  className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+                  role="status"
+                >
+                  <p className="font-bold text-amber-950 mb-1">
+                    Possible duplicate subscription
+                  </p>
+                  <p className="font-medium leading-relaxed text-amber-950/95">
+                    We see both a web (Stripe) subscription and an app store
+                    subscription. Cancel one to avoid paying twice — use the
+                    Stripe customer portal for web, or Subscriptions in the App
+                    Store / Google Play for the app.
+                  </p>
+                </div>
+              )}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-slate-50/80 border border-slate-200 rounded-3xl gap-4">
               <div className="flex items-center gap-4">
                 <div
@@ -531,10 +559,20 @@ export default function Settings() {
                 </p>
               ) : (
                 <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                  You have full access to professional renovation tools. Billing
-                  and invoices are handled securely through Stripe.
+                  {subscriptionRow &&
+                  architectBillingChannel(subscriptionRow) === "stripe"
+                    ? "You have full access to professional renovation tools. Billing and invoices are handled securely through Stripe."
+                    : subscriptionRow &&
+                        architectBillingChannel(subscriptionRow) === "store"
+                      ? "You have full access to professional tools. This subscription is billed through the App Store or Google Play — manage or cancel there."
+                      : "You have full access to professional renovation tools. Manage billing wherever you subscribed (Stripe on the web, or the app store in the mobile app)."}
                 </p>
               )}
+              <p className="text-xs text-slate-500 leading-relaxed font-medium border-t border-slate-100 pt-4 mt-2">
+                Plans on the website are billed through Stripe. If you subscribe
+                in the iOS or Android app, manage or cancel in the App Store or
+                Google Play — use the same place you subscribed.
+              </p>
             </div>
           </CardContent>
         </Card>

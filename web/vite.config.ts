@@ -1,21 +1,32 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  /** Monorepo root — same as `envDir` (shared `.env` for web + tooling). */
+  const rootDir = path.resolve(__dirname, "..");
+  const env = loadEnv(mode, rootDir, "");
+  const sentryAuthToken = env.SENTRY_AUTH_TOKEN?.trim();
+
+  /** Only wire Sentry when a token is present (CI / release). Avoids noisy local build warnings. */
+  const sentryPlugins =
+    sentryAuthToken !== undefined && sentryAuthToken.length > 0
+      ? [
+          sentryVitePlugin({
+            org: "base83",
+            project: "bluprntai-web",
+            authToken: sentryAuthToken,
+            telemetry: false,
+          }),
+        ]
+      : [];
+
   return {
     /** Load `.env` from monorepo root (one file for web + tooling). */
-    envDir: path.resolve(__dirname, ".."),
-    plugins: [
-      react(),
-      tailwindcss(),
-      sentryVitePlugin({
-        org: "base83",
-        project: "bluprntai-web",
-      }),
-    ],
+    envDir: rootDir,
+    plugins: [react(), tailwindcss(), ...sentryPlugins],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

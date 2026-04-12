@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 
 export function AIAssistant({ projectId }: { projectId: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +59,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
         ...prev,
         {
           role: "assistant",
-          content: "Something went wrong. Please try again later.",
+          content: friendlyPostgrestMutationError(err),
         },
       ]);
     } finally {

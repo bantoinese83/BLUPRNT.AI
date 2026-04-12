@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/supabase";
 import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
+import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
+import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
 
 interface UseInvoiceManagementProps {
   projectId: string;
@@ -28,6 +30,7 @@ export function useInvoiceManagement({
   hasProjectPass,
 }: UseInvoiceManagementProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const reviewQueueRef = useRef<string[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +85,14 @@ export function useInvoiceManagement({
     setGuideDismissed(true);
   };
 
+  const closeReviewModal = useCallback(() => {
+    setReviewInvoiceId(null);
+    const next = reviewQueueRef.current.shift();
+    if (next) {
+      setTimeout(() => setReviewInvoiceId(next), 80);
+    }
+  }, []);
+
   const handleUploadFile = async (files: FileList | null) => {
     const file = files?.[0];
     if (!file) return;
@@ -121,29 +132,20 @@ export function useInvoiceManagement({
         invoice_id?: string;
         ocr_status?: string;
         error?: string;
+        error_code?: string;
       }>("upload-invoice", { body: fd });
 
-      if (fnErr) {
-        setError(friendlyDocumentUploadError(fnErr, data ?? undefined));
-        return;
-      }
-
-      if (data && "error" in data && data.error) {
-        const e = String(data.error);
+      const failure = extractUploadFailureFromInvokeResult(data, fnErr);
+      if (failure) {
         if (
-          e.includes("Free plan") ||
-          e.includes("Free limit") ||
-          e.includes("10 invoice") ||
-          e.includes("billing period") ||
-          e.includes("Upgrade")
+          shouldPromptUpgradeAfterUploadFailure(
+            failure.errorCode,
+            failure.message,
+          )
         ) {
           onUpgradeClick("invoice_limit");
         }
-        setError(
-          e.includes("limit") || e.includes("Architect")
-            ? e
-            : friendlyDocumentUploadError(null, data),
-        );
+        setError(failure.message);
         return;
       }
 
@@ -151,7 +153,13 @@ export function useInvoiceManagement({
       onUploaded();
       const newId = data?.invoice_id;
       if (newId && documentType === "invoice") {
-        setTimeout(() => setReviewInvoiceId(newId), 100);
+        setReviewInvoiceId((prev) => {
+          if (prev) {
+            reviewQueueRef.current.push(newId);
+            return prev;
+          }
+          return newId;
+        });
       }
       toast.success(
         `${documentType === "invoice" ? "Invoice" : "Document"} uploaded successfully`,
@@ -180,6 +188,7 @@ export function useInvoiceManagement({
     error,
     reviewInvoiceId,
     setReviewInvoiceId,
+    closeReviewModal,
     documentType,
     setDocumentType,
     guideDismissed,

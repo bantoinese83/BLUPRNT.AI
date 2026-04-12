@@ -126,6 +126,8 @@ type UserSubscriptionsRow = {
   current_period_end: string | null;
   invoice_uploads_count: number;
   invoice_uploads_reset_at: string | null;
+  /** True when RevenueCat reports an active App Store / Play subscription. */
+  revenuecat_entitlement_active: boolean;
   created_at: string | null;
   updated_at: string | null;
 };

@@ -56,4 +56,21 @@ describe("useCachedData", () => {
     rerender({ rev: false });
     await waitFor(() => expect(result.current.data).toEqual({ n: firstN }));
   });
+
+  it("reuses in-flight promise for the same key", async () => {
+    const key = `shared-${Math.random()}`;
+    let resolve!: (v: string) => void;
+    const p = new Promise<string>((r) => {
+      resolve = r;
+    });
+    const fetcher = vi.fn().mockReturnValue(p);
+
+    const a = renderHook(() => useCachedData({ key, fetcher }));
+    const b = renderHook(() => useCachedData({ key, fetcher }));
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    resolve("done");
+    await waitFor(() => expect(a.result.current.data).toBe("done"));
+    await waitFor(() => expect(b.result.current.data).toBe("done"));
+  });
 });

@@ -170,6 +170,11 @@ export function InvoiceReviewSheet({
             </TouchableOpacity>
           ) : null}
 
+          <Text style={styles.reviewDismissHint}>
+            You can close this anytime — the document stays in your ledger. Line
+            items can be matched to scope on the web app.
+          </Text>
+
           {/* Delete */}
           <TouchableOpacity
             style={styles.deleteBtn}
@@ -330,6 +335,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Outfit_600SemiBold",
     color: "#e2e8f0",
+  },
+  reviewDismissHint: {
+    fontSize: 12,
+    fontFamily: "Outfit_500Medium",
+    color: "#64748b",
+    lineHeight: 18,
+    textAlign: "center",
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   deleteBtn: {
     flexDirection: "row",

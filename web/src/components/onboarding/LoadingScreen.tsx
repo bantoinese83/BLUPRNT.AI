@@ -38,9 +38,9 @@ export function LoadingScreen() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // Ensure the user sees the animations for at least 5 seconds for "weight"
-      const minDelay = new Promise((resolve) => setTimeout(resolve, 5000));
-      await Promise.all([runPhotoToScope(), minDelay]);
+      await runPhotoToScope();
+      // Brief beat so the route transition doesn’t feel abrupt after a fast response
+      await new Promise((resolve) => setTimeout(resolve, 350));
 
       if (cancelled) return;
       navigate("/onboarding/estimate", { replace: true });
@@ -84,7 +84,7 @@ export function LoadingScreen() {
             initial={{ width: "2%" }}
             animate={{ width: estimateError ? "100%" : "92%" }}
             transition={{
-              duration: estimateError ? 0.5 : 20,
+              duration: estimateError ? 0.5 : 6,
               ease: estimateError ? "easeOut" : [0.1, 0, 0, 1],
             }}
           />

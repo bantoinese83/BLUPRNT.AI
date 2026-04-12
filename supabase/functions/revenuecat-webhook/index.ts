@@ -9,11 +9,11 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
  * RevenueCat Webhook Handler
- * Syncs App Store/Play Store entitlements to the internal `user_subscriptions` table.
+ * Syncs App Store/Play entitlements. When the user also has Stripe (web),
+ * we only update `revenuecat_entitlement_active` so we never clobber Stripe-driven status.
  */
-serve(async (req) => {
+serve(async (req: Request) => {
   try {
-    // 1. Authentication (Optional Header check)
     if (webhookSecret) {
       const authHeader = req.headers.get("Authorization");
       if (authHeader !== `Bearer ${webhookSecret}`) {
@@ -22,8 +22,7 @@ serve(async (req) => {
     }
 
     const { event } = await req.json();
-    const { type, app_user_id, product_id, expiration_at_ms, period_type } =
-      event;
+    const { type, app_user_id, expiration_at_ms } = event;
 
     if (!app_user_id) {
       return new Response("No app_user_id provided", { status: 400 });
@@ -31,27 +30,51 @@ serve(async (req) => {
 
     console.log(`[RevenueCat] Event: ${type} for User: ${app_user_id}`);
 
-    // 2. Map RevenueCat status to internal DB status
-    let status = "active";
+    const periodEnd = expiration_at_ms
+      ? new Date(expiration_at_ms).toISOString()
+      : null;
+
+    let status: "active" | "canceled" | "past_due" | "trialing" = "active";
     if (type === "EXPIRATION" || type === "CANCELLATION") {
       status = "canceled";
     } else if (type === "BILLING_ISSUE") {
       status = "past_due";
     }
 
-    const periodEnd = expiration_at_ms
-      ? new Date(expiration_at_ms).toISOString()
-      : null;
+    const rcEntitlementActive =
+      type !== "EXPIRATION" && type !== "CANCELLATION";
 
-    // 3. Sync to `user_subscriptions`
-    // We use a service role client to bypass RLS for administrative sync.
+    const { data: existing } = await supabase
+      .from("user_subscriptions")
+      .select("user_id, stripe_subscription_id")
+      .eq("user_id", app_user_id)
+      .maybeSingle();
+
+    const hasStripe = Boolean(existing?.stripe_subscription_id);
+
+    if (hasStripe) {
+      const { error } = await supabase
+        .from("user_subscriptions")
+        .update({
+          revenuecat_entitlement_active: rcEntitlementActive,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", app_user_id);
+
+      if (error) {
+        console.error("[RevenueCat] Stripe co-existence update error:", error);
+        return new Response("Internal Error", { status: 500 });
+      }
+      return new Response("OK", { status: 200 });
+    }
+
     const { error } = await supabase.from("user_subscriptions").upsert(
       {
         user_id: app_user_id,
-        status: status,
+        status,
         current_period_end: periodEnd,
-        // product_id can be mapped to our 'architect' plan if needed
         plan: "architect",
+        revenuecat_entitlement_active: rcEntitlementActive,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" },

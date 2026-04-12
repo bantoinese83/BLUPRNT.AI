@@ -13,6 +13,8 @@ const ARCHITECT_UPLOADS_PER_MONTH = 10;
 export type EntitlementResult = {
   allowed: boolean;
   reason?: string;
+  /** Stable code for clients (see shared/constants/upload-error-codes.ts). */
+  code?: "INVOICE_LIMIT_FREE_PROJECT" | "INVOICE_LIMIT_ARCHITECT_MONTH";
 };
 
 export async function checkInvoiceUploadAllowed(
@@ -86,12 +88,14 @@ export async function checkInvoiceUploadAllowed(
     return {
       allowed: false,
       reason: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
+      code: "INVOICE_LIMIT_ARCHITECT_MONTH",
     };
   }
 
   return {
     allowed: false,
     reason: `Free tier limit reached (${FREE_INVOICE_LIMIT} invoices for this project). Upgrade for more uploads and premium features.`,
+    code: "INVOICE_LIMIT_FREE_PROJECT",
   };
 }
 

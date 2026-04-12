@@ -104,6 +104,10 @@ export default function Dashboard() {
                 We couldn&apos;t reach BLUPRNT. Check your connection, try
                 again, or contact support if this keeps happening.
               </p>
+              <p className="text-xs font-medium leading-relaxed text-slate-400">
+                This usually means environment variables aren&apos;t set for
+                this deployment, or something is blocking the connection.
+              </p>
             </div>
             {import.meta.env.DEV && (
               <div className="w-full space-y-2 rounded-2xl border border-slate-200 bg-slate-100 p-4 text-left font-mono text-[10px]">

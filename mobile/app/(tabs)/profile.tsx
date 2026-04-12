@@ -43,6 +43,10 @@ import {
   ArchitectPlanIcon,
   ProjectPassIcon,
 } from "../../src/components/icons/PlanMarks";
+import {
+  architectBillingChannel,
+  hasDuplicateWebAndStoreSubscriptions,
+} from "../../../shared/lib/subscription-billing";
 
 const TAB_BAR_OFFSET = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 20;
 
@@ -50,7 +54,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { isPro } = usePremium();
 
-  const { configurationMissing, load } = useDashboardData();
+  const { configurationMissing, load, subscription } = useDashboardData();
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
 
   const [displayName, setDisplayName] = useState(
@@ -271,6 +275,22 @@ export default function ProfileScreen() {
         >
           <GlassCard style={styles.sectionCard}>
             <Text style={styles.sectionHeader}>Membership</Text>
+            {isPro &&
+              subscription &&
+              hasDuplicateWebAndStoreSubscriptions(subscription) && (
+                <View
+                  style={styles.duplicateSubBanner}
+                  accessibilityRole="alert"
+                >
+                  <Text style={styles.duplicateSubTitle}>
+                    Possible duplicate subscription
+                  </Text>
+                  <Text style={styles.duplicateSubBody}>
+                    We see billing on both the web (Stripe) and the app store.
+                    Cancel one to avoid paying twice.
+                  </Text>
+                </View>
+              )}
             <View style={[styles.planCard, isPro && styles.architectPlanCard]}>
               <View style={[styles.planIcon, isPro && styles.architectIcon]}>
                 {isPro ? (
@@ -315,6 +335,15 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               )}
             </View>
+            <Text style={styles.billingNote}>
+              {isPro && subscription
+                ? architectBillingChannel(subscription) === "stripe"
+                  ? "Your plan is billed through Stripe on the web. Manage it from the website billing page."
+                  : architectBillingChannel(subscription) === "store"
+                    ? "Your plan is billed through the App Store or Google Play. Use Manage above or your store subscriptions."
+                    : "In-app subscriptions use the app store; web plans use Stripe — manage where you subscribed."
+                : "In-app subscriptions are managed in the App Store or Google Play. Web subscriptions use Stripe — use the same place you subscribed to change or cancel."}
+            </Text>
           </GlassCard>
         </MotiView>
 
@@ -471,6 +500,36 @@ const styles = StyleSheet.create({
   saveButton: {
     marginTop: Theme.spacing.sm,
     height: 56,
+  },
+  duplicateSubBanner: {
+    marginBottom: Theme.spacing.md,
+    padding: 14,
+    borderRadius: Theme.radius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(245, 158, 11, 0.45)",
+    backgroundColor: "rgba(245, 158, 11, 0.12)",
+  },
+  duplicateSubTitle: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+    marginBottom: 6,
+  },
+  duplicateSubBody: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    lineHeight: 20,
+  },
+  billingNote: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.muted,
+    lineHeight: 18,
+    marginTop: Theme.spacing.md,
+    paddingTop: Theme.spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Theme.colors.border,
   },
   planCard: {
     flexDirection: "row",

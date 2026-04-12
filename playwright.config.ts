@@ -19,5 +19,19 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    /** So `vite build` succeeds in CI / clean clones without a root `.env` (matches Vitest fallbacks). */
+    env: {
+      ...process.env,
+      VITE_SUPABASE_URL:
+        process.env.VITE_SUPABASE_URL ?? "http://127.0.0.1:54321",
+      VITE_SUPABASE_ANON_KEY:
+        process.env.VITE_SUPABASE_ANON_KEY ?? "playwright-e2e-anon-placeholder",
+      VITE_SITE_URL: process.env.VITE_SITE_URL ?? baseURL,
+      VITE_STRIPE_ARCHITECT_PRICE_ID:
+        process.env.VITE_STRIPE_ARCHITECT_PRICE_ID ?? "price_e2e_placeholder",
+      VITE_STRIPE_PROJECT_PASS_PRICE_ID:
+        process.env.VITE_STRIPE_PROJECT_PASS_PRICE_ID ??
+        "price_e2e_placeholder",
+    },
   },
 });

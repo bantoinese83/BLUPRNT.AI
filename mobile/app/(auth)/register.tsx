@@ -27,6 +27,7 @@ import { useAuth } from "../../src/contexts/auth-context";
 import { ScreenWrapper } from "../../src/components/ScreenWrapper";
 import { Theme } from "../../src/constants/Theme";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { getPostAuthRedirectHref } from "../../src/lib/onboarding-draft";
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();
@@ -52,7 +53,7 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -71,12 +72,47 @@ export default function RegisterScreen() {
         ),
       );
       setLoading(false);
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Success", "Check your email to confirm your account", [
-        { text: "OK", onPress: () => router.replace("/(auth)/login") },
-      ]);
+      return;
     }
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    if (data.session) {
+      const href = await getPostAuthRedirectHref();
+      setLoading(false);
+      router.replace(href);
+      return;
+    }
+
+    if (data.user) {
+      const { data: signInData } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInData.session) {
+        const href = await getPostAuthRedirectHref();
+        setLoading(false);
+        router.replace(href);
+        return;
+      }
+    }
+
+    setLoading(false);
+    const emailParam = email.trim();
+    Alert.alert(
+      "Check your email",
+      "We sent a confirmation link. After you confirm, sign in with your password.",
+      [
+        {
+          text: "OK",
+          onPress: () =>
+            router.replace({
+              pathname: "/(auth)/login",
+              params: { email: emailParam },
+            }),
+        },
+      ],
+    );
   };
 
   const handleGoogleLogin = async () => {

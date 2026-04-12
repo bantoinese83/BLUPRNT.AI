@@ -33,7 +33,10 @@ Deno.serve(async (req: Request) => {
   const userId = await getUserIdFromRequest(req);
   if (!userId) {
     return jsonResponse(
-      { error: "Please sign in to upload invoices." },
+      {
+        error: "Please sign in to upload invoices.",
+        error_code: "SESSION_REQUIRED",
+      },
       401,
       req,
     );
@@ -91,6 +94,8 @@ Deno.serve(async (req: Request) => {
         {
           error:
             entitlement.reason ?? "Upload limit reached. Upgrade for more.",
+          error_code:
+            entitlement.code ?? "INVOICE_LIMIT_FREE_PROJECT",
         },
         403,
         req,

@@ -310,9 +310,9 @@ export default function FinanceScreen() {
       >
         <EmptyState
           icon={BookOpen}
-          title="No Project Active"
-          description="Select a property renovation or create a new one to start tracking your equity and expenses."
-          actionTitle="Start New Project"
+          title="Your home hub is ready"
+          description="Set up a renovation to track your ledger, equity, and documents — same quick flow as the Home tab."
+          actionTitle="Set up your project"
           onAction={() => router.push("/onboarding?newProject=1")}
         />
       </ScreenWrapper>

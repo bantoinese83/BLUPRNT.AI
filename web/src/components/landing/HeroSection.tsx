@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ArrowRight, UserPlus } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
+import { Iphone } from "@/components/ui/iphone";
 import { LANDING_HERO_COPY, LANDING_HIGHLIGHT_COLOR } from "./landing-content";
 
 export function HeroSection({
@@ -121,21 +122,10 @@ export function HeroSection({
           />
 
           <div className="animate-float relative z-[1] w-full">
-            <div className="relative rotate-[0.5deg] rounded-[2.4rem] border-[10px] border-slate-900/92 bg-slate-900 p-[3px] shadow-[0_40px_80px_-20px_rgba(15,23,42,0.55),0_0_0_1px_rgba(255,255,255,0.08)_inset] sm:rounded-[2.55rem] sm:border-[11px] sm:p-1">
-              <div
-                className="pointer-events-none absolute inset-[3px] rounded-[2rem] ring-1 ring-white/12 sm:inset-1 sm:rounded-[2.1rem]"
-                aria-hidden
-              />
-              <div className="relative overflow-hidden rounded-[1.85rem] bg-slate-950 shadow-inner sm:rounded-[2rem]">
-                <img
-                  src="/images/mobile-app-hero.png"
-                  alt="BLUPRNT iPhone app: bathroom project with estimate range, documents count, and plan vs documented spend"
-                  className="h-auto w-full object-cover object-top"
-                  loading="eager"
-                  decoding="async"
-                />
-              </div>
-            </div>
+            <Iphone
+              src="/images/mobile-app-hero.png"
+              className="rotate-[0.5deg]"
+            />
             <div
               className="mx-auto -mt-1 h-4 w-[42%] rounded-[100%] bg-slate-900/18 blur-lg"
               aria-hidden
