@@ -48,7 +48,9 @@ test.describe("Auth: signup to dashboard", () => {
       page.getByRole("link", { name: "BLUPRNT — Dashboard home" }),
     ).toBeVisible({ timeout: 30_000 });
 
-    await expect(page.getByText("My home project")).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "My home project" }),
+    ).toBeVisible({
       timeout: 30_000,
     });
   });

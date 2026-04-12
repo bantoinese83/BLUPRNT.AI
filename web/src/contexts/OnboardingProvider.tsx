@@ -1,8 +1,15 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
 import type { PhotoToScopeResult } from "@/types/estimate";
 import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
 import { isSupabaseConfigured, supabase, invokeFunction } from "@/lib/supabase";
 import { userFriendlyEstimateError } from "@/lib/onboarding-estimate-errors";
+import { toast } from "sonner";
 import {
   DEFAULT_ESTIMATE_CONFIDENCE,
   DEFAULT_ESTIMATE_MAX,
@@ -50,6 +57,64 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [estimateError, setEstimateError] = useState<string | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
+
+  // Sync from cross-device handoff (e.g. mobile to web)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const syncToken = params.get("sync");
+    if (!syncToken) return;
+
+    // Clean URL
+    const newUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, "", newUrl);
+
+    const loadSync = async () => {
+      const dismiss = toast.loading("Resuming your mobile draft...");
+      try {
+        const { data, error } = await supabase
+          .from("onboarding_sync")
+          .select("payload")
+          .eq("token", syncToken)
+          .single();
+
+        if (error || !data) throw new Error("Link expired or invalid");
+
+        const payload = (data as Record<string, unknown>).payload as Record<
+          string,
+          unknown
+        >;
+        if (payload.projectType)
+          setProjectType(payload.projectType as ProjectTypeOption);
+        if (payload.location) setLocationInput(payload.location as string);
+        if (payload.stage) setStage(payload.stage as StageOption);
+        if (payload.scopeDescription)
+          setScopeDescription(payload.scopeDescription as string);
+        if (payload.estimate) {
+          setEstimate(payload.estimate as PhotoToScopeResult);
+          sessionStorage.setItem(
+            "bluprnt_pending_estimate",
+            JSON.stringify(payload.estimate),
+          );
+        }
+
+        toast.success("Ready to finish your BLUPRNT!", {
+          id: dismiss,
+        });
+      } catch (_err) {
+        toast.error("Couldn't resume draft. Please start again.", {
+          id: dismiss,
+        });
+      }
+    };
+
+    void loadSync();
+  }, [
+    setProjectType,
+    setLocationInput,
+    setStage,
+    setScopeDescription,
+    setEstimate,
+  ]);
 
   const zipFromLocation = useCallback(() => {
     const lStr = String(locationInput || "");

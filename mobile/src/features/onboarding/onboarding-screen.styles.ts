@@ -793,4 +793,32 @@ export const onboardingStyles = StyleSheet.create({
   activeViewDetailsText: {
     color: "white",
   },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.08)",
+  },
+  dividerText: {
+    color: Theme.colors.text.muted,
+    fontFamily: Theme.typography.family.medium,
+    fontSize: 12,
+    marginHorizontal: 12,
+  },
+  handoffBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+  },
+  handoffBtnText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
+  },
 });

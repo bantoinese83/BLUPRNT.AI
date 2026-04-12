@@ -174,9 +174,18 @@ type ProjectViewTokensRow = {
   expires_at: string;
 };
 
+type OnboardingSyncRow = {
+  id: string;
+  token: string;
+  payload: Json;
+  expires_at: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
+      onboarding_sync: TableRow<OnboardingSyncRow>;
       projects: TableRow<ProjectsRow>;
       properties: TableRow<PropertiesRow>;
       scope_items: TableRow<ScopeItemsRow>;

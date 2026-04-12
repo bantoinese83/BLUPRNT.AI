@@ -1,53 +1,70 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import {
   getOnboardingResumeIfPending,
   resolvePostLoginHref,
+  consumeAuthCallbackRedirectHref,
 } from "./onboarding-post-auth-redirect";
 
-describe("getOnboardingResumeIfPending", () => {
+describe("onboarding-post-auth-redirect", () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    vi.stubGlobal("sessionStorage", {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
+  });
+
+  afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("returns null when no pending estimate in sessionStorage", () => {
-    expect(getOnboardingResumeIfPending()).toBeNull();
+  describe("getOnboardingResumeIfPending", () => {
+    it("returns null if no pending estimate", () => {
+      vi.mocked(sessionStorage.getItem).mockReturnValue(null);
+      expect(getOnboardingResumeIfPending()).toBeNull();
+    });
+
+    it("returns onboarding signup if valid estimate exists", () => {
+      vi.mocked(sessionStorage.getItem).mockReturnValue(
+        JSON.stringify({ summary: { total: 100 } }),
+      );
+      expect(getOnboardingResumeIfPending()).toBe("/onboarding/signup");
+    });
   });
 
-  it("returns signup path when pending estimate has summary object", () => {
-    sessionStorage.setItem(
-      "bluprnt_pending_estimate",
-      JSON.stringify({ summary: { min: 1, max: 2 } }),
-    );
-    expect(getOnboardingResumeIfPending()).toBe("/onboarding/signup");
+  describe("resolvePostLoginHref", () => {
+    it("uses redirectParam if present", () => {
+      expect(resolvePostLoginHref("/settings")).toBe("/settings");
+    });
+
+    it("falls back to dashboard if no param and no pending estimate", () => {
+      vi.mocked(sessionStorage.getItem).mockReturnValue(null);
+      expect(resolvePostLoginHref(null)).toBe("/dashboard");
+    });
   });
 
-  it("returns null when JSON is invalid", () => {
-    sessionStorage.setItem("bluprnt_pending_estimate", "not-json");
-    expect(getOnboardingResumeIfPending()).toBeNull();
-  });
+  describe("consumeAuthCallbackRedirectHref", () => {
+    it("uses stored redirect from sessionStorage", () => {
+      vi.mocked(sessionStorage.getItem).mockReturnValue("/settings");
+      expect(consumeAuthCallbackRedirectHref()).toBe("/settings");
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith(
+        "bluprnt_auth_redirect",
+      );
+    });
 
-  it("returns null when summary is missing", () => {
-    sessionStorage.setItem(
-      "bluprnt_pending_estimate",
-      JSON.stringify({ other: true }),
-    );
-    expect(getOnboardingResumeIfPending()).toBeNull();
-  });
-});
+    it("falls back to pending estimate if no stored redirect", () => {
+      vi.mocked(sessionStorage.getItem).mockImplementation((key) => {
+        if (key === "bluprnt_auth_redirect") return null;
+        if (key === "bluprnt_pending_estimate")
+          return JSON.stringify({ summary: {} });
+        return null;
+      });
+      expect(consumeAuthCallbackRedirectHref()).toBe("/onboarding/signup");
+    });
 
-describe("resolvePostLoginHref", () => {
-  it("uses safe redirect when redirect param is present", () => {
-    expect(resolvePostLoginHref("/dashboard")).toBe("/dashboard");
-  });
-
-  it("falls back to onboarding resume then dashboard", () => {
-    sessionStorage.clear();
-    expect(resolvePostLoginHref(undefined)).toBe("/dashboard");
-    sessionStorage.setItem(
-      "bluprnt_pending_estimate",
-      JSON.stringify({ summary: { a: 1 } }),
-    );
-    expect(resolvePostLoginHref(undefined)).toBe("/onboarding/signup");
+    it("defaults to dashboard if nothing is pending", () => {
+      vi.mocked(sessionStorage.getItem).mockReturnValue(null);
+      expect(consumeAuthCallbackRedirectHref()).toBe("/dashboard");
+    });
   });
 });

@@ -37,6 +37,58 @@ describe("uploadDocumentWithType", () => {
     expect(invokeFunction).toHaveBeenCalled();
   });
 
+  it("uploads after user picks Quote", async () => {
+    alertMock.mockImplementationOnce((_title, _msg, buttons) => {
+      const btn = buttons.find((b: any) => b.text === "Quote");
+      btn?.onPress?.();
+    });
+    const result = await uploadDocumentWithType(
+      "file:///a.jpg",
+      "image/jpeg",
+      "p1",
+    );
+    expect(result.success).toBe(true);
+  });
+
+  it("uploads after user picks Warranty", async () => {
+    alertMock.mockImplementationOnce((_title, _msg, buttons) => {
+      const btn = buttons.find((b: any) => b.text === "Warranty");
+      btn?.onPress?.();
+    });
+    const result = await uploadDocumentWithType(
+      "file:///a.jpg",
+      "image/jpeg",
+      "p1",
+    );
+    expect(result.success).toBe(true);
+  });
+
+  it("uploads after user picks Permit", async () => {
+    alertMock.mockImplementationOnce((_title, _msg, buttons) => {
+      const btn = buttons.find((b: any) => b.text === "Permit");
+      btn?.onPress?.();
+    });
+    const result = await uploadDocumentWithType(
+      "file:///a.jpg",
+      "image/jpeg",
+      "p1",
+    );
+    expect(result.success).toBe(true);
+  });
+
+  it("handles Cancel", async () => {
+    alertMock.mockImplementationOnce((_title, _msg, buttons) => {
+      const btn = buttons.find((b: any) => b.text === "Cancel");
+      btn?.onPress?.();
+    });
+    const result = await uploadDocumentWithType(
+      "file:///a.jpg",
+      "image/jpeg",
+      "p1",
+    );
+    expect(result.success).toBe(false);
+  });
+
   it("returns friendly error when invoke fails", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
       data: null,

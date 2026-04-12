@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Check, ArrowRight, UserPlus, LogIn } from "lucide-react-native";
+import {
+  Check,
+  ArrowRight,
+  UserPlus,
+  LogIn,
+  Monitor,
+} from "lucide-react-native";
 import { router } from "expo-router";
 import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +17,7 @@ import { persistOnboardingDraft } from "@/lib/onboarding-draft";
 import type { ProjectTypeOption, StageOption } from "@/lib/onboarding-helpers";
 import type { OnboardingEstimateState } from "@/features/onboarding/hooks/useOnboardingAnalysis";
 import type { OnboardingStyles } from "@/features/onboarding/onboarding-step-types";
+import { SyncDraftModal } from "./SyncDraftModal";
 
 interface FinalStepProps {
   styles: OnboardingStyles;
@@ -35,6 +42,8 @@ export function FinalStep({
   scopeDescription,
   estimate,
 }: FinalStepProps) {
+  const [showSync, setShowSync] = useState(false);
+
   const handleAuthNavigation = (path: "/(auth)/register" | "/(auth)/login") => {
     Haptics.selectionAsync();
     void persistOnboardingDraft({
@@ -54,6 +63,23 @@ export function FinalStep({
         : null,
     });
     router.push(path);
+  };
+
+  const draftPayload = {
+    projectType,
+    location,
+    stage,
+    scopeDescription,
+    estimate: estimate
+      ? {
+          summary: {
+            estimated_min_total: estimate.min,
+            estimated_max_total: estimate.max,
+            confidence_score: estimate.confidence,
+          },
+          scope_items: estimate.scope,
+        }
+      : null,
   };
 
   return (
@@ -112,6 +138,23 @@ export function FinalStep({
               onPress={() => handleAuthNavigation("/(auth)/login")}
               icon={<LogIn size={20} color="white" />}
             />
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.handoffBtn}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowSync(true);
+              }}
+            >
+              <Monitor size={18} color={Theme.colors.text.secondary} />
+              <Text style={styles.handoffBtnText}>Continue on computer</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -123,6 +166,12 @@ export function FinalStep({
           </TouchableOpacity>
         </View>
       )}
+
+      <SyncDraftModal
+        isOpen={showSync}
+        onClose={() => setShowSync(false)}
+        payload={draftPayload}
+      />
     </MotiView>
   );
 }

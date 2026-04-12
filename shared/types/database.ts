@@ -52,3 +52,11 @@ export type InvoiceRow = Pick<
 export type UserSubscriptionRow =
   PublicSchema["Tables"]["user_subscriptions"]["Row"];
 export type ProjectPassRow = PublicSchema["Tables"]["project_passes"]["Row"];
+
+export type OnboardingSyncRow = {
+  id: string;
+  token: string;
+  payload: Record<string, unknown>;
+  expires_at: string;
+  created_at: string;
+};
