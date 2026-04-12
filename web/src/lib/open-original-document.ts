@@ -38,6 +38,12 @@ export async function openOriginalDocumentForInvoice(
     return false;
   }
 
-  window.open(url, "_blank", "noopener,noreferrer");
+  const win = window.open(url, "_blank", "noopener,noreferrer");
+  if (!win) {
+    toast.error(
+      "We opened the link, but your browser blocked the new tab. Allow pop-ups for this site or copy the link from your browser settings.",
+    );
+    return false;
+  }
   return true;
 }

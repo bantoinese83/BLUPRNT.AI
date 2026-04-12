@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import { dashboardQueryKey } from "@/lib/query-client";
 import { fetchMobileDashboardSnapshot } from "@/lib/fetch-dashboard-snapshot";
 import type { DashboardSnapshot } from "@/types/dashboard-snapshot";
@@ -99,11 +100,16 @@ export function useDashboardData() {
         data: { session },
       } = await supabase.auth.getSession();
       if (session?.user) {
-        await supabase.from("user_preferences").upsert({
-          user_id: session.user.id,
-          last_active_project_id: id,
-          updated_at: new Date().toISOString(),
-        });
+        const { error: prefErr } = await supabase
+          .from("user_preferences")
+          .upsert({
+            user_id: session.user.id,
+            last_active_project_id: id,
+            updated_at: new Date().toISOString(),
+          });
+        if (prefErr) {
+          reportClientError("dashboard_last_project_preference", prefErr);
+        }
       }
       void client.invalidateQueries({ queryKey: dashboardQueryKey });
     },

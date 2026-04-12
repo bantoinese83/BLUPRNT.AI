@@ -6,6 +6,10 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
+vi.mock("@/lib/sentry", () => ({
+  reportClientError: vi.fn(),
+}));
+
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     auth: {

@@ -4,7 +4,7 @@ import { MessageSquare, Send, X, Bot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
+import { invokeFunction } from "@/lib/supabase";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 
 export function AIAssistant({ projectId }: { projectId: string }) {
@@ -37,7 +37,7 @@ export function AIAssistant({ projectId }: { projectId: string }) {
     setIsTyping(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke(
+      const { data, error } = await invokeFunction<{ reply?: string }>(
         "chat-with-project",
         {
           body: { query: userMsg, projectId },
@@ -46,11 +46,17 @@ export function AIAssistant({ projectId }: { projectId: string }) {
 
       if (error) throw error;
 
+      const reply =
+        data && typeof data === "object" && "reply" in data
+          ? String((data as { reply?: string }).reply ?? "").trim()
+          : "";
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: data.reply || "Sorry, I couldn't process that right now.",
+          content:
+            reply || "Sorry, I couldn’t process that right now. Try again.",
         },
       ]);
     } catch (err) {

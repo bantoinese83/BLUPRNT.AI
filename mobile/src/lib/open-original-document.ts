@@ -1,5 +1,6 @@
 import { Linking, Alert } from "react-native";
 import { invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 
 type SignedUrlResponse = {
   signed_url?: string;
@@ -43,6 +44,15 @@ export async function openOriginalDocumentForInvoice(
     return false;
   }
 
-  await Linking.openURL(url);
+  try {
+    await Linking.openURL(url);
+  } catch (err: unknown) {
+    reportClientError("open_invoice_document_url", err);
+    Alert.alert(
+      "Couldn’t open file",
+      "Something went wrong opening the link. Try again or copy the URL if your browser supports it.",
+    );
+    return false;
+  }
   return true;
 }

@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ensureUserHasWorkspace } from "./ensure-user-workspace";
 import { supabase } from "./supabase";
+import { reportClientError } from "@/lib/sentry";
+
+vi.mock("@/lib/sentry", () => ({
+  reportClientError: vi.fn(),
+}));
 
 vi.mock("./supabase", () => ({
   supabase: {
@@ -134,7 +139,7 @@ describe("ensureUserHasWorkspace", () => {
     expect(localStorage.getItem("bluprnt_project_id")).toBe(mockProject.id);
   });
 
-  it("warns but doesn't throw on Supabase errors", async () => {
+  it("reports but doesn't throw on Supabase errors", async () => {
     const fromSpy = vi.spyOn(supabase, "from");
     fromSpy.mockImplementation(
       () =>
@@ -149,9 +154,9 @@ describe("ensureUserHasWorkspace", () => {
     );
 
     await expect(ensureUserHasWorkspace(userId)).resolves.not.toThrow();
-    expect(console.warn).toHaveBeenCalledWith(
-      "ensureUserHasWorkspace: properties query failed",
-      "DB Error",
+    expect(reportClientError).toHaveBeenCalledWith(
+      "ensure_workspace_properties_query",
+      { message: "DB Error" },
     );
   });
 

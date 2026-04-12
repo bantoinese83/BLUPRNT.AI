@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import {
   dashboardQueryKey,
   fetchDashboardSnapshot,
@@ -124,11 +125,16 @@ export function useDashboardData() {
         data: { session },
       } = await supabase.auth.getSession();
       if (session?.user) {
-        await supabase.from("user_preferences").upsert({
-          user_id: session.user.id,
-          last_active_project_id: id,
-          updated_at: new Date().toISOString(),
-        });
+        const { error: prefErr } = await supabase
+          .from("user_preferences")
+          .upsert({
+            user_id: session.user.id,
+            last_active_project_id: id,
+            updated_at: new Date().toISOString(),
+          });
+        if (prefErr) {
+          reportClientError("dashboard_last_project_preference", prefErr);
+        }
       }
       void queryClient.invalidateQueries({ queryKey: dashboardQueryKey });
     },

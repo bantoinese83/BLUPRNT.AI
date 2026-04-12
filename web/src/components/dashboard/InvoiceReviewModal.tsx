@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase, invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
 
 type LineItem = {
@@ -84,18 +85,23 @@ export function InvoiceReviewModal({
           budget_mapping_suggestions: inv.budget_mapping_suggestions,
         });
 
-        const { data: scope } = await supabase
+        const { data: scope, error: scopeErr } = await supabase
           .from("scope_items")
           .select("id, category, description")
           .eq("project_id", projectId);
         if (cancelled) return;
-        setScopeItems(
-          (scope ?? []) as {
-            id: string;
-            category: string;
-            description: string;
-          }[],
-        );
+        if (scopeErr) {
+          reportClientError("invoice_review_scope_list", scopeErr);
+          setScopeItems([]);
+        } else {
+          setScopeItems(
+            (scope ?? []) as {
+              id: string;
+              category: string;
+              description: string;
+            }[],
+          );
+        }
 
         const initial: Record<string, string> = {};
         (inv.line_items ?? []).forEach((line: LineItem) => {
@@ -117,10 +123,11 @@ export function InvoiceReviewModal({
     setSaving(true);
     try {
       for (const [lineId, scopeItemId] of Object.entries(mappings)) {
-        await supabase
+        const { error: lineErr } = await supabase
           .from("invoice_line_items")
           .update({ scope_item_id: scopeItemId || null })
           .eq("id", lineId);
+        if (lineErr) throw lineErr;
       }
       onSaved?.();
       onClose();

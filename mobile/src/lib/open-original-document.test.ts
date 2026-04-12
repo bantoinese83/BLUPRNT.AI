@@ -11,6 +11,10 @@ vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),
 }));
 
+vi.mock("@/lib/sentry", () => ({
+  reportClientError: vi.fn(),
+}));
+
 describe("openOriginalDocumentForInvoice", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -66,5 +70,17 @@ describe("openOriginalDocumentForInvoice", () => {
     canOpenURLMock.mockResolvedValue(false);
     const ok = await openOriginalDocumentForInvoice("i1");
     expect(ok).toBe(false);
+  });
+
+  it("returns false when openURL throws", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://x.com/a.pdf" },
+      error: null,
+    });
+    canOpenURLMock.mockResolvedValue(true);
+    openURLMock.mockRejectedValue(new Error("cannot open"));
+    const ok = await openOriginalDocumentForInvoice("i1");
+    expect(ok).toBe(false);
+    expect(alertMock).toHaveBeenCalled();
   });
 });

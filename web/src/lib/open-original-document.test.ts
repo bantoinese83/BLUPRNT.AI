@@ -16,7 +16,6 @@ vi.mock("sonner", () => ({
 describe("openOriginalDocumentForInvoice", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(window, "open").mockImplementation(() => null);
   });
 
   it("returns false and toasts on invoke error", async () => {
@@ -40,17 +39,31 @@ describe("openOriginalDocumentForInvoice", () => {
   });
 
   it("opens window when signed_url present", async () => {
+    const openSpy = vi
+      .spyOn(window, "open")
+      .mockImplementation(() => ({}) as Window);
     vi.mocked(invokeFunction).mockResolvedValue({
       data: { signed_url: "https://example.com/doc.pdf" },
       error: null,
     });
     const ok = await openOriginalDocumentForInvoice("inv-3");
     expect(ok).toBe(true);
-    expect(window.open).toHaveBeenCalledWith(
+    expect(openSpy).toHaveBeenCalledWith(
       "https://example.com/doc.pdf",
       "_blank",
       "noopener,noreferrer",
     );
+  });
+
+  it("returns false when popup is blocked", async () => {
+    vi.spyOn(window, "open").mockImplementation(() => null);
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://example.com/doc.pdf" },
+      error: null,
+    });
+    const ok = await openOriginalDocumentForInvoice("inv-popup");
+    expect(ok).toBe(false);
+    expect(toast.error).toHaveBeenCalled();
   });
 
   it("returns false when no signed_url", async () => {

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 
 /**
  * After OAuth or magic link, new users have no property/project. Create a starter workspace once.
@@ -11,10 +12,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     .limit(1);
 
   if (existErr) {
-    console.warn(
-      "ensureUserHasWorkspace: properties query failed",
-      existErr.message,
-    );
+    reportClientError("ensure_workspace_properties_query", existErr);
     return;
   }
 
@@ -27,10 +25,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
       .limit(1);
 
     if (projErr) {
-      console.warn(
-        "ensureUserHasWorkspace: projects query failed",
-        projErr.message,
-      );
+      reportClientError("ensure_workspace_projects_query", projErr);
       return;
     }
 
@@ -57,10 +52,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
       .single();
 
     if (jErr) {
-      console.warn(
-        "ensureUserHasWorkspace: project insert failed",
-        jErr.message,
-      );
+      reportClientError("ensure_workspace_project_insert", jErr);
       return;
     }
 
@@ -88,9 +80,9 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     .single();
 
   if (pErr || !prop) {
-    console.warn(
-      "ensureUserHasWorkspace: property insert failed",
-      pErr?.message,
+    reportClientError(
+      "ensure_workspace_property_insert",
+      pErr ?? new Error("missing property row"),
     );
     return;
   }
@@ -107,7 +99,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     .single();
 
   if (jErr) {
-    console.warn("ensureUserHasWorkspace: project insert failed", jErr.message);
+    reportClientError("ensure_workspace_project_insert_new_property", jErr);
     return;
   }
 
