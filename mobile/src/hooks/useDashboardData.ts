@@ -37,9 +37,7 @@ export function useDashboardData() {
   const query = useQuery({
     queryKey: dashboardQueryKey,
     queryFn: fetchMobileDashboardSnapshot,
-    staleTime: 30_000,
     enabled: isSupabaseConfigured(),
-    retry: 1,
   });
 
   const snapshot = query.data;

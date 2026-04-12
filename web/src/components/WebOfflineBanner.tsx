@@ -24,6 +24,7 @@ export function WebOfflineBanner() {
 
   return (
     <div
+      data-testid="web-offline-banner"
       className="fixed left-0 right-0 top-0 z-[85] flex items-center justify-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-sm font-medium text-amber-950 shadow-sm"
       role="status"
       aria-live="polite"

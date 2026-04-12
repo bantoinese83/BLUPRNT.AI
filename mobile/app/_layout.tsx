@@ -43,6 +43,7 @@ import { View, Text, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "@/constants/Theme";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
+import { isNetworkReachable } from "@/lib/network-status";
 import { WifiOff } from "lucide-react-native";
 
 export {
@@ -157,7 +158,7 @@ function OfflineBannerHost() {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOffline(!state.isConnected);
+      setIsOffline(!isNetworkReachable(state));
     });
     return () => unsubscribe();
   }, []);
@@ -165,9 +166,15 @@ function OfflineBannerHost() {
   if (!isOffline) return null;
 
   return (
-    <View style={[styles.offlineBanner, { top: insets.top + 8 }]}>
-      <WifiOff size={16} color="white" />
-      <Text style={styles.offlineText}>
+    <View
+      style={[styles.offlineBanner, { top: insets.top + 8 }]}
+      accessible
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+      accessibilityLabel="No internet connection. Updates are paused until you are back online."
+    >
+      <WifiOff size={16} color="white" importantForAccessibility="no" />
+      <Text style={styles.offlineText} importantForAccessibility="no">
         No connection — updates pause until you’re back online
       </Text>
     </View>
