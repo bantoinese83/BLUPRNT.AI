@@ -90,7 +90,7 @@ export function LoadingScreen() {
           />
         </div>
         <p className="mt-4 text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">
-          Scanning Database Assets
+          Pulling your details together
         </p>
       </div>
     </PageTransition>

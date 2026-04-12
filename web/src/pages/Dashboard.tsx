@@ -206,7 +206,7 @@ export default function Dashboard() {
             <EmptyState
               variant="projects"
               currentStep={1}
-              title="Your workspace is ready"
+              title="You’re all set"
               description="Add a renovation project to see your estimate, scope, and document ledger in one place. Jump straight in, or start from the short intro if you prefer a quick tour first."
               action={{
                 label: "Start a project",

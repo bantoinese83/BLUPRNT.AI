@@ -23,6 +23,7 @@ export async function uploadDocumentWithType(
 ): Promise<{
   success: boolean;
   invoice_id?: string;
+  documentType?: DocumentType;
   error?: string;
   errorCode?: string;
 }> {
@@ -90,6 +91,7 @@ async function postDocumentToUploadInvoice(
   resolve: (result: {
     success: boolean;
     invoice_id?: string;
+    documentType?: DocumentType;
     error?: string;
     errorCode?: string;
   }) => void,
@@ -126,7 +128,11 @@ async function postDocumentToUploadInvoice(
       return;
     }
 
-    resolve({ success: true, invoice_id: data?.invoice_id });
+    resolve({
+      success: true,
+      invoice_id: data?.invoice_id,
+      documentType,
+    });
   } catch (err) {
     resolve({
       success: false,

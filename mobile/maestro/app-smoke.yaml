@@ -1,6 +1,13 @@
 # Run from repo root: npm run test:e2e:mobile
 # Requires: Maestro CLI, iOS Simulator or Android emulator, dev build installed (ai.bluprnt.mobile).
 # Extend for login → project → export when you have test credentials.
+#
+# Web coverage (Playwright, same repo):
+#   npm run test:e2e -- e2e/project-view-share.spec.ts   # expired / missing share link
+#   npm run test:e2e -- e2e/e2e-probes.spec.ts            # popup-blocked + offline “save” probe
+# Mobile manual ideas (no stable Maestro API for pop-ups / airplane mode here):
+#   - Airplane mode ON → attempt upload or pull-to-refresh → expect error or offline banner
+#   - Open a share link in Safari (web) to match expired-link UX
 appId: ai.bluprnt.mobile
 ---
 - launchApp

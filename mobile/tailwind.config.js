@@ -17,11 +17,13 @@ module.exports = {
         "primary-hover": "#115e59",
         "primary-muted": "#f8fafc",
         surface: "#f9fafb",
-        accent: "#4f46e5",
+        /** Brand teal — must match `@shared/constants/design-tokens` `accent` */
+        accent: "#0d9488",
         border: "#f1f5f9",
         "border-focus": "#334155",
         "slate-950": "#020617",
-        "slate-900": "#0f172a",
+        /** Body ink — matches web `--color-slate-900` / shared `ink` (not default Tailwind slate-900) */
+        "slate-900": "#111827",
         "slate-800": "#1e293b",
         "slate-700": "#334155",
         "slate-600": "#475569",

@@ -145,7 +145,7 @@ export function CommandPalette() {
                 </Command.Group>
 
                 <Command.Group
-                  heading="Workspace"
+                  heading="This project"
                   className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-3 py-2"
                 >
                   <Item

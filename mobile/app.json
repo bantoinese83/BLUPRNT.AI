@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/images/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f9fafb"
     },
     "ios": {
       "supportsTablet": true,
@@ -71,13 +71,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow BlueprintAI to access your camera to capture renovation photos for analysis."
+          "cameraPermission": "Allow BLUPRNT to use your camera to capture renovation photos for estimates."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow BlueprintAI to access your photo library to select renovation photos for estimation."
+          "photosPermission": "Allow BLUPRNT to access your photos so you can pick renovation images for estimates."
         }
       ],
       [

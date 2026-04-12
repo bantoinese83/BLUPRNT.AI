@@ -1,10 +1,14 @@
 import { supabase } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 
+export type EnsureWorkspaceResult = { ok: true } | { ok: false };
+
 /**
  * After OAuth or magic link, new users have no property/project. Create a starter workspace once.
  */
-export async function ensureUserHasWorkspace(userId: string): Promise<void> {
+export async function ensureUserHasWorkspace(
+  userId: string,
+): Promise<EnsureWorkspaceResult> {
   const { data: existing, error: existErr } = await supabase
     .from("properties")
     .select("id")
@@ -13,7 +17,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
 
   if (existErr) {
     reportClientError("ensure_workspace_properties_query", existErr);
-    return;
+    return { ok: false };
   }
 
   if (existing?.length) {
@@ -26,7 +30,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
 
     if (projErr) {
       reportClientError("ensure_workspace_projects_query", projErr);
-      return;
+      return { ok: false };
     }
 
     const pid = projects?.[0]?.id;
@@ -36,10 +40,9 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
       } catch {
         /* ignore */
       }
-      return;
+      return { ok: true };
     }
 
-    // Property exists but no project, fall through to project creation
     const { data: proj, error: jErr } = await supabase
       .from("projects")
       .insert({
@@ -53,7 +56,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
 
     if (jErr) {
       reportClientError("ensure_workspace_project_insert", jErr);
-      return;
+      return { ok: false };
     }
 
     if (proj?.id) {
@@ -62,8 +65,9 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
       } catch {
         /* ignore */
       }
+      return { ok: true };
     }
-    return;
+    return { ok: false };
   }
 
   const postal = "00000";
@@ -84,7 +88,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
       "ensure_workspace_property_insert",
       pErr ?? new Error("missing property row"),
     );
-    return;
+    return { ok: false };
   }
 
   const { data: proj, error: jErr } = await supabase
@@ -100,7 +104,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
 
   if (jErr) {
     reportClientError("ensure_workspace_project_insert_new_property", jErr);
-    return;
+    return { ok: false };
   }
 
   if (proj?.id) {
@@ -109,5 +113,7 @@ export async function ensureUserHasWorkspace(userId: string): Promise<void> {
     } catch {
       /* ignore */
     }
+    return { ok: true };
   }
+  return { ok: false };
 }

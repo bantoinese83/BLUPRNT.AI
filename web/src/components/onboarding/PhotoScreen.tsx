@@ -24,9 +24,7 @@ export function PhotoScreen() {
       }
       const validTypes = ["image/jpeg", "image/png", "image/webp"];
       if (!validTypes.includes(file.type)) {
-        toast.error(
-          `"${file.name}" is not a supported format (JPEG, PNG, WEBP).`,
-        );
+        toast.error(`"${file.name}" isn’t a supported photo. Use JPEG or PNG.`);
         return false;
       }
       return true;

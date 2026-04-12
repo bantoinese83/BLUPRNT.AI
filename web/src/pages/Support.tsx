@@ -54,23 +54,25 @@ export default function Support() {
             </a>
           </div>
 
-          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-teal-500/30 transition-all group">
+          <a
+            href="#faq"
+            className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-teal-500/30 transition-all group block no-underline"
+          >
             <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <HelpCircle className="w-6 h-6 text-teal-400" />
             </div>
-            <h3 className="text-xl font-bold mb-2">Knowledge Base</h3>
-            <p className="text-slate-400 mb-6 italic">Self-service help docs</p>
-            <button
-              onClick={() => alert("Knowledge Base coming soon!")}
-              className="text-teal-400 font-semibold hover:text-teal-300 transition-colors"
-            >
-              Browse Articles
-            </button>
-          </div>
+            <h3 className="text-xl font-bold mb-2 text-white">FAQs</h3>
+            <p className="text-slate-400 mb-6 italic">
+              Answers to common questions — jump to the list below.
+            </p>
+            <span className="text-teal-400 font-semibold group-hover:text-teal-300 transition-colors">
+              Browse FAQs
+            </span>
+          </a>
         </div>
 
         {/* FAQ Section */}
-        <div className="mb-20">
+        <div id="faq" className="mb-20 scroll-mt-24">
           <h2 className="mb-8 flex items-center gap-3 text-2xl font-bold">
             <MessageCircle className="text-teal-400" />
             Common Questions

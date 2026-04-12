@@ -87,9 +87,7 @@ export default function ProjectView() {
         setScopeItems(json.scope_items ?? []);
       } catch {
         if (!cancelled) {
-          setError(
-            "We couldn’t reach the server. Check your connection and try again.",
-          );
+          setError("We couldn’t connect. Check your connection and try again.");
         }
       } finally {
         if (!cancelled) setLoading(false);

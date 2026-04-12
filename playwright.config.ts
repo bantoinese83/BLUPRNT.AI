@@ -33,6 +33,8 @@ export default defineConfig({
       VITE_STRIPE_PROJECT_PASS_PRICE_ID:
         process.env.VITE_STRIPE_PROJECT_PASS_PRICE_ID ??
         "price_e2e_placeholder",
+      /** Dev-only routes under /__e2e__/ for Playwright (popup + offline save probes). */
+      VITE_E2E: "1",
     },
   },
 });

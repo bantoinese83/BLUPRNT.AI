@@ -12,7 +12,8 @@
     --border: #f1f5f9;
     --border-focus: #334155;
     --slate-950: #020617;
-    --slate-900: #0f172a;
+    /* Body ink — align with web + shared/design-tokens `ink` */
+    --slate-900: #111827;
     --slate-800: #1e293b;
     --slate-500: #64748b;
     --slate-400: #94a3b8;

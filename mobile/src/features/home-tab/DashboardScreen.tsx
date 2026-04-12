@@ -36,6 +36,8 @@ import {
   presentDocumentCapturePrompt,
 } from "@/lib/present-document-capture";
 import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
+import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
+import type { InvoiceRow } from "@shared/types/database";
 import { getDashboardGreeting } from "@/features/home-tab/dashboard-greeting";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 
@@ -80,6 +82,8 @@ export default function DashboardScreen() {
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [isCelebrating, setIsCelebrating] = useState(false);
   const [renameVisible, setRenameVisible] = useState(false);
+  const [reviewInvoice, setReviewInvoice] = useState<InvoiceRow | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   useEffect(() => {
     if (
@@ -139,7 +143,7 @@ export default function DashboardScreen() {
 
     setIsUploading(true);
     try {
-      await uploadPickedDocumentToProject({
+      const result = await uploadPickedDocumentToProject({
         projectId: project.id,
         fileUri,
         mimeType,
@@ -150,6 +154,18 @@ export default function DashboardScreen() {
         },
         refreshProjectData: load,
       });
+      if (result.ok && result.documentType === "invoice" && result.invoiceId) {
+        const { data: row } = await supabase
+          .from("invoices")
+          .select("*")
+          .eq("id", result.invoiceId)
+          .maybeSingle();
+        if (row) {
+          setReviewInvoice(row as InvoiceRow);
+          setReviewOpen(true);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      }
     } finally {
       setIsUploading(false);
     }
@@ -373,6 +389,21 @@ export default function DashboardScreen() {
         isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}
         reason={upgradeReason}
+      />
+      <InvoiceReviewSheet
+        invoice={reviewInvoice}
+        projectId={project?.id ?? null}
+        isOpen={reviewOpen}
+        onClose={() => {
+          setReviewOpen(false);
+          setReviewInvoice(null);
+        }}
+        onDeleted={() => {
+          void load();
+        }}
+        onSaved={() => {
+          void load();
+        }}
       />
       <Confetti active={isCelebrating} />
     </ScreenWrapper>

@@ -3,6 +3,7 @@ import { X, Loader2, Link2, FileText, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
@@ -92,6 +93,10 @@ export function InvoiceReviewModal({
         if (cancelled) return;
         if (scopeErr) {
           reportClientError("invoice_review_scope_list", scopeErr);
+          toast.error(
+            "We couldn’t load your budget breakdown, so some line links may be missing. You can still review amounts—try again shortly or check your connection.",
+            { duration: 8000 },
+          );
           setScopeItems([]);
         } else {
           setScopeItems(
@@ -132,7 +137,7 @@ export function InvoiceReviewModal({
       onSaved?.();
       onClose();
     } catch {
-      setError("Couldn't save mappings.");
+      setError("We couldn’t save your line links. Try again.");
     } finally {
       setSaving(false);
     }
@@ -220,7 +225,7 @@ export function InvoiceReviewModal({
                     variant="outline"
                     className="text-[10px] text-amber-700 border-amber-200 bg-amber-50"
                   >
-                    Low Confidence
+                    Needs a quick check
                   </Badge>
                 )}
               </h4>
@@ -291,7 +296,7 @@ export function InvoiceReviewModal({
                       }
                       className="text-sm rounded-lg border border-slate-300 px-2 py-1 shrink-0"
                     >
-                      <option value="">— Not mapped</option>
+                      <option value="">— Not linked</option>
                       {scopeItems.map((s) => (
                         <option key={s.id} value={s.id}>
                           {s.category}
@@ -315,7 +320,7 @@ export function InvoiceReviewModal({
               className="flex-1 gap-2"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Save mappings
+              Save
             </Button>
           </div>
         </div>

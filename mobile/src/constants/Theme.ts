@@ -1,62 +1,57 @@
+import { BLUPRNT_COLORS } from "@shared/constants/design-tokens";
+
 /**
- * BLUPRNT design tokens — keep in sync with web `src/index.css` `@theme` block
- * (surface, accent teal, neutral text ink, primary CTA deep teal — matches web tokens).
+ * BLUPRNT design tokens — colors come from `@shared/constants/design-tokens`
+ * (web mirrors the same hex values in `web/src/index.css` `@theme`).
  *
  * Layout principles (spacing / type / color):
- * — Avoid pure #000 for text; use slate/gray-900-scale inks for comfortable contrast.
+ * — Avoid pure #000 for text; use ink + slate scale for comfortable contrast.
  * — Spacing: 8px grid (multiples of 8 only in `spacing`).
- * — Color: ~60% dominant neutrals (background), ~30% surfaces (cards/header), ~10% accent (brand CTAs).
+ * — Color: ~60% neutrals, ~30% surfaces, ~10% accent.
  * — Type: one family (Outfit), distinct steps (~1.25×+) between body → subhead → display.
  */
 export const Theme = {
   colors: {
     /** ~60% — page field */
-    background: "#f9fafb",
+    background: BLUPRNT_COLORS.surface,
     /** ~30% — elevated surfaces */
-    header: "#ffffff",
-    card: "#ffffff",
+    header: BLUPRNT_COLORS.card,
+    card: BLUPRNT_COLORS.card,
 
-    // Accent (~10%) — matches web `--color-accent` / EmptyState highlights
     brand: {
-      light: "#14b8a6", // Teal 500
-      primary: "#0d9488", // Teal 600
-      deep: "#115e59", // Teal 800
+      light: BLUPRNT_COLORS.accentLight,
+      primary: BLUPRNT_COLORS.accent,
+      deep: BLUPRNT_COLORS.teal800,
     },
 
-    // Primary CTA gradient — matches web `.premium-gradient` / `.liquid-metal-button`
     cta: {
-      from: "#042f2e",
-      to: "#134e4a",
+      from: BLUPRNT_COLORS.teal950,
+      to: BLUPRNT_COLORS.primary,
     },
 
-    // Text — ink tones (never pure black #000 for primary body copy)
     text: {
-      primary: "#111827", // Gray 900 — readable without harsh #000
-      secondary: "#64748b", // Slate 500
-      /** Strong body on soft backgrounds (e.g. Slate 50) — better than secondary at small sizes */
-      onSoft: "#334155", // Slate 700
-      muted: "#94a3b8", // Slate 400
-      disabled: "#cbd5e1", // Slate 300
+      primary: BLUPRNT_COLORS.ink,
+      secondary: BLUPRNT_COLORS.slate500,
+      onSoft: BLUPRNT_COLORS.slate700,
+      muted: BLUPRNT_COLORS.slate400,
+      disabled: BLUPRNT_COLORS.slate300,
     },
 
-    // Status Palette
     status: {
-      success: "#10b981", // Emerald 500
-      error: "#f43f5e", // Rose 500
-      warning: "#f59e0b", // Amber 500
-      info: "#3b82f6", // Blue 500
+      success: BLUPRNT_COLORS.success,
+      error: BLUPRNT_COLORS.error,
+      warning: BLUPRNT_COLORS.warning,
+      info: BLUPRNT_COLORS.info,
     },
 
-    // UI Elements
-    border: "#e2e8f0", // Slate 200
-    divider: "#f1f5f9", // Slate 100
-    inputBg: "#f8fafc", // Slate 50
-    inputBorder: "#e2e8f0", // Slate 200
+    border: BLUPRNT_COLORS.borderDefault,
+    divider: BLUPRNT_COLORS.borderLight,
+    inputBg: BLUPRNT_COLORS.slate50,
+    inputBorder: BLUPRNT_COLORS.borderDefault,
 
-    // Glassmorphism (Light Optimized)
     glass: {
       bg: "rgba(255, 255, 255, 0.8)",
-      border: "rgba(15, 23, 42, 0.08)",
+      border: BLUPRNT_COLORS.glassBorder,
       highlight: "rgba(255, 255, 255, 0.5)",
     },
   },
@@ -114,14 +109,14 @@ export const Theme = {
 
   shadows: {
     soft: {
-      shadowColor: "#042f2e",
+      shadowColor: BLUPRNT_COLORS.teal950,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.15,
       shadowRadius: 16,
       elevation: 8,
     },
     brand: {
-      shadowColor: "#0d9488",
+      shadowColor: BLUPRNT_COLORS.accent,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 12,
@@ -129,14 +124,14 @@ export const Theme = {
     },
     /** Neutral card drop — matches web `--shadow-drop-md` */
     card: {
-      shadowColor: "#042f2e",
+      shadowColor: BLUPRNT_COLORS.teal950,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.1,
       shadowRadius: 18,
       elevation: 5,
     },
     cardElevated: {
-      shadowColor: "#042f2e",
+      shadowColor: BLUPRNT_COLORS.teal950,
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.12,
       shadowRadius: 28,

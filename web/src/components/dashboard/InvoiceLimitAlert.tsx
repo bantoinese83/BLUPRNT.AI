@@ -28,7 +28,8 @@ export function InvoiceLimitAlert({
       </p>
       <p className="text-slate-600">
         <strong>Good news:</strong> quotes, warranties, and permits don&apos;t
-        count—switch the dropdown and upload those for free.
+        count toward that limit—change the document type and upload those for
+        free.
       </p>
       <Button
         type="button"

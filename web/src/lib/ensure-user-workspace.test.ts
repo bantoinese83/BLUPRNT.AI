@@ -55,8 +55,8 @@ describe("ensureUserHasWorkspace", () => {
       }
     });
 
-    await ensureUserHasWorkspace(userId);
-
+    const result = await ensureUserHasWorkspace(userId);
+    expect(result.ok).toBe(true);
     expect(localStorage.getItem("bluprnt_project_id")).toBe(mockProject.id);
   });
 
@@ -95,8 +95,8 @@ describe("ensureUserHasWorkspace", () => {
       }
     });
 
-    await ensureUserHasWorkspace(userId);
-
+    const result = await ensureUserHasWorkspace(userId);
+    expect(result.ok).toBe(true);
     expect(localStorage.getItem("bluprnt_project_id")).toBe(mockProject.id);
   });
 
@@ -134,8 +134,8 @@ describe("ensureUserHasWorkspace", () => {
       }
     });
 
-    await ensureUserHasWorkspace(userId);
-
+    const result = await ensureUserHasWorkspace(userId);
+    expect(result.ok).toBe(true);
     expect(localStorage.getItem("bluprnt_project_id")).toBe(mockProject.id);
   });
 
@@ -153,7 +153,8 @@ describe("ensureUserHasWorkspace", () => {
         }) as any,
     );
 
-    await expect(ensureUserHasWorkspace(userId)).resolves.not.toThrow();
+    const result = await ensureUserHasWorkspace(userId);
+    expect(result.ok).toBe(false);
     expect(reportClientError).toHaveBeenCalledWith(
       "ensure_workspace_properties_query",
       { message: "DB Error" },
@@ -196,7 +197,8 @@ describe("ensureUserHasWorkspace", () => {
         throw new Error("Quota exceeded");
       });
 
-    await expect(ensureUserHasWorkspace(userId)).resolves.not.toThrow();
+    const result = await ensureUserHasWorkspace(userId);
+    expect(result.ok).toBe(true);
     expect(setItemSpy).toHaveBeenCalledWith(
       "bluprnt_project_id",
       mockProject.id,

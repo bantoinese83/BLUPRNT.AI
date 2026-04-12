@@ -3,8 +3,17 @@ import { Alert } from "react-native";
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { addUserFlowBreadcrumb } from "@/lib/sentry";
-import { uploadDocumentWithType } from "@/lib/upload-document";
+import {
+  uploadDocumentWithType,
+  type DocumentType,
+} from "@/lib/upload-document";
 import { showAppToast } from "@/lib/app-toast";
+
+export type UploadPickedDocumentResult = {
+  ok: boolean;
+  invoiceId?: string;
+  documentType?: DocumentType;
+};
 
 export type UploadPickedDocumentOptions = {
   projectId: string;
@@ -23,7 +32,7 @@ export type UploadPickedDocumentOptions = {
  */
 export async function uploadPickedDocumentToProject(
   options: UploadPickedDocumentOptions,
-): Promise<void> {
+): Promise<UploadPickedDocumentResult> {
   const mime = options.mimeType || "image/jpeg";
   const kind = mime.includes("pdf") ? "pdf" : "image";
   addUserFlowBreadcrumb("document_upload_started", { kind });
@@ -58,15 +67,21 @@ export async function uploadPickedDocumentToProject(
           empty_error: true,
         });
       }
-      return;
+      return { ok: false };
     }
 
     addUserFlowBreadcrumb("document_upload_succeeded", { kind });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     showAppToast(options.successToastMessage);
     options.refreshProjectData();
+    return {
+      ok: true,
+      invoiceId: result.invoice_id,
+      documentType: result.documentType,
+    };
   } catch (err) {
     addUserFlowBreadcrumb("document_upload_exception", { kind });
     Alert.alert("Upload issue", friendlyDocumentUploadError(err));
+    return { ok: false };
   }
 }

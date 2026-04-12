@@ -198,7 +198,7 @@ export default function OnboardingScreen() {
         await signOut();
         Alert.alert(
           "Sign in again",
-          "We couldn’t verify your account on the server. If your profile was reset or removed, sign in again—then you can finish saving your project.",
+          "We couldn’t confirm your account. If your profile changed or was removed, sign in again—then you can finish saving your project.",
           [{ text: "OK", onPress: () => router.replace("/(auth)/login") }],
         );
         return;

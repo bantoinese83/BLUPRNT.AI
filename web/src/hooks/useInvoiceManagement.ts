@@ -116,7 +116,7 @@ export function useInvoiceManagement({
     ];
     if (!validTypes.includes(file.type)) {
       toast.error(
-        "Unsupported file type. Please upload a PDF, JPEG, PNG, or WEBP.",
+        "That file type isn’t supported. Use a PDF or a photo (JPEG or PNG).",
       );
       if (inputRef.current) inputRef.current.value = "";
       return;

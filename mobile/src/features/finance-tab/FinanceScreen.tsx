@@ -33,6 +33,7 @@ import {
 } from "@/features/finance-tab/ledger-helpers";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 import { reportClientError } from "@/lib/sentry";
+import { supabase } from "@/lib/supabase";
 import { FinanceLedgerHeader } from "@/features/finance-tab/FinanceLedgerHeader";
 import { FinanceInvoiceRow } from "@/features/finance-tab/FinanceInvoiceRow";
 
@@ -145,7 +146,7 @@ export default function FinanceScreen() {
 
     setIsUploading(true);
     try {
-      await uploadPickedDocumentToProject({
+      const result = await uploadPickedDocumentToProject({
         projectId: project.id,
         fileUri,
         mimeType,
@@ -156,6 +157,18 @@ export default function FinanceScreen() {
         },
         refreshProjectData: load,
       });
+      if (result.ok && result.documentType === "invoice" && result.invoiceId) {
+        const { data: row } = await supabase
+          .from("invoices")
+          .select("*")
+          .eq("id", result.invoiceId)
+          .maybeSingle();
+        if (row) {
+          setSelectedInvoice(row as InvoiceRow);
+          setIsReviewOpen(true);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      }
     } finally {
       setIsUploading(false);
     }
@@ -274,6 +287,7 @@ export default function FinanceScreen() {
 
       <InvoiceReviewSheet
         invoice={selectedInvoice}
+        projectId={project?.id ?? null}
         isOpen={isReviewOpen}
         onClose={() => {
           setIsReviewOpen(false);
@@ -281,6 +295,9 @@ export default function FinanceScreen() {
         }}
         onDeleted={() => {
           load();
+        }}
+        onSaved={() => {
+          void load();
         }}
       />
     </ScreenWrapper>

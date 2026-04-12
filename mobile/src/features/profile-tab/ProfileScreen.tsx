@@ -17,6 +17,7 @@ import {
   Trash2,
   Mail,
   FileText,
+  HelpCircle,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "@/contexts/auth-context";
@@ -60,6 +61,9 @@ export default function ProfileScreen() {
   );
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
 
   const handleUpgrade = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -106,6 +110,42 @@ export default function ProfileScreen() {
       );
     } else {
       showAppToast("Check your inbox for a reset link.");
+    }
+  };
+
+  const handleUpdatePasswordInApp = async () => {
+    if (newPassword.length < 8) {
+      Alert.alert(
+        "Check password",
+        "Use at least 8 characters for your new password.",
+      );
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert(
+        "Check password",
+        "New password and confirmation must match.",
+      );
+      return;
+    }
+    setPasswordSaving(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    setPasswordSaving(false);
+    if (error) {
+      Alert.alert(
+        "Couldn’t update password",
+        friendlyAuthError(
+          error.message || "",
+          "status" in error ? (error as { status?: number }).status : undefined,
+        ),
+      );
+    } else {
+      setNewPassword("");
+      setConfirmPassword("");
+      showAppToast("Password updated.");
     }
   };
 
@@ -353,9 +393,64 @@ export default function ProfileScreen() {
           <GlassCard style={styles.sectionCard}>
             <Text style={styles.sectionHeader}>Security & Data</Text>
             <ProfileSettingItem
+              icon={<HelpCircle size={20} color={Theme.colors.text.muted} />}
+              title="Help & Support"
+              subtitle="FAQs and contact"
+              onPress={() => router.push("/support")}
+            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>New password</Text>
+              <View style={styles.inputWrapper}>
+                <Lock
+                  size={18}
+                  color={Theme.colors.text.secondary}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="At least 8 characters"
+                  placeholderTextColor={Theme.colors.text.disabled}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Confirm new password</Text>
+              <View style={styles.inputWrapper}>
+                <Lock
+                  size={18}
+                  color={Theme.colors.text.secondary}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Repeat password"
+                  placeholderTextColor={Theme.colors.text.disabled}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+            <Button
+              title={passwordSaving ? "Updating…" : "Update password"}
+              onPress={() => void handleUpdatePasswordInApp()}
+              disabled={passwordSaving || !newPassword || !confirmPassword}
+              loading={passwordSaving}
+              variant="outline"
+              titleCase="sentence"
+              style={styles.saveButton}
+            />
+            <ProfileSettingItem
               icon={<Lock size={20} color={Theme.colors.text.muted} />}
-              title="Reset Password"
-              subtitle="Sent via email"
+              title="Email me a reset link"
+              subtitle="If you forgot your password"
               onPress={handleChangePassword}
             />
             <ProfileSettingItem

@@ -63,7 +63,7 @@ export function ProjectSwitcher({
         <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-slate-200/60 bg-white/50 px-4 py-2 text-slate-700 shadow-sm">
           <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
             {getProjectIcon(label)({
-              className: "w-4 h-4 text-slate-900 invert-0 grayscale opacity-80",
+              className: "w-4 h-4 object-contain opacity-95",
             })}
           </div>
           <span className="truncate text-sm font-bold">{label}</span>
@@ -89,14 +89,14 @@ export function ProjectSwitcher({
             className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-slate-900" : "bg-slate-50 group-hover:bg-slate-100"}`}
           >
             {getProjectIcon(label)({
-              className: `w-3.5 h-3.5 transition-all ${open ? "brightness-0 invert opacity-100" : "grayscale opacity-70"}`,
+              className: `w-3.5 h-3.5 object-contain transition-all ${open ? "brightness-0 invert opacity-100" : "opacity-95"}`,
             })}
           </div>
           <span className="min-w-0 truncate font-bold text-slate-700">
             {label}
           </span>
           <ChevronDown
-            className={`ml-auto h-4 w-4 shrink-0 transition-transform duration-300 ${open ? "rotate-180 text-slate-950" : "text-slate-400"}`}
+            className={`ml-auto h-4 w-4 shrink-0 transition-transform duration-300 ${open ? "rotate-180 text-slate-950" : "text-slate-600"}`}
             aria-hidden
           />
         </Button>
@@ -134,10 +134,10 @@ export function ProjectSwitcher({
                       }}
                     >
                       <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/20" : "bg-slate-50 group-hover:bg-slate-100"}`}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/20" : "bg-slate-100 ring-1 ring-slate-200/80 group-hover:bg-slate-200/70"}`}
                       >
                         {getProjectIcon(p.name)({
-                          className: `w-4 h-4 transition-all ${isActive ? "brightness-0 invert opacity-100" : "grayscale opacity-60"}`,
+                          className: `w-4 h-4 object-contain transition-all ${isActive ? "brightness-0 invert opacity-100" : "opacity-100"}`,
                         })}
                       </div>
 

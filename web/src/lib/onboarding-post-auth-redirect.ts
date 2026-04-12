@@ -41,3 +41,32 @@ export function resolvePostLoginHref(
   }
   return getOnboardingResumeIfPending() ?? "/dashboard";
 }
+
+/**
+ * Reads and clears `bluprnt_auth_redirect` from sessionStorage, then applies
+ * safe redirect + onboarding resume (same rules as after OAuth).
+ */
+export function consumeAuthCallbackRedirectHref(): string {
+  if (typeof window === "undefined") {
+    return "/dashboard";
+  }
+  let redirectTo = "/dashboard";
+  let usedStoredRedirect = false;
+  try {
+    const stored = sessionStorage.getItem("bluprnt_auth_redirect");
+    if (stored) {
+      sessionStorage.removeItem("bluprnt_auth_redirect");
+      redirectTo = getSafeRedirect(stored);
+      usedStoredRedirect = true;
+    }
+  } catch {
+    /* ignore */
+  }
+  if (!usedStoredRedirect) {
+    const resume = getOnboardingResumeIfPending();
+    if (resume) {
+      redirectTo = resume;
+    }
+  }
+  return redirectTo;
+}

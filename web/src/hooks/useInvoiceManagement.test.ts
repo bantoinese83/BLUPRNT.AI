@@ -185,7 +185,7 @@ describe("useInvoiceManagement", () => {
       });
 
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining("Unsupported file type"),
+        expect.stringMatching(/file type.*supported/i),
       );
       expect(invokeFunction).not.toHaveBeenCalled();
     });

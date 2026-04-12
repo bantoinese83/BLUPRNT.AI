@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
 /*
- * BLUPRNT web tokens — align with mobile `Theme` & readable UI defaults:
+ * BLUPRNT web tokens — hex values mirror `@shared/constants/design-tokens.ts`
+ * (mobile `Theme` imports that module; update both when changing brand colors).
+ *
+ * Readable UI defaults:
  * — No pure #000 for body ink; neutral field + surfaces + one accent (60/30/10).
  * — Prefer Tailwind spacing that lands on an 8px rhythm (e.g. 2=8px, 4=16px, 6=24px, 8=32px).
  * — Long copy: use `max-th` (65ch) / `max-w-prose` so line length stays comfortable.
@@ -468,11 +471,11 @@
   padding: 0.4rem;
   background: conic-gradient(
     from 180deg,
-    #0ea5e9,
-    #8b5cf6,
-    #ec4899,
-    #8b5cf6,
-    #0ea5e9
+    #115e59,
+    #14b8a6,
+    #5eead4,
+    #14b8a6,
+    #115e59
   );
 }
 

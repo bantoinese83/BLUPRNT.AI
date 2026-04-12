@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { exportUserData } from "@/services/export-service";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export function useUserSettings() {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ export function useUserSettings() {
     });
     setProfileSaving(false);
     if (error) {
-      toast.error(error.message || "Couldn't save your name.");
+      toast.error(friendlyAuthError(error.message || ""));
       return;
     }
     toast.success("Profile updated");
@@ -119,7 +120,7 @@ export function useUserSettings() {
     setPasswordSaving(false);
 
     if (error) {
-      toast.error(error.message || "Couldn't update password.");
+      toast.error(friendlyAuthError(error.message || ""));
       return;
     }
 

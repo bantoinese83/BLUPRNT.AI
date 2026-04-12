@@ -35,6 +35,8 @@ const Support = lazy(() => import("./pages/Support"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const E2EPopupProbe = lazy(() => import("./pages/E2EPopupProbe"));
+const E2EOfflineSaveProbe = lazy(() => import("./pages/E2EOfflineSaveProbe"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -125,6 +127,18 @@ export default function App() {
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/terms" element={<TermsOfService />} />
                     <Route path="/support" element={<Support />} />
+                    {import.meta.env.VITE_E2E === "1" ? (
+                      <>
+                        <Route
+                          path="/__e2e__/popup-probe"
+                          element={<E2EPopupProbe />}
+                        />
+                        <Route
+                          path="/__e2e__/offline-save"
+                          element={<E2EOfflineSaveProbe />}
+                        />
+                      </>
+                    ) : null}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
