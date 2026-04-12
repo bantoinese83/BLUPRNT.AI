@@ -5,6 +5,10 @@ import { invokeFunction } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
+vi.mock("@/lib/sentry", () => ({
+  addUserFlowBreadcrumb: vi.fn(),
+}));
+
 vi.mock("@/lib/supabase", () => ({
   invokeFunction: vi.fn().mockResolvedValue({ data: {}, error: null }),
 }));

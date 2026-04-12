@@ -31,6 +31,7 @@
     "test:e2e:mobile": "bash scripts/e2e-mobile-maestro.sh",
     "functions:check": "bash scripts/check-edge-functions.sh",
     "postdeploy:verify": "bash scripts/post-deploy-verify.sh",
+    "qa:core": "bash scripts/qa-core-journeys.sh",
     "test:ui": "npm run test:ui -w web",
     "format": "prettier --write \"web/src/**/*.{ts,tsx,css,html}\" \"shared/**/*.ts\" \"mobile/**/*.{ts,tsx}\"",
     "knip": "knip --exclude types,nsTypes,enumMembers,duplicates",

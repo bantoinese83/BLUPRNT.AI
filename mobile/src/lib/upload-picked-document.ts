@@ -2,6 +2,7 @@ import * as Haptics from "expo-haptics";
 import { Alert } from "react-native";
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
+import { addUserFlowBreadcrumb } from "@/lib/sentry";
 import { uploadDocumentWithType } from "@/lib/upload-document";
 import { showAppToast } from "@/lib/app-toast";
 
@@ -24,6 +25,8 @@ export async function uploadPickedDocumentToProject(
   options: UploadPickedDocumentOptions,
 ): Promise<void> {
   const mime = options.mimeType || "image/jpeg";
+  const kind = mime.includes("pdf") ? "pdf" : "image";
+  addUserFlowBreadcrumb("document_upload_started", { kind });
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
   try {
@@ -35,21 +38,35 @@ export async function uploadPickedDocumentToProject(
 
     if (!result.success) {
       if (result.error) {
-        if (
-          shouldPromptUpgradeAfterUploadFailure(result.errorCode, result.error)
-        ) {
+        const limitPrompt = shouldPromptUpgradeAfterUploadFailure(
+          result.errorCode,
+          result.error,
+        );
+        addUserFlowBreadcrumb("document_upload_failed", {
+          kind,
+          limit_prompt: limitPrompt,
+        });
+        if (limitPrompt) {
           options.onInvoiceLimitUpgrade();
         } else {
           Alert.alert("Upload Failed", result.error);
         }
+      } else {
+        addUserFlowBreadcrumb("document_upload_failed", {
+          kind,
+          limit_prompt: false,
+          empty_error: true,
+        });
       }
       return;
     }
 
+    addUserFlowBreadcrumb("document_upload_succeeded", { kind });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     showAppToast(options.successToastMessage);
     options.refreshProjectData();
   } catch (err) {
+    addUserFlowBreadcrumb("document_upload_exception", { kind });
     Alert.alert("Upload issue", friendlyDocumentUploadError(err));
   }
 }

@@ -6,6 +6,7 @@ import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
+import { addUserFlowBreadcrumb } from "@/lib/sentry";
 
 interface UseInvoiceManagementProps {
   projectId: string;
@@ -123,6 +124,9 @@ export function useInvoiceManagement({
 
     setError(null);
     setUploading(true);
+    addUserFlowBreadcrumb("invoice_upload_started", {
+      document_type: documentType,
+    });
     try {
       const fd = new FormData();
       fd.set("project_id", projectId);
@@ -137,6 +141,10 @@ export function useInvoiceManagement({
 
       const failure = extractUploadFailureFromInvokeResult(data, fnErr);
       if (failure) {
+        addUserFlowBreadcrumb("invoice_upload_failed", {
+          document_type: documentType,
+          error_code: failure.errorCode ?? "unknown",
+        });
         if (
           shouldPromptUpgradeAfterUploadFailure(
             failure.errorCode,
@@ -164,7 +172,14 @@ export function useInvoiceManagement({
       toast.success(
         `${documentType === "invoice" ? "Invoice" : "Document"} uploaded successfully`,
       );
+      addUserFlowBreadcrumb("invoice_upload_succeeded", {
+        document_type: documentType,
+        opens_review: Boolean(newId && documentType === "invoice"),
+      });
     } catch {
+      addUserFlowBreadcrumb("invoice_upload_exception", {
+        document_type: documentType,
+      });
       const msg = friendlyDocumentUploadError(null);
       setError(msg);
       toast.error(msg);

@@ -24,4 +24,20 @@ test.describe("Public routes", () => {
       page.getByRole("heading", { level: 1, name: "Terms of Service" }),
     ).toBeVisible({ timeout: 15_000 });
   });
+
+  test("register page loads", async ({ page }) => {
+    const res = await page.goto("/register");
+    expect(res?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Create account" }),
+    ).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("forgot password page loads", async ({ page }) => {
+    const res = await page.goto("/forgot-password");
+    expect(res?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Reset your password" }),
+    ).toBeVisible({ timeout: 15_000 });
+  });
 });

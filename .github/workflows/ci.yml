@@ -28,6 +28,9 @@ jobs:
       - name: Lint and typecheck (app)
         run: npm run lint
 
+      - name: Knip (unused exports / dependencies)
+        run: npm run knip:check
+
       - name: Unit tests
         run: npm run test:run
 

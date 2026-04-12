@@ -62,4 +62,20 @@ export function captureEdgeInvokeFailure(
   );
 }
 
+/** High-level product flow markers (no PII). Only recorded when Sentry is initialized. */
+export function addUserFlowBreadcrumb(
+  message: string,
+  data?: Record<string, unknown>,
+): void {
+  if (!initialized) {
+    return;
+  }
+  Sentry.addBreadcrumb({
+    category: "user_flow",
+    message,
+    level: "info",
+    data,
+  });
+}
+
 export { Sentry };
