@@ -1,5 +1,6 @@
 import "../global.css";
 import { LogBox } from "react-native";
+
 LogBox.ignoreLogs([
   "SafeAreaView has been deprecated and will be removed in a future release",
 ]);
@@ -39,7 +40,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
 import NetInfo from "@react-native-community/netinfo";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Theme } from "@/constants/Theme";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";

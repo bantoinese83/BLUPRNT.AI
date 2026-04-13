@@ -11,6 +11,7 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
+    "esModuleInterop": true,
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],

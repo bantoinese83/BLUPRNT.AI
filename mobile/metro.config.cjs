@@ -10,4 +10,10 @@ const config = getDefaultConfig(projectRoot);
 // 1. Watch all files in root (includes /shared)
 config.watchFolders = [workspaceRoot];
 
+// 2. Let Metro know where to look for modules
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, "node_modules"),
+  path.resolve(workspaceRoot, "node_modules"),
+];
+
 module.exports = withNativeWind(config, { input: "./global.css" });
