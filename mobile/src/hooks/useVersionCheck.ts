@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Linking, Platform } from "react-native";
 import Constants from "expo-constants";
 import { supabase } from "@/lib/supabase";
+import { IOS_APP_STORE_URL } from "@shared/constants/app-links";
 
 /**
  * Hook to enforce a minimum required app version.
@@ -79,10 +80,9 @@ function showUpdateAlert() {
       {
         text: "Update Now",
         onPress: () => {
-          // Replace with your actual App Store / Play Store links
           const url =
             Platform.OS === "ios"
-              ? "https://apps.apple.com/app/id6761769731"
+              ? IOS_APP_STORE_URL
               : "https://play.google.com/store/apps/details?id=ai.bluprnt.mobile";
           void Linking.openURL(url);
         },

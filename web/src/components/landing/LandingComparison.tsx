@@ -11,8 +11,9 @@ export function LandingComparison() {
             Precision Over Guesswork.
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto font-medium">
-            While others give you "ballpark" numbers, BLUPRNT delivers
-            contractor-grade data depth through a simple consumer interface.
+            BLUPRNT pairs regional cost ranges with structured scope, invoices,
+            and exports—so homeowners get clearer numbers than a lone
+            visualizer, without pro job-site software.
           </p>
         </div>
 

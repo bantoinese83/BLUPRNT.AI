@@ -182,7 +182,8 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
                 <Text style={styles.planPeriod}> once</Text>
               </Text>
               <Text style={styles.planTagline}>
-                6 months of full tools for one job · then view-only forever
+                6 months of full tools for one job · then view-only while
+                BLUPRNT is available.
               </Text>
               <View style={styles.popularBadge}>
                 <Text style={styles.popularText}>POPULAR</Text>

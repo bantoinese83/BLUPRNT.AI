@@ -4,6 +4,7 @@ import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
 import { Iphone } from "@/components/ui/iphone";
 import { LANDING_HERO_COPY, LANDING_HIGHLIGHT_COLOR } from "./landing-content";
+import { IOS_APP_STORE_URL } from "@shared/constants/app-links";
 
 export function HeroSection({
   onStart,
@@ -87,15 +88,15 @@ export function HeroSection({
             <div className="h-12 w-px bg-slate-200/50 hidden sm:block mx-1" />
 
             <a
-              href="https://apps.apple.com"
+              href={IOS_APP_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:scale-[1.03] active:scale-[0.97] transition-all"
-              aria-label="Download on the App Store"
+              aria-label="Download BLUPRNT on the App Store"
             >
               <img
                 src="/app-store-badge.svg"
-                alt="Available on the App Store"
+                alt="Download BLUPRNT on the App Store"
                 className="h-10 w-auto sm:h-[42px]"
               />
             </a>

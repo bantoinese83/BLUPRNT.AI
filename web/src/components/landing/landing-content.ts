@@ -55,9 +55,9 @@ export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
   },
   {
     feature: "Invoice & receipt reads",
-    architect: "10 invoice photos / mo",
-    pass: "Unlimited (this job)",
-    hint: "We read amounts & dates from what you upload",
+    architect: "10 invoiced docs / mo (account total)",
+    pass: "Unlimited for this project (during pass)",
+    hint: "Invoices only count toward limits—not quotes or warranties. Architect: one monthly quota shared across all projects.",
   },
   {
     feature: "Jobs at once",
@@ -80,8 +80,8 @@ export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
   {
     feature: "Open your records later",
     architect: "Anytime",
-    pass: "Forever (view only)",
-    hint: "Pass: full editing for 6 mo, then read-only for good",
+    pass: "View-only after pass",
+    hint: "Pass: full editing for 6 mo, then read-only while BLUPRNT is available",
   },
 ] as const;
 

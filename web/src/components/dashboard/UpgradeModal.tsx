@@ -236,7 +236,7 @@ export function UpgradeModal({
               <ul className="space-y-3">
                 {[
                   "Expert AI Insights & Project Strategy",
-                  `Up to ${ARCHITECT_INVOICE_LIMIT} smart invoice uploads per billing period`,
+                  `Up to ${ARCHITECT_INVOICE_LIMIT} invoice uploads per billing period, total across all projects`,
                   "Track up to 2 active projects",
                   "Cloud-backed Seller Packet PDF",
                 ].map((item, i) => (
@@ -268,7 +268,7 @@ export function UpgradeModal({
                 ) : isArchitect ? (
                   "Current Plan"
                 ) : (
-                  "Start Architect plan"
+                  "Subscribe to Architect"
                 )}
               </Button>
             </div>
@@ -292,7 +292,7 @@ export function UpgradeModal({
               <ul className="space-y-3">
                 {[
                   "6 months of Architect features",
-                  "Unlimited invoices (this project)",
+                  "Unlimited invoice uploads for this project while your pass is active",
                   "No subscription – one-time payment",
                   "Perfect for one big remodel",
                 ].map((item, i) => (

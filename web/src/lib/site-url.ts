@@ -29,7 +29,7 @@ export const LANDING_FAQ = [
   {
     question: "Is BLUPRNT free to try?",
     answer:
-      "You can start without a credit card: get an estimate and explore core workflows. Paid plans add higher limits and advanced features; pricing is shown on the site before you commit.",
+      "You can sign up and get an estimate without a credit card. The free tier includes core workflows with up to three invoice uploads per project (other document types don’t count toward that cap). Paid plans add higher limits; prices are shown before you pay at checkout.",
   },
   {
     question: "Who is BLUPRNT for?",
@@ -127,7 +127,8 @@ export function buildLandingJsonLd(siteUrl: string) {
           "@type": "Offer",
           price: "0",
           priceCurrency: "USD",
-          description: "Free tier and trial; paid plans available.",
+          description:
+            "Free tier with per-project invoice limits; paid subscription and passes available.",
         },
         description:
           "AI renovation cost estimator, remodel budget tracker, and seller packet PDFs. Compare estimates to invoices and quotes with regional pricing.",

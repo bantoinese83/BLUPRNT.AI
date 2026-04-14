@@ -80,7 +80,7 @@ export function LandingPricing({
             <ul className="space-y-4 mb-10 flex-1">
               {[
                 "AI coach for budgets, stages, and “wait—what did we pay?”",
-                "Up to 10 invoice photo reads per billing cycle",
+                "10 invoice uploads per billing month, total across all projects you track",
                 "Up to 2 remodels at the same time",
                 "Full home file + listing-ready PDF export",
                 "Cloud backup of your packet (PDF)",
@@ -105,7 +105,7 @@ export function LandingPricing({
               }`}
               onClick={() => !isArchitect && onPlanSelect("architect")}
             >
-              {isArchitect ? "Current Plan" : "Start Architect free"}
+              {isArchitect ? "Current Plan" : "Subscribe to Architect"}
             </Button>
           </motion.div>
 
@@ -134,16 +134,17 @@ export function LandingPricing({
                 <span className="text-slate-500 font-bold">/project</span>
               </div>
               <p className="mt-4 text-slate-600 font-medium">
-                Pay once for one kitchen, bath, or whole-house gut—then keep
-                viewing forever.
+                Pay once for one kitchen, bath, or whole-house gut—after six
+                months your project stays view-only for as long as BLUPRNT is
+                available.
               </p>
             </div>
             <ul className="space-y-4 mb-10 flex-1">
               {[
                 "6 months of everything Architect includes",
-                "Unlimited invoice reads on that one job",
+                "Unlimited invoice uploads for that one project (while the pass is active)",
                 "Same AI help as Architect during those 6 months",
-                "After 6 months: your project stays readable forever (view-only)",
+                "After 6 months: your project stays readable (view-only) as long as BLUPRNT is available",
                 "Best when you’re not a “forever renovating” household",
               ].map((feature, i) => (
                 <li
@@ -167,8 +168,9 @@ export function LandingPricing({
         </div>
 
         <p className="mt-12 text-center text-slate-500 font-medium italic">
-          All plans include a 3-invoice free trial per project. No credit card
-          required to start.
+          Free tier: up to 3 invoice uploads per project (quotes and other
+          document types don’t count). No credit card required to sign up or run
+          an estimate; paid plans are charged at checkout.
         </p>
 
         {/* Plan comparison */}
@@ -280,8 +282,9 @@ export function LandingPricing({
             </div>
             <p className="border-t border-slate-100 bg-slate-50/50 px-4 py-4 text-center text-xs leading-relaxed text-slate-500 sm:px-6">
               Project Pass includes Architect features for six months, locked to
-              one project. After that, your ledger stays readable — upgrade
-              anytime if you start another remodel.
+              one project. After that, your ledger stays view-only for as long
+              as BLUPRNT is available — upgrade anytime if you start another
+              remodel.
             </p>
           </div>
         </motion.div>
