@@ -1,15 +1,32 @@
 /**
  * CORS — set ALLOWED_ORIGINS (comma-separated) in production.
- * When unset, allows `*` (local / backwards compatibility).
- * When set, only listed origins get Access-Control-Allow-Origin (no implicit domain bypass).
- * Non-browser clients often omit Origin; we then echo the first allowlisted host.
+ * When unset: fail closed unless CORS_RELAX_LOCAL=1 (then `*`).
+ * Wildcard in ALLOWED_ORIGINS requires CORS_RELAX_LOCAL=1.
+ * Non-browser clients often omit Origin; we then echo SITE_URL or the first allowlisted host.
  */
 function resolveAccessControlAllowOrigin(req: Request): string | null {
   const requestOrigin = req.headers.get("Origin");
   const raw = Deno.env.get("ALLOWED_ORIGINS");
+  const relax = Deno.env.get("CORS_RELAX_LOCAL") === "1";
+  const siteBase = Deno.env.get("SITE_URL")?.replace(/\/$/, "") ?? "";
 
   if (!raw?.trim()) {
-    return "*";
+    if (relax) {
+      return "*";
+    }
+    if (!requestOrigin) {
+      return siteBase || null;
+    }
+    if (
+      siteBase &&
+      requestOrigin.replace(/\/$/, "") === siteBase
+    ) {
+      return requestOrigin;
+    }
+    console.warn(
+      "[cors] ALLOWED_ORIGINS unset — set it or CORS_RELAX_LOCAL=1 for local dev",
+    );
+    return null;
   }
 
   const origins = raw
@@ -17,10 +34,19 @@ function resolveAccessControlAllowOrigin(req: Request): string | null {
     .map((o) => o.trim())
     .filter(Boolean);
   if (origins.length === 0) {
-    return "*";
+    if (relax) {
+      return "*";
+    }
+    return null;
   }
   if (origins.includes("*")) {
-    return "*";
+    if (relax) {
+      return "*";
+    }
+    console.warn(
+      "[cors] Wildcard ALLOWED_ORIGINS requires CORS_RELAX_LOCAL=1",
+    );
+    return null;
   }
 
   if (!requestOrigin) {

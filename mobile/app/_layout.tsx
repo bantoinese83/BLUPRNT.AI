@@ -1,5 +1,5 @@
 import "../global.css";
-import { LogBox } from "react-native";
+import { LogBox, Platform } from "react-native";
 
 LogBox.ignoreLogs([
   "SafeAreaView has been deprecated and will be removed in a future release",
@@ -13,11 +13,7 @@ import Constants, { ExecutionEnvironment } from "expo-constants";
 
 initMobileSentry();
 
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import {
   useFonts,
   Outfit_400Regular,
@@ -31,7 +27,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/components/useColorScheme";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { useAuth } from "@/contexts/auth-context";
 import { AppToastHost } from "@/components/AppToastHost";
@@ -46,6 +41,7 @@ import { Theme } from "@/constants/Theme";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 import { isNetworkReachable } from "@/lib/network-status";
 import { WifiOff } from "lucide-react-native";
+import { getProductAnalyticsConsent } from "@/lib/product-analytics";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -83,6 +79,7 @@ function RootLayout() {
   // shows immediately. Expo Go may still flash its default for a moment before JS.
   useEffect(() => {
     void SplashScreen.hideAsync();
+    void getProductAnalyticsConsent();
 
     // Initialize RevenueCat
     const isExpoGo =
@@ -183,7 +180,6 @@ function OfflineBannerHost() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
   const { session, loading } = useAuth();
   const segments = useSegments();
   const pathname = usePathname();
@@ -258,7 +254,7 @@ function RootLayoutNav() {
   }, [session, loading]);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <Stack
         screenOptions={{
           headerShown: false, // Universal fail-safe
@@ -267,6 +263,7 @@ function RootLayoutNav() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)/login" />
+        <Stack.Screen name="auth/callback" />
         <Stack.Screen name="(auth)/register" />
         <Stack.Screen name="(auth)/forgot-password" />
         <Stack.Screen name="(auth)/reset-password" />

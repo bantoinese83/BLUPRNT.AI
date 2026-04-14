@@ -7,6 +7,7 @@ import {
   assertProjectOwner,
 } from "../_shared/auth.ts";
 import { callGemini } from "../_shared/gemini.ts";
+import { chatWithProjectSchema } from "../_shared/validation.ts";
 
 Deno.serve(async (req: Request) => {
   const opt = handleOptions(req);
@@ -32,10 +33,16 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Unauthorized" }, 401, req);
     }
 
-    const { query, projectId } = await req.json();
-    if (!projectId || !query || typeof query !== "string") {
-      return jsonResponse({ error: "Missing projectId or query" }, 400, req);
+    const raw = await req.json().catch(() => null);
+    const parsed = chatWithProjectSchema.safeParse(raw);
+    if (!parsed.success) {
+      return jsonResponse(
+        { error: "Invalid projectId or query" },
+        400,
+        req,
+      );
     }
+    const { query, projectId } = parsed.data;
 
     const admin = getServiceClient();
     await assertProjectOwner(admin, projectId, userId);

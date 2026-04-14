@@ -200,6 +200,10 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      get_onboarding_sync_payload: {
+        Args: { p_token: string };
+        Returns: Json | null;
+      };
       recalc_project_totals: { Args: { p_id: string }; Returns: undefined };
     };
     Enums: Record<string, never>;

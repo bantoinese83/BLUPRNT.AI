@@ -112,4 +112,78 @@ describe("fetchMobileDashboardSnapshot", () => {
     expect(snap.project).toBeNull();
     expect(AsyncStorage.removeItem).toHaveBeenCalled();
   });
+
+  it("returns cached snapshot when projects query fails but cache exists", async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session },
+    } as never);
+    const cached = {
+      projects: [
+        {
+          id: "p1",
+          name: "Kitchen",
+          property_id: "prop-1",
+          estimated_min_total: null,
+          estimated_max_total: null,
+          confidence_score: null,
+          stage: "planning",
+          created_at: "2026-01-01T00:00:00Z",
+        },
+      ],
+      project: {
+        id: "p1",
+        name: "Kitchen",
+        property_id: "prop-1",
+        estimated_min_total: null,
+        estimated_max_total: null,
+        confidence_score: null,
+        stage: "planning",
+        created_at: "2026-01-01T00:00:00Z",
+      },
+      scopeItems: [],
+      invoices: [],
+      spendByCategory: {},
+      isArchitect: true,
+      subscription: null,
+      hasProjectPass: false,
+    };
+    vi.mocked(AsyncStorage.getItem).mockImplementation(async (key: string) => {
+      if (key === "bluprnt_project_id") return "p1";
+      if (key === `bluprnt_dash_${userId}`) {
+        return JSON.stringify(cached);
+      }
+      return null;
+    });
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
+      if (table === "user_preferences") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }
+      if (table === "projects") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: null,
+            error: { message: "network", code: "PGRST301" },
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+    }) as unknown as typeof supabase.from);
+
+    const snap = await fetchMobileDashboardSnapshot();
+    expect(snap.loadError).toBeTruthy();
+    expect(snap.projects).toHaveLength(1);
+    expect(snap.project?.id).toBe("p1");
+    expect(snap.isArchitect).toBe(true);
+  });
 });

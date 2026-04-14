@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Share,
+  Switch,
 } from "react-native";
 import {
   User,
@@ -18,6 +19,7 @@ import {
   Mail,
   FileText,
   HelpCircle,
+  TrendingUp,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "@/contexts/auth-context";
@@ -48,6 +50,10 @@ import {
 } from "@shared/lib/subscription-billing";
 import { profileTabStyles as styles } from "@/features/profile-tab/profile-tab.styles";
 import { ProfileSettingItem } from "@/features/profile-tab/ProfileSettingItem";
+import {
+  getProductAnalyticsConsent,
+  setProductAnalyticsConsent,
+} from "@/lib/product-analytics";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -64,6 +70,17 @@ export default function ProfileScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+
+  useEffect(() => {
+    void getProductAnalyticsConsent().then(setAnalyticsEnabled);
+  }, []);
+
+  const onAnalyticsToggle = useCallback(async (enabled: boolean) => {
+    Haptics.selectionAsync();
+    setAnalyticsEnabled(enabled);
+    await setProductAnalyticsConsent(enabled);
+  }, []);
 
   const handleUpgrade = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -89,7 +106,7 @@ export default function ProfileScreen() {
         ),
       );
     } else {
-      showAppToast("Profile updated.");
+      showAppToast("Profile updated.", { type: "success" });
     }
   };
 
@@ -109,7 +126,7 @@ export default function ProfileScreen() {
         ),
       );
     } else {
-      showAppToast("Check your inbox for a reset link.");
+      showAppToast("Check your inbox for a reset link.", { type: "success" });
     }
   };
 
@@ -145,7 +162,7 @@ export default function ProfileScreen() {
     } else {
       setNewPassword("");
       setConfirmPassword("");
-      showAppToast("Password updated.");
+      showAppToast("Password updated.", { type: "success" });
     }
   };
 
@@ -398,6 +415,34 @@ export default function ProfileScreen() {
               subtitle="FAQs and contact"
               onPress={() => router.push("/support")}
             />
+            <View
+              style={styles.analyticsRow}
+              accessible
+              accessibilityRole="switch"
+              accessibilityState={{ checked: analyticsEnabled }}
+              accessibilityLabel="Optional usage analytics"
+              accessibilityHint="When on, anonymous product events may be collected to improve the app"
+            >
+              <View style={styles.settingIcon}>
+                <TrendingUp size={20} color={Theme.colors.text.muted} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.settingTitle}>Help improve the app</Text>
+                <Text style={styles.settingSubtitle}>
+                  Anonymous usage insights if you opt in
+                </Text>
+              </View>
+              <Switch
+                value={analyticsEnabled}
+                onValueChange={(v) => void onAnalyticsToggle(v)}
+                trackColor={{
+                  false: Theme.colors.divider,
+                  true: Theme.colors.brand.light,
+                }}
+                thumbColor={Theme.colors.card}
+                ios_backgroundColor={Theme.colors.divider}
+              />
+            </View>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>New password</Text>
               <View style={styles.inputWrapper}>

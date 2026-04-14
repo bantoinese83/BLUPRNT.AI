@@ -22,8 +22,8 @@ ALTER TABLE public.onboarding_sync ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can create a sync record" ON public.onboarding_sync
   FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Anyone with token can read sync record" ON public.onboarding_sync
-  FOR SELECT USING (expires_at > now());
+-- No broad SELECT: clients use get_onboarding_sync_payload(token); see
+-- 20260415160000_onboarding_sync_secure_read.sql.
 
 -- Add a cron job or similar to cleanup expired records (optional, but good practice).
 -- For now, we'll assume manual/periodic cleanup.

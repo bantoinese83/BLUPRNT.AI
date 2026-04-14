@@ -1,12 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["app/**/*.{ts,tsx}", "src/**/*.{ts,tsx}"],
-  "ignore": [
-    "babel.config.cjs",
-    "metro.config.cjs",
-    "src/test/**",
-    "src/components/useColorScheme.web.ts"
-  ],
+  "ignore": ["babel.config.cjs", "metro.config.cjs"],
   "ignoreDependencies": [
     "@expo/vector-icons",
     "clsx",
@@ -22,6 +17,6 @@
     "expo-system-ui",
     "@react-navigation/bottom-tabs"
   ],
-  "ignoreBinaries": ["expo", "eas", "maestro", "eslint", "vitest", "knip"],
+  "ignoreBinaries": ["expo", "eslint", "vitest", "knip"],
   "expo": true
 }

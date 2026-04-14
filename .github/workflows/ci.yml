@@ -31,8 +31,8 @@ jobs:
       - name: Knip (unused exports / dependencies)
         run: npm run knip:check
 
-      - name: Unit tests
-        run: npm run test:run
+      - name: Unit tests (with coverage thresholds)
+        run: npm run test:coverage
 
       - name: Production builds (web + Expo iOS/Android bundles)
         run: npm run build
@@ -42,8 +42,8 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Install Playwright (Chromium)
-        run: npx playwright install chromium --with-deps
+      - name: Install Playwright (Chromium, Firefox, WebKit)
+        run: npx playwright install --with-deps
 
       - name: E2E smoke (web)
         run: npm run test:e2e

@@ -72,7 +72,7 @@ export async function uploadPickedDocumentToProject(
 
     addUserFlowBreadcrumb("document_upload_succeeded", { kind });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showAppToast(options.successToastMessage);
+    showAppToast(options.successToastMessage, { type: "success" });
     options.refreshProjectData();
     return {
       ok: true,

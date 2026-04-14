@@ -6,6 +6,7 @@ import {
   readDashboardWelcomeFlag,
 } from "@/lib/dashboard-welcome";
 import { Highlighter } from "@/components/ui/Highlighter";
+import { ROUGH_NOTATION } from "@shared/constants/visualization";
 
 export function DashboardWelcomeBanner() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export function DashboardWelcomeBanner() {
           <h2 className="text-lg font-bold text-slate-900">
             <Highlighter
               action="highlight"
-              color="#ffd1dc"
+              color={ROUGH_NOTATION.highlightRose}
               padding={2}
               iterations={1}
               isView={true}

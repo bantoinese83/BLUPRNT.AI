@@ -145,9 +145,66 @@ describe("useScopeManagement", () => {
       expect(result.current.error).toBe("Update failed");
       expect(toast.error).toHaveBeenCalledWith("Couldn't save changes");
     });
+
+    it("rescales unit costs from economy tier toward mid", async () => {
+      const mockChain = mockSupabaseQuery();
+      (supabase.from as any).mockImplementation((table: string) => {
+        if (table === "scope_items") return mockChain;
+        return mockSupabaseQuery();
+      });
+
+      const { result } = renderHook(() =>
+        useScopeManagement({
+          projectId: mockProjectId,
+          onRefresh: mockOnRefresh,
+        }),
+      );
+
+      const mockItem = {
+        id: "item-1",
+        quantity: 1,
+        finish_tier: "economy",
+        unit_cost_min: 85,
+        unit_cost_max: 170,
+      } as any;
+
+      act(() => {
+        result.current.startEdit(mockItem);
+        result.current.setEditQty("1");
+        result.current.setEditTier("mid");
+      });
+
+      await act(async () => {
+        await result.current.handleSave(mockItem);
+      });
+
+      expect(mockChain.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          finish_tier: "mid",
+          unit_cost_min: 100,
+          unit_cost_max: 200,
+        }),
+      );
+    });
   });
 
   describe("confirmDelete", () => {
+    it("does nothing when no delete target is set", async () => {
+      (supabase.from as any).mockClear();
+      const { result } = renderHook(() =>
+        useScopeManagement({
+          projectId: mockProjectId,
+          onRefresh: mockOnRefresh,
+        }),
+      );
+
+      await act(async () => {
+        await result.current.confirmDelete();
+      });
+
+      expect(supabase.from).not.toHaveBeenCalled();
+    });
+
     it("deletes item and refreshes project", async () => {
       const mockChain = mockSupabaseQuery();
       (supabase.from as any).mockReturnValue(mockChain);
@@ -193,6 +250,89 @@ describe("useScopeManagement", () => {
 
       expect(result.current.error).toBe("Delete failed");
       expect(toast.error).toHaveBeenCalledWith("Couldn't remove item");
+    });
+  });
+
+  describe("addItem", () => {
+    it("returns false when insert fails", async () => {
+      const insert = vi.fn().mockResolvedValue({ error: { message: "nope" } });
+      (supabase.from as any).mockImplementation((table: string) => {
+        if (table === "scope_items") {
+          return {
+            insert,
+            update: vi.fn().mockReturnThis(),
+            delete: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          };
+        }
+        return mockSupabaseQuery();
+      });
+
+      const { result } = renderHook(() =>
+        useScopeManagement({
+          projectId: mockProjectId,
+          onRefresh: mockOnRefresh,
+        }),
+      );
+
+      let ok = true;
+      await act(async () => {
+        ok = (await result.current.addItem({
+          category: "Roof",
+          description: "Tiles",
+          phase: "exterior",
+          cost: 25,
+        })) as boolean;
+      });
+
+      expect(ok).toBe(false);
+      expect(result.current.error).toBe("nope");
+    });
+
+    it("inserts scope row and refreshes on success", async () => {
+      const insert = vi.fn().mockResolvedValue({ error: null });
+      (supabase.from as any).mockImplementation((table: string) => {
+        if (table === "scope_items") {
+          return {
+            insert,
+            update: vi.fn().mockReturnThis(),
+            delete: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          };
+        }
+        return mockSupabaseQuery();
+      });
+
+      const { result } = renderHook(() =>
+        useScopeManagement({
+          projectId: mockProjectId,
+          onRefresh: mockOnRefresh,
+        }),
+      );
+
+      await act(async () => {
+        await result.current.addItem({
+          category: "Paint",
+          description: "",
+          phase: "interior",
+          cost: 40,
+          quantity: 3,
+          unit: "gallon",
+        });
+      });
+
+      expect(insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          project_id: mockProjectId,
+          category: "Paint",
+          description: "",
+          quantity: 3,
+          unit: "gallon",
+          finish_tier: "mid",
+        }),
+      );
+      expect(toast.success).toHaveBeenCalledWith("Item added to budget");
+      expect(mockOnRefresh).toHaveBeenCalled();
     });
   });
 });

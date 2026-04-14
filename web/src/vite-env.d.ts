@@ -9,6 +9,10 @@ interface ImportMetaEnv {
   readonly VITE_STRIPE_ARCHITECT_PRICE_ID?: string;
   /** Stripe Project Pass one-time price ID */
   readonly VITE_STRIPE_PROJECT_PASS_PRICE_ID?: string;
+  /** Sentry browser DSN (optional) */
+  readonly VITE_SENTRY_DSN?: string;
+  /** Set to "1" in E2E / automation to expose probe routes */
+  readonly VITE_E2E?: string;
 }
 
 interface ImportMeta {

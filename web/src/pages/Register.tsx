@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Helmet } from "react-helmet-async";
 import {
   Link,
@@ -30,11 +31,34 @@ import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
-import { useEffect } from "react";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 import { reportClientError } from "@/lib/sentry";
 
 type Mode = "password" | "magic";
+
+type RegisterFormValues = {
+  email: string;
+  password?: string;
+  zip: string;
+  acceptedPolicies: boolean;
+};
+
+const EMAIL_RULES = {
+  required: "Enter your email address.",
+  pattern: {
+    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: "Enter a valid email address.",
+  },
+} as const;
+
+const ZIP_RULES = {
+  required: "ZIP is required.",
+  setValueAs: (v: unknown) =>
+    String(v ?? "")
+      .replace(/\D/g, "")
+      .slice(0, 5),
+  validate: (v: string) => v.length === 5 || "Use a 5-digit ZIP code.",
+} as const;
 
 export default function Register() {
   const navigate = useNavigate();
@@ -46,15 +70,30 @@ export default function Register() {
       ? `/login?redirect=${encodeURIComponent(redirectParam)}`
       : "/login";
   const [mode, setMode] = useState<Mode>("password");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [zip, setZip] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
-  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const { user, loading: authLoading } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    resetField,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+      zip: "",
+      acceptedPolicies: false,
+    },
+    shouldUnregister: true,
+  });
+
+  const emailValue = watch("email");
+  const passwordValue = watch("password") ?? "";
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -63,19 +102,10 @@ export default function Register() {
     }
   }, [user, authLoading, navigate, searchParams]);
 
-  async function handlePasswordSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const onPasswordRegister = handleSubmit(async ({ email, password, zip }) => {
     setError(null);
-    if (!acceptedPolicies) {
-      setError("Agree to the Terms and Privacy Policy to create an account.");
-      return;
-    }
     if (!isSupabaseConfigured()) {
       setError("Sign-up isn't available right now. Please try again later.");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Use at least 8 characters for your password.");
       return;
     }
 
@@ -83,7 +113,7 @@ export default function Register() {
     try {
       const { data: auth, error: signErr } = await supabase.auth.signUp({
         email: email.trim(),
-        password,
+        password: password ?? "",
       });
       if (signErr) {
         setError(
@@ -101,7 +131,7 @@ export default function Register() {
       if (!session && auth.user) {
         const { data: signInData } = await supabase.auth.signInWithPassword({
           email: email.trim(),
-          password,
+          password: password ?? "",
         });
         session = signInData.session;
       }
@@ -165,19 +195,11 @@ export default function Register() {
     } finally {
       setLoading(false);
     }
-  }
+  });
 
-  async function sendMagicLink() {
+  const onMagicRegister = handleSubmit(async ({ email }) => {
     setError(null);
     setMagicSent(false);
-    if (!acceptedPolicies) {
-      setError("Agree to the Terms and Privacy Policy to continue.");
-      return;
-    }
-    if (!email.trim() || !zip.trim()) {
-      setError("Email and ZIP are required.");
-      return;
-    }
     if (!isSupabaseConfigured()) {
       setError("Sign-in isn't available right now. Please try again later.");
       return;
@@ -208,7 +230,21 @@ export default function Register() {
       return;
     }
     setMagicSent(true);
+  });
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setMagicSent(false);
+    if (next === "magic") {
+      resetField("password", { defaultValue: "" });
+    }
   }
+
+  const policyRegister = register("acceptedPolicies", {
+    validate: (v) =>
+      v === true || "Agree to the Terms and Privacy Policy to continue.",
+  });
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white">
@@ -243,40 +279,55 @@ export default function Register() {
             <input
               id="register-policies"
               type="checkbox"
-              checked={acceptedPolicies}
+              className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+              aria-invalid={errors.acceptedPolicies ? true : undefined}
+              aria-describedby={
+                errors.acceptedPolicies ? "register-policies-error" : undefined
+              }
+              {...policyRegister}
               onChange={(e) => {
-                setAcceptedPolicies(e.target.checked);
+                void policyRegister.onChange(e);
                 if (error?.includes("Agree to")) setError(null);
               }}
-              className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
             />
-            <label
-              htmlFor="register-policies"
-              className="text-sm font-medium text-slate-600 leading-snug cursor-pointer"
-            >
-              I agree to the{" "}
-              <Link
-                to="/terms"
-                className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
+            <div className="flex-1">
+              <label
+                htmlFor="register-policies"
+                className="text-sm font-medium text-slate-600 leading-snug cursor-pointer"
               >
-                Terms
-              </Link>{" "}
-              and{" "}
-              <Link
-                to="/privacy"
-                className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
-              >
-                Privacy Policy
-              </Link>
-              .
-            </label>
+                I agree to the{" "}
+                <Link
+                  to="/terms"
+                  className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
+                >
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link
+                  to="/privacy"
+                  className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </label>
+              {errors.acceptedPolicies ? (
+                <p
+                  id="register-policies-error"
+                  className="mt-1.5 text-xs text-rose-600"
+                  role="alert"
+                >
+                  {errors.acceptedPolicies.message}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <AuthSocialButtons
             onError={(msg) => setError(friendlyAuthError(msg))}
             googleLoading={googleLoading}
             setGoogleLoading={setGoogleLoading}
-            disabled={!acceptedPolicies}
+            disabled={!watch("acceptedPolicies")}
           />
 
           <div className="relative">
@@ -298,11 +349,7 @@ export default function Register() {
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
               }`}
-              onClick={() => {
-                setMode("password");
-                setError(null);
-                setMagicSent(false);
-              }}
+              onClick={() => switchMode("password")}
             >
               <Lock className="w-4 h-4" aria-hidden />
               Password
@@ -314,11 +361,7 @@ export default function Register() {
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
               }`}
-              onClick={() => {
-                setMode("magic");
-                setError(null);
-                setMagicSent(false);
-              }}
+              onClick={() => switchMode("magic")}
             >
               <Wand2 className="w-4 h-4" aria-hidden />
               Magic link
@@ -336,7 +379,11 @@ export default function Register() {
           )}
 
           {mode === "password" ? (
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <form
+              onSubmit={onPasswordRegister}
+              className="space-y-4"
+              noValidate
+            >
               <div className="space-y-2">
                 <label
                   className="text-sm font-bold text-slate-700 ml-1"
@@ -352,12 +399,11 @@ export default function Register() {
                   <Input
                     id="register-email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 pl-11 rounded-xl"
-                    required
                     autoComplete="email"
                     placeholder="you@example.com"
+                    className="h-12 pl-11 rounded-xl"
+                    error={errors.email?.message}
+                    {...register("email", EMAIL_RULES)}
                   />
                 </div>
               </div>
@@ -376,15 +422,20 @@ export default function Register() {
                   <Input
                     id="register-password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 pl-11 rounded-xl"
-                    required
                     autoComplete="new-password"
-                    placeholder="Min. 6 characters"
+                    placeholder="At least 8 characters"
+                    className="h-12 pl-11 rounded-xl"
+                    error={errors.password?.message}
+                    {...register("password", {
+                      required: "Enter a password.",
+                      minLength: {
+                        value: 8,
+                        message: "Use at least 8 characters for your password.",
+                      },
+                    })}
                   />
                 </div>
-                <PasswordStrengthMeter password={password} />
+                <PasswordStrengthMeter password={passwordValue} />
               </div>
 
               <div className="space-y-2">
@@ -403,13 +454,11 @@ export default function Register() {
                     id="register-zip"
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     maxLength={5}
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value.replace(/\D/g, ""))}
                     className="h-12 pl-11 rounded-xl"
-                    required
                     placeholder="For regional pricing"
+                    error={errors.zip?.message}
+                    {...register("zip", ZIP_RULES)}
                   />
                 </div>
               </div>
@@ -418,7 +467,7 @@ export default function Register() {
                 size="lg"
                 variant="primary"
                 className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
-                disabled={loading || !acceptedPolicies}
+                disabled={loading || !watch("acceptedPolicies")}
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
@@ -438,8 +487,10 @@ export default function Register() {
                   </p>
                   <p className="font-medium text-slate-600">
                     We sent a sign-in link to{" "}
-                    <strong className="text-slate-900">{email.trim()}</strong>.
-                    Open it on this device to create your account.
+                    <strong className="text-slate-900">
+                      {emailValue.trim()}
+                    </strong>
+                    . Open it on this device to create your account.
                   </p>
                   <button
                     type="button"
@@ -466,11 +517,11 @@ export default function Register() {
                       <Input
                         id="magic-email"
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 pl-11 rounded-xl"
                         autoComplete="email"
                         placeholder="you@example.com"
+                        className="h-12 pl-11 rounded-xl"
+                        error={errors.email?.message}
+                        {...register("email", EMAIL_RULES)}
                       />
                     </div>
                   </div>
@@ -490,15 +541,11 @@ export default function Register() {
                         id="magic-zip"
                         type="text"
                         inputMode="numeric"
-                        pattern="[0-9]*"
                         maxLength={5}
-                        value={zip}
-                        onChange={(e) =>
-                          setZip(e.target.value.replace(/\D/g, ""))
-                        }
                         className="h-12 pl-11 rounded-xl"
-                        required
                         placeholder="For regional pricing"
+                        error={errors.zip?.message}
+                        {...register("zip", ZIP_RULES)}
                       />
                     </div>
                   </div>
@@ -507,8 +554,8 @@ export default function Register() {
                     size="lg"
                     variant="primary"
                     className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
-                    disabled={loading || !acceptedPolicies}
-                    onClick={sendMagicLink}
+                    disabled={loading || !watch("acceptedPolicies")}
+                    onClick={() => void onMagicRegister()}
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" aria-hidden />

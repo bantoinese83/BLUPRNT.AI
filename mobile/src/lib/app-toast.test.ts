@@ -6,9 +6,11 @@ describe("app-toast", () => {
     const handler = vi.fn();
     registerAppToastHandler(handler);
     showAppToast("hello");
-    expect(handler).toHaveBeenCalledWith("hello");
+    expect(handler).toHaveBeenCalledWith("hello", undefined);
+    showAppToast("done", { type: "success" });
+    expect(handler).toHaveBeenCalledWith("done", { type: "success" });
     registerAppToastHandler(null);
     showAppToast("x");
-    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalledTimes(2);
   });
 });

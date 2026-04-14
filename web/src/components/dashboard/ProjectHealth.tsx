@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import { Highlighter } from "@/components/ui/Highlighter";
+import { VIZ_GRADIENT } from "@shared/constants/visualization";
 
 type ProjectHealthProps = {
   estimatedMin?: number | null;
@@ -22,12 +23,13 @@ function calculateHealthScore(
   stop2: string;
 } {
   if (min === 0 || invoiceTotal === 0) {
+    const g = VIZ_GRADIENT.healthAnalyzing;
     return {
       score: 0,
       status: "Analyzing",
       color: "from-slate-400 to-slate-500",
-      stop1: "#94a3b8",
-      stop2: "#64748b",
+      stop1: g.stop1,
+      stop2: g.stop2,
       message: "Processing your initial project data...",
     };
   }
@@ -37,44 +39,48 @@ function calculateHealthScore(
 
   if (budgetUtilization > 100) {
     const overPct = budgetUtilization - 100;
+    const g = VIZ_GRADIENT.healthOver;
     return {
       score: Math.max(0, Math.round(70 - overPct)),
       status: "Over Budget",
       color: "from-rose-500 to-orange-600",
-      stop1: "#f43f5e",
-      stop2: "#ea580c",
+      stop1: g.stop1,
+      stop2: g.stop2,
       message: "Careful! You've exceeded your lifecycle estimate.",
     };
   }
 
   if (budgetUtilization > 85) {
+    const g = VIZ_GRADIENT.healthAtLimit;
     return {
       score: 75,
       status: "At Limit",
       color: "from-amber-400 to-orange-500",
-      stop1: "#fbbf24",
-      stop2: "#f59e0b",
+      stop1: g.stop1,
+      stop2: g.stop2,
       message: "You're approaching the upper limit of your budget.",
     };
   }
 
   if (progressPct < 20) {
+    const g = VIZ_GRADIENT.healthExcellent;
     return {
       score: 95,
       status: "Excellent",
       color: "from-emerald-400 to-teal-500",
-      stop1: "#34d399",
-      stop2: "#14b8a6",
+      stop1: g.stop1,
+      stop2: g.stop2,
       message: "Starting strong! Your initial spending is well-aligned.",
     };
   }
 
+  const g = VIZ_GRADIENT.healthHealthy;
   return {
     score: 88,
     status: "Healthy",
     color: "from-teal-500 to-blue-600",
-    stop1: "#14b8a6",
-    stop2: "#2563eb",
+    stop1: g.stop1,
+    stop2: g.stop2,
     message: "Your project spending is pacing well against estimates.",
   };
 }
@@ -127,7 +133,7 @@ const CircleProgress = ({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-slate-100 dark:text-slate-800"
+          className="text-slate-200"
         />
 
         <motion.circle

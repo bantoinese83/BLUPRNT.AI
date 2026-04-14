@@ -17,10 +17,10 @@
     "build:mobile": "npm run build -w mobile",
     "preview": "npm run preview -w web",
     "clean": "npm run clean -w web",
-    "lint": "eslint web mobile shared --max-warnings 0 && npm run typecheck -w web && npm run typecheck -w mobile",
-    "typecheck": "npm run typecheck -w web && npm run typecheck -w mobile",
+    "lint": "eslint web mobile shared --max-warnings 0 && npm run typecheck -w shared && npm run typecheck -w web && npm run typecheck -w mobile && node scripts/check-design-token-parity.mjs",
+    "typecheck": "npm run typecheck -w shared && npm run typecheck -w web && npm run typecheck -w mobile",
     "test": "npm run test -w web",
-    "check": "npm run lint && npm run knip:check && npm run test:run && npm run build",
+    "check": "npm run lint && npm run knip:check && npm run test:coverage && npm run build",
     "quality": "npm run check",
     "test:all": "npm run check && npm run test:coverage && npm run test:e2e",
     "test:run": "npm run test:run -w web && npm run test:run -w mobile",
@@ -84,8 +84,5 @@
     "*.{json,css,md,html}": [
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "tslib": "^2.6.2"
   }
 }

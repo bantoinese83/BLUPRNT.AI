@@ -71,18 +71,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const loadSync = async () => {
       const dismiss = toast.loading("Resuming your mobile draft...");
       try {
-        const { data, error } = await supabase
-          .from("onboarding_sync")
-          .select("payload")
-          .eq("token", syncToken)
-          .single();
+        const { data: payloadJson, error } = await supabase.rpc(
+          "get_onboarding_sync_payload",
+          { p_token: syncToken },
+        );
 
-        if (error || !data) throw new Error("Link expired or invalid");
+        if (error || payloadJson == null) {
+          throw new Error("Link expired or invalid");
+        }
 
-        const payload = (data as Record<string, unknown>).payload as Record<
-          string,
-          unknown
-        >;
+        const payload = payloadJson as Record<string, unknown>;
         if (payload.projectType)
           setProjectType(payload.projectType as ProjectTypeOption);
         if (payload.location) setLocationInput(payload.location as string);

@@ -169,4 +169,160 @@ describe("useUserSettings", () => {
 
     expect(result.current.deleteMessage).toBe("nope");
   });
+
+  it("does not export when user is missing", async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: null },
+    } as never);
+
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.handleExportData();
+    });
+
+    expect(exportUserData).not.toHaveBeenCalled();
+  });
+
+  it("shows toast when profile save fails", async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      error: { message: "Profile blocked" },
+    } as never);
+
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.handleSaveProfile();
+    });
+
+    expect(toast.error).toHaveBeenCalled();
+    expect(toast.success).not.toHaveBeenCalledWith("Profile updated");
+  });
+
+  it("blocks password change when passwords differ", async () => {
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+
+    await act(() => {
+      result.current.setNewPassword("longpassword1");
+      result.current.setConfirmPassword("longpassword2");
+    });
+
+    await act(async () => {
+      await result.current.handleChangePassword();
+    });
+
+    expect(result.current.passwordMessage).toMatch(/do not match/i);
+    expect(supabase.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("shows toast when password update fails", async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      error: { message: "weak" },
+    } as never);
+
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+
+    await act(() => {
+      result.current.setNewPassword("longenough9");
+      result.current.setConfirmPassword("longenough9");
+    });
+
+    await act(async () => {
+      await result.current.handleChangePassword();
+    });
+
+    expect(toast.error).toHaveBeenCalled();
+  });
+
+  it("skips delete-account invoke when not confirmed", async () => {
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+    vi.mocked(supabase.functions.invoke).mockClear();
+
+    await act(async () => {
+      await result.current.handleDeleteAccount(false);
+    });
+
+    expect(supabase.functions.invoke).not.toHaveBeenCalled();
+  });
+
+  it("signs out and navigates after successful delete-account", async () => {
+    vi.mocked(supabase.functions.invoke).mockResolvedValue({
+      data: { success: true },
+      error: null,
+    } as never);
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      error: null,
+    } as never);
+
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.handleDeleteAccount(true);
+    });
+
+    expect(supabase.auth.signOut).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith("/", { replace: true });
+  });
+
+  it("marks architect and picks latest project for upgrades", async () => {
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
+      if (table === "user_subscriptions") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { status: "active" },
+            error: null,
+          }),
+        };
+      }
+      if (table === "properties") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockResolvedValue({
+            data: [{ id: "prop-1" }],
+            error: null,
+          }),
+        };
+      }
+      if (table === "projects") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue({
+            data: [{ id: "proj-latest" }],
+            error: null,
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        in: vi.fn().mockReturnThis(),
+      };
+    }) as never);
+
+    const { result } = renderHook(() => useUserSettings());
+
+    await waitFor(() => expect(result.current.userLoading).toBe(false));
+
+    expect(result.current.isArchitect).toBe(true);
+    expect(result.current.upgradeProjectId).toBe("proj-latest");
+  });
 });

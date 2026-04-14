@@ -7,6 +7,7 @@ import { ScopeHeader } from "./ScopeHeader";
 import { ScopeSummary } from "./ScopeSummary";
 import { ScopeItemRow } from "./ScopeItemRow";
 import { AddScopeItemModal } from "./AddScopeItemModal";
+import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 import type { ProjectRow, ScopeRow } from "@shared/types/database";
 
 const PHASE_ORDER = [
@@ -136,28 +137,29 @@ export function ScopeDetail({
         />
         <CardContent className="p-0">
           {scopeItems.length === 0 ? (
-            <div className="p-10 sm:p-14 flex flex-col items-center text-center max-w-md mx-auto">
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <ListTree className="w-7 h-7 text-slate-400" aria-hidden />
-              </div>
-              <h3 className="font-semibold text-slate-900 mb-2">
-                No line items yet
-              </h3>
-              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                <strong className="text-slate-800">Next step:</strong> Run the
-                estimate flow once to generate your kitchen, bath, or remodel
-                breakdown—or ask support if you expected data here.
-              </p>
-              <Button
-                type="button"
-                variant="primary"
-                className="gap-2 rounded-xl w-full sm:w-auto"
-                onClick={() => navigate("/onboarding")}
-              >
-                <Rocket className="w-4 h-4 shrink-0" aria-hidden />
-                Start or redo estimate
-              </Button>
-            </div>
+            <DashboardEmptyPanel
+              density="compact"
+              icon={ListTree}
+              title="No line items yet"
+              description={
+                <>
+                  <strong className="text-slate-800">Next step:</strong> Run the
+                  estimate flow once to generate your kitchen, bath, or remodel
+                  breakdown—or ask support if you expected data here.
+                </>
+              }
+              action={
+                <Button
+                  type="button"
+                  variant="primary"
+                  className="gap-2 rounded-xl w-full sm:w-auto"
+                  onClick={() => navigate("/onboarding")}
+                >
+                  <Rocket className="w-4 h-4 shrink-0" aria-hidden />
+                  Start or redo estimate
+                </Button>
+              }
+            />
           ) : (
             <div className="divide-y divide-slate-100">
               {sortedPhases.map(([phase, items]) => (

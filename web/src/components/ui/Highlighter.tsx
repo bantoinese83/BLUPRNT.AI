@@ -5,6 +5,7 @@ import type React from "react";
 import { useInView } from "motion/react";
 import { annotate } from "rough-notation";
 import { type RoughAnnotation } from "rough-notation/lib/model";
+import { ROUGH_NOTATION } from "@shared/constants/visualization";
 
 type AnnotationAction =
   | "highlight"
@@ -31,7 +32,7 @@ interface HighlighterProps {
 export function Highlighter({
   children,
   action = "highlight",
-  color = "#ffd1dc",
+  color = ROUGH_NOTATION.highlightRose,
   strokeWidth = 1.5,
   animationDuration = 600,
   iterations = 2,

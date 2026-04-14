@@ -4,7 +4,10 @@ import {
   canOpenURLMock,
   openURLMock,
 } from "@/test/react-native-mock";
-import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
+import {
+  fetchInvoiceOriginalSignedUrl,
+  openOriginalDocumentForInvoice,
+} from "@/lib/open-original-document";
 import { invokeFunction } from "@/lib/supabase";
 
 vi.mock("./supabase", () => ({
@@ -14,6 +17,37 @@ vi.mock("./supabase", () => ({
 vi.mock("@/lib/sentry", () => ({
   reportClientError: vi.fn(),
 }));
+
+describe("fetchInvoiceOriginalSignedUrl", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns ok when signed_url present", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://x.com/a.pdf", filename: "a.pdf" },
+      error: null,
+    });
+    const r = await fetchInvoiceOriginalSignedUrl("i1");
+    expect(r).toEqual({
+      ok: true,
+      signedUrl: "https://x.com/a.pdf",
+      filename: "a.pdf",
+    });
+  });
+
+  it("returns error when invoke fails", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: null,
+      error: new Error("x"),
+    });
+    const r = await fetchInvoiceOriginalSignedUrl("i1");
+    expect(r).toEqual({
+      ok: false,
+      message: "Check your connection and try again.",
+    });
+  });
+});
 
 describe("openOriginalDocumentForInvoice", () => {
   beforeEach(() => {

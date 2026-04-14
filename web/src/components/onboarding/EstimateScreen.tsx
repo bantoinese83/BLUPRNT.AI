@@ -22,6 +22,7 @@ import {
   DEFAULT_ESTIMATE_MIN,
 } from "@/lib/onboarding-helpers";
 import { formatCurrency } from "@/lib/i18n";
+import { ESTIMATE_CHART_COLORS } from "@shared/constants/visualization";
 
 function formatMoney(n: number) {
   return formatCurrency(n);
@@ -38,7 +39,7 @@ export function EstimateScreen() {
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#14b8a6", "#2dd4bf", "#0d9488"],
+        colors: [...ESTIMATE_CHART_COLORS],
       });
     }
   }, [estimate]);

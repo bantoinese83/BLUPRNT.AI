@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModalDialog } from "@/components/ui/modal-dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -108,294 +108,263 @@ export function UpgradeModal({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="upgrade-modal-title"
-          onKeyDown={(e) => {
-            if (e.key === "Escape") onClose();
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+    <ModalDialog
+      open={isOpen}
+      onClose={onClose}
+      titleId="upgrade-modal-title"
+      zClassName="z-50"
+      panelClassName="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors z-10"
+      >
+        <X className="w-4 h-4" />
+      </button>
+
+      <div
+        className={`p-6 sm:p-10 text-center space-y-4 border-b border-slate-100 ${showDiscount ? "bg-slate-50/50" : ""}`}
+      >
+        {checkoutError && (
+          <p
+            className="text-sm text-red-800 bg-red-50 border border-red-100 rounded-xl px-4 py-3 max-w-xl mx-auto text-left"
+            role="alert"
           >
-            <button
-              onClick={onClose}
-              aria-label="Close"
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors z-10"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            {checkoutError}
+          </p>
+        )}
+        {openReason === "invoice_limit" && (
+          <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
+            Only <strong>invoice</strong> uploads count toward this limit.
+            Quotes, warranties, and permits don&apos;t.
+          </p>
+        )}
+        {showDiscount && (
+          <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
+            Use promo code <strong>BLUEPRINT35</strong> on the Stripe checkout
+            page if you have one. List prices:{" "}
+            <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect,{" "}
+            <strong>${PRICING.projectPassUsdOneTime}</strong> Project Pass.
+          </p>
+        )}
 
-            <div
-              className={`p-6 sm:p-10 text-center space-y-4 border-b border-slate-100 ${showDiscount ? "bg-slate-50/50" : ""}`}
-            >
-              {checkoutError && (
-                <p
-                  className="text-sm text-red-800 bg-red-50 border border-red-100 rounded-xl px-4 py-3 max-w-xl mx-auto text-left"
-                  role="alert"
-                >
-                  {checkoutError}
-                </p>
-              )}
-              {openReason === "invoice_limit" && (
-                <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
-                  Only <strong>invoice</strong> uploads count toward this limit.
-                  Quotes, warranties, and permits don&apos;t.
-                </p>
-              )}
-              {showDiscount && (
-                <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
-                  Use promo code <strong>BLUEPRINT35</strong> on the Stripe
-                  checkout page if you have one. List prices:{" "}
-                  <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect,{" "}
-                  <strong>${PRICING.projectPassUsdOneTime}</strong> Project
-                  Pass.
-                </p>
-              )}
+        {openReason === "invoice_limit" && isArchitect && (
+          <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+            You&apos;ve used your{" "}
+            <strong>{ARCHITECT_INVOICE_LIMIT} invoice uploads</strong> for this
+            billing period. Your limit will reset when your subscription renews.{" "}
+            <span className="text-slate-600">
+              Quotes, warranties, and permits don&apos;t count toward this
+              limit.
+            </span>
+          </p>
+        )}
+        {openReason === "invoice_limit" && !isArchitect && !hasProjectPass && (
+          <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+            You&apos;ve used all{" "}
+            <strong>{FREE_INVOICE_LIMIT} free invoices</strong> on this project.
+            Upgrade to add more invoices anytime.{" "}
+            <span className="text-slate-600">
+              Quotes, warranties, and permits don&apos;t count toward that
+              limit—you can still upload those for free.
+            </span>
+          </p>
+        )}
+        {openReason === "export" && !isArchitect && !hasProjectPass && (
+          <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+            The full <strong>seller packet PDF</strong> (estimate scope, plan vs
+            documented spend, and recorded costs) is included with{" "}
+            <strong>Architect</strong> or a <strong>Project Pass</strong>. You
+            can still browse your project on the free plan.
+          </p>
+        )}
+        <h2
+          id="upgrade-modal-title"
+          className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"
+        >
+          Protect your {formatEstimate(mid)} investment
+        </h2>
+        <p className="text-slate-600 max-w-xl mx-auto text-base leading-relaxed">
+          {mid >= 50000 ? (
+            "Projects over $50k tend to run 10–20% over budget. Turn on advanced protections to stay on track."
+          ) : mid >= 15000 ? (
+            "Projects over $15k often run over budget. BLUPRNT.AI helps you stay on track for less than the cost of one takeout."
+          ) : (
+            <>
+              Renovations often run 10–20% over budget. That&apos;s{" "}
+              <span className="font-semibold text-slate-900">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  maximumFractionDigits: 0,
+                }).format(mid * 0.15)}
+                –
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  maximumFractionDigits: 0,
+                }).format(mid * 0.2)}
+              </span>{" "}
+              at risk. BLUPRNT.AI helps you stay on track for less than the cost
+              of one takeout.
+            </>
+          )}
+        </p>
+      </div>
 
-              {openReason === "invoice_limit" && isArchitect && (
-                <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-                  You&apos;ve used your{" "}
-                  <strong>{ARCHITECT_INVOICE_LIMIT} invoice uploads</strong> for
-                  this billing period. Your limit will reset when your
-                  subscription renews.{" "}
-                  <span className="text-slate-600">
-                    Quotes, warranties, and permits don&apos;t count toward this
-                    limit.
-                  </span>
-                </p>
-              )}
-              {openReason === "invoice_limit" &&
-                !isArchitect &&
-                !hasProjectPass && (
-                  <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-                    You&apos;ve used all{" "}
-                    <strong>{FREE_INVOICE_LIMIT} free invoices</strong> on this
-                    project. Upgrade to add more invoices anytime.{" "}
-                    <span className="text-slate-600">
-                      Quotes, warranties, and permits don&apos;t count toward
-                      that limit—you can still upload those for free.
-                    </span>
-                  </p>
-                )}
-              {openReason === "export" && !isArchitect && !hasProjectPass && (
-                <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-                  The full <strong>seller packet PDF</strong> (estimate scope,
-                  plan vs documented spend, and recorded costs) is included with{" "}
-                  <strong>Architect</strong> or a <strong>Project Pass</strong>.
-                  You can still browse your project on the free plan.
-                </p>
-              )}
-              <h2
-                id="upgrade-modal-title"
-                className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"
-              >
-                Protect your {formatEstimate(mid)} investment
-              </h2>
-              <p className="text-slate-600 max-w-xl mx-auto text-base leading-relaxed">
-                {mid >= 50000 ? (
-                  "Projects over $50k tend to run 10–20% over budget. Turn on advanced protections to stay on track."
-                ) : mid >= 15000 ? (
-                  "Projects over $15k often run over budget. BLUPRNT.AI helps you stay on track for less than the cost of one takeout."
-                ) : (
-                  <>
-                    Renovations often run 10–20% over budget. That&apos;s{" "}
-                    <span className="font-semibold text-slate-900">
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                        maximumFractionDigits: 0,
-                      }).format(mid * 0.15)}
-                      –
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                        maximumFractionDigits: 0,
-                      }).format(mid * 0.2)}
-                    </span>{" "}
-                    at risk. BLUPRNT.AI helps you stay on track for less than
-                    the cost of one takeout.
-                  </>
-                )}
-              </p>
-            </div>
+      <div className="p-6 sm:p-10 bg-slate-50 flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Door A */}
+          <Card className="border-slate-200 shadow-md shadow-slate-100/50 relative overflow-hidden flex flex-col">
+            <div className="absolute top-0 inset-x-0 h-1 bg-slate-900"></div>
 
-            <div className="p-6 sm:p-10 bg-slate-50 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Door A */}
-                <Card className="border-slate-200 shadow-md shadow-slate-100/50 relative overflow-hidden flex flex-col">
-                  <div className="absolute top-0 inset-x-0 h-1 bg-slate-900"></div>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                <ArchitectPlanIcon className="h-8 w-8" />
+                Architect
+              </CardTitle>
 
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                      <ArchitectPlanIcon className="h-8 w-8" />
-                      Architect
-                    </CardTitle>
-
-                    <div className="mt-2 flex items-baseline text-slate-900">
-                      <span className="text-4xl font-bold tracking-tight">
-                        ${PRICING.architectUsdPerMonth}
-                      </span>
-                      <span className="text-slate-500 ml-1">/mo</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4 flex-1">
-                    <ul className="space-y-3">
-                      {[
-                        "Expert AI Insights & Project Strategy",
-                        `Up to ${ARCHITECT_INVOICE_LIMIT} smart invoice uploads per billing period`,
-                        "Track up to 2 active projects",
-                        "Cloud-backed Seller Packet PDF",
-                      ].map((item, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start space-x-3 text-sm text-slate-700"
-                        >
-                          <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <div className="p-6 pt-0 mt-auto">
-                    <Button
-                      variant="primary"
-                      className="w-full premium-gradient"
-                      size="lg"
-                      disabled={
-                        loadingPlan !== null ||
-                        !ARCHITECT_PRICE_ID ||
-                        isArchitect
-                      }
-                      onClick={() => handleUpgrade("architect")}
-                    >
-                      {loadingPlan === "architect" ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Redirecting...
-                        </>
-                      ) : isArchitect ? (
-                        "Current Plan"
-                      ) : (
-                        "Start Architect plan"
-                      )}
-                    </Button>
-                  </div>
-                </Card>
-
-                {/* Door B */}
-                <Card className="border-slate-200 shadow-sm flex flex-col relative">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                      <ProjectPassIcon className="h-8 w-8" />
-                      Project Pass
-                    </CardTitle>
-                    <div className="mt-2 flex items-baseline text-slate-900">
-                      <span className="text-4xl font-bold tracking-tight">
-                        ${PRICING.projectPassUsdOneTime}
-                      </span>
-                      <span className="text-slate-500 ml-1">/project</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4 flex-1">
-                    <ul className="space-y-3">
-                      {[
-                        "6 months of Architect features",
-                        "Unlimited invoices (this project)",
-                        "No subscription – one-time payment",
-                        "Perfect for one big remodel",
-                      ].map((item, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start space-x-3 text-sm text-slate-700"
-                        >
-                          <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <div className="p-6 pt-0 mt-auto">
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      size="lg"
-                      disabled={
-                        loadingPlan !== null || !PASS_PRICE_ID || hasProjectPass
-                      }
-                      onClick={() => handleUpgrade("pass")}
-                    >
-                      {loadingPlan === "pass" ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Redirecting...
-                        </>
-                      ) : hasProjectPass ? (
-                        "Current Plan"
-                      ) : (
-                        "Get Project Pass"
-                      )}
-                    </Button>
-                  </div>
-                </Card>
+              <div className="mt-2 flex items-baseline text-slate-900">
+                <span className="text-4xl font-bold tracking-tight">
+                  ${PRICING.architectUsdPerMonth}
+                </span>
+                <span className="text-slate-500 ml-1">/mo</span>
               </div>
-
-              <div className="mt-8 text-center space-y-4">
-                <div className="inline-block px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
-                  <p className="text-xs font-bold text-slate-900">
-                    Which should I pick?
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    One big remodel?{" "}
-                    <span className="font-semibold text-slate-700">
-                      Project Pass
-                    </span>
-                    . Ongoing maintenance?{" "}
-                    <span className="font-semibold text-slate-700">
-                      Architect
-                    </span>
-                    .
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center gap-3 pt-2">
-                  <div className="flex items-center justify-center gap-1.5 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                      Secure payments via
-                    </span>
-                    <img
-                      src="/stripe-logo.svg"
-                      alt="Stripe"
-                      className="h-5 w-auto mb-0.5"
-                    />
-                  </div>
-
-                  <button
-                    className="text-sm text-slate-400 hover:text-slate-600 font-medium transition-colors"
-                    onClick={onClose}
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <ul className="space-y-3">
+                {[
+                  "Expert AI Insights & Project Strategy",
+                  `Up to ${ARCHITECT_INVOICE_LIMIT} smart invoice uploads per billing period`,
+                  "Track up to 2 active projects",
+                  "Cloud-backed Seller Packet PDF",
+                ].map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start space-x-3 text-sm text-slate-700"
                   >
-                    Maybe later
-                  </button>
-                </div>
-              </div>
+                    <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <div className="p-6 pt-0 mt-auto">
+              <Button
+                variant="primary"
+                className="w-full premium-gradient"
+                size="lg"
+                disabled={
+                  loadingPlan !== null || !ARCHITECT_PRICE_ID || isArchitect
+                }
+                onClick={() => handleUpgrade("architect")}
+              >
+                {loadingPlan === "architect" ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Redirecting...
+                  </>
+                ) : isArchitect ? (
+                  "Current Plan"
+                ) : (
+                  "Start Architect plan"
+                )}
+              </Button>
             </div>
-          </motion.div>
+          </Card>
+
+          {/* Door B */}
+          <Card className="border-slate-200 shadow-sm flex flex-col relative">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                <ProjectPassIcon className="h-8 w-8" />
+                Project Pass
+              </CardTitle>
+              <div className="mt-2 flex items-baseline text-slate-900">
+                <span className="text-4xl font-bold tracking-tight">
+                  ${PRICING.projectPassUsdOneTime}
+                </span>
+                <span className="text-slate-500 ml-1">/project</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <ul className="space-y-3">
+                {[
+                  "6 months of Architect features",
+                  "Unlimited invoices (this project)",
+                  "No subscription – one-time payment",
+                  "Perfect for one big remodel",
+                ].map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start space-x-3 text-sm text-slate-700"
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-slate-400 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <div className="p-6 pt-0 mt-auto">
+              <Button
+                className="w-full"
+                variant="outline"
+                size="lg"
+                disabled={
+                  loadingPlan !== null || !PASS_PRICE_ID || hasProjectPass
+                }
+                onClick={() => handleUpgrade("pass")}
+              >
+                {loadingPlan === "pass" ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Redirecting...
+                  </>
+                ) : hasProjectPass ? (
+                  "Current Plan"
+                ) : (
+                  "Get Project Pass"
+                )}
+              </Button>
+            </div>
+          </Card>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-8 text-center space-y-4">
+          <div className="inline-block px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <p className="text-xs font-bold text-slate-900">
+              Which should I pick?
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              One big remodel?{" "}
+              <span className="font-semibold text-slate-700">Project Pass</span>
+              . Ongoing maintenance?{" "}
+              <span className="font-semibold text-slate-700">Architect</span>.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 pt-2">
+            <div className="flex items-center justify-center gap-1.5 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                Secure payments via
+              </span>
+              <img
+                src="/stripe-logo.svg"
+                alt="Stripe"
+                className="h-5 w-auto mb-0.5"
+              />
+            </div>
+
+            <button
+              className="text-sm text-slate-400 hover:text-slate-600 font-medium transition-colors"
+              onClick={onClose}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalDialog>
   );
 }

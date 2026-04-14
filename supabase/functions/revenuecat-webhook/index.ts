@@ -3,7 +3,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const webhookSecret = Deno.env.get("REVENUECAT_WEBHOOK_SECRET") || "";
+const webhookSecret = (
+  Deno.env.get("REVENUECAT_WEBHOOK_SECRET") ||
+    Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN") ||
+    ""
+).trim();
+const allowInsecureWebhook =
+  Deno.env.get("REVENUECAT_ALLOW_INSECURE_WEBHOOK") === "1";
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -14,7 +20,14 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  */
 serve(async (req: Request) => {
   try {
-    if (webhookSecret) {
+    if (!webhookSecret) {
+      if (!allowInsecureWebhook) {
+        console.error(
+          "[RevenueCat] REVENUECAT_WEBHOOK_SECRET is required (or set REVENUECAT_ALLOW_INSECURE_WEBHOOK=1 for local only)",
+        );
+        return new Response("Webhook not configured", { status: 503 });
+      }
+    } else {
       const authHeader = req.headers.get("Authorization");
       if (authHeader !== `Bearer ${webhookSecret}`) {
         return new Response("Unauthorized", { status: 401 });

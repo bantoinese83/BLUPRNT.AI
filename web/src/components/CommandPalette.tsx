@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 import { useNavigate } from "react-router-dom";
 import { Command } from "cmdk";
@@ -21,9 +21,12 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 
 export function CommandPalette() {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  useFocusTrap(open, dialogRef);
   const [search, setSearch] = useState("");
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const navigate = useNavigate();
@@ -70,6 +73,7 @@ export function CommandPalette() {
     <AnimatePresence>
       {open && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4"
           role="dialog"
           aria-modal="true"

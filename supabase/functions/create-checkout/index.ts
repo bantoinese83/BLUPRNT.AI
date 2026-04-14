@@ -9,6 +9,30 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2023-10-16",
 });
 
+/** Price IDs permitted for Checkout (Edge secrets — not VITE_*). */
+function resolveAllowedPriceIds(): Set<string> {
+  const ids = new Set<string>();
+  for (const key of [
+    "STRIPE_ARCHITECT_PRICE_ID",
+    "STRIPE_PROJECT_PASS_PRICE_ID",
+  ] as const) {
+    const v = Deno.env.get(key)?.trim();
+    if (v) {
+      ids.add(v);
+    }
+  }
+  const extra = Deno.env.get("STRIPE_ALLOWED_PRICE_IDS")?.trim();
+  if (extra) {
+    for (const part of extra.split(",")) {
+      const t = part.trim();
+      if (t) {
+        ids.add(t);
+      }
+    }
+  }
+  return ids;
+}
+
 function getSafeOrigin(req: Request): string {
   const origin = req.headers.get("origin") ?? "";
   const allowed = Deno.env.get("ALLOWED_ORIGINS")?.trim();
@@ -56,6 +80,28 @@ Deno.serve(async (req: Request) => {
 
     if (!priceId) {
       return jsonResponse({ error: "Missing priceId" }, 400, req);
+    }
+
+    const allowedPrices = resolveAllowedPriceIds();
+    if (allowedPrices.size === 0) {
+      logEdge("error", "create-checkout missing price allowlist env", {});
+      return jsonResponse(
+        {
+          error: "Checkout is not configured. Please try again later.",
+        },
+        503,
+        req,
+      );
+    }
+    if (!allowedPrices.has(priceId)) {
+      return jsonResponse(
+        {
+          error:
+            "That plan isn't available right now. Please refresh and try again.",
+        },
+        400,
+        req,
+      );
     }
 
     const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY")?.trim();

@@ -12,6 +12,65 @@ import type {
 import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
 
+/** Shape written by `fetchMobileDashboardSnapshot` on successful load. */
+type CachedDashboardPayload = {
+  projects: ProjectRow[];
+  project: ProjectRow | null;
+  scopeItems: ScopeRow[];
+  invoices: InvoiceRow[];
+  spendByCategory: Record<string, number>;
+  isArchitect: boolean;
+  subscription: UserSubscriptionRow | null;
+  hasProjectPass: boolean;
+};
+
+function parseCachedDashboard(raw: string): CachedDashboardPayload | null {
+  try {
+    const o = JSON.parse(raw) as Partial<CachedDashboardPayload>;
+    if (!o || typeof o !== "object") return null;
+    return {
+      projects: Array.isArray(o.projects) ? o.projects : [],
+      project: o.project ?? null,
+      scopeItems: Array.isArray(o.scopeItems) ? o.scopeItems : [],
+      invoices: Array.isArray(o.invoices) ? o.invoices : [],
+      spendByCategory:
+        o.spendByCategory && typeof o.spendByCategory === "object"
+          ? o.spendByCategory
+          : {},
+      isArchitect: Boolean(o.isArchitect),
+      subscription: o.subscription ?? null,
+      hasProjectPass: Boolean(o.hasProjectPass),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function loadStaleDashboardFromCache(
+  cacheKey: string,
+): Promise<DashboardSnapshot | null> {
+  const raw = await AsyncStorage.getItem(cacheKey);
+  if (!raw) return null;
+  const c = parseCachedDashboard(raw);
+  if (!c) return null;
+  const lastProjectId =
+    c.project?.id ?? (await AsyncStorage.getItem("bluprnt_project_id")) ?? null;
+  return {
+    configured: true,
+    redirectToLogin: null,
+    loadError: null,
+    projects: c.projects,
+    project: c.project,
+    scopeItems: c.scopeItems,
+    invoices: c.invoices,
+    spendByCategory: c.spendByCategory,
+    isArchitect: c.isArchitect,
+    subscription: c.subscription,
+    hasProjectPass: c.hasProjectPass,
+    lastProjectId,
+  };
+}
+
 const emptySnapshot = (): DashboardSnapshot => ({
   configured: true,
   redirectToLogin: null,
@@ -63,6 +122,13 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
     .order("created_at", { ascending: false });
 
   if (projRes.error) {
+    const stale = await loadStaleDashboardFromCache(cacheKey);
+    if (stale) {
+      return {
+        ...stale,
+        loadError: friendlyDashboardLoadError(projRes.error),
+      };
+    }
     return {
       ...emptySnapshot(),
       loadError: friendlyDashboardLoadError(projRes.error),

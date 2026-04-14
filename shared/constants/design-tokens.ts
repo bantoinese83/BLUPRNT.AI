@@ -2,6 +2,7 @@
  * Canonical BLUPRNT design tokens (hex / rgba).
  *
  * - **Web:** Keep `web/src/index.css` `@theme` in sync when changing these values.
+ *   CI enforces overlap via `node scripts/check-design-token-parity.mjs` (see root `npm run lint`).
  * - **Mobile:** `mobile/src/constants/Theme.ts` builds from this module.
  *
  * Ink (`ink`) is body text — matches web `--color-slate-900` (gray-900, not default Tailwind slate-900).

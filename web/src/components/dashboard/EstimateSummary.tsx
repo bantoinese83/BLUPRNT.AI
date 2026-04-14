@@ -15,6 +15,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 
 import type { ProjectRow, ScopeRow } from "@shared/types/database";
 
@@ -172,34 +173,32 @@ export function EstimateSummary({
 
       <CardContent className="p-0 bg-white">
         {isEmpty ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center px-6">
-            <div className="w-20 h-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-6 shadow-sm">
-              <ListTree
-                className="w-10 h-10 text-slate-300"
-                strokeWidth={1.5}
-              />
-            </div>
-            <h4 className="text-xl font-bold text-slate-900 mb-2">
-              No line items yet
-            </h4>
-            <p className="text-slate-500 max-w-sm mb-8 leading-relaxed">
-              We&apos;re still gathering the full scope for your{" "}
-              <span className="font-semibold text-slate-700">
-                {project.name}
-              </span>
-              . Run the smart estimate to see detailed category costs.
-            </p>
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              className="gap-2.5 rounded-2xl px-8 shadow-lg shadow-slate-100"
-              onClick={() => navigate("/dashboard/scope")}
-            >
-              <ListTree className="w-5 h-5 shrink-0" aria-hidden />
-              Open project scope
-            </Button>
-          </div>
+          <DashboardEmptyPanel
+            density="comfortable"
+            icon={ListTree}
+            title="No line items yet"
+            description={
+              <>
+                We&apos;re still gathering the full scope for your{" "}
+                <span className="font-semibold text-slate-700">
+                  {project.name}
+                </span>
+                . Run the smart estimate to see detailed category costs.
+              </>
+            }
+            action={
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                className="gap-2.5 rounded-2xl px-8 shadow-lg shadow-slate-100"
+                onClick={() => navigate("/dashboard/scope")}
+              >
+                <ListTree className="w-5 h-5 shrink-0" aria-hidden />
+                Open project scope
+              </Button>
+            }
+          />
         ) : (
           <div className="divide-y divide-slate-100">
             {scopeItems.slice(0, 10).map((item) => {

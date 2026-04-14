@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Info } from "lucide-react";
 import { motion } from "motion/react";
+import { BLUPRNT_COLORS } from "@shared/constants/design-tokens";
 
 export function ResaleValueImpact({
   investment,
@@ -84,7 +85,7 @@ export function ResaleValueImpact({
                   y2="0%"
                 >
                   <stop offset="0%" stopColor="transparent" />
-                  <stop offset="100%" stopColor="#134e4a" />
+                  <stop offset="100%" stopColor={BLUPRNT_COLORS.primary} />
                 </linearGradient>
               </defs>
               <motion.path
@@ -105,7 +106,7 @@ export function ResaleValueImpact({
                 cx="300"
                 cy="10"
                 r="6"
-                fill="#134e4a"
+                fill={BLUPRNT_COLORS.primary}
                 className="drop-shadow-[0_0_8px_rgba(19,78,74,0.45)]"
               />
             </svg>

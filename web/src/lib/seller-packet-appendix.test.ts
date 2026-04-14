@@ -98,4 +98,130 @@ describe("buildSellerPacketAppendixItems", () => {
     ]);
     expect(items[0].kind).toBe("pdf_note");
   });
+
+  it("adds pdf_note when signed_url is missing", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { filename: "orphan.bin" },
+      error: null,
+    });
+    const items = await buildSellerPacketAppendixItems([
+      inv({ id: "1", document_id: "doc-1" }),
+    ]);
+    expect(items[0].kind).toBe("pdf_note");
+    expect(
+      (items[0] as { noteLines: string[] }).noteLines.some((l) =>
+        l.includes("View original"),
+      ),
+    ).toBe(true);
+  });
+
+  it("adds pdf_note when fetch throws", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://cdn.example.com/x.png", filename: "x.png" },
+      error: null,
+    });
+    vi.mocked(global.fetch).mockRejectedValue(new Error("network"));
+
+    const items = await buildSellerPacketAppendixItems([
+      inv({ id: "1", document_id: "doc-1" }),
+    ]);
+    expect(items[0].kind).toBe("pdf_note");
+  });
+
+  it("adds pdf_note when response is not ok", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://cdn.example.com/x.png", filename: "x.png" },
+      error: null,
+    });
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 500,
+      blob: async () => new Blob(),
+    } as Response);
+
+    const items = await buildSellerPacketAppendixItems([
+      inv({ id: "1", document_id: "doc-1" }),
+    ]);
+    expect(items[0].kind).toBe("pdf_note");
+  });
+
+  it("rejects oversized blobs with a friendly note", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: {
+        signed_url: "https://cdn.example.com/big.png",
+        filename: "big.png",
+      },
+      error: null,
+    });
+    const huge = new Uint8Array(3_000_000);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      blob: async () => new Blob([huge], { type: "image/png" }),
+    } as Response);
+
+    const items = await buildSellerPacketAppendixItems([
+      inv({ id: "1", document_id: "doc-1" }),
+    ]);
+    expect(items[0].kind).toBe("pdf_note");
+    expect((items[0] as { noteLines: string[] }).noteLines[0]).toMatch(
+      /too large/i,
+    );
+  });
+
+  it("embeds png and webp images", async () => {
+    for (const [mime, fmt] of [
+      ["image/png", "PNG"],
+      ["image/webp", "WEBP"],
+    ] as const) {
+      vi.mocked(invokeFunction).mockResolvedValue({
+        data: {
+          signed_url: `https://cdn.example.com/a.${fmt.toLowerCase()}`,
+          filename: `a.${fmt.toLowerCase()}`,
+        },
+        error: null,
+      });
+      const blob = new Blob([new Uint8Array(50)], { type: mime });
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        blob: async () => blob,
+      } as Response);
+
+      const items = await buildSellerPacketAppendixItems([
+        inv({ id: "1", document_id: "doc-1" }),
+      ]);
+      expect(items[0].kind).toBe("image");
+      expect((items[0] as { imageFormat: string }).imageFormat).toBe(fmt);
+    }
+  });
+
+  it("uses pdf_note for unsupported image types", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://cdn.example.com/a.gif", filename: "a.gif" },
+      error: null,
+    });
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      blob: async () => new Blob([new Uint8Array(20)], { type: "image/gif" }),
+    } as Response);
+
+    const items = await buildSellerPacketAppendixItems([
+      inv({ id: "1", document_id: "doc-1" }),
+    ]);
+    expect(items[0].kind).toBe("pdf_note");
+  });
+
+  it("uses neutral title when vendor name is blank", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: null,
+      error: new Error("x"),
+    });
+    const items = await buildSellerPacketAppendixItems([
+      inv({
+        id: "1",
+        document_id: "doc-1",
+        vendor_name: "   ",
+      }),
+    ]);
+    expect((items[0] as { title: string }).title).toContain("Document");
+  });
 });

@@ -10,6 +10,7 @@ import { Loader2, FileText, Upload } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 
 type InvoicesSectionProps = {
@@ -215,29 +216,32 @@ export function InvoicesSection({
           )}
 
           {invoices.length === 0 && !uploading && (
-            <div className="sm:col-span-2 flex flex-col items-center justify-center p-10 rounded-2xl border-2 border-dashed border-slate-200 bg-white/60 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <FileText className="w-7 h-7 text-slate-400" />
-              </div>
-              <h4 className="font-semibold text-slate-700 mb-1">
-                No documents yet
-              </h4>
-              <p className="text-sm text-slate-500 mb-5 max-w-sm">
-                <strong className="text-slate-700">Next step:</strong> Upload an
-                invoice or quote. After upload, we&apos;ll open it so you can
-                line items up with your estimate.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openFileUpload}
-                disabled={uploading || atLimit}
-                type="button"
-                className="gap-2 rounded-xl"
-              >
-                <Upload className="w-4 h-4" />
-                Upload your first document
-              </Button>
+            <div className="sm:col-span-2 rounded-2xl border-2 border-dashed border-slate-200 bg-white/60">
+              <DashboardEmptyPanel
+                density="compact"
+                icon={FileText}
+                title="No documents yet"
+                description={
+                  <>
+                    <strong className="text-slate-700">Next step:</strong>{" "}
+                    Upload an invoice or quote. After upload, we&apos;ll open it
+                    so you can line items up with your estimate.
+                  </>
+                }
+                action={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={openFileUpload}
+                    disabled={uploading || atLimit}
+                    type="button"
+                    className="gap-2 rounded-xl"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload your first document
+                  </Button>
+                }
+              />
             </div>
           )}
 

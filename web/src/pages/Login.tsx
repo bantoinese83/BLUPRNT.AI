@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Helmet } from "react-helmet-async";
 import {
   Link,
@@ -25,24 +26,45 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect } from "react";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 type Mode = "password" | "magic";
+
+type LoginFormValues = {
+  email: string;
+  password?: string;
+};
+
+const EMAIL_RULES = {
+  required: "Enter your email address.",
+  pattern: {
+    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: "Enter a valid email address.",
+  },
+} as const;
 
 export default function Login() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<Mode>("password");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  const [magicRecipientEmail, setMagicRecipientEmail] = useState("");
   const { user, loading: authLoading } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    resetField,
+  } = useForm<LoginFormValues>({
+    defaultValues: { email: "", password: "" },
+    shouldUnregister: true,
+  });
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -67,8 +89,7 @@ export default function Login() {
       ? `/register?redirect=${encodeURIComponent(redirectParam)}`
       : "/register";
 
-  async function handlePasswordSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const onPasswordLogin = handleSubmit(async ({ email, password }) => {
     setError(null);
     if (!isSupabaseConfigured()) {
       setError("Sign-in isn't available right now. Please try again later.");
@@ -77,7 +98,7 @@ export default function Login() {
     setLoading(true);
     const { error: err } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      password,
+      password: password ?? "",
     });
     setLoading(false);
     if (err) {
@@ -91,15 +112,11 @@ export default function Login() {
     }
     const redirectTo = resolvePostLoginHref(searchParams.get("redirect"));
     navigate(redirectTo, { replace: true });
-  }
+  });
 
-  async function sendMagicLink() {
+  const onMagicRequest = handleSubmit(async ({ email }) => {
     setError(null);
     setMagicSent(false);
-    if (!email.trim()) {
-      setError("Enter your email address.");
-      return;
-    }
     if (!isSupabaseConfigured()) {
       setError("Sign-in isn't available right now. Please try again later.");
       return;
@@ -130,7 +147,18 @@ export default function Login() {
       );
       return;
     }
+    setMagicRecipientEmail(email.trim());
     setMagicSent(true);
+  });
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setMagicSent(false);
+    setMagicRecipientEmail("");
+    if (next === "magic") {
+      resetField("password", { defaultValue: "" });
+    }
   }
 
   return (
@@ -187,11 +215,7 @@ export default function Login() {
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
               }`}
-              onClick={() => {
-                setMode("password");
-                setError(null);
-                setMagicSent(false);
-              }}
+              onClick={() => switchMode("password")}
             >
               <Lock className="w-4 h-4" aria-hidden />
               Password
@@ -203,11 +227,7 @@ export default function Login() {
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
               }`}
-              onClick={() => {
-                setMode("magic");
-                setError(null);
-                setMagicSent(false);
-              }}
+              onClick={() => switchMode("magic")}
             >
               <Wand2 className="w-4 h-4" aria-hidden />
               Magic link
@@ -225,7 +245,7 @@ export default function Login() {
           )}
 
           {mode === "password" ? (
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <form onSubmit={onPasswordLogin} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <label
                   className="text-sm font-bold text-slate-700 ml-1"
@@ -241,11 +261,10 @@ export default function Login() {
                   <Input
                     id="login-email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 pl-11 rounded-xl"
-                    required
                     autoComplete="email"
+                    className="h-12 pl-11 rounded-xl"
+                    error={errors.email?.message}
+                    {...register("email", EMAIL_RULES)}
                   />
                 </div>
               </div>
@@ -276,11 +295,12 @@ export default function Login() {
                   <Input
                     id="login-password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 pl-11 rounded-xl"
-                    required
                     autoComplete="current-password"
+                    className="h-12 pl-11 rounded-xl"
+                    error={errors.password?.message}
+                    {...register("password", {
+                      required: "Enter your password.",
+                    })}
                   />
                 </div>
               </div>
@@ -310,13 +330,18 @@ export default function Login() {
                   </p>
                   <p className="font-medium text-slate-600">
                     We sent a sign-in link to{" "}
-                    <strong className="text-slate-900">{email.trim()}</strong>.
-                    Open it on this device to continue.
+                    <strong className="text-slate-900">
+                      {magicRecipientEmail}
+                    </strong>
+                    . Open it on this device to continue.
                   </p>
                   <button
                     type="button"
                     className="text-teal-600 font-bold hover:text-teal-500 text-sm transition-colors"
-                    onClick={() => setMagicSent(false)}
+                    onClick={() => {
+                      setMagicSent(false);
+                      setMagicRecipientEmail("");
+                    }}
                   >
                     ← Use a different email
                   </button>
@@ -338,11 +363,11 @@ export default function Login() {
                       <Input
                         id="magic-email"
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 pl-11 rounded-xl"
                         autoComplete="email"
                         placeholder="you@example.com"
+                        className="h-12 pl-11 rounded-xl"
+                        error={errors.email?.message}
+                        {...register("email", EMAIL_RULES)}
                       />
                     </div>
                     <p className="text-[11px] text-slate-400 font-medium px-1">
@@ -362,7 +387,7 @@ export default function Login() {
                     variant="primary"
                     className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
                     disabled={loading}
-                    onClick={sendMagicLink}
+                    onClick={() => void onMagicRequest()}
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" aria-hidden />

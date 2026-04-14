@@ -28,7 +28,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { supabase, invokeFunction } from "@/lib/supabase";
-import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
+import { OriginalUploadPreviewModal } from "@/components/OriginalUploadPreviewModal";
 import { money } from "@shared/lib/formatters";
 import type { InvoiceRow } from "@/types/database";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
@@ -98,6 +98,7 @@ export function InvoiceReviewSheet({
   const [scopePickerLineId, setScopePickerLineId] = useState<string | null>(
     null,
   );
+  const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
 
   const resetDetailState = useCallback(() => {
     setLoadError(null);
@@ -106,6 +107,7 @@ export function InvoiceReviewSheet({
     setScopeItems([]);
     setMappings({});
     setScopePickerLineId(null);
+    setOriginalPreviewOpen(false);
   }, []);
 
   useEffect(() => {
@@ -148,6 +150,7 @@ export function InvoiceReviewSheet({
           reportClientError("invoice_review_scope_list", scopeErr);
           showAppToast(
             "Budget list didn’t load — line links may be incomplete. Try again shortly.",
+            { type: "warning" },
           );
           setScopeItems([]);
         } else {
@@ -244,7 +247,7 @@ export function InvoiceReviewSheet({
         if (lineErr) throw lineErr;
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      showAppToast("Line links saved.");
+      showAppToast("Line links saved.", { type: "success" });
       onSaved?.();
       onClose();
     } catch {
@@ -352,7 +355,7 @@ export function InvoiceReviewSheet({
                     style={styles.viewOriginalBtn}
                     onPress={() => {
                       Haptics.selectionAsync();
-                      void openOriginalDocumentForInvoice(invoice.id);
+                      setOriginalPreviewOpen(true);
                     }}
                   >
                     <ExternalLink size={18} color="#2dd4bf" />
@@ -508,6 +511,14 @@ export function InvoiceReviewSheet({
           </View>
         </View>
       </Modal>
+
+      {originalPreviewOpen && invoice ? (
+        <OriginalUploadPreviewModal
+          key={invoice.id}
+          invoiceId={invoice.id}
+          onClose={() => setOriginalPreviewOpen(false)}
+        />
+      ) : null}
     </>
   );
 }

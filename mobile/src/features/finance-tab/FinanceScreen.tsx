@@ -15,7 +15,7 @@ import { Theme } from "@/constants/Theme";
 import { ConfigurationRequired } from "@/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 import { FinanceTabSkeleton } from "@/components/TabLoadingSkeletons";
-import { openOriginalDocumentForInvoice } from "@/lib/open-original-document";
+import { OriginalUploadPreviewModal } from "@/components/OriginalUploadPreviewModal";
 import { isFreeTierInvoiceLimitReached } from "@/lib/invoice-upload-gate";
 import {
   DOCUMENT_CAPTURE_LEDGER_COPY,
@@ -65,6 +65,9 @@ export default function FinanceScreen() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [includeAppendix, setIncludeAppendix] = useState(false);
+  const [originalPreviewInvoiceId, setOriginalPreviewInvoiceId] = useState<
+    string | null
+  >(null);
 
   const stats = useMemo(() => computeLedgerStats(invoices), [invoices]);
 
@@ -274,7 +277,7 @@ export default function FinanceScreen() {
               setIsReviewOpen(true);
               Haptics.selectionAsync();
             }}
-            onViewOriginal={() => void openOriginalDocumentForInvoice(inv.id)}
+            onViewOriginal={() => setOriginalPreviewInvoiceId(inv.id)}
           />
         )}
       />
@@ -300,6 +303,14 @@ export default function FinanceScreen() {
           void load();
         }}
       />
+
+      {originalPreviewInvoiceId ? (
+        <OriginalUploadPreviewModal
+          key={originalPreviewInvoiceId}
+          invoiceId={originalPreviewInvoiceId}
+          onClose={() => setOriginalPreviewInvoiceId(null)}
+        />
+      ) : null}
     </ScreenWrapper>
   );
 }

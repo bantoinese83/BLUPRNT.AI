@@ -205,12 +205,6 @@
   .bluprnt-snurra-stop-b {
     stop-color: #134e4a;
   }
-  .dark .bluprnt-snurra-stop-a {
-    stop-color: #5eead4;
-  }
-  .dark .bluprnt-snurra-stop-b {
-    stop-color: #0f766e;
-  }
 
   .bluprnt-snurra-halvan {
     animation: bluprnt-snurra-spin 10s linear infinite;

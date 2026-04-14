@@ -77,3 +77,9 @@ export const marketingLeadSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(320),
   source: z.string().trim().min(1).max(64),
 });
+
+/** AI chat: bounded prompt + project scope. */
+export const chatWithProjectSchema = z.object({
+  projectId: uuidSchema,
+  query: z.string().trim().min(1).max(8000),
+});

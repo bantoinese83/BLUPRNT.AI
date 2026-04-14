@@ -4,6 +4,7 @@ import { getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 import { getServiceClient } from "../_shared/auth.ts";
+import { sanitizeUserEmailHtml } from "../_shared/sanitize-email-html.ts";
 
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
 
@@ -87,8 +88,9 @@ Deno.serve(async (req: Request) => {
       typeof body?.subject === "string"
         ? body.subject.slice(0, MAX_SUBJECT_LEN)
         : "";
-    const html =
+    const rawHtml =
       typeof body?.html === "string" ? body.html.slice(0, MAX_HTML_LEN) : "";
+    const html = rawHtml ? sanitizeUserEmailHtml(rawHtml) : "";
 
     if (!subject || !html) {
       return jsonResponse(

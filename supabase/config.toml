@@ -1,37 +1,37 @@
 # Local Supabase (optional). Deploy functions with:
 # npx supabase functions deploy <name> --project-ref YOUR_REF
 #
-# JWT verification: enabled for user-invoked functions; disabled for webhooks,
-# public token endpoints, and submit-marketing-lead (anon).
+# JWT verification at gateway: off for user functions that validate the bearer in Deno;
+# off for webhooks and public/anon endpoints. See README Edge Functions table.
 
-# Multipart + RN/Expo clients: gateway JWT verify often 401s even with a valid session.
-# Auth is enforced in-handler when `project_id` is present (assertProjectOwner).
+# Gateway JWT verify often returns 401 "Invalid JWT" for valid ES256 session tokens
+# (browser + supabase-js). Auth is enforced in-handler via getUserIdFromRequest + RLS patterns.
 [functions.photo-to-scope]
 verify_jwt = false
 
 [functions.upload-invoice]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-invoice]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-document-signed-url]
-verify_jwt = true
+verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
 
 [functions.create-checkout]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-project-view]
 verify_jwt = false
 
 [functions.delete-account]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-email]
-verify_jwt = true
+verify_jwt = false
 
 [functions.revenuecat-webhook]
 enabled = true
@@ -40,7 +40,7 @@ import_map = "./functions/revenuecat-webhook/deno.json"
 entrypoint = "./functions/revenuecat-webhook/index.ts"
 
 [functions.chat-with-project]
-verify_jwt = true
+verify_jwt = false
 
 [functions.submit-marketing-lead]
 verify_jwt = false

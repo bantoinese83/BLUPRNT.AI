@@ -1,2 +1,2 @@
 npx lint-staged
-npm run test:run
+node scripts/pre-commit-tests.mjs

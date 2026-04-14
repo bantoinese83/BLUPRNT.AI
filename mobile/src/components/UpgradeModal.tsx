@@ -57,7 +57,7 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
       desc: "Photo your invoices and quotes; we read the amounts (limits vary by plan).",
     },
     {
-      icon: <FileDown size={20} color="#4F46E5" />,
+      icon: <FileDown size={20} color={Theme.colors.status.info} />,
       title: "Listing-ready PDF",
       desc: "Download a polished packet for agents, buyers, or your own records.",
     },

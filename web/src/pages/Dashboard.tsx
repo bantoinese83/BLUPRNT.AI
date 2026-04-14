@@ -40,6 +40,7 @@ import type {
   InvoiceRow,
   UserSubscriptionRow,
 } from "@shared/types/database";
+import { CONFETTI_PALETTES } from "@shared/constants/visualization";
 
 import { motion, AnimatePresence } from "motion/react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
@@ -336,7 +337,7 @@ function DashboardContent({
         particleCount: 200,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#14b8a6", "#020617", "#94a3b8"],
+        colors: [...CONFETTI_PALETTES.brandMuted],
       });
     }
   }, [location.search]);
@@ -355,7 +356,7 @@ function DashboardContent({
           particleCount: 200,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ["#14b8a6", "#020617", "#94a3b8"],
+          colors: [...CONFETTI_PALETTES.brandMuted],
         });
         setTimeout(() => setHasCelebrated(true), 100);
       }
@@ -366,7 +367,7 @@ function DashboardContent({
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#10b981", "#ffffff", "#020617"],
+        colors: [...CONFETTI_PALETTES.firstDocument],
       });
       setTimeout(() => setHasCelebratedFirst(true), 100);
     }

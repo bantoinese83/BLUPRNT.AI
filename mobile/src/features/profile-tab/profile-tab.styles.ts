@@ -179,6 +179,14 @@ export const profileTabStyles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     marginTop: 2,
   },
+  analyticsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: Theme.colors.divider,
+    gap: 12,
+  },
   dangerZone: {
     marginTop: 10,
     gap: 12,

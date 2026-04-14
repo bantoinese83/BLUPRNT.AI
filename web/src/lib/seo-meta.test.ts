@@ -21,6 +21,18 @@ describe("seoCanonicalOrigin", () => {
     vi.stubGlobal("window", { location: { origin: "http://localhost:4173" } });
     expect(seoCanonicalOrigin()).toBe("http://localhost:4173");
   });
+
+  it("uses static fallback when env is empty and window is unavailable", () => {
+    vi.stubEnv("VITE_SITE_URL", "");
+    const prev = globalThis.window;
+    try {
+      // @ts-expect-error — prerender / non-DOM environments
+      delete globalThis.window;
+      expect(seoCanonicalOrigin()).toBe("https://bluprntai.com");
+    } finally {
+      globalThis.window = prev;
+    }
+  });
 });
 
 describe("seoAbsoluteUrl", () => {
