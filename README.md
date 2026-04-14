@@ -280,7 +280,25 @@ Shared client: `supabase/functions/_shared/gemini.ts` (`callGemini`).
 
 ## Database
 
-Core tables include: `properties`, `projects`, `scope_items`, `documents`, `invoices`, `invoice_line_items`, `project_view_tokens`, `seller_packets`, `user_preferences`, plus Storage bucket `project-documents`. Apply migrations in lexicographic (timestamp) order from [`supabase/migrations/`](supabase/migrations/).
+Core tables include: `properties`, `projects`, `scope_items`, `documents`, `invoices`, `invoice_line_items`, `project_view_tokens`, `seller_packets`, `user_preferences`, plus Storage bucket `project-documents`.
+
+**Migrations** live in [`supabase/migrations/`](supabase/migrations/) as a **single consolidated file** (`20260420100000_consolidated_schema.sql`) that replaces the previous incremental chain. New environments apply it with `supabase db reset` (local) or `supabase db push` (empty project).
+
+**Already-deployed Supabase projects** that recorded the old migration versions must **not** run that SQL again. After pulling this repo, align history once:
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase migration repair --linked --status reverted \
+  20260318000000 20260318100000 20260318110000 20260318120000 \
+  20260324100000 20260324110000 20260402120000 20260402130000 \
+  20260402140000 20260402150000 20260402160000 20260406134430 \
+  20260406194620 20260407150000 20260408210000 20260409120000 \
+  20260410000000 20260410010000 20260412132118 20260412150000 \
+  20260415160000 20260416103000
+supabase migration repair --linked --status applied 20260420100000
+```
+
+That marks the old rows removed and the consolidated migration as applied without re-executing DDL. Use the Dashboard SQL editor backup/export first if you are unsure.
 
 **Generate TypeScript types** after schema changes (output is committed as **`shared/types/supabase.gen.ts`**; the generator script path is defined in [`scripts/gen-db-types.sh`](scripts/gen-db-types.sh); requires `SUPABASE_ACCESS_TOKEN` and uses `SUPABASE_PROJECT_ID` if set):
 
