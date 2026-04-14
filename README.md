@@ -282,7 +282,12 @@ Shared client: `supabase/functions/_shared/gemini.ts` (`callGemini`).
 
 Core tables include: `properties`, `projects`, `scope_items`, `documents`, `invoices`, `invoice_line_items`, `project_view_tokens`, `seller_packets`, `user_preferences`, plus Storage bucket `project-documents`.
 
-**Migrations** live in [`supabase/migrations/`](supabase/migrations/) as a **single consolidated file** (`20260420100000_consolidated_schema.sql`) that replaces the previous incremental chain. New environments apply it with `supabase db reset` (local) or `supabase db push` (empty project).
+**Migrations** in [`supabase/migrations/`](supabase/migrations/) run in timestamp order:
+
+1. **`20260420000000_base_schema.sql`** — core tables: `properties`, `projects`, `scope_items`, `documents`, `invoices`, `invoice_line_items`.
+2. **`20260420100000_consolidated_schema.sql`** — RLS policies, subscriptions, storage buckets, triggers, and all other app schema.
+
+New environments: `supabase db reset` (local) or `supabase db push` (empty project).
 
 **Already-deployed Supabase projects** that recorded the old migration versions must **not** run that SQL again. After pulling this repo, align history once:
 
@@ -295,10 +300,10 @@ supabase migration repair --linked --status reverted \
   20260406194620 20260407150000 20260408210000 20260409120000 \
   20260410000000 20260410010000 20260412132118 20260412150000 \
   20260415160000 20260416103000
-supabase migration repair --linked --status applied 20260420100000
+supabase migration repair --linked --status applied 20260420000000 20260420100000
 ```
 
-That marks the old rows removed and the consolidated migration as applied without re-executing DDL. Use the Dashboard SQL editor backup/export first if you are unsure.
+That marks the old rows removed and **both** current migrations as applied without re-executing DDL (use only when the database already matches this repo). If you earlier repaired with only `20260420100000` applied, run **`supabase db push`** once after pulling: `20260420000000` is idempotent when core tables already exist. Use the Dashboard SQL editor backup/export first if you are unsure.
 
 **Generate TypeScript types** after schema changes (output is committed as **`shared/types/supabase.gen.ts`**; the generator script path is defined in [`scripts/gen-db-types.sh`](scripts/gen-db-types.sh); requires `SUPABASE_ACCESS_TOKEN` and uses `SUPABASE_PROJECT_ID` if set):
 

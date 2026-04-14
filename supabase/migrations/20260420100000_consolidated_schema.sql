@@ -14,7 +14,7 @@
  *     20260415160000 20260416103000
  *   supabase migration repair --linked --status applied 20260420100000
  *
- * Fresh local DBs: `supabase db reset` applies this file only.
+ * Fresh local DBs: `supabase db reset` runs `20260420000000_base_schema.sql` first, then this file.
  */
 
 -- =============================================================================
@@ -196,8 +196,11 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 CREATE TABLE IF NOT EXISTS user_preferences (
   user_id   UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   last_active_project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  push_token text,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.user_preferences ADD COLUMN IF NOT EXISTS push_token text;
 
 ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
 

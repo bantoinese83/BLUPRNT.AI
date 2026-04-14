@@ -57,7 +57,7 @@ export async function registerForPushNotificationsAsync(userId: string) {
     }
 
     // Sync token to user_preferences table
-    // Migration 20260402130000_user_preferences.sql should have a push_token column
+    // user_preferences.push_token (see supabase/migrations consolidated schema)
     const { error } = await supabase.from("user_preferences").upsert(
       {
         user_id: userId,
