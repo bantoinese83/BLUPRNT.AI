@@ -1,5 +1,9 @@
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/supabase";
+import {
+  invoiceOriginalMessages,
+  messageForInvoiceOriginalApiError,
+} from "@shared/lib/invoice-original-messages";
 
 type SignedUrlResponse = {
   signed_url?: string;
@@ -22,8 +26,7 @@ export async function fetchInvoiceOriginalSignedUrl(
   if (error) {
     return {
       ok: false,
-      message:
-        "We couldn’t open the original file. Check your connection and try again.",
+      message: invoiceOriginalMessages.network,
     };
   }
 
@@ -31,15 +34,13 @@ export async function fetchInvoiceOriginalSignedUrl(
   if (body?.error) {
     return {
       ok: false,
-      message: body.error.includes("No original")
-        ? "There’s no saved file for this record."
-        : "We couldn’t open the original file.",
+      message: messageForInvoiceOriginalApiError(body.error),
     };
   }
 
   const url = body?.signed_url;
   if (!url) {
-    return { ok: false, message: "We couldn’t open the original file." };
+    return { ok: false, message: invoiceOriginalMessages.generic };
   }
 
   return { ok: true, signedUrl: url, filename: body.filename };
@@ -56,9 +57,7 @@ export async function openOriginalDocumentForInvoice(
 
   const win = window.open(result.signedUrl, "_blank", "noopener,noreferrer");
   if (!win) {
-    toast.error(
-      "We opened the link, but your browser blocked the new tab. Allow pop-ups for this site or copy the link from your browser settings.",
-    );
+    toast.error(invoiceOriginalMessages.popupBlocked);
     return false;
   }
   return true;

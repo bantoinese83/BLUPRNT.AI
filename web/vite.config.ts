@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import fs from "node:fs";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -9,6 +10,11 @@ export default defineConfig(({ mode }) => {
   const rootDir = path.resolve(__dirname, "..");
   const env = loadEnv(mode, rootDir, "");
   const sentryAuthToken = env.SENTRY_AUTH_TOKEN?.trim();
+
+  const webPkg = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "package.json"), "utf8"),
+  ) as { version?: string };
+  const appVersion = webPkg.version?.trim() || "0.0.0";
 
   /** Only wire Sentry when a token is present (CI / release). Avoids noisy local build warnings. */
   const sentryPlugins =
@@ -26,6 +32,9 @@ export default defineConfig(({ mode }) => {
   return {
     /** Load `.env` from monorepo root (one file for web + tooling). */
     envDir: rootDir,
+    define: {
+      "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
+    },
     plugins: [react(), tailwindcss(), ...sentryPlugins],
     resolve: {
       alias: {

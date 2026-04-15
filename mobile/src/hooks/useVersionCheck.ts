@@ -3,6 +3,10 @@ import { Alert, Linking, Platform } from "react-native";
 import Constants from "expo-constants";
 import { supabase } from "@/lib/supabase";
 import { IOS_APP_STORE_URL } from "@shared/constants/app-links";
+import {
+  compareSemverParts,
+  minSemverFromAppConfigValue,
+} from "@shared/lib/semver-compare";
 
 /**
  * Hook to enforce a minimum required app version.
@@ -31,15 +35,13 @@ export function useVersionCheck() {
         }
 
         const row = data as { value: unknown };
-        const minVersion =
-          typeof row.value === "string" ? row.value : String(row.value ?? "");
+        const minVersion = minSemverFromAppConfigValue(row.value);
         if (!minVersion) {
           setIsChecking(false);
           return;
         }
 
-        // Simple semver comparison (major.minor.patch)
-        if (compareVersions(currentVersion, minVersion) < 0) {
+        if (compareSemverParts(currentVersion, minVersion) < 0) {
           setIsOutdated(true);
           showUpdateAlert();
         }
@@ -54,22 +56,6 @@ export function useVersionCheck() {
   }, []);
 
   return { isChecking, isOutdated };
-}
-
-/**
- * Returns 1 if v1 > v2, -1 if v1 < v2, 0 if equal
- */
-function compareVersions(v1: string, v2: string) {
-  const parts1 = v1.split(".").map(Number);
-  const parts2 = v2.split(".").map(Number);
-
-  for (let i = 0; i < 3; i++) {
-    const p1 = parts1[i] || 0;
-    const p2 = parts2[i] || 0;
-    if (p1 > p2) return 1;
-    if (p1 < p2) return -1;
-  }
-  return 0;
 }
 
 function showUpdateAlert() {

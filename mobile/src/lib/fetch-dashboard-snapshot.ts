@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
-import type { DashboardSnapshot } from "@/types/dashboard-snapshot";
+import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
 import type {
   ProjectRow,
   ScopeRow,
@@ -11,47 +11,14 @@ import type {
 } from "@shared/types/database";
 import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
-
-/** Shape written by `fetchMobileDashboardSnapshot` on successful load. */
-type CachedDashboardPayload = {
-  projects: ProjectRow[];
-  project: ProjectRow | null;
-  scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
-  spendByCategory: Record<string, number>;
-  isArchitect: boolean;
-  subscription: UserSubscriptionRow | null;
-  hasProjectPass: boolean;
-};
-
-function parseCachedDashboard(raw: string): CachedDashboardPayload | null {
-  try {
-    const o = JSON.parse(raw) as Partial<CachedDashboardPayload>;
-    if (!o || typeof o !== "object") return null;
-    return {
-      projects: Array.isArray(o.projects) ? o.projects : [],
-      project: o.project ?? null,
-      scopeItems: Array.isArray(o.scopeItems) ? o.scopeItems : [],
-      invoices: Array.isArray(o.invoices) ? o.invoices : [],
-      spendByCategory:
-        o.spendByCategory && typeof o.spendByCategory === "object"
-          ? o.spendByCategory
-          : {},
-      isArchitect: Boolean(o.isArchitect),
-      subscription: o.subscription ?? null,
-      hasProjectPass: Boolean(o.hasProjectPass),
-    };
-  } catch {
-    return null;
-  }
-}
+import { parseCachedDashboardPayload } from "@shared/lib/dashboard-cache-payload";
 
 async function loadStaleDashboardFromCache(
   cacheKey: string,
 ): Promise<DashboardSnapshot | null> {
   const raw = await AsyncStorage.getItem(cacheKey);
   if (!raw) return null;
-  const c = parseCachedDashboard(raw);
+  const c = parseCachedDashboardPayload(raw);
   if (!c) return null;
   const lastProjectId =
     c.project?.id ?? (await AsyncStorage.getItem("bluprnt_project_id")) ?? null;

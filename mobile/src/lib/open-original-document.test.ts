@@ -9,6 +9,7 @@ import {
   openOriginalDocumentForInvoice,
 } from "@/lib/open-original-document";
 import { invokeFunction } from "@/lib/supabase";
+import { invoiceOriginalMessages } from "@shared/lib/invoice-original-messages";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),
@@ -44,7 +45,7 @@ describe("fetchInvoiceOriginalSignedUrl", () => {
     const r = await fetchInvoiceOriginalSignedUrl("i1");
     expect(r).toEqual({
       ok: false,
-      message: "Check your connection and try again.",
+      message: invoiceOriginalMessages.network,
     });
   });
 });

@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   readonly VITE_SENTRY_DSN?: string;
   /** Set to "1" in E2E / automation to expose probe routes */
   readonly VITE_E2E?: string;
+  /** Injected from `web/package.json` at build time (semver gate vs `app_config`). */
+  readonly VITE_APP_VERSION: string;
 }
 
 interface ImportMeta {

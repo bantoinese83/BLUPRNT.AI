@@ -289,6 +289,8 @@ Core tables include: `properties`, `projects`, `scope_items`, `documents`, `invo
 
 New environments: `supabase db reset` (local) or `supabase db push` (empty project).
 
+**Client version gates** (optional, via `app_config`): mobile uses `min_supported_mobile_version`; web compares `VITE_APP_VERSION` (from `web/package.json` at build time) to `min_supported_web_version`.
+
 **Already-deployed Supabase projects** that recorded the old migration versions must **not** run that SQL again. After pulling this repo, align history once:
 
 ```bash

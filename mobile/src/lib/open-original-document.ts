@@ -1,6 +1,10 @@
 import { Linking, Alert } from "react-native";
 import { invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
+import {
+  invoiceOriginalMessages,
+  messageForInvoiceOriginalApiError,
+} from "@shared/lib/invoice-original-messages";
 
 type SignedUrlResponse = {
   signed_url?: string;
@@ -23,7 +27,7 @@ export async function fetchInvoiceOriginalSignedUrl(
   if (error) {
     return {
       ok: false,
-      message: "Check your connection and try again.",
+      message: invoiceOriginalMessages.network,
     };
   }
 
@@ -31,15 +35,13 @@ export async function fetchInvoiceOriginalSignedUrl(
   if (body?.error) {
     return {
       ok: false,
-      message: body.error.includes("No original")
-        ? "There’s no saved file for this record."
-        : "Something went wrong.",
+      message: messageForInvoiceOriginalApiError(body.error),
     };
   }
 
   const url = body?.signed_url;
   if (!url) {
-    return { ok: false, message: "Something went wrong." };
+    return { ok: false, message: invoiceOriginalMessages.generic };
   }
 
   return { ok: true, signedUrl: url, filename: body.filename };
@@ -57,7 +59,10 @@ export async function openOriginalDocumentForInvoice(
 
   const can = await Linking.canOpenURL(result.signedUrl);
   if (!can) {
-    Alert.alert("Couldn’t open file", "This device can’t open that link.");
+    Alert.alert(
+      "Couldn’t open file",
+      invoiceOriginalMessages.deviceCannotOpenLink,
+    );
     return false;
   }
 
@@ -65,10 +70,7 @@ export async function openOriginalDocumentForInvoice(
     await Linking.openURL(result.signedUrl);
   } catch (err: unknown) {
     reportClientError("open_invoice_document_url", err);
-    Alert.alert(
-      "Couldn’t open file",
-      "Something went wrong opening the link. Try again.",
-    );
+    Alert.alert("Couldn’t open file", invoiceOriginalMessages.openLinkFailed);
     return false;
   }
   return true;

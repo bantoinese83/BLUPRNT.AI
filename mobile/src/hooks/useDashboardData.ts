@@ -5,7 +5,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import { dashboardQueryKey } from "@/lib/query-client";
 import { fetchMobileDashboardSnapshot } from "@/lib/fetch-dashboard-snapshot";
-import type { DashboardSnapshot } from "@/types/dashboard-snapshot";
+import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
 
 function applyPatch(
@@ -134,7 +134,8 @@ export function useDashboardData() {
     const { error: err } = await supabase.from("scope_items").insert({
       project_id: pid,
       category: newItem.category,
-      description: newItem.description,
+      description: newItem.description || "",
+      phase: newItem.phase,
       quantity: newItem.quantity,
       unit: newItem.unit,
       finish_tier: "mid",
@@ -142,7 +143,6 @@ export function useDashboardData() {
       unit_cost_max: newItem.cost,
       total_cost_min: newItem.cost * newItem.quantity,
       total_cost_max: newItem.cost * newItem.quantity,
-      metadata: { phase: newItem.phase, priority: "medium" },
     });
 
     if (err) throw err;

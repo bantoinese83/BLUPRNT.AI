@@ -20,10 +20,6 @@ describe("fetchDashboardSnapshot", () => {
     sessionStorage.clear();
     localStorage.clear();
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
-    vi.spyOn(global, "setTimeout").mockImplementation((fn: TimerHandler) => {
-      if (typeof fn === "function") fn();
-      return 0 as unknown as ReturnType<typeof setTimeout>;
-    });
     delete (window as { location?: unknown }).location;
     (window as { location: Location }).location = {
       pathname: "/dashboard",
@@ -59,14 +55,22 @@ describe("fetchDashboardSnapshot", () => {
     expect(snap.redirectToLogin).toContain("settings");
   });
 
-  it("skips skeleton delay when session cache contains projects array", async () => {
+  it("returns stale dashboard from session cache when projects query fails", async () => {
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session },
     } as never);
-    const setTimeoutSpy = vi.spyOn(global, "setTimeout");
     sessionStorage.setItem(
       dashCacheKey,
-      JSON.stringify({ projects: [{ id: "cached" }] }),
+      JSON.stringify({
+        projects: [{ id: "p1", name: "Cached", property_id: "pr1" }],
+        project: { id: "p1", name: "Cached", property_id: "pr1" },
+        scopeItems: [],
+        invoices: [],
+        spendByCategory: {},
+        isArchitect: false,
+        subscription: null,
+        hasProjectPass: false,
+      }),
     );
 
     vi.mocked(supabase.from).mockImplementation(((table: string) => {
@@ -81,7 +85,10 @@ describe("fetchDashboardSnapshot", () => {
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          order: vi.fn().mockResolvedValue({
+            data: null,
+            error: { message: "boom", code: "PGRST301" },
+          }),
         };
       }
       return {
@@ -92,12 +99,10 @@ describe("fetchDashboardSnapshot", () => {
       };
     }) as unknown as typeof supabase.from);
 
-    await fetchDashboardSnapshot();
-    const dashboardSkeletonDelays = setTimeoutSpy.mock.calls.filter(
-      (args) => args[1] === 1200,
-    );
-    expect(dashboardSkeletonDelays).toHaveLength(0);
-    setTimeoutSpy.mockRestore();
+    const snap = await fetchDashboardSnapshot();
+    expect(snap.loadError).toBeTruthy();
+    expect(snap.projects).toHaveLength(1);
+    expect(snap.project?.id).toBe("p1");
   });
 
   it("ignores malformed session cache JSON", async () => {

@@ -10,24 +10,10 @@ import type {
 } from "@shared/types/database";
 import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
+import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
+import { parseCachedDashboardPayload } from "@shared/lib/dashboard-cache-payload";
 
-export type DashboardSnapshot = {
-  configured: boolean;
-  /** When set, the hook redirects to login with this `returnTo` path. */
-  redirectToLogin: string | null;
-  loadError: string | null;
-  projects: ProjectRow[];
-  project: ProjectRow | null;
-  scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
-  /** Documented spend by scope category (from invoice line items). */
-  spendByCategory: Record<string, number>;
-  isArchitect: boolean;
-  subscription: UserSubscriptionRow | null;
-  hasProjectPass: boolean;
-  /** Resolved active project id after preferences + defaults. */
-  lastProjectId: string | null;
-};
+export type { DashboardSnapshot };
 
 const emptySnapshot = (): DashboardSnapshot => ({
   configured: true,
@@ -43,6 +29,44 @@ const emptySnapshot = (): DashboardSnapshot => ({
   hasProjectPass: false,
   lastProjectId: null,
 });
+
+function snapshotFromCachePayload(
+  c: NonNullable<ReturnType<typeof parseCachedDashboardPayload>>,
+): DashboardSnapshot {
+  let lastProjectId: string | null = c.project?.id ?? null;
+  if (!lastProjectId && typeof window !== "undefined") {
+    try {
+      lastProjectId = localStorage.getItem("bluprnt_project_id");
+    } catch {
+      /* ignore */
+    }
+  }
+  return {
+    configured: true,
+    redirectToLogin: null,
+    loadError: null,
+    projects: c.projects,
+    project: c.project,
+    scopeItems: c.scopeItems,
+    invoices: c.invoices,
+    spendByCategory: c.spendByCategory,
+    isArchitect: c.isArchitect,
+    subscription: c.subscription,
+    hasProjectPass: c.hasProjectPass,
+    lastProjectId,
+  };
+}
+
+async function loadStaleDashboardFromSession(
+  cacheKey: string,
+): Promise<DashboardSnapshot | null> {
+  if (typeof window === "undefined") return null;
+  const raw = sessionStorage.getItem(cacheKey);
+  if (!raw) return null;
+  const c = parseCachedDashboardPayload(raw);
+  if (!c) return null;
+  return snapshotFromCachePayload(c);
+}
 
 /**
  * Loads dashboard data from Supabase (+ session cache). Pure except for
@@ -71,25 +95,6 @@ export async function fetchDashboardSnapshot(options?: {
   }
 
   const cacheKey = `bluprnt_dash_${session.user.id}`;
-  const cachedRaw =
-    typeof window !== "undefined" ? sessionStorage.getItem(cacheKey) : null;
-
-  let hadCache = false;
-  if (cachedRaw) {
-    try {
-      const c = JSON.parse(cachedRaw) as Record<string, unknown>;
-      if (c && typeof c === "object" && Array.isArray(c.projects)) {
-        hadCache = true;
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-
-  if (!hadCache && typeof window !== "undefined") {
-    const minDelay = new Promise((resolve) => setTimeout(resolve, 1200));
-    await minDelay;
-  }
 
   let projectId: string | null = null;
   try {
@@ -119,6 +124,13 @@ export async function fetchDashboardSnapshot(options?: {
     .order("created_at", { ascending: false });
 
   if (projRes.error) {
+    const stale = await loadStaleDashboardFromSession(cacheKey);
+    if (stale) {
+      return {
+        ...stale,
+        loadError: friendlyDashboardLoadError(projRes.error),
+      };
+    }
     return {
       ...emptySnapshot(),
       loadError: friendlyDashboardLoadError(projRes.error),

@@ -19,6 +19,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { HelpWidget } from "@/components/HelpWidget";
 import { WebOfflineBanner } from "@/components/WebOfflineBanner";
 import { ConsentAwareAnalytics } from "@/components/ConsentAwareAnalytics";
+import { ForceUpdateGate } from "@/components/ForceUpdateGate";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -55,100 +56,102 @@ export default function App() {
       <AuthProvider>
         <ErrorBoundary>
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <a
-                href="#main-content"
-                className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-24 focus-visible:z-[100] focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-xl focus-visible:bg-teal-950 focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white focus-visible:shadow-lg focus-visible:shadow-teal-950/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
-                onClick={(e) => {
-                  const main = document.getElementById("main-content");
-                  if (!main) return;
-                  e.preventDefault();
-                  main.focus({ preventScroll: true });
-                  main.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                onKeyDown={(e) => {
-                  if (e.key !== " ") return;
-                  const main = document.getElementById("main-content");
-                  if (!main) return;
-                  e.preventDefault();
-                  main.focus({ preventScroll: true });
-                  main.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-              >
-                Skip to main content
-              </a>
-              <AuthListener />
-              <WebOfflineBanner />
-              <div
-                id="main-content"
-                tabIndex={-1}
-                className="min-h-0 outline-none focus:outline-none"
-              >
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<Landing />} />
-                    <Route
-                      path="/onboarding/*"
-                      element={
-                        <OnboardingProvider>
-                          <Onboarding />
-                        </OnboardingProvider>
-                      }
-                    />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route
-                      path="/forgot-password"
-                      element={<ForgotPassword />}
-                    />
-                    <Route
-                      path="/auth/reset-password"
-                      element={<ResetPassword />}
-                    />
+            <ForceUpdateGate>
+              <BrowserRouter>
+                <a
+                  href="#main-content"
+                  className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-24 focus-visible:z-[100] focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-xl focus-visible:bg-teal-950 focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white focus-visible:shadow-lg focus-visible:shadow-teal-950/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+                  onClick={(e) => {
+                    const main = document.getElementById("main-content");
+                    if (!main) return;
+                    e.preventDefault();
+                    main.focus({ preventScroll: true });
+                    main.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== " ") return;
+                    const main = document.getElementById("main-content");
+                    if (!main) return;
+                    e.preventDefault();
+                    main.focus({ preventScroll: true });
+                    main.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                >
+                  Skip to main content
+                </a>
+                <AuthListener />
+                <WebOfflineBanner />
+                <div
+                  id="main-content"
+                  tabIndex={-1}
+                  className="min-h-0 outline-none focus:outline-none"
+                >
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Landing />} />
+                      <Route
+                        path="/onboarding/*"
+                        element={
+                          <OnboardingProvider>
+                            <Onboarding />
+                          </OnboardingProvider>
+                        }
+                      />
+                      <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route
+                        path="/forgot-password"
+                        element={<ForgotPassword />}
+                      />
+                      <Route
+                        path="/auth/reset-password"
+                        element={<ResetPassword />}
+                      />
 
-                    <Route
-                      path="/dashboard/*"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/project/:token" element={<ProjectView />} />
-                    <Route
-                      path="/settings"
-                      element={
-                        <ProtectedRoute>
-                          <Settings />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/support" element={<Support />} />
-                    {import.meta.env.VITE_E2E === "1" ? (
-                      <>
-                        <Route
-                          path="/__e2e__/popup-probe"
-                          element={<E2EPopupProbe />}
-                        />
-                        <Route
-                          path="/__e2e__/offline-save"
-                          element={<E2EOfflineSaveProbe />}
-                        />
-                      </>
-                    ) : null}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </div>
-              <Toaster position="top-right" expand={false} richColors />
-              <CommandPalette />
-              <CookieConsent />
-              <HelpWidget />
-              <ConsentAwareAnalytics />
-            </BrowserRouter>
+                      <Route
+                        path="/dashboard/*"
+                        element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/project/:token" element={<ProjectView />} />
+                      <Route
+                        path="/settings"
+                        element={
+                          <ProtectedRoute>
+                            <Settings />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/terms" element={<TermsOfService />} />
+                      <Route path="/support" element={<Support />} />
+                      {import.meta.env.VITE_E2E === "1" ? (
+                        <>
+                          <Route
+                            path="/__e2e__/popup-probe"
+                            element={<E2EPopupProbe />}
+                          />
+                          <Route
+                            path="/__e2e__/offline-save"
+                            element={<E2EOfflineSaveProbe />}
+                          />
+                        </>
+                      ) : null}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </div>
+                <Toaster position="top-right" expand={false} richColors />
+                <CommandPalette />
+                <CookieConsent />
+                <HelpWidget />
+                <ConsentAwareAnalytics />
+              </BrowserRouter>
+            </ForceUpdateGate>
           </QueryClientProvider>
         </ErrorBoundary>
       </AuthProvider>
