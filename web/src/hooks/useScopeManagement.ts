@@ -32,7 +32,7 @@ export function useScopeManagement({
   };
 
   const handleSave = async (item: ScopeRow) => {
-    let qty = parseFloat(editQty || "0");
+    let qty = parseFloat((editQty || "0").replace(/[^0-9.]/g, ""));
     if (Number.isNaN(qty) || qty < 0) qty = 0;
     if (qty > 1000000) qty = 1000000;
 

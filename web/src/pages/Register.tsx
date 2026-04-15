@@ -10,17 +10,15 @@ import {
 
 import {
   AlertCircle,
-  Loader2,
-  Lock,
   LogIn,
-  Mail,
-  MapPin,
-  UserPlus,
+  Lock,
   Wand2,
 } from "lucide-react";
 
+import { RegisterPasswordForm } from "@/components/auth/register/RegisterPasswordForm";
+import { RegisterMagicForm } from "@/components/auth/register/RegisterMagicForm";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { resolvePostLoginHref } from "@/lib/onboarding-post-auth-redirect";
@@ -30,7 +28,6 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
-import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 import { reportClientError } from "@/lib/sentry";
 
@@ -93,7 +90,6 @@ export default function Register() {
   });
 
   const emailValue = watch("email");
-  const passwordValue = watch("password") ?? "";
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -145,6 +141,7 @@ export default function Register() {
       const userId = session.user.id;
       const postal = zip.replace(/\D/g, "").slice(0, 5) || "00000";
 
+      // Step 2: Create Property
       const { data: prop, error: pErr } = await supabase
         .from("properties")
         .insert({
@@ -158,12 +155,10 @@ export default function Register() {
         .single();
 
       if (pErr || !prop) {
-        setError(
-          "Account created, but we couldn’t set up your property. Try signing in from the login page.",
-        );
-        return;
+        throw new Error("Unable to set up your property records.");
       }
 
+      // Step 3: Create Initial Project
       const { data: proj, error: jErr } = await supabase
         .from("projects")
         .insert({
@@ -176,9 +171,10 @@ export default function Register() {
         .single();
 
       if (jErr || !proj) {
-        setError(
-          "Account created. Sign in and add a project from the dashboard.",
-        );
+        // We have an account and a property, but project failed.
+        // We'll redirect to dashboard and let them add it manually.
+        const next = resolvePostLoginHref(redirectParam);
+        navigate(next, { replace: true });
         return;
       }
 
@@ -378,195 +374,31 @@ export default function Register() {
             </div>
           )}
 
-          {mode === "password" ? (
-            <form
-              onSubmit={onPasswordRegister}
-              className="space-y-4"
-              noValidate
-            >
-              <div className="space-y-2">
-                <label
-                  className="text-sm font-bold text-slate-700 ml-1"
-                  htmlFor="register-email"
-                >
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-                    aria-hidden
-                  />
-                  <Input
-                    id="register-email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    className="h-12 pl-11 rounded-xl"
-                    error={errors.email?.message}
-                    {...register("email", EMAIL_RULES)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label
-                  className="text-sm font-bold text-slate-700 ml-1"
-                  htmlFor="register-password"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-                    aria-hidden
-                  />
-                  <Input
-                    id="register-password"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="At least 8 characters"
-                    className="h-12 pl-11 rounded-xl"
-                    error={errors.password?.message}
-                    {...register("password", {
-                      required: "Enter a password.",
-                      minLength: {
-                        value: 8,
-                        message: "Use at least 8 characters for your password.",
-                      },
-                    })}
-                  />
-                </div>
-                <PasswordStrengthMeter password={passwordValue} />
-              </div>
 
-              <div className="space-y-2">
-                <label
-                  className="text-sm font-bold text-slate-700 ml-1"
-                  htmlFor="register-zip"
-                >
-                  Property ZIP Code
-                </label>
-                <div className="relative">
-                  <MapPin
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-                    aria-hidden
-                  />
-                  <Input
-                    id="register-zip"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={5}
-                    className="h-12 pl-11 rounded-xl"
-                    placeholder="For regional pricing"
-                    error={errors.zip?.message}
-                    {...register("zip", ZIP_RULES)}
-                  />
-                </div>
-              </div>
-              <Button
-                type="submit"
-                size="lg"
-                variant="primary"
-                className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
-                disabled={loading || !watch("acceptedPolicies")}
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
-                ) : (
-                  <UserPlus className="w-5 h-5 shrink-0" aria-hidden />
-                )}
-                {loading ? "Creating account…" : "Create account"}
-              </Button>
-            </form>
+
+          {mode === "password" ? (
+            <RegisterPasswordForm
+              onSubmit={onPasswordRegister}
+              register={register}
+              errors={errors}
+              watch={watch}
+              loading={loading}
+              emailRules={EMAIL_RULES}
+              zipRules={ZIP_RULES}
+            />
           ) : (
-            <div className="space-y-4">
-              {magicSent ? (
-                <div className="rounded-2xl border border-teal-100 bg-teal-50/30 px-5 py-5 text-sm text-slate-900 space-y-3">
-                  <p className="font-black flex items-center gap-2 text-teal-900 uppercase tracking-wider text-xs">
-                    <Mail className="w-4 h-4 shrink-0" aria-hidden />
-                    Check your inbox
-                  </p>
-                  <p className="font-medium text-slate-600">
-                    We sent a sign-in link to{" "}
-                    <strong className="text-slate-900">
-                      {emailValue.trim()}
-                    </strong>
-                    . Open it on this device to create your account.
-                  </p>
-                  <button
-                    type="button"
-                    className="text-teal-600 font-bold hover:text-teal-500 text-sm transition-colors"
-                    onClick={() => setMagicSent(false)}
-                  >
-                    ← Use a different email
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <label
-                      className="text-sm font-bold text-slate-700 ml-1"
-                      htmlFor="magic-email"
-                    >
-                      Email address
-                    </label>
-                    <div className="relative">
-                      <Mail
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-                        aria-hidden
-                      />
-                      <Input
-                        id="magic-email"
-                        type="email"
-                        autoComplete="email"
-                        placeholder="you@example.com"
-                        className="h-12 pl-11 rounded-xl"
-                        error={errors.email?.message}
-                        {...register("email", EMAIL_RULES)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      className="text-sm font-bold text-slate-700 ml-1"
-                      htmlFor="magic-zip"
-                    >
-                      Property ZIP Code
-                    </label>
-                    <div className="relative">
-                      <MapPin
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-                        aria-hidden
-                      />
-                      <Input
-                        id="magic-zip"
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={5}
-                        className="h-12 pl-11 rounded-xl"
-                        placeholder="For regional pricing"
-                        error={errors.zip?.message}
-                        {...register("zip", ZIP_RULES)}
-                      />
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    size="lg"
-                    variant="primary"
-                    className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
-                    disabled={loading || !watch("acceptedPolicies")}
-                    onClick={() => void onMagicRegister()}
-                  >
-                    {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
-                    ) : (
-                      <Wand2 className="w-5 h-5 shrink-0" aria-hidden />
-                    )}
-                    {loading ? "Sending…" : "Email me a magic link"}
-                  </Button>
-                </>
-              )}
-            </div>
+            <RegisterMagicForm
+              onMagicRegister={onMagicRegister}
+              register={register}
+              errors={errors}
+              watch={watch}
+              loading={loading}
+              magicSent={magicSent}
+              setMagicSent={setMagicSent}
+              emailValue={emailValue}
+              emailRules={EMAIL_RULES}
+              zipRules={ZIP_RULES}
+            />
           )}
 
           <div className="relative pt-4">

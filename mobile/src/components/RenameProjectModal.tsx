@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";
+import { showAppToast } from "@/lib/app-toast";
 
 type Props = {
   visible: boolean;
@@ -26,6 +27,7 @@ export function RenameProjectModal({
   onSave,
 }: Props) {
   const [name, setName] = useState(initialName);
+  const [saving, setSaving] = useState(false);
 
   return (
     <Modal
@@ -54,6 +56,7 @@ export function RenameProjectModal({
                 placeholderTextColor={Theme.colors.text.muted}
                 autoFocus
                 autoCorrect={false}
+                editable={!saving}
               />
               <View style={styles.row}>
                 <Button
@@ -62,15 +65,25 @@ export function RenameProjectModal({
                   onPress={onClose}
                   style={styles.half}
                   titleCase="sentence"
+                  disabled={saving}
                 />
                 <Button
-                  title="Save"
-                  onPress={() => {
+                  title={saving ? "Saving..." : "Save"}
+                  onPress={async () => {
                     const t = name.trim();
-                    if (!t) return;
-                    void onSave(t);
+                    if (!t || saving) return;
+                    setSaving(true);
+                    try {
+                      await onSave(t);
+                    } catch (err) {
+                      console.error("Rename project error:", err);
+                      showAppToast("Failed to rename project.");
+                    } finally {
+                      setSaving(false);
+                    }
                   }}
-                  disabled={!name.trim()}
+                  disabled={!name.trim() || saving}
+                  loading={saving}
                   style={styles.half}
                   titleCase="sentence"
                 />

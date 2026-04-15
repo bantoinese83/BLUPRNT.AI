@@ -40,6 +40,7 @@ import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
 import { getDashboardGreeting } from "@/features/home-tab/dashboard-greeting";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
+import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -385,11 +386,13 @@ export default function DashboardScreen() {
         onClose={() => setRenameVisible(false)}
         onSave={handleRenameSave}
       />
-      <UpgradeModal
-        isOpen={showUpgrade}
-        onClose={() => setShowUpgrade(false)}
-        reason={upgradeReason}
-      />
+      <ComponentErrorBoundary name="Payments">
+        <UpgradeModal
+          isOpen={showUpgrade}
+          onClose={() => setShowUpgrade(false)}
+          reason={upgradeReason}
+        />
+      </ComponentErrorBoundary>
       <InvoiceReviewSheet
         invoice={reviewInvoice}
         projectId={project?.id ?? null}

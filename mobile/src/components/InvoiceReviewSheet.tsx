@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
@@ -27,31 +27,16 @@ import {
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
-import { supabase, invokeFunction } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { OriginalUploadPreviewModal } from "@/components/OriginalUploadPreviewModal";
 import { money } from "@shared/lib/formatters";
 import type { InvoiceRow } from "@/types/database";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
-import { reportClientError } from "@/lib/sentry";
-import { showAppToast } from "@/lib/app-toast";
 import { Theme } from "@/constants/Theme";
-
-type LineItem = {
-  id: string;
-  description: string;
-  quantity: number;
-  unit_price: number;
-  line_total: number;
-  category: string | null;
-  scope_item_id?: string | null;
-};
-
-type InvoiceDetail = {
-  vendor_name: string | null;
-  total: number | null;
-  payment_status: string;
-  document_id?: string | null;
-};
+import {
+  useInvoiceReviewDetail,
+  type LineItem,
+} from "@/hooks/useInvoiceReviewDetail";
 
 interface Props {
   invoice: InvoiceRow | null;
@@ -85,100 +70,23 @@ export function InvoiceReviewSheet({
   onDeleted,
   onSaved,
 }: Props) {
+  const {
+    loading: loadingDetail,
+    error: loadError,
+    detail,
+    lineItems,
+    scopeItems,
+    mappings,
+    setMappings,
+    saving,
+    saveMappings,
+  } = useInvoiceReviewDetail(invoice, projectId, isOpen);
+
   const [deleting, setDeleting] = useState(false);
-  const [loadingDetail, setLoadingDetail] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<InvoiceDetail | null>(null);
-  const [lineItems, setLineItems] = useState<LineItem[]>([]);
-  const [scopeItems, setScopeItems] = useState<
-    { id: string; category: string; description: string }[]
-  >([]);
-  const [mappings, setMappings] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
   const [scopePickerLineId, setScopePickerLineId] = useState<string | null>(
     null,
   );
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
-
-  const resetDetailState = useCallback(() => {
-    setLoadError(null);
-    setDetail(null);
-    setLineItems([]);
-    setScopeItems([]);
-    setMappings({});
-    setScopePickerLineId(null);
-    setOriginalPreviewOpen(false);
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen || !invoice?.id || !projectId) {
-      if (!isOpen) resetDetailState();
-      return;
-    }
-
-    let cancelled = false;
-    (async () => {
-      setLoadingDetail(true);
-      setLoadError(null);
-      try {
-        const { data: invData, error: invErr } = await invokeFunction<{
-          invoice: InvoiceDetail & { id: string };
-          line_items: LineItem[];
-        }>("get-invoice", {
-          body: { invoice_id: invoice.id },
-        });
-        if (cancelled) return;
-        if (invErr || !invData) {
-          setLoadError("We couldn’t load this document’s details.");
-          setLoadingDetail(false);
-          return;
-        }
-        const payload = invData as unknown as {
-          invoice: InvoiceDetail;
-          line_items: LineItem[];
-        };
-        setDetail(payload.invoice);
-        const lines = payload.line_items ?? [];
-        setLineItems(lines);
-
-        const { data: scope, error: scopeErr } = await supabase
-          .from("scope_items")
-          .select("id, category, description")
-          .eq("project_id", projectId);
-        if (cancelled) return;
-        if (scopeErr) {
-          reportClientError("invoice_review_scope_list", scopeErr);
-          showAppToast(
-            "Budget list didn’t load — line links may be incomplete. Try again shortly.",
-            { type: "warning" },
-          );
-          setScopeItems([]);
-        } else {
-          setScopeItems(
-            (scope ?? []) as {
-              id: string;
-              category: string;
-              description: string;
-            }[],
-          );
-        }
-
-        const initial: Record<string, string> = {};
-        lines.forEach((line) => {
-          if (line.scope_item_id) initial[line.id] = line.scope_item_id;
-        });
-        setMappings(initial);
-      } catch {
-        if (!cancelled) setLoadError("Something went wrong.");
-      } finally {
-        if (!cancelled) setLoadingDetail(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, invoice?.id, projectId, resetDetailState]);
 
   if (!invoice) return null;
 
@@ -234,37 +142,12 @@ export function InvoiceReviewSheet({
     );
   };
 
-  const handleSaveMappings = async () => {
-    if (!projectId) return;
-    setSaving(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    try {
-      for (const [lineId, scopeItemId] of Object.entries(mappings)) {
-        const { error: lineErr } = await supabase
-          .from("invoice_line_items")
-          .update({ scope_item_id: scopeItemId || null })
-          .eq("id", lineId);
-        if (lineErr) throw lineErr;
-      }
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      showAppToast("Line links saved.", { type: "success" });
+  const handleSave = async () => {
+    const ok = await saveMappings();
+    if (ok) {
       onSaved?.();
       onClose();
-    } catch {
-      Alert.alert(
-        "Couldn’t save",
-        "We couldn’t save your line links. Try again.",
-      );
-    } finally {
-      setSaving(false);
     }
-  };
-
-  const scopeLabelForLine = (lineId: string, line: LineItem) => {
-    const id = mappings[lineId] ?? line.scope_item_id ?? "";
-    if (!id) return "Not linked";
-    const s = scopeItems.find((x) => x.id === id);
-    return s?.category ?? "Linked";
   };
 
   const pickerOptions = [
@@ -376,69 +259,39 @@ export function InvoiceReviewSheet({
                     <Text style={styles.linesHint}>
                       Match lines to your estimate to track plan vs actual.
                     </Text>
-                    {lineItems.map((line) => {
-                      const mappedVal =
-                        mappings[line.id] ?? line.scope_item_id ?? "";
-                      const isUnmapped = !mappedVal;
-                      const showHint = isUnmapped && scopeItems.length > 0;
-                      return (
-                        <View
-                          key={line.id}
-                          style={[
-                            styles.lineCard,
-                            showHint ? styles.lineCardWarn : undefined,
-                          ]}
-                        >
-                          <Text style={styles.lineDesc}>
-                            {line.description}
-                          </Text>
-                          <Text style={styles.lineAmt}>
-                            {money(line.line_total)}
-                          </Text>
-                          {showHint ? (
-                            <View style={styles.hintRow}>
-                              <AlertTriangle size={14} color="#fbbf24" />
-                              <Text style={styles.hintText}>
-                                Not linked to your original budget
-                              </Text>
-                            </View>
-                          ) : null}
-                          <TouchableOpacity
-                            style={styles.linkPickerBtn}
-                            onPress={() => {
-                              Haptics.selectionAsync();
-                              setScopePickerLineId(line.id);
-                            }}
-                          >
-                            <Text style={styles.linkPickerBtnText}>
-                              {scopeLabelForLine(line.id, line)}
-                            </Text>
-                            <Text style={styles.linkPickerChevron}>▼</Text>
-                          </TouchableOpacity>
-                        </View>
-                      );
-                    })}
+                    {lineItems.map((line) => (
+                      <LineItemRow
+                        key={line.id}
+                        line={line}
+                        mappedId={mappings[line.id] ?? line.scope_item_id ?? ""}
+                        scopeItems={scopeItems}
+                        onPick={() => {
+                          Haptics.selectionAsync();
+                          setScopePickerLineId(line.id);
+                        }}
+                      />
+                    ))}
                   </View>
                 ) : null}
 
-                {!loadingDetail && !loadError && lineItems.length === 0 ? (
+                {lineItems.length === 0 && !loadingDetail && !loadError && (
                   <Text style={styles.noLines}>
                     No line items yet. Totals above still update your ledger.
                   </Text>
-                ) : null}
+                )}
 
                 <Text style={styles.reviewDismissHint}>
                   You can close anytime — the document stays in your ledger.
                 </Text>
 
-                {projectId && lineItems.length > 0 ? (
+                {projectId && lineItems.length > 0 && (
                   <TouchableOpacity
                     style={[
                       styles.saveBtn,
                       saving ? styles.saveBtnDisabled : undefined,
                     ]}
                     disabled={saving}
-                    onPress={() => void handleSaveMappings()}
+                    onPress={() => void handleSave()}
                   >
                     {saving ? (
                       <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
@@ -446,7 +299,7 @@ export function InvoiceReviewSheet({
                       <Text style={styles.saveBtnText}>Save links</Text>
                     )}
                   </TouchableOpacity>
-                ) : null}
+                )}
 
                 <TouchableOpacity
                   style={styles.deleteBtn}
@@ -512,14 +365,50 @@ export function InvoiceReviewSheet({
         </View>
       </Modal>
 
-      {originalPreviewOpen && invoice ? (
+      {originalPreviewOpen && invoice && (
         <OriginalUploadPreviewModal
           key={invoice.id}
           invoiceId={invoice.id}
           onClose={() => setOriginalPreviewOpen(false)}
         />
-      ) : null}
+      )}
     </>
+  );
+}
+
+function LineItemRow({
+  line,
+  mappedId,
+  scopeItems,
+  onPick,
+}: {
+  line: LineItem;
+  mappedId: string;
+  scopeItems: { id: string; category: string }[];
+  onPick: () => void;
+}) {
+  const isUnmapped = !mappedId;
+  const label = isUnmapped
+    ? "Not linked"
+    : scopeItems.find((s) => s.id === mappedId)?.category ?? "Linked";
+
+  return (
+    <View style={[styles.lineCard, isUnmapped && styles.lineCardWarn]}>
+      <Text style={styles.lineDesc}>{line.description}</Text>
+      <Text style={styles.lineAmt}>{money(line.line_total)}</Text>
+      {isUnmapped && scopeItems.length > 0 && (
+        <View style={styles.hintRow}>
+          <AlertTriangle size={14} color="#fbbf24" />
+          <Text style={styles.hintText}>
+            Not linked to your original budget
+          </Text>
+        </View>
+      )}
+      <TouchableOpacity style={styles.linkPickerBtn} onPress={onPick}>
+        <Text style={styles.linkPickerBtnText}>{label}</Text>
+        <Text style={styles.linkPickerChevron}>▼</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -851,3 +740,4 @@ const styles = StyleSheet.create({
     color: Theme.colors.brand.primary,
   },
 });
+

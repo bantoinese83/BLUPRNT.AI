@@ -16,6 +16,7 @@ import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
+import { showAppToast } from "@/lib/app-toast";
 
 const PHASE_ORDER = [
   "Site Prep",
@@ -52,8 +53,8 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
-    const costNum = parseFloat(cost);
-    const qtyNum = parseFloat(quantity);
+    const costNum = parseFloat(cost.replace(/[^0-9.]/g, ""));
+    const qtyNum = parseFloat(quantity.replace(/[^0-9.]/g, ""));
     if (!category.trim() || isNaN(costNum)) return;
 
     setSaving(true);
@@ -75,6 +76,7 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
       onClose();
     } catch (err) {
       console.error("Add item error:", err);
+      showAppToast("Failed to add item. Please check your connection.");
     } finally {
       setSaving(false);
     }

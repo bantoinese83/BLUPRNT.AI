@@ -54,7 +54,7 @@ export default function RegisterScreen() {
 
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
       options: {
         data: {
@@ -86,7 +86,7 @@ export default function RegisterScreen() {
 
     if (data.user) {
       const { data: signInData } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
       if (signInData.session) {

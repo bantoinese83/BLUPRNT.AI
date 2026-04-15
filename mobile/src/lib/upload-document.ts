@@ -2,6 +2,7 @@ import { Alert } from "react-native";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { invokeFunction } from "@/lib/supabase";
+import { showAppToast } from "@/lib/app-toast";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
 
@@ -111,12 +112,19 @@ async function postDocumentToUploadInvoice(
       type: mimeType || "image/jpeg",
     } as unknown as Blob);
 
-    const { data, error } = await invokeFunction<UploadResult>(
-      "upload-invoice",
-      {
-        body: formData,
-      },
+    showAppToast("Starting upload... please keep the app open.");
+
+    // Simple timeout wrapper for the invokeFunction
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Upload timed out after 60s")), 60000),
     );
+
+    const { data, error } = await (Promise.race([
+      invokeFunction<UploadResult>("upload-invoice", {
+        body: formData,
+      }),
+      timeoutPromise,
+    ]) as Promise<{ data: UploadResult | null; error: Error | null }>);
 
     const failure = extractUploadFailureFromInvokeResult(data, error);
     if (failure) {

@@ -55,3 +55,44 @@ jobs:
 
       - name: Typecheck Edge Functions
         run: bash scripts/check-edge-functions.sh
+
+  mobile-verify:
+    name: Mobile E2E (Maestro)
+    runs-on: macos-latest
+    # Run fully on PRs or when explicitly requested via commit message
+    if: github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[mobile-e2e]')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Start iOS Simulator
+        run: |
+          # Use a stable iPhone model available on the runner
+          DEVICE=$(xcrun simctl list devices | grep -E "iPhone 16|iPhone 15" | head -1 | awk -F '[()]' '{print $2}')
+          echo "Starting device: $DEVICE"
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE"
+
+      - name: Build & Install Mobile App
+        run: |
+          cd mobile
+          # Build for simulator (x86_64/arm64) and install directly
+          # We use --no-packager as we just want the binary for Maestro to talk to
+          npx expo run:ios --no-packager --scheme bluprnt --configuration Release
+
+      - name: Run Maestro Tests
+        run: npm run test:e2e:mobile
+

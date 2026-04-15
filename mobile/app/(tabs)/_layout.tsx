@@ -7,6 +7,7 @@ import { useAwareness } from "@/contexts/AwarenessContext";
 import { InsightsDrawer } from "@/components/InsightsDrawer";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { NotchedTabBar } from "@/components/NotchedTabBar";
+import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 
 /**
  * Bottom clearance for scroll content (notched bar + FAB overlap).
@@ -57,12 +58,16 @@ function TabOverlays() {
 
   return (
     <>
-      <InsightsDrawer />
-      <UpgradeModal
-        isOpen={showUpgrade}
-        onClose={handleCloseUpgrade}
-        reason={upgradeReason || "general"}
-      />
+      <ComponentErrorBoundary name="AI Insights">
+        <InsightsDrawer />
+      </ComponentErrorBoundary>
+      <ComponentErrorBoundary name="Payments">
+        <UpgradeModal
+          isOpen={showUpgrade}
+          onClose={handleCloseUpgrade}
+          reason={upgradeReason || "general"}
+        />
+      </ComponentErrorBoundary>
     </>
   );
 }

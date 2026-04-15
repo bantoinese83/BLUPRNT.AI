@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -39,11 +39,20 @@ export function useDashboardData() {
   const queryClient = useQueryClient();
   const lastRedirect = useRef<string | null>(null);
 
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem("bluprnt_project_id");
+    } catch {
+      return null;
+    }
+  });
+
   const query = useQuery({
-    queryKey: dashboardQueryKey,
+    queryKey: dashboardQueryKey(activeProjectId),
     queryFn: () =>
       fetchDashboardSnapshot({
         currentPath: `${window.location.pathname}${window.location.search}`,
+        projectId: activeProjectId,
       }),
     staleTime: 30_000,
     enabled: isSupabaseConfigured(),
@@ -51,6 +60,19 @@ export function useDashboardData() {
   });
 
   const data = query.data;
+
+  // Sync state with resolved project ID from the first successful load if not set
+  useEffect(() => {
+    if (data?.project?.id && !activeProjectId) {
+      setActiveProjectId(data.project.id);
+      try {
+        localStorage.setItem("bluprnt_project_id", data.project.id);
+      } catch {
+        /* ignore */
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.project?.id]);
 
   useEffect(() => {
     if (!data?.redirectToLogin || !data.configured) {
@@ -66,52 +88,63 @@ export function useDashboardData() {
   const snapshot: DashboardSnapshot | undefined = data;
 
   const clearLoadError = useCallback(() => {
-    queryClient.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-      prev ? { ...prev, loadError: null } : prev,
+    queryClient.setQueryData<DashboardSnapshot>(
+      dashboardQueryKey(activeProjectId),
+      (prev) => (prev ? { ...prev, loadError: null } : prev),
     );
-  }, [queryClient]);
+  }, [queryClient, activeProjectId]);
 
   const load = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: dashboardQueryKey });
-  }, [queryClient]);
+    await queryClient.invalidateQueries({
+      queryKey: dashboardQueryKey(activeProjectId),
+    });
+  }, [queryClient, activeProjectId]);
 
   const setProjects = useCallback(
     (projects: ProjectRow[]) => {
-      queryClient.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, { projects }),
+      queryClient.setQueryData<DashboardSnapshot>(
+        dashboardQueryKey(activeProjectId),
+        (prev) => applyPatch(prev, { projects }),
       );
     },
-    [queryClient],
+    [queryClient, activeProjectId],
   );
 
   const setProject = useCallback(
     (project: ProjectRow | null) => {
-      queryClient.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, {
-          project,
-          lastProjectId: project?.id ?? prev?.lastProjectId ?? null,
-        }),
+      queryClient.setQueryData<DashboardSnapshot>(
+        dashboardQueryKey(activeProjectId),
+        (prev) =>
+          applyPatch(prev, {
+            project,
+            lastProjectId: project?.id ?? prev?.lastProjectId ?? null,
+          }),
       );
+      if (project?.id) {
+        setActiveProjectId(project.id);
+      }
     },
-    [queryClient],
+    [queryClient, activeProjectId],
   );
 
   const setScopeItems = useCallback(
     (scopeItems: ScopeRow[]) => {
-      queryClient.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, { scopeItems }),
+      queryClient.setQueryData<DashboardSnapshot>(
+        dashboardQueryKey(activeProjectId),
+        (prev) => applyPatch(prev, { scopeItems }),
       );
     },
-    [queryClient],
+    [queryClient, activeProjectId],
   );
 
   const setInvoices = useCallback(
     (invoices: InvoiceRow[]) => {
-      queryClient.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, { invoices }),
+      queryClient.setQueryData<DashboardSnapshot>(
+        dashboardQueryKey(activeProjectId),
+        (prev) => applyPatch(prev, { invoices }),
       );
     },
-    [queryClient],
+    [queryClient, activeProjectId],
   );
 
   const handleProjectSelect = useCallback(
@@ -121,6 +154,8 @@ export function useDashboardData() {
       } catch {
         /* ignore */
       }
+      setActiveProjectId(id);
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -136,7 +171,9 @@ export function useDashboardData() {
           reportClientError("dashboard_last_project_preference", prefErr);
         }
       }
-      void queryClient.invalidateQueries({ queryKey: dashboardQueryKey });
+      void queryClient.invalidateQueries({
+        queryKey: dashboardQueryKey(id),
+      });
     },
     [queryClient],
   );

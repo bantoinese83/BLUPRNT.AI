@@ -125,4 +125,33 @@ describe("exportUserData", () => {
     expect(supabase.from).not.toHaveBeenCalledWith("invoice_line_items");
     expect(clickSpy).toHaveBeenCalled();
   });
+
+  it("handles null data returns from Supabase gracefully in main queries", async () => {
+    vi.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === "properties") {
+        return {
+          select: vi.fn().mockResolvedValue({ data: [{ id: "prop-1" }] }),
+        } as unknown as ReturnType<typeof supabase.from>;
+      }
+      if (table === "projects") {
+        return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn().mockResolvedValue({
+              data: [{ id: "proj-1", property_id: "prop-1" }],
+            }),
+          }),
+        } as unknown as ReturnType<typeof supabase.from>;
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          in: vi.fn().mockResolvedValue({ data: null, error: new Error("DB Error") }),
+        }),
+      } as unknown as ReturnType<typeof supabase.from>;
+    });
+
+    await exportUserData("user-4", "x@example.com");
+
+    expect(supabase.from).toHaveBeenCalledWith("scope_items");
+    expect(clickSpy).toHaveBeenCalled();
+  });
 });

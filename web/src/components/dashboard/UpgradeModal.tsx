@@ -62,7 +62,9 @@ export function UpgradeModal({
   }, [isOpen]);
 
   const mid =
-    estimatedAmount != null && Number.isFinite(estimatedAmount)
+    estimatedAmount != null &&
+    Number.isFinite(estimatedAmount) &&
+    estimatedAmount > 0
       ? estimatedAmount
       : 28000;
 

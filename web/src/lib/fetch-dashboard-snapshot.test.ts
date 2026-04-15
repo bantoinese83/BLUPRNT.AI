@@ -55,55 +55,7 @@ describe("fetchDashboardSnapshot", () => {
     expect(snap.redirectToLogin).toContain("settings");
   });
 
-  it("returns stale dashboard from session cache when projects query fails", async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session },
-    } as never);
-    sessionStorage.setItem(
-      dashCacheKey,
-      JSON.stringify({
-        projects: [{ id: "p1", name: "Cached", property_id: "pr1" }],
-        project: { id: "p1", name: "Cached", property_id: "pr1" },
-        scopeItems: [],
-        invoices: [],
-        spendByCategory: {},
-        isArchitect: false,
-        subscription: null,
-        hasProjectPass: false,
-      }),
-    );
 
-    vi.mocked(supabase.from).mockImplementation(((table: string) => {
-      if (table === "user_preferences") {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-        };
-      }
-      if (table === "projects") {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({
-            data: null,
-            error: { message: "boom", code: "PGRST301" },
-          }),
-        };
-      }
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: [], error: null }),
-        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      };
-    }) as unknown as typeof supabase.from);
-
-    const snap = await fetchDashboardSnapshot();
-    expect(snap.loadError).toBeTruthy();
-    expect(snap.projects).toHaveLength(1);
-    expect(snap.project?.id).toBe("p1");
-  });
 
   it("ignores malformed session cache JSON", async () => {
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
@@ -214,7 +166,8 @@ describe("fetchDashboardSnapshot", () => {
 
     const snap = await fetchDashboardSnapshot();
     expect(snap.project?.id).toBe("proj-live");
-    expect(localStorage.getItem("bluprnt_project_id")).toBe("proj-live");
+    // Snapshot returns the new project, but fetcher no longer writes to localStorage directly
+    expect(localStorage.getItem("bluprnt_project_id")).toBe("stale-id");
   });
 
   it("returns loadError when projects query fails", async () => {

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { EmptyState } from "@/components/EmptyState";
-import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Helmet } from "react-helmet-async";
 
 import {
@@ -15,15 +14,13 @@ import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
-import { downloadSellerPacket } from "@/lib/seller-packet-download";
-import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
-import { DashboardStats } from "@/components/dashboard/DashboardStats";
-import { EstimateSummary } from "@/components/dashboard/EstimateSummary";
-import { generateActivityEvents } from "@/lib/activity";
-import { ScopeDetail } from "@/components/dashboard/ScopeDetail";
 import { InvoicesSection } from "@/components/dashboard/InvoicesSection";
 import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
 import { PropertyLedger } from "@/components/dashboard/PropertyLedger";
+import { downloadSellerPacket } from "@/lib/seller-packet-download";
+import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { generateActivityEvents } from "@/lib/activity";
 import {
   UpgradeModal,
   type UpgradeOpenReason,
@@ -31,7 +28,7 @@ import {
 import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
-import { Settings2, ListTree } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { ShareModal } from "@/components/dashboard/ShareModal";
 import type {
@@ -50,7 +47,6 @@ import { Button } from "@/components/ui/button";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
 import {
   containerVariants,
   itemVariants,
@@ -61,8 +57,13 @@ import { AwarenessProvider } from "@/contexts/AwarenessProvider";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
-import { PlanVsActualCard } from "@/components/dashboard/PlanVsActualCard";
 import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
+import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
+import { DashboardPlan } from "./dashboard/DashboardPlan";
+import { DashboardScope } from "./dashboard/DashboardScope";
+import { DashboardExecute } from "./dashboard/DashboardExecute";
+import { DashboardRecord } from "./dashboard/DashboardRecord";
+import { DeleteProjectModal } from "@/components/dashboard/DeleteProjectModal";
 
 export default function Dashboard() {
   const {
@@ -305,6 +306,8 @@ function DashboardContent({
     useState<UpgradeOpenReason>("general");
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [deleteProject, setDeleteProject] = useState<ProjectRow | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { isSidebarOpen, setIsSidebarOpen } = useAwareness();
 
@@ -430,9 +433,17 @@ function DashboardContent({
     }
   }, [project, scopeItems, invoices, isArchitect, hasProjectPass]);
 
-  async function handleProjectDelete(id: string) {
-    if (!isSupabaseConfigured()) return;
+   function handleProjectDelete(id: string) {
+    const p = projects.find((x) => x.id === id);
+    if (!p) return;
+    setDeleteProject(p);
+    setShowDeleteModal(true);
+  }
 
+  async function handleConfirmDelete() {
+    if (!deleteProject || !isSupabaseConfigured()) return;
+
+    const id = deleteProject.id;
     const originalProjects = [...projects];
     const originalCurrentProject = project;
 
@@ -453,17 +464,21 @@ function DashboardContent({
       return true;
     };
 
+    setShowDeleteModal(false);
+
     toast.promise(deleteAction(), {
       loading: "Deleting project...",
       success: () => {
         if (id === originalCurrentProject?.id) {
           load();
         }
+        setDeleteProject(null);
         return "Project permanently removed";
       },
       error: () => {
         setProjects(originalProjects);
         setProject(originalCurrentProject);
+        setDeleteProject(null);
         return "Failed to delete project";
       },
     });
@@ -675,55 +690,29 @@ function DashboardContent({
               <Route
                 path="plan"
                 element={
-                  <DashboardSubPage
-                    side={
-                      <>
-                        {health}
-                        {location.pathname.endsWith("/plan") && (
-                          <ActivityFeed
-                            events={activityEvents}
-                            className="mt-8"
-                          />
-                        )}
-                        {ledger}
-                      </>
-                    }
-                  >
-                    <EstimateSummary
-                      project={project}
-                      scopeItems={scopeItems}
-                      isArchitect={isArchitect}
-                      hasProjectPass={hasProjectPass}
-                      onUpgradeClick={() => {
-                        setUpgradeReason("general");
-                        setShowUpgrade(true);
-                      }}
-                    />
-                    <PlanVsActualCard
-                      estimatedMin={project.estimated_min_total}
-                      estimatedMax={project.estimated_max_total}
-                      invoices={invoices}
-                    />
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2 rounded-xl border-slate-200 hover:bg-slate-50"
-                      onClick={() => navigate("/dashboard/scope")}
-                      type="button"
-                    >
-                      <ListTree className="w-5 h-5 shrink-0" aria-hidden />
-                      View full scope
-                    </Button>
-                    {invoicesComp}
-                  </DashboardSubPage>
+                  <DashboardPlan
+                    project={project}
+                    scopeItems={scopeItems}
+                    invoices={invoices}
+                    activityEvents={activityEvents}
+                    isArchitect={isArchitect}
+                    hasProjectPass={hasProjectPass}
+                    health={health}
+                    ledger={ledger}
+                    invoicesComp={invoicesComp}
+                    onUpgradeClick={() => {
+                      setUpgradeReason("general");
+                      setShowUpgrade(true);
+                    }}
+                  />
                 }
               />
               <Route
                 path="scope"
                 element={
-                  <ScopeDetail
+                  <DashboardScope
                     project={project}
                     scopeItems={scopeItems}
-                    projectId={project.id}
                     onRefresh={load}
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}
@@ -733,21 +722,17 @@ function DashboardContent({
               <Route
                 path="execute"
                 element={
-                  <DashboardSubPage side={health}>
-                    <PlanVsActualCard
-                      estimatedMin={project.estimated_min_total}
-                      estimatedMax={project.estimated_max_total}
-                      invoices={invoices}
-                    />
-                    {invoicesComp}
-                  </DashboardSubPage>
+                  <DashboardExecute
+                    project={project}
+                    invoices={invoices}
+                    health={health}
+                    invoicesComp={invoicesComp}
+                  />
                 }
               />
               <Route
                 path="record"
-                element={
-                  <DashboardSubPage side={health}>{ledger}</DashboardSubPage>
-                }
+                element={<DashboardRecord health={health} ledger={ledger} />}
               />
             </Routes>
           </motion.div>
@@ -756,25 +741,27 @@ function DashboardContent({
 
       <AppSlimFooter className="border-slate-200/60 bg-white/40 backdrop-blur-sm" />
 
-      <UpgradeModal
-        isOpen={showUpgrade}
-        onClose={() => {
-          setShowUpgrade(false);
-          setUseDiscount(false);
-          setUpgradeReason("general");
-        }}
-        showDiscount={useDiscount}
-        openReason={upgradeReason}
-        estimatedAmount={
-          project.estimated_min_total != null &&
-          project.estimated_max_total != null
-            ? (project.estimated_min_total + project.estimated_max_total) / 2
-            : (project.estimated_min_total ?? project.estimated_max_total)
-        }
-        projectId={project.id}
-        isArchitect={isArchitect}
-        hasProjectPass={hasProjectPass}
-      />
+      <ComponentErrorBoundary name="Billing">
+        <UpgradeModal
+          isOpen={showUpgrade}
+          onClose={() => {
+            setShowUpgrade(false);
+            setUseDiscount(false);
+            setUpgradeReason("general");
+          }}
+          showDiscount={useDiscount}
+          openReason={upgradeReason}
+          estimatedAmount={
+            project.estimated_min_total != null &&
+            project.estimated_max_total != null
+              ? (project.estimated_min_total + project.estimated_max_total) / 2
+              : (project.estimated_min_total ?? project.estimated_max_total)
+          }
+          projectId={project.id}
+          isArchitect={isArchitect}
+          hasProjectPass={hasProjectPass}
+        />
+      </ComponentErrorBoundary>
 
       <LeadCaptureModal
         onPlanSelect={(_plan) => {
@@ -792,7 +779,16 @@ function DashboardContent({
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
-      <AIAssistant projectId={project?.id ?? ""} />
+      <ComponentErrorBoundary name="AI Assistant">
+        <AIAssistant projectId={project?.id ?? ""} />
+      </ComponentErrorBoundary>
+
+      <DeleteProjectModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        projectName={deleteProject?.name ?? ""}
+      />
     </div>
   );
 }

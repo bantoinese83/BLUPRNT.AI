@@ -11,7 +11,7 @@ import type {
 import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
 import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
-import { parseCachedDashboardPayload } from "@shared/lib/dashboard-cache-payload";
+
 
 export type { DashboardSnapshot };
 
@@ -30,50 +30,16 @@ const emptySnapshot = (): DashboardSnapshot => ({
   lastProjectId: null,
 });
 
-function snapshotFromCachePayload(
-  c: NonNullable<ReturnType<typeof parseCachedDashboardPayload>>,
-): DashboardSnapshot {
-  let lastProjectId: string | null = c.project?.id ?? null;
-  if (!lastProjectId && typeof window !== "undefined") {
-    try {
-      lastProjectId = localStorage.getItem("bluprnt_project_id");
-    } catch {
-      /* ignore */
-    }
-  }
-  return {
-    configured: true,
-    redirectToLogin: null,
-    loadError: null,
-    projects: c.projects,
-    project: c.project,
-    scopeItems: c.scopeItems,
-    invoices: c.invoices,
-    spendByCategory: c.spendByCategory,
-    isArchitect: c.isArchitect,
-    subscription: c.subscription,
-    hasProjectPass: c.hasProjectPass,
-    lastProjectId,
-  };
-}
 
-async function loadStaleDashboardFromSession(
-  cacheKey: string,
-): Promise<DashboardSnapshot | null> {
-  if (typeof window === "undefined") return null;
-  const raw = sessionStorage.getItem(cacheKey);
-  if (!raw) return null;
-  const c = parseCachedDashboardPayload(raw);
-  if (!c) return null;
-  return snapshotFromCachePayload(c);
-}
 
 /**
- * Loads dashboard data from Supabase (+ session cache). Pure except for
- * sessionStorage / localStorage writes that mirror existing client behavior.
+ * Loads dashboard data from Supabase. Pure data fetcher designed to be wrapped
+ * by TanStack Query. Side effects (redirects, local storage updates) should be
+ * handled in the calling hook.
  */
 export async function fetchDashboardSnapshot(options?: {
   currentPath?: string;
+  projectId?: string | null;
 }): Promise<DashboardSnapshot> {
   if (!isSupabaseConfigured()) {
     return { ...emptySnapshot(), configured: false };
@@ -94,27 +60,22 @@ export async function fetchDashboardSnapshot(options?: {
     };
   }
 
-  const cacheKey = `bluprnt_dash_${session.user.id}`;
+  let projectId = options?.projectId ?? null;
 
-  let projectId: string | null = null;
-  try {
-    if (typeof window !== "undefined") {
-      projectId = localStorage.getItem("bluprnt_project_id");
+  // 1. Resolve projectId (Preference -> Projects List -> LocalStorage)
+  if (!projectId) {
+    const prefRes = await supabase
+      .from("user_preferences")
+      .select("last_active_project_id")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+
+    if (!prefRes.error && prefRes.data?.last_active_project_id) {
+      projectId = prefRes.data.last_active_project_id;
     }
-  } catch {
-    /* ignore */
   }
 
-  const prefRes = await supabase
-    .from("user_preferences")
-    .select("last_active_project_id")
-    .eq("user_id", session.user.id)
-    .maybeSingle();
-
-  if (!prefRes.error && prefRes.data?.last_active_project_id) {
-    projectId = prefRes.data.last_active_project_id;
-  }
-
+  // 2. Load all projects for the user
   const projRes = await supabase
     .from("projects")
     .select(
@@ -124,13 +85,6 @@ export async function fetchDashboardSnapshot(options?: {
     .order("created_at", { ascending: false });
 
   if (projRes.error) {
-    const stale = await loadStaleDashboardFromSession(cacheKey);
-    if (stale) {
-      return {
-        ...stale,
-        loadError: friendlyDashboardLoadError(projRes.error),
-      };
-    }
     return {
       ...emptySnapshot(),
       loadError: friendlyDashboardLoadError(projRes.error),
@@ -140,39 +94,13 @@ export async function fetchDashboardSnapshot(options?: {
   const rows = (projRes.data ?? []) as unknown as ProjectRow[];
 
   if (rows.length > 0) {
-    if (!projectId) {
+    // If we have a projectId but it's not in our list, fallback to the latest
+    if (!projectId || !rows.find((p) => p.id === projectId)) {
       projectId = rows[0].id;
-      try {
-        if (typeof window !== "undefined" && projectId) {
-          localStorage.setItem("bluprnt_project_id", projectId);
-        }
-      } catch {
-        /* ignore */
-      }
     }
 
-    let project: ProjectRow | null =
-      rows.find((p) => p.id === projectId) ?? null;
-    if (!project) {
-      projectId = rows[0].id;
-      project = rows[0];
-      try {
-        if (typeof window !== "undefined" && projectId) {
-          localStorage.setItem("bluprnt_project_id", projectId);
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-
-    if (!projectId) {
-      return {
-        ...emptySnapshot(),
-        projects: rows,
-        project: null,
-        lastProjectId: null,
-      };
-    }
+    const project: ProjectRow =
+      rows.find((p) => p.id === projectId) ?? rows[0];
 
     const [scopesRes, invRes, subRes, subRes2] = await Promise.all([
       supabase
@@ -230,22 +158,6 @@ export async function fetchDashboardSnapshot(options?: {
       }
     }
 
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          projects: rows,
-          project: rows.find((p) => p.id === projectId) ?? rows[0] ?? null,
-          scopeItems: newScopes,
-          invoices: newInvoices,
-          spendByCategory,
-          isArchitect: newIsArchitect,
-          subscription: sub,
-          hasProjectPass: newHasProjectPass,
-        }),
-      );
-    }
-
     return {
       configured: true,
       redirectToLogin: null,
@@ -262,10 +174,6 @@ export async function fetchDashboardSnapshot(options?: {
     };
   }
 
-  if (typeof window !== "undefined") {
-    sessionStorage.removeItem(cacheKey);
-  }
-
   return {
     ...emptySnapshot(),
     projects: rows,
@@ -274,4 +182,5 @@ export async function fetchDashboardSnapshot(options?: {
   };
 }
 
-export const dashboardQueryKey = ["dashboard", "snapshot"] as const;
+export const dashboardQueryKey = (projectId?: string | null) =>
+  ["dashboard", "snapshot", projectId ?? "latest"] as const;
