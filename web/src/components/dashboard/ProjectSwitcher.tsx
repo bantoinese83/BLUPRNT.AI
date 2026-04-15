@@ -166,13 +166,7 @@ export function ProjectSwitcher({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (
-                            confirm(
-                              `Are you sure you want to delete "${p.name}"?`,
-                            )
-                          ) {
-                            onDelete(p.id);
-                          }
+                          onDelete(p.id);
                         }}
                         className="absolute right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                         aria-label={`Delete project ${p.name}`}
