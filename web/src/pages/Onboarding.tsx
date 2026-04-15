@@ -21,6 +21,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { cn } from "@/lib/utils";
+import { Check, Home, Calculator, UserPlus } from "lucide-react";
 
 /** Aligned with mobile: three phases, same internal routes. */
 const ONBOARDING_PHASES = [
@@ -80,6 +81,8 @@ function StepProgress({ currentPath }: { currentPath: string }) {
         ? "Seconds away"
         : `${Math.ceil(remainingSteps / 2)} min left`;
 
+  const phaseIcons = [Home, Calculator, UserPlus];
+
   return (
     <div className="w-full flex flex-col items-center space-y-4 mb-8 sm:mb-12">
       <div className="flex w-full justify-between items-end px-1 gap-3">
@@ -92,8 +95,8 @@ function StepProgress({ currentPath }: { currentPath: string }) {
             {stepMeta.label}
           </h1>
         </div>
-        <div className="flex shrink-0 items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
-          <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+        <div className="flex shrink-0 items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
+          <Check className="w-2.5 h-2.5 text-teal-500 stroke-[4]" />
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
             {timeLabel}
           </span>
@@ -122,6 +125,8 @@ function StepProgress({ currentPath }: { currentPath: string }) {
             const isCompleted = idx < phaseIndex;
             const isActive = idx === phaseIndex;
             const firstPathInPhase = phase.paths[0];
+            const ActiveIcon = phaseIcons[idx] || Home;
+
             return (
               <button
                 key={phase.label}
@@ -136,16 +141,23 @@ function StepProgress({ currentPath }: { currentPath: string }) {
                 )}
                 aria-label={`Phase ${idx + 1}: ${phase.label}`}
               >
-                <span
+                <div
                   className={cn(
-                    "h-3 w-3 rounded-full border-2 transition-all duration-300 bg-white",
+                    "flex items-center justify-center h-5 w-5 rounded-full border-2 transition-all duration-300 bg-white",
                     idx > phaseIndex && "border-slate-200",
                     idx <= phaseIndex && "border-transparent",
                     isCompleted && "bg-teal-600 border-teal-600",
                     isActive &&
-                      "bg-teal-600 border-teal-100 ring-2 ring-teal-600/20 scale-125",
+                      "bg-teal-600 border-teal-100 ring-4 ring-teal-600/10 scale-125",
                   )}
-                />
+                >
+                  {isCompleted && (
+                    <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
+                  )}
+                  {isActive && (
+                    <ActiveIcon className="w-2.5 h-2.5 text-white animate-in fade-in zoom-in duration-500" />
+                  )}
+                </div>
               </button>
             );
           })}
