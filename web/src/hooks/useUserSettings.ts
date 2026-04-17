@@ -4,6 +4,7 @@ import { exportUserData } from "@/services/export-service";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 export function useUserSettings() {
   const navigate = useNavigate();
@@ -42,10 +43,10 @@ export function useUserSettings() {
       if (u) {
         const { data: sub } = await supabase
           .from("user_subscriptions")
-          .select("status")
+          .select("status, current_period_end, revenuecat_entitlement_active")
           .eq("user_id", u.id)
           .maybeSingle();
-        setIsArchitect(sub?.status === "active");
+        setIsArchitect(isArchitectPlanEffective(sub));
 
         const { data: owned } = await supabase
           .from("properties")

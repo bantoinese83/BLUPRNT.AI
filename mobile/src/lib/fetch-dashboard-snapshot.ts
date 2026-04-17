@@ -12,6 +12,7 @@ import type {
 import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
 import { parseCachedDashboardPayload } from "@shared/lib/dashboard-cache-payload";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 async function loadStaleDashboardFromCache(
   cacheKey: string,
@@ -168,7 +169,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
     const newInvoices = (invRes.data ?? []) as InvoiceRow[];
     const sub = subRes.data as UserSubscriptionRow | null;
     const pass = subRes2.data as ProjectPassRow | null;
-    const newIsArchitect = sub?.status === "active";
+    const newIsArchitect = isArchitectPlanEffective(sub);
     const newHasProjectPass = !!pass;
 
     const invoiceIds = newInvoices.map((i) => i.id).filter(Boolean);

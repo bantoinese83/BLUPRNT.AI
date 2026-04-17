@@ -49,6 +49,7 @@ export function RenameProjectModal({
                 This name appears on your dashboard and exports.
               </Text>
               <TextInput
+                testID="rename-project-input"
                 value={name}
                 onChangeText={setName}
                 style={styles.input}

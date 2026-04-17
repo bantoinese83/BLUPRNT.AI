@@ -12,5 +12,10 @@ appId: ai.bluprnt.mobile
 ---
 - launchApp
 - extendedWaitUntil:
-    visible: "Snap the room"
-    timeout: 60000
+    visible: "Snap the room. Get the number."
+    timeout: 30000
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Get Started"
+- assertVisible: "Enter project details"

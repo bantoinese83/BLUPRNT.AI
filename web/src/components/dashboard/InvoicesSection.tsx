@@ -18,7 +18,6 @@ type InvoicesSectionProps = {
   invoices: InvoiceRow[];
   onUploaded: () => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
-  isArchitect?: boolean;
   subscription?: UserSubscriptionRow | null;
   hasProjectPass?: boolean;
 };
@@ -28,7 +27,6 @@ export function InvoicesSection({
   invoices,
   onUploaded,
   onUpgradeClick,
-  isArchitect = false,
   subscription = null,
   hasProjectPass = false,
 }: InvoicesSectionProps) {
@@ -61,7 +59,6 @@ export function InvoicesSection({
     invoices,
     onUploaded,
     onUpgradeClick,
-    isArchitect,
     subscription,
     hasProjectPass,
   });

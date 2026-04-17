@@ -176,12 +176,21 @@ If the build cannot resolve `@shared`, confirm the setting above and that the fu
 From the repo root:
 
 ```bash
-npm run dev:mobile
+npm run dev:mobile   # Bundler only (JS changes)
+npm run ios          # Native Build (Required for RevenueCat & Maestro)
 ```
 
 Use **EAS** and project env for store builds; see [`.env.example`](.env.example) for `EXPO_PUBLIC_*` and RevenueCat keys. CI for mobile builds may use root `npm ci` and the single root lockfile — see [`.github/workflows/`](.github/workflows/) if present.
 
-**Path aliases** ([`mobile/tsconfig.json`](mobile/tsconfig.json)): `@/*` → `mobile/src/*`, `@shared/*` → repo `shared/*`, `@app/*` → `mobile/app/*`, `@assets/*` → `mobile/assets/*`. Enable Metro resolution with **`experiments.tsconfigPaths`: true** in [`mobile/app.json`](mobile/app.json). Vitest mirrors these in [`mobile/vitest.config.ts`](mobile/vitest.config.ts). Optional maintenance: [`scripts/rewrite-mobile-imports.mjs`](scripts/rewrite-mobile-imports.mjs) rewrites relative imports to aliases.
+**Path aliases** ([`mobile/tsconfig.json`](mobile/tsconfig.json)): `@/*` → `mobile/src/*`, `@shared/*` → repo `shared/*`, `@app/*` → `mobile/app/*`, `@assets/*` → `mobile/assets/*`. Enable Metro resolution with **`experiments.tsconfigPaths`: true** in [`mobile/app.json`](mobile/app.json).
+
+### Mobile Payments (RevenueCat)
+
+Mobile billing uses **RevenueCat**. To streamline development, the app implements an automated **Simulator Preview Mode**:
+
+- **Simulators**: Automatically detect `!Device.isDevice` and use the `EXPO_PUBLIC_REVENUECAT_TEST_STORE_KEY`. This connects to the **RevenueCat Test Store**, allowing you to fetch mock products (`monthly`, `lifetime`) without needing a valid Apple Sandbox account or internet.
+- **Physical Devices**: Use the production Apple/Google API keys.
+- **StoreKit Configuration**: For high-fidelity testing of native payment sheets, use the `mobile/ios/Configuration.storekit` file. In Xcode, select it in **Product > Scheme > Edit Scheme... > Run > Options**.
 
 ## Stripe (paid plans)
 
@@ -381,7 +390,10 @@ All commands run from the **repository root** unless you use `npm run <script> -
 ### End-to-end tests
 
 - **Web**: `npm run test:e2e` starts a production preview and runs Playwright under [`e2e/`](e2e/). The web server injects minimal `VITE_*` defaults when unset so builds work in CI without a root `.env`.
-- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/app-smoke.yaml`](mobile/maestro/app-smoke.yaml). You need the [Maestro CLI](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli), an iOS Simulator or Android emulator, and the **dev client** installed for bundle id `ai.bluprnt.mobile` (for example `npx expo run:ios` or `run:android` from `mobile/`). This is **not** part of the default Ubuntu CI job; add a separate **macOS** workflow with Xcode if you want Maestro in CI.
+- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/dashboard-management.yaml`](mobile/maestro/dashboard-management.yaml). 
+    - **Requirement**: You must have a **Native Development Build** installed on the simulator (run `npm run ios` at least once).
+    - **Setup**: Requires the [Maestro CLI](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli).
+    - **Note**: This is **not** part of the default Ubuntu CI job; add a separate **macOS** workflow with Xcode if you want Maestro in CI.
 
 ---
 

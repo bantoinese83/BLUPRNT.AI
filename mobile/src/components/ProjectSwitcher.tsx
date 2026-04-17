@@ -46,6 +46,7 @@ export function ProjectSwitcher({
         keyExtractor={(p) => p.id}
         renderItem={({ item: p }) => (
           <TouchableOpacity
+            testID={`project-card-${p.name}`}
             style={styles.cardWrapper}
             onPress={() => {
               Haptics.selectionAsync();

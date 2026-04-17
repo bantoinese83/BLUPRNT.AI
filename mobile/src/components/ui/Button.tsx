@@ -25,6 +25,7 @@ interface Props {
   accessibilityLabel?: string;
   /** Primary buttons default to uppercase; use `sentence` to match web-style labels (e.g. “Continue”). */
   titleCase?: "uppercase" | "sentence";
+  testID?: string;
 }
 
 export function Button({
@@ -38,6 +39,7 @@ export function Button({
   textSize,
   accessibilityLabel,
   titleCase = "uppercase",
+  testID,
 }: Props) {
   const a11yLabel = accessibilityLabel ?? title;
   const primaryTextStyle =
@@ -67,6 +69,7 @@ export function Button({
           accessibilityRole="button"
           accessibilityLabel={a11yLabel}
           accessibilityState={{ disabled: isInteractionDisabled }}
+          testID={testID}
         >
           <MotiView
             animate={{
@@ -124,6 +127,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityLabel={a11yLabel}
       accessibilityState={{ disabled: isInteractionDisabled }}
+      testID={testID}
       style={[
         styles.button,
         variant === "outline" ? styles.outline : styles.ghost,

@@ -539,7 +539,6 @@ function DashboardContent({
         );
         setShowUpgrade(true);
       }}
-      isArchitect={isArchitect}
       subscription={subscription}
       hasProjectPass={hasProjectPass}
     />

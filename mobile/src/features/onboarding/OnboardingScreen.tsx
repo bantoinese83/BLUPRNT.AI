@@ -338,6 +338,7 @@ export default function OnboardingScreen() {
                   ? "Continue, complete this step first"
                   : "Continue"
               }
+              testID="onboarding-continue"
               icon={<ChevronRight size={20} color="white" />}
             />
           </View>

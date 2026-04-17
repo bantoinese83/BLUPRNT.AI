@@ -35,6 +35,7 @@ import {
   architectBillingChannel,
   hasDuplicateWebAndStoreSubscriptions,
 } from "@shared/lib/subscription-billing";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ export default function Settings() {
           .eq("user_id", u.id)
           .maybeSingle();
         setSubscriptionRow(sub as UserSubscriptionRow | null);
-        setIsArchitect(sub?.status === "active");
+        setIsArchitect(isArchitectPlanEffective(sub));
 
         const { data: owned } = await supabase
           .from("properties")

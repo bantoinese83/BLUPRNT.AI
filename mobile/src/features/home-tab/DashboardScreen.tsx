@@ -236,7 +236,10 @@ export default function DashboardScreen() {
         transition={{ type: "timing", duration: 800 }}
         style={styles.headerContainer}
       >
-        <TouchableOpacity onPress={handleRenameProject}>
+        <TouchableOpacity 
+          testID="rename-project-trigger"
+          onPress={handleRenameProject}
+        >
           <Text style={styles.welcomeText}>{greetingLine},</Text>
           <Text style={styles.userFirstName}>
             {project?.name ||

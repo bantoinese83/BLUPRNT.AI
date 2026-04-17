@@ -1,0 +1,67 @@
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/onboarding-skip.yaml
+
+# Step 1: Create a temporary account
+- tapOn: "Get Started"
+- tapOn: "Kitchen"
+- tapOn: { id: "onboarding-continue" }
+- tapOn: "ZIP code"
+- inputText: "90210"
+- tapOn: "Where is this home?"
+- tapOn: { id: "onboarding-continue" }
+- tapOn: { text: "Just planning.*" }
+- tapOn: { id: "onboarding-continue" }
+- tapOn: "Or describe the project here…"
+- inputText: "Profile Test"
+- tapOn: "Vision-Match your room"
+- tapOn: { id: "onboarding-continue" }
+
+# Wait for analysis complete
+- extendedWaitUntil:
+    visible: "Everything we see"
+    timeout: 30000
+- tapOn: { id: "onboarding-continue" }
+
+# Registration
+- runScript: 
+    text: |
+      const suffix = Date.now();
+      output.testEmail = `profile.${suffix}@bluprnt.ai`;
+- inputText: ${output.testEmail}
+- tapOn: "Password"
+- inputText: "ProfilePassword123!"
+- tapOn: "Create account"
+
+# Land on Dashboard
+- extendedWaitUntil:
+    visible: "Dashboard"
+    timeout: 30000
+
+# Step 2: Navigate to Profile
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Account Settings"
+    timeout: 10000
+
+# Step 3: Update Profile Name
+- tapOn: { id: "profile-name-input" }
+- clearText
+- inputText: "Maestro Tester"
+- tapOn: { id: "profile-save-button" }
+- extendedWaitUntil:
+    visible: "Profile updated."
+    timeout: 5000
+
+# Step 4: Sign Out
+- tapOn: { id: "profile-logout-button" }
+- assertVisible: "Sign Out" # Alert title
+- tapOn: "Sign Out" # Alert action
+
+# Verify redirection to Landing
+- extendedWaitUntil:
+    visible: "Snap the room. Get the number."
+    timeout: 10000

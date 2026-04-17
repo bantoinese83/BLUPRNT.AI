@@ -4,7 +4,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-FLOW="$ROOT/mobile/maestro/app-smoke.yaml"
+FLOW="${1:-$ROOT/mobile/maestro/}"
+
+# Add common local install paths to PATH just in case terminal wasn't restarted
+export PATH="$PATH:$HOME/.maestro/bin"
 
 if ! command -v maestro >/dev/null 2>&1; then
   echo "Maestro CLI not found."

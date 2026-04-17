@@ -6,6 +6,7 @@ import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { addUserFlowBreadcrumb, reportClientError } from "@/lib/sentry";
 
 interface UseInvoiceManagementProps {
@@ -13,7 +14,6 @@ interface UseInvoiceManagementProps {
   invoices: InvoiceRow[];
   onUploaded: () => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
-  isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
 }
@@ -26,7 +26,6 @@ export function useInvoiceManagement({
   invoices,
   onUploaded,
   onUpgradeClick,
-  isArchitect,
   subscription,
   hasProjectPass,
 }: UseInvoiceManagementProps) {
@@ -53,7 +52,7 @@ export function useInvoiceManagement({
   ).length;
 
   const architectUploads = subscription?.invoice_uploads_count ?? 0;
-  const isArchitectActive = isArchitect && subscription?.status === "active";
+  const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
   const atLimit =
     documentType === "invoice" &&

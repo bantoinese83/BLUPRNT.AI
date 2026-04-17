@@ -10,6 +10,7 @@ import type {
 } from "@shared/types/database";
 import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 import { partialDashboardLoadMessage } from "@shared/lib/dashboard-partial-load";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
 
 
@@ -143,7 +144,7 @@ export async function fetchDashboardSnapshot(options?: {
     const newInvoices = (invRes.data ?? []) as InvoiceRow[];
     const sub = subRes.data as UserSubscriptionRow | null;
     const pass = subRes2.data as ProjectPassRow | null;
-    const newIsArchitect = sub?.status === "active";
+    const newIsArchitect = isArchitectPlanEffective(sub);
     const newHasProjectPass = !!pass;
 
     const invoiceIds = newInvoices.map((i) => i.id).filter(Boolean);

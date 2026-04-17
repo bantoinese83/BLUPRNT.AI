@@ -78,6 +78,7 @@ export function ProjectSwitcher({
       <div ref={ref} className="relative min-w-0 flex-1">
         <Button
           variant="outline"
+          data-testid="project-switcher-toggle"
           className={`h-11 min-w-0 max-w-full gap-2.5 rounded-2xl border-slate-200/80 bg-white px-4 shadow-sm transition-all hover:border-slate-400 hover:shadow-md group sm:min-w-[160px] sm:max-w-[280px] ${open ? "border-slate-950 ring-2 ring-slate-950/20" : ""}`}
           onClick={() => setOpen((o) => !o)}
           disabled={disabled}
@@ -132,6 +133,7 @@ export function ProjectSwitcher({
                         onSelect(p.id);
                         setOpen(false);
                       }}
+                      data-testid={`project-option-${p.name}`}
                     >
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/20" : "bg-slate-100 ring-1 ring-slate-200/80 group-hover:bg-slate-200/70"}`}
@@ -168,6 +170,7 @@ export function ProjectSwitcher({
                           e.stopPropagation();
                           onDelete(p.id);
                         }}
+                        data-testid={`project-delete-${p.name}`}
                         className="absolute right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                         aria-label={`Delete project ${p.name}`}
                       >

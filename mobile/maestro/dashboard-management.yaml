@@ -1,0 +1,63 @@
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/onboarding-skip.yaml
+
+# Step 1: Create a temporary account for this test run
+- tapOn: "Get Started"
+- tapOn: "Kitchen"
+- tapOn: { id: "onboarding-continue" }
+- tapOn: "ZIP code"
+- inputText: "90210"
+- tapOn: "Where is this home?"
+- tapOn: { id: "onboarding-continue" }
+- tapOn: { text: "Just planning.*" }
+- tapOn: { id: "onboarding-continue" }
+- tapOn: "Or describe the project here…"
+- inputText: "Maestro Test Project"
+- tapOn: "Vision-Match your room"
+- tapOn: { id: "onboarding-continue" }
+
+# Wait for analysis complete
+- extendedWaitUntil:
+    visible: "Everything we see"
+    timeout: 30000
+- tapOn: { id: "onboarding-continue" }
+
+# Registration
+- inputText: "maestro.test.final@bluprnt.ai"
+- tapOn: "Password"
+- inputText: "MaestroPassword123!"
+- tapOn: "Create account"
+
+# Verification: Should land on Dashboard
+- extendedWaitUntil:
+    visible: "Dashboard"
+    timeout: 30000
+- assertVisible: "Maestro Test Project"
+
+# Step 2: Management - Rename
+- tapOn: { id: "rename-project-trigger" }
+- tapOn: { id: "rename-project-input" }
+- eraseText: 50
+- inputText: "Renamed Maestro Project"
+- tapOn: "Save"
+- extendedWaitUntil:
+    visible: "Renamed Maestro Project"
+    timeout: 10000
+
+# Step 3: Management - Delete
+- longPressOn: { id: "project-card-Renamed Maestro Project" }
+- assertVisible: "Delete Project"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible: "Deleted" # Success alert
+    timeout: 5000
+- tapOn: "OK"
+
+# Verify redirection to empty state
+- extendedWaitUntil:
+    visible: "Your home hub is ready"
+    timeout: 10000

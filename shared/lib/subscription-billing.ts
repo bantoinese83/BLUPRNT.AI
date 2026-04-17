@@ -1,4 +1,5 @@
 import type { UserSubscriptionRow } from "@shared/types/database";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 /** User may be paying for Architect on both Stripe (web) and the app store. */
 export function hasDuplicateWebAndStoreSubscriptions(
@@ -16,7 +17,7 @@ export type ArchitectBillingChannel = "stripe" | "store" | "mixed" | "unknown";
 export function architectBillingChannel(
   sub: UserSubscriptionRow | null,
 ): ArchitectBillingChannel {
-  if (!sub || sub.status !== "active") return "unknown";
+  if (!sub || !isArchitectPlanEffective(sub)) return "unknown";
   const stripe = Boolean(sub.stripe_subscription_id);
   const rc = sub.revenuecat_entitlement_active === true;
   if (stripe && rc) return "mixed";

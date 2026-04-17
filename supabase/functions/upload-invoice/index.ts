@@ -8,8 +8,10 @@ import {
   getUserIdFromRequest,
 } from "../_shared/auth.ts";
 import {
+  ARCHITECT_UPLOADS_PER_MONTH,
   checkInvoiceUploadAllowed,
-  incrementArchitectUploadCount,
+  releaseArchitectInvoiceUploadSlot,
+  reserveArchitectInvoiceUploadSlot,
 } from "../_shared/entitlements.ts";
 import { extractInvoiceFromPdf } from "../_shared/ocr.ts";
 
@@ -102,7 +104,24 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const docId = crypto.randomUUID();
+    let rollbackArchitectSlot = false;
+    try {
+      if (docType === "invoice" && entitlement.reason === "architect_plan") {
+        const slot = await reserveArchitectInvoiceUploadSlot(admin, userId);
+        if (!slot.ok) {
+          return jsonResponse(
+            {
+              error: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
+              error_code: "INVOICE_LIMIT_ARCHITECT_MONTH",
+            },
+            403,
+            req,
+          );
+        }
+        rollbackArchitectSlot = true;
+      }
+
+      const docId = crypto.randomUUID();
     const ext = validatedFile.name.includes(".")
       ? validatedFile.name.slice(validatedFile.name.lastIndexOf("."))
       : "";
@@ -294,9 +313,7 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      if (type === "invoice") {
-        await incrementArchitectUploadCount(admin, userId);
-      }
+      rollbackArchitectSlot = false;
       return jsonResponse(
         {
           invoice_id: invoiceId,
@@ -309,9 +326,16 @@ Deno.serve(async (req: Request) => {
       );
     };
 
-    return docType === "invoice"
-      ? await createInvoiceRecord("invoice")
-      : await createInvoiceRecord(docType);
+      return docType === "invoice"
+        ? await createInvoiceRecord("invoice")
+        : await createInvoiceRecord(docType);
+    } finally {
+      if (rollbackArchitectSlot) {
+        await releaseArchitectInvoiceUploadSlot(admin, userId).catch((err) => {
+          console.error("[upload-invoice] release architect slot failed:", err);
+        });
+      }
+    }
   } catch (e) {
     console.error(e);
     return jsonResponse({ error: "Upload failed. Try again." }, 500, req);

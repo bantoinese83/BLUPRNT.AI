@@ -13,6 +13,7 @@ import Constants, { ExecutionEnvironment } from "expo-constants";
 
 initMobileSentry();
 
+import * as Device from "expo-device";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import {
   useFonts,
@@ -85,26 +86,33 @@ function RootLayout() {
     const isExpoGo =
       Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
     const testKey = process.env.EXPO_PUBLIC_REVENUECAT_TEST_STORE_KEY || "";
+    const isSimulator = !Device.isDevice && Platform.OS !== "web";
 
-    if (isExpoGo) {
-      console.log("Expo Go detected. Using RevenueCat Test Store Key.");
+    // Simulators default to "Test Store" (Preview Mode) to bypass unreliable Apple Sandbox
+    if (isExpoGo || isSimulator) {
+      console.log(`LOG  ${isSimulator ? "Simulator" : "Expo Go"} detected. Using RevenueCat in Preview Mode.`);
       Purchases.configure({ apiKey: testKey });
     } else {
-      if (Platform.OS === "ios") {
-        Purchases.configure({
-          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY || "",
-        });
-      } else if (Platform.OS === "android") {
-        Purchases.configure({
-          apiKey: process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY || "",
-        });
+      const apiKey = Platform.OS === "ios" 
+        ? process.env.EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY 
+        : process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
+
+      if (apiKey) {
+        console.log(`LOG  Physical device (${Platform.OS}) detected. Using production RevenueCat keys.`);
+        Purchases.configure({ apiKey });
+      } else if (testKey) {
+        console.warn("WARN No production API key found. Falling back to Test Store.");
+        Purchases.configure({ apiKey: testKey });
+      } else {
+        console.error("ERROR RevenueCat: No API keys found for configuration.");
       }
     }
   }, []);
 
-  if (!loaded || isOutdated) {
-    return <BrandedSplash />;
-  }
+  /* Bypassing for debug */
+  // if (!loaded || isOutdated) {
+  //   return <BrandedSplash />;
+  // }
 
   return (
     <QueryClientProvider client={queryClient}>

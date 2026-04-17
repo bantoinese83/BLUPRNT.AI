@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 4173;
+const PORT = 3000;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({

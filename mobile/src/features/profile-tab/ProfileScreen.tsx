@@ -290,6 +290,7 @@ export default function ProfileScreen() {
                   style={styles.inputIcon}
                 />
                 <TextInput
+                  testID="profile-name-input"
                   style={styles.input}
                   value={displayName}
                   onChangeText={setDisplayName}
@@ -314,6 +315,7 @@ export default function ProfileScreen() {
               </View>
             </View>
             <Button
+              testID="profile-save-button"
               title={saving ? "Saving..." : "Save Profile"}
               onPress={handleSaveProfile}
               disabled={saving}
@@ -531,7 +533,11 @@ export default function ProfileScreen() {
             <Text style={styles.dangerText}>Delete My Account</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
+          <TouchableOpacity 
+            testID="profile-logout-button"
+            style={styles.logoutButton} 
+            onPress={handleSignOut}
+          >
             <LogOut size={20} color={Theme.colors.text.secondary} />
             <Text style={styles.logoutText}>Sign Out</Text>
           </TouchableOpacity>

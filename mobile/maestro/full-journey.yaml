@@ -1,0 +1,60 @@
+appId: ai.bluprnt.mobile
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Snap the room. Get the number."
+    timeout: 30000
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Get Started"
+
+# Step 0: Project Type
+- assertVisible: "What are you working on first?"
+- tapOn: "Kitchen"
+- tapOn:
+    id: "onboarding-continue"
+
+# Step 1: Location
+- assertVisible: "Where is this home?"
+- tapOn: "ZIP code"
+- inputText: "90210"
+- tapOn: "Where is this home?" # Dismiss keyboard
+- tapOn:
+    id: "onboarding-continue"
+- extendedWaitUntil:
+    visible: "Where are you in the process?"
+    timeout: 10000
+
+# Step 2: Stage
+- tapOn:
+    text: "Just planning.*"
+- tapOn:
+    id: "onboarding-continue"
+- extendedWaitUntil:
+    visible: "Vision-Match your room"
+    timeout: 10000
+
+# Step 3: Vision/Context
+- tapOn: "Or describe the project here…"
+- inputText: "Full remodel with quartz countertops and custom cabinets"
+- tapOn: "Vision-Match your room" # Dismiss keyboard
+- tapOn:
+    id: "onboarding-continue"
+- extendedWaitUntil:
+    visible: "Building your kitchen estimate..."
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "Everything we see" 
+    timeout: 60000
+
+# Step 5: Preview
+- assertVisible: "Estimate Summary"
+- assertVisible: "Materials Breakdown"
+- tapOn:
+    id: "onboarding-continue"
+
+# Step 6: Final
+- assertVisible: "Get ready to save"
+- tapOn: "Already have an account? Sign In"
+- assertVisible: "Enter your email"

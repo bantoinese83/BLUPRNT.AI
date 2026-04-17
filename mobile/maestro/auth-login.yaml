@@ -1,0 +1,16 @@
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: ${CLEAR_STATE}
+- runFlow:
+    file: common/onboarding-skip.yaml
+    when:
+      visible: "Snap the room. Get the number."
+- tapOn: "Already have an account? Sign In"
+- inputText: ${USER_EMAIL}
+- tapOn: "Password"
+- inputText: ${USER_PASSWORD}
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: "Dashboard"
+    timeout: 30000

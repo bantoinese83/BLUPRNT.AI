@@ -1,14 +1,18 @@
 /**
  * Entitlement checks for invoice upload limits.
  * Free: 3 invoices per project.
- * Architect: 10 invoice uploads per Stripe billing period (aligned with current_period_end).
+ * Architect: 10 global invoice uploads per billing period (Stripe period when applicable, or store entitlement).
  * Project Pass: unlimited invoices for that project while pass is valid.
  */
 
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import {
+  isArchitectGlobalUploadQuotaAvailable,
+  isArchitectPlanEffective,
+} from "./architect-entitlement.ts";
 
 const FREE_INVOICE_LIMIT = 3;
-const ARCHITECT_UPLOADS_PER_MONTH = 10;
+export const ARCHITECT_UPLOADS_PER_MONTH = 10;
 
 export type EntitlementResult = {
   allowed: boolean;
@@ -48,7 +52,9 @@ export async function checkInvoiceUploadAllowed(
   const [subRes, invCountRes] = await Promise.all([
     admin
       .from("user_subscriptions")
-      .select("status, current_period_end, invoice_uploads_count")
+      .select(
+        "status, current_period_end, invoice_uploads_count, revenuecat_entitlement_active",
+      )
       .eq("user_id", userId)
       .single(),
     admin
@@ -61,16 +67,11 @@ export async function checkInvoiceUploadAllowed(
   const sub = subRes.data;
   const projectInvoiceCount = invCountRes.count ?? 0;
 
-  const isArchitectActive = sub && sub.status === "active";
-  const periodEnd = sub?.current_period_end
-    ? new Date(sub.current_period_end)
-    : null;
-  const isPeriodValid = periodEnd && periodEnd > now;
-
-  const architectHasGlobalSpace =
-    isArchitectActive &&
-    isPeriodValid &&
-    (sub.invoice_uploads_count ?? 0) < ARCHITECT_UPLOADS_PER_MONTH;
+  const architectHasGlobalSpace = isArchitectGlobalUploadQuotaAvailable(
+    sub,
+    now,
+    ARCHITECT_UPLOADS_PER_MONTH,
+  );
   const projectHasFreeSpace = projectInvoiceCount < FREE_INVOICE_LIMIT;
 
   // 3. Evaluate permissions
@@ -84,7 +85,10 @@ export async function checkInvoiceUploadAllowed(
   }
 
   // 4. Blocked - return descriptive reason
-  if (isArchitectActive && isPeriodValid) {
+  if (
+    isArchitectPlanEffective(sub, now) &&
+    (sub?.invoice_uploads_count ?? 0) >= ARCHITECT_UPLOADS_PER_MONTH
+  ) {
     return {
       allowed: false,
       reason: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
@@ -99,32 +103,37 @@ export async function checkInvoiceUploadAllowed(
   };
 }
 
-export async function incrementArchitectUploadCount(
+/** Row-locked atomic reserve; call before storage/OCR. See DB reserve_architect_invoice_upload_slot. */
+export async function reserveArchitectInvoiceUploadSlot(
+  admin: SupabaseClient,
+  userId: string,
+): Promise<{ ok: boolean; invoice_uploads_count?: number }> {
+  const { data, error } = await admin.rpc("reserve_architect_invoice_upload_slot", {
+    p_user_id: userId,
+    p_max_uploads: ARCHITECT_UPLOADS_PER_MONTH,
+  });
+  if (error) {
+    console.error("[entitlements] reserve_architect_invoice_upload_slot:", error);
+    return { ok: false };
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || typeof row !== "object") return { ok: false };
+  const rec = row as { ok?: boolean; invoice_uploads_count?: number };
+  return {
+    ok: Boolean(rec.ok),
+    invoice_uploads_count: rec.invoice_uploads_count,
+  };
+}
+
+/** Undo reserve when upload fails after slot was claimed. */
+export async function releaseArchitectInvoiceUploadSlot(
   admin: SupabaseClient,
   userId: string,
 ): Promise<void> {
-  const now = new Date();
-  const { data: sub } = await admin
-    .from("user_subscriptions")
-    .select("status, invoice_uploads_count, current_period_end")
-    .eq("user_id", userId)
-    .single();
-
-  if (!sub || sub.status !== "active") return;
-
-  const periodEnd = sub.current_period_end
-    ? new Date(sub.current_period_end)
-    : null;
-  if (!periodEnd || periodEnd <= now) return;
-
-  const count = sub.invoice_uploads_count ?? 0;
-
-  await admin
-    .from("user_subscriptions")
-    .update({
-      invoice_uploads_count: count + 1,
-      invoice_uploads_reset_at: periodEnd.toISOString(),
-      updated_at: now.toISOString(),
-    })
-    .eq("user_id", userId);
+  const { error } = await admin.rpc("release_architect_invoice_upload_slot", {
+    p_user_id: userId,
+  });
+  if (error) {
+    console.error("[entitlements] release_architect_invoice_upload_slot:", error);
+  }
 }

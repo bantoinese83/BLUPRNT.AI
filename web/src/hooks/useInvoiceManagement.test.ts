@@ -45,7 +45,6 @@ describe("useInvoiceManagement", () => {
     invoices: [],
     onUploaded: mockOnUploaded,
     onUpgradeClick: mockOnUpgradeClick,
-    isArchitect: false,
     subscription: null,
     hasProjectPass: false,
   };
@@ -90,8 +89,12 @@ describe("useInvoiceManagement", () => {
       const { result } = renderHook(() =>
         useInvoiceManagement({
           ...defaultProps,
-          isArchitect: true,
-          subscription: { status: "active", invoice_uploads_count: 10 } as any,
+          subscription: {
+            status: "active",
+            invoice_uploads_count: 10,
+            current_period_end: null,
+            revenuecat_entitlement_active: false,
+          } as any,
         }),
       );
       expect(result.current.atLimit).toBe(true);
@@ -101,8 +104,12 @@ describe("useInvoiceManagement", () => {
       const { result } = renderHook(() =>
         useInvoiceManagement({
           ...defaultProps,
-          isArchitect: true,
-          subscription: { status: "active", invoice_uploads_count: 9 } as any,
+          subscription: {
+            status: "active",
+            invoice_uploads_count: 9,
+            current_period_end: null,
+            revenuecat_entitlement_active: false,
+          } as any,
         }),
       );
       expect(result.current.atLimit).toBe(false);

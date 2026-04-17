@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
-import { normalizeScopeSourceForDb, sanitizeEstimate } from "./estimate.ts";
+import { normalizeScopeSourceForDb, sanitizeEstimate, cityFromZip } from "./estimate.ts";
 
 Deno.test("normalizeScopeSourceForDb - DB only allows text | photo", () => {
   assertEquals(normalizeScopeSourceForDb("photo"), "photo");
@@ -7,6 +7,14 @@ Deno.test("normalizeScopeSourceForDb - DB only allows text | photo", () => {
   assertEquals(normalizeScopeSourceForDb("text"), "text");
   assertEquals(normalizeScopeSourceForDb(undefined), "text");
   assertEquals(normalizeScopeSourceForDb("vision"), "text");
+});
+
+Deno.test("cityFromZip - handles edge cases", () => {
+  assertEquals(cityFromZip("90210"), "Los Angeles area");
+  assertEquals(cityFromZip("10001"), "NYC Metro area");
+  assertEquals(cityFromZip("abc"), "your area");
+  assertEquals(cityFromZip(""), "your area");
+  assertEquals(cityFromZip("1234"), "your area"); // Too short
 });
 
 Deno.test("sanitizeEstimate - enforces itemized math", () => {
@@ -35,6 +43,24 @@ Deno.test("sanitizeEstimate - enforces itemized math", () => {
   // Math should be corrected: 10 * 100 = 1000
   assertEquals(result.scope_items[0].total_cost_min, 1000);
   assertEquals(result.scope_items[0].total_cost_max, 2000);
+});
+
+Deno.test("sanitizeEstimate - handles extreme values gracefully", () => {
+  const input = {
+    summary: { estimated_min_total: 0, estimated_max_total: 0 },
+    scope_items: [
+      {
+        quantity: 1000000,
+        unit_cost_min: 100,
+        unit_cost_max: 200,
+      },
+    ],
+  };
+
+  const result = sanitizeEstimate(input as any, "premium", false);
+
+  assertEquals(result.summary.estimated_min_total, 100000000); // 100M
+  assertEquals(result.summary.estimated_max_total, 200000000); // 200M
 });
 
 Deno.test("sanitizeEstimate - syncs summary totals if they drift", () => {
@@ -103,3 +129,4 @@ Deno.test("sanitizeEstimate - sanitizes materials list", () => {
   assertEquals(result.scope_items[0].materials?.[0].quantity, 2);
   assertEquals(result.scope_items[0].materials?.[1].name, "Material");
 });
+

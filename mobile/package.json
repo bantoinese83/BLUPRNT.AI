@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "build": "expo export --platform ios --platform android",
     "check-types": "tsc --noEmit",
@@ -16,6 +16,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e:mobile": "npm run test:e2e:mobile --prefix ..",
     "knip": "knip --exclude types,nsTypes,enumMembers,duplicates"
   },
   "dependencies": {

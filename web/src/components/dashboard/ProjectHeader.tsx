@@ -75,6 +75,7 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
           <div className="flex items-center gap-2 max-w-xl animate-in fade-in slide-in-from-left-2 duration-200">
             <Input
               ref={inputRef}
+              data-testid="project-rename-input"
               value={tempName}
               onChange={(e) => setTempName(e.target.value)}
               onKeyDown={(e) => {
@@ -85,6 +86,7 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
             />
             <Button
               size="icon"
+              data-testid="project-rename-save"
               variant="primary"
               className="h-10 w-10 shrink-0"
               onClick={handleSave}
@@ -103,6 +105,7 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
         ) : (
           <div
             className="group flex items-center gap-3 cursor-pointer"
+            data-testid="project-name-display"
             onClick={() => setIsEditing(true)}
           >
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 group-hover:text-slate-700 transition-colors">

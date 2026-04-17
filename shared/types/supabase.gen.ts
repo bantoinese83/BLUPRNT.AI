@@ -205,6 +205,17 @@ export type Database = {
         Returns: Json | null;
       };
       recalc_project_totals: { Args: { p_id: string }; Returns: undefined };
+      release_architect_invoice_upload_slot: {
+        Args: { p_user_id: string };
+        Returns: undefined;
+      };
+      reserve_architect_invoice_upload_slot: {
+        Args: { p_max_uploads?: number; p_user_id: string };
+        Returns: {
+          invoice_uploads_count: number;
+          ok: boolean;
+        }[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

@@ -12,6 +12,7 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { LandingTrustStrip } from "@/components/landing/LandingTrustStrip";
 import { PLAN_COMPARISON_ROWS } from "@/components/landing/landing-content";
 import { useAuth } from "@/hooks/use-auth";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingSocialProof } from "@/components/landing/LandingSocialProof";
@@ -46,11 +47,11 @@ export default function Landing() {
 
       const { data } = await supabase
         .from("user_subscriptions")
-        .select("status")
+        .select("status, current_period_end, revenuecat_entitlement_active")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      setIsArchitect(data?.status === "active");
+      setIsArchitect(isArchitectPlanEffective(data));
     }
     checkSubscription();
   }, [user]);
