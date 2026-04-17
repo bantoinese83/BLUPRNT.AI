@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import RevenueCatUI from "react-native-purchases-ui";
 import { X, Bot, ShieldCheck, FileDown, Check } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { PRICING } from "@shared/constants/pricing";
 import * as Haptics from "expo-haptics";
+import { usePremium } from "@/hooks/usePremium";
 import { MotiView } from "moti";
 import {
   ArchitectPlanIcon,
@@ -31,11 +33,12 @@ interface Props {
  * as the functional layer for production builds.
  */
 export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">(
-    "monthly",
-  );
+  const insets = useSafeAreaInsets();
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">("monthly");
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const { purchase, packages, loading } = usePremium();
 
-  const handlePurchaseCompleted = () => {
+  const handlePurchaseCompleted = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onClose();
   };
@@ -72,8 +75,17 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
     >
       <View style={styles.container}>
         <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+          bounces
+          contentContainerStyle={[
+            styles.scroll,
+            {
+              paddingTop: Math.max(insets.top, 12) + 36,
+              paddingBottom: Math.max(insets.bottom, 16) + 32,
+            },
+          ]}
         >
           {/* Hero Header */}
           <MotiView
@@ -197,17 +209,52 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               price is shown in the App Store confirmation.
             </Text>
 
-            {/* Functional RC layer overlayed briefly or as the button target */}
-            <RevenueCatUI.Paywall
-              onPurchaseCompleted={handlePurchaseCompleted}
-              onRestoreCompleted={handleRestoreCompleted}
-              onDismiss={onClose}
-              style={styles.rcPaywall}
-            />
+            <TouchableOpacity
+              style={[styles.continueButton, isPurchasing && styles.continueButtonDisabled]}
+              disabled={isPurchasing || loading}
+              onPress={async () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setIsPurchasing(true);
+                try {
+                  // Find correct package from RevenueCat based on selection
+                  const targetIdentifier = selectedPlan === "monthly" ? "$rc_monthly" : "$rc_lifetime";
+                  const pkg = packages.find((p) => p.identifier === targetIdentifier);
+                  
+                  if (pkg) {
+                    const success = await purchase(pkg);
+                    if (success) handlePurchaseCompleted();
+                  } else {
+                    console.error("Could not find matching package in RevenueCat offerings for:", targetIdentifier);
+                  }
+                } catch (e) {
+                  console.error(e);
+                } finally {
+                  setIsPurchasing(false);
+                }
+              }}
+            >
+              <Text style={styles.continueButtonText}>
+                {isPurchasing ? "Securing Plan..." : "Continue"}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.restoreButton}
+              onPress={handleRestoreCompleted}
+            >
+              <Text style={styles.restoreText}>Restore Purchases</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
 
-        <TouchableOpacity style={styles.closeFloat} onPress={onClose}>
+        <TouchableOpacity
+          style={[
+            styles.closeFloat,
+            { top: Math.max(insets.top, 8) + 8 },
+          ]}
+          onPress={onClose}
+          accessibilityLabel="Close"
+        >
           <X size={20} color={Theme.colors.text.secondary} />
         </TouchableOpacity>
       </View>
@@ -221,9 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background,
   },
   scroll: {
-    padding: 24,
-    paddingTop: 40,
-    paddingBottom: 60,
+    paddingHorizontal: 24,
   },
   hero: {
     alignItems: "center",
@@ -374,15 +419,39 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     paddingHorizontal: 40,
   },
-  rcPaywall: {
+  continueButton: {
+    backgroundColor: Theme.colors.brand.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 14,
     width: "100%",
-    // In dev builds/Expo, RC will show its button. In Prod, it renders the full UI.
-    // We adjust height to only show the "Buy" trigger if the UI is custom.
-    height: Platform.OS === "web" ? 0 : 64,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    shadowColor: Theme.colors.brand.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  continueButtonDisabled: {
+    opacity: 0.7,
+  },
+  continueButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: Theme.typography.family.bold,
+  },
+  restoreButton: {
+    paddingVertical: 8,
+  },
+  restoreText: {
+    color: Theme.colors.text.secondary,
+    fontSize: 13,
+    fontFamily: Theme.typography.family.medium,
   },
   closeFloat: {
     position: "absolute",
-    top: 16,
     right: 16,
     width: 36,
     height: 36,
