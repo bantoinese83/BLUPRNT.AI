@@ -1,0 +1,31 @@
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: true
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Get Started"
+
+# 1. Trigger Upgrade flow
+- tapOn: "Profile"
+- tapOn: "Upgrade to Architect"
+- assertVisible: "Architect Plan"
+- tapOn: "Unlock All Features"
+
+# 2. Complete Apple Sandbox Purchase
+# Note: Maestro can't always tap native iOS system alerts (Sandbox sign-in), 
+# but we can assert the app's 'Success' state if we bypass or handle the mock.
+# In a real Maestro CI environment, we would use 'allow-native-alerts'.
+- extendedWaitUntil:
+    visible: "Confirm Purchase"
+    timeout: 30000
+- tapOn: "Purchase"
+
+# 3. Verify Entitlement Update
+- extendedWaitUntil:
+    visible: "Welcome to Architect"
+    timeout: 30000
+- tapOn: "Continue"
+- assertVisible: "Plan: Architect"
+- assertVisible: "Unlimited PDF Exports"
