@@ -13,7 +13,7 @@ type Props = {
 };
 
 function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
-  if (min === 0 || invoiceTotal === 0) {
+  if (min === 0) {
     return {
       score: 0,
       status: "Analyzing",

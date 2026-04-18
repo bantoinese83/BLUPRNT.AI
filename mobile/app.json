@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ai.bluprnt.mobile",
-      "buildNumber": "1",
+      "buildNumber": "14",
       "associatedDomains": ["applinks:bluprnt.ai"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
