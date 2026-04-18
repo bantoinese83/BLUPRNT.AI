@@ -4,6 +4,13 @@
 
 Monorepo: **Vite + React** (`web/`), **Expo** (`mobile/`), and **shared TypeScript** (`shared/`) on **Supabase** (Postgres, Auth, Storage) with **Edge Functions** for estimates, invoice OCR, billing, and resale analytics.
 
+---
+
+### 🚀 Production Readiness (April 2026)
+The platform is currently in **Production Hardening** phase. For the latest deployment steps, security configurations, and developer handover notes, please see:
+- [**Production Launch Handbook**](docs/production_launch_handbook.md) — Infrastructure, API, and Submission details.
+- [**Developer Handover**](docs/developer_handover.md) — Immediate next tasks and project status.
+
 ## Architecture
 
 ### System overview

@@ -117,8 +117,37 @@ The final step was automating App Store submission directly from the developer e
 
 ---
 
-## 🚀 Final Release Pipeline
+---
 
-1. Add final `EXPO_PUBLIC_*` secrets directly into the Expo Web Dashboard Settings (Supabase URLs, RevenueCat Appl Keys).
-2. Ensure Supabase Secrets holds `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `GEMINI_API_KEY`.
-3. Run `npx eas-cli build --profile production --platform ios` to initiate the final App Store drop!
+## 9. Mobile UX & Hardening Polish
+
+The final phase of the mobile app focus was on "Day 1" user experience and stability.
+
+### What was done:
+- **Branded Splash**: Re-enabled `BrandedSplash` in `_layout.tsx` to handle the transition between native boot and JS loading. Hiding of the splash screen is now gated by font and asset loading.
+- **Dynamic Versioning**: Replaced hardcoded version strings on the Profile screen with `expo-constants`. The app now automatically displays the correct `version` and `buildNumber` from `app.json`.
+- **Micro-animations**: Enhanced the onboarding flow with `moti` transitions (slides and fades) for phase labels and step content, providing a more premium, AI-native feel.
+- **Analytics Fallback**: Implemented a Sentry breadcrumb fallback in `trackProductEvent` for production builds, ensuring observability even before a dedicated analytics SDK is integrated.
+
+---
+
+## 10. Web Production & SEO Hardening
+
+We finalized the web application to ensure it is as polished and discoverable as the mobile app.
+
+### What was done:
+- **Canonical Redirects**: Updated `vercel.json` to enforce `https://bluprntai.com`. All `www` traffic is now consolidated on the root domain to maximize SEO authority.
+- **SEO Page Titles**: Integrated `Helmet` on the Dashboard and Project views to show descriptive, context-aware browser tab titles (e.g., "Financial Dashboard | BLUPRNT.AI").
+- **A11y (Accessibility)**: Conducted an audit of the Landing Header and Footer to ensure all images have proper `alt` tags and navigation is keyboard-accessible.
+- **Chunk Recovery**: Confirmed that `main.tsx` includes automatic reload logic for chunk loading failures, preventing stale sessions after new code deployments.
+
+---
+
+## 11. Final Checklist & Submission
+
+1. **Mobile**: Run `npx eas build --profile production --platform ios` and then `eas submit --latest`.
+2. **Web**: Any push to `main` will automatically trigger a Vercel deployment with the new SEO and redirect rules.
+3. **Legal**: Direct users to `bluprnt.ai/privacy` and `bluprnt.ai/terms` for the final Apple review pass.
+
+---
+*Last updated: April 18, 2026*
