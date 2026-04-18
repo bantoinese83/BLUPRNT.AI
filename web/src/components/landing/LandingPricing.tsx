@@ -41,7 +41,7 @@ export function LandingPricing({
             Simple, <span className="text-slate-900">transparent</span> pricing
           </h2>
 
-          <p className="mx-auto max-w-xl text-slate-600 text-lg">
+          <p className="mx-auto max-w-xl text-slate-800 text-lg">
             Pick monthly if you’re always fixing something, or a one-time pass
             for one big remodel.
           </p>
@@ -71,9 +71,9 @@ export function LandingPricing({
                 <span className="text-5xl font-black tracking-tight text-slate-900">
                   ${PRICING.architectUsdPerMonth}
                 </span>
-                <span className="text-slate-500 font-bold">/mo</span>
+                <span className="text-slate-800 font-bold">/mo</span>
               </div>
-              <p className="mt-4 text-slate-600 font-medium">
+              <p className="mt-4 text-slate-800 font-medium">
                 For people juggling more than one job or always mid-project.
               </p>
             </div>
@@ -100,7 +100,7 @@ export function LandingPricing({
               disabled={isArchitect}
               className={`w-full h-14 rounded-2xl text-lg font-black ${
                 isArchitect
-                  ? "bg-slate-50 border-slate-200 text-slate-400 group-hover:scale-100 cursor-default"
+                  ? "bg-slate-50 border-slate-200 text-slate-800 group-hover:scale-100 cursor-default"
                   : "premium-gradient border-0 shadow-lg shadow-teal-500/30 group-hover:shadow-teal-500/40 group-hover:scale-[1.02] active:scale-[0.98] transition-all"
               }`}
               onClick={() => !isArchitect && onPlanSelect("architect")}
@@ -131,9 +131,9 @@ export function LandingPricing({
                 <span className="text-5xl font-black tracking-tight text-slate-900">
                   ${PRICING.projectPassUsdOneTime}
                 </span>
-                <span className="text-slate-500 font-bold">/project</span>
+                <span className="text-slate-800 font-bold">/project</span>
               </div>
-              <p className="mt-4 text-slate-600 font-medium">
+              <p className="mt-4 text-slate-800 font-medium">
                 Pay once for one kitchen, bath, or whole-house gut—after six
                 months your project stays view-only for as long as BLUPRNT is
                 available.
@@ -167,7 +167,7 @@ export function LandingPricing({
           </motion.div>
         </div>
 
-        <p className="mt-12 text-center text-slate-500 font-medium italic">
+        <p className="mt-12 text-center text-slate-800 font-medium italic">
           Free tier: up to 3 invoice uploads per project (quotes and other
           document types don’t count). No credit card required to sign up or run
           an estimate; paid plans are charged at checkout.
@@ -182,14 +182,14 @@ export function LandingPricing({
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="mb-8 text-center sm:mb-10">
-            <p className="mb-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
+            <p className="mb-2 inline-flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
               <Hammer className="h-3.5 w-3.5" aria-hidden />
               Plans
             </p>
             <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
               Compare at a glance
             </h3>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600 sm:text-base">
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-800 sm:text-base">
               Same core product — pick monthly for ongoing work, or a pass for
               one big remodel.
             </p>
@@ -208,7 +208,7 @@ export function LandingPricing({
                       scope="col"
                       className="sticky left-0 z-20 min-w-[10.5rem] bg-gradient-to-b from-slate-50 to-slate-50/90 px-4 py-5 text-left align-bottom shadow-[6px_0_14px_-8px_rgba(15,23,42,0.12)] sm:min-w-[13rem] sm:px-6 sm:py-6"
                     >
-                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                      <span className="text-[12px] font-black uppercase tracking-[0.18em] text-slate-800">
                         What you get
                       </span>
                     </th>
@@ -220,12 +220,12 @@ export function LandingPricing({
                         <span className="text-xs font-black uppercase tracking-[0.14em] text-teal-900">
                           Architect
                         </span>
-                        <span className="rounded-full bg-teal-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm shadow-teal-900/20">
+                        <span className="rounded-full bg-teal-600 px-2.5 py-0.5 text-[12px] font-black uppercase tracking-wider text-white shadow-sm shadow-teal-900/20">
                           Most flexible
                         </span>
                         <span className="text-sm font-bold tabular-nums text-slate-700">
                           ${PRICING.architectUsdPerMonth}
-                          <span className="text-slate-500">/mo</span>
+                          <span className="text-slate-800">/mo</span>
                         </span>
                       </div>
                     </th>
@@ -237,12 +237,12 @@ export function LandingPricing({
                         <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-800">
                           Project Pass
                         </span>
-                        <span className="rounded-full bg-slate-200/80 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-600">
+                        <span className="rounded-full bg-slate-200/80 px-2.5 py-0.5 text-[12px] font-black uppercase tracking-wider text-slate-800">
                           One project
                         </span>
                         <span className="text-sm font-bold tabular-nums text-slate-700">
                           ${PRICING.projectPassUsdOneTime}
-                          <span className="text-slate-500"> once</span>
+                          <span className="text-slate-800"> once</span>
                         </span>
                       </div>
                     </th>
@@ -261,7 +261,7 @@ export function LandingPricing({
                         <span className="block text-sm font-bold text-slate-900">
                           {row.feature}
                         </span>
-                        <span className="mt-1 block text-xs font-medium leading-snug text-slate-500">
+                        <span className="mt-1 block text-xs font-medium leading-snug text-slate-800">
                           {row.hint}
                         </span>
                       </th>
@@ -280,7 +280,7 @@ export function LandingPricing({
                 </tbody>
               </table>
             </div>
-            <p className="border-t border-slate-100 bg-slate-50/50 px-4 py-4 text-center text-xs leading-relaxed text-slate-500 sm:px-6">
+            <p className="border-t border-slate-100 bg-slate-50/50 px-4 py-4 text-center text-xs leading-relaxed text-slate-800 sm:px-6">
               Project Pass includes Architect features for six months, locked to
               one project. After that, your ledger stays view-only for as long
               as BLUPRNT is available — upgrade anytime if you start another

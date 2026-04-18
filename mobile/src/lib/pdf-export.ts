@@ -1,8 +1,12 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { money } from "@shared/lib/formatters";
+import { money, formatShortUsDate } from "@shared/lib/formatters";
 import { supabase } from "@/lib/supabase";
-import { planVsActualPdfLines } from "@/lib/plan-vs-actual";
+import {
+  capitalImprovementTotal,
+  maintenanceDocumentTotal,
+  planVsActualPdfLines,
+} from "@/lib/plan-vs-actual";
 import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
 import type { InvoiceRow } from "@shared/types/database";
 
@@ -30,18 +34,6 @@ type ProjectInfo = {
   estimated_max_total: number | null;
 };
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
 export type SellerPacketPdfOptions = {
   /** Larger PDF; may embed receipt images. PDF uploads stay as notes only. */
   includeAppendix?: boolean;
@@ -53,19 +45,8 @@ export async function generateSellerPacketPDF(
   invoices: InvoiceItem[],
   options?: SellerPacketPdfOptions,
 ) {
-  const capitalTotal = invoices
-    .filter((i) => {
-      const t = (i.document_type || "invoice").toLowerCase();
-      return t === "invoice" || t === "quote";
-    })
-    .reduce((s, i) => s + (i.total || 0), 0);
-
-  const maintenanceTotal = invoices
-    .filter((i) => {
-      const t = (i.document_type || "").toLowerCase();
-      return t === "warranty" || t === "permit";
-    })
-    .reduce((s, i) => s + (i.total || 0), 0);
+  const capitalTotal = capitalImprovementTotal(invoices);
+  const maintenanceTotal = maintenanceDocumentTotal(invoices);
 
   const appendixHtml =
     options?.includeAppendix && invoices.some((i) => i.document_id)
@@ -99,7 +80,7 @@ export async function generateSellerPacketPDF(
         <div class="header">
           <p class="subtitle">BLUPRNT.AI — PROPERTY LEDGER</p>
           <h1 class="title">Property Improvement Ledger</h1>
-          <p class="subtitle">Project: ${project.name} | Generated: ${formatDate(new Date().toISOString())}</p>
+          <p class="subtitle">Project: ${project.name} | Generated: ${formatShortUsDate(new Date().toISOString())}</p>
         </div>
 
         <div class="section">
@@ -183,7 +164,7 @@ export async function generateSellerPacketPDF(
                       .map(
                         (inv) => `
                 <tr>
-                  <td>${formatDate(inv.created_at)}</td>
+                  <td>${formatShortUsDate(inv.created_at)}</td>
                   <td>${inv.vendor_name || "Uncategorized"}</td>
                   <td>${(inv.document_type || "Invoice").charAt(0).toUpperCase() + (inv.document_type || "Invoice").slice(1)}</td>
                   <td>${money(inv.total)}</td>

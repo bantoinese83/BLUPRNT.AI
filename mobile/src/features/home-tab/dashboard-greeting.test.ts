@@ -10,7 +10,7 @@ describe("getDashboardGreeting", () => {
     expect(
       getDashboardGreeting({
         invoicesLength: 2,
-        invoiceTotal: 100,
+        capitalDocumentedTotal: 100,
         estimatedMinTotal: 100,
       }),
     ).toBe("Budget reached");
@@ -20,7 +20,7 @@ describe("getDashboardGreeting", () => {
     expect(
       getDashboardGreeting({
         invoicesLength: 3,
-        invoiceTotal: 50,
+        capitalDocumentedTotal: 50,
         estimatedMinTotal: 100,
       }),
     ).toBe("3 Documents tracked");
@@ -31,7 +31,7 @@ describe("getDashboardGreeting", () => {
     expect(
       getDashboardGreeting({
         invoicesLength: 0,
-        invoiceTotal: 0,
+        capitalDocumentedTotal: 0,
         estimatedMinTotal: null,
       }),
     ).toBe("Good morning");

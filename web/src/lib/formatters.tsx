@@ -1,6 +1,6 @@
 import { Star } from "lucide-react";
 
-export { money } from "@shared/lib/formatters";
+export { money, formatShortUsDate } from "@shared/lib/formatters";
 
 export function getStars(score: number | null) {
   const n = score != null ? Math.min(5, Math.max(0, Math.round(score))) : 3;

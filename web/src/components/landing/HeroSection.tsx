@@ -49,7 +49,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="max-w-2xl text-base text-slate-600 leading-[1.55] font-medium sm:text-lg"
+            className="max-w-2xl text-base text-slate-800 leading-[1.55] font-medium sm:text-lg"
           >
             <span className="inline leading-[1.55]">
               <Highlighter
@@ -61,7 +61,7 @@ export function HeroSection({
                 isView
                 delay={0.02}
               >
-                <span className="whitespace-normal text-slate-600">
+                <span className="whitespace-normal text-slate-800">
                   {LANDING_HERO_COPY.bodyLead}
                 </span>
               </Highlighter>{" "}
@@ -78,7 +78,7 @@ export function HeroSection({
                   {LANDING_HERO_COPY.bodyEmphasis}
                 </span>
               </Highlighter>{" "}
-              <span className="text-slate-600">
+              <span className="text-slate-800">
                 {LANDING_HERO_COPY.bodyTail}
               </span>
             </span>

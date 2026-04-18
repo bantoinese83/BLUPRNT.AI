@@ -103,7 +103,7 @@ export function DashboardStats({
           </span>
         </p>
         <p className="text-xs text-slate-400 font-bold">
-          Invoices & quotes track
+          Includes maintenance &amp; permits
         </p>
       </motion.div>
 
@@ -136,7 +136,9 @@ export function DashboardStats({
             </motion.span>
           )}
         </div>
-        <p className="text-xs text-slate-400 font-bold">Actual vs estimate</p>
+        <p className="text-xs text-slate-400 font-bold">
+          Invoices &amp; quotes vs your estimate
+        </p>
       </motion.div>
     </div>
   );

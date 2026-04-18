@@ -159,7 +159,7 @@ export function useInvoiceManagement({
       dismissGuide();
       onUploaded();
       const newId = data?.invoice_id;
-      if (newId && documentType === "invoice") {
+      if (newId) {
         setReviewInvoiceId((prev) => {
           if (prev) {
             reviewQueueRef.current.push(newId);
@@ -173,7 +173,7 @@ export function useInvoiceManagement({
       );
       addUserFlowBreadcrumb("invoice_upload_succeeded", {
         document_type: documentType,
-        opens_review: Boolean(newId && documentType === "invoice"),
+        opens_review: Boolean(newId),
       });
     } catch (err: unknown) {
       reportClientError("invoice_upload", err);

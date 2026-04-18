@@ -31,7 +31,7 @@ export function AppSlimFooter({
         className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-between sm:gap-y-2"
         aria-label="Site footer"
       >
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-slate-500 sm:text-sm">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-semibold text-slate-600 sm:text-sm">
           {showHome ? (
             <Link to="/" className="transition-colors hover:text-slate-900">
               Home
@@ -69,7 +69,7 @@ export function AppSlimFooter({
             Cookie settings
           </button>
         </div>
-        <p className="text-center text-[11px] text-slate-400 sm:text-right">
+        <p className="text-center text-[12px] font-bold text-slate-600 sm:text-right">
           © {new Date().getFullYear()} BLUPRNT
         </p>
       </nav>

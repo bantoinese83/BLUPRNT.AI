@@ -178,6 +178,64 @@ export function useDashboardData() {
     [queryClient],
   );
 
+  // REALTIME SYNC: Subscribe to any changes for the current project
+  useEffect(() => {
+    if (!activeProjectId || !isSupabaseConfigured()) return;
+
+    const channel = supabase
+      .channel(`project_sync:${activeProjectId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "projects",
+          filter: `id=eq.${activeProjectId}`,
+        },
+        () => {
+          console.log("[Realtime] Project updated, refreshing...");
+          queryClient.invalidateQueries({
+            queryKey: dashboardQueryKey(activeProjectId),
+          });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "invoices",
+          filter: `project_id=eq.${activeProjectId}`,
+        },
+        () => {
+          console.log("[Realtime] Invoices updated, refreshing...");
+          queryClient.invalidateQueries({
+            queryKey: dashboardQueryKey(activeProjectId),
+          });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "scope_items",
+          filter: `project_id=eq.${activeProjectId}`,
+        },
+        () => {
+          console.log("[Realtime] Scope updated, refreshing...");
+          queryClient.invalidateQueries({
+            queryKey: dashboardQueryKey(activeProjectId),
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeProjectId, queryClient]);
+
   const loading = isSupabaseConfigured()
     ? query.isPending || query.isLoading
     : false;

@@ -114,7 +114,7 @@ export function DashboardStats({
       <StatItem
         label="Invested"
         value={formatCurrency(invoiceTotal)}
-        subValue="Actual vs estimate"
+        subValue="Invoices & quotes vs estimate"
         icon={TrendingUp}
         delay={200}
         badge={

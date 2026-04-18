@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useInvoiceManagement } from "@/hooks/useInvoiceManagement";
 import { InvoiceUploadHeader } from "./InvoiceUploadHeader";
 import { InvoiceGuide } from "./InvoiceGuide";
@@ -13,6 +13,10 @@ import { cn } from "@/lib/utils";
 import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
+import {
+  filterInvoicesByLedgerDocumentFilter,
+  type LedgerDocumentFilter,
+} from "@/lib/plan-vs-actual";
 
 type InvoicesSectionProps = {
   projectId: string;
@@ -35,6 +39,12 @@ export function InvoicesSection({
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const wasUploading = useRef(false);
   const [dropActive, setDropActive] = useState(false);
+  const [ledgerFilter, setLedgerFilter] = useState<LedgerDocumentFilter>("all");
+
+  const visibleInvoices = useMemo(
+    () => filterInvoicesByLedgerDocumentFilter(invoices, ledgerFilter),
+    [invoices, ledgerFilter],
+  );
 
   const {
     inputRef,
@@ -160,6 +170,53 @@ export function InvoicesSection({
           </p>
         )}
 
+        {invoices.length > 0 ? (
+          <div
+            className="flex flex-wrap gap-2"
+            role="tablist"
+            aria-label="Filter ledger documents"
+          >
+            {(
+              [
+                { id: "all" as const, label: "All" },
+                { id: "capital" as const, label: "Capital" },
+                { id: "maintenance" as const, label: "Maintenance" },
+              ] as const
+            ).map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={ledgerFilter === id}
+                className={cn(
+                  "rounded-full px-4 py-2 text-xs font-bold transition-colors",
+                  ledgerFilter === id
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                )}
+                onClick={() => setLedgerFilter(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {invoices.length > 0 && visibleInvoices.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-6 text-center">
+            <p className="text-sm font-semibold text-slate-800">
+              {ledgerFilter === "capital"
+                ? "No invoices or quotes in this view"
+                : "No warranties or permits in your maintenance log yet"}
+            </p>
+            <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+              {ledgerFilter === "capital"
+                ? "Switch to All or Maintenance, or upload a capital document."
+                : "Upload warranty or permit documents — they appear here and in your seller packet."}
+            </p>
+          </div>
+        ) : null}
+
         {documentType === "invoice" &&
           !isArchitectActive &&
           !hasProjectPass &&
@@ -244,7 +301,7 @@ export function InvoicesSection({
             </div>
           )}
 
-          {invoices.map((inv, idx) => (
+          {visibleInvoices.map((inv, idx) => (
             <InvoiceCard
               key={inv.id}
               invoice={inv}
@@ -253,7 +310,7 @@ export function InvoicesSection({
             />
           ))}
 
-          {invoices.length > 0 && (
+          {invoices.length > 0 && visibleInvoices.length > 0 && (
             <button
               type="button"
               className="border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center text-slate-500 hover:bg-slate-50/80 hover:border-slate-300 transition-all min-h-[140px]"

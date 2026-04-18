@@ -93,6 +93,7 @@ export function AddScopeItemModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
+            aria-label="Close"
             className="rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100"
           >
             <X className="w-5 h-5" />
@@ -101,10 +102,14 @@ export function AddScopeItemModal({
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+            <label
+              htmlFor="item-name"
+              className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+            >
               Item Name *
             </label>
             <input
+              id="item-name"
               autoFocus
               required
               value={category}
@@ -116,10 +121,14 @@ export function AddScopeItemModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+              <label
+                htmlFor="phase-select"
+                className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+              >
                 Phase
               </label>
               <select
+                id="phase-select"
                 value={phase}
                 onChange={(e) => setPhase(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
@@ -132,10 +141,14 @@ export function AddScopeItemModal({
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+              <label
+                htmlFor="unit-cost"
+                className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+              >
                 Estimated Unit Cost ($) *
               </label>
               <input
+                id="unit-cost"
                 required
                 type="number"
                 step="0.01"
@@ -149,10 +162,14 @@ export function AddScopeItemModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+              <label
+                htmlFor="quantity"
+                className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+              >
                 Quantity
               </label>
               <input
+                id="quantity"
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
@@ -160,10 +177,14 @@ export function AddScopeItemModal({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+              <label
+                htmlFor="unit"
+                className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+              >
                 Unit
               </label>
               <input
+                id="unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="ea, sqft..."
@@ -173,10 +194,14 @@ export function AddScopeItemModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+            <label
+              htmlFor="description"
+              className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+            >
               Description (Optional)
             </label>
             <textarea
+              id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add more detail here..."

@@ -18,7 +18,7 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
     >
       <div className="mx-auto max-w-3xl">
         <div className="mb-10 text-center">
-          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
+          <p className="mb-2 text-[12px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
             Questions
           </p>
           <h2
@@ -27,7 +27,7 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
           >
             Common questions
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600 sm:text-base">
+          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-800 sm:text-base">
             Straight answers about estimates, tracking, and who BLUPRNT is for.
           </p>
         </div>
@@ -47,7 +47,7 @@ export function LandingFaq({ faqData }: LandingFaqProps) {
                     {item.question}
                   </h3>
                   <div>
-                    <p className="text-sm leading-relaxed text-slate-600 sm:text-[15px]">
+                    <p className="text-sm leading-relaxed text-slate-800 sm:text-[15px]">
                       {item.answer}
                     </p>
                   </div>

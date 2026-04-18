@@ -15,3 +15,4 @@ mobile/maestro/screenshots/
 
 # Supabase CLI (local; never commit)
 supabase/.temp/
+supabase/.branches/

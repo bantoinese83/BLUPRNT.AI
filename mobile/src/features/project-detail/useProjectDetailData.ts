@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import type { InvoiceRow, ProjectRow, ScopeRow } from "@shared/types/database";
 import { groupScopeByCategory, projectHasEstimateTotals } from "./helpers";
+import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 
 export function useProjectDetailData() {
   const { id: rawId, focus: rawFocus } = useLocalSearchParams<{
@@ -47,8 +48,9 @@ export function useProjectDetailData() {
     setInvoiceLoadWarning(null);
   }, []);
 
+  /** Capital improvements only — matches home dashboard health & resale inputs. */
   const invoiceTotal = useMemo(
-    () => detailInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0),
+    () => capitalImprovementTotal(detailInvoices),
     [detailInvoices],
   );
 

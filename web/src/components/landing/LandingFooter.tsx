@@ -27,10 +27,13 @@ export function LandingFooter() {
                 />
               </div>
               <span className="font-black italic tracking-tighter text-slate-900">
-                BLUPRNT<span className="text-teal-600">.AI</span>
+                BLUPRNT
+                <span className="text-teal-600" style={{ color: "#086960" }}>
+                  .AI
+                </span>
               </span>
             </Link>
-            <p className="max-w-xs text-center text-sm text-slate-600 sm:text-left">
+            <p className="max-w-xs text-center text-sm text-slate-800 sm:text-left">
               Home renovation financial OS — estimates, spending, and records in
               one place.
             </p>
@@ -41,10 +44,10 @@ export function LandingFooter() {
             aria-label="Footer"
           >
             <div className="text-center sm:text-left">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-slate-800">
                 Product
               </p>
-              <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+              <ul className="flex flex-col gap-2.5 text-sm text-slate-800">
                 <li>
                   <Link
                     to="/onboarding"
@@ -72,10 +75,10 @@ export function LandingFooter() {
               </ul>
             </div>
             <div className="text-center sm:text-left">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-slate-800">
                 Help
               </p>
-              <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+              <ul className="flex flex-col gap-2.5 text-sm text-slate-800">
                 <li>
                   <Link
                     to={{ pathname: "/", hash: "faq" }}
@@ -95,10 +98,10 @@ export function LandingFooter() {
               </ul>
             </div>
             <div className="text-center sm:text-left">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              <p className="mb-3 text-[12px] font-black uppercase tracking-[0.2em] text-slate-800">
                 Legal
               </p>
-              <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
+              <ul className="flex flex-col gap-2.5 text-sm text-slate-800">
                 <li>
                   <Link
                     to={WEB_APP_PATH_PRIVACY}
@@ -127,7 +130,7 @@ export function LandingFooter() {
                   <button
                     type="button"
                     onClick={() => openCookieSettings()}
-                    className="font-medium text-slate-600 hover:text-slate-900"
+                    className="font-medium text-slate-800 hover:text-slate-900"
                   >
                     Cookie settings
                   </button>
@@ -138,10 +141,10 @@ export function LandingFooter() {
         </div>
 
         <div className="mx-auto mt-10 border-t border-slate-200/80 pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-center text-xs text-slate-500 sm:text-left">
+          <p className="text-center text-xs text-slate-800 sm:text-left">
             © {new Date().getFullYear()} BLUPRNT. All rights reserved.
           </p>
-          <p className="text-center text-xs text-slate-500 sm:text-right">
+          <p className="text-center text-xs text-slate-800 sm:text-right">
             Built by{" "}
             <a
               href="https://www.monarch-labs.com/"

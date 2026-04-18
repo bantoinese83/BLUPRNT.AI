@@ -28,7 +28,7 @@ export function LandingFinalCta() {
             Ready to start?
           </Highlighter>
         </h2>
-        <p className="mt-4 text-slate-600">
+        <p className="mt-4 text-slate-800">
           Get your first estimate in{" "}
           <Highlighter
             action="underline"

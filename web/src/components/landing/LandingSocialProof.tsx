@@ -27,7 +27,7 @@ export function LandingSocialProof() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
           <div className="flex flex-col items-center gap-2 lg:items-start">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+            <p className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-800">
               <Highlighter
                 action="highlight"
                 color={LANDING_HIGHLIGHT_COLOR}
@@ -40,9 +40,9 @@ export function LandingSocialProof() {
             </p>
             <p className="text-2xl font-black text-slate-900">
               {dbCount !== null ? dbCount.toLocaleString() : "…"}{" "}
-              <span className="text-slate-500 font-bold">BLUPRNTs managed</span>
+              <span className="text-slate-800 font-bold">BLUPRNTs managed</span>
             </p>
-            <p className="max-w-sm text-center text-xs font-medium leading-relaxed text-slate-500 lg:text-left">
+            <p className="max-w-sm text-center text-xs font-medium leading-relaxed text-slate-800 lg:text-left">
               Count is from real projects in BLUPRNT—not paid endorsements from
               listing or contractor brands.
             </p>

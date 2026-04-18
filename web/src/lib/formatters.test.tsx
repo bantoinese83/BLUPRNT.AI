@@ -1,6 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
+import { formatShortUsDate } from "@shared/lib/formatters";
 import { money, getStars } from "./formatters";
+
+describe("formatShortUsDate (shared)", () => {
+  it("formats ISO timestamps", () => {
+    expect(formatShortUsDate("2026-04-18T12:00:00.000Z")).toMatch(/Apr/);
+    expect(formatShortUsDate("2026-04-18T12:00:00.000Z")).toMatch(/2026/);
+  });
+});
 
 describe("money", () => {
   it("formats single value correctly", () => {

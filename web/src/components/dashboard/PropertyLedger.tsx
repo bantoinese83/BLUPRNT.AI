@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { downloadSellerPacket } from "@/lib/seller-packet-download";
 import type { InvoiceRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
+import {
+  capitalImprovementTotal,
+  maintenanceDocumentTotal,
+} from "@/lib/plan-vs-actual";
 
 type ScopeItem = {
   id: string;
@@ -55,19 +59,8 @@ export function PropertyLedger({
   const [message, setMessage] = useState<string | null>(null);
   const [includeOriginalAppendix, setIncludeOriginalAppendix] = useState(false);
 
-  const capitalTotal = invoices
-    .filter((i) => {
-      const t = (i.document_type ?? "invoice").toLowerCase();
-      return t === "invoice" || t === "quote";
-    })
-    .reduce((s, i) => s + (i.total ?? 0), 0);
-
-  const maintenanceTotal = invoices
-    .filter((i) => {
-      const t = (i.document_type ?? "").toLowerCase();
-      return t === "warranty" || t === "permit";
-    })
-    .reduce((s, i) => s + (i.total ?? 0), 0);
+  const capitalTotal = capitalImprovementTotal(invoices);
+  const maintenanceTotal = maintenanceDocumentTotal(invoices);
 
   async function handleExportPDF() {
     if (!project || !projectId || !propertyId) {
@@ -181,7 +174,7 @@ export function PropertyLedger({
             </div>
             <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-100/50">
               <span className="text-slate-900 block mb-1 uppercase text-[8.5px] tracking-tighter leading-tight font-black">
-                Maintenance Logs
+                Maintenance Log
               </span>
               <span className="font-medium text-slate-500 normal-case tracking-normal">
                 Essential upkeep to prove home health to buyers.

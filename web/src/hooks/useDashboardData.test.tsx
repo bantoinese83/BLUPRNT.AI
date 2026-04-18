@@ -16,6 +16,11 @@ vi.mock("@/lib/supabase", () => ({
       getSession: vi.fn(),
     },
     from: vi.fn(),
+    channel: vi.fn().mockReturnValue({
+      on: vi.fn().mockReturnThis(),
+      subscribe: vi.fn().mockReturnThis(),
+    }),
+    removeChannel: vi.fn(),
   },
   isSupabaseConfigured: vi.fn(() => true),
 }));

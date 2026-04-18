@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
 import { AwarenessContext, SmartInsight } from "@/contexts/AwarenessContext";
+import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 
 export function AwarenessProvider({
   children,
@@ -56,7 +57,7 @@ export function AwarenessProvider({
       (a, b) => a + b,
       0,
     );
-    const invoiceGrandTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+    const capitalDocumentedTotal = capitalImprovementTotal(invoices);
     const scopeMaxSum = scopeItems.reduce(
       (s, it) => s + (it.total_cost_max ?? 0),
       0,
@@ -64,14 +65,14 @@ export function AwarenessProvider({
     if (
       scopeItems.length > 0 &&
       scopeMaxSum > 0 &&
-      invoiceGrandTotal > scopeMaxSum &&
-      lineBackedTotal < invoiceGrandTotal * 0.85
+      capitalDocumentedTotal > scopeMaxSum &&
+      lineBackedTotal < capitalDocumentedTotal * 0.85
     ) {
       newInsights.push({
         id: "budget-aggregate-over",
         type: "anomaly",
         title: "Spend above total scope",
-        description: `Invoices total about $${invoiceGrandTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
+        description: `Documented capital (invoices and quotes) is about $${capitalDocumentedTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
       });
       health = health === "optimal" ? "warning" : health;
     }
@@ -107,9 +108,8 @@ export function AwarenessProvider({
       });
     }
 
-    // 3. Opportunity: resale value tip
-    const invoiceTotal = invoices.reduce((s, i) => s + (i.total || 0), 0);
-    if (invoiceTotal > 5000 && scopeItems.length > 0) {
+    // 3. Opportunity: resale value tip (capital work, not maintenance-only log)
+    if (capitalDocumentedTotal > 5000 && scopeItems.length > 0) {
       newInsights.push({
         id: "resale-opportunity",
         type: "opportunity",

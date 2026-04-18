@@ -159,7 +159,7 @@ export default function FinanceScreen() {
         },
         refreshProjectData: load,
       });
-      if (result.ok && result.documentType === "invoice" && result.invoiceId) {
+      if (result.ok && result.invoiceId) {
         const { data: row } = await supabase
           .from("invoices")
           .select("*")

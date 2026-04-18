@@ -28,3 +28,16 @@ export function money(
   if (valA !== null) return fmt(valA);
   return "—";
 }
+
+/** US short date for PDFs and exports (e.g. Apr 18, 2026). */
+export function formatShortUsDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}

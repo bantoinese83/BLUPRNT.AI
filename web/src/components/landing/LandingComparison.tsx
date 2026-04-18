@@ -10,7 +10,7 @@ export function LandingComparison() {
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
             Precision Over Guesswork.
           </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto font-medium">
+          <p className="text-lg text-slate-800 max-w-2xl mx-auto font-medium">
             BLUPRNT pairs regional cost ranges with structured scope, invoices,
             and exports—so homeowners get clearer numbers than a lone
             visualizer, without pro job-site software.
@@ -21,7 +21,7 @@ export function LandingComparison() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="p-6 text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                <th className="p-6 text-sm font-black text-slate-800 uppercase tracking-widest border-b border-slate-100">
                   Feature
                 </th>
                 <th className="p-6 text-center border-b border-slate-100 bg-brand-primary/[0.03]">
@@ -29,13 +29,13 @@ export function LandingComparison() {
                     BLUPRNT.AI
                   </span>
                 </th>
-                <th className="p-6 text-center text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                <th className="p-6 text-center text-sm font-black text-slate-800 uppercase tracking-widest border-b border-slate-100">
                   Visualizers
                 </th>
-                <th className="p-6 text-center text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                <th className="p-6 text-center text-sm font-black text-slate-800 uppercase tracking-widest border-b border-slate-100">
                   Pro Tools
                 </th>
-                <th className="hidden sm:table-cell p-6 text-center text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                <th className="hidden sm:table-cell p-6 text-center text-sm font-black text-slate-800 uppercase tracking-widest border-b border-slate-100">
                   Static Guides
                 </th>
               </tr>
@@ -65,7 +65,7 @@ export function LandingComparison() {
                   <td className="p-6 text-center border-b border-slate-100">
                     <div className="flex justify-center">
                       {feature.visualizers ? (
-                        <Check className="h-5 w-5 text-slate-400" />
+                        <Check className="h-5 w-5 text-slate-800" />
                       ) : (
                         <X className="h-5 w-5 text-slate-200" />
                       )}
@@ -74,7 +74,7 @@ export function LandingComparison() {
                   <td className="p-6 text-center border-b border-slate-100">
                     <div className="flex justify-center">
                       {feature.proTools ? (
-                        <Check className="h-5 w-5 text-slate-400" />
+                        <Check className="h-5 w-5 text-slate-800" />
                       ) : (
                         <X className="h-5 w-5 text-slate-200" />
                       )}
@@ -83,7 +83,7 @@ export function LandingComparison() {
                   <td className="hidden sm:table-cell p-6 text-center border-b border-slate-100">
                     <div className="flex justify-center">
                       {feature.static ? (
-                        <Check className="h-5 w-5 text-slate-400" />
+                        <Check className="h-5 w-5 text-slate-800" />
                       ) : (
                         <X className="h-5 w-5 text-slate-200" />
                       )}
@@ -96,7 +96,7 @@ export function LandingComparison() {
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-sm font-bold text-slate-400 italic">
+          <p className="text-sm font-bold text-slate-800 italic">
             * Comparison based on internal market research of leading consumer
             home improvement platforms.
           </p>

@@ -235,6 +235,35 @@ describe("useInvoiceManagement", () => {
       expect(toast.success).toHaveBeenCalledWith(
         expect.stringContaining("uploaded successfully"),
       );
+      expect(result.current.reviewInvoiceId).toBe("new-inv-123");
+    });
+
+    it("opens review after upload for warranty documents too", async () => {
+      vi.mocked(invokeFunction).mockResolvedValue({
+        data: { invoice_id: "war-456" },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useInvoiceManagement(defaultProps));
+
+      await act(async () => {
+        result.current.setDocumentType("warranty");
+      });
+
+      const file = new File(["content"], "warranty.pdf", {
+        type: "application/pdf",
+      });
+      const fileList = {
+        0: file,
+        length: 1,
+        item: () => file,
+      } as unknown as FileList;
+
+      await act(async () => {
+        await result.current.handleUploadFile(fileList);
+      });
+
+      expect(result.current.reviewInvoiceId).toBe("war-456");
     });
 
     it("handles invokeFunction error using friendlyDocumentUploadError", async () => {

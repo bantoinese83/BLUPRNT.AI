@@ -46,6 +46,7 @@ import { getDashboardGreeting } from "@/features/home-tab/dashboard-greeting";
 import { presentProjectShareSheet } from "@/lib/share-project";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
+import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -72,16 +73,19 @@ export default function DashboardScreen() {
     setUpgradeReason,
   } = useAwareness();
 
-  const invoiceTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+  const capitalDocumentedTotal = useMemo(
+    () => capitalImprovementTotal(invoices),
+    [invoices],
+  );
 
   const greetingLine = useMemo(
     () =>
       getDashboardGreeting({
         invoicesLength: invoices.length,
-        invoiceTotal,
+        capitalDocumentedTotal,
         estimatedMinTotal: project?.estimated_min_total,
       }),
-    [invoices.length, invoiceTotal, project?.estimated_min_total],
+    [invoices.length, capitalDocumentedTotal, project?.estimated_min_total],
   );
 
   const [isUploading, setIsUploading] = useState(false);
@@ -98,13 +102,13 @@ export default function DashboardScreen() {
       project.estimated_min_total != null &&
       !hasCelebrated
     ) {
-      if (invoiceTotal >= project.estimated_min_total) {
+      if (capitalDocumentedTotal >= project.estimated_min_total) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setIsCelebrating(true);
         setHasCelebrated(true);
       }
     }
-  }, [project, invoices, hasCelebrated, invoiceTotal]);
+  }, [project, invoices, hasCelebrated, capitalDocumentedTotal]);
 
   const handleRenameProject = () => {
     if (!project) return;
@@ -160,7 +164,7 @@ export default function DashboardScreen() {
         },
         refreshProjectData: load,
       });
-      if (result.ok && result.documentType === "invoice" && result.invoiceId) {
+      if (result.ok && result.invoiceId) {
         const { data: row } = await supabase
           .from("invoices")
           .select("*")
@@ -304,7 +308,7 @@ export default function DashboardScreen() {
       <DashboardStats
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
-        invoiceTotal={invoiceTotal}
+        invoiceTotal={capitalDocumentedTotal}
         invoiceCount={invoices.length}
       />
 
@@ -326,7 +330,7 @@ export default function DashboardScreen() {
           <ProjectHealth
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
-            invoiceTotal={invoiceTotal}
+            invoiceTotal={capitalDocumentedTotal}
           />
         </MotiView>
 
@@ -336,7 +340,7 @@ export default function DashboardScreen() {
           transition={{ type: "timing", duration: 600, delay: 350 }}
         >
           <ResaleValueImpact
-            investment={invoiceTotal}
+            investment={capitalDocumentedTotal}
             projectName={project.name}
           />
         </MotiView>

@@ -6,8 +6,10 @@
 import { jsPDF } from "jspdf";
 
 type JsPdfInstance = InstanceType<typeof jsPDF>;
+import { formatShortUsDate } from "@/lib/formatters";
 import {
   capitalImprovementTotal,
+  maintenanceDocumentTotal,
   planVsActualPdfLines,
 } from "@/lib/plan-vs-actual";
 import type { SellerPacketAppendixItem } from "@/lib/seller-packet-appendix";
@@ -58,28 +60,6 @@ function moneyRange(min: number | null, max: number | null): string {
   if (min != null && max != null) return `${money(min)} – ${money(max)}`;
   if (min != null) return money(min);
   return "—";
-}
-
-function formatDate(iso: string): string {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function maintenanceTotal(invoices: InvoiceItem[]): number {
-  return invoices
-    .filter((i) => {
-      const t = (i.document_type ?? "").toLowerCase();
-      return t === "warranty" || t === "permit";
-    })
-    .reduce((s, i) => s + (i.total ?? 0), 0);
 }
 
 /** Plan vs documented spend — narrative for agents, buyers, and you. */
@@ -210,7 +190,7 @@ export async function generateSellerPacketBlob(
   let y = MARGIN;
 
   const capitalTotal = capitalImprovementTotal(invoices);
-  const maintenance = maintenanceTotal(invoices);
+  const maintenance = maintenanceDocumentTotal(invoices);
 
   const addPageIfNeeded = (needed: number) => {
     if (y + needed > doc.internal.pageSize.height - MARGIN) {
@@ -228,7 +208,11 @@ export async function generateSellerPacketBlob(
   doc.setFont("helvetica", "normal");
   doc.text(`Project: ${project.name}`, MARGIN, y);
   y += LINE_HEIGHT;
-  doc.text(`Generated: ${formatDate(new Date().toISOString())}`, MARGIN, y);
+  doc.text(
+    `Generated: ${formatShortUsDate(new Date().toISOString())}`,
+    MARGIN,
+    y,
+  );
   y += LINE_HEIGHT * 2;
 
   doc.setFontSize(HEADING_SIZE);
@@ -280,7 +264,7 @@ export async function generateSellerPacketBlob(
       const type = (inv.document_type ?? "invoice").toString();
       const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
       doc.text(
-        `${formatDate(inv.created_at)} — ${inv.vendor_name ?? "Vendor"} (${typeLabel}): ${money(inv.total)}`,
+        `${formatShortUsDate(inv.created_at)} — ${inv.vendor_name ?? "Vendor"} (${typeLabel}): ${money(inv.total)}`,
         MARGIN + 2,
         y,
         { maxWidth: 170 },

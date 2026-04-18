@@ -40,7 +40,7 @@ function DeliverableList({
           <span className="text-xs font-bold text-slate-900 text-left">
             {row.label}
           </span>
-          <span className="shrink-0 text-[10px] font-black text-slate-400 bg-slate-200/50 px-2 py-1 rounded-md">
+          <span className="shrink-0 text-[12px] font-black text-slate-800 bg-slate-200/50 px-2 py-1 rounded-md">
             {row.tag}
           </span>
         </div>
@@ -63,7 +63,7 @@ export function LandingHowItWorks() {
         >
           How it works
         </h2>
-        <p className="mx-auto mt-3 max-w-lg text-center text-slate-600 leading-relaxed">
+        <p className="mx-auto mt-3 max-w-lg text-center text-slate-800 leading-relaxed">
           {LANDING_HOW_INTRO}{" "}
           <Highlighter
             action="underline"
@@ -108,7 +108,7 @@ export function LandingHowItWorks() {
               </Highlighter>
             </h3>
 
-            <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
+            <p className="text-slate-800 text-lg leading-relaxed font-medium mb-6">
               Turn “we should redo this” into a number that matches your zip
               code—not a fantasy from TV.
             </p>
@@ -132,10 +132,10 @@ export function LandingHowItWorks() {
               <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 text-left">
                 <div className="flex gap-2 mb-2">
-                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
+                  <span className="bg-emerald-500/20 text-emerald-300 text-[12px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
                     Auto-read receipts
                   </span>
-                  <span className="bg-slate-500/20 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
+                  <span className="bg-slate-500/20 text-slate-200 text-[12px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md">
                     Smart Sorting
                   </span>
                 </div>
@@ -157,7 +157,7 @@ export function LandingHowItWorks() {
               </Highlighter>
             </h3>
 
-            <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
+            <p className="text-slate-800 text-lg leading-relaxed font-medium mb-6">
               Stack bids, receipts, and paid invoices next to that budget—most
               of the typing is on us.
             </p>
@@ -196,7 +196,7 @@ export function LandingHowItWorks() {
               </Highlighter>
             </h3>
 
-            <p className="text-slate-500 text-lg leading-relaxed font-medium mb-6">
+            <p className="text-slate-800 text-lg leading-relaxed font-medium mb-6">
               Turn your history into downloads people can actually open—not
               another zip of photos.
             </p>

@@ -36,7 +36,10 @@ export function AppSimpleHeader({
             />
           </div>
           <span className="text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
-            BLUPRNT<span className="text-teal-600">.AI</span>
+            BLUPRNT
+            <span className="text-teal-600" style={{ color: "#086960" }}>
+              .AI
+            </span>
           </span>
         </Link>
 

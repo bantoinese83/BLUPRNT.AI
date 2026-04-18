@@ -25,11 +25,11 @@
   --color-border: #f1f5f9;
   --color-border-focus: #334155;
   --color-slate-950: #020617;
-  /** Brand accent — teal-600 (replaces former indigo) */
-  --color-teal-600: #0d9488;
+  /** Brand accent — darkened to #086960 for guaranteed AA contrast (4.5:1+) on all light modes */
+  --color-teal-600: #086960;
   --color-slate-200: #e2e8f0;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
+  --color-slate-400: #64748b; /* Bumped from 94a3b8 */
+  --color-slate-500: #475569; /* Bumped from 64748b */
   /* Ink for body copy — gray-900, easier long reads than harsher slate-900 */
   --color-slate-900: #111827;
 

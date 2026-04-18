@@ -19,6 +19,35 @@ export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
     .reduce((s, i) => s + (i.total ?? 0), 0);
 }
 
+/** Warranties & permits — maintenance log (excluded from plan vs capital spend). */
+export function maintenanceDocumentTotal(invoices: InvoiceLike[]): number {
+  return invoices
+    .filter((i) => {
+      const t = (i.document_type ?? "").toLowerCase();
+      return t === "warranty" || t === "permit";
+    })
+    .reduce((s, i) => s + (i.total ?? 0), 0);
+}
+
+export type LedgerDocumentFilter = "all" | "capital" | "maintenance";
+
+export function filterInvoicesByLedgerDocumentFilter<T extends InvoiceLike>(
+  invoices: T[],
+  filter: LedgerDocumentFilter,
+): T[] {
+  if (filter === "all") return invoices;
+  if (filter === "capital") {
+    return invoices.filter((i) => {
+      const t = (i.document_type ?? "invoice").toLowerCase();
+      return t === "invoice" || t === "quote";
+    });
+  }
+  return invoices.filter((i) => {
+    const t = (i.document_type ?? "").toLowerCase();
+    return t === "warranty" || t === "permit";
+  });
+}
+
 export type PlanVsActualKind =
   | "no_estimate"
   | "no_documents"

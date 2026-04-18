@@ -19,7 +19,7 @@ export function LandingFeatures() {
         >
           Built for homeowners
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
+        <p className="mx-auto mt-3 max-w-xl text-center text-slate-800">
           <Highlighter
             action="underline"
             color={LANDING_HIGHLIGHT_UNDERLINE}
@@ -45,7 +45,7 @@ export function LandingFeatures() {
               <h3 className="font-semibold text-slate-900">
                 Room photos → rough budget
               </h3>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-slate-800">
                 Point the camera, get a starter range and what’s in the job—no
                 spreadsheet required.
               </p>
@@ -57,7 +57,7 @@ export function LandingFeatures() {
               <h3 className="font-semibold text-slate-900">
                 Share-ready detail
               </h3>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-slate-800">
                 Your to-do list, checks you wrote, and files—together, not
                 scattered across apps. They still make the final call.
               </p>
@@ -76,7 +76,7 @@ export function LandingFeatures() {
                   Seller packet
                 </Highlighter>
               </h3>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-slate-800">
                 Summarize improvements and documented spend in one export—not a
                 valuation or guarantee.
               </p>
@@ -91,7 +91,7 @@ export function LandingFeatures() {
               <h3 className="font-semibold text-slate-900">
                 Where did the money go?
               </h3>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-slate-800">
                 Watch planned vs. actual spend so surprises don’t arrive in a
                 lump at the end.
               </p>

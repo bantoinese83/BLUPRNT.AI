@@ -1,13 +1,17 @@
 /** Headline line above the project / user name on the home dashboard. */
 export function getDashboardGreeting(params: {
   invoicesLength: number;
-  invoiceTotal: number;
+  /** Invoices & quotes only — same basis as plan vs actual (excludes maintenance log). */
+  capitalDocumentedTotal: number;
   estimatedMinTotal: number | null | undefined;
 }): string {
-  const { invoicesLength, invoiceTotal, estimatedMinTotal } = params;
+  const { invoicesLength, capitalDocumentedTotal, estimatedMinTotal } = params;
 
   if (invoicesLength > 0) {
-    if (estimatedMinTotal != null && invoiceTotal >= estimatedMinTotal) {
+    if (
+      estimatedMinTotal != null &&
+      capitalDocumentedTotal >= estimatedMinTotal
+    ) {
       return "Budget reached";
     }
     return `${invoicesLength} Documents tracked`;

@@ -20,13 +20,13 @@ export function LandingStory() {
             {LANDING_STORY_COPY.heading}
           </Highlighter>
         </h2>
-        <div className="space-y-4 text-lg text-slate-600 leading-relaxed font-medium">
+        <div className="space-y-4 text-lg text-slate-800 leading-relaxed font-medium">
           {LANDING_STORY_COPY.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
         <div className="mt-12">
-          <p className="mb-8 text-center text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 sm:mb-10">
+          <p className="mb-8 text-center text-[12px] font-black uppercase tracking-[0.22em] text-slate-800 sm:mb-10">
             The BLUPRNT Team
           </p>
           <div className="flex flex-col items-stretch justify-center gap-10 sm:flex-row sm:items-start sm:gap-14 lg:gap-16">
@@ -47,7 +47,7 @@ export function LandingStory() {
                 <span className="block text-base font-black tracking-tight text-slate-900">
                   Bryan Antoine
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-800">
                   Co-founder
                 </span>
               </figcaption>
@@ -69,7 +69,7 @@ export function LandingStory() {
                 <span className="block text-base font-black tracking-tight text-slate-900">
                   Lauren Antoine
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-800">
                   Co-founder
                 </span>
               </figcaption>

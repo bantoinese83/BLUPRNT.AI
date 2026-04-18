@@ -24,6 +24,16 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(url && anonKey);
 }
 
+declare global {
+  interface Window {
+    supabase?: typeof supabase;
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.supabase = supabase;
+}
+
 function devWarn(...args: unknown[]) {
   if (import.meta.env.DEV) {
     console.warn(...args);

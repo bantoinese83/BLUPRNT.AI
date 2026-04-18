@@ -1,26 +1,20 @@
 import type { InvoiceRow, ScopeRow } from "@shared/types/database";
+import {
+  capitalImprovementTotal,
+  maintenanceDocumentTotal,
+  filterInvoicesByLedgerDocumentFilter,
+  type LedgerDocumentFilter,
+} from "@shared/lib/plan-vs-actual";
 
-export type InvoiceLedgerFilter = "all" | "capital" | "maintenance";
+export type InvoiceLedgerFilter = LedgerDocumentFilter;
 
 export function computeLedgerStats(invoices: InvoiceRow[]): {
   capital: number;
   maintenance: number;
   total: number;
 } {
-  const capital = invoices
-    .filter((i) => {
-      const type = (i.document_type || "invoice").toLowerCase();
-      return type === "invoice" || type === "quote";
-    })
-    .reduce((s, i) => s + (i.total || 0), 0);
-
-  const maintenance = invoices
-    .filter((i) => {
-      const type = (i.document_type || "").toLowerCase();
-      return type === "warranty" || type === "permit";
-    })
-    .reduce((s, i) => s + (i.total || 0), 0);
-
+  const capital = capitalImprovementTotal(invoices);
+  const maintenance = maintenanceDocumentTotal(invoices);
   return { capital, maintenance, total: capital + maintenance };
 }
 
@@ -31,21 +25,11 @@ export function sortInvoicesByDateDesc(invoices: InvoiceRow[]): InvoiceRow[] {
   );
 }
 
-function matchesFilter(inv: InvoiceRow, filter: InvoiceLedgerFilter): boolean {
-  const type = (inv.document_type || "").toLowerCase();
-  if (filter === "all") return true;
-  if (filter === "capital") return type === "invoice" || type === "quote";
-  return type === "warranty" || type === "permit";
-}
-
 export function groupInvoicesByMonth(
   sortedInvoices: InvoiceRow[],
   filter: InvoiceLedgerFilter,
 ): Record<string, InvoiceRow[]> {
-  const active =
-    filter === "all"
-      ? sortedInvoices
-      : sortedInvoices.filter((i) => matchesFilter(i, filter));
+  const active = filterInvoicesByLedgerDocumentFilter(sortedInvoices, filter);
 
   const groups: Record<string, InvoiceRow[]> = {};
   active.forEach((inv) => {

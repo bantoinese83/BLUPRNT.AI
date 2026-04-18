@@ -69,7 +69,10 @@ export function LandingHeader() {
                 />
               </div>
               <span className="truncate pr-1 text-lg font-black italic tracking-tighter text-slate-900 sm:text-xl">
-                BLUPRNT<span className="text-teal-600">.AI</span>
+                BLUPRNT
+                <span className="text-teal-600" style={{ color: "#086960" }}>
+                  .AI
+                </span>
               </span>
             </Link>
           </motion.div>
@@ -84,7 +87,7 @@ export function LandingHeader() {
               <Link
                 key={id}
                 to={`/#${id}`}
-                className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100/80 hover:text-slate-900"
+                className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100/80 hover:text-slate-900"
               >
                 {label}
               </Link>
@@ -112,7 +115,7 @@ export function LandingHeader() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  className="rounded-xl text-slate-800 hover:bg-slate-100 hover:text-slate-900"
                 >
                   <LogIn className="mr-1.5 h-4 w-4" aria-hidden />
                   Sign in
@@ -195,7 +198,7 @@ export function LandingHeader() {
                       className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
                       onClick={() => setMobileNavOpen(false)}
                     >
-                      <LogIn className="h-4 w-4 text-slate-500" aria-hidden />
+                      <LogIn className="h-4 w-4 text-slate-800" aria-hidden />
                       Sign in
                     </Link>
                     <Link
@@ -204,7 +207,7 @@ export function LandingHeader() {
                       onClick={() => setMobileNavOpen(false)}
                     >
                       <UserPlus
-                        className="h-4 w-4 text-slate-500"
+                        className="h-4 w-4 text-slate-800"
                         aria-hidden
                       />
                       Create account

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
@@ -56,6 +56,10 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  useEffect(() => {
+    document.documentElement.lang = "en";
+  }, []);
+
   return (
     <HelmetProvider>
       <AuthProvider>
