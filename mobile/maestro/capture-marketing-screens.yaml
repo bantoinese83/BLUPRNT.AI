@@ -6,7 +6,7 @@
 #   2. A seeded project must exist in the dashboard
 #   3. Run: ~/.maestro/bin/maestro test mobile/maestro/capture-marketing-screens.yaml
 #
-# Output: app-store-assets/raw-screenshots/  (10 PNGs)
+# Output: mobile/maestro/screenshots/ (10 PNGs; gitignored — run flow from repo root)
 ##############################################################################
 
 appId: ai.bluprnt.mobile
@@ -23,7 +23,7 @@ appId: ai.bluprnt.mobile
 # ══════════════════════════════════════════════════════════════════════════════
 # 01 — Hero Dashboard (Budget Overview)
 # ══════════════════════════════════════════════════════════════════════════════
-- takeScreenshot: "../../app-store-assets/raw-screenshots/01_hero_dashboard"
+- takeScreenshot: "screenshots/01_hero_dashboard"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 02 — Dashboard scrolled down (Cost Estimates cards)
@@ -32,7 +32,7 @@ appId: ai.bluprnt.mobile
     direction: UP
     duration: 700
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/02_dashboard_estimate_cards"
+- takeScreenshot: "screenshots/02_dashboard_estimate_cards"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 03 — Dashboard scrolled further (Activity / Next Steps)
@@ -41,7 +41,7 @@ appId: ai.bluprnt.mobile
     direction: UP
     duration: 700
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/03_dashboard_activity"
+- takeScreenshot: "screenshots/03_dashboard_activity"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 04 — Finance Tab (Total Spent)
@@ -51,7 +51,7 @@ appId: ai.bluprnt.mobile
     visible: "Property Ledger"
     timeout: 20000
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/04_finance_total_spent"
+- takeScreenshot: "screenshots/04_finance_total_spent"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 05 — Finance Tab scrolled (Invoice list)
@@ -60,7 +60,7 @@ appId: ai.bluprnt.mobile
     direction: UP
     duration: 500
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/05_finance_invoice_list"
+- takeScreenshot: "screenshots/05_finance_invoice_list"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 06 — AI Assistant (landing state)
@@ -70,14 +70,14 @@ appId: ai.bluprnt.mobile
     visible: "Project Assistant"
     timeout: 20000
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/06_ai_assistant_landing"
+- takeScreenshot: "screenshots/06_ai_assistant_landing"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 07 — AI Assistant (user typing)
 # ══════════════════════════════════════════════════════════════════════════════
 - inputText: "Is $15,000 fair for custom white oak cabinets?"
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/07_ai_copilot_typing"
+- takeScreenshot: "screenshots/07_ai_copilot_typing"
 - hideKeyboard
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -88,7 +88,7 @@ appId: ai.bluprnt.mobile
     visible: "Profile"
     timeout: 15000
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/08_profile_screen"
+- takeScreenshot: "screenshots/08_profile_screen"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 09 — Home Dashboard top (fresh)
@@ -101,7 +101,7 @@ appId: ai.bluprnt.mobile
     direction: DOWN
     duration: 800
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/09_dashboard_hero_clean"
+- takeScreenshot: "screenshots/09_dashboard_hero_clean"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 10 — Dashboard (Plan vs Actual card visible)
@@ -110,4 +110,4 @@ appId: ai.bluprnt.mobile
     direction: UP
     duration: 500
 - waitForAnimationToEnd
-- takeScreenshot: "../../app-store-assets/raw-screenshots/10_dashboard_plan_vs_actual"
+- takeScreenshot: "screenshots/10_dashboard_plan_vs_actual"
