@@ -7,8 +7,8 @@ const workspaceRoot = path.resolve(projectRoot, "..");
 
 const config = getDefaultConfig(projectRoot);
 
-// 1. Watch all files in root (includes /shared)
-config.watchFolders = [workspaceRoot];
+// Expo's getDefaultConfig already detects monorepos and includes shared workspaces
+// in watchFolders. Manual overrides can trigger expo-doctor warnings.
 
 // 2. Let Metro know where to look for modules
 config.resolver.nodeModulesPaths = [
