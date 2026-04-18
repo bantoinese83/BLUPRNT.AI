@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { AwarenessProvider } from "@/contexts/AwarenessProvider";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -55,12 +56,16 @@ export default function Dashboard() {
   }
 
   return (
-    <AwarenessProvider
-      project={project}
-      scopeItems={scopeItems}
-      invoices={invoices}
-      spendByCategory={spendByCategory}
-    >
+    <>
+      <Helmet>
+        <title>Financial Dashboard | BLUPRNT.AI</title>
+      </Helmet>
+      <AwarenessProvider
+        project={project}
+        scopeItems={scopeItems}
+        invoices={invoices}
+        spendByCategory={spendByCategory}
+      >
       <DashboardContent
         projects={projects}
         project={project}
@@ -80,5 +85,6 @@ export default function Dashboard() {
         setInvoices={setInvoices}
       />
     </AwarenessProvider>
+  </>
   );
 }

@@ -1,9 +1,7 @@
 import "../global.css";
 import { LogBox, Platform } from "react-native";
 
-LogBox.ignoreLogs([
-  "SafeAreaView has been deprecated and will be removed in a future release",
-]);
+LogBox.ignoreLogs([]);
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { initMobileSentry, isSentryConfigured, Sentry } from "@/lib/sentry";
@@ -27,6 +25,7 @@ import { Stack, router, useSegments, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
 import "react-native-reanimated";
+import { BrandedSplash } from "@/components/BrandedSplash";
 
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { useAuth } from "@/contexts/auth-context";
@@ -63,7 +62,7 @@ SplashScreen.preventAutoHideAsync();
 // SplashScreen hide logic handled inside RootLayout hook
 
 function RootLayout() {
-  const [, error] = useFonts({
+  const [loaded, error] = useFonts({
     Outfit_400Regular,
     Outfit_500Medium,
     Outfit_600SemiBold,
@@ -78,10 +77,15 @@ function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  // Hide native layer as soon as JS runs so BrandedSplash (real icon + wordmark)
-  // shows immediately. Expo Go may still flash its default for a moment before JS.
+  // Hide native layer as soon as JS runs so BrandedSplash (real logo)
+  // shows immediately. Native splash is often low-res or misaligned.
   useEffect(() => {
-    void SplashScreen.hideAsync();
+    if (loaded || error) {
+      void SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  useEffect(() => {
     void getProductAnalyticsConsent();
 
     // Wire a production analytics SDK here when available.
@@ -127,10 +131,9 @@ function RootLayout() {
     }
   }, []);
 
-  /* Bypassing for debug */
-  // if (!loaded || isOutdated) {
-  //   return <BrandedSplash />;
-  // }
+  if (!loaded && !error) {
+    return <BrandedSplash />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

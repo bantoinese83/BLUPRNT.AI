@@ -64,7 +64,7 @@ export function LandingHeader() {
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/40 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-1.5">
                 <img
                   src="/bluprnt_logo.svg"
-                  alt=""
+                  alt="BLUPRNT.AI Logo"
                   className="h-full w-full object-contain"
                 />
               </div>

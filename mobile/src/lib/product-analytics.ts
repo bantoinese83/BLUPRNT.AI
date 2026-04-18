@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { Sentry } from "@/lib/sentry";
+
 const STORAGE_KEY = "@bluprnt/product_analytics_consent_v1";
 
 /** In-memory cache so `trackProductEvent` avoids async reads on the hot path. */
@@ -53,6 +55,17 @@ export function trackProductEvent(
 ): void {
   if (!isProductAnalyticsConsentGranted()) return;
   sdkHandler?.(name, properties);
+
+  // Fallback to Sentry breadcrumbs for production observability
+  if (!__DEV__) {
+    Sentry.addBreadcrumb({
+      category: "analytics",
+      message: name,
+      data: properties ?? {},
+      level: "info",
+    });
+  }
+
   if (__DEV__) {
     console.log(`[product-analytics] ${name}`, properties ?? {});
   }

@@ -22,6 +22,7 @@ import {
 import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
 import { router } from "expo-router";
+import Constants from "expo-constants";
 
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -346,7 +347,12 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
           </TouchableOpacity>
         </MotiView>
 
-        <Text style={styles.versionText}>BLUPRNT Mobile v1.0.4 • Build 24</Text>
+        <Text style={styles.versionText}>
+          BLUPRNT Mobile v{Constants.expoConfig?.version ?? "1.0.0"} • Build{" "}
+          {Constants.expoConfig?.ios?.buildNumber ??
+            Constants.expoConfig?.android?.versionCode ??
+            "1"}
+        </Text>
       </ScrollView>
     </ScreenWrapper>
   );

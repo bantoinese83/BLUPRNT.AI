@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import { AnimatePresence } from "moti";
+import { AnimatePresence, MotiView, MotiText } from "moti";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/auth-context";
@@ -163,7 +164,7 @@ export default function OnboardingScreen() {
     setLoading(true);
     try {
       const zipCode = location.replace(/\D/g, "").slice(0, 5) || "00000";
-      await saveOnboardingProject({
+      const newProjectId = await saveOnboardingProject({
         supabase,
         userId: user!.id,
         projectType,
@@ -182,6 +183,17 @@ export default function OnboardingScreen() {
           : null,
         photos: photos.map((p) => ({ uri: p })),
       });
+
+      // Automatically switch to the new project so it loads on the dashboard
+      await AsyncStorage.setItem("bluprnt_project_id", newProjectId);
+      await supabase
+        .from("user_preferences")
+        .upsert({
+          user_id: user!.id,
+          last_active_project_id: newProjectId,
+          updated_at: new Date().toISOString(),
+        });
+
       await clearOnboardingDraft();
       setLoading(false);
       router.replace("/(tabs)");
@@ -276,9 +288,19 @@ export default function OnboardingScreen() {
                 );
               })}
             </View>
-            <Text style={onboardingStyles.phaseLabel} numberOfLines={1}>
-              {ONBOARDING_PHASES[phaseIndexForStep(step)].label}
-            </Text>
+            <AnimatePresence exitBeforeEnter>
+              <MotiText
+                key={phaseIndexForStep(step)}
+                from={{ opacity: 0, translateY: 4 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                exit={{ opacity: 0, translateY: -4 }}
+                transition={{ type: "timing", duration: 300 }}
+                style={onboardingStyles.phaseLabel}
+                numberOfLines={1}
+              >
+                {ONBOARDING_PHASES[phaseIndexForStep(step)].label}
+              </MotiText>
+            </AnimatePresence>
           </View>
         </View>
 
@@ -289,35 +311,44 @@ export default function OnboardingScreen() {
           showsVerticalScrollIndicator={false}
         >
           <AnimatePresence exitBeforeEnter>
-            <OnboardingStepContent
-              step={step}
-              onboardingStyles={onboardingStyles}
-              projectType={projectType}
-              setProjectType={setProjectType}
-              location={location}
-              setLocation={setLocation}
-              locatingZip={locatingZip}
-              onFillZipFromLocation={handleFillZipFromLocation}
-              stage={stage}
-              setStage={setStage}
-              photos={photos}
-              setPhotos={setPhotos}
-              scopeDescription={scopeDescription}
-              setScopeDescription={setScopeDescription}
-              analysisAwaitingChoice={analysisAwaitingChoice}
-              onAnalysisRetry={handleAnalysisRetry}
-              onAnalysisTextOnly={handleAnalysisTextOnly}
-              onAnalysisRegionalFallback={handleAnalysisRegionalFallback}
-              analysisBarTargetW={analysisBarTargetW}
-              onAnalysisBarLayout={setAnalysisBarW}
-              analysisIndex={analysisIndex}
-              analysisMessages={analysisMessages}
-              estimate={estimate}
-              showBreakdown={showBreakdown}
-              setShowBreakdown={setShowBreakdown}
-              session={session}
-              onComplete={handleComplete}
-            />
+            <MotiView
+              key={step}
+              from={{ opacity: 0, translateX: 20 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              exit={{ opacity: 0, translateX: -20 }}
+              transition={{ type: "timing", duration: 400 }}
+              style={{ flex: 1 }}
+            >
+              <OnboardingStepContent
+                step={step}
+                onboardingStyles={onboardingStyles}
+                projectType={projectType}
+                setProjectType={setProjectType}
+                location={location}
+                setLocation={setLocation}
+                locatingZip={locatingZip}
+                onFillZipFromLocation={handleFillZipFromLocation}
+                stage={stage}
+                setStage={setStage}
+                photos={photos}
+                setPhotos={setPhotos}
+                scopeDescription={scopeDescription}
+                setScopeDescription={setScopeDescription}
+                analysisAwaitingChoice={analysisAwaitingChoice}
+                onAnalysisRetry={handleAnalysisRetry}
+                onAnalysisTextOnly={handleAnalysisTextOnly}
+                onAnalysisRegionalFallback={handleAnalysisRegionalFallback}
+                analysisBarTargetW={analysisBarTargetW}
+                onAnalysisBarLayout={setAnalysisBarW}
+                analysisIndex={analysisIndex}
+                analysisMessages={analysisMessages}
+                estimate={estimate}
+                showBreakdown={showBreakdown}
+                setShowBreakdown={setShowBreakdown}
+                session={session}
+                onComplete={handleComplete}
+              />
+            </MotiView>
           </AnimatePresence>
           {step <= 2 ? (
             <Text
