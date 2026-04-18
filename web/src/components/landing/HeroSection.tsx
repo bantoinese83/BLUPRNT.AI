@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ArrowRight, UserPlus } from "lucide-react";
+import { ArrowRight, PlayCircle } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
 import { Iphone } from "@/components/ui/iphone";
@@ -13,9 +13,11 @@ import { IOS_APP_STORE_URL } from "@shared/constants/app-links";
 export function HeroSection({
   onStart,
   onCreateAccount,
+  onSeeHowItWorks,
 }: {
   onStart: () => void;
   onCreateAccount: () => void;
+  onSeeHowItWorks: () => void;
 }) {
   return (
     <section
@@ -88,24 +90,33 @@ export function HeroSection({
             transition={{ delay: 0.4 }}
             className="flex flex-wrap items-center gap-4 pt-1"
           >
-            <div className="flex flex-wrap gap-3">
-              <Button
-                size="lg"
-                className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
-                onClick={onStart}
-              >
-                {LANDING_HERO_COPY.primaryCta}{" "}
-                <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  size="lg"
+                  className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
+                  onClick={onStart}
+                >
+                  {LANDING_HERO_COPY.primaryCta}{" "}
+                  <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-12 px-6 text-base font-black rounded-xl glass border-slate-200 hover:bg-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all sm:px-7"
+                  onClick={onSeeHowItWorks}
+                >
+                  <PlayCircle className="mr-2 h-5 w-5" aria-hidden />
+                  {LANDING_HERO_COPY.secondaryCta}
+                </Button>
+              </div>
+              <button
+                type="button"
                 onClick={onCreateAccount}
+                className="text-left text-sm font-bold text-teal-700 underline-offset-4 hover:underline sm:self-center sm:pl-1"
               >
-                <UserPlus className="mr-2 h-5 w-5" aria-hidden />{" "}
-                {LANDING_HERO_COPY.secondaryCta}
-              </Button>
+                {LANDING_HERO_COPY.createAccountLink}
+              </button>
             </div>
 
             <div className="h-12 w-px bg-slate-200/50 hidden sm:block mx-1" />

@@ -41,7 +41,10 @@ import { Theme } from "@/constants/Theme";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 import { isNetworkReachable } from "@/lib/network-status";
 import { WifiOff } from "lucide-react-native";
-import { getProductAnalyticsConsent } from "@/lib/product-analytics";
+import {
+  getProductAnalyticsConsent,
+  setProductAnalyticsHandler,
+} from "@/lib/product-analytics";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -80,6 +83,15 @@ function RootLayout() {
   useEffect(() => {
     void SplashScreen.hideAsync();
     void getProductAnalyticsConsent();
+
+    // Wire a production analytics SDK here when available.
+    // Example (Segment): setProductAnalyticsHandler((name, props) => analytics.track(name, props));
+    // For now only DEV console output is active (handled inside trackProductEvent).
+    if (__DEV__) {
+      setProductAnalyticsHandler((name, props) => {
+        console.log(`[analytics:dev] ${name}`, props ?? {});
+      });
+    }
 
     // Initialize RevenueCat
     const isExpoGo =

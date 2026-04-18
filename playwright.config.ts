@@ -22,6 +22,11 @@ export default defineConfig({
   webServer: {
     command: `npm run build -w web && npm run preview -w web -- --host 127.0.0.1 --port ${PORT}`,
     url: baseURL,
+    /**
+     * Reusing a manually started preview can skip `VITE_E2E=1` here and break
+     * `e2e/e2e-probes.spec.ts`. Use `npm run test:e2e:smoke` for marketing smoke;
+     * run `npm run test:e2e:probes` with no other server on this port (or CI).
+     */
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     /** So `vite build` succeeds in CI / clean clones without a root `.env` (matches Vitest fallbacks). */

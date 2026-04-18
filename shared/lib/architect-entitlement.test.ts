@@ -119,6 +119,17 @@ describe("architect-entitlement", () => {
         ),
       ).toBe(true);
     });
+
+    it("grants access (null period end) but upload period is not open — intentional asymmetry", () => {
+      const sub = {
+        status: "active" as const,
+        current_period_end: null,
+        revenuecat_entitlement_active: false,
+      };
+      // User gets product access immediately; upload quota reset requires a known anchor.
+      expect(isStripeArchitectSubscriptionEntitled(sub, now)).toBe(true);
+      expect(isStripeArchitectUploadPeriodOpen(sub, now)).toBe(false);
+    });
   });
 
   describe("isArchitectGlobalUploadQuotaAvailable", () => {

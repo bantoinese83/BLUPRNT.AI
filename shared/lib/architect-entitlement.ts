@@ -1,5 +1,12 @@
 import type { UserSubscriptionRow } from "@shared/types/database";
 
+/**
+ * The RevenueCat entitlement identifier for the Architect (Pro) plan.
+ * Must match the entitlement ID configured in the RevenueCat dashboard.
+ * All mobile code should import this constant rather than hard-coding the string.
+ */
+export const ARCHITECT_ENTITLEMENT_ID = "Bluprntai Pro";
+
 export type ArchitectEntitlementFields = Pick<
   UserSubscriptionRow,
   "status" | "current_period_end" | "revenuecat_entitlement_active"
@@ -17,16 +24,21 @@ export function isStripeArchitectSubscriptionEntitled(
   if (!sub) return false;
   const st = sub.status;
   if (st !== "active" && st !== "trialing") return false;
-  const pe = sub.current_period_end
-    ? new Date(sub.current_period_end)
-    : null;
+  const pe = sub.current_period_end ? new Date(sub.current_period_end) : null;
   if (!pe) return true;
   return pe > now;
 }
 
 /**
  * Stripe subscription row is in good standing for Architect (web billing).
- * Requires a current period end in the future when present (used for billing-anchor resets).
+ *
+ * Intentional asymmetry vs {@link isStripeArchitectSubscriptionEntitled}:
+ * - `isStripeArchitectSubscriptionEntitled` returns `true` when `current_period_end`
+ *   is null because the first webhook may arrive before the period end is set;
+ *   we give the benefit of the doubt so the user gets access immediately.
+ * - This function requires a *known, non-expired* period end because it is used
+ *   to gate invoice-upload-count resets — resetting without a known anchor would
+ *   allow unlimited resets while the row is not yet fully synced.
  */
 export function isStripeArchitectUploadPeriodOpen(
   sub: ArchitectEntitlementFields | null | undefined,
@@ -35,9 +47,7 @@ export function isStripeArchitectUploadPeriodOpen(
   if (!sub) return false;
   const st = sub.status;
   if (st !== "active" && st !== "trialing") return false;
-  const pe = sub.current_period_end
-    ? new Date(sub.current_period_end)
-    : null;
+  const pe = sub.current_period_end ? new Date(sub.current_period_end) : null;
   return Boolean(pe && pe > now);
 }
 

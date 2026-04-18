@@ -15,6 +15,15 @@ export const onboardingStyles = StyleSheet.create({
     paddingTop: 0,
     paddingBottom: 16,
   },
+  privacyNote: {
+    marginTop: 20,
+    marginBottom: 8,
+    fontSize: 12,
+    lineHeight: 18,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+  },
   header: {
     paddingHorizontal: 20,
     paddingTop: 10,
@@ -643,13 +652,6 @@ export const onboardingStyles = StyleSheet.create({
     fontFamily: Theme.typography.family.bold,
     color: "#10b981",
     textTransform: "uppercase",
-  },
-  privacyNote: {
-    fontSize: 12,
-    fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
-    textAlign: "center",
-    marginTop: 24,
   },
   scopeBreakdownContainer: {
     width: "100%",

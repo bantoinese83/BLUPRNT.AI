@@ -8,8 +8,6 @@ const webhookSecret = (
     Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN") ||
     ""
 ).trim();
-const allowInsecureWebhook =
-  Deno.env.get("REVENUECAT_ALLOW_INSECURE_WEBHOOK") === "1";
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -17,21 +15,21 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * RevenueCat Webhook Handler
  * Syncs App Store/Play entitlements. When the user also has Stripe (web),
  * we only update `revenuecat_entitlement_active` so we never clobber Stripe-driven status.
+ *
+ * Required secret: REVENUECAT_WEBHOOK_SECRET (set in Supabase Edge Function secrets).
  */
 serve(async (req: Request) => {
   try {
     if (!webhookSecret) {
-      if (!allowInsecureWebhook) {
-        console.error(
-          "[RevenueCat] REVENUECAT_WEBHOOK_SECRET is required (or set REVENUECAT_ALLOW_INSECURE_WEBHOOK=1 for local only)",
-        );
-        return new Response("Webhook not configured", { status: 503 });
-      }
-    } else {
-      const authHeader = req.headers.get("Authorization");
-      if (authHeader !== `Bearer ${webhookSecret}`) {
-        return new Response("Unauthorized", { status: 401 });
-      }
+      console.error(
+        "[RevenueCat] REVENUECAT_WEBHOOK_SECRET is not configured. Set this secret in the Supabase dashboard.",
+      );
+      return new Response("Webhook not configured", { status: 503 });
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader !== `Bearer ${webhookSecret}`) {
+      return new Response("Unauthorized", { status: 401 });
     }
 
     const { event } = await req.json();

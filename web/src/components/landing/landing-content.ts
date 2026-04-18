@@ -16,15 +16,17 @@ export const LANDING_HERO_COPY = {
   bodyLead: "Start your Bluprnt and get accurate local estimates,",
   bodyEmphasis: "track your project in real time,",
   bodyTail: "and prove your investment at resale.",
+  /** Moment A: one primary job—start planning; secondary explores without signup. */
   primaryCta: "Start planning free",
-  secondaryCta: "Create free account",
+  secondaryCta: "See how it works",
+  createAccountLink: "Create free account",
 } as const;
 
 /** Trust & distribution — short pills below the hero */
 export const LANDING_TRUST_PILLS = [
-  { label: "For homeowners—not contractor ads" },
-  { label: "Export your file anytime" },
-  { label: "Planned budget vs. real spending" },
+  { label: "Built for homeowners—not contractor lead lists" },
+  { label: "Local estimate range + your real receipts in one story" },
+  { label: "Export or share when you’re ready—your data stays yours" },
 ] as const;
 
 export const LANDING_HOW_INTRO =

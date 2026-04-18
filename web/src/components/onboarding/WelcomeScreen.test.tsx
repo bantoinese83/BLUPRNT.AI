@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { AuthProvider } from "@/contexts/AuthProvider";
+import { ONBOARDING_PRIVACY_NOTE } from "@shared/constants/onboarding";
 
 describe("WelcomeScreen", () => {
   it("renders heading and CTAs after load", async () => {
@@ -25,6 +26,7 @@ describe("WelcomeScreen", () => {
     expect(
       screen.getByRole("button", { name: /sign in/i }),
     ).toBeInTheDocument();
+    expect(screen.getByText(ONBOARDING_PRIVACY_NOTE)).toBeInTheDocument();
   });
 
   it("register link goes to register", async () => {

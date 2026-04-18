@@ -37,6 +37,11 @@ import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
 import { Theme } from "@/constants/Theme";
 import { PRICING } from "@shared/constants/pricing";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_SUPPORT,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 import { ConfigurationRequired } from "@/components/ConfigurationRequired";
 import { showAppToast } from "@/lib/app-toast";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
@@ -415,7 +420,7 @@ export default function ProfileScreen() {
               icon={<HelpCircle size={20} color={Theme.colors.text.muted} />}
               title="Help & Support"
               subtitle="FAQs and contact"
-              onPress={() => router.push("/support")}
+              onPress={() => router.push(WEB_APP_PATH_SUPPORT)}
             />
             <View
               style={styles.analyticsRow}
@@ -511,12 +516,12 @@ export default function ProfileScreen() {
             <ProfileSettingItem
               icon={<Shield size={20} color={Theme.colors.text.secondary} />}
               title="Privacy Policy"
-              onPress={() => router.push("/privacy")}
+              onPress={() => router.push(WEB_APP_PATH_PRIVACY)}
             />
             <ProfileSettingItem
               icon={<FileText size={20} color={Theme.colors.text.secondary} />}
               title="Terms of Service"
-              onPress={() => router.push("/terms")}
+              onPress={() => router.push(WEB_APP_PATH_TERMS)}
             />
           </GlassCard>
         </MotiView>

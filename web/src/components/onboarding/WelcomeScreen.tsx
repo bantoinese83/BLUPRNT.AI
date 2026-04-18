@@ -13,6 +13,7 @@ import { PageTransition } from "./PageTransition";
 import { useLogout } from "@/hooks/use-logout";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
+import { ONBOARDING_PRIVACY_NOTE } from "@shared/constants/onboarding";
 
 export function WelcomeScreen() {
   const navigate = useNavigate();
@@ -96,6 +97,15 @@ export function WelcomeScreen() {
           >
             Get real-world costs, track invoices, and build a project record you
             can hand to future buyers.
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="text-xs text-slate-500 leading-relaxed px-4 max-w-sm mx-auto"
+          >
+            {ONBOARDING_PRIVACY_NOTE}
           </motion.p>
         </div>
 

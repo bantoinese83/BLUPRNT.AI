@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, HelpCircle, ArrowLeft } from "lucide-react";
+import { PUBLIC_SUPPORT_EMAIL } from "@shared/constants/public-site";
 
 export default function Support() {
   return (
@@ -47,10 +48,10 @@ export default function Support() {
               Response time: &lt; 24h
             </p>
             <a
-              href="mailto:support@monarchlabs.co"
+              href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}
               className="text-teal-400 font-semibold hover:text-teal-300 transition-colors inline-flex items-center gap-2"
             >
-              support@monarchlabs.co
+              {PUBLIC_SUPPORT_EMAIL}
             </a>
           </div>
 
@@ -118,7 +119,7 @@ export default function Support() {
             personally.
           </p>
           <a
-            href="mailto:support@monarchlabs.co"
+            href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}
             className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 font-bold text-slate-900 shadow-xl shadow-white/10 transition-all hover:scale-105 active:scale-95"
           >
             Contact Support

@@ -1,5 +1,10 @@
 import { Link } from "react-router-dom";
 import { openCookieSettings } from "@/lib/cookie-consent";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_SUPPORT,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 
 export function LandingFooter() {
   return (
@@ -96,7 +101,7 @@ export function LandingFooter() {
               <ul className="flex flex-col gap-2.5 text-sm text-slate-600">
                 <li>
                   <Link
-                    to="/privacy"
+                    to={WEB_APP_PATH_PRIVACY}
                     className="font-medium hover:text-slate-900"
                   >
                     Privacy Policy
@@ -104,7 +109,7 @@ export function LandingFooter() {
                 </li>
                 <li>
                   <Link
-                    to="/terms"
+                    to={WEB_APP_PATH_TERMS}
                     className="font-medium hover:text-slate-900"
                   >
                     Terms of Service
@@ -112,7 +117,7 @@ export function LandingFooter() {
                 </li>
                 <li>
                   <Link
-                    to="/support"
+                    to={WEB_APP_PATH_SUPPORT}
                     className="font-medium hover:text-slate-900"
                   >
                     Support center

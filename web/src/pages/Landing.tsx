@@ -159,6 +159,12 @@ export default function Landing() {
           <HeroSection
             onStart={() => navigate("/onboarding")}
             onCreateAccount={() => navigate("/register")}
+            onSeeHowItWorks={() => {
+              document.getElementById("how")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
           />
 
           <LandingTrustStrip />

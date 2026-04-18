@@ -45,6 +45,7 @@ export function setProductAnalyticsHandler(
 /**
  * Forward to {@link setProductAnalyticsHandler} when integrated.
  * No events are sent unless the user has opted in via Profile.
+ * Prefer `AnalyticsEvent` values from `@shared/constants/analytics-events` for `name` so platforms stay aligned.
  */
 export function trackProductEvent(
   name: string,

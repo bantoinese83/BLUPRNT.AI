@@ -8,12 +8,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import {
-  AlertCircle,
-  LogIn,
-  Lock,
-  Wand2,
-} from "lucide-react";
+import { AlertCircle, LogIn, Lock, Wand2 } from "lucide-react";
 
 import { RegisterPasswordForm } from "@/components/auth/register/RegisterPasswordForm";
 import { RegisterMagicForm } from "@/components/auth/register/RegisterMagicForm";
@@ -23,6 +18,10 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { resolvePostLoginHref } from "@/lib/onboarding-post-auth-redirect";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
@@ -293,14 +292,14 @@ export default function Register() {
               >
                 I agree to the{" "}
                 <Link
-                  to="/terms"
+                  to={WEB_APP_PATH_TERMS}
                   className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
                 >
                   Terms
                 </Link>{" "}
                 and{" "}
                 <Link
-                  to="/privacy"
+                  to={WEB_APP_PATH_PRIVACY}
                   className="font-bold text-teal-700 underline underline-offset-2 hover:text-teal-600"
                 >
                   Privacy Policy
@@ -373,8 +372,6 @@ export default function Register() {
               <span className="font-medium">{error}</span>
             </div>
           )}
-
-
 
           {mode === "password" ? (
             <RegisterPasswordForm

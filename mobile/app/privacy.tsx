@@ -13,6 +13,7 @@ import { MotiView } from "moti";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { reportClientError } from "@/lib/sentry";
+import { PUBLIC_PRIVACY_POLICY_URL } from "@shared/constants/public-site";
 
 export default function PrivacyScreen() {
   return (
@@ -68,7 +69,7 @@ export default function PrivacyScreen() {
           <TouchableOpacity
             style={styles.externalLink}
             onPress={() =>
-              void Linking.openURL("https://bluprnt.ai/privacy").catch(
+              void Linking.openURL(PUBLIC_PRIVACY_POLICY_URL).catch(
                 (err: unknown) =>
                   reportClientError("open_external_privacy_policy", err),
               )

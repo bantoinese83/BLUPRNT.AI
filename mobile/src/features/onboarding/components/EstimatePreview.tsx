@@ -9,7 +9,7 @@ import { ProjectIcon } from "@/lib/project-icons";
 import { Theme } from "@/constants/Theme";
 import { ScopeEstimateBreakdown } from "@/features/onboarding/components/ScopeEstimateBreakdown";
 import { MaterialDetailList } from "@/features/onboarding/components/MaterialDetailList";
-import { hasValidOnboardingZip } from "@/features/onboarding/onboarding-constants";
+import { hasValidOnboardingZip } from "@shared/constants/onboarding";
 import type { OnboardingStyles } from "@/features/onboarding/onboarding-step-types";
 import type { OnboardingEstimateState } from "@/features/onboarding/hooks/useOnboardingAnalysis";
 

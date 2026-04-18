@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { PageTransition } from "./PageTransition";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { Loader } from "@/components/ui/Loader";
+import { loadingScreenMessages } from "@shared/constants/onboarding";
 
 export function LoadingScreen() {
   const navigate = useNavigate();
@@ -11,22 +12,10 @@ export function LoadingScreen() {
     useOnboarding();
   const [messageIdx, setMessageIdx] = useState(0);
 
-  const kind =
-    projectType === "Kitchen"
-      ? "kitchen"
-      : projectType === "Bathroom"
-        ? "bathroom"
-        : "project";
-
-  const messages = [
-    `Analyzing your ${kind} scope...`,
-    locationInput
-      ? `Scanning market rates in ${locationInput}...`
-      : "Checking local renovation costs...",
-    `Matching materials to ${kind} standards...`,
-    "Applying current market labor rates...",
-    "Finalizing your financial blueprint...",
-  ];
+  const messages = useMemo(
+    () => loadingScreenMessages(projectType, locationInput),
+    [projectType, locationInput],
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {

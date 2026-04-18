@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AnalyticsEvent } from "@shared/constants/analytics-events";
 import {
   clearProductAnalyticsConsentCache,
   getProductAnalyticsConsent,
@@ -26,7 +27,7 @@ describe("product-analytics", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
     await getProductAnalyticsConsent();
-    trackProductEvent("screen_view", { screen: "home" });
+    trackProductEvent(AnalyticsEvent.ScreenView, { screen: "home" });
 
     expect(log).not.toHaveBeenCalled();
     log.mockRestore();
@@ -37,7 +38,7 @@ describe("product-analytics", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
     await getProductAnalyticsConsent();
-    trackProductEvent("screen_view", { screen: "home" });
+    trackProductEvent(AnalyticsEvent.ScreenView, { screen: "home" });
 
     expect(log).toHaveBeenCalled();
     log.mockRestore();
@@ -51,7 +52,7 @@ describe("product-analytics", () => {
       "1",
     );
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    trackProductEvent("tap");
+    trackProductEvent(AnalyticsEvent.Tap);
     expect(log).toHaveBeenCalled();
     log.mockRestore();
   });

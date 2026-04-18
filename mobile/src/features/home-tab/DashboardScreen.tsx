@@ -17,6 +17,10 @@ import { useAwareness } from "@/contexts/AwarenessContext";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { generateActivityEvents } from "@/lib/activity";
 import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  DASHBOARD_EMPTY_STATE,
+  DASHBOARD_SECTION_PLAN_SPENDING,
+} from "@shared/copy/dashboard";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { DashboardStats } from "@/components/DashboardStats";
@@ -206,10 +210,12 @@ export default function DashboardScreen() {
       >
         <EmptyState
           icon={PlusCircle}
-          title="Your home hub is ready"
-          description="Set up one renovation and we’ll guide you through vision, an estimate, and your document ledger. Everything starts from the same quick flow below."
-          actionTitle="Set up your project"
+          title={DASHBOARD_EMPTY_STATE.title}
+          description={DASHBOARD_EMPTY_STATE.description}
+          actionTitle={DASHBOARD_EMPTY_STATE.primaryCta}
           onAction={() => router.push("/onboarding?newProject=1")}
+          secondaryTitle={DASHBOARD_EMPTY_STATE.secondaryCta}
+          onSecondary={() => router.push("/onboarding")}
           withRoadmap
         />
       </ScreenWrapper>
@@ -292,6 +298,9 @@ export default function DashboardScreen() {
         }}
       />
 
+      <Text style={styles.sectionHeader} accessibilityRole="header">
+        {DASHBOARD_SECTION_PLAN_SPENDING}
+      </Text>
       <DashboardStats
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}

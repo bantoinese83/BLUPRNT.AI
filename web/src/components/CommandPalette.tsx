@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { useFocusTrap } from "@/lib/use-focus-trap";
+import { WEB_APP_PATH_PRIVACY } from "@shared/constants/public-site";
 
 export function CommandPalette() {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -229,7 +230,9 @@ export function CommandPalette() {
                   <Item
                     icon={<Shield />}
                     label="Privacy Policy"
-                    onSelect={() => runCommand(() => navigate("/privacy"))}
+                    onSelect={() =>
+                      runCommand(() => navigate(WEB_APP_PATH_PRIVACY))
+                    }
                   />
                   <Item
                     icon={<LogOut className="text-rose-400" />}

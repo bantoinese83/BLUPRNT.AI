@@ -1,21 +1,39 @@
-# Run from repo root: npm run test:e2e:mobile
+# Run from repo root: npm run test:e2e:mobile mobile/maestro/app-smoke.yaml
 # Requires: Maestro CLI, iOS Simulator or Android emulator, dev build installed (ai.bluprnt.mobile).
-# Extend for login → project → export when you have test credentials.
 #
-# Web coverage (Playwright, same repo):
-#   npm run test:e2e -- e2e/project-view-share.spec.ts   # expired / missing share link
-#   npm run test:e2e -- e2e/e2e-probes.spec.ts            # popup-blocked + offline “save” probe
-# Mobile manual ideas (no stable Maestro API for pop-ups / airplane mode here):
-#   - Airplane mode ON → attempt upload or pull-to-refresh → expect error or offline banner
-#   - Open a share link in Safari (web) to match expired-link UX
+# Web smoke (fast, no device): npm run test:e2e:smoke
+# Deeper web: npm run test:e2e
+# Deeper mobile: mobile/maestro/full-journey.yaml
 appId: ai.bluprnt.mobile
 ---
-- launchApp
+# Fresh state so the marketing carousel appears (returning users may skip it).
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 12000
+# Carousel title can lag after a cold start; "Next" is the primary readiness signal.
 - extendedWaitUntil:
-    visible: "Snap the room. Get the number."
-    timeout: 30000
+    visible: "Next"
+    timeout: 90000
+- assertVisible: "Snap the room. Get the number."
 - tapOn: "Next"
+- waitForAnimationToEnd:
+    timeout: 4000
 - tapOn: "Next"
+- waitForAnimationToEnd:
+    timeout: 4000
 - tapOn: "Next"
+- waitForAnimationToEnd:
+    timeout: 4000
 - tapOn: "Get Started"
-- assertVisible: "Enter project details"
+- waitForAnimationToEnd:
+    timeout: 4000
+- assertVisible: "What are you working on first?"
+- scrollUntilVisible:
+    element:
+      id: "onboarding-privacy-note"
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 40
+- assertVisible:
+    id: "onboarding-privacy-note"

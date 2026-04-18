@@ -28,6 +28,11 @@ import {
 import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
+import {
+  DASHBOARD_EMPTY_STATE,
+  DASHBOARD_SECTION_GUIDED_PATH,
+  DASHBOARD_SECTION_PLAN_SPENDING,
+} from "@shared/copy/dashboard";
 import { Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { ShareModal } from "@/components/dashboard/ShareModal";
@@ -210,16 +215,16 @@ export default function Dashboard() {
             <EmptyState
               variant="projects"
               currentStep={1}
-              title="You’re all set"
-              description="Add a renovation project to see your estimate, scope, and document ledger in one place. Jump straight in, or start from the short intro if you prefer a quick tour first."
+              title={DASHBOARD_EMPTY_STATE.title}
+              description={DASHBOARD_EMPTY_STATE.description}
               action={{
-                label: "Start a project",
+                label: DASHBOARD_EMPTY_STATE.primaryCta,
                 onClick: () => {
                   window.location.href = "/onboarding/type";
                 },
               }}
               secondaryAction={{
-                label: "Begin with the intro",
+                label: DASHBOARD_EMPTY_STATE.secondaryCta,
                 onClick: () => {
                   window.location.href = "/onboarding";
                 },
@@ -633,11 +638,20 @@ function DashboardContent({
           <DashboardWelcomeBanner />
         </motion.div>
 
+        <motion.div variants={itemVariants}>
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
+              {DASHBOARD_SECTION_PLAN_SPENDING}
+            </h3>
+            {stats}
+          </div>
+        </motion.div>
+
         {project && (
           <motion.div variants={itemVariants}>
             <div className="space-y-4">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
-                Your Guided Path
+                {DASHBOARD_SECTION_GUIDED_PATH}
               </h3>
               <NextStepsChecklist
                 stage={project.stage || "planning"}
@@ -658,8 +672,6 @@ function DashboardContent({
             </div>
           </motion.div>
         )}
-
-        <motion.div variants={itemVariants}>{stats}</motion.div>
 
         <motion.div variants={itemVariants}>
           <UpgradeBanner

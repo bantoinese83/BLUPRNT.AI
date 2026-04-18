@@ -13,6 +13,7 @@ import { MotiView } from "moti";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { reportClientError } from "@/lib/sentry";
+import { PUBLIC_TERMS_OF_SERVICE_URL } from "@shared/constants/public-site";
 
 export default function TermsScreen() {
   return (
@@ -76,7 +77,7 @@ export default function TermsScreen() {
           <TouchableOpacity
             style={styles.externalLink}
             onPress={() =>
-              void Linking.openURL("https://bluprnt.ai/terms").catch(
+              void Linking.openURL(PUBLIC_TERMS_OF_SERVICE_URL).catch(
                 (err: unknown) => reportClientError("open_external_terms", err),
               )
             }

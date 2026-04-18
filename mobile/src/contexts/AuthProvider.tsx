@@ -3,6 +3,8 @@ import { Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Linking from "expo-linking";
+import * as Notifications from "expo-notifications";
+import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { extractPkceCodeFromUrl, getAuthRedirectUrl } from "@/lib/auth-linking";
 import { registerForPushNotificationsAsync } from "@/lib/push";
@@ -51,6 +53,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
+  }, []);
+
+  /** Push notification tap → navigate to the relevant screen. */
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data as
+          | Record<string, string>
+          | undefined;
+        try {
+          if (data?.projectId) {
+            router.push(`/project/${data.projectId}` as never);
+          } else if (data?.url) {
+            void Linking.openURL(data.url);
+          }
+        } catch (err) {
+          reportClientError("push_tap_navigation", err);
+        }
+      },
+    );
+    return () => sub.remove();
   }, []);
 
   /** PKCE recovery / magic links: exchange `?code=` when the app opens from a deep link. */

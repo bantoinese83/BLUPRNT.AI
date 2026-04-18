@@ -3,13 +3,14 @@ import {
   LegalParagraph,
   LegalSectionTitle,
 } from "@/components/legal/LegalPageShell";
+import { WEB_APP_PATH_PRIVACY } from "@shared/constants/public-site";
 
 export default function PrivacyPolicy() {
   return (
     <LegalPageShell
       title="Privacy Policy"
       metaDescription="Learn how BLUPRNT protects your data and manages your personal and project information."
-      canonicalPath="/privacy"
+      canonicalPath={WEB_APP_PATH_PRIVACY}
     >
       <section>
         <LegalSectionTitle>1. Information we collect</LegalSectionTitle>

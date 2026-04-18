@@ -38,6 +38,46 @@
               "scheme": "https",
               "host": "bluprnt.ai",
               "pathPrefix": "/reset-password"
+            },
+            {
+              "scheme": "https",
+              "host": "bluprnt.ai",
+              "pathPrefix": "/dashboard"
+            },
+            {
+              "scheme": "https",
+              "host": "bluprnt.ai",
+              "pathPrefix": "/project"
+            },
+            {
+              "scheme": "https",
+              "host": "bluprnt.ai",
+              "pathPrefix": "/share"
+            },
+            {
+              "scheme": "https",
+              "host": "www.bluprnt.ai",
+              "pathPrefix": "/onboarding"
+            },
+            {
+              "scheme": "https",
+              "host": "www.bluprnt.ai",
+              "pathPrefix": "/reset-password"
+            },
+            {
+              "scheme": "https",
+              "host": "www.bluprnt.ai",
+              "pathPrefix": "/dashboard"
+            },
+            {
+              "scheme": "https",
+              "host": "www.bluprnt.ai",
+              "pathPrefix": "/project"
+            },
+            {
+              "scheme": "https",
+              "host": "www.bluprnt.ai",
+              "pathPrefix": "/share"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]

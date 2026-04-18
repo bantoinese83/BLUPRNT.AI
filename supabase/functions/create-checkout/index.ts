@@ -1,7 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
-import { getUserIdFromRequest } from "../_shared/auth.ts";
+import {
+  getUserIdFromRequest,
+  assertProjectOwner,
+  getServiceClient,
+} from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 
@@ -80,6 +84,30 @@ Deno.serve(async (req: Request) => {
 
     if (!priceId) {
       return jsonResponse({ error: "Missing priceId" }, 400, req);
+    }
+
+    // If a projectId is supplied, verify the authenticated user owns it before
+    // creating a checkout session on their behalf. This prevents any user from
+    // purchasing a Project Pass for someone else's project.
+    if (projectId) {
+      const admin = getServiceClient();
+      try {
+        await assertProjectOwner(admin, projectId, userId);
+      } catch (ownershipErr) {
+        const msg = (ownershipErr as Error).message;
+        if (msg === "forbidden") {
+          return jsonResponse(
+            { error: "You don't have permission to purchase for that project." },
+            403,
+            req,
+          );
+        }
+        return jsonResponse(
+          { error: "Project not found. Please refresh and try again." },
+          404,
+          req,
+        );
+      }
     }
 
     const allowedPrices = resolveAllowedPriceIds();

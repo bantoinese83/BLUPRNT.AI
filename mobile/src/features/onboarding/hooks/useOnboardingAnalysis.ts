@@ -13,7 +13,7 @@ import {
 import {
   loadingScreenMessages,
   onboardingZipCode,
-} from "@/features/onboarding/onboarding-constants";
+} from "@shared/constants/onboarding";
 
 export type OnboardingEstimateState = {
   min: number;

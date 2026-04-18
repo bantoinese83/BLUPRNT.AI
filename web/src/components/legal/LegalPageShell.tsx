@@ -5,6 +5,10 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { openCookieSettings } from "@/lib/cookie-consent";
 import { getPublicSiteUrl } from "@/lib/site-url";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 
 const FALLBACK_ORIGIN = "https://bluprntai.com";
 
@@ -157,10 +161,16 @@ export function LegalPageShell({
             <Link to="/onboarding" className="font-medium hover:text-slate-900">
               Get started
             </Link>
-            <Link to="/privacy" className="font-medium hover:text-slate-900">
+            <Link
+              to={WEB_APP_PATH_PRIVACY}
+              className="font-medium hover:text-slate-900"
+            >
               Privacy
             </Link>
-            <Link to="/terms" className="font-medium hover:text-slate-900">
+            <Link
+              to={WEB_APP_PATH_TERMS}
+              className="font-medium hover:text-slate-900"
+            >
               Terms
             </Link>
             <a

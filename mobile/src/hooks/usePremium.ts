@@ -4,8 +4,7 @@ import Purchases, {
   PurchasesOffering,
   PurchasesPackage,
 } from "react-native-purchases";
-
-const ENTITLEMENT_ID = "Bluprntai Pro";
+import { ARCHITECT_ENTITLEMENT_ID } from "@shared/lib/architect-entitlement";
 
 export function usePremium() {
   const [isPro, setIsPro] = useState<boolean>(false);
@@ -14,7 +13,7 @@ export function usePremium() {
 
   const updateCustomerInfo = useCallback((info: CustomerInfo) => {
     const proActive =
-      typeof info.entitlements.active[ENTITLEMENT_ID] !== "undefined";
+      typeof info.entitlements.active[ARCHITECT_ENTITLEMENT_ID] !== "undefined";
     setIsPro(proActive);
     setLoading(false);
   }, []);

@@ -5,13 +5,14 @@ import {
   LegalParagraph,
   LegalSectionTitle,
 } from "@/components/legal/LegalPageShell";
+import { WEB_APP_PATH_TERMS } from "@shared/constants/public-site";
 
 export default function TermsOfService() {
   return (
     <LegalPageShell
       title="Terms of Service"
       metaDescription="Read the terms and conditions for using BLUPRNT, the home renovation financial OS."
-      canonicalPath="/terms"
+      canonicalPath={WEB_APP_PATH_TERMS}
     >
       <section>
         <LegalSectionTitle>1. Agreement to terms</LegalSectionTitle>

@@ -13,6 +13,10 @@ import { MotiView } from "moti";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { reportClientError } from "@/lib/sentry";
+import {
+  PUBLIC_SUPPORT_EMAIL,
+  PUBLIC_SUPPORT_PAGE_URL,
+} from "@shared/constants/public-site";
 
 const FAQS = [
   {
@@ -32,9 +36,6 @@ const FAQS = [
     a: "Open a document from the Finance tab, then choose a budget line for each extracted line. That powers plan vs actual in your project.",
   },
 ] as const;
-
-const SUPPORT_EMAIL = "support@monarchlabs.co";
-const SUPPORT_WEB = "https://bluprnt.ai/support";
 
 export default function SupportScreen() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -72,25 +73,25 @@ export default function SupportScreen() {
           <TouchableOpacity
             style={styles.mailCard}
             onPress={() =>
-              void Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(
+              void Linking.openURL(`mailto:${PUBLIC_SUPPORT_EMAIL}`).catch(
                 (err: unknown) => reportClientError("support_mailto", err),
               )
             }
             accessibilityRole="button"
-            accessibilityLabel={`Email ${SUPPORT_EMAIL}`}
+            accessibilityLabel={`Email ${PUBLIC_SUPPORT_EMAIL}`}
           >
             <Mail size={22} color={Theme.colors.brand.primary} />
             <View style={styles.mailTextWrap}>
               <Text style={styles.mailTitle}>Email support</Text>
-              <Text style={styles.mailSubtitle}>{SUPPORT_EMAIL}</Text>
+              <Text style={styles.mailSubtitle}>{PUBLIC_SUPPORT_EMAIL}</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.linkCard}
             onPress={() =>
-              void Linking.openURL(SUPPORT_WEB).catch((err: unknown) =>
-                reportClientError("support_open_web", err),
+              void Linking.openURL(PUBLIC_SUPPORT_PAGE_URL).catch(
+                (err: unknown) => reportClientError("support_open_web", err),
               )
             }
           >

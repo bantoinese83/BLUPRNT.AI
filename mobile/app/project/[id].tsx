@@ -5,6 +5,7 @@ import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import {
   ProjectDetailContent,
   projectDetailStyles,
@@ -58,5 +59,9 @@ export default function ProjectDetailScreen() {
       </ScreenWrapper>
     );
   }
-  return <ProjectDetailScreenInner />;
+  return (
+    <ComponentErrorBoundary name="Project Detail">
+      <ProjectDetailScreenInner />
+    </ComponentErrorBoundary>
+  );
 }

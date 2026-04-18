@@ -76,7 +76,20 @@ Deno.serve(async (req: Request) => {
             targetUserId = rpcUserId;
           }
 
-          if (targetUserId) {
+          if (!targetUserId) {
+            // No userId in metadata and email lookup failed — log prominently so
+            // the operator can manually reconcile. Return 200 so Stripe does not
+            // keep retrying an unrecoverable event.
+            logEdge(
+              "error",
+              "stripe-webhook checkout.session.completed: could not resolve userId — subscription NOT provisioned",
+              {
+                session_id: session.id,
+                customer_email: customerEmail ?? "none",
+                subscription_id: subId,
+              },
+            );
+          } else {
             const { error: upsertErr } = await admin
               .from("user_subscriptions")
               .upsert(

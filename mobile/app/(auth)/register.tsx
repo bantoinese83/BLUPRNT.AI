@@ -27,6 +27,10 @@ import { useAuth } from "@/contexts/auth-context";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 
 export default function RegisterScreen() {
@@ -207,7 +211,7 @@ export default function RegisterScreen() {
                         style={styles.policyLink}
                         onPress={() => {
                           Haptics.selectionAsync();
-                          router.push("/terms");
+                          router.push(WEB_APP_PATH_TERMS);
                         }}
                       >
                         Terms
@@ -217,7 +221,7 @@ export default function RegisterScreen() {
                         style={styles.policyLink}
                         onPress={() => {
                           Haptics.selectionAsync();
-                          router.push("/privacy");
+                          router.push(WEB_APP_PATH_PRIVACY);
                         }}
                       >
                         Privacy Policy

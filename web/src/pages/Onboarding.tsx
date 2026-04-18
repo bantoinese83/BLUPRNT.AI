@@ -22,58 +22,24 @@ import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { cn } from "@/lib/utils";
 import { Check, Home, Calculator, UserPlus } from "lucide-react";
-
-/** Aligned with mobile: three phases, same internal routes. */
-const ONBOARDING_PHASES = [
-  {
-    label: "About project",
-    paths: [
-      "/onboarding/type",
-      "/onboarding/location",
-      "/onboarding/stage",
-      "/onboarding/photo",
-      "/onboarding/text-scope",
-    ],
-  },
-  {
-    label: "Your estimate",
-    paths: ["/onboarding/loading", "/onboarding/estimate"],
-  },
-  { label: "Save", paths: ["/onboarding/signup"] },
-] as const;
-
-const ONBOARDING_STEPS = [
-  { path: "/onboarding/type", label: "Project" },
-  { path: "/onboarding/location", label: "Location" },
-  { path: "/onboarding/stage", label: "Stage" },
-  { path: "/onboarding/photo", label: "Photos" },
-  { path: "/onboarding/text-scope", label: "Details" },
-  { path: "/onboarding/loading", label: "Analysis" },
-  { path: "/onboarding/estimate", label: "Estimate" },
-  { path: "/onboarding/signup", label: "Account" },
-];
-
-function phaseIndexForPath(pathname: string): number {
-  for (let i = ONBOARDING_PHASES.length - 1; i >= 0; i--) {
-    for (const p of ONBOARDING_PHASES[i].paths) {
-      if (p === pathname) return i;
-    }
-  }
-  return 0;
-}
+import {
+  ONBOARDING_WEB_PHASES,
+  ONBOARDING_WEB_STEPS,
+  phaseIndexForOnboardingPath,
+} from "@shared/constants/onboarding";
 
 function StepProgress({ currentPath }: { currentPath: string }) {
   const navigate = useNavigate();
-  const stepMeta = ONBOARDING_STEPS.find((s) => s.path === currentPath);
+  const stepMeta = ONBOARDING_WEB_STEPS.find((s) => s.path === currentPath);
   if (!stepMeta) return null;
 
-  const currentIndex = ONBOARDING_STEPS.findIndex(
+  const currentIndex = ONBOARDING_WEB_STEPS.findIndex(
     (s) => s.path === currentPath,
   );
-  const phaseIndex = phaseIndexForPath(currentPath);
-  const phasesTotal = ONBOARDING_PHASES.length;
+  const phaseIndex = phaseIndexForOnboardingPath(currentPath);
+  const phasesTotal = ONBOARDING_WEB_PHASES.length;
 
-  const remainingSteps = ONBOARDING_STEPS.length - currentIndex - 1;
+  const remainingSteps = ONBOARDING_WEB_STEPS.length - currentIndex - 1;
   const timeLabel =
     remainingSteps <= 0
       ? "Almost done"
@@ -88,7 +54,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
       <div className="flex w-full justify-between items-end px-1 gap-3">
         <div className="space-y-1 min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600/60 leading-none">
-            {ONBOARDING_PHASES[phaseIndex].label} — {phaseIndex + 1} of{" "}
+            {ONBOARDING_WEB_PHASES[phaseIndex].label} — {phaseIndex + 1} of{" "}
             {phasesTotal}
           </p>
           <h1 className="text-lg sm:text-xl font-black italic tracking-tighter text-slate-900 leading-none truncate">
@@ -105,7 +71,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
 
       <div className="relative w-full px-1 space-y-2">
         <div className="flex w-full gap-2">
-          {ONBOARDING_PHASES.map((_, i) => (
+          {ONBOARDING_WEB_PHASES.map((_, i) => (
             <div
               key={i}
               className="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden"
@@ -121,7 +87,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
         </div>
 
         <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 z-10 flex justify-between px-1 pointer-events-none gap-2">
-          {ONBOARDING_PHASES.map((phase, idx) => {
+          {ONBOARDING_WEB_PHASES.map((phase, idx) => {
             const isCompleted = idx < phaseIndex;
             const isActive = idx === phaseIndex;
             const firstPathInPhase = phase.paths[0];

@@ -19,13 +19,14 @@ import {
 } from "@/lib/onboarding-helpers";
 import { clearOnboardingDraft } from "@/lib/onboarding-draft";
 import { resolveZipFromCurrentLocation } from "@/lib/zip-from-location";
-import { onboardingStyles } from "@/features/onboarding/onboarding-screen.styles";
 import {
+  ONBOARDING_PRIVACY_NOTE,
   ONBOARDING_LAST_STEP_INDEX,
   ONBOARDING_PHASES,
   phaseIndexForStep,
   hasValidOnboardingZip,
-} from "@/features/onboarding/onboarding-constants";
+} from "@shared/constants/onboarding";
+import { onboardingStyles } from "@/features/onboarding/onboarding-screen.styles";
 import {
   useOnboardingAnalysis,
   type OnboardingEstimateState,
@@ -318,6 +319,16 @@ export default function OnboardingScreen() {
               onComplete={handleComplete}
             />
           </AnimatePresence>
+          {step <= 2 ? (
+            <Text
+              testID="onboarding-privacy-note"
+              style={onboardingStyles.privacyNote}
+              accessibilityRole="text"
+              accessibilityLabel={ONBOARDING_PRIVACY_NOTE}
+            >
+              {ONBOARDING_PRIVACY_NOTE}
+            </Text>
+          ) : null}
         </ScrollView>
 
         {step < ONBOARDING_LAST_STEP_INDEX && step !== 4 && (

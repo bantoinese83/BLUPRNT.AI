@@ -8,6 +8,12 @@ vi.mock("./supabase", () => ({
   },
 }));
 
+vi.mock("expo-constants", () => ({
+  default: {
+    expoConfig: { extra: { eas: { projectId: "test-project-id" } } },
+  },
+}));
+
 import { registerForPushNotificationsAsync } from "@/lib/push";
 
 vi.mock("expo-notifications", () => ({

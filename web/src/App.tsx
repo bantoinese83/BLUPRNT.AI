@@ -20,6 +20,11 @@ import { HelpWidget } from "@/components/HelpWidget";
 import { WebOfflineBanner } from "@/components/WebOfflineBanner";
 import { ConsentAwareAnalytics } from "@/components/ConsentAwareAnalytics";
 import { ForceUpdateGate } from "@/components/ForceUpdateGate";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_SUPPORT,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -126,9 +131,18 @@ export default function App() {
                           </ProtectedRoute>
                         }
                       />
-                      <Route path="/privacy" element={<PrivacyPolicy />} />
-                      <Route path="/terms" element={<TermsOfService />} />
-                      <Route path="/support" element={<Support />} />
+                      <Route
+                        path={WEB_APP_PATH_PRIVACY}
+                        element={<PrivacyPolicy />}
+                      />
+                      <Route
+                        path={WEB_APP_PATH_TERMS}
+                        element={<TermsOfService />}
+                      />
+                      <Route
+                        path={WEB_APP_PATH_SUPPORT}
+                        element={<Support />}
+                      />
                       {import.meta.env.VITE_E2E === "1" ? (
                         <>
                           <Route

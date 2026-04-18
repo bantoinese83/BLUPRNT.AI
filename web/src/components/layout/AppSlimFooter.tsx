@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
 import { openCookieSettings } from "@/lib/cookie-consent";
+import {
+  WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_TERMS,
+} from "@shared/constants/public-site";
 import { cn } from "@/lib/utils";
 
 type AppSlimFooterProps = {
@@ -34,12 +38,15 @@ export function AppSlimFooter({
             </Link>
           ) : null}
           <Link
-            to="/privacy"
+            to={WEB_APP_PATH_PRIVACY}
             className="transition-colors hover:text-slate-900"
           >
             Privacy
           </Link>
-          <Link to="/terms" className="transition-colors hover:text-slate-900">
+          <Link
+            to={WEB_APP_PATH_TERMS}
+            className="transition-colors hover:text-slate-900"
+          >
             Terms
           </Link>
           <Link
