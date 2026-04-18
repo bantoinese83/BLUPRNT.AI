@@ -39,38 +39,7 @@ export function HeroSection({
               id="hero-heading"
               className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
             >
-              <span className="block">{LANDING_HERO_COPY.titlePrefix}</span>
-              <span className="mt-2 block leading-[1.18] sm:leading-[1.15]">
-                <Highlighter
-                  action="underline"
-                  color={LANDING_HIGHLIGHT_UNDERLINE}
-                  strokeWidth={2.25}
-                  padding={2}
-                  multiline
-                  isView
-                  delay={0.02}
-                >
-                  <span className="whitespace-normal">
-                    {LANDING_HERO_COPY.titleHighlightLead}
-                  </span>
-                </Highlighter>{" "}
-                <Highlighter
-                  action="highlight"
-                  color={LANDING_HIGHLIGHT_COLOR}
-                  strokeWidth={2}
-                  padding={4}
-                  multiline
-                  isView
-                  delay={0.08}
-                >
-                  <span className="liquid-metal-text">
-                    {LANDING_HERO_COPY.titleHighlightEmphasis}
-                  </span>
-                </Highlighter>{" "}
-                <span className="liquid-metal-text">
-                  {LANDING_HERO_COPY.titleHighlightTail}
-                </span>
-              </span>
+              {LANDING_HERO_COPY.titlePrefix}
             </h1>
           </motion.div>
 
@@ -78,9 +47,39 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="max-w-xl text-base text-slate-600 leading-relaxed font-medium sm:text-lg"
+            className="max-w-2xl text-base text-slate-600 leading-[1.55] font-medium sm:text-lg"
           >
-            {LANDING_HERO_COPY.body}
+            <span className="inline leading-[1.55]">
+              <Highlighter
+                action="underline"
+                color={LANDING_HIGHLIGHT_UNDERLINE}
+                strokeWidth={2.25}
+                padding={2}
+                multiline
+                isView
+                delay={0.02}
+              >
+                <span className="whitespace-normal text-slate-600">
+                  {LANDING_HERO_COPY.bodyLead}
+                </span>
+              </Highlighter>{" "}
+              <Highlighter
+                action="highlight"
+                color={LANDING_HIGHLIGHT_COLOR}
+                strokeWidth={2}
+                padding={4}
+                multiline
+                isView
+                delay={0.08}
+              >
+                <span className="liquid-metal-text font-semibold">
+                  {LANDING_HERO_COPY.bodyEmphasis}
+                </span>
+              </Highlighter>{" "}
+              <span className="text-slate-600">
+                {LANDING_HERO_COPY.bodyTail}
+              </span>
+            </span>
           </motion.p>
 
           <motion.div
