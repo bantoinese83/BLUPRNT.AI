@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, TouchableOpacity, Alert, Share } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
 import { Plus, PlusCircle, MessageCircle } from "lucide-react-native";
@@ -39,6 +39,7 @@ import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
 import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
 import { getDashboardGreeting } from "@/features/home-tab/dashboard-greeting";
+import { presentProjectShareSheet } from "@/lib/share-project";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 
@@ -236,9 +237,11 @@ export default function DashboardScreen() {
         transition={{ type: "timing", duration: 800 }}
         style={styles.headerContainer}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           testID="rename-project-trigger"
           onPress={handleRenameProject}
+          accessibilityRole="button"
+          accessibilityLabel="Rename project"
         >
           <Text style={styles.welcomeText}>{greetingLine},</Text>
           <Text style={styles.userFirstName}>
@@ -269,6 +272,8 @@ export default function DashboardScreen() {
             onPress={openDashboardDocumentCapture}
             disabled={isUploading}
             style={[styles.headerBtn, styles.captureBtn]}
+            accessibilityRole="button"
+            accessibilityLabel="Add document"
           >
             {isUploading ? (
               <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
@@ -336,7 +341,11 @@ export default function DashboardScreen() {
           <NextStepsChecklist
             stage={project.stage || "planning"}
             onAction={(id) => {
-              if (id === "review-scope") router.push(`/project/${project.id}`);
+              if (id === "review-health") {
+                router.push(`/project/${project.id}`);
+              } else if (id === "review-scope") {
+                router.push(`/project/${project.id}?focus=scope`);
+              }
               if (
                 id === "upload-quote" ||
                 id === "upload-invoice" ||
@@ -345,10 +354,13 @@ export default function DashboardScreen() {
                 openDashboardDocumentCapture();
               }
               if (id === "share-access") {
-                Share.share({
-                  message: `Check out my home renovation project '${project.name}' on BLUPRNT.AI!`,
-                  url: "https://bluprnt.ai",
-                });
+                void (async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  await presentProjectShareSheet({
+                    id: project.id,
+                    name: project.name,
+                  });
+                })();
               }
             }}
           />

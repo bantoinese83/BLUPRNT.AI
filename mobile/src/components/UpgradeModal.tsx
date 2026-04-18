@@ -4,12 +4,10 @@ import {
   StyleSheet,
   View,
   Text,
-  Platform,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import RevenueCatUI from "react-native-purchases-ui";
 import { X, Bot, ShieldCheck, FileDown, Check } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { PRICING } from "@shared/constants/pricing";
@@ -34,7 +32,9 @@ interface Props {
  */
 export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
   const insets = useSafeAreaInsets();
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">("monthly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">(
+    "monthly",
+  );
   const [isPurchasing, setIsPurchasing] = useState(false);
   const { purchase, packages, loading } = usePremium();
 
@@ -106,7 +106,7 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               {reason === "invoice_limit"
                 ? "You’ve used the free invoice slots for this project. Upgrade to keep snapping receipts without hitting a wall."
                 : reason === "export"
-                  ? "Upgrade to Architect to build full PDF packets and the complete home file."
+                  ? "Upgrade to Pro to build full PDF packets and your complete home file."
                   : "Keep budgets, photos of bills, and one-tap exports in a single place—built for homeowners."}
             </Text>
             {reason === "invoice_limit" ? (
@@ -155,12 +155,15 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               <View style={styles.planHeader}>
                 <View style={styles.planTitleRow}>
                   <ArchitectPlanIcon size={22} />
-                  <Text style={styles.planName}>Architect Monthly</Text>
+                  <Text style={styles.planName}>Pro — monthly</Text>
                 </View>
                 {selectedPlan === "monthly" && (
                   <Check size={18} color={Theme.colors.brand.primary} />
                 )}
               </View>
+              <Text style={styles.planTierHint}>
+                Full app access (Architect tier)
+              </Text>
               <Text style={styles.planPrice}>
                 ${PRICING.architectUsdPerMonth}
                 <Text style={styles.planPeriod}>/mo</Text>
@@ -210,21 +213,30 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
             </Text>
 
             <TouchableOpacity
-              style={[styles.continueButton, isPurchasing && styles.continueButtonDisabled]}
+              style={[
+                styles.continueButton,
+                isPurchasing && styles.continueButtonDisabled,
+              ]}
               disabled={isPurchasing || loading}
               onPress={async () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setIsPurchasing(true);
                 try {
                   // Find correct package from RevenueCat based on selection
-                  const targetIdentifier = selectedPlan === "monthly" ? "$rc_monthly" : "$rc_lifetime";
-                  const pkg = packages.find((p) => p.identifier === targetIdentifier);
-                  
+                  const targetIdentifier =
+                    selectedPlan === "monthly" ? "$rc_monthly" : "$rc_lifetime";
+                  const pkg = packages.find(
+                    (p) => p.identifier === targetIdentifier,
+                  );
+
                   if (pkg) {
                     const success = await purchase(pkg);
                     if (success) handlePurchaseCompleted();
                   } else {
-                    console.error("Could not find matching package in RevenueCat offerings for:", targetIdentifier);
+                    console.error(
+                      "Could not find matching package in RevenueCat offerings for:",
+                      targetIdentifier,
+                    );
                   }
                 } catch (e) {
                   console.error(e);
@@ -238,7 +250,7 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.restoreButton}
               onPress={handleRestoreCompleted}
             >
@@ -248,10 +260,7 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
         </ScrollView>
 
         <TouchableOpacity
-          style={[
-            styles.closeFloat,
-            { top: Math.max(insets.top, 8) + 8 },
-          ]}
+          style={[styles.closeFloat, { top: Math.max(insets.top, 8) + 8 }]}
           onPress={onClose}
           accessibilityLabel="Close"
         >
@@ -376,6 +385,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
+  },
+  planTierHint: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.muted,
+    marginBottom: 6,
+    lineHeight: 14,
   },
   planPrice: {
     fontSize: 24,

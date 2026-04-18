@@ -41,7 +41,11 @@ export function FinanceInvoiceRow({
                 )}
               </View>
               <View style={styles.invoiceText}>
-                <Text style={styles.vendorName}>
+                <Text
+                  style={styles.vendorName}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
                   {inv.vendor_name || "Uncategorized"}
                 </Text>
                 <Text style={styles.invoiceDate}>

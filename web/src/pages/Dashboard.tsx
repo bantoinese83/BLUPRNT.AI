@@ -107,10 +107,12 @@ export default function Dashboard() {
                 We couldn&apos;t reach BLUPRNT. Check your connection, try
                 again, or contact support if this keeps happening.
               </p>
-              <p className="text-xs font-medium leading-relaxed text-slate-400">
-                This usually means environment variables aren&apos;t set for
-                this deployment, or something is blocking the connection.
-              </p>
+              {import.meta.env.DEV ? (
+                <p className="text-xs font-medium leading-relaxed text-slate-400">
+                  This usually means environment variables aren&apos;t set for
+                  this deployment, or something is blocking the connection.
+                </p>
+              ) : null}
             </div>
             {import.meta.env.DEV && (
               <div className="w-full space-y-2 rounded-2xl border border-slate-200 bg-slate-100 p-4 text-left font-mono text-[10px]">
@@ -433,7 +435,7 @@ function DashboardContent({
     }
   }, [project, scopeItems, invoices, isArchitect, hasProjectPass]);
 
-   function handleProjectDelete(id: string) {
+  function handleProjectDelete(id: string) {
     const p = projects.find((x) => x.id === id);
     if (!p) return;
     setDeleteProject(p);
@@ -479,7 +481,7 @@ function DashboardContent({
         setProjects(originalProjects);
         setProject(originalCurrentProject);
         setDeleteProject(null);
-        return "Failed to delete project";
+        return "Failed to delete project. Check your connection and try again.";
       },
     });
   }
@@ -555,7 +557,9 @@ function DashboardContent({
       load();
     } catch (err: unknown) {
       reportClientError("dashboard_rename_project", err);
-      toast.error("Failed to rename project.");
+      toast.error("Failed to rename project.", {
+        description: "Check your connection and try again.",
+      });
     }
   };
 

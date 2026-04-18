@@ -42,7 +42,13 @@ export function ProjectScopeLineCard({
         style={[styles.scopeCard, isOpen && styles.expandedScopeCard]}
       >
         <View style={styles.scopeHeader}>
-          <Text style={styles.scopeDescription}>{item.description}</Text>
+          <Text
+            style={styles.scopeDescription}
+            numberOfLines={3}
+            ellipsizeMode="tail"
+          >
+            {item.description}
+          </Text>
           <View style={styles.tierBadge}>
             <Text style={styles.tierText}>{item.finish_tier}</Text>
           </View>

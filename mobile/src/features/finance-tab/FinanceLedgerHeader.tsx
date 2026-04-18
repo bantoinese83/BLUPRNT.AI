@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Switch } from "react-native";
-import * as Haptics from "expo-haptics";
 import {
   BookOpen,
   Wrench,
@@ -77,6 +76,8 @@ export function FinanceLedgerHeader({
             style={styles.headerCaptureBtn}
             onPress={onPressAddDocument}
             disabled={isUploading}
+            accessibilityLabel="Add to ledger"
+            accessibilityHint="Upload an invoice, quote, or receipt"
           >
             {isUploading ? (
               <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
@@ -174,7 +175,6 @@ export function FinanceLedgerHeader({
           ]}
           value={filter}
           onChange={(val: string) => {
-            Haptics.selectionAsync();
             onFilterChange(val as InvoiceLedgerFilter);
           }}
           containerStyle={{ marginTop: 32, marginBottom: 16 }}

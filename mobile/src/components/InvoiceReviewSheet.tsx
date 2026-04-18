@@ -204,7 +204,13 @@ export function InvoiceReviewSheet({
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
               >
-                <Text style={styles.vendor}>{vendorDisplay}</Text>
+                <Text
+                  style={styles.vendor}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {vendorDisplay}
+                </Text>
                 <Text style={styles.amount}>{money(totalDisplay)}</Text>
 
                 <View style={styles.detailGrid}>
@@ -390,7 +396,7 @@ function LineItemRow({
   const isUnmapped = !mappedId;
   const label = isUnmapped
     ? "Not linked"
-    : scopeItems.find((s) => s.id === mappedId)?.category ?? "Linked";
+    : (scopeItems.find((s) => s.id === mappedId)?.category ?? "Linked");
 
   return (
     <View style={[styles.lineCard, isUnmapped && styles.lineCardWarn]}>
@@ -490,9 +496,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: "rgba(255,255,255,0.05)",
     justifyContent: "center",
     alignItems: "center",
@@ -740,4 +746,3 @@ const styles = StyleSheet.create({
     color: Theme.colors.brand.primary,
   },
 });
-

@@ -142,8 +142,11 @@ export const profileTabStyles = StyleSheet.create({
   upgradeBtn: {
     backgroundColor: Theme.colors.brand.primary,
     paddingHorizontal: 16,
+    minHeight: 44,
     paddingVertical: 10,
     borderRadius: Theme.radius.sm,
+    justifyContent: "center",
+    alignItems: "center",
   },
   upgradeText: {
     color: "white",

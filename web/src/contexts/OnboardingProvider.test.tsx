@@ -66,21 +66,23 @@ describe("OnboardingProvider", () => {
     const { result } = renderHook(() => useOnboarding(), { wrapper });
 
     await act(async () => {
-      result.current.setProjectType("kitchen");
+      result.current.setProjectType("Kitchen");
       result.current.setLocationInput("90210");
     });
 
-    expect(result.current.projectType).toBe("kitchen");
+    expect(result.current.projectType).toBe("Kitchen");
     expect(result.current.locationInput).toBe("90210");
-    
-    expect(localStorage.getItem("bluprnt_onboarding_type")).toContain("kitchen");
+
+    expect(localStorage.getItem("bluprnt_onboarding_type")).toContain(
+      "Kitchen",
+    );
   });
 
   it("clears all onboarding state", async () => {
     const { result } = renderHook(() => useOnboarding(), { wrapper });
 
     await act(async () => {
-      result.current.setProjectType("bathroom");
+      result.current.setProjectType("Bathroom");
       result.current.clearOnboarding();
     });
 
@@ -88,4 +90,3 @@ describe("OnboardingProvider", () => {
     expect(localStorage.getItem("bluprnt_onboarding_type")).toBeNull();
   });
 });
-

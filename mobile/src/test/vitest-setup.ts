@@ -12,3 +12,7 @@ vi.mock("expo-image-manipulator", () => ({
 vi.mock("../lib/sentry", () => ({
   captureEdgeInvokeFailure: vi.fn(),
 }));
+
+vi.mock("expo-crypto", () => ({
+  randomUUID: vi.fn(() => "00000000-0000-0000-0000-000000000000"),
+}));

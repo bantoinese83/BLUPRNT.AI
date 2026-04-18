@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 type InvoicesSectionProps = {
   projectId: string;
@@ -71,6 +72,7 @@ export function InvoicesSection({
   }, [uploading, invoices.length]);
 
   const dropDisabled = uploading || atLimit || isArchitectAtGlobalLimit;
+  const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
   const onDragOver = useCallback(
     (e: React.DragEvent) => {
@@ -159,7 +161,7 @@ export function InvoicesSection({
         )}
 
         {documentType === "invoice" &&
-          !isArchitect &&
+          !isArchitectActive &&
           !hasProjectPass &&
           invoiceCount > 0 &&
           invoiceCount < FREE_LIMIT && (

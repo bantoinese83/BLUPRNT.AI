@@ -11,7 +11,6 @@ import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAwareness } from "@/contexts/AwarenessContext";
-import { Theme } from "@/constants/Theme";
 import { ConfigurationRequired } from "@/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 import { FinanceTabSkeleton } from "@/components/TabLoadingSkeletons";
@@ -255,9 +254,14 @@ export default function FinanceScreen() {
         contentContainerStyle={{ paddingBottom: FINANCE_TAB_BAR_OFFSET + 20 }}
         stickySectionHeadersEnabled={false}
         ListEmptyComponent={
-          <View style={styles.emptyList}>
-            <Receipt size={40} color={Theme.colors.text.onSoft} />
-            <Text style={styles.emptyListText}>No documents found.</Text>
+          <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+            <EmptyState
+              icon={Receipt}
+              title="Nothing in your ledger yet"
+              description="Add invoices, quotes, or receipts—they all show up here as your project record."
+              actionTitle="Add to ledger"
+              onAction={openLedgerDocumentCapture}
+            />
           </View>
         }
         renderSectionHeader={({ section: { title } }) => (

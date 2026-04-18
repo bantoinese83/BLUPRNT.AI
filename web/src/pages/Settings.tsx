@@ -36,6 +36,7 @@ import {
   hasDuplicateWebAndStoreSubscriptions,
 } from "@shared/lib/subscription-billing";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -259,8 +260,11 @@ export default function Settings() {
       await supabase.auth.signOut();
       navigate("/", { replace: true });
     } catch (e) {
+      const raw = e instanceof Error ? e.message : "";
       setDeleteMessage(
-        e instanceof Error ? e.message : "Couldn't delete account.",
+        raw
+          ? friendlyAuthError(raw)
+          : "Something went wrong. Please try again or contact support.",
       );
     } finally {
       setDeleteLoading(false);
@@ -592,8 +596,8 @@ export default function Settings() {
                   Export Project Data
                 </h4>
                 <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  Download a comprehensive JSON archive of your properties,
-                  projects, scope items, and documents.
+                  Download a single file with your properties, projects, scope,
+                  and documents—useful for backups or moving your data.
                 </p>
               </div>
               {exportMessage && (

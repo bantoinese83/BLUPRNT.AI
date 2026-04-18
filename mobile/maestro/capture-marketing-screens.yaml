@@ -1,0 +1,113 @@
+##############################################################################
+# BLUPRNT.AI — App Store Marketing Screenshot Automation (v3)
+#
+# Prerequisites:
+#   1. Be logged into the app as b.antoine.se@gmail.com on the iOS simulator
+#   2. A seeded project must exist in the dashboard
+#   3. Run: ~/.maestro/bin/maestro test mobile/maestro/capture-marketing-screens.yaml
+#
+# Output: app-store-assets/raw-screenshots/  (10 PNGs)
+##############################################################################
+
+appId: ai.bluprnt.mobile
+---
+
+# ─── Launch and wait for the app to fully load ───────────────────────────────
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible: "BLUPRNT.AI"
+    timeout: 30000
+- waitForAnimationToEnd
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 01 — Hero Dashboard (Budget Overview)
+# ══════════════════════════════════════════════════════════════════════════════
+- takeScreenshot: "../../app-store-assets/raw-screenshots/01_hero_dashboard"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 02 — Dashboard scrolled down (Cost Estimates cards)
+# ══════════════════════════════════════════════════════════════════════════════
+- swipe:
+    direction: UP
+    duration: 700
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/02_dashboard_estimate_cards"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 03 — Dashboard scrolled further (Activity / Next Steps)
+# ══════════════════════════════════════════════════════════════════════════════
+- swipe:
+    direction: UP
+    duration: 700
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/03_dashboard_activity"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 04 — Finance Tab (Total Spent)
+# ══════════════════════════════════════════════════════════════════════════════
+- tapOn: "Finance"
+- extendedWaitUntil:
+    visible: "Property Ledger"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/04_finance_total_spent"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 05 — Finance Tab scrolled (Invoice list)
+# ══════════════════════════════════════════════════════════════════════════════
+- swipe:
+    direction: UP
+    duration: 500
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/05_finance_invoice_list"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 06 — AI Assistant (landing state)
+# ══════════════════════════════════════════════════════════════════════════════
+- tapOn: "Assistant"
+- extendedWaitUntil:
+    visible: "Project Assistant"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/06_ai_assistant_landing"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 07 — AI Assistant (user typing)
+# ══════════════════════════════════════════════════════════════════════════════
+- inputText: "Is $15,000 fair for custom white oak cabinets?"
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/07_ai_copilot_typing"
+- hideKeyboard
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 08 — Profile Screen
+# ══════════════════════════════════════════════════════════════════════════════
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 15000
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/08_profile_screen"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 09 — Home Dashboard top (fresh)
+# ══════════════════════════════════════════════════════════════════════════════
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "BLUPRNT.AI"
+    timeout: 15000
+- swipe:
+    direction: DOWN
+    duration: 800
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/09_dashboard_hero_clean"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 10 — Dashboard (Plan vs Actual card visible)
+# ══════════════════════════════════════════════════════════════════════════════
+- swipe:
+    direction: UP
+    duration: 500
+- waitForAnimationToEnd
+- takeScreenshot: "../../app-store-assets/raw-screenshots/10_dashboard_plan_vs_actual"

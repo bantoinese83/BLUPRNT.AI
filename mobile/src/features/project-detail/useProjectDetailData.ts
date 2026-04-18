@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Share } from "react-native";
+import { Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
-import { generateProjectShareLink } from "@/lib/share-project";
-import { friendlyProjectShareError } from "@shared/lib/user-friendly-errors";
+import { presentProjectShareSheet } from "@/lib/share-project";
 import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -12,10 +11,16 @@ import type { InvoiceRow, ProjectRow, ScopeRow } from "@shared/types/database";
 import { groupScopeByCategory, projectHasEstimateTotals } from "./helpers";
 
 export function useProjectDetailData() {
-  const { id: rawId } = useLocalSearchParams<{ id: string }>();
+  const { id: rawId, focus: rawFocus } = useLocalSearchParams<{
+    id: string;
+    focus?: string;
+  }>();
   const id = typeof rawId === "string" ? rawId : undefined;
+  const scrollFocus = rawFocus === "scope" ? "scope" : undefined;
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [projectLoadError, setProjectLoadError] = useState<string | null>(null);
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scope, setScope] = useState<ScopeRow[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -26,6 +31,21 @@ export function useProjectDetailData() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [scopePollDone, setScopePollDone] = useState(false);
   const [scopeLoadWarning, setScopeLoadWarning] = useState<string | null>(null);
+  const [invoiceLoadWarning, setInvoiceLoadWarning] = useState<string | null>(
+    null,
+  );
+
+  const detailDataWarning = useMemo(
+    () =>
+      [scopeLoadWarning, invoiceLoadWarning].filter(Boolean).join("\n\n") ||
+      null,
+    [scopeLoadWarning, invoiceLoadWarning],
+  );
+
+  const clearDetailDataWarnings = useCallback(() => {
+    setScopeLoadWarning(null);
+    setInvoiceLoadWarning(null);
+  }, []);
 
   const invoiceTotal = useMemo(
     () => detailInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0),
@@ -34,37 +54,87 @@ export function useProjectDetailData() {
 
   const groupedScope = useMemo(() => groupScopeByCategory(scope), [scope]);
 
-  const handleShare = useCallback(async () => {
-    if (!project) return;
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      const res = await generateProjectShareLink(project.id);
-      if (res.ok && res.url) {
-        await Share.share({
-          message: `Check out my project: ${project.name} on BLUPRNT.AI\n\n${res.url}`,
-          url: res.url,
-          title: project.name,
-        });
+  const ingestFetchResults = useCallback(
+    (
+      projRes: {
+        data: ProjectRow | null;
+        error: { message: string; code?: string } | null;
+      },
+      scopeRes: {
+        data: ScopeRow[] | null;
+        error: { message: string; code?: string } | null;
+      },
+      invRes: {
+        data: InvoiceRow[] | null;
+        error: { message: string; code?: string } | null;
+      },
+    ) => {
+      if (projRes.error) {
+        setProjectLoadError(
+          friendlyDashboardLoadError({
+            message: projRes.error.message,
+            code: projRes.error.code,
+          }),
+        );
+        setProject(null);
+      } else if (projRes.data) {
+        setProject(projRes.data);
+        setProjectLoadError(null);
       } else {
-        Alert.alert(
-          "Couldn’t share",
-          friendlyProjectShareError(res.message, res.code),
+        setProject(null);
+        setProjectLoadError(
+          friendlyDashboardLoadError({
+            message: "We couldn’t find this project.",
+            code: "PGRST116",
+          }),
         );
       }
-    } catch (err) {
-      console.error("Share error:", err);
-      Alert.alert(
-        "Couldn’t share",
-        friendlyProjectShareError(
-          err instanceof Error ? err.message : undefined,
-        ),
-      );
-    }
+
+      setScope(scopeRes.data ?? []);
+      if (scopeRes.error) {
+        console.warn("[project] scope_items", scopeRes.error.message);
+        setScopeLoadWarning(
+          friendlyDashboardLoadError({
+            message: scopeRes.error.message,
+            code: scopeRes.error.code,
+          }),
+        );
+      } else {
+        setScopeLoadWarning(null);
+      }
+
+      if (invRes.error) {
+        console.warn("[project] invoices", invRes.error.message);
+        setInvoiceLoadWarning(
+          friendlyDashboardLoadError({
+            message: invRes.error.message,
+            code: invRes.error.code,
+          }),
+        );
+      } else {
+        setInvoiceLoadWarning(null);
+      }
+
+      setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
+    },
+    [],
+  );
+
+  const handleShare = useCallback(async () => {
+    if (!project) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await presentProjectShareSheet({ id: project.id, name: project.name });
   }, [project]);
 
   useEffect(() => {
     async function fetchProject() {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        setProjectLoadError(null);
+        setScopeLoadWarning(null);
+        setInvoiceLoadWarning(null);
+        return;
+      }
 
       setLoading(true);
       queueMicrotask(() => setScopePollDone(false));
@@ -85,25 +155,12 @@ export function useProjectDetailData() {
           .order("created_at", { ascending: false }),
       ]);
 
-      if (projRes.data) setProject(projRes.data);
-      setScope(scopeRes.data ?? []);
-      if (scopeRes.error) {
-        console.warn("[project] scope_items", scopeRes.error.message);
-        setScopeLoadWarning(
-          friendlyDashboardLoadError({
-            message: scopeRes.error.message,
-            code: scopeRes.error.code,
-          }),
-        );
-      } else {
-        setScopeLoadWarning(null);
-      }
-      setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
+      ingestFetchResults(projRes, scopeRes, invRes);
       setLoading(false);
     }
 
     void fetchProject();
-  }, [id]);
+  }, [id, ingestFetchResults]);
 
   useEffect(() => {
     if (!id || loading) return;
@@ -133,10 +190,17 @@ export function useProjectDetailData() {
       if (cancelled) return false;
       if (error) {
         console.warn("[project] scope_items poll", error.message);
+        setScopeLoadWarning(
+          friendlyDashboardLoadError({
+            message: error.message,
+            code: error.code,
+          }),
+        );
         return false;
       }
       if (data?.length) {
         setScope(data);
+        setScopeLoadWarning(null);
         return true;
       }
       return false;
@@ -177,7 +241,7 @@ export function useProjectDetailData() {
 
   const handleRefresh = useCallback(async () => {
     if (!id) return;
-    setLoading(true);
+    setRefreshing(true);
     setScopePollDone(false);
     const [projRes, scopeRes, invRes] = await Promise.all([
       supabase.from("projects").select("*").eq("id", id).single(),
@@ -195,22 +259,9 @@ export function useProjectDetailData() {
         .order("created_at", { ascending: false }),
     ]);
 
-    if (projRes.data) setProject(projRes.data);
-    setScope(scopeRes.data ?? []);
-    if (scopeRes.error) {
-      console.warn("[project] scope_items refresh", scopeRes.error.message);
-      setScopeLoadWarning(
-        friendlyDashboardLoadError({
-          message: scopeRes.error.message,
-          code: scopeRes.error.code,
-        }),
-      );
-    } else {
-      setScopeLoadWarning(null);
-    }
-    setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
-    setLoading(false);
-  }, [id]);
+    ingestFetchResults(projRes, scopeRes, invRes);
+    setRefreshing(false);
+  }, [id, ingestFetchResults]);
 
   const exportSellerPacket = useCallback(async () => {
     if (!project || !id) return;
@@ -257,7 +308,10 @@ export function useProjectDetailData() {
 
   return {
     id,
+    scrollFocus,
     loading,
+    refreshing,
+    projectLoadError,
     project,
     scope,
     expandedId,
@@ -273,8 +327,8 @@ export function useProjectDetailData() {
     showAddModal,
     setShowAddModal,
     scopePollDone,
-    scopeLoadWarning,
-    setScopeLoadWarning,
+    detailDataWarning,
+    clearDetailDataWarnings,
     invoiceTotal,
     groupedScope,
     handleShare,

@@ -132,8 +132,10 @@ export const financeTabStyles = StyleSheet.create({
   },
   viewOriginalBtn: {
     marginTop: 10,
-    paddingVertical: 8,
+    minHeight: 44,
+    paddingVertical: 10,
     alignSelf: "flex-start",
+    justifyContent: "center",
   },
   viewOriginalText: {
     fontSize: 12,
@@ -205,16 +207,6 @@ export const financeTabStyles = StyleSheet.create({
     fontSize: 15,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
-  },
-  emptyList: {
-    padding: 60,
-    alignItems: "center",
-    gap: 12,
-  },
-  emptyListText: {
-    fontSize: 14,
-    fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
   },
   monthGroup: {
     marginBottom: 24,

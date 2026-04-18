@@ -162,6 +162,7 @@ export function ShareModal({ isOpen, onClose, projectId }: ShareModalProps) {
                 variant="primary"
                 onClick={handleCopy}
                 className="shrink-0 rounded-2xl px-5 h-auto transition-all premium-gradient"
+                aria-label={copied ? "Link copied" : "Copy link"}
               >
                 {copied ? (
                   <Check className="w-5 h-5" />

@@ -3,7 +3,11 @@ import { ArrowRight, UserPlus } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
 import { Iphone } from "@/components/ui/iphone";
-import { LANDING_HERO_COPY, LANDING_HIGHLIGHT_COLOR } from "./landing-content";
+import {
+  LANDING_HERO_COPY,
+  LANDING_HIGHLIGHT_COLOR,
+  LANDING_HIGHLIGHT_UNDERLINE,
+} from "./landing-content";
 import { IOS_APP_STORE_URL } from "@shared/constants/app-links";
 
 export function HeroSection({
@@ -35,18 +39,38 @@ export function HeroSection({
               id="hero-heading"
               className="text-4xl font-black tracking-tight text-slate-900 leading-[1.12] sm:text-5xl lg:text-[2.75rem] xl:text-6xl"
             >
-              {LANDING_HERO_COPY.titlePrefix}{" "}
-              <Highlighter
-                action="highlight"
-                color={LANDING_HIGHLIGHT_COLOR}
-                strokeWidth={4}
-                padding={8}
-                isView
-              >
+              <span className="block">{LANDING_HERO_COPY.titlePrefix}</span>
+              <span className="mt-2 block leading-[1.18] sm:leading-[1.15]">
+                <Highlighter
+                  action="underline"
+                  color={LANDING_HIGHLIGHT_UNDERLINE}
+                  strokeWidth={2.25}
+                  padding={2}
+                  multiline
+                  isView
+                  delay={0.02}
+                >
+                  <span className="whitespace-normal">
+                    {LANDING_HERO_COPY.titleHighlightLead}
+                  </span>
+                </Highlighter>{" "}
+                <Highlighter
+                  action="highlight"
+                  color={LANDING_HIGHLIGHT_COLOR}
+                  strokeWidth={2}
+                  padding={4}
+                  multiline
+                  isView
+                  delay={0.08}
+                >
+                  <span className="liquid-metal-text">
+                    {LANDING_HERO_COPY.titleHighlightEmphasis}
+                  </span>
+                </Highlighter>{" "}
                 <span className="liquid-metal-text">
-                  {LANDING_HERO_COPY.titleHighlight}
+                  {LANDING_HERO_COPY.titleHighlightTail}
                 </span>
-              </Highlighter>
+              </span>
             </h1>
           </motion.div>
 

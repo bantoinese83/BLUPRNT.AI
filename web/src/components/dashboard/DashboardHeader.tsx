@@ -67,9 +67,15 @@ export function DashboardHeader({
                 BLUPRNT<span className="text-teal-600">.AI</span>
               </Link>
               {isArchitect ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-teal-700 ring-1 ring-teal-100">
-                  <ArchitectPlanIcon className="h-4 w-4" />
-                  Architect
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-teal-700 ring-1 ring-teal-100"
+                  title="Pro subscription (Architect tier)—full app access for homeowners"
+                >
+                  <ArchitectPlanIcon
+                    className="h-4 w-4"
+                    title="Pro plan, Architect tier"
+                  />
+                  Pro
                 </span>
               ) : hasProjectPass ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-100">
@@ -118,6 +124,7 @@ export function DashboardHeader({
               className="h-9 rounded-xl px-2 text-slate-600 hover:bg-teal-50 hover:text-teal-600 sm:px-3"
               onClick={onOpenInsights}
               type="button"
+              aria-label="Insights"
             >
               <img
                 src="/insights-icon.svg"

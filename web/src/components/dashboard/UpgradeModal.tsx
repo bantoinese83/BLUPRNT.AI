@@ -146,8 +146,9 @@ export function UpgradeModal({
           <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
             Use promo code <strong>BLUEPRINT35</strong> on the Stripe checkout
             page if you have one. List prices:{" "}
-            <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect,{" "}
-            <strong>${PRICING.projectPassUsdOneTime}</strong> Project Pass.
+            <strong>${PRICING.architectUsdPerMonth}/mo</strong> Pro (Architect
+            tier), <strong>${PRICING.projectPassUsdOneTime}</strong> Project
+            Pass.
           </p>
         )}
 
@@ -177,8 +178,9 @@ export function UpgradeModal({
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             The full <strong>seller packet PDF</strong> (estimate scope, plan vs
             documented spend, and recorded costs) is included with{" "}
-            <strong>Architect</strong> or a <strong>Project Pass</strong>. You
-            can still browse your project on the free plan.
+            <strong>Pro</strong> (Architect tier) or a{" "}
+            <strong>Project Pass</strong>. You can still browse your project on
+            the free plan.
           </p>
         )}
         <h2
@@ -223,9 +225,16 @@ export function UpgradeModal({
 
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                <ArchitectPlanIcon className="h-8 w-8" />
-                Architect
+                <ArchitectPlanIcon
+                  className="h-8 w-8"
+                  title="Pro plan, Architect tier"
+                />
+                Pro
               </CardTitle>
+              <p className="text-xs text-slate-500 font-medium leading-snug">
+                Monthly subscription — full app access (Architect tier), for
+                homeowners and renovators.
+              </p>
 
               <div className="mt-2 flex items-baseline text-slate-900">
                 <span className="text-4xl font-bold tracking-tight">
@@ -270,7 +279,7 @@ export function UpgradeModal({
                 ) : isArchitect ? (
                   "Current Plan"
                 ) : (
-                  "Subscribe to Architect"
+                  "Subscribe to Pro"
                 )}
               </Button>
             </div>
@@ -293,7 +302,7 @@ export function UpgradeModal({
             <CardContent className="space-y-4 flex-1">
               <ul className="space-y-3">
                 {[
-                  "6 months of Architect features",
+                  "6 months of Pro features",
                   "Unlimited invoice uploads for this project while your pass is active",
                   "No subscription – one-time payment",
                   "Perfect for one big remodel",
@@ -342,7 +351,7 @@ export function UpgradeModal({
               One big remodel?{" "}
               <span className="font-semibold text-slate-700">Project Pass</span>
               . Ongoing maintenance?{" "}
-              <span className="font-semibold text-slate-700">Architect</span>.
+              <span className="font-semibold text-slate-700">Pro</span>.
             </p>
           </div>
 

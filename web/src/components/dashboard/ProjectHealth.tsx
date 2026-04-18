@@ -280,7 +280,7 @@ export function ProjectHealth({
               />
             </div>
             <p className="text-[9px] text-slate-400 font-bold text-center uppercase tracking-widest pt-1">
-              Based on paid invoices vs. minimum baseline
+              Based on paid invoices vs. the low end of your estimate
             </p>
           </div>
         )}

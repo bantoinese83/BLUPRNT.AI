@@ -503,7 +503,9 @@ export default function ProfileScreen() {
             <ProfileSettingItem
               icon={<Download size={20} color={Theme.colors.text.muted} />}
               title="Export My Data"
-              subtitle={exporting ? "Generating..." : "JSON Archive"}
+              subtitle={
+                exporting ? "Generating..." : "Backup file with all your data"
+              }
               onPress={handleExportData}
             />
             <ProfileSettingItem
@@ -533,9 +535,9 @@ export default function ProfileScreen() {
             <Text style={styles.dangerText}>Delete My Account</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             testID="profile-logout-button"
-            style={styles.logoutButton} 
+            style={styles.logoutButton}
             onPress={handleSignOut}
           >
             <LogOut size={20} color={Theme.colors.text.secondary} />

@@ -11,8 +11,11 @@ export const LANDING_HIGHLIGHT_SOFT = "rgba(45, 212, 191, 0.32)";
 
 export const LANDING_HERO_COPY = {
   badge: "Renovation money—finally in one place",
-  titlePrefix: "Stop guessing what your remodel costs.",
-  titleHighlight: "See a local ballpark. Track every receipt.",
+  titlePrefix: "Run your remodel like a pro from budget to resale.",
+  /** Hero subline: underline + highlight combo (see HeroSection). */
+  titleHighlightLead: "Start your Bluprnt and get accurate local estimates,",
+  titleHighlightEmphasis: "track your project in real time,",
+  titleHighlightTail: "and prove your investment at resale.",
   body: "Before you hire, get a realistic range for your zip code. While work is underway, snap invoices and quotes so “what we planned” and “what we paid” stay clear—then wrap it into one neat PDF when you list or refinance.",
   primaryCta: "Start planning free",
   secondaryCta: "Create free account",

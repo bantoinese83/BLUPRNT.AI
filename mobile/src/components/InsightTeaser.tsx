@@ -19,7 +19,7 @@ export function InsightTeaser({ projectName, onUpgradePress }: Props) {
             <Lock size={18} color={Theme.colors.brand.primary} />
           </View>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>Architect Insight</Text>
+            <Text style={styles.badgeText}>Premium insights</Text>
             <Lightbulb
               size={12}
               color={Theme.colors.brand.primary}

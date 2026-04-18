@@ -10,6 +10,7 @@ import {
   ArrowRight,
   FileText,
   Hammer,
+  Shield,
   Share2,
   LucideIcon,
 } from "lucide-react-native";
@@ -64,14 +65,14 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
       },
       {
         id: "review-health",
-        label: "Check Health",
-        description: "See if you're staying within baseline.",
-        icon: Hammer,
+        label: "Budget health",
+        description: "Compare spending to your estimate range.",
+        icon: Shield,
       },
       {
         id: "share-access",
-        label: "Share Access",
-        description: "Invite someone to view records.",
+        label: "Share project link",
+        description: "Send a read-only web link to your project.",
         icon: Share2,
       },
     );

@@ -31,7 +31,6 @@ import "react-native-reanimated";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { useAuth } from "@/contexts/auth-context";
 import { AppToastHost } from "@/components/AppToastHost";
-import { BrandedSplash } from "@/components/BrandedSplash";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
@@ -61,7 +60,7 @@ SplashScreen.preventAutoHideAsync();
 // SplashScreen hide logic handled inside RootLayout hook
 
 function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [, error] = useFonts({
     Outfit_400Regular,
     Outfit_500Medium,
     Outfit_600SemiBold,
@@ -69,7 +68,7 @@ function RootLayout() {
     Outfit_800ExtraBold,
   });
 
-  const { isOutdated } = useVersionCheck();
+  useVersionCheck();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -90,18 +89,25 @@ function RootLayout() {
 
     // Simulators default to "Test Store" (Preview Mode) to bypass unreliable Apple Sandbox
     if (isExpoGo || isSimulator) {
-      console.log(`LOG  ${isSimulator ? "Simulator" : "Expo Go"} detected. Using RevenueCat in Preview Mode.`);
+      console.log(
+        `LOG  ${isSimulator ? "Simulator" : "Expo Go"} detected. Using RevenueCat in Preview Mode.`,
+      );
       Purchases.configure({ apiKey: testKey });
     } else {
-      const apiKey = Platform.OS === "ios" 
-        ? process.env.EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY 
-        : process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
+      const apiKey =
+        Platform.OS === "ios"
+          ? process.env.EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY
+          : process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
 
       if (apiKey) {
-        console.log(`LOG  Physical device (${Platform.OS}) detected. Using production RevenueCat keys.`);
+        console.log(
+          `LOG  Physical device (${Platform.OS}) detected. Using production RevenueCat keys.`,
+        );
         Purchases.configure({ apiKey });
       } else if (testKey) {
-        console.warn("WARN No production API key found. Falling back to Test Store.");
+        console.warn(
+          "WARN No production API key found. Falling back to Test Store.",
+        );
         Purchases.configure({ apiKey: testKey });
       } else {
         console.error("ERROR RevenueCat: No API keys found for configuration.");

@@ -28,6 +28,8 @@ interface Props {
   withLogo?: boolean;
   withTabBar?: boolean;
   withKeyboard?: boolean;
+  /** When `withScroll` is true, attaches to the inner `ScrollView` (e.g. programmatic scroll). */
+  scrollViewRef?: React.RefObject<ScrollView | null>;
 }
 
 export function ScreenWrapper({
@@ -40,9 +42,11 @@ export function ScreenWrapper({
   withLogo = false,
   withTabBar = true,
   withKeyboard = false,
+  scrollViewRef,
 }: Props) {
   const content = withScroll ? (
     <ScrollView
+      ref={scrollViewRef}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={[

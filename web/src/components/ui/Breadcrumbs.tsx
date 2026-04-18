@@ -38,8 +38,9 @@ export function Breadcrumbs({ className, projectName }: BreadcrumbsProps) {
       <Link
         to="/"
         className="flex items-center hover:text-slate-900 transition-colors duration-200"
+        aria-label="Home"
       >
-        <Home className="w-3.5 h-3.5" />
+        <Home className="w-3.5 h-3.5" aria-hidden />
       </Link>
 
       {pathnames.map((value, index) => {

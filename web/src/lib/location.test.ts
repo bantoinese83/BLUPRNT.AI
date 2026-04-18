@@ -296,9 +296,7 @@ describe("location library", () => {
         "access is blocked",
       );
       expect(userFacingLocationError("timeout")).toContain("too long");
-      expect(userFacingLocationError("unavailable")).toContain(
-        "precise location",
-      );
+      expect(userFacingLocationError("unavailable")).toContain("ZIP code");
       expect(userFacingLocationError("something_else")).toContain(
         "Something went wrong",
       );

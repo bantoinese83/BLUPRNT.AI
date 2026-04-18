@@ -145,7 +145,7 @@ export function userFacingLocationError(code: string): string {
     case "timeout":
       return "It took too long to find your location. Try again or enter your area manually.";
     case "unavailable":
-      return "We couldn’t determine your precise location (kCLErrorLocationUnknown). ZIP code works best for estimates!";
+      return "We couldn’t pin your location this time. Enter your ZIP code or city for the most accurate estimates.";
     default:
       return "Something went wrong with location services. Please enter your area manually.";
   }

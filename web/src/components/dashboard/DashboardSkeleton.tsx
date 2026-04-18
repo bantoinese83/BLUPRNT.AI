@@ -10,7 +10,8 @@ function Shimmer() {
 
 export function DashboardSkeleton() {
   return (
-    <div className="min-h-screen dashboard-bg">
+    <div className="min-h-screen dashboard-bg" role="status" aria-live="polite">
+      <span className="sr-only">Loading dashboard…</span>
       {/* Header skeleton */}
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">

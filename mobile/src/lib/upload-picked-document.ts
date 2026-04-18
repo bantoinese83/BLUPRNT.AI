@@ -58,7 +58,10 @@ export async function uploadPickedDocumentToProject(
         if (limitPrompt) {
           options.onInvoiceLimitUpgrade();
         } else {
-          Alert.alert("Upload Failed", result.error);
+          Alert.alert(
+            "Upload didn’t go through",
+            friendlyDocumentUploadError(undefined, { error: result.error }),
+          );
         }
       } else {
         addUserFlowBreadcrumb("document_upload_failed", {

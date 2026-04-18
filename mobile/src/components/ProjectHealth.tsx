@@ -33,7 +33,7 @@ function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
       status: "Over Budget",
       color: Theme.colors.status.error,
       secondary: "#ea580c",
-      message: "Careful! You've exceeded your lifecycle estimate.",
+      message: "Careful! Spending is above the top of your estimate range.",
     };
   }
 
