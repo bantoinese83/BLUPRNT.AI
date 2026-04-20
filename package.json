@@ -56,8 +56,11 @@
     "prepare": "node -e \"if (process.env.VERCEL || process.env.CI) process.exit(0); const { spawnSync } = require('child_process'); const r = spawnSync('husky', { shell: true, stdio: 'inherit' }); process.exit(r.status ?? 1);\""
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.2",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.59.1",
+    "@supabase/supabase-js": "^2.100.1",
+    "pdf-parse": "^2.4.5",
     "dotenv": "^17.3.1",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",

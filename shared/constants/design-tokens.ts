@@ -16,7 +16,8 @@ export const BLUPRNT_COLORS = {
   accent: "#0d9488",
   accentLight: "#14b8a6",
   accentSoft: "rgba(45, 212, 191, 0.32)",
-  teal600: "#0d9488",
+  /** Matches `web/src/index.css` `--color-teal-600` (parity: check-design-token-parity.mjs). */
+  teal600: "#086960",
   teal800: "#115e59",
   teal950: "#042f2e",
   ink: "#111827",
@@ -24,8 +25,10 @@ export const BLUPRNT_COLORS = {
   borderDefault: "#e2e8f0",
   borderFocus: "#334155",
   slate950: "#020617",
-  slate500: "#64748b",
-  slate400: "#94a3b8",
+  /** Matches web `--color-slate-500` (slightly darker than default Tailwind slate-500 for contrast). */
+  slate500: "#475569",
+  /** Matches web `--color-slate-400`. */
+  slate400: "#64748b",
   slate700: "#334155",
   slate300: "#cbd5e1",
   slate100: "#f1f5f9",
