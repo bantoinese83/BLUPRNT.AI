@@ -4,35 +4,37 @@ Supabase Edge Functions call the **Google Gemini API** over **REST** (`generateC
 
 ## Official documentation (Google AI)
 
-| Topic | URL |
-|--------|-----|
-| Models (names, tiers, deprecations) | https://ai.google.dev/gemini-api/docs/models |
+| Topic                                      | URL                                                   |
+| ------------------------------------------ | ----------------------------------------------------- |
+| Models (names, tiers, deprecations)        | https://ai.google.dev/gemini-api/docs/models          |
 | Text generation (REST `contents`, `parts`) | https://ai.google.dev/gemini-api/docs/text-generation |
-| Tools (built-in vs function calling) | https://ai.google.dev/gemini-api/docs/tools |
-| Grounding with Google Search | https://ai.google.dev/gemini-api/docs/google-search |
+| Tools (built-in vs function calling)       | https://ai.google.dev/gemini-api/docs/tools           |
+| Grounding with Google Search               | https://ai.google.dev/gemini-api/docs/google-search   |
 
 ## Secrets (Supabase Dashboard → Edge Functions → Secrets)
 
-| Secret | Required | Description |
-|--------|----------|-------------|
-| `GEMINI_API_KEY` | Yes* | API key from [Google AI Studio](https://aistudio.google.com/) or Google Cloud. |
-| `GEMINI_MODEL` | No | Model id for all `callGemini` usages. Default: `gemini-2.5-flash`. |
+| Secret           | Required | Description                                                                                                                         |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY` | Yes\*    | API key from [Google AI Studio](https://aistudio.google.com/) or Google Cloud.                                                      |
+| `GEMINI_MODEL`   | No       | Model id for all `callGemini` usages. Default: `gemini-2.5-flash`. Do **not** set deprecated `gemini-1.5-flash` (or other 1.5 ids). |
 
 \*Invoice OCR and photo estimates are degraded or skipped when the key is missing, depending on the function.
 
 ## Code layout
 
-| File | Role |
-|------|------|
-| [`supabase/functions/_shared/gemini.ts`](../supabase/functions/_shared/gemini.ts) | `callGemini()` — `v1beta` REST, optional `google_search` tool, JSON schema responses. |
-| [`supabase/functions/_shared/ocr.ts`](../supabase/functions/_shared/ocr.ts) | Invoice PDF/image → structured fields (uses `callGemini`, no search grounding). |
-| [`supabase/functions/photo-to-scope/_shared/estimate.ts`](../supabase/functions/photo-to-scope/_shared/estimate.ts) | Renovation estimate JSON + **`useGrounding: true`** for local market context. |
+| File                                                                                                                | Role                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`supabase/functions/_shared/gemini.ts`](../supabase/functions/_shared/gemini.ts)                                   | `callGemini()` — `v1beta` REST, optional `google_search` tool, JSON schema responses. |
+| [`supabase/functions/_shared/ocr.ts`](../supabase/functions/_shared/ocr.ts)                                         | Invoice PDF/image → structured fields (uses `callGemini`, no search grounding).       |
+| [`supabase/functions/photo-to-scope/_shared/estimate.ts`](../supabase/functions/photo-to-scope/_shared/estimate.ts) | Renovation estimate JSON + **`useGrounding: true`** for local market context.         |
 
 ## Model choice
 
-- Default **`gemini-2.5-flash`** is a stable, cost-effective multimodal model and supports **Grounding with Google Search** per Google’s [supported models](https://ai.google.dev/gemini-api/docs/google-search#supported_models) table.
-- Override with **`GEMINI_MODEL`** when you want e.g. `gemini-2.5-pro` (heavier reasoning) or a newer stable id from the [models](https://ai.google.dev/gemini-api/docs/models) page.
-- Avoid deprecated / shut-down ids listed on [deprecations](https://ai.google.dev/gemini-api/docs/deprecations).
+- Default **`gemini-2.5-flash`** is the repo default when `GEMINI_MODEL` is unset.
+- **Recommended Flash ids** (pick one via `GEMINI_MODEL`): `gemini-2.5-flash`, `gemini-2.5-flash-lite`, or `gemini-flash-latest` (tracks Google’s latest Flash). Re-check names on the [models](https://ai.google.dev/gemini-api/docs/models) page — aliases can change.
+- **Avoid** **`gemini-1.5-flash`** and other 1.5-era ids — they are deprecated / sunset per [deprecations](https://ai.google.dev/gemini-api/docs/deprecations). If your Supabase secret still sets 1.5, remove or replace it and redeploy.
+- For heavier reasoning, consider `gemini-2.5-pro` or newer Pro ids from the models doc.
+- **Grounding with Google Search**: only some models support it; see Google’s [supported models](https://ai.google.dev/gemini-api/docs/google-search#supported_models) table.
 
 ## Grounding with Google Search
 

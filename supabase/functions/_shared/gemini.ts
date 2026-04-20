@@ -53,6 +53,34 @@ function extractTextFromGenerateContentResponse(response: unknown): string | nul
   return null;
 }
 
+/** True when Google returns overload / rate limits — safe to retry with backoff. */
+function isRetryableGeminiError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  if (
+    /503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|heavy load|try again later|temporarily unavailable/i
+      .test(msg)
+  ) {
+    return true;
+  }
+  const codeMatch = msg.match(/"code"\s*:\s*(\d+)/);
+  if (codeMatch) {
+    const c = parseInt(codeMatch[1], 10);
+    return c === 503 || c === 429;
+  }
+  return false;
+}
+
+const DEFAULT_MAX_ATTEMPTS = 3;
+
+/**
+ * Default when `GEMINI_MODEL` is unset. Use a current Flash id — not `gemini-1.5-flash`
+ * (deprecated per Google’s model lifecycle).
+ *
+ * Common overrides via `GEMINI_MODEL`: `gemini-2.5-flash` (default), `gemini-2.5-flash-lite`,
+ * `gemini-flash-latest` (alias to Google’s latest Flash). Confirm ids in the official models doc.
+ */
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+
 export async function callGemini(params: {
   parts: GeminiPart[];
   systemInstruction?: string;
@@ -81,79 +109,101 @@ export async function callGemini(params: {
   } = params;
 
   const model =
-    (Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash").trim() ||
-    "gemini-2.5-flash";
+    (Deno.env.get("GEMINI_MODEL") ?? DEFAULT_GEMINI_MODEL).trim() ||
+    DEFAULT_GEMINI_MODEL;
 
-  try {
-    // 1. Initialize the new unified Client
-    const ai = new GoogleGenAI({ apiKey });
+  const maxAttempts = Math.max(
+    1,
+    Math.min(
+      5,
+      parseInt(Deno.env.get("GEMINI_RETRY_ATTEMPTS") ?? "", 10) ||
+        DEFAULT_MAX_ATTEMPTS,
+    ),
+  );
 
-    // 2. Format parts for the new SDK structure
-    const sdkContents = parts.map((p) => {
-      if ("inline_data" in p) {
-        return {
-          inlineData: {
-            mimeType: p.inline_data.mime_type,
-            data: p.inline_data.data,
-          },
-        };
-      }
-      return { text: p.text };
-    });
-
-    console.log(`[callGemini] generateContent (model: ${model})`);
-
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error(`Gemini API Timeout (${timeoutMs / 1000}s)`)),
-        timeoutMs,
-      ),
-    );
-
-    const contentsArg =
-      parts.length === 1 && "text" in parts[0] && !("inline_data" in parts[0])
-        ? parts[0].text
-        : sdkContents;
-
-    const callPromise = ai.models.generateContent({
-      model,
-      contents: contentsArg,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: temperature,
-        maxOutputTokens,
-        responseMimeType: responseMimeType,
-        responseSchema: responseSchema,
-      },
-    });
-
-    // When the timeout wins Promise.race, the SDK promise can still reject later.
-    // Unhandled rejections have been observed to crash the Edge isolate (plain 500).
-    callPromise.catch((err: unknown) => {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn("[callGemini] Background request settled after race:", msg);
-    });
-
-    const response = await Promise.race([callPromise, timeoutPromise]);
-
-    const text = extractTextFromGenerateContentResponse(response);
-    if (!text) {
-      console.warn("[callGemini] No usable text in response");
-      return null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (attempt > 1) {
+      const delayMs = Math.min(4000, 400 * Math.pow(2, attempt - 2));
+      console.warn(
+        `[callGemini] Retry ${attempt}/${maxAttempts} after ${delayMs}ms (transient Gemini error)`,
+      );
+      await new Promise((r) => setTimeout(r, delayMs));
     }
 
-    const data =
-      response && typeof response === "object" && "data" in response
-        ? (response as { data?: Record<string, unknown> }).data
-        : undefined;
+    try {
+      const ai = new GoogleGenAI({ apiKey });
 
-    return {
-      text,
-      data,
-    };
-  } catch (e: unknown) {
-    const error = e as Error;
-    console.error("[callGemini] New SDK Error:", error.name, error.message);
-    return null;
+      const sdkContents = parts.map((p) => {
+        if ("inline_data" in p) {
+          return {
+            inlineData: {
+              mimeType: p.inline_data.mime_type,
+              data: p.inline_data.data,
+            },
+          };
+        }
+        return { text: p.text };
+      });
+
+      console.log(
+        `[callGemini] generateContent (model: ${model}, attempt ${attempt}/${maxAttempts})`,
+      );
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`Gemini API Timeout (${timeoutMs / 1000}s)`)),
+          timeoutMs,
+        ),
+      );
+
+      const contentsArg =
+        parts.length === 1 && "text" in parts[0] && !("inline_data" in parts[0])
+          ? parts[0].text
+          : sdkContents;
+
+      const callPromise = ai.models.generateContent({
+        model,
+        contents: contentsArg,
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: temperature,
+          maxOutputTokens,
+          responseMimeType: responseMimeType,
+          responseSchema: responseSchema,
+        },
+      });
+
+      callPromise.catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn("[callGemini] Background request settled after race:", msg);
+      });
+
+      const response = await Promise.race([callPromise, timeoutPromise]);
+
+      const text = extractTextFromGenerateContentResponse(response);
+      if (!text) {
+        console.warn("[callGemini] No usable text in response");
+        return null;
+      }
+
+      const data =
+        response && typeof response === "object" && "data" in response
+          ? (response as { data?: Record<string, unknown> }).data
+          : undefined;
+
+      return {
+        text,
+        data,
+      };
+    } catch (e: unknown) {
+      const error = e as Error;
+      console.error("[callGemini] New SDK Error:", error.name, error.message);
+      const retry = isRetryableGeminiError(e) && attempt < maxAttempts;
+      if (!retry) {
+        return null;
+      }
+    }
   }
+
+  return null;
 }

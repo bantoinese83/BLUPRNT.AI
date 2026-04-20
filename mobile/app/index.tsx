@@ -5,6 +5,7 @@ import {
   Text,
   Platform,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { router } from "expo-router";
 import { MotiView, AnimatePresence } from "moti";
@@ -72,26 +73,31 @@ export default function LandingScreen() {
       edges={["top", "bottom", "left", "right"]}
     >
       <View style={styles.container}>
-        {/* Progress Bars */}
-        <View style={styles.progressContainer}>
-          {slides.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.progressBar,
-                {
-                  backgroundColor:
-                    i === activeSlide
-                      ? Theme.colors.brand.primary
-                      : "rgba(0,0,0,0.05)",
-                },
-              ]}
-            />
-          ))}
-        </View>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          bounces
+        >
+          {/* Progress bars */}
+          <View style={styles.progressContainer}>
+            {slides.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.progressBar,
+                  {
+                    backgroundColor:
+                      i === activeSlide
+                        ? Theme.colors.brand.primary
+                        : "rgba(0,0,0,0.05)",
+                  },
+                ]}
+              />
+            ))}
+          </View>
 
-        {/* Hero Section */}
-        <View style={styles.hero}>
           <View style={styles.logoContainer}>
             <Logo size={60} />
           </View>
@@ -117,10 +123,10 @@ export default function LandingScreen() {
               <View style={styles.slideIconContainer}>{slide.icon}</View>
             </MotiView>
           </AnimatePresence>
-        </View>
+        </ScrollView>
 
-        {/* CTA Container */}
-        <View style={styles.ctaContainer}>
+        {/* Footer below scroll — layout order guarantees no overlap with icon */}
+        <View style={styles.footer}>
           <Button
             title={activeSlide === slides.length - 1 ? "Get Started" : "Next"}
             onPress={() => {
@@ -154,24 +160,26 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    justifyContent: "space-between",
+    paddingHorizontal: Theme.spacing.margin,
     paddingTop: Platform.OS === "ios" ? 20 : 40,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    alignItems: "center",
+    paddingBottom: Theme.spacing.lg,
   },
   progressContainer: {
     flexDirection: "row",
     gap: 8,
     marginBottom: 40,
+    width: "100%",
   },
   progressBar: {
     flex: 1,
     height: 4,
     borderRadius: 2,
-  },
-  hero: {
-    flex: 1,
-    alignItems: "center",
-    zIndex: 1,
   },
   logoContainer: {
     marginBottom: 40,
@@ -179,7 +187,6 @@ const styles = StyleSheet.create({
   slideContent: {
     alignItems: "center",
     width: "100%",
-    zIndex: 2,
   },
   badgeContainer: {
     backgroundColor: "rgba(13, 148, 136, 0.08)",
@@ -236,10 +243,10 @@ const styles = StyleSheet.create({
     elevation: 8,
     marginTop: 20,
   },
-  ctaContainer: {
+  footer: {
     width: "100%",
+    paddingTop: Theme.spacing.md,
     paddingBottom: 20,
-    zIndex: 1,
   },
   signInLink: {
     alignItems: "center",

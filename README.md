@@ -7,7 +7,9 @@ Monorepo: **Vite + React** (`web/`), **Expo** (`mobile/`), and **shared TypeScri
 ---
 
 ### 🚀 Production Readiness (April 2026)
+
 The platform is currently in **Production Hardening** phase. For the latest deployment steps, security configurations, and developer handover notes, please see:
+
 - [**Production Launch Handbook**](docs/production_launch_handbook.md) — Infrastructure, API, and Submission details.
 - [**Developer Handover**](docs/developer_handover.md) — Immediate next tasks and project status.
 
@@ -269,19 +271,19 @@ Edge runtime receives `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE
 
 Set in Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 
-| Secret                      | Description                                                         |
-| --------------------------- | ------------------------------------------------------------------- |
-| `ALLOWED_ORIGINS`           | Comma-separated origins for CORS. If unset, allows `*`.             |
-| `RATE_LIMIT_REQUESTS`       | Max requests per window (default: 60)                               |
-| `RATE_LIMIT_WINDOW_MS`      | Window in ms (default: 60000)                                       |
-| `STRIPE_SECRET_KEY`         | Stripe secret: webhook, checkout, `delete-account` cleanup          |
-| `STRIPE_WEBHOOK_SECRET`     | Stripe webhook signing secret                                       |
-| `STRIPE_ARCHITECT_PRICE_ID` | Optional on Edge; forces subscription mode if set                   |
-| `GEMINI_API_KEY`            | Gemini for invoice OCR and `photo-to-scope` (never in Vite env)     |
-| `GEMINI_MODEL`              | Optional model id (default `gemini-2.5-flash`)                      |
-| `BREVO_API_KEY`             | Brevo / `send-email`                                                |
-| `UPSTASH_REDIS_REST_URL`    | Optional; with token, shared rate limits in `_shared/rate-limit.ts` |
-| `UPSTASH_REDIS_REST_TOKEN`  | Optional; Upstash REST token                                        |
+| Secret                      | Description                                                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ALLOWED_ORIGINS`           | Comma-separated origins for CORS. If unset, allows `*`.                                                                                                                        |
+| `RATE_LIMIT_REQUESTS`       | Max requests per window (default: 60)                                                                                                                                          |
+| `RATE_LIMIT_WINDOW_MS`      | Window in ms (default: 60000)                                                                                                                                                  |
+| `STRIPE_SECRET_KEY`         | Stripe secret: webhook, checkout, `delete-account` cleanup                                                                                                                     |
+| `STRIPE_WEBHOOK_SECRET`     | Stripe webhook signing secret                                                                                                                                                  |
+| `STRIPE_ARCHITECT_PRICE_ID` | Optional on Edge; forces subscription mode if set                                                                                                                              |
+| `GEMINI_API_KEY`            | Gemini for invoice OCR and `photo-to-scope` (never in Vite env)                                                                                                                |
+| `GEMINI_MODEL`              | Optional; default `gemini-2.5-flash`. Use e.g. `gemini-2.5-flash-lite` or `gemini-flash-latest` — not deprecated `gemini-1.5-flash` ([docs/gemini-api.md](docs/gemini-api.md)) |
+| `BREVO_API_KEY`             | Brevo / `send-email`                                                                                                                                                           |
+| `UPSTASH_REDIS_REST_URL`    | Optional; with token, shared rate limits in `_shared/rate-limit.ts`                                                                                                            |
+| `UPSTASH_REDIS_REST_TOKEN`  | Optional; Upstash REST token                                                                                                                                                   |
 
 #### Gemini API (Edge)
 
@@ -397,10 +399,10 @@ All commands run from the **repository root** unless you use `npm run <script> -
 ### End-to-end tests
 
 - **Web**: `npm run test:e2e` starts a production preview and runs Playwright under [`e2e/`](e2e/). The web server injects minimal `VITE_*` defaults when unset so builds work in CI without a root `.env`.
-- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/dashboard-management.yaml`](mobile/maestro/dashboard-management.yaml). 
-    - **Requirement**: You must have a **Native Development Build** installed on the simulator (run `npm run ios` at least once).
-    - **Setup**: Requires the [Maestro CLI](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli).
-    - **Note**: This is **not** part of the default Ubuntu CI job; add a separate **macOS** workflow with Xcode if you want Maestro in CI.
+- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/dashboard-management.yaml`](mobile/maestro/dashboard-management.yaml).
+  - **Requirement**: You must have a **Native Development Build** installed on the simulator (run `npm run ios` at least once).
+  - **Setup**: Requires the [Maestro CLI](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli).
+  - **Note**: This is **not** part of the default Ubuntu CI job; add a separate **macOS** workflow with Xcode if you want Maestro in CI.
 
 ---
 
