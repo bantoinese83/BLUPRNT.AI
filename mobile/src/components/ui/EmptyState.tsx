@@ -11,6 +11,8 @@ interface EmptyStateProps {
   title: string;
   description: string;
   actionTitle?: string;
+  /** Primary CTA label casing. Default uppercase to match buttons elsewhere. */
+  actionTitleCase?: "uppercase" | "sentence";
   onAction?: () => void;
   /** Optional second action (prefer a single primary CTA unless paths are truly different). */
   secondaryTitle?: string;
@@ -24,6 +26,7 @@ export function EmptyState({
   title,
   description,
   actionTitle,
+  actionTitleCase = "uppercase",
   onAction,
   secondaryTitle,
   onSecondary,
@@ -51,6 +54,7 @@ export function EmptyState({
         {actionTitle && onAction && (
           <Button
             title={actionTitle}
+            titleCase={actionTitleCase}
             onPress={onAction}
             style={styles.button}
           />

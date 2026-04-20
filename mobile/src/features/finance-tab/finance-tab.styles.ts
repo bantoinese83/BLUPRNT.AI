@@ -14,8 +14,18 @@ export const financeTabStyles = StyleSheet.create({
   },
   headerTop: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    gap: 8,
+  },
+  headerBackBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Theme.colors.inputBg,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
   },
   headerCaptureBtn: {
     width: 44,
@@ -30,6 +40,14 @@ export const financeTabStyles = StyleSheet.create({
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
     letterSpacing: -1,
+  },
+  pageTitleCenter: {
+    flex: 1,
+    fontSize: 22,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    letterSpacing: -0.8,
+    textAlign: "center",
   },
   content: {
     paddingHorizontal: 24,

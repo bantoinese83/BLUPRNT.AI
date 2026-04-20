@@ -26,9 +26,9 @@ export default function LandingScreen() {
   const slides = [
     {
       title: "Snap the room. Get the number.",
-      highlight: "A budget before the contractor shows up",
+      highlight: "See a budget range before contractors bid",
       subtitle:
-        "One photo helps build a starter cost range for your area—so the first bid isn’t your only data point.",
+        "Add one room photo and your location. We show a planning range from local cost data so you can compare quotes instead of guessing.",
       icon: <Hammer size={32} color={Theme.colors.brand.primary} />,
       badge: "SMART ESTIMATE",
     },

@@ -51,7 +51,7 @@ export function ProjectTypeScreen() {
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl font-bold tracking-tight text-slate-900"
           >
-            What are you working on first?
+            What are you working on?
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, x: -10 }}

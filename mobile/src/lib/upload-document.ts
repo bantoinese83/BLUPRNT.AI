@@ -6,6 +6,35 @@ import { showAppToast } from "@/lib/app-toast";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
 
+/** Ensures camera / library picks send a MIME the edge function accepts (incl. HEIC on iOS). */
+export function normalizeInvoiceUploadMime(
+  fileUri: string,
+  mimeHint?: string,
+): string {
+  const lower = (mimeHint || "").trim().toLowerCase();
+  if (
+    [
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ].includes(lower)
+  ) {
+    if (lower === "image/jpg") return "image/jpeg";
+    return lower;
+  }
+  const u = fileUri.toLowerCase();
+  if (u.includes(".heic")) return "image/heic";
+  if (u.includes(".heif")) return "image/heif";
+  if (u.includes(".png")) return "image/png";
+  if (u.includes(".webp")) return "image/webp";
+  if (u.includes(".pdf")) return "application/pdf";
+  return "image/jpeg";
+}
+
 interface UploadResult {
   invoice_id?: string;
   ocr_status?: string;
@@ -98,9 +127,16 @@ async function postDocumentToUploadInvoice(
   }) => void,
 ) {
   try {
-    const ext = mimeType.includes("pdf")
+    const mime = normalizeInvoiceUploadMime(uri, mimeType);
+    const ext = mime.includes("pdf")
       ? "pdf"
-      : mimeType.split("/")[1] || "jpg";
+      : mime.includes("png")
+        ? "png"
+        : mime.includes("webp")
+          ? "webp"
+          : mime.includes("heic") || mime.includes("heif")
+            ? "heic"
+            : "jpg";
     const fileName = `document_${Date.now()}.${ext}`;
 
     const formData = new FormData();
@@ -109,7 +145,7 @@ async function postDocumentToUploadInvoice(
     formData.append("file", {
       uri,
       name: fileName,
-      type: mimeType || "image/jpeg",
+      type: mime,
     } as unknown as Blob);
 
     showAppToast("Starting upload... please keep the app open.");

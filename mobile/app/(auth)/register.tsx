@@ -270,7 +270,6 @@ export default function RegisterScreen() {
                     title="Sign Up"
                     onPress={handleRegister}
                     loading={loading}
-                    disabled={!acceptedPolicies}
                     style={{ marginTop: 8 }}
                   />
 
@@ -286,12 +285,12 @@ export default function RegisterScreen() {
                     loading={googleLoading}
                     variant="outline"
                     icon={<GoogleIcon />}
-                    disabled={!acceptedPolicies}
                     style={{ marginTop: 0 }}
                   />
 
                   <AppleSignIn
-                    disabled={!acceptedPolicies}
+                    policyAccepted={acceptedPolicies}
+                    busy={googleLoading}
                     onStart={() => setGoogleLoading(true)}
                     onSuccess={() => setGoogleLoading(false)}
                     onError={(err) => {
@@ -343,12 +342,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(15, 23, 42, 0.1)",
   },
   header: {
     marginBottom: 32,
@@ -356,21 +355,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 36,
+    fontSize: 34,
     fontFamily: "Outfit_800ExtraBold",
-    color: "white",
-    marginBottom: 12,
+    color: Theme.colors.text.primary,
+    marginBottom: 8,
     letterSpacing: -1,
   },
   subtitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: "Outfit_400Regular",
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     textAlign: "center",
   },
   formCard: {
     padding: 24,
     borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.05)",
   },
   form: {
     width: "100%",
@@ -383,15 +384,15 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.12)",
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    borderColor: "rgba(15, 23, 42, 0.08)",
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
   },
   policyCheck: {
     width: 22,
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.35)",
+    borderColor: "rgba(15, 23, 42, 0.25)",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
@@ -404,11 +405,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontFamily: "Outfit_500Medium",
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     lineHeight: 20,
   },
   policyLink: {
-    color: "#5eead4",
+    color: Theme.colors.brand.primary,
     fontFamily: "Outfit_700Bold",
     textDecorationLine: "underline",
   },
@@ -420,10 +421,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(15, 23, 42, 0.08)",
   },
   dividerText: {
-    color: "#94a3b8",
+    color: Theme.colors.text.muted,
     fontFamily: "Outfit_400Regular",
     fontSize: 14,
     marginHorizontal: 16,
@@ -435,26 +436,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    color: "#94a3b8",
+    color: Theme.colors.text.secondary,
     fontFamily: "Outfit_400Regular",
     fontSize: 14,
   },
   linkText: {
-    color: "white",
+    color: Theme.colors.brand.primary,
     fontFamily: "Outfit_700Bold",
     fontSize: 14,
   },
   errorText: {
-    color: "#f43f5e",
+    color: Theme.colors.status.error,
     fontSize: 13,
     fontFamily: "Outfit_600SemiBold",
     textAlign: "center",
     marginBottom: 16,
-    backgroundColor: "rgba(244, 63, 94, 0.1)",
+    backgroundColor: "rgba(244, 63, 94, 0.05)",
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(244, 63, 94, 0.2)",
+    borderColor: "rgba(244, 63, 94, 0.1)",
     overflow: "hidden",
   },
 });

@@ -52,10 +52,24 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
   const [unit, setUnit] = useState("ea");
   const [saving, setSaving] = useState(false);
 
+  const costNum = parseFloat(cost.replace(/[^0-9.]/g, ""));
+  const qtyNum = parseFloat(quantity.replace(/[^0-9.]/g, ""));
+  const canSubmit =
+    Boolean(category.trim()) &&
+    Number.isFinite(costNum) &&
+    costNum > 0 &&
+    (Number.isFinite(qtyNum) ? qtyNum > 0 : true);
+
   const handleSubmit = async () => {
-    const costNum = parseFloat(cost.replace(/[^0-9.]/g, ""));
-    const qtyNum = parseFloat(quantity.replace(/[^0-9.]/g, ""));
-    if (!category.trim() || isNaN(costNum)) return;
+    if (!category.trim()) {
+      showAppToast("Add a name for this line item.");
+      return;
+    }
+    if (!Number.isFinite(costNum) || costNum <= 0) {
+      showAppToast("Enter a valid unit cost greater than zero.");
+      return;
+    }
+    const q = Number.isFinite(qtyNum) && qtyNum > 0 ? qtyNum : 1;
 
     setSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -65,7 +79,7 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
         description: description.trim(),
         phase,
         cost: costNum,
-        quantity: isNaN(qtyNum) ? 1 : qtyNum,
+        quantity: q,
         unit: unit.trim() || "ea",
       });
       setCategory("");
@@ -76,7 +90,9 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
       onClose();
     } catch (err) {
       console.error("Add item error:", err);
-      showAppToast("Failed to add item. Please check your connection.");
+      showAppToast(
+        "Couldn’t add this line. Check your connection and try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -115,7 +131,7 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
             <ScrollView
               style={styles.content}
               showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
+              keyboardShouldPersistTaps="always"
             >
               <View style={styles.form}>
                 <View style={styles.inputGroup}>
@@ -202,12 +218,11 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
                 </View>
 
                 <TouchableOpacity
-                  onPress={handleSubmit}
-                  disabled={saving || !category.trim() || !cost}
+                  onPress={() => void handleSubmit()}
+                  disabled={saving || !canSubmit}
                   style={[
                     styles.submitBtn,
-                    (saving || !category.trim() || !cost) &&
-                      styles.submitBtnDisabled,
+                    (saving || !canSubmit) && styles.submitBtnDisabled,
                   ]}
                 >
                   {saving ? (

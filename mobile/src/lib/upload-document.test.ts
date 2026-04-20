@@ -1,11 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { alertMock } from "@/test/react-native-mock";
-import { uploadDocumentWithType } from "@/lib/upload-document";
+import {
+  uploadDocumentWithType,
+  normalizeInvoiceUploadMime,
+} from "@/lib/upload-document";
 import { invokeFunction } from "@/lib/supabase";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),
 }));
+
+describe("normalizeInvoiceUploadMime", () => {
+  it("maps iOS .heic paths when MIME is missing", () => {
+    expect(
+      normalizeInvoiceUploadMime("file:///var/IMG.CR2.heic", undefined),
+    ).toBe("image/heic");
+  });
+
+  it("keeps declared JPEG", () => {
+    expect(normalizeInvoiceUploadMime("file:///a", "image/jpeg")).toBe(
+      "image/jpeg",
+    );
+  });
+});
 
 describe("uploadDocumentWithType", () => {
   beforeEach(() => {

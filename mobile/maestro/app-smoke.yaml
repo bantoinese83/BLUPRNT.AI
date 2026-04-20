@@ -28,7 +28,7 @@ appId: ai.bluprnt.mobile
 - tapOn: "Get Started"
 - waitForAnimationToEnd:
     timeout: 4000
-- assertVisible: "What are you working on first?"
+- assertVisible: "What are you working on?"
 - scrollUntilVisible:
     element:
       id: "onboarding-privacy-note"

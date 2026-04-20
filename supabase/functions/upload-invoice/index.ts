@@ -15,6 +15,19 @@ import {
 } from "../_shared/entitlements.ts";
 import { extractInvoiceFromPdf } from "../_shared/ocr.ts";
 
+/** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
+function resolvedMimeType(f: File): string {
+  const t = (f.type || "").trim().toLowerCase();
+  if (t && t !== "application/octet-stream") return t;
+  const n = (f.name || "").toLowerCase();
+  if (n.endsWith(".pdf")) return "application/pdf";
+  if (n.endsWith(".png")) return "image/png";
+  if (n.endsWith(".webp")) return "image/webp";
+  if (n.endsWith(".heic") || n.endsWith(".heif")) return "image/heic";
+  if (n.endsWith(".jpg") || n.endsWith(".jpeg")) return "image/jpeg";
+  return "image/jpeg";
+}
+
 Deno.serve(async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
@@ -130,10 +143,12 @@ Deno.serve(async (req: Request) => {
 
     const fileBuf = await validatedFile.arrayBuffer();
     const buf = new Uint8Array(fileBuf);
+    const mimeForStore = resolvedMimeType(validatedFile);
+
     const { error: upErr } = await admin.storage
       .from("project-documents")
       .upload(storagePath, buf, {
-        contentType: validatedFile.type || "application/octet-stream",
+        contentType: mimeForStore,
         upsert: false,
       });
 
@@ -198,7 +213,7 @@ Deno.serve(async (req: Request) => {
         const pdfBase64 = btoa(binary);
         const ocrResult = await extractInvoiceFromPdf(
           pdfBase64,
-          validatedFile.type || "application/pdf",
+          mimeForStore || "application/pdf",
         );
 
         if (ocrResult) {

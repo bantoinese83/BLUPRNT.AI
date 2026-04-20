@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
@@ -45,6 +46,7 @@ interface Props {
 
 export function AIAssistant({ projectId }: Props) {
   const insets = useSafeAreaInsets();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -69,6 +71,23 @@ export function AIAssistant({ projectId }: Props) {
     requestAnimationFrame(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     });
+  }, []);
+
+  useEffect(() => {
+    const showEvt =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvt =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showSub = Keyboard.addListener(showEvt, () =>
+      setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener(hideEvt, () =>
+      setKeyboardVisible(false),
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -108,7 +127,9 @@ export function AIAssistant({ projectId }: Props) {
         {
           id: nextMessageId(),
           role: "assistant",
-          content: data?.reply || "Sorry, I couldn't process that right now.",
+          content:
+            data?.reply?.trim() ||
+            "Something went wrong. Pull to refresh your project data and try again.",
         },
       ]);
     } catch (err) {
@@ -130,6 +151,11 @@ export function AIAssistant({ projectId }: Props) {
   const keyboardOffset =
     Platform.OS === "ios" ? insets.top + 132 : insets.top + 24;
 
+  const dockBottomPadding =
+    keyboardVisible && Platform.OS === "ios"
+      ? Math.max(insets.bottom, Theme.spacing.sm)
+      : TAB_BAR_BUFFER + insets.bottom;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -138,6 +164,7 @@ export function AIAssistant({ projectId }: Props) {
     >
       <ScrollView
         ref={scrollViewRef}
+        style={styles.messagesScroll}
         onScroll={onScroll}
         scrollEventThrottle={16}
         onContentSizeChange={() => {
@@ -145,8 +172,9 @@ export function AIAssistant({ projectId }: Props) {
         }}
         contentContainerStyle={styles.messagesContainer}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         keyboardDismissMode="interactive"
+        nestedScrollEnabled
       >
         {messages.map((m) => (
           <MotiView
@@ -217,8 +245,10 @@ export function AIAssistant({ projectId }: Props) {
           {
             paddingBottom:
               Platform.OS === "ios"
-                ? TAB_BAR_BUFFER + insets.bottom
-                : TAB_BAR_BUFFER,
+                ? dockBottomPadding
+                : keyboardVisible
+                  ? Math.max(insets.bottom, Theme.spacing.sm)
+                  : TAB_BAR_BUFFER,
           },
         ]}
       >
@@ -282,7 +312,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Theme.colors.background,
   },
+  messagesScroll: {
+    flex: 1,
+  },
   messagesContainer: {
+    flexGrow: 1,
     paddingHorizontal: Theme.spacing.xl,
     paddingTop: Theme.spacing.md,
     paddingBottom: Theme.spacing.xl,

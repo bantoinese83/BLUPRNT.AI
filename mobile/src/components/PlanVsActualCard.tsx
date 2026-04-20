@@ -21,32 +21,37 @@ type Props = {
 
 const toneForKind: Record<
   string,
-  { border: string; headline: string; iconBg: string }
+  { border: string; headline: string; iconBg: string; iconColor: string }
 > = {
   no_estimate: {
     border: "rgba(148, 163, 184, 0.35)",
     headline: Theme.colors.text.primary,
     iconBg: "rgba(148, 163, 184, 0.2)",
+    iconColor: Theme.colors.text.secondary,
   },
   no_documents: {
     border: "rgba(13, 148, 136, 0.45)",
-    headline: "#5eead4",
-    iconBg: "rgba(13, 148, 136, 0.22)",
+    headline: Theme.colors.brand.deep,
+    iconBg: "rgba(13, 148, 136, 0.14)",
+    iconColor: Theme.colors.brand.deep,
   },
   within: {
-    border: "rgba(52, 211, 153, 0.45)",
-    headline: "#6ee7b7",
-    iconBg: "rgba(16, 185, 129, 0.2)",
+    border: "rgba(5, 150, 105, 0.4)",
+    headline: "#047857",
+    iconBg: "rgba(16, 185, 129, 0.16)",
+    iconColor: "#047857",
   },
   below_min: {
-    border: "rgba(56, 189, 248, 0.45)",
-    headline: "#7dd3fc",
-    iconBg: "rgba(14, 165, 233, 0.2)",
+    border: "rgba(13, 148, 136, 0.4)",
+    headline: Theme.colors.brand.deep,
+    iconBg: "rgba(13, 148, 136, 0.12)",
+    iconColor: Theme.colors.brand.deep,
   },
   above_max: {
-    border: "rgba(251, 191, 36, 0.5)",
-    headline: "#fcd34d",
-    iconBg: "rgba(245, 158, 11, 0.2)",
+    border: "rgba(217, 119, 6, 0.45)",
+    headline: "#b45309",
+    iconBg: "rgba(245, 158, 11, 0.18)",
+    iconColor: "#b45309",
   },
 };
 
@@ -74,7 +79,7 @@ export function PlanVsActualCard({
     >
       <View style={styles.row}>
         <View style={[styles.iconWrap, { backgroundColor: tone.iconBg }]}>
-          <Scale size={22} color="white" />
+          <Scale size={22} color={tone.iconColor} />
         </View>
         <View style={styles.textCol}>
           <Text style={styles.kicker}>Plan vs documented spend</Text>
@@ -161,7 +166,7 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 14,
     fontFamily: Theme.typography.family.regular,
-    color: Theme.colors.text.secondary,
+    color: Theme.colors.text.onSoft,
     lineHeight: 21,
   },
   statsRow: {

@@ -19,7 +19,7 @@ import assetManagementSvg from "@assets/asset-management.svg";
 import assistantSvg from "@assets/assistant.svg";
 import mansionSvg from "@assets/mansion.svg";
 import userSvg from "@assets/user.svg";
-import fileSvg from "@assets/file.svg";
+import { Plus } from "lucide-react-native";
 
 const CORNER = 22;
 /** Visible white bar height (icons sit here). */
@@ -208,16 +208,13 @@ export function NotchedTabBar({
           </View>
         </View>
 
-        <View
-          style={[styles.fabRing, { width: barW }]}
-          pointerEvents="box-none"
-        >
+        <View style={styles.fabRing} pointerEvents="box-none">
           <TouchableOpacity
             onPress={pressFab}
             accessibilityRole="button"
             accessibilityLabel="Add project"
             accessibilityState={{ selected: newFocused }}
-            style={styles.fabTouchable}
+            style={[styles.fabTouchable, { left: barW / 2 - 32 }]}
             activeOpacity={0.9}
           >
             <LinearGradient
@@ -226,13 +223,7 @@ export function NotchedTabBar({
               end={{ x: 0.85, y: 1 }}
               style={styles.fabGradient}
             >
-              <Image
-                source={fileSvg}
-                style={styles.fabIcon}
-                contentFit="contain"
-                tintColor="#ffffff"
-                accessibilityIgnoresInvertColors
-              />
+              <Plus size={30} color="#ffffff" strokeWidth={2.5} />
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -300,12 +291,14 @@ const styles = StyleSheet.create({
   fabRing: {
     position: "absolute",
     top: -30,
-    alignItems: "center",
-    justifyContent: "flex-start",
+    left: 0,
+    right: 0,
     height: 72,
     pointerEvents: "box-none",
   },
   fabTouchable: {
+    position: "absolute",
+    top: 0,
     shadowColor: "#134e4a",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.38,
@@ -321,9 +314,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "rgba(255,255,255,0.98)",
-  },
-  fabIcon: {
-    width: 30,
-    height: 30,
   },
 });

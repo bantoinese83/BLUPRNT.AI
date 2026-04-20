@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Switch } from "react-native";
 import {
   BookOpen,
+  ChevronLeft,
   Wrench,
   ShieldCheck,
   FileDown,
@@ -71,7 +72,27 @@ export function FinanceLedgerHeader({
       ) : null}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.pageTitle}>Property Ledger</Text>
+          <TouchableOpacity
+            style={styles.headerBackBtn}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/(tabs)");
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+          >
+            <ChevronLeft
+              size={24}
+              color={Theme.colors.text.primary}
+              strokeWidth={2.2}
+            />
+          </TouchableOpacity>
+          <Text style={styles.pageTitleCenter} numberOfLines={1}>
+            Property Ledger
+          </Text>
           <TouchableOpacity
             style={styles.headerCaptureBtn}
             onPress={onPressAddDocument}

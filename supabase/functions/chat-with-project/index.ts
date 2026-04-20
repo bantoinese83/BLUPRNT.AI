@@ -96,7 +96,11 @@ Deno.serve(async (req: Request) => {
     });
 
     return jsonResponse(
-      { reply: result?.text || "I'm sorry, I couldn't generate a response." },
+      {
+        reply:
+          result?.text ??
+          "I couldn’t answer that just now. Check your connection and try again in a moment.",
+      },
       200,
       req,
     );

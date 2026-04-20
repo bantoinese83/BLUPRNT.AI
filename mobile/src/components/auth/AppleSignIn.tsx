@@ -14,7 +14,10 @@ interface Props {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
   style?: StyleProp<ViewStyle>;
-  disabled?: boolean;
+  /** When false, shows an alert instead of starting Apple (e.g. register until terms are accepted). Default true for sign-in screens. */
+  policyAccepted?: boolean;
+  /** Blocks starting another OAuth flow (e.g. shared loading with Google). */
+  busy?: boolean;
 }
 
 export function AppleSignIn({
@@ -22,12 +25,14 @@ export function AppleSignIn({
   onSuccess,
   onError,
   style,
-  disabled = false,
+  policyAccepted = true,
+  busy = false,
 }: Props) {
   const { signInWithApple } = useAuth();
 
   const handleAppleSignIn = async () => {
-    if (disabled) {
+    if (busy) return;
+    if (!policyAccepted) {
       Alert.alert(
         "Terms and privacy",
         "Please agree to the Terms and Privacy Policy first.",

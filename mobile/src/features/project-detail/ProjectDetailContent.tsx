@@ -134,7 +134,9 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={async (item) => {
-          if (!id) return;
+          if (!id) {
+            throw new Error("Missing project");
+          }
           await addItem(id, item);
           handleRefresh();
         }}

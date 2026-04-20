@@ -10,7 +10,7 @@ appId: ai.bluprnt.mobile
 - tapOn: "Get Started"
 
 # Step 0: Project Type
-- assertVisible: "What are you working on first?"
+- assertVisible: "What are you working on?"
 - tapOn: "Kitchen"
 - tapOn:
     id: "onboarding-continue"

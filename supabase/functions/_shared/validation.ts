@@ -44,17 +44,36 @@ const documentTypeSchema = z
   .enum(["invoice", "quote", "warranty", "permit"])
   .default("invoice");
 
+/** iOS camera/library often produces HEIC; mobile multipart may omit `File.type`. */
+const UPLOAD_MIME_ALLOWLIST = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+]);
+
+function uploadFileMimeLooksAllowed(f: File): boolean {
+  const t = (f.type || "").trim().toLowerCase();
+  if (t && UPLOAD_MIME_ALLOWLIST.has(t)) return true;
+  // React Native / some clients send an empty type — infer from filename.
+  if (!t || t === "application/octet-stream") {
+    const n = (f.name || "").toLowerCase();
+    return /\.(pdf|jpe?g|png|webp|heic|heif)$/i.test(n);
+  }
+  return false;
+}
+
 export const uploadInvoiceSchema = z.object({
   project_id: uuidSchema,
   file: z
     .custom<File>((v) => v instanceof File && v.size > 0, "Valid file required")
     .refine((f) => f.size <= 10 * 1024 * 1024, "File must be under 10MB")
     .refine(
-      (f) =>
-        ["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(
-          f.type,
-        ),
-      "Unsupported file type. Upload a PDF, JPEG, PNG, or WEBP.",
+      uploadFileMimeLooksAllowed,
+      "Unsupported file type. Upload a PDF, JPEG, PNG, WEBP, or HEIC.",
     ),
   document_type: documentTypeSchema,
   vendor_hint: z.string().max(200).optional().nullable(),

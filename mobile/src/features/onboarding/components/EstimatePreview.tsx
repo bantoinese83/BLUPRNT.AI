@@ -50,7 +50,7 @@ export function EstimatePreview({
             <ProjectIcon name={projectType || ""} size={36} />
           </View>
           <View style={styles.confidenceBadge}>
-            <TrendingUp size={12} color={Theme.colors.brand.light} />
+            <TrendingUp size={12} color={Theme.colors.brand.deep} />
             <Text style={styles.confidenceText}>Refined Range</Text>
           </View>
         </View>
@@ -110,7 +110,7 @@ export function EstimatePreview({
                 {showBreakdown ? (
                   <ChevronUp size={14} color="white" />
                 ) : (
-                  <ChevronDown size={14} color={Theme.colors.text.secondary} />
+                  <ChevronDown size={14} color={Theme.colors.text.onSoft} />
                 )}
               </TouchableOpacity>
 

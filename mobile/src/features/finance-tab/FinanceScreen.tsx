@@ -211,7 +211,8 @@ export default function FinanceScreen() {
           icon={BookOpen}
           title="Your home hub is ready"
           description="Set up a renovation to track your ledger, equity, and documents — same quick flow as the Home tab."
-          actionTitle="Set up your project"
+          actionTitle="Start your BLUPRNT"
+          actionTitleCase="sentence"
           onAction={() => router.push("/onboarding?newProject=1")}
         />
       </ScreenWrapper>

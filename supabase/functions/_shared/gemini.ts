@@ -14,6 +14,45 @@ export interface GeminiResponse {
   data?: Record<string, unknown>;
 }
 
+/** Some Edge responses omit `text` but still include candidates — merge parts manually. */
+function extractTextFromGenerateContentResponse(response: unknown): string | null {
+  if (!response || typeof response !== "object") return null;
+
+  const r = response as {
+    text?: string;
+    promptFeedback?: { blockReason?: string; blockReasonMessage?: string };
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+      finishReason?: string;
+    }>;
+  };
+
+  if (typeof r.text === "string" && r.text.trim()) {
+    return r.text.trim();
+  }
+
+  const blockReason = r.promptFeedback?.blockReason;
+  if (blockReason) {
+    console.warn("[callGemini] Prompt blocked:", blockReason);
+    return "I can’t reply to that. Ask about your project’s budget, scope, timeline, or documents instead.";
+  }
+
+  const parts = r.candidates?.[0]?.content?.parts;
+  if (parts?.length) {
+    const combined = parts
+      .map((p) => (p && typeof p.text === "string" ? p.text : ""))
+      .join("");
+    if (combined.trim()) return combined.trim();
+  }
+
+  const finish = r.candidates?.[0]?.finishReason;
+  if (finish && finish !== "STOP" && finish !== "MAX_TOKENS") {
+    console.warn("[callGemini] Unexpected finishReason:", finish);
+  }
+
+  return null;
+}
+
 export async function callGemini(params: {
   parts: GeminiPart[];
   systemInstruction?: string;
@@ -71,9 +110,14 @@ export async function callGemini(params: {
       ),
     );
 
+    const contentsArg =
+      parts.length === 1 && "text" in parts[0] && !("inline_data" in parts[0])
+        ? parts[0].text
+        : sdkContents;
+
     const callPromise = ai.models.generateContent({
       model,
-      contents: sdkContents,
+      contents: contentsArg,
       config: {
         systemInstruction: systemInstruction,
         temperature: temperature,
@@ -90,19 +134,22 @@ export async function callGemini(params: {
       console.warn("[callGemini] Background request settled after race:", msg);
     });
 
-    const response = (await Promise.race([callPromise, timeoutPromise])) as {
-      text?: string;
-      data?: Record<string, unknown>;
-    };
+    const response = await Promise.race([callPromise, timeoutPromise]);
 
-    if (!response || !response.text) {
-      console.warn("[callGemini] No response text returned");
+    const text = extractTextFromGenerateContentResponse(response);
+    if (!text) {
+      console.warn("[callGemini] No usable text in response");
       return null;
     }
 
+    const data =
+      response && typeof response === "object" && "data" in response
+        ? (response as { data?: Record<string, unknown> }).data
+        : undefined;
+
     return {
-      text: response.text.trim(),
-      data: response.data,
+      text,
+      data,
     };
   } catch (e: unknown) {
     const error = e as Error;
