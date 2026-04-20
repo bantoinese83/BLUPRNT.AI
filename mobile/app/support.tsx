@@ -25,11 +25,11 @@ const FAQS = [
   },
   {
     q: "Can I use my subscription on web and mobile?",
-    a: "Yes. Architect (Pro) can sync across devices. If you subscribed on the web (Stripe) and in the app store, you might be billed twice—cancel one in the store or on the website where you bought it.",
+    a: "Yes. Architect can sync across devices. If you subscribed on the web (Stripe) and in the iOS App Store, you might be billed twice—cancel one where you bought it.",
   },
   {
     q: "How do I get a refund?",
-    a: "For App Store or Google Play purchases, use your store’s refund or subscription management. For web (Stripe) purchases, email support and we’ll help.",
+    a: "For App Store purchases, use Apple’s subscription management or refund flow. For web (Stripe) purchases, email support and we’ll help.",
   },
   {
     q: "How do I link invoice lines to my budget?",

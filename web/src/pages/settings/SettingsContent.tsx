@@ -285,7 +285,7 @@ export function SettingsContent(props: SettingsContentProps) {
                     We see both a web (Stripe) subscription and an app store
                     subscription. Cancel one to avoid paying twice — use the
                     Stripe customer portal for web, or Subscriptions in the App
-                    Store / Google Play for the app.
+                    Store for the iOS app.
                   </p>
                 </div>
               )}
@@ -345,14 +345,14 @@ export function SettingsContent(props: SettingsContentProps) {
                     ? "You have full access to professional renovation tools. Billing and invoices are handled securely through Stripe."
                     : subscriptionRow &&
                         architectBillingChannel(subscriptionRow) === "store"
-                      ? "You have full access to professional tools. This subscription is billed through the App Store or Google Play — manage or cancel there."
-                      : "You have full access to professional renovation tools. Manage billing wherever you subscribed (Stripe on the web, or the app store in the mobile app)."}
+                      ? "You have full access to professional tools. This subscription is billed through the App Store (iOS) — manage or cancel there."
+                      : "You have full access to professional renovation tools. Manage billing wherever you subscribed (Stripe on the web, or the App Store on iOS)."}
                 </p>
               )}
               <p className="text-xs text-slate-500 leading-relaxed font-medium border-t border-slate-100 pt-4 mt-2">
                 Plans on the website are billed through Stripe. If you subscribe
-                in the iOS or Android app, manage or cancel in the App Store or
-                Google Play — use the same place you subscribed.
+                in the iOS app, manage or cancel in the App Store — use the same
+                place you subscribed.
               </p>
             </div>
           </CardContent>

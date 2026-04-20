@@ -202,9 +202,9 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
                 ? architectBillingChannel(subscription) === "stripe"
                   ? "Your plan is billed through Stripe on the web. Manage it from the website billing page."
                   : architectBillingChannel(subscription) === "store"
-                    ? "Your plan is billed through the App Store or Google Play. Use Manage above or your store subscriptions."
-                    : "In-app subscriptions use the app store; web plans use Stripe — manage where you subscribed."
-                : "In-app subscriptions are managed in the App Store or Google Play. Web subscriptions use Stripe — use the same place you subscribed to change or cancel."}
+                    ? "Your plan is billed through the App Store. Use Manage above or Apple’s subscription settings."
+                    : "In-app subscriptions use the App Store; web plans use Stripe — manage where you subscribed."
+                : "In-app subscriptions are managed in the App Store. Web subscriptions use Stripe — use the same place you subscribed to change or cancel."}
             </Text>
           </GlassCard>
         </MotiView>

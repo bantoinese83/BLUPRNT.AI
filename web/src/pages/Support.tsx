@@ -32,8 +32,8 @@ export default function Support() {
             How can we help?
           </h1>
           <p className="mx-auto max-th text-lg leading-relaxed text-slate-400">
-            Our team of project architects is ready to assist you with AI
-            analysis, account issues, or blueprint optimization.
+            Our support team can help with estimates, billing, account access,
+            and how to use BLUPRNT on web and mobile.
           </p>
         </div>
 
@@ -81,16 +81,16 @@ export default function Support() {
           <div className="mx-auto w-full max-th space-y-4">
             {[
               {
-                q: "How does the AI analysis work?",
-                a: "Our AI model 'Visionary-1' processes your project photos and descriptions to identify scope items and cross-reference them with regional pricing benchmarks.",
+                q: "How does the AI estimate work?",
+                a: "BLUPRNT uses your photos and project details together with AI and regional cost context to suggest scope lines and a planning range. Treat it as a budgeting guide—not a contractor bid. Compare any range with local quotes.",
               },
               {
-                q: "Can I use Bluprnt Pro on multiple devices?",
-                a: "Yes! Your 'Bluprnt Pro' subscription synced via RevenueCat works across both iOS, Android, and Web automatically.",
+                q: "Can I use my subscription on web and mobile?",
+                a: "Yes—sign in with the same account everywhere. Web subscriptions are billed through Stripe; the iOS app is billed through the App Store (via RevenueCat). If you subscribe on both web and iOS, you can be billed twice—cancel the extra subscription where you bought it. The app can warn you if it detects both.",
               },
               {
                 q: "How do I request a refund?",
-                a: "For App Store purchases, please use the Apple Report a Problem page. For Web purchases, contact our support email directly.",
+                a: "For purchases made in the iOS app, use Apple’s subscription management or Report a Problem. For web (Stripe) purchases, email support and we’ll help.",
               },
             ].map((faq, i) => (
               <details
@@ -115,8 +115,7 @@ export default function Support() {
         <div className="p-12 rounded-[2rem] bg-gradient-to-br from-teal-600/20 to-teal-800/20 border border-white/10 text-center">
           <h3 className="text-2xl font-bold mb-4">Still stuck?</h3>
           <p className="mx-auto mb-8 max-th text-slate-300 leading-relaxed">
-            Drop us a line and one of our human architects will get back to you
-            personally.
+            Email us and someone from the team will get back to you.
           </p>
           <a
             href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}
