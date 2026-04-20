@@ -64,6 +64,10 @@ export interface PhotoToScopeResult {
     confidence_score: number;
   };
   scope_items: ScopeItem[];
+  /** True when the Edge function used `getFallbackEstimate` (Gemini returned no payload). */
+  used_fallback?: boolean;
+  /** Machine-readable cause; see `@shared/constants/onboarding` helpers. */
+  fallback_reason?: string | null;
 }
 
 export interface PhotoAsset {

@@ -20,6 +20,12 @@ Supabase Edge Functions call the **Google Gemini API** over **REST** (`generateC
 
 \*Invoice OCR and photo estimates are degraded or skipped when the key is missing, depending on the function.
 
+### Production checklist (avoid silent fallbacks)
+
+1. Set **`GEMINI_MODEL`** to a current Flash id (e.g. `gemini-2.5-flash`) or **delete** the secret so the code default applies. A lingering `gemini-1.5-flash` value overrides the repo default and can cause errors or overload responses.
+2. After changing secrets, **redeploy** functions that bundle `_shared/gemini.ts` (e.g. `photo-to-scope`, `upload-invoice`, `chat-with-project`).
+3. The **`photo-to-scope`** JSON includes **`used_fallback`** (and **`fallback_reason`**) when the handler used the regional placeholder because Gemini returned no payload. Clients should show `estimateFallbackUserMessage` from `@shared/constants/onboarding` so users are not misled.
+
 ## Code layout
 
 | File                                                                                                                | Role                                                                                  |

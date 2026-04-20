@@ -59,6 +59,8 @@ export function FinalStep({
             max: estimate.max,
             scope: estimate.scope,
             confidence: estimate.confidence,
+            usedFallback: estimate.usedFallback,
+            fallbackReason: estimate.fallbackReason ?? null,
           }
         : null,
     });

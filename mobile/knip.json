@@ -6,7 +6,6 @@
     "@expo/vector-icons",
     "clsx",
     "expo-auth-session",
-    "expo-crypto",
     "expo-symbols",
     "tailwind-merge",
     "react-dom",

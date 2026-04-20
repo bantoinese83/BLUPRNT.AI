@@ -165,10 +165,14 @@ Deno.serve(async (req: Request) => {
         photoParts,
       });
 
+      let usedFallback = false;
+      const fallbackReasonAiUnavailable = "ai_analysis_unavailable" as const;
+
       if (!payload) {
         console.warn(
           `[photo-to-scope] AI analysis failed for ZIP ${zip_code}. Invoking high-fidelity fallback.`,
         );
+        usedFallback = true;
         payload = getFallbackEstimate(room_type as RoomType, zip_code);
       }
 
@@ -291,6 +295,8 @@ Deno.serve(async (req: Request) => {
             summary: payload.summary,
             scope_items,
             explanations: payload.explanations,
+            used_fallback: usedFallback,
+            fallback_reason: usedFallback ? fallbackReasonAiUnavailable : null,
           },
           200,
           req,
@@ -308,6 +314,8 @@ Deno.serve(async (req: Request) => {
           scope_items,
           explanations: payload.explanations,
           area_label: areaLabel || cityFromZip(zip_code),
+          used_fallback: usedFallback,
+          fallback_reason: usedFallback ? fallbackReasonAiUnavailable : null,
         },
         200,
         req,

@@ -23,6 +23,7 @@ import {
 } from "@/lib/onboarding-helpers";
 import { formatCurrency } from "@/lib/i18n";
 import { ESTIMATE_CHART_COLORS } from "@shared/constants/visualization";
+import { estimateFallbackUserMessage } from "@shared/constants/onboarding";
 
 function formatMoney(n: number) {
   return formatCurrency(n);
@@ -53,6 +54,11 @@ export function EstimateScreen() {
     (locationInput.replace(/\D/g, "").length >= 5
       ? `ZIP ${locationInput.replace(/\D/g, "").slice(0, 5)}`
       : "your area");
+
+  const fallbackLine = estimateFallbackUserMessage(
+    estimate?.used_fallback,
+    estimate?.fallback_reason,
+  );
 
   const bullets = estimate?.scope_items
     ?.map((s) => s.category)
@@ -99,6 +105,17 @@ export function EstimateScreen() {
           >
             Based on current market data for {area}.
           </motion.p>
+          {fallbackLine ? (
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="mx-auto max-w-md rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm leading-relaxed text-amber-950"
+              role="status"
+            >
+              {fallbackLine}
+            </motion.p>
+          ) : null}
         </div>
 
         <motion.div
@@ -139,8 +156,9 @@ export function EstimateScreen() {
               </div>
 
               <p className="text-sm text-slate-500 max-w-[240px] leading-relaxed">
-                This includes labor, materials, and local permits for a standard
-                project.
+                {estimate?.used_fallback
+                  ? "Use this range for planning only—not a substitute for a contractor bid."
+                  : "This includes labor, materials, and local permits for a standard project."}
               </p>
             </div>
             <CardContent className="p-8 pt-0 space-y-6">

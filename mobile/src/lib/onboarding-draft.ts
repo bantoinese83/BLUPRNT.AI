@@ -22,6 +22,8 @@ export type OnboardingDraftV1 = {
     max: number;
     scope: PhotoToScopeResult["scope_items"];
     confidence: number;
+    usedFallback?: boolean;
+    fallbackReason?: string | null;
   } | null;
 };
 

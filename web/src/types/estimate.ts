@@ -48,4 +48,7 @@ export type PhotoToScopeResult = {
   scope_items: ScopeItemPreview[];
   explanations: string[];
   area_label?: string;
+  /** True when the Edge function used regional fallback (Gemini returned no payload). */
+  used_fallback?: boolean;
+  fallback_reason?: string | null;
 };

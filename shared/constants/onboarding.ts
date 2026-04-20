@@ -97,3 +97,28 @@ export function phaseIndexForOnboardingPath(pathname: string): number {
   }
   return 0;
 }
+
+/** Edge `photo-to-scope` when Gemini did not return a payload. */
+export const FALLBACK_REASON_AI_UNAVAILABLE =
+  "ai_analysis_unavailable" as const;
+/** Client-only range from project type (no API scope). */
+export const FALLBACK_REASON_CLIENT_TYPE_BENCHMARK =
+  "client_type_benchmark" as const;
+
+export type EstimateFallbackReason =
+  | typeof FALLBACK_REASON_AI_UNAVAILABLE
+  | typeof FALLBACK_REASON_CLIENT_TYPE_BENCHMARK;
+
+/**
+ * One plain sentence when the dollar range is not a full AI line-item estimate.
+ */
+export function estimateFallbackUserMessage(
+  usedFallback: boolean | undefined,
+  reason: string | null | undefined,
+): string | null {
+  if (!usedFallback) return null;
+  if (reason === FALLBACK_REASON_CLIENT_TYPE_BENCHMARK) {
+    return "This is a broad benchmark for your project type—not a line-by-line estimate.";
+  }
+  return "We couldn't finish the full analysis right now. This range is a regional placeholder—compare with local quotes.";
+}

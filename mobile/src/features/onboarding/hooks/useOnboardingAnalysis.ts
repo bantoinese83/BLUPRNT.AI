@@ -11,6 +11,7 @@ import {
   type ProjectTypeOption,
 } from "@/lib/onboarding-helpers";
 import {
+  FALLBACK_REASON_CLIENT_TYPE_BENCHMARK,
   loadingScreenMessages,
   onboardingZipCode,
 } from "@shared/constants/onboarding";
@@ -20,6 +21,8 @@ export type OnboardingEstimateState = {
   max: number;
   scope: PhotoToScopeResult["scope_items"];
   confidence: number;
+  usedFallback?: boolean;
+  fallbackReason?: string | null;
 } | null;
 
 type SetEstimate = React.Dispatch<
@@ -73,6 +76,8 @@ export function useOnboardingAnalysis(
             max: range.max,
             scope: [],
             confidence: DEFAULT_ESTIMATE_CONFIDENCE,
+            usedFallback: true,
+            fallbackReason: FALLBACK_REASON_CLIENT_TYPE_BENCHMARK,
           });
           setStep(5);
           return;
@@ -126,6 +131,8 @@ export function useOnboardingAnalysis(
           confidence: Number.isFinite(result.summary.confidence_score)
             ? result.summary.confidence_score
             : DEFAULT_ESTIMATE_CONFIDENCE,
+          usedFallback: Boolean(result.used_fallback),
+          fallbackReason: result.fallback_reason ?? null,
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setStep(5);
@@ -162,6 +169,8 @@ export function useOnboardingAnalysis(
       max: range.max,
       scope: [],
       confidence: DEFAULT_ESTIMATE_CONFIDENCE,
+      usedFallback: true,
+      fallbackReason: FALLBACK_REASON_CLIENT_TYPE_BENCHMARK,
     });
     setAnalysisAwaitingChoice(false);
     setStep(5);

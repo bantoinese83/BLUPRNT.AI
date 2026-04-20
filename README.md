@@ -396,6 +396,10 @@ All commands run from the **repository root** unless you use `npm run <script> -
 | `npm run functions:deploy`                     | Deploy all Edge Functions via Supabase CLI (project ref in root `package.json`)                                             |
 | `npm run functions:deploy:rate-limited`        | Batch deploy of rate-limited / public surface                                                                               |
 
+### Dependency audit (`npm audit`)
+
+`npm audit` may report **markdown-it** (via **react-native-markdown-display**). A patched release is not always available without upstream changes; markdown rendered in the app is trusted content. Revisit when that package updates its **markdown-it** range.
+
 ### End-to-end tests
 
 - **Web**: `npm run test:e2e` starts a production preview and runs Playwright under [`e2e/`](e2e/). The web server injects minimal `VITE_*` defaults when unset so builds work in CI without a root `.env`.

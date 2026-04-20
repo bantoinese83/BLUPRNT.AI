@@ -9,7 +9,10 @@ import { ProjectIcon } from "@/lib/project-icons";
 import { Theme } from "@/constants/Theme";
 import { ScopeEstimateBreakdown } from "@/features/onboarding/components/ScopeEstimateBreakdown";
 import { MaterialDetailList } from "@/features/onboarding/components/MaterialDetailList";
-import { hasValidOnboardingZip } from "@shared/constants/onboarding";
+import {
+  estimateFallbackUserMessage,
+  hasValidOnboardingZip,
+} from "@shared/constants/onboarding";
 import type { OnboardingStyles } from "@/features/onboarding/onboarding-step-types";
 import type { OnboardingEstimateState } from "@/features/onboarding/hooks/useOnboardingAnalysis";
 
@@ -30,6 +33,11 @@ export function EstimatePreview({
   showBreakdown,
   setShowBreakdown,
 }: EstimatePreviewProps) {
+  const fallbackLine = estimateFallbackUserMessage(
+    estimate?.usedFallback,
+    estimate?.fallbackReason,
+  );
+
   return (
     <MotiView
       from={{ opacity: 0, translateY: 20 }}
@@ -73,6 +81,10 @@ export function EstimatePreview({
             {money(estimate?.min ?? 0, estimate?.max ?? 0)}
           </Text>
         </MotiView>
+
+        {fallbackLine ? (
+          <Text style={styles.estimateFallbackNotice}>{fallbackLine}</Text>
+        ) : null}
 
         <Text style={styles.estimateDisclaimer}>
           {estimate?.scope && estimate.scope.length > 0

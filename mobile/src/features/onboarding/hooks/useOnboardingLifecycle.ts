@@ -95,6 +95,8 @@ export function useOnboardingLifecycle({
               max: draft.estimate.max,
               scope: draft.estimate.scope,
               confidence: draft.estimate.confidence,
+              usedFallback: draft.estimate.usedFallback,
+              fallbackReason: draft.estimate.fallbackReason ?? null,
             }
           : null,
       );
