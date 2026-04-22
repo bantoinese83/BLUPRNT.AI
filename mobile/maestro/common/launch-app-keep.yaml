@@ -1,0 +1,5 @@
+# Used locally with Expo dev client: preserves Metro URL (clearState would strand the app).
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: false

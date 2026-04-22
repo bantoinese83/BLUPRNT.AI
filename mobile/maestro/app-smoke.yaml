@@ -6,9 +6,9 @@
 # Deeper mobile: mobile/maestro/full-journey.yaml
 appId: ai.bluprnt.mobile
 ---
-# Fresh state so the marketing carousel appears (returning users may skip it).
-- launchApp:
-    clearState: true
+# Launch template chosen by scripts/e2e-mobile-maestro.sh (see common/launch-app-*.yaml).
+- runFlow:
+    file: common/launch-app.active.yaml
 - waitForAnimationToEnd:
     timeout: 12000
 # Carousel title can lag after a cold start; "Next" is the primary readiness signal.

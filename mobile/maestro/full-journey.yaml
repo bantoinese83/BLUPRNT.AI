@@ -1,6 +1,7 @@
 appId: ai.bluprnt.mobile
 ---
-- launchApp
+- runFlow:
+    file: common/launch-app.active.yaml
 - extendedWaitUntil:
     visible: "Snap the room. Get the number."
     timeout: 30000

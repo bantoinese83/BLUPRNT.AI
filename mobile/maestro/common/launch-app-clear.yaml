@@ -1,0 +1,5 @@
+# Used on CI (Release build): deterministic cold start.
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: true

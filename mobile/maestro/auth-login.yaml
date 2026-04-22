@@ -1,7 +1,7 @@
 appId: ai.bluprnt.mobile
 ---
-- launchApp:
-    clearState: ${CLEAR_STATE}
+- runFlow:
+    file: common/launch-app.active.yaml
 - runFlow:
     file: common/onboarding-skip.yaml
     when:

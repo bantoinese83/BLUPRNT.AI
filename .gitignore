@@ -8,6 +8,7 @@ playwright-report/
 test-results/
 .playwright-mcp/
 mobile/maestro/screenshots/
+mobile/maestro/common/launch-app.active.yaml
 .DS_Store
 *.log
 .env*

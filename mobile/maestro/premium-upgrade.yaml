@@ -1,7 +1,7 @@
 appId: ai.bluprnt.mobile
 ---
-- launchApp:
-    clearState: true
+- runFlow:
+    file: common/launch-app.active.yaml
 - tapOn: "Next"
 - tapOn: "Next"
 - tapOn: "Next"
