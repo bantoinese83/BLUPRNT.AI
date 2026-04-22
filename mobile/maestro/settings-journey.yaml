@@ -26,12 +26,8 @@ appId: ai.bluprnt.mobile
     timeout: 30000
 - tapOn: { id: "onboarding-continue" }
 
-# Registration
-- runScript: 
-    text: |
-      const suffix = Date.now();
-      output.testEmail = `profile.${suffix}@bluprnt.ai`;
-- inputText: ${output.testEmail}
+# Registration (unique email via Maestro flow expression)
+- inputText: ${'profile.' + Date.now() + '@bluprnt.ai'}
 - tapOn: "Password"
 - inputText: "ProfilePassword123!"
 - tapOn: "Create account"
@@ -49,7 +45,7 @@ appId: ai.bluprnt.mobile
 
 # Step 3: Update Profile Name
 - tapOn: { id: "profile-name-input" }
-- clearText
+- eraseText: 100
 - inputText: "Maestro Tester"
 - tapOn: { id: "profile-save-button" }
 - extendedWaitUntil:

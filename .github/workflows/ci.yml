@@ -94,5 +94,5 @@ jobs:
           npx expo run:ios --no-packager --scheme bluprnt --configuration Release
 
       - name: Run Maestro Tests
-        run: npm run test:e2e:mobile
+        run: npm run test:e2e:mobile -- mobile/maestro/
 

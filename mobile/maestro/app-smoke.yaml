@@ -1,4 +1,4 @@
-# Run from repo root: npm run test:e2e:mobile mobile/maestro/app-smoke.yaml
+# Run from repo root: npm run test:e2e:mobile  (defaults to this flow)
 # Requires: Maestro CLI, iOS Simulator or Android emulator, dev build installed (ai.bluprnt.mobile).
 #
 # Web smoke (fast, no device): npm run test:e2e:smoke
