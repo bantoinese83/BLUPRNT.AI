@@ -10,6 +10,7 @@ import {
 import { Image } from "expo-image";
 import { MotiView } from "moti";
 import { StatusBar } from "expo-status-bar";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GradientBackground } from "@/components/ui/GradientBackground";
@@ -102,10 +103,14 @@ export function LaunchLoadingLayout({
   }
 
   return (
-    <GradientBackground style={styles.standRoot}>
-      <StatusBar style="dark" />
+    <View style={styles.standRoot}>
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={["#0F172A", "#1E293B"]}
+        style={StyleSheet.absoluteFill}
+      />
       {body}
-    </GradientBackground>
+    </View>
   );
 }
 
@@ -129,35 +134,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoCard: {
-    width: LOGO + 28,
-    height: LOGO + 28,
-    borderRadius: 28,
-    backgroundColor: Theme.colors.card,
+    width: LOGO + 40,
+    height: LOGO + 40,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Theme.colors.divider,
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 6,
   },
   logoImage: {
-    width: LOGO,
-    height: LOGO,
-    borderRadius: 20,
+    width: LOGO + 20,
+    height: LOGO + 20,
+    borderRadius: 24,
   },
   wordmark: {
     marginTop: 22,
     fontSize: 26,
     letterSpacing: 5,
-    color: Theme.colors.text.primary,
+    color: "#FFFFFF",
   },
   aiLine: {
     marginTop: 6,
     fontSize: 14,
-    color: Theme.colors.text.secondary,
+    color: "#94A3B8",
     letterSpacing: 0.2,
   },
   footer: {
