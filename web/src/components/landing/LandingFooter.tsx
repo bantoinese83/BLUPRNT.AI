@@ -17,6 +17,7 @@ export function LandingFooter() {
           <div className="flex flex-col items-center gap-3 sm:items-start">
             <Link
               to="/"
+              aria-label="BLUPRNT.AI — home"
               className="flex items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-sm">

@@ -32,6 +32,8 @@
     "test:e2e:smoke": "playwright test e2e/landing.spec.ts e2e/public-routes.spec.ts e2e/onboarding-welcome-smoke.spec.ts",
     "test:e2e:probes": "playwright test e2e/e2e-probes.spec.ts",
     "test:e2e:mobile": "bash scripts/e2e-mobile-maestro.sh",
+    "lighthouse:mobile": "bash scripts/lighthouse-local.sh mobile",
+    "lighthouse:desktop": "bash scripts/lighthouse-local.sh desktop",
     "functions:check": "bash scripts/check-edge-functions.sh",
     "postdeploy:verify": "bash scripts/post-deploy-verify.sh",
     "qa:core": "bash scripts/qa-core-journeys.sh",

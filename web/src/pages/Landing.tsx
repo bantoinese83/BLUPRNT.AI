@@ -1,36 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Helmet } from "react-helmet-async";
 import { getAuthCallbackUrl } from "@/lib/auth-redirect";
-import {
-  buildLandingJsonLd,
-  getPublicSiteUrl,
-  LANDING_FAQ,
-} from "@/lib/site-url";
+import { buildLandingJsonLd, getPublicSiteUrl } from "@/lib/site-url";
+import { PUBLIC_SITE_ORIGIN } from "@shared/constants/public-site";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { LandingTrustStrip } from "@/components/landing/LandingTrustStrip";
-import { PLAN_COMPARISON_ROWS } from "@/components/landing/landing-content";
 import { useAuth } from "@/hooks/use-auth";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { LandingSocialProof } from "@/components/landing/LandingSocialProof";
-import { LandingHowItWorks } from "@/components/landing/LandingHowItWorks";
-import { LandingComparison } from "@/components/landing/LandingComparison";
-import { LandingStory } from "@/components/landing/LandingStory";
-import { LandingFeatures } from "@/components/landing/LandingFeatures";
-import { LandingPricing } from "@/components/landing/LandingPricing";
-import { LandingFaq } from "@/components/landing/LandingFaq";
-import { LandingFinalCta } from "@/components/landing/LandingFinalCta";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+
+const LandingBelowFold = lazy(() =>
+  import("@/components/landing/LandingBelowFold").then((m) => ({
+    default: m.LandingBelowFold,
+  })),
+);
 
 const SITE_URL =
   getPublicSiteUrl() ||
   getAuthCallbackUrl().replace(/\/auth\/callback$/, "") ||
   (typeof window !== "undefined" ? window.location.origin : "");
 
-const FALLBACK_SITE_URL = "https://bluprntai.com";
+const FALLBACK_SITE_URL = PUBLIC_SITE_ORIGIN;
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -112,7 +105,13 @@ export default function Landing() {
           name="robots"
           content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
         />
-        <link rel="canonical" href={metaBase} />
+        <link rel="canonical" href={`${metaBase.replace(/\/$/, "")}/`} />
+        <link
+          rel="preload"
+          as="image"
+          href="/images/mobile-app-hero-480.webp"
+          type="image/webp"
+        />
         <link rel="alternate" hrefLang="en-US" href={metaBase} />
         <link rel="alternate" hrefLang="x-default" href={metaBase} />
         <meta property="og:type" content="website" />
@@ -167,19 +166,12 @@ export default function Landing() {
             }}
           />
 
-          <LandingTrustStrip />
-          <LandingSocialProof />
-          <LandingHowItWorks />
-          <LandingComparison />
-          <LandingStory />
-          <LandingFeatures />
-          <LandingPricing
-            isArchitect={isArchitect}
-            onPlanSelect={handlePlanSelect}
-            planComparisonRows={PLAN_COMPARISON_ROWS}
-          />
-          <LandingFaq faqData={LANDING_FAQ} />
-          <LandingFinalCta />
+          <Suspense fallback={null}>
+            <LandingBelowFold
+              isArchitect={isArchitect}
+              onPlanSelect={handlePlanSelect}
+            />
+          </Suspense>
         </main>
 
         <LandingFooter />

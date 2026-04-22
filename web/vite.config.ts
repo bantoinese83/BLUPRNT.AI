@@ -57,8 +57,12 @@ export default defineConfig(({ mode }) => {
             "vendor-react": ["react", "react-dom", "react-router-dom"],
             "vendor-motion": ["motion", "motion/react"],
             "vendor-lucide": ["lucide-react"],
-            "vendor-pdf": ["jspdf", "html2canvas"],
+            // Do not force jsPDF into a shared manual chunk: Vite's `__vitePreload` helper
+            // can end up in that chunk and the entry bundle then imports the whole PDF stack
+            // on every route (including `/`). jsPDF is loaded only via dynamic import in
+            // `pdf-export.ts` when generating a seller packet.
             "vendor-supabase": ["@supabase/supabase-js"],
+            "vendor-rough": ["rough-notation"],
           },
         },
       },

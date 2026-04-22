@@ -5,7 +5,7 @@
 
 import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
@@ -15,8 +15,6 @@ import { AuthListener } from "@/components/AuthListener";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Toaster } from "sonner";
-import { CommandPalette } from "@/components/CommandPalette";
-import { HelpWidget } from "@/components/HelpWidget";
 import { WebOfflineBanner } from "@/components/WebOfflineBanner";
 import { ConsentAwareAnalytics } from "@/components/ConsentAwareAnalytics";
 import { ForceUpdateGate } from "@/components/ForceUpdateGate";
@@ -25,6 +23,28 @@ import {
   WEB_APP_PATH_SUPPORT,
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
+import { isHeavyGlobalChromeDeferredPath } from "@/lib/marketing-surfaces";
+
+const CommandPalette = lazy(() =>
+  import("@/components/CommandPalette").then((m) => ({
+    default: m.CommandPalette,
+  })),
+);
+const HelpWidget = lazy(() =>
+  import("@/components/HelpWidget").then((m) => ({ default: m.HelpWidget })),
+);
+
+/** Command palette + help widget: omit on marketing surfaces for a smaller landing JS payload. */
+function DeferredGlobalChrome() {
+  const { pathname } = useLocation();
+  if (isHeavyGlobalChromeDeferredPath(pathname)) return null;
+  return (
+    <Suspense fallback={null}>
+      <CommandPalette />
+      <HelpWidget />
+    </Suspense>
+  );
+}
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -164,9 +184,8 @@ export default function App() {
                   </Suspense>
                 </div>
                 <Toaster position="top-right" expand={false} richColors />
-                <CommandPalette />
                 <CookieConsent />
-                <HelpWidget />
+                <DeferredGlobalChrome />
                 <ConsentAwareAnalytics />
               </BrowserRouter>
             </ForceUpdateGate>

@@ -12,6 +12,7 @@ The platform is currently in **Production Hardening** phase. For the latest depl
 
 - [**Production Launch Handbook**](docs/production_launch_handbook.md) — Infrastructure, API, and Submission details.
 - [**Developer Handover**](docs/developer_handover.md) — Immediate next tasks and project status.
+- [**Web Lighthouse (local)**](docs/web-lighthouse.md) — Run Lighthouse on the Vite production build; report paths and performance notes.
 
 ## Architecture
 
@@ -170,6 +171,8 @@ npm run dev:mobile   # Expo (from root)
 ```bash
 npm run check        # lint (incl. design-token parity) → knip → tests w/ coverage → production build
 ```
+
+**Web performance (Lighthouse):** after changing the landing page, marketing layout, or Vite chunking, run `npm run lighthouse:mobile` and `npm run lighthouse:desktop`. See [docs/web-lighthouse.md](docs/web-lighthouse.md) for behavior, output files, and maintainer notes (LCP, lazy below-the-fold, jsPDF chunking).
 
 ## Vercel (web)
 
@@ -383,6 +386,8 @@ All commands run from the **repository root** unless you use `npm run <script> -
 | `npm run format`                               | Prettier for web, mobile, shared sources                                                                                                                         |
 | `npm run functions:check`                      | Validate Edge Function layout (`scripts/check-edge-functions.sh`)                                                                                                |
 | `npm run postdeploy:verify`                    | Post-deploy smoke script (`scripts/post-deploy-verify.sh`)                                                                                                       |
+| `npm run lighthouse:mobile`                    | Lighthouse (mobile emulation) on local `vite preview` — see [docs/web-lighthouse.md](docs/web-lighthouse.md)                                                     |
+| `npm run lighthouse:desktop`                   | Lighthouse (desktop emulation) on local `vite preview` — same doc                                                                                                |
 | `npm run functions:deploy:photo`               | Deploy `photo-to-scope`                                                                                                                                          |
 | `npm run functions:deploy:invoices`            | Deploy `upload-invoice`, `get-invoice`                                                                                                                           |
 | `npm run functions:deploy:project-view`        | Deploy `get-project-view`                                                                                                                                        |

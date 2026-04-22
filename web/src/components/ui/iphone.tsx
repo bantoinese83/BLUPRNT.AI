@@ -20,12 +20,18 @@ const RADIUS_V = (SCREEN_RADIUS / SCREEN_HEIGHT) * 100;
 
 export interface IphoneProps extends HTMLAttributes<HTMLDivElement> {
   src?: string;
+  /** Optional WebP (or AVIF) for the screen image — improves LCP when paired with a PNG fallback. */
+  screenSrcSetWebp?: string;
   videoSrc?: string;
+  /** When set, hints the browser to fetch the screen image early (LCP on marketing). */
+  screenImagePriority?: "high" | "low" | "auto";
 }
 
 export function Iphone({
   src,
+  screenSrcSetWebp,
   videoSrc,
+  screenImagePriority,
   className,
   style,
   ...props
@@ -76,11 +82,30 @@ export function Iphone({
             borderRadius: `${RADIUS_H}% / ${RADIUS_V}%`,
           }}
         >
-          <img
-            src={src}
-            alt=""
-            className="block size-full object-cover object-top"
-          />
+          {screenSrcSetWebp ? (
+            <picture className="block size-full">
+              <source srcSet={screenSrcSetWebp} type="image/webp" />
+              <img
+                src={src}
+                alt=""
+                width={Math.round(SCREEN_WIDTH)}
+                height={Math.round(SCREEN_HEIGHT)}
+                decoding="async"
+                fetchPriority={screenImagePriority}
+                className="block size-full object-cover object-top"
+              />
+            </picture>
+          ) : (
+            <img
+              src={src}
+              alt=""
+              width={Math.round(SCREEN_WIDTH)}
+              height={Math.round(SCREEN_HEIGHT)}
+              decoding="async"
+              fetchPriority={screenImagePriority}
+              className="block size-full object-cover object-top"
+            />
+          )}
         </div>
       )}
 

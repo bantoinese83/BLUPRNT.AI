@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { Button } from "@/components/ui/button";
@@ -28,12 +27,7 @@ export function HeroSection({
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-10">
         <div className="space-y-5">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-3"
-          >
+          <div className="space-y-3">
             <span className="text-[11px] font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-[0.18em] inline-block">
               {LANDING_HERO_COPY.badge}
             </span>
@@ -43,14 +37,9 @@ export function HeroSection({
             >
               {LANDING_HERO_COPY.titlePrefix}
             </h1>
-          </motion.div>
+          </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="max-w-2xl text-base text-slate-800 leading-[1.55] font-medium sm:text-lg"
-          >
+          <p className="max-w-2xl text-base text-slate-800 leading-[1.55] font-medium sm:text-lg">
             <span className="inline leading-[1.55]">
               <Highlighter
                 action="underline"
@@ -82,14 +71,9 @@ export function HeroSection({
                 {LANDING_HERO_COPY.bodyTail}
               </span>
             </span>
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-wrap items-center gap-4 pt-1"
-          >
+          <div className="flex flex-wrap items-center gap-4 pt-1">
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <div className="flex flex-wrap gap-3">
                 <Button
@@ -128,21 +112,20 @@ export function HeroSection({
               className="inline-block hover:scale-[1.03] active:scale-[0.97] transition-all"
               aria-label="Download BLUPRNT on the App Store"
             >
+              <span className="sr-only">Download BLUPRNT on the App Store</span>
               <img
                 src="/app-store-badge.svg"
-                alt="Download BLUPRNT on the App Store"
+                alt=""
+                width={120}
+                height={40}
+                decoding="async"
                 className="h-10 w-auto sm:h-[42px]"
               />
             </a>
-          </motion.div>
+          </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.45, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto flex w-full max-w-[min(100%,280px)] flex-col items-center sm:max-w-[300px] lg:mx-0 lg:ml-auto lg:max-w-[320px] lg:items-end"
-        >
+        <div className="relative mx-auto flex w-full max-w-[min(100%,280px)] flex-col items-center sm:max-w-[300px] lg:mx-0 lg:ml-auto lg:max-w-[320px] lg:items-end">
           <div
             className="pointer-events-none absolute left-1/2 top-[42%] h-[min(420px,52vh)] w-[140%] max-w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-[40%] bg-[radial-gradient(ellipse_at_center,rgba(13,148,136,0.35),transparent_68%)] blur-3xl"
             aria-hidden
@@ -159,6 +142,8 @@ export function HeroSection({
           <div className="animate-float relative z-[1] w-full">
             <Iphone
               src="/images/mobile-app-hero.png"
+              screenSrcSetWebp="/images/mobile-app-hero-480.webp"
+              screenImagePriority="high"
               className="rotate-[0.5deg]"
             />
             <div
@@ -166,7 +151,7 @@ export function HeroSection({
               aria-hidden
             />
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

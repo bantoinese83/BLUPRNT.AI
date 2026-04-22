@@ -6,6 +6,9 @@ web/coverage/
 coverage/
 playwright-report/
 test-results/
+# Local Lighthouse runs (`npm run lighthouse:*`)
+web/lighthouse-report.report.html
+web/lighthouse-report.report.json
 .playwright-mcp/
 mobile/maestro/screenshots/
 mobile/maestro/common/launch-app.active.yaml

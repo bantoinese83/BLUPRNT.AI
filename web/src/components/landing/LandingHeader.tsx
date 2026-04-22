@@ -52,7 +52,7 @@ export function LandingHeader() {
           aria-label="Main navigation"
         >
           <motion.div
-            initial={{ opacity: 0, x: -12 }}
+            initial={false}
             animate={{ opacity: 1, x: 0 }}
             className="min-w-0 shrink"
           >
@@ -79,7 +79,7 @@ export function LandingHeader() {
 
           {/* Desktop in-page links */}
           <motion.div
-            initial={{ opacity: 0, y: -6 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             className="absolute left-1/2 hidden -translate-x-1/2 lg:flex lg:items-center lg:gap-0.5"
           >
@@ -95,7 +95,7 @@ export function LandingHeader() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 12 }}
+            initial={false}
             animate={{ opacity: 1, x: 0 }}
             className="flex shrink-0 items-center gap-1.5 sm:gap-2"
           >
@@ -129,7 +129,7 @@ export function LandingHeader() {
                 variant="primary"
                 className="rounded-xl px-3.5 text-xs font-bold shadow-md shadow-teal-500/15"
               >
-                Start
+                Get started
               </Button>
             </Link>
 

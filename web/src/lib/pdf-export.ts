@@ -3,7 +3,7 @@
  * Generates a printable record of home improvements for buyers and agents.
  */
 
-import { jsPDF } from "jspdf";
+import type { jsPDF } from "jspdf";
 
 type JsPdfInstance = InstanceType<typeof jsPDF>;
 import { formatShortUsDate } from "@/lib/formatters";

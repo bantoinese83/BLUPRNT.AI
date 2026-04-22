@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MessageCircle, X, ArrowRight, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { isHelpWidgetHiddenPath } from "@/lib/marketing-surfaces";
 
 export function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,18 +13,8 @@ export function HelpWidget() {
     sessionStorage.getItem("bluprnt_help_auto") === "true",
   );
 
-  // Hide the widget on Landing, Login, Register, Onboarding flows where it might distract
-  // Show it primarily in the Dashboard and Settings.
-  const hiddenPaths = [
-    "/",
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/auth/reset-password",
-  ];
-  const isHidden =
-    hiddenPaths.includes(location.pathname) ||
-    location.pathname.startsWith("/onboarding");
+  // Hide the widget on marketing / auth / onboarding flows where it might distract.
+  const isHidden = isHelpWidgetHiddenPath(location.pathname);
 
   // Auto-open after 60s on first dashboard visit (once per session)
   useEffect(() => {
