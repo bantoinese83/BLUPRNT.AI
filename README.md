@@ -403,7 +403,7 @@ All commands run from the **repository root** unless you use `npm run <script> -
 ### End-to-end tests
 
 - **Web**: `npm run test:e2e` starts a production preview and runs Playwright under [`e2e/`](e2e/). The web server injects minimal `VITE_*` defaults when unset so builds work in CI without a root `.env`.
-- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/app-smoke.yaml`](mobile/maestro/app-smoke.yaml) by default. Pass another flow or `mobile/maestro/` for a full suite (full folder needs `MAESTRO_CLEAR_STATE=true` locally or runs on **CI** with a Release build).
+- **Mobile**: `npm run test:e2e:mobile` runs [`mobile/maestro/app-smoke.yaml`](mobile/maestro/app-smoke.yaml) by default. Other flows: [`mobile/maestro/tabs-core-journey.yaml`](mobile/maestro/tabs-core-journey.yaml) (tabs, project detail, profile legal links, FAB), [`mobile/maestro/dashboard-management.yaml`](mobile/maestro/dashboard-management.yaml), etc. Pass a path or `mobile/maestro/` for a full suite (full folder needs `MAESTRO_CLEAR_STATE=true` locally or runs on **CI** with a Release build).
   - **Requirement**: You must have a **Native Development Build** installed on the simulator (run `npm run ios` at least once).
   - **Setup**: Requires the [Maestro CLI](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli).
   - **Note**: This is **not** part of the default Ubuntu CI job; add a separate **macOS** workflow with Xcode if you want Maestro in CI.

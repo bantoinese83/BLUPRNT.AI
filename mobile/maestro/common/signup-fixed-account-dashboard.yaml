@@ -1,0 +1,30 @@
+# Used by dashboard-management: fixed test user + project name (rename/delete flow expects these).
+appId: ai.bluprnt.mobile
+---
+- runFlow:
+    file: common/onboarding-skip.yaml
+- tapOn: "Get Started"
+- tapOn: "Kitchen"
+- tapOn: { id: "onboarding-continue" }
+- tapOn: "ZIP code"
+- inputText: "90210"
+- tapOn: "Where is this home?"
+- tapOn: { id: "onboarding-continue" }
+- tapOn: { text: "Just planning.*" }
+- tapOn: { id: "onboarding-continue" }
+- tapOn: "Or describe the project here…"
+- inputText: "Maestro Test Project"
+- tapOn: "Vision-Match your room"
+- tapOn: { id: "onboarding-continue" }
+- extendedWaitUntil:
+    visible: "Everything we see"
+    timeout: 90000
+- tapOn: { id: "onboarding-continue" }
+- inputText: "maestro.test.final@bluprnt.ai"
+- tapOn: "Password"
+- inputText: "MaestroPassword123!"
+- tapOn: "Create account"
+- extendedWaitUntil:
+    visible: "Dashboard"
+    timeout: 30000
+- assertVisible: "Maestro Test Project"

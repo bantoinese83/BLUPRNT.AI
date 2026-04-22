@@ -1,0 +1,94 @@
+# Deep tab + legal surfaces (logged-in). CI: Release + clearState. Local: Metro + dev client (npm script).
+appId: ai.bluprnt.mobile
+---
+- runFlow:
+    file: common/launch-app.active.yaml
+- runFlow:
+    file: common/signup-unique-account-dashboard.yaml
+
+# Bottom tabs (accessibility labels from NotchedTabBar)
+- tapOn: "Finance"
+- extendedWaitUntil:
+    visible: "Property Ledger"
+    timeout: 25000
+- assertVisible: "Property record"
+
+- tapOn: "Assistant"
+- extendedWaitUntil:
+    visible: "Project Assistant"
+    timeout: 15000
+
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "E2E Tab Journey Project"
+    timeout: 15000
+
+# Project detail from dashboard / switcher (testID from ProjectSwitcher)
+- tapOn: { id: "project-card-E2E Tab Journey Project" }
+- extendedWaitUntil:
+    visible: "Share Project"
+    timeout: 20000
+- back
+
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Account Settings"
+    timeout: 15000
+
+- scrollUntilVisible:
+    element:
+      id: "profile-row-privacy-policy"
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 30
+- tapOn: { id: "profile-row-privacy-policy" }
+- extendedWaitUntil:
+    visible: "Privacy Policy"
+    timeout: 15000
+- assertVisible: "Summary — see website for full policy"
+- tapOn: "Back"
+
+- extendedWaitUntil:
+    visible: "Account Settings"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "profile-row-terms-of-service"
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 30
+- tapOn: { id: "profile-row-terms-of-service" }
+- extendedWaitUntil:
+    visible: "Terms of Service"
+    timeout: 15000
+- tapOn: "Back"
+
+- extendedWaitUntil:
+    visible: "Account Settings"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "profile-row-help-support"
+    direction: DOWN
+    timeout: 20000
+    visibilityPercentage: 30
+- tapOn: { id: "profile-row-help-support" }
+- extendedWaitUntil:
+    visible: "Help & Support"
+    timeout: 15000
+- assertVisible: "How does the AI estimate work?"
+- tapOn: "Back"
+
+- extendedWaitUntil:
+    visible: "Account Settings"
+    timeout: 15000
+
+# Center FAB → new project redirect (brief) then dismiss via Home
+- tapOn: "Add project"
+- extendedWaitUntil:
+    visible: "New project"
+    timeout: 15000
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "E2E Tab Journey Project"
+    timeout: 20000

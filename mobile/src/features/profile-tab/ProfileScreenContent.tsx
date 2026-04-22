@@ -217,6 +217,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
           <GlassCard style={styles.sectionCard}>
             <Text style={styles.sectionHeader}>Security & Data</Text>
             <ProfileSettingItem
+              testID="profile-row-help-support"
               icon={<HelpCircle size={20} color={Theme.colors.text.muted} />}
               title="Help & Support"
               subtitle="FAQs and contact"
@@ -314,11 +315,13 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
               onPress={onExportData}
             />
             <ProfileSettingItem
+              testID="profile-row-privacy-policy"
               icon={<Shield size={20} color={Theme.colors.text.secondary} />}
               title="Privacy Policy"
               onPress={() => router.push(WEB_APP_PATH_PRIVACY)}
             />
             <ProfileSettingItem
+              testID="profile-row-terms-of-service"
               icon={<FileText size={20} color={Theme.colors.text.secondary} />}
               title="Terms of Service"
               onPress={() => router.push(WEB_APP_PATH_TERMS)}

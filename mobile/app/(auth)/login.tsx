@@ -104,7 +104,7 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
             bounces={false}
           >
-            <View style={styles.container}>
+            <View style={styles.container} testID="auth-login-screen">
               <TouchableOpacity
                 onPress={() => {
                   Haptics.selectionAsync();

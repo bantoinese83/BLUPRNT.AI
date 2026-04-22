@@ -141,6 +141,7 @@ export default function LandingScreen() {
           />
           <View style={{ height: 12 }} />
           <TouchableOpacity
+            testID="landing-sign-in-link"
             style={styles.signInLink}
             onPress={() => {
               Haptics.selectionAsync();

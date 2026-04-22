@@ -10,6 +10,7 @@ type ProfileSettingItemProps = {
   title: string;
   subtitle?: string;
   onPress: () => void;
+  testID?: string;
 };
 
 export function ProfileSettingItem({
@@ -17,9 +18,11 @@ export function ProfileSettingItem({
   title,
   subtitle,
   onPress,
+  testID,
 }: ProfileSettingItemProps) {
   return (
     <TouchableOpacity
+      testID={testID}
       style={styles.settingItem}
       onPress={() => {
         Haptics.selectionAsync();
