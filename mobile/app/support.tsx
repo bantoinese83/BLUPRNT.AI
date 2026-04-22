@@ -20,6 +20,10 @@ import {
 
 const FAQS = [
   {
+    q: "Why don’t I see prices or plans in the app?",
+    a: "After App Store or subscription setup, it can take a few hours for plans to appear. Check your network, try Restore purchases, or use Email support. If you’re setting up a new app, confirm Paid Apps and subscriptions are active in App Store Connect.",
+  },
+  {
     q: "How does the AI estimate work?",
     a: "BLUPRNT uses your photos and project details to suggest scope lines and regional cost ranges. Treat numbers as a planning guide—always compare with local quotes.",
   },

@@ -6,6 +6,9 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  Linking,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { X, Bot, ShieldCheck, FileDown, Check } from "lucide-react-native";
@@ -13,7 +16,16 @@ import { Theme } from "@/constants/Theme";
 import { PRICING } from "@shared/constants/pricing";
 import * as Haptics from "expo-haptics";
 import { usePremium } from "@/hooks/usePremium";
+import {
+  PURCHASE_FAILED_GENERIC,
+  PURCHASE_NO_PRODUCTS,
+  PURCHASE_OFFERINGS_LOAD_ERROR,
+  PURCHASE_PACKAGE_MISSING,
+  PURCHASE_RESTORE_FAILED,
+  PURCHASE_RESTORE_NONE,
+} from "@/lib/purchase-messages";
 import { MotiView } from "moti";
+import { PUBLIC_SUPPORT_PAGE_URL } from "@shared/constants/public-site";
 import {
   ArchitectPlanIcon,
   ProjectPassIcon,
@@ -36,16 +48,47 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
     "monthly",
   );
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const { purchase, packages, loading } = usePremium();
+  const [isRestoring, setIsRestoring] = useState(false);
+  const {
+    purchase,
+    packages,
+    loading,
+    offeringsError,
+    noProductsConfigured,
+    retryOfferings,
+    restore,
+  } = usePremium();
+
+  const canPurchase =
+    !loading && !offeringsError && !noProductsConfigured && packages.length > 0;
 
   const handlePurchaseCompleted = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onClose();
   };
 
-  const handleRestoreCompleted = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onClose();
+  const handleRestore = async () => {
+    if (isRestoring) return;
+    setIsRestoring(true);
+    try {
+      const result = await restore();
+      if (result === "ok") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onClose();
+        return;
+      }
+      if (result === "not_found") {
+        Alert.alert("No purchase found", PURCHASE_RESTORE_NONE, [
+          { text: "OK" },
+        ]);
+        return;
+      }
+      Alert.alert("Couldn’t restore", PURCHASE_RESTORE_FAILED, [
+        { text: "OK" },
+      ]);
+    } finally {
+      setIsRestoring(false);
+    }
   };
 
   const features = [
@@ -116,6 +159,50 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               </Text>
             ) : null}
           </MotiView>
+
+          {loading ? (
+            <View
+              style={[styles.noticeCard, styles.noticeRow]}
+              accessibilityLabel="Loading subscription plans"
+            >
+              <ActivityIndicator color={Theme.colors.brand.primary} />
+              <Text style={styles.noticeBody}>Loading plans…</Text>
+            </View>
+          ) : null}
+
+          {offeringsError ? (
+            <View style={[styles.noticeCard, styles.noticeCardError]}>
+              <Text style={styles.noticeTitle}>We couldn’t load plans</Text>
+              <Text style={styles.noticeBody}>
+                {PURCHASE_OFFERINGS_LOAD_ERROR}
+              </Text>
+              <TouchableOpacity
+                onPress={() => void retryOfferings()}
+                style={styles.noticeButton}
+                accessibilityRole="button"
+                accessibilityLabel="Try loading plans again"
+              >
+                <Text style={styles.noticeButtonText}>Try again</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {noProductsConfigured && !loading && !offeringsError ? (
+            <View style={[styles.noticeCard, styles.noticeCardWarning]}>
+              <Text style={styles.noticeTitle}>Plans not available yet</Text>
+              <Text style={styles.noticeBody}>{PURCHASE_NO_PRODUCTS}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  void Linking.openURL(PUBLIC_SUPPORT_PAGE_URL);
+                }}
+                style={styles.noticeButton}
+                accessibilityRole="link"
+                accessibilityLabel="Open help and support in browser"
+              >
+                <Text style={styles.noticeButtonText}>Open help center</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
 
           {/* Features */}
           <View style={styles.featuresList}>
@@ -215,9 +302,9 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
             <TouchableOpacity
               style={[
                 styles.continueButton,
-                isPurchasing && styles.continueButtonDisabled,
+                (isPurchasing || !canPurchase) && styles.continueButtonDisabled,
               ]}
-              disabled={isPurchasing || loading}
+              disabled={isPurchasing || !canPurchase}
               onPress={async () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setIsPurchasing(true);
@@ -233,28 +320,34 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
                     const success = await purchase(pkg);
                     if (success) handlePurchaseCompleted();
                   } else {
-                    console.error(
-                      "Could not find matching package in RevenueCat offerings for:",
-                      targetIdentifier,
-                    );
+                    Alert.alert("Plan unavailable", PURCHASE_PACKAGE_MISSING, [
+                      { text: "OK" },
+                    ]);
                   }
-                } catch (e) {
-                  console.error(e);
+                } catch {
+                  Alert.alert(
+                    "Purchase didn’t go through",
+                    PURCHASE_FAILED_GENERIC,
+                    [{ text: "OK" }],
+                  );
                 } finally {
                   setIsPurchasing(false);
                 }
               }}
             >
               <Text style={styles.continueButtonText}>
-                {isPurchasing ? "Securing Plan..." : "Continue"}
+                {isPurchasing ? "Securing plan…" : "Continue"}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.restoreButton}
-              onPress={handleRestoreCompleted}
+              onPress={() => void handleRestore()}
+              disabled={isRestoring}
             >
-              <Text style={styles.restoreText}>Restore Purchases</Text>
+              <Text style={styles.restoreText}>
+                {isRestoring ? "Restoring…" : "Restore purchases"}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -475,5 +568,47 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(15, 23, 42, 0.05)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  noticeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  noticeCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    backgroundColor: Theme.colors.card,
+    gap: 8,
+  },
+  noticeCardError: {
+    borderColor: "rgba(220, 38, 38, 0.25)",
+    backgroundColor: "rgba(254, 242, 242, 0.6)",
+  },
+  noticeCardWarning: {
+    borderColor: "rgba(217, 119, 6, 0.3)",
+    backgroundColor: "rgba(255, 251, 235, 0.8)",
+  },
+  noticeTitle: {
+    fontSize: 15,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+  },
+  noticeBody: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 20,
+  },
+  noticeButton: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+  },
+  noticeButtonText: {
+    fontSize: 15,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
   },
 });
