@@ -77,7 +77,7 @@ export function LegalPageShell({
           <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md ring-1 ring-slate-200/60 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-2">
               <img
-                src="/bluprnt_logo.svg"
+                src="/bluprnt_logo.png"
                 alt=""
                 className="h-full w-full object-contain"
               />

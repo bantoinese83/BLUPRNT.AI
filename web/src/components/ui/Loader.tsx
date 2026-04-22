@@ -155,7 +155,7 @@ function SnurraSpinner({
             )}
           >
             <img
-              src="/bluprnt_logo.svg"
+              src="/bluprnt_logo.png"
               alt="BLUPRNT"
               className="h-full w-full object-contain"
             />

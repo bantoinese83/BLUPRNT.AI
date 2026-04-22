@@ -75,6 +75,6 @@ describe("buildLandingJsonLd", () => {
       (item) => item["@type"] === "Organization",
     );
     expect(organization?.url).toBe(siteUrl);
-    expect(organization?.logo!.url).toBe(`${siteUrl}/bluprnt_logo.svg`);
+    expect(organization?.logo!.url).toBe(`${siteUrl}/bluprnt_logo.png`);
   });
 });

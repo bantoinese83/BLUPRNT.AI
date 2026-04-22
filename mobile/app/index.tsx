@@ -6,7 +6,6 @@ import {
   Platform,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { MotiView, AnimatePresence } from "moti";
@@ -20,6 +19,7 @@ import {
 } from "lucide-react-native";
 import { Button } from "@/components/ui/Button";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { LaunchLoadingLayout } from "@/components/LaunchLoadingLayout";
 import { Logo } from "@/components/ui/Logo";
 import { Theme } from "@/constants/Theme";
 import * as Haptics from "expo-haptics";
@@ -86,13 +86,10 @@ export default function LandingScreen() {
         withTabBar={false}
         edges={["top", "bottom", "left", "right"]}
       >
-        <View style={styles.bootWrap} accessibilityLabel="Loading">
-          <Logo size={60} />
-          <ActivityIndicator
-            color={Theme.colors.brand.primary}
-            style={styles.bootSpinner}
-          />
-        </View>
+        <LaunchLoadingLayout
+          variant="embedded"
+          status="Checking your session…"
+        />
       </ScreenWrapper>
     );
   }
@@ -104,13 +101,10 @@ export default function LandingScreen() {
         withTabBar={false}
         edges={["top", "bottom", "left", "right"]}
       >
-        <View style={styles.bootWrap} accessibilityLabel="Opening your home">
-          <Logo size={60} />
-          <ActivityIndicator
-            color={Theme.colors.brand.primary}
-            style={styles.bootSpinner}
-          />
-        </View>
+        <LaunchLoadingLayout
+          variant="embedded"
+          status="Opening your workspace…"
+        />
       </ScreenWrapper>
     );
   }
@@ -231,15 +225,6 @@ export default function LandingScreen() {
 }
 
 const styles = StyleSheet.create({
-  bootWrap: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: Theme.spacing.margin,
-  },
-  bootSpinner: {
-    marginTop: 24,
-  },
   container: {
     flex: 1,
     paddingHorizontal: Theme.spacing.margin,

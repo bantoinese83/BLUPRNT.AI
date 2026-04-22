@@ -118,7 +118,7 @@ export default function ResetPassword() {
             <div className="text-center space-y-4">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white p-2 shadow-xl shadow-slate-100/50 ring-4 ring-white border border-slate-100 overflow-hidden">
                 <img
-                  src="/bluprnt_logo.svg"
+                  src="/bluprnt_logo.png"
                   alt="BLUPRNT logo"
                   className="h-full w-full object-contain"
                 />

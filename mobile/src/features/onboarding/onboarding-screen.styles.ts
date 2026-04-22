@@ -232,8 +232,9 @@ export const onboardingStyles = StyleSheet.create({
     fontFamily: Theme.typography.family.medium,
   },
   textInput: {
-    height: 64,
+    height: 72,
     paddingHorizontal: 20,
+    paddingVertical: 8,
     fontSize: 28,
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,
@@ -242,7 +243,7 @@ export const onboardingStyles = StyleSheet.create({
   zipInputRow: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 64,
+    minHeight: 72,
     backgroundColor: "#ffffff",
     borderRadius: 20,
     borderWidth: 1,
@@ -251,9 +252,10 @@ export const onboardingStyles = StyleSheet.create({
   },
   zipTextInput: {
     flex: 1,
-    minHeight: 64,
+    minHeight: 72,
     paddingLeft: 20,
     paddingRight: 8,
+    paddingVertical: 8,
     fontSize: 28,
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.primary,

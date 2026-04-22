@@ -30,7 +30,7 @@ export function AppSimpleHeader({
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200 sm:h-10 sm:w-10 sm:rounded-2xl sm:p-2">
             <img
-              src="/bluprnt_logo.svg"
+              src="/bluprnt_logo.png"
               alt=""
               className="h-full w-full object-contain"
             />

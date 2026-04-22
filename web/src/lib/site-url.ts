@@ -79,7 +79,7 @@ export function buildLandingJsonLd(siteUrl: string) {
           "Homeowner-first renovation app: local estimates, planned vs. documented spend, and seller-ready exports.",
         logo: {
           "@type": "ImageObject",
-          url: `${siteUrl}/bluprnt_logo.svg`,
+          url: `${siteUrl}/bluprnt_logo.png`,
         },
         image: `${siteUrl}/og-image.png`,
       },

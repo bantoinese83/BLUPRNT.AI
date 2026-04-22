@@ -138,7 +138,11 @@ function RootLayout() {
   }, []);
 
   if (!loaded && !error) {
-    return <BrandedSplash />;
+    return (
+      <SafeAreaProvider>
+        <BrandedSplash />
+      </SafeAreaProvider>
+    );
   }
 
   return (

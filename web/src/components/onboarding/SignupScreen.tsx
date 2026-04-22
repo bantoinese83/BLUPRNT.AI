@@ -83,7 +83,7 @@ export function SignupScreen() {
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-white p-2 shadow-xl shadow-slate-100/50 ring-8 ring-white border border-slate-100 overflow-hidden sm:h-28 sm:w-28 sm:rounded-3xl sm:p-2.5">
             <img
-              src="/bluprnt_logo.svg"
+              src="/bluprnt_logo.png"
               alt="BLUPRNT logo"
               className="h-full w-full object-contain"
             />
