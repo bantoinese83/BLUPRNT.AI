@@ -10,12 +10,9 @@ import { NotchedTabBar } from "@/components/NotchedTabBar";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 
 /**
- * Bottom clearance for scroll content (notched bar + FAB overlap).
- * Dock is flush to screen edges; `TAB_BAR_HEIGHT` includes former floating margin
- * so scroll padding still clears the center FAB.
+ * Bottom clearance for scroll content lives in `@/constants/Layout` (`TAB_BAR_SCROLL_PADDING`).
+ * Dock is flush to screen edges; tab bar height includes clearance for the center FAB.
  */
-export const TAB_BAR_HEIGHT = 90;
-export const TAB_BAR_MARGIN = 0;
 
 function TabShell() {
   return (
@@ -40,9 +37,9 @@ function TabShell() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
-      <Tabs.Screen name="finance" options={{ title: "Finance" }} />
-      <Tabs.Screen name="new" options={{ title: "Add" }} />
-      <Tabs.Screen name="ai" options={{ title: "Assistant" }} />
+      <Tabs.Screen name="finance" options={{ title: "Ledger" }} />
+      <Tabs.Screen name="new" options={{ title: "New" }} />
+      <Tabs.Screen name="ai" options={{ title: "Ask" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
       <Tabs.Screen name="projects" options={{ href: null }} />
     </Tabs>

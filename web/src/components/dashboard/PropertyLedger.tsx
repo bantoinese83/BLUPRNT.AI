@@ -137,8 +137,8 @@ export function PropertyLedger({
         <CardContent className="px-6 sm:px-8 pb-8 space-y-8 relative">
           <p className="text-base text-slate-500 leading-relaxed font-medium max-w-sm">
             Your estimate, plan vs documented spend, and recorded costs—in one
-            PDF. Optionally append image receipts below (larger file; may
-            include personal details). Export the{" "}
+            PDF. Optionally include receipt photos from linked uploads below
+            (larger file; may include personal details). Export the{" "}
             <span className="text-slate-900 font-bold underline decoration-slate-300">
               Seller Packet
             </span>{" "}
@@ -155,11 +155,21 @@ export function PropertyLedger({
             />
             <span className="text-sm text-slate-600 leading-snug">
               <span className="font-semibold text-slate-900 block mb-0.5">
-                Append image originals
+                Include uploads in PDF
               </span>
-              Embeds photo receipts in the PDF (not PDF uploads). Larger
-              download; only turn on if you are comfortable sharing those
-              images.
+              {invoices.every((i) => !i.document_id) ? (
+                <>
+                  Available after you attach a photo or file to at least one
+                  invoice. Nothing is linked yet, so this stays off.
+                </>
+              ) : (
+                <>
+                  Adds receipt photos at the end of your seller packet. If an
+                  invoice is a PDF, we add a short note instead of the full
+                  file. Larger download — only turn on if you are comfortable
+                  sharing those images.
+                </>
+              )}
             </span>
           </label>
 

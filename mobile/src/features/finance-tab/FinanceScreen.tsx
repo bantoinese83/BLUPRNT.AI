@@ -35,6 +35,7 @@ import { reportClientError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import { FinanceLedgerHeader } from "@/features/finance-tab/FinanceLedgerHeader";
 import { FinanceInvoiceRow } from "@/features/finance-tab/FinanceInvoiceRow";
+import { Theme } from "@/constants/Theme";
 
 export default function FinanceScreen() {
   const {
@@ -261,7 +262,7 @@ export default function FinanceScreen() {
         maxToRenderPerBatch={10}
         windowSize={5}
         contentContainerStyle={{ paddingBottom: FINANCE_TAB_BAR_OFFSET + 20 }}
-        stickySectionHeadersEnabled={false}
+        stickySectionHeadersEnabled
         ListEmptyComponent={
           <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
             {invoices.length === 0 ? (
@@ -284,7 +285,17 @@ export default function FinanceScreen() {
           </View>
         }
         renderSectionHeader={({ section: { title } }) => (
-          <View style={[styles.monthGroup, { paddingHorizontal: 24 }]}>
+          <View
+            style={[
+              styles.monthGroup,
+              {
+                paddingHorizontal: 24,
+                paddingTop: 6,
+                paddingBottom: 4,
+                backgroundColor: Theme.colors.background,
+              },
+            ]}
+          >
             <View style={styles.monthHeader}>
               <Text style={styles.monthHeaderText}>{title}</Text>
               <View style={styles.monthHeaderLine} />

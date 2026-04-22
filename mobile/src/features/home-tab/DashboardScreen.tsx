@@ -8,6 +8,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAuth } from "@/contexts/auth-context";
 import { InsightTeaser } from "@/components/InsightTeaser";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { DashboardRecentDocumentsPanel } from "@/components/DashboardRecentDocumentsPanel";
 import { ProjectHealth } from "@/components/ProjectHealth";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ResaleValueImpact } from "@/components/ResaleValueImpact";
@@ -42,7 +43,7 @@ import {
 import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
 import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
-import { getDashboardGreeting } from "@/features/home-tab/dashboard-greeting";
+import { buildDashboardHeaderLines } from "@/features/home-tab/dashboard-greeting";
 import { presentProjectShareSheet } from "@/lib/share-project";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
@@ -82,14 +83,28 @@ export default function DashboardScreen() {
     [invoices],
   );
 
-  const greetingLine = useMemo(
+  const dashboardFirstName = useMemo(() => {
+    const raw = user?.user_metadata?.full_name;
+    if (typeof raw !== "string" || !raw.trim()) return null;
+    return raw.trim().split(/\s+/).filter(Boolean)[0] ?? null;
+  }, [user?.user_metadata?.full_name]);
+
+  const { line1: greetingLine, line2: dashboardSubline } = useMemo(
     () =>
-      getDashboardGreeting({
+      buildDashboardHeaderLines({
         invoicesLength: invoices.length,
         capitalDocumentedTotal,
         estimatedMinTotal: project?.estimated_min_total,
+        firstName: dashboardFirstName,
+        projectDisplayName: project?.name ?? null,
       }),
-    [invoices.length, capitalDocumentedTotal, project?.estimated_min_total],
+    [
+      invoices.length,
+      capitalDocumentedTotal,
+      project?.estimated_min_total,
+      dashboardFirstName,
+      project?.name,
+    ],
   );
 
   const [isUploading, setIsUploading] = useState(false);
@@ -289,24 +304,34 @@ export default function DashboardScreen() {
         />
       ) : null}
       <MotiView
-        from={{ opacity: 0, translateY: -20 }}
+        from={{ opacity: 0, translateY: -10 }}
         animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: "timing", duration: 800 }}
+        transition={{ type: "timing", duration: 420 }}
         style={styles.headerContainer}
       >
-        <TouchableOpacity
-          testID="rename-project-trigger"
-          onPress={handleRenameProject}
-          accessibilityRole="button"
-          accessibilityLabel="Rename project"
-        >
-          <Text style={styles.welcomeText}>{greetingLine},</Text>
-          <Text style={styles.userFirstName}>
-            {project?.name ||
-              user?.user_metadata?.full_name?.split(" ")[0] ||
-              "there"}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerTitleBlock}>
+          <TouchableOpacity
+            testID="rename-project-trigger"
+            onPress={handleRenameProject}
+            accessibilityRole="button"
+            accessibilityLabel="Rename project"
+          >
+            <Text
+              style={styles.welcomeText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {greetingLine}
+            </Text>
+            <Text
+              style={styles.userFirstName}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {dashboardSubline}
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.headerRight}>
           <TouchableOpacity
             onPress={() => {
@@ -349,7 +374,52 @@ export default function DashboardScreen() {
         }}
       />
 
-      <Text style={styles.sectionHeader} accessibilityRole="header">
+      <View style={{ marginTop: 4, marginBottom: 8 }}>
+        <ProjectSwitcher
+          projects={projects}
+          currentId={project.id}
+          onSelect={handleProjectSelect}
+          onAdd={() => router.push("/onboarding?newProject=1")}
+        />
+      </View>
+
+      <MotiView
+        from={{ opacity: 0, translateY: 12 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: "timing", duration: 380, delay: 40 }}
+      >
+        <Text style={styles.sectionHeader}>Your guided path</Text>
+        <NextStepsChecklist
+          stage={project.stage || "planning"}
+          onAction={(id) => {
+            if (id === "review-health") {
+              router.push(`/project/${project.id}`);
+            } else if (id === "review-scope") {
+              router.push(`/project/${project.id}?focus=scope`);
+            }
+            if (id === "upload-quote" || id === "upload-invoice") {
+              openDashboardDocumentCapture();
+            }
+            if (id === "export-packet") {
+              void handleExportSellerPacket();
+            }
+            if (id === "share-access") {
+              void (async () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                await presentProjectShareSheet({
+                  id: project.id,
+                  name: project.name,
+                });
+              })();
+            }
+          }}
+        />
+      </MotiView>
+
+      <Text
+        style={[styles.sectionHeader, { marginTop: 28 }]}
+        accessibilityRole="header"
+      >
         {DASHBOARD_SECTION_PLAN_SPENDING}
       </Text>
       <DashboardStats
@@ -370,9 +440,9 @@ export default function DashboardScreen() {
 
       <View style={{ gap: 24, marginTop: 24 }}>
         <MotiView
-          from={{ opacity: 0, translateY: 20 }}
+          from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 600, delay: 150 }}
+          transition={{ type: "timing", duration: 380, delay: 100 }}
         >
           <ProjectHealth
             estimatedMin={project.estimated_min_total}
@@ -382,9 +452,9 @@ export default function DashboardScreen() {
         </MotiView>
 
         <MotiView
-          from={{ opacity: 0, translateY: 20 }}
+          from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 600, delay: 350 }}
+          transition={{ type: "timing", duration: 380, delay: 140 }}
         >
           <ResaleValueImpact
             investment={capitalDocumentedTotal}
@@ -393,44 +463,33 @@ export default function DashboardScreen() {
         </MotiView>
 
         <MotiView
-          from={{ opacity: 0, translateY: 20 }}
+          from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 600, delay: 450 }}
+          transition={{ type: "timing", duration: 380, delay: 180 }}
         >
-          <Text style={styles.sectionHeader}>Your Guided Path</Text>
-          <NextStepsChecklist
-            stage={project.stage || "planning"}
-            onAction={(id) => {
-              if (id === "review-health") {
-                router.push(`/project/${project.id}`);
-              } else if (id === "review-scope") {
-                router.push(`/project/${project.id}?focus=scope`);
-              }
-              if (id === "upload-quote" || id === "upload-invoice") {
-                openDashboardDocumentCapture();
-              }
-              if (id === "export-packet") {
-                void handleExportSellerPacket();
-              }
-              if (id === "share-access") {
-                void (async () => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  await presentProjectShareSheet({
-                    id: project.id,
-                    name: project.name,
-                  });
-                })();
-              }
-            }}
-          />
+          <ActivityFeed events={generateActivityEvents(project, invoices)} />
         </MotiView>
 
         <MotiView
-          from={{ opacity: 0, translateY: 20 }}
+          from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 600, delay: 550 }}
+          transition={{ type: "timing", duration: 380, delay: 210 }}
         >
-          <ActivityFeed events={generateActivityEvents(project, invoices)} />
+          <DashboardRecentDocumentsPanel
+            invoices={invoices}
+            estimatedMin={project.estimated_min_total}
+            estimatedMax={project.estimated_max_total}
+            onOpenInvoice={(inv) => {
+              void Haptics.selectionAsync();
+              setReviewInvoice(inv);
+              setReviewOpen(true);
+            }}
+            onOpenLedger={() => {
+              void Haptics.selectionAsync();
+              router.push("/(tabs)/finance");
+            }}
+            onAddDocument={openDashboardDocumentCapture}
+          />
         </MotiView>
 
         {!isArchitect && !hasProjectPass && (
@@ -442,15 +501,6 @@ export default function DashboardScreen() {
             }}
           />
         )}
-
-        <ProjectSwitcher
-          projects={projects}
-          currentId={project.id}
-          onSelect={handleProjectSelect}
-          onAdd={() => router.push("/onboarding?newProject=1")}
-        />
-
-        <View style={{ height: 120 }} />
       </View>
 
       <RenameProjectModal

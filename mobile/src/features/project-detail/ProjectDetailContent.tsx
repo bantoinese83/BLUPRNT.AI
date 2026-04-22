@@ -43,6 +43,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
     handleShare,
     handleRefresh,
     exportSellerPacket,
+    updateScopeItemMaterials,
   } = vm;
 
   const hasScopeRows = Object.keys(groupedScope).length > 0;
@@ -106,6 +107,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
             groupedScope={groupedScope}
             expandedId={expandedId}
             setExpandedId={setExpandedId}
+            onPersistScopeMaterials={updateScopeItemMaterials}
           />
         ) : (
           <ProjectScopeEmptyState

@@ -20,6 +20,7 @@ vi.mock("@/lib/supabase", () => ({
 vi.mock("sonner", () => ({
   toast: {
     error: vi.fn(),
+    success: vi.fn(),
   },
 }));
 
@@ -27,6 +28,7 @@ describe("useLogout", () => {
   const mockNavigate = vi.fn();
   const mockSignOut = vi.mocked(supabase.auth.signOut);
   const mockToastError = vi.mocked(toast.error);
+  const mockToastSuccess = vi.mocked(toast.success);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -50,7 +52,7 @@ describe("useLogout", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  it("signs out from Supabase, clears localStorage and navigates to default path", async () => {
+  it("signs out from Supabase, clears localStorage and navigates to signed-out", async () => {
     mockSignOut.mockResolvedValue({ error: null });
     localStorage.setItem("bluprnt_project_id", "test-project");
 
@@ -60,7 +62,8 @@ describe("useLogout", () => {
     expect(mockSignOut).toHaveBeenCalled();
     expect(localStorage.removeItem).toHaveBeenCalledWith("bluprnt_project_id");
     expect(localStorage.getItem("bluprnt_project_id")).toBeNull();
-    expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
+    expect(mockToastSuccess).toHaveBeenCalledWith("You're signed out.");
+    expect(mockNavigate).toHaveBeenCalledWith("/signed-out", { replace: true });
   });
 
   it("navigates to custom path when provided", async () => {
@@ -69,10 +72,11 @@ describe("useLogout", () => {
     const { result } = renderHook(() => useLogout());
     await result.current.logout("/login");
 
+    expect(mockToastSuccess).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith("/login", { replace: true });
   });
 
-  it("shows toast error when Supabase sign out fails", async () => {
+  it("shows toast error when Supabase sign out fails and sends user home", async () => {
     const error = { message: "Sign out failed" } as any;
     mockSignOut.mockResolvedValue({ error });
 
@@ -82,10 +86,11 @@ describe("useLogout", () => {
     expect(mockToastError).toHaveBeenCalledWith(
       "There was a problem signing out.",
     );
-    expect(mockNavigate).toHaveBeenCalled();
+    expect(mockToastSuccess).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
   });
 
-  it("handles fatal errors and still navigates", async () => {
+  it("handles fatal errors and navigates home", async () => {
     mockSignOut.mockRejectedValue(new Error("Fatal error"));
 
     const { result } = renderHook(() => useLogout());
@@ -95,6 +100,9 @@ describe("useLogout", () => {
       "Logout fatal error:",
       expect.any(Error),
     );
-    expect(mockNavigate).toHaveBeenCalled();
+    expect(mockToastError).toHaveBeenCalledWith(
+      "There was a problem signing out.",
+    );
+    expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
   });
 });

@@ -2,14 +2,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
+import { useQueryClient } from "@tanstack/react-query";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
 import { presentProjectShareSheet } from "@/lib/share-project";
 import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { dashboardQueryKey } from "@/lib/query-client";
 import type { InvoiceRow, ProjectRow, ScopeRow } from "@shared/types/database";
 import { groupScopeByCategory, projectHasEstimateTotals } from "./helpers";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
+import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 
 export function useProjectDetailData() {
   const { id: rawId, focus: rawFocus } = useLocalSearchParams<{
@@ -27,6 +30,7 @@ export function useProjectDetailData() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [detailInvoices, setDetailInvoices] = useState<InvoiceRow[]>([]);
   const [includeAppendix, setIncludeAppendix] = useState(false);
+  const queryClient = useQueryClient();
   const { isArchitect, hasProjectPass, addItem } = useDashboardData();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -241,6 +245,46 @@ export function useProjectDetailData() {
     scope.length,
   ]);
 
+  const updateScopeItemMaterials = useCallback(
+    async (
+      scopeItemId: string,
+      materials: NonNullable<ScopeRow["metadata"]>["materials"],
+    ) => {
+      const row = scope.find((s) => s.id === scopeItemId);
+      if (!row || !id) return;
+
+      const base =
+        row.metadata && typeof row.metadata === "object"
+          ? { ...row.metadata }
+          : {};
+      const nextMetadata: ScopeRow["metadata"] = {
+        ...base,
+        materials: materials ?? [],
+      };
+
+      const { error } = await supabase
+        .from("scope_items")
+        .update({ metadata: nextMetadata })
+        .eq("id", scopeItemId);
+
+      if (error) {
+        Alert.alert(
+          "Couldn't update list",
+          friendlyPostgrestMutationError(error),
+        );
+        return;
+      }
+
+      setScope((prev) =>
+        prev.map((s) =>
+          s.id === scopeItemId ? { ...s, metadata: nextMetadata } : s,
+        ),
+      );
+      void queryClient.invalidateQueries({ queryKey: dashboardQueryKey });
+    },
+    [scope, id, queryClient],
+  );
+
   const handleRefresh = useCallback(async () => {
     if (!id) return;
     setRefreshing(true);
@@ -336,6 +380,7 @@ export function useProjectDetailData() {
     handleShare,
     handleRefresh,
     exportSellerPacket,
+    updateScopeItemMaterials,
   };
 }
 

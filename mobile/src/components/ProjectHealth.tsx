@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { Shield, TrendingUp } from "lucide-react-native";
@@ -83,7 +83,9 @@ export function ProjectHealth({
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const progress = ((100 - score) / 100) * circumference;
+  /** Portion of the ring hidden by dash offset so `score/100` of the stroke shows (clockwise from top). */
+  const ringDashOffset = circumference * (1 - score / 100);
+  const gradId = `healthRing-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   return (
     <GlassCard intensity={20} style={styles.card}>
@@ -129,7 +131,7 @@ export function ProjectHealth({
             style={styles.svg}
           >
             <Defs>
-              <LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <LinearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
                 <Stop offset="0%" stopColor={color} />
                 <Stop offset="100%" stopColor={secondary} />
               </LinearGradient>
@@ -138,28 +140,23 @@ export function ProjectHealth({
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke="rgba(0,0,0,0.03)"
+              stroke="rgba(0,0,0,0.06)"
               strokeWidth={strokeWidth}
               fill="none"
             />
-            <MotiView
-              from={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ type: "timing", duration: 1000 }}
-            >
-              <Circle
-                cx={size / 2}
-                cy={size / 2}
-                r={radius}
-                stroke="url(#grad)"
-                strokeWidth={strokeWidth}
-                strokeDasharray={circumference}
-                strokeDashoffset={progress}
-                strokeLinecap="round"
-                fill="none"
-                transform={`rotate(-90 ${size / 2} ${size / 2})`}
-              />
-            </MotiView>
+            {/* Must stay Svg primitives — wrapping with MotiView breaks the ring on device. */}
+            <Circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke={`url(#${gradId})`}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${circumference}`}
+              strokeDashoffset={ringDashOffset}
+              strokeLinecap="round"
+              fill="none"
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            />
           </Svg>
         </MotiView>
       </View>
@@ -197,6 +194,8 @@ const styles = StyleSheet.create({
   },
   leftCol: {
     flex: 1,
+    minWidth: 0,
+    paddingRight: 12,
   },
   scoreRow: {
     flexDirection: "row",
@@ -244,6 +243,7 @@ const styles = StyleSheet.create({
   },
   rightCol: {
     width: 100,
+    flexShrink: 0,
     alignItems: "flex-end",
   },
   svg: {

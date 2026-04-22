@@ -229,6 +229,16 @@ function RootLayoutNav() {
     const inTabsGroup = segs[0] === "(tabs)";
     const onOnboarding =
       segs[0] === "onboarding" || pathname.startsWith("/onboarding");
+    const onProjectRoute =
+      segs[0] === "project" || pathname.startsWith("/project/");
+    const onSupportRoute =
+      segs[0] === "support" ||
+      pathname === "/support" ||
+      pathname.startsWith("/support/");
+    const isSignedOutRoute = pathname === "/signed-out";
+    const inProtectedShell =
+      !isSignedOutRoute &&
+      (inTabsGroup || onProjectRoute || onSupportRoute || onOnboarding);
     /** Root carousel — typed `segments` omits `index`, so use pathname + string segments. */
     const isLanding =
       pathname === "/" ||
@@ -237,8 +247,8 @@ function RootLayoutNav() {
       segs.length === 0 ||
       (segs.length === 1 && segs[0] === "index");
 
-    if (!session && inTabsGroup) {
-      router.replace("/");
+    if (!session && inProtectedShell) {
+      router.replace("/signed-out");
       return;
     }
 
@@ -303,6 +313,7 @@ function RootLayoutNav() {
         <Stack.Screen name="privacy" />
         <Stack.Screen name="terms" />
         <Stack.Screen name="onboarding" />
+        <Stack.Screen name="signed-out" />
         <Stack.Screen name="+not-found" />
         <Stack.Screen
           name="modal"

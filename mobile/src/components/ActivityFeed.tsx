@@ -13,7 +13,6 @@ import { router, Href } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { formatRelativeTime, type ActivityEvent } from "@/lib/activity";
 import { Theme } from "@/constants/Theme";
-import { LinearGradient } from "expo-linear-gradient";
 
 export type { ActivityEvent };
 
@@ -28,29 +27,30 @@ const ICON_MAP: Record<ActivityEvent["type"], LucideIcon> = {
   goal_reached: CheckCircle2,
 };
 
+/** Solid fills so a timeline spine never shows through the icon tiles. */
 const COLOR_MAP: Record<
   ActivityEvent["type"],
   { text: string; bg: string; border: string }
 > = {
   upload: {
-    text: "#60a5fa",
-    bg: "rgba(96, 165, 250, 0.08)",
-    border: "rgba(96, 165, 250, 0.12)",
+    text: "#2563eb",
+    bg: "#eff6ff",
+    border: "#bfdbfe",
   },
   status_change: {
-    text: "#fbbf24",
-    bg: "rgba(251, 191, 36, 0.08)",
-    border: "rgba(251, 191, 36, 0.12)",
+    text: "#b45309",
+    bg: "#fffbeb",
+    border: "#fde68a",
   },
   project_created: {
-    text: "#34d399",
-    bg: "rgba(52, 211, 153, 0.08)",
-    border: "rgba(52, 211, 153, 0.12)",
+    text: "#047857",
+    bg: "#ecfdf5",
+    border: "#a7f3d0",
   },
   goal_reached: {
-    text: "#a78bfa",
-    bg: "rgba(167, 139, 250, 0.08)",
-    border: "rgba(167, 139, 250, 0.12)",
+    text: "#6d28d9",
+    bg: "#f5f3ff",
+    border: "#ddd6fe",
   },
 };
 
@@ -65,17 +65,13 @@ export function ActivityFeed({ events }: Props) {
       </View>
 
       <View style={styles.feedContainer}>
-        {/* Vertical Line */}
-        <View style={styles.timelineContainer}>
-          <LinearGradient
-            colors={[Theme.colors.divider, "transparent"]}
-            style={StyleSheet.absoluteFill}
-          />
-        </View>
+        {/* Spine sits in the gap between icons and copy — never through the tiles. */}
+        <View style={styles.timelineSpine} pointerEvents="none" />
 
         {events.map((event, idx) => {
           const Icon = ICON_MAP[event.type];
           const colors = COLOR_MAP[event.type];
+          const isLast = idx === events.length - 1;
 
           return (
             <MotiView
@@ -83,7 +79,7 @@ export function ActivityFeed({ events }: Props) {
               from={{ opacity: 0, translateX: -10 }}
               animate={{ opacity: 1, translateX: 0 }}
               transition={{ delay: idx * 100 }}
-              style={styles.eventRow}
+              style={[styles.eventRow, !isLast && styles.eventRowSpacing]}
             >
               <View
                 style={[
@@ -135,7 +131,7 @@ export function ActivityFeed({ events }: Props) {
 const styles = StyleSheet.create({
   container: {
     marginTop: 8,
-    marginBottom: 32,
+    marginBottom: 12,
   },
   headerRow: {
     flexDirection: "row",
@@ -160,18 +156,27 @@ const styles = StyleSheet.create({
     position: "relative",
     paddingLeft: 4,
   },
-  timelineContainer: {
+  /**
+   * Icon column: paddingLeft 4 + width 44 → right edge 48. Gap to text is 16px.
+   * Spine centered in that gap: starts ~52px, 2px wide.
+   * Trim top/bottom so the stroke does not run past the first/last icon tiles.
+   */
+  timelineSpine: {
     position: "absolute",
-    left: 21,
-    top: 4,
-    bottom: 4,
-    width: 1.5,
-    overflow: "hidden",
+    left: 51,
+    top: 26,
+    bottom: 26,
+    width: 2,
+    borderRadius: 2,
+    backgroundColor: Theme.colors.divider,
   },
   eventRow: {
     flexDirection: "row",
-    marginBottom: 24,
+    alignItems: "flex-start",
     gap: 16,
+  },
+  eventRowSpacing: {
+    marginBottom: 20,
   },
   iconContainer: {
     width: 44,
@@ -180,7 +185,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1,
+    zIndex: 2,
   },
   eventContent: {
     flex: 1,

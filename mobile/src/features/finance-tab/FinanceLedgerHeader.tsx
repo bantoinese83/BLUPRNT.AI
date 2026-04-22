@@ -59,6 +59,8 @@ export function FinanceLedgerHeader({
   filter,
   onFilterChange,
 }: FinanceLedgerHeaderProps) {
+  const canIncludeUploads = invoices.some((i) => Boolean(i.document_id));
+
   return (
     <>
       {loadError ? (
@@ -153,16 +155,22 @@ export function FinanceLedgerHeader({
 
             <View style={styles.appendixRow}>
               <View style={styles.appendixTextCol}>
-                <Text style={styles.appendixLabel}>Append image originals</Text>
+                <Text style={styles.appendixLabel}>Include uploads in PDF</Text>
                 <Text style={styles.appendixHint}>
-                  Larger PDF. PDF uploads appear as notes only, not full pages.
+                  {canIncludeUploads
+                    ? "Adds receipt photos at the end of your seller packet. Larger download. If an invoice is a PDF, we add a short note instead of the full file."
+                    : "Turn this on after you attach a photo or file to at least one invoice — nothing is linked yet, so the switch stays off."}
                 </Text>
               </View>
               <Switch
                 value={includeAppendix}
                 onValueChange={onIncludeAppendixChange}
-                disabled={
-                  exporting || !invoices.some((i) => Boolean(i.document_id))
+                disabled={exporting || !canIncludeUploads}
+                accessibilityLabel="Include uploads in seller packet PDF"
+                accessibilityHint={
+                  canIncludeUploads
+                    ? "Adds an extra section with images from linked invoice files"
+                    : "Requires at least one invoice with an attached file"
                 }
                 trackColor={{
                   false: "rgba(148,163,184,0.35)",

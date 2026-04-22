@@ -5,6 +5,7 @@ import { AIAssistant } from "@/components/AIAssistant";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
+import { TAB_BAR_SCROLL_PADDING } from "@/constants/Layout";
 import { ConfigurationRequired } from "@/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Theme.spacing.xl,
     paddingTop: Theme.spacing.sm,
     paddingBottom: Theme.spacing.md,
-    backgroundColor: "transparent",
+    backgroundColor: Theme.colors.card,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Theme.colors.border,
   },
@@ -90,8 +91,14 @@ const styles = StyleSheet.create({
     marginTop: 6,
     lineHeight: 20,
   },
+  /**
+   * Reserve tab bar + FAB below the assistant. Solid fill so the global
+   * gradient never shows through this strip (reads as “grey dead space”).
+   */
   assistantContainer: {
     flex: 1,
+    paddingBottom: TAB_BAR_SCROLL_PADDING,
+    backgroundColor: Theme.colors.card,
   },
   emptyContainer: {
     flex: 1,

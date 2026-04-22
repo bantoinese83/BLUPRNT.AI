@@ -21,6 +21,8 @@ export function ProjectDetailFooterActions({
   onShare,
   onExportSellerPacket,
 }: Props) {
+  const canIncludeUploads = detailInvoices.some((i) => Boolean(i.document_id));
+
   return (
     <MotiView
       from={{ opacity: 0, scale: 0.95 }}
@@ -30,15 +32,23 @@ export function ProjectDetailFooterActions({
     >
       <View style={styles.exportAppendixRow}>
         <View style={styles.exportAppendixTextCol}>
-          <Text style={styles.exportAppendixLabel}>Append image originals</Text>
+          <Text style={styles.exportAppendixLabel}>Include uploads in PDF</Text>
           <Text style={styles.exportAppendixHint}>
-            Larger PDF. PDF uploads appear as notes only.
+            {canIncludeUploads
+              ? "Adds receipt photos at the end of your seller packet. Larger download. If an invoice is a PDF, we add a short note instead of the full file."
+              : "Turn this on after you attach a photo or file to at least one invoice — nothing is linked yet, so the switch stays off."}
           </Text>
         </View>
         <Switch
           value={includeAppendix}
           onValueChange={setIncludeAppendix}
-          disabled={!detailInvoices.some((i) => Boolean(i.document_id))}
+          disabled={!canIncludeUploads}
+          accessibilityLabel="Include uploads in seller packet PDF"
+          accessibilityHint={
+            canIncludeUploads
+              ? "Adds an extra section with images from linked invoice files"
+              : "Requires at least one invoice with an attached file"
+          }
           trackColor={{
             false: "rgba(148,163,184,0.35)",
             true: Theme.colors.brand.primary,

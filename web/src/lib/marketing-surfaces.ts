@@ -6,7 +6,8 @@ export function isHelpWidgetHiddenPath(pathname: string): boolean {
   if (
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/forgot-password"
+    pathname === "/forgot-password" ||
+    pathname === "/signed-out"
   ) {
     return true;
   }

@@ -162,7 +162,12 @@ export function NotchedTabBar({
                       accessibilityIgnoresInvertColors
                     />
                   ) : null}
-                  <Text style={[styles.tabLabel, { color }]} numberOfLines={1}>
+                  <Text
+                    style={[styles.tabLabel, { color }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.78}
+                  >
                     {label}
                   </Text>
                 </TouchableOpacity>
@@ -199,7 +204,12 @@ export function NotchedTabBar({
                       accessibilityIgnoresInvertColors
                     />
                   ) : null}
-                  <Text style={[styles.tabLabel, { color }]} numberOfLines={1}>
+                  <Text
+                    style={[styles.tabLabel, { color }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.78}
+                  >
                     {label}
                   </Text>
                 </TouchableOpacity>
@@ -212,7 +222,8 @@ export function NotchedTabBar({
           <TouchableOpacity
             onPress={pressFab}
             accessibilityRole="button"
-            accessibilityLabel="Add project"
+            accessibilityLabel="New project"
+            accessibilityHint="Opens the flow to add another renovation"
             accessibilityState={{ selected: newFocused }}
             style={[styles.fabTouchable, { left: barW / 2 - 32 }]}
             activeOpacity={0.9}
@@ -284,9 +295,11 @@ const styles = StyleSheet.create({
     height: 26,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: Theme.typography.family.bold,
-    letterSpacing: 0.15,
+    letterSpacing: 0.1,
+    maxWidth: "100%",
+    textAlign: "center",
   },
   fabRing: {
     position: "absolute",

@@ -93,7 +93,7 @@ export function useSettingsPage(): UseSettingsPageResult {
 
   const onSignOut = useCallback(async () => {
     setSignOutLoading(true);
-    await logout("/");
+    await logout();
     setSignOutLoading(false);
   }, [logout]);
 
@@ -232,7 +232,7 @@ export function useSettingsPage(): UseSettingsPageResult {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
       await supabase.auth.signOut();
-      navigate("/", { replace: true });
+      navigate("/signed-out", { replace: true });
     } catch (e) {
       const raw = e instanceof Error ? e.message : "";
       setDeleteMessage(

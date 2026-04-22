@@ -57,7 +57,12 @@ appId: ai.bluprnt.mobile
 - assertVisible: "Sign Out" # Alert title
 - tapOn: "Sign Out" # Alert action
 
-# Verify redirection to Landing
+# Signed-out confirmation, then back to welcome
+- extendedWaitUntil:
+    visible: "You're signed out"
+    timeout: 10000
+- tapOn:
+    id: "signed-out-continue"
 - extendedWaitUntil:
     visible: "Snap the room. Get the number."
     timeout: 10000

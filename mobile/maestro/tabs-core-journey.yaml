@@ -7,13 +7,13 @@ appId: ai.bluprnt.mobile
     file: common/signup-unique-account-dashboard.yaml
 
 # Bottom tabs (accessibility labels from NotchedTabBar)
-- tapOn: "Finance"
+- tapOn: "Ledger"
 - extendedWaitUntil:
     visible: "Property Ledger"
     timeout: 25000
 - assertVisible: "Property record"
 
-- tapOn: "Assistant"
+- tapOn: "Ask"
 - extendedWaitUntil:
     visible: "Project Assistant"
     timeout: 15000

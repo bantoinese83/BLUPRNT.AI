@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
-  Keyboard,
   Platform,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
@@ -22,11 +21,6 @@ import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors
 import { reportClientError } from "@/lib/sentry";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
-import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "@app/(tabs)/_layout";
-
-/** Space above the notched tab bar + FAB (matches scroll clearance scale). */
-const TAB_BAR_BUFFER = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 28;
-
 type Role = "user" | "assistant";
 
 interface Message {
@@ -47,7 +41,6 @@ interface Props {
 
 export function AIAssistant({ projectId }: Props) {
   const insets = useSafeAreaInsets();
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -80,23 +73,6 @@ export function AIAssistant({ projectId }: Props) {
     requestAnimationFrame(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     });
-  }, []);
-
-  useEffect(() => {
-    const showEvt =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvt =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-    const showSub = Keyboard.addListener(showEvt, () =>
-      setKeyboardVisible(true),
-    );
-    const hideSub = Keyboard.addListener(hideEvt, () =>
-      setKeyboardVisible(false),
-    );
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
   }, []);
 
   const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -162,10 +138,8 @@ export function AIAssistant({ projectId }: Props) {
   const keyboardOffset =
     Platform.OS === "ios" ? insets.top + 132 : insets.top + 24;
 
-  const dockBottomPadding =
-    keyboardVisible && Platform.OS === "ios"
-      ? Math.max(insets.bottom, Theme.spacing.sm)
-      : TAB_BAR_BUFFER + insets.bottom;
+  /** Tight to tab; home indicator when present (no extra sm floor). */
+  const inputDockPaddingBottom = Math.max(insets.bottom, 6);
 
   return (
     <KeyboardAvoidingView
@@ -251,17 +225,7 @@ export function AIAssistant({ projectId }: Props) {
       </ScrollView>
 
       <View
-        style={[
-          styles.inputDock,
-          {
-            paddingBottom:
-              Platform.OS === "ios"
-                ? dockBottomPadding
-                : keyboardVisible
-                  ? Math.max(insets.bottom, Theme.spacing.sm)
-                  : TAB_BAR_BUFFER,
-          },
-        ]}
+        style={[styles.inputDock, { paddingBottom: inputDockPaddingBottom }]}
       >
         <ScrollView
           horizontal
@@ -321,16 +285,18 @@ export function AIAssistant({ projectId }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Theme.colors.background,
+    /** Match composer dock — one continuous sheet (no gradient bleed). */
+    backgroundColor: Theme.colors.card,
   },
   messagesScroll: {
     flex: 1,
   },
   messagesContainer: {
     flexGrow: 1,
+    justifyContent: "flex-end",
     paddingHorizontal: Theme.spacing.xl,
     paddingTop: Theme.spacing.md,
-    paddingBottom: Theme.spacing.xl,
+    paddingBottom: Theme.spacing.xs,
   },
   messageWrapper: {
     marginBottom: Theme.spacing.lg,
@@ -388,7 +354,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   inputDock: {
-    backgroundColor: Theme.colors.header,
+    backgroundColor: Theme.colors.card,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: Theme.colors.border,
     ...Platform.select({
@@ -435,8 +401,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     paddingHorizontal: Theme.spacing.xl,
-    paddingTop: Theme.spacing.xs,
-    paddingBottom: Theme.spacing.sm,
+    /** More space under chips so the field + send read lower on the sheet. */
+    paddingTop: Theme.spacing.lg,
+    paddingBottom: Theme.spacing.xs,
   },
   input: {
     flex: 1,

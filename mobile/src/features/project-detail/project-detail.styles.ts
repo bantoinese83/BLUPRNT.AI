@@ -194,6 +194,10 @@ export const projectDetailStyles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
+  materialHeaderSpacer: {
+    flex: 1,
+    minWidth: 8,
+  },
   materialHeaderText: {
     fontSize: 10,
     fontFamily: Theme.typography.family.black,
@@ -212,6 +216,34 @@ export const projectDetailStyles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Theme.colors.glass.border,
+  },
+  materialBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  materialRowActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginLeft: 4,
+  },
+  materialIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Theme.colors.background,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+  },
+  materialEmptyText: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 19,
+    textAlign: "center",
+    paddingVertical: 8,
   },
   materialIconBg: {
     width: 28,

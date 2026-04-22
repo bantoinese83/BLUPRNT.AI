@@ -16,6 +16,10 @@ type Props = {
   index: number;
   expandedId: string | null;
   onToggleExpand: (itemId: string) => void;
+  onPersistScopeMaterials?: (
+    scopeItemId: string,
+    next: NonNullable<ScopeRow["metadata"]>["materials"],
+  ) => Promise<void>;
 };
 
 export function ProjectScopeLineCard({
@@ -24,8 +28,11 @@ export function ProjectScopeLineCard({
   index,
   expandedId,
   onToggleExpand,
+  onPersistScopeMaterials,
 }: Props) {
   const isOpen = expandedId === item.id;
+  const materialRows = item.metadata?.materials;
+  const hasMaterialBreakdown = Array.isArray(materialRows);
 
   return (
     <MotiView
@@ -63,7 +70,7 @@ export function ProjectScopeLineCard({
           </Text>
         </View>
 
-        {item.metadata?.materials && item.metadata.materials.length > 0 && (
+        {hasMaterialBreakdown && (
           <>
             <TouchableOpacity
               style={[
@@ -100,7 +107,12 @@ export function ProjectScopeLineCard({
                   style={{ overflow: "hidden" }}
                 >
                   <ProjectMaterialDetailList
-                    materials={item.metadata.materials}
+                    materials={materialRows}
+                    onPersist={
+                      onPersistScopeMaterials
+                        ? (next) => onPersistScopeMaterials(item.id, next)
+                        : undefined
+                    }
                   />
                 </MotiView>
               )}

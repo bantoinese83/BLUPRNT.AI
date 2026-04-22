@@ -29,7 +29,7 @@ export function DashboardWelcomeBanner({ onAction }: Props) {
           from={{ opacity: 0, scale: 0.95, translateY: -10 }}
           animate={{ opacity: 1, scale: 1, translateY: 0 }}
           exit={{ opacity: 0, scale: 0.95, translateY: -10 }}
-          transition={{ type: "timing", duration: 400 }}
+          transition={{ type: "timing", duration: 320 }}
           style={styles.container}
         >
           <GlassCard intensity={4} style={styles.card}>

@@ -9,12 +9,17 @@ type Props = {
   groupedScope: Record<string, ScopeRow[]>;
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
+  onPersistScopeMaterials?: (
+    scopeItemId: string,
+    next: NonNullable<ScopeRow["metadata"]>["materials"],
+  ) => Promise<void>;
 };
 
 export function ProjectScopeGroupedList({
   groupedScope,
   expandedId,
   setExpandedId,
+  onPersistScopeMaterials,
 }: Props) {
   const toggle = (itemId: string) => {
     setExpandedId(expandedId === itemId ? null : itemId);
@@ -43,6 +48,7 @@ export function ProjectScopeGroupedList({
               index={index}
               expandedId={expandedId}
               onToggleExpand={toggle}
+              onPersistScopeMaterials={onPersistScopeMaterials}
             />
           ))}
         </MotiView>

@@ -56,6 +56,7 @@ const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const SignedOut = lazy(() => import("./pages/SignedOut"));
 const Support = lazy(() => import("./pages/Support"));
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -127,6 +128,7 @@ export default function App() {
                         }
                       />
                       <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route path="/signed-out" element={<SignedOut />} />
                       <Route path="/register" element={<Register />} />
                       <Route path="/login" element={<Login />} />
                       <Route

@@ -46,7 +46,7 @@ appId: ai.bluprnt.mobile
 # ══════════════════════════════════════════════════════════════════════════════
 # 04 — Finance Tab (Total Spent)
 # ══════════════════════════════════════════════════════════════════════════════
-- tapOn: "Finance"
+- tapOn: "Ledger"
 - extendedWaitUntil:
     visible: "Property Ledger"
     timeout: 20000
@@ -65,7 +65,7 @@ appId: ai.bluprnt.mobile
 # ══════════════════════════════════════════════════════════════════════════════
 # 06 — AI Assistant (landing state)
 # ══════════════════════════════════════════════════════════════════════════════
-- tapOn: "Assistant"
+- tapOn: "Ask"
 - extendedWaitUntil:
     visible: "Project Assistant"
     timeout: 20000

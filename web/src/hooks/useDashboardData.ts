@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import {
@@ -55,6 +59,7 @@ export function useDashboardData() {
         projectId: activeProjectId,
       }),
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
     enabled: isSupabaseConfigured(),
     retry: 2,
   });

@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: "How do I link invoice lines to my budget?",
-    a: "Open a document from the Finance tab, then choose a budget line for each extracted line. That powers plan vs actual in your project.",
+    a: "Open a document from the Ledger tab, then choose a budget line for each extracted line. That powers plan vs actual in your project.",
   },
 ] as const;
 

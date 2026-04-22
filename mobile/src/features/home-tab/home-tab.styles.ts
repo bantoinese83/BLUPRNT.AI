@@ -22,7 +22,9 @@ export const homeTabStyles = StyleSheet.create({
   },
   headerRight: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
+    flexShrink: 0,
+    alignItems: "center",
   },
   headerBtn: {
     width: 44,
@@ -40,10 +42,16 @@ export const homeTabStyles = StyleSheet.create({
   },
   headerContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     marginBottom: 32,
-    paddingHorizontal: 4,
+    paddingHorizontal: 0,
+    gap: 8,
+  },
+  headerTitleBlock: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 4,
   },
   welcomeText: {
     fontSize: 16,
@@ -55,6 +63,7 @@ export const homeTabStyles = StyleSheet.create({
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
     letterSpacing: -0.5,
+    maxWidth: "100%",
   },
   insightsDot: {
     position: "absolute",

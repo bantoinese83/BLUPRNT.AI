@@ -14,9 +14,7 @@ import { GradientBackground } from "@/components/ui/GradientBackground";
 import { StatusBar } from "expo-status-bar";
 import { Logo } from "@/components/ui/Logo";
 import { Theme } from "@/constants/Theme";
-import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "@app/(tabs)/_layout";
-
-const TAB_BAR_CLEARANCE = TAB_BAR_HEIGHT + TAB_BAR_MARGIN + 8;
+import { TAB_BAR_SCROLL_PADDING } from "@/constants/Layout";
 
 interface Props {
   children: React.ReactNode;
@@ -51,7 +49,7 @@ export function ScreenWrapper({
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={[
         styles.scrollContent,
-        withTabBar && { paddingBottom: TAB_BAR_CLEARANCE },
+        withTabBar && { paddingBottom: TAB_BAR_SCROLL_PADDING },
       ]}
       refreshControl={
         onRefresh ? (
