@@ -21,6 +21,8 @@ import { TextField } from "@/components/ui/TextField";
 import { supabase } from "@/lib/supabase";
 import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
 import { Theme } from "@/constants/Theme";
+import { isValidEmail } from "@/lib/validation";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -29,13 +31,13 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const handleReset = async () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim()) {
+    const trimmed = email.trim();
+    if (!trimmed) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setError("Please enter your email address.");
       return;
     }
-    if (!emailRegex.test(email.trim())) {
+    if (!isValidEmail(trimmed)) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setError("Please enter a valid email address.");
       return;
@@ -47,7 +49,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        email.trim(),
+        trimmed,
         {
           redirectTo: getPasswordRecoveryRedirectUrl(),
         },
@@ -57,7 +59,8 @@ export default function ForgotPasswordScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSent(true);
     } catch (err) {
-      setError((err as Error).message || "Failed to send reset link.");
+      const e = err as { message?: string; status?: number };
+      setError(friendlyAuthError(e?.message || "", e?.status));
     } finally {
       setLoading(false);
     }
@@ -74,9 +77,15 @@ export default function ForgotPasswordScreen() {
             <TouchableOpacity
               onPress={() => {
                 Haptics.selectionAsync();
-                router.back();
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/(auth)/login");
+                }
               }}
               style={styles.backButton}
+              accessibilityRole="button"
+              accessibilityLabel="Back"
             >
               <BlurView
                 intensity={20}

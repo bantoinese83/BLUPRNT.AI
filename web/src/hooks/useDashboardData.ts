@@ -94,11 +94,14 @@ export function useDashboardData() {
     );
   }, [queryClient, activeProjectId]);
 
-  const load = useCallback(async () => {
-    await queryClient.invalidateQueries({
-      queryKey: dashboardQueryKey(activeProjectId),
-    });
-  }, [queryClient, activeProjectId]);
+  const load = useCallback(
+    async (id?: string) => {
+      await queryClient.invalidateQueries({
+        queryKey: dashboardQueryKey(id ?? activeProjectId),
+      });
+    },
+    [queryClient, activeProjectId],
+  );
 
   const setProjects = useCallback(
     (projects: ProjectRow[]) => {

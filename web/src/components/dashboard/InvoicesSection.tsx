@@ -21,7 +21,7 @@ import {
 type InvoicesSectionProps = {
   projectId: string;
   invoices: InvoiceRow[];
-  onUploaded: () => void;
+  onUploaded: (id?: string) => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
   subscription?: UserSubscriptionRow | null;
   hasProjectPass?: boolean;

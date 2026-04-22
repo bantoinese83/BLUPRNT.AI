@@ -18,6 +18,7 @@ export function DashboardScope({
 }: DashboardScopeProps) {
   return (
     <ScopeDetail
+      key={project.id}
       project={project}
       scopeItems={scopeItems}
       projectId={project.id}

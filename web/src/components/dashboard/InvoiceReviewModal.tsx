@@ -46,7 +46,7 @@ export function InvoiceReviewModal({
   invoiceId: string;
   projectId: string;
   onClose: () => void;
-  onSaved?: () => void;
+  onSaved?: (id?: string) => void;
 }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,7 +136,7 @@ export function InvoiceReviewModal({
           .eq("id", lineId);
         if (lineErr) throw lineErr;
       }
-      onSaved?.();
+      onSaved?.(projectId);
       onClose();
     } catch {
       setError("We couldn’t save your line links. Try again.");

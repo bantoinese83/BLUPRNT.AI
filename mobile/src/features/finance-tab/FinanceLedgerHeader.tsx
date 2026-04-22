@@ -96,11 +96,11 @@ export function FinanceLedgerHeader({
           <TouchableOpacity
             style={styles.headerCaptureBtn}
             onPress={onPressAddDocument}
-            disabled={isUploading}
+            disabled={isUploading || exporting}
             accessibilityLabel="Add to ledger"
             accessibilityHint="Upload an invoice, quote, or receipt"
           >
-            {isUploading ? (
+            {isUploading || exporting ? (
               <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
             ) : (
               <Plus size={22} color="white" />
@@ -173,9 +173,9 @@ export function FinanceLedgerHeader({
             </View>
 
             <Button
-              title={exporting ? "Generating..." : "Export Seller Packet"}
+              title={exporting ? "Generating…" : "Export Seller Packet"}
               onPress={onExport}
-              disabled={exporting}
+              disabled={exporting || isUploading}
               style={styles.exportButton}
               icon={
                 exporting ? (

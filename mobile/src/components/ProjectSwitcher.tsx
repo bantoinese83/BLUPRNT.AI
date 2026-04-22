@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -29,6 +29,7 @@ export function ProjectSwitcher({
   onSelect,
   onAdd,
 }: ProjectSwitcherProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   // Always show switcher if there is at least 1 project, so we can see the "Add" button
   if (projects.length === 0) return null;
 
@@ -48,11 +49,14 @@ export function ProjectSwitcher({
           <TouchableOpacity
             testID={`project-card-${p.name}`}
             style={styles.cardWrapper}
+            disabled={deletingId === p.id}
             onPress={() => {
+              if (deletingId === p.id) return;
               Haptics.selectionAsync();
               onSelect(p.id);
             }}
             onLongPress={() => {
+              if (deletingId) return;
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Warning,
               );
@@ -65,12 +69,17 @@ export function ProjectSwitcher({
                     text: "Delete",
                     style: "destructive",
                     onPress: async () => {
+                      setDeletingId(p.id);
                       const { error } = await supabase
                         .from("projects")
                         .delete()
                         .eq("id", p.id);
+                      setDeletingId(null);
                       if (error) {
-                        Alert.alert("Error", "Could not delete project.");
+                        Alert.alert(
+                          "Couldn't delete project",
+                          "Please check your connection and try again.",
+                        );
                       } else {
                         Haptics.notificationAsync(
                           Haptics.NotificationFeedbackType.Success,

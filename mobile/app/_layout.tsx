@@ -105,9 +105,11 @@ function RootLayout() {
 
     // Simulators default to "Test Store" (Preview Mode) to bypass unreliable Apple Sandbox
     if (isExpoGo || isSimulator) {
-      console.log(
-        `LOG  ${isSimulator ? "Simulator" : "Expo Go"} detected. Using RevenueCat in Preview Mode.`,
-      );
+      if (__DEV__) {
+        console.log(
+          `[revenuecat] ${isSimulator ? "Simulator" : "Expo Go"} detected. Using Preview Mode.`,
+        );
+      }
       Purchases.configure({ apiKey: testKey });
     } else {
       const apiKey =
@@ -116,17 +118,21 @@ function RootLayout() {
           : process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
 
       if (apiKey) {
-        console.log(
-          `LOG  Physical device (${Platform.OS}) detected. Using production RevenueCat keys.`,
-        );
+        if (__DEV__) {
+          console.log(
+            `[revenuecat] Physical device (${Platform.OS}) — using production key.`,
+          );
+        }
         Purchases.configure({ apiKey });
       } else if (testKey) {
-        console.warn(
-          "WARN No production API key found. Falling back to Test Store.",
-        );
+        if (__DEV__) {
+          console.warn(
+            "[revenuecat] No production API key — falling back to Test Store.",
+          );
+        }
         Purchases.configure({ apiKey: testKey });
-      } else {
-        console.error("ERROR RevenueCat: No API keys found for configuration.");
+      } else if (__DEV__) {
+        console.error("[revenuecat] No API keys found for configuration.");
       }
     }
   }, []);
@@ -170,7 +176,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
     gap: 8,
-    zIndex: 9999,
+    // Stay above in-tree UI but below native iOS/Android modals (Modal always wins).
+    zIndex: 10,
   },
   offlineText: {
     color: "white",
@@ -194,6 +201,7 @@ function OfflineBannerHost() {
 
   return (
     <View
+      pointerEvents="none"
       style={[styles.offlineBanner, { top: insets.top + 8 }]}
       accessible
       accessibilityRole="alert"
@@ -262,22 +270,16 @@ function RootLayoutNav() {
     lastSyncedId.current = currentId;
 
     if (currentId) {
-      // Sentry
       Sentry.setUser({ id: currentId, email: session?.user?.email });
-
-      // RevenueCat
       Purchases.logIn(currentId).catch((e) => {
         // Silently handle 429s as they are often transient during HMR/fast reloads
         if (e.code === 16 || e.message?.includes("429")) return;
-        console.error("RevenueCat Login Error:", e);
+        if (__DEV__) console.warn("[revenuecat] login error:", e);
       });
     } else {
-      // Sentry
       Sentry.setUser(null);
-
-      // RevenueCat
       Purchases.logOut().catch((e) => {
-        console.error("RevenueCat Logout Error:", e);
+        if (__DEV__) console.warn("[revenuecat] logout error:", e);
       });
     }
   }, [session, loading]);

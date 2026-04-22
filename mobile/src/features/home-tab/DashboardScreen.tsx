@@ -47,6 +47,9 @@ import { presentProjectShareSheet } from "@/lib/share-project";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
+import { generateSellerPacketPDF } from "@/lib/pdf-export";
+import { reportClientError } from "@/lib/sentry";
+import { scopeRowsForSellerPacket } from "@/features/finance-tab/ledger-helpers";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -59,6 +62,7 @@ export default function DashboardScreen() {
     projects,
     project,
     invoices,
+    scopeItems,
     load,
     handleProjectSelect,
     isArchitect,
@@ -89,26 +93,29 @@ export default function DashboardScreen() {
   );
 
   const [isUploading, setIsUploading] = useState(false);
-  const [hasCelebrated, setHasCelebrated] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [celebratedProjectId, setCelebratedProjectId] = useState<string | null>(
+    null,
+  );
   const [isCelebrating, setIsCelebrating] = useState(false);
   const [renameVisible, setRenameVisible] = useState(false);
   const [reviewInvoice, setReviewInvoice] = useState<InvoiceRow | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
 
   useEffect(() => {
+    if (!project) return;
+    const alreadyCelebrated = celebratedProjectId === project.id;
     if (
-      project &&
       invoices.length > 0 &&
       project.estimated_min_total != null &&
-      !hasCelebrated
+      !alreadyCelebrated &&
+      capitalDocumentedTotal >= project.estimated_min_total
     ) {
-      if (capitalDocumentedTotal >= project.estimated_min_total) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setIsCelebrating(true);
-        setHasCelebrated(true);
-      }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setIsCelebrating(true);
+      setCelebratedProjectId(project.id);
     }
-  }, [project, invoices, hasCelebrated, capitalDocumentedTotal]);
+  }, [project, invoices.length, capitalDocumentedTotal, celebratedProjectId]);
 
   const handleRenameProject = () => {
     if (!project) return;
@@ -128,6 +135,46 @@ export default function DashboardScreen() {
       load();
     } catch (e) {
       Alert.alert("Couldn't rename project", friendlyPostgrestMutationError(e));
+    }
+  };
+
+  const handleExportSellerPacket = async () => {
+    if (!project) return;
+    if (!isArchitect && !hasProjectPass) {
+      setUpgradeReason("export");
+      setShowUpgrade(true);
+      return;
+    }
+    if (scopeItems.length === 0 && invoices.length === 0) {
+      Alert.alert(
+        "Nothing to export yet",
+        "Add a scope item or upload an invoice, then try Export Packet again.",
+      );
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsExporting(true);
+    try {
+      await generateSellerPacketPDF(
+        {
+          id: project.id,
+          property_id: project.property_id,
+          name: project.name,
+          estimated_min_total: project.estimated_min_total,
+          estimated_max_total: project.estimated_max_total,
+        },
+        scopeRowsForSellerPacket(scopeItems),
+        invoices,
+        { includeAppendix: false },
+      );
+    } catch (err: unknown) {
+      reportClientError("dashboard_seller_packet_pdf", err);
+      Alert.alert(
+        "Export Failed",
+        "We couldn't generate the PDF. Please check your connection and try again.",
+      );
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -280,12 +327,12 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={openDashboardDocumentCapture}
-            disabled={isUploading}
+            disabled={isUploading || isExporting}
             style={[styles.headerBtn, styles.captureBtn]}
             accessibilityRole="button"
             accessibilityLabel="Add document"
           >
-            {isUploading ? (
+            {isUploading || isExporting ? (
               <SnurraLoader size={SnurraSize.inline} tone="onPrimary" />
             ) : (
               <Plus size={22} color="white" />
@@ -298,7 +345,7 @@ export default function DashboardScreen() {
         onAction={(id) => {
           if (id === "upload") openDashboardDocumentCapture();
           if (id === "scope") router.push(`/project/${project.id}`);
-          if (id === "export") openDashboardDocumentCapture();
+          if (id === "export") void handleExportSellerPacket();
         }}
       />
 
@@ -359,12 +406,11 @@ export default function DashboardScreen() {
               } else if (id === "review-scope") {
                 router.push(`/project/${project.id}?focus=scope`);
               }
-              if (
-                id === "upload-quote" ||
-                id === "upload-invoice" ||
-                id === "export-packet"
-              ) {
+              if (id === "upload-quote" || id === "upload-invoice") {
                 openDashboardDocumentCapture();
+              }
+              if (id === "export-packet") {
+                void handleExportSellerPacket();
               }
               if (id === "share-access") {
                 void (async () => {

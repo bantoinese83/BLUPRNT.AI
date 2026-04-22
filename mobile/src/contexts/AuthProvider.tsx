@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await supabase.auth.signOut();
     } catch (error) {
-      console.error("Sign out error:", error);
+      reportClientError("auth_sign_out", error);
     }
   };
 
@@ -130,16 +130,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         redirectUri,
       );
 
-      if (res.type === "success" && res.url) {
-        const code = extractPkceCodeFromUrl(res.url);
-        if (code) {
-          const { error: exchangeError } =
-            await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
-        }
+      // User cancelled or dismissed the browser — stay silent, let UI reset.
+      if (res.type !== "success" || !res.url) return;
+
+      const code = extractPkceCodeFromUrl(res.url);
+      if (!code) {
+        throw new Error(
+          "We couldn’t finish signing in with Google. Please try again.",
+        );
       }
+
+      const { error: exchangeError } =
+        await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) throw exchangeError;
     } catch (error) {
-      console.error("Google sign in error:", error);
+      if (__DEV__) console.warn("Google sign in error:", error);
       throw error;
     }
   };
@@ -171,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // user cancelled
         return;
       }
-      console.error("Apple sign in error:", error);
+      if (__DEV__) console.warn("Apple sign in error:", error);
       throw error;
     }
   };

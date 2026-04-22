@@ -150,6 +150,9 @@ export function useOnboardingAnalysis(
   const runAnalysisRef = useRef(runAnalysis);
   runAnalysisRef.current = runAnalysis;
 
+  const analysisMessagesLenRef = useRef(analysisMessages.length);
+  analysisMessagesLenRef.current = analysisMessages.length;
+
   const handleAnalysisRetry = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void runAnalysisRef.current();
@@ -184,7 +187,8 @@ export function useOnboardingAnalysis(
     setAnalysisIndex(0);
     let current = 0;
     const messageInterval = setInterval(() => {
-      current = (current + 1) % analysisMessages.length;
+      const len = Math.max(1, analysisMessagesLenRef.current);
+      current = (current + 1) % len;
       setAnalysisIndex(current);
     }, 2500);
 
@@ -194,7 +198,7 @@ export function useOnboardingAnalysis(
       analysisStepActiveRef.current = false;
       clearInterval(messageInterval);
     };
-  }, [step, analysisMessages.length]);
+  }, [step]);
 
   const analysisBarTargetW = analysisBarW > 0 ? analysisBarW : 280;
 

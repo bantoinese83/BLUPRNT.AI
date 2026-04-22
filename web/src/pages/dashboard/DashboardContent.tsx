@@ -103,7 +103,7 @@ export function DashboardContent({
     navigate,
     setShowUpgrade,
   );
-  useDashboardCheckoutSuccessConfetti(location.search);
+  useDashboardCheckoutSuccessConfetti(location.search, load);
   useDashboardMilestoneConfetti(
     project,
     invoices,
@@ -512,13 +512,15 @@ export function DashboardContent({
         />
       </ComponentErrorBoundary>
 
-      <LeadCaptureModal
-        onPlanSelect={(_plan) => {
-          setUseDiscount(true);
-          setUpgradeReason("general");
-          setShowUpgrade(true);
-        }}
-      />
+      {!isArchitect && !hasProjectPass && (
+        <LeadCaptureModal
+          onPlanSelect={(_plan) => {
+            setUseDiscount(true);
+            setUpgradeReason("general");
+            setShowUpgrade(true);
+          }}
+        />
+      )}
       <ShareModal
         isOpen={shareOpen}
         onClose={() => setShareOpen(false)}

@@ -1,6 +1,8 @@
 import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
+  Alert,
+  Linking,
   View,
   Text,
   TouchableOpacity,
@@ -52,6 +54,24 @@ export function VisionCapture({
         <TouchableOpacity
           style={styles.visionButton}
           onPress={async () => {
+            const { status } =
+              await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== "granted") {
+              Alert.alert(
+                "Photo access needed",
+                "Allow photo library access in Settings so we can analyze your space.",
+                [
+                  { text: "Not now", style: "cancel" },
+                  {
+                    text: "Open Settings",
+                    onPress: () => {
+                      void Linking.openSettings();
+                    },
+                  },
+                ],
+              );
+              return;
+            }
             const result = await ImagePicker.launchImageLibraryAsync({
               mediaTypes: "images",
               quality: 0.8,
@@ -83,7 +103,22 @@ export function VisionCapture({
           onPress={async () => {
             const { status } =
               await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== "granted") return;
+            if (status !== "granted") {
+              Alert.alert(
+                "Camera access needed",
+                "Allow camera access in Settings to snap your space.",
+                [
+                  { text: "Not now", style: "cancel" },
+                  {
+                    text: "Open Settings",
+                    onPress: () => {
+                      void Linking.openSettings();
+                    },
+                  },
+                ],
+              );
+              return;
+            }
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: ["images"],
               quality: 0.8,
@@ -136,6 +171,11 @@ export function VisionCapture({
           multiline
           value={scopeDescription}
           onChangeText={setScopeDescription}
+          autoCapitalize="sentences"
+          autoCorrect
+          maxLength={1000}
+          returnKeyType="default"
+          accessibilityLabel="Project description"
         />
       </GlassCard>
     </MotiView>

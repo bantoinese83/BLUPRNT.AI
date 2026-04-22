@@ -26,7 +26,10 @@ export function useDashboardUpgradeQueryEffect(
   }, [search, pathname, hash, navigate, setShowUpgrade]);
 }
 
-export function useDashboardCheckoutSuccessConfetti(search: string): void {
+export function useDashboardCheckoutSuccessConfetti(
+  search: string,
+  onRefresh?: () => void,
+): void {
   useEffect(() => {
     const params = new URLSearchParams(search);
     if (params.get("success") === "true") {
@@ -45,6 +48,9 @@ export function useDashboardCheckoutSuccessConfetti(search: string): void {
         origin: { y: 0.6 },
         colors: [...CONFETTI_PALETTES.brandMuted],
       });
+
+      // Refresh to pull new subscription/pass state
+      onRefresh?.();
     }
-  }, [search]);
+  }, [search, onRefresh]);
 }

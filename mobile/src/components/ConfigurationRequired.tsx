@@ -1,14 +1,30 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { Settings } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/contexts/auth-context";
 
 type Props = {
   onRetry?: () => void;
 };
 
 export function ConfigurationRequired({ onRetry }: Props) {
+  const { session, signOut } = useAuth();
+
+  const handleSignOut = () => {
+    Alert.alert("Sign out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign out",
+        style: "destructive",
+        onPress: () => {
+          void signOut();
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.iconWrap}>
@@ -32,6 +48,14 @@ export function ConfigurationRequired({ onRetry }: Props) {
       )}
       {onRetry ? (
         <Button title="Try again" onPress={onRetry} style={styles.btn} />
+      ) : null}
+      {session ? (
+        <Button
+          title="Sign out"
+          variant="ghost"
+          onPress={handleSignOut}
+          style={styles.secondaryBtn}
+        />
       ) : null}
     </View>
   );
@@ -86,6 +110,10 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginTop: 8,
+    minWidth: 200,
+  },
+  secondaryBtn: {
+    marginTop: 4,
     minWidth: 200,
   },
 });

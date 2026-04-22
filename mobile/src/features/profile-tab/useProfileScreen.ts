@@ -51,11 +51,19 @@ export function useProfileScreen(): UseProfileScreenResult {
   }, [setShowUpgrade, setUpgradeReason]);
 
   const onSaveProfile = useCallback(async () => {
+    const trimmed = displayName.trim();
+    if (trimmed.length === 0) {
+      Alert.alert(
+        "Add your name",
+        "Please enter your name before saving. This is how we greet you across the app.",
+      );
+      return;
+    }
     setSaving(true);
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     const { error } = await supabase.auth.updateUser({
-      data: { full_name: displayName.trim() || null },
+      data: { full_name: trimmed },
     });
 
     setSaving(false);
@@ -171,7 +179,7 @@ export function useProfileScreen(): UseProfileScreenResult {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     Alert.alert(
       "Delete Account",
-      "This action is permanent and cannot be undone. All your projects, documents, and data will be deleted.",
+      "This permanently removes your projects, documents, and account data. This cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -180,11 +188,11 @@ export function useProfileScreen(): UseProfileScreenResult {
           onPress: () => {
             Alert.alert(
               "Are you absolutely sure?",
-              "Type DELETE to confirm — or tap confirm to proceed.",
+              "Tap “Yes, delete my account” to confirm. This cannot be reversed.",
               [
                 { text: "Go Back", style: "cancel" },
                 {
-                  text: "Confirm Delete",
+                  text: "Yes, delete my account",
                   style: "destructive",
                   onPress: async () => {
                     try {

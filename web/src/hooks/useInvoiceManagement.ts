@@ -12,7 +12,7 @@ import { addUserFlowBreadcrumb, reportClientError } from "@/lib/sentry";
 interface UseInvoiceManagementProps {
   projectId: string;
   invoices: InvoiceRow[];
-  onUploaded: () => void;
+  onUploaded: (id?: string) => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
@@ -75,6 +75,14 @@ export function useInvoiceManagement({
       setSearchParams(next, { replace: true });
     }
   }, [searchParams, setSearchParams]);
+
+  // Prevent cross-project data contamination during project switching
+  useEffect(() => {
+    setReviewInvoiceId(null);
+    reviewQueueRef.current = [];
+    setError(null);
+    setUploading(false);
+  }, [projectId]);
 
   const dismissGuide = () => {
     try {
@@ -157,7 +165,7 @@ export function useInvoiceManagement({
       }
 
       dismissGuide();
-      onUploaded();
+      onUploaded(projectId);
       const newId = data?.invoice_id;
       if (newId) {
         setReviewInvoiceId((prev) => {

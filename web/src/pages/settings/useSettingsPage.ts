@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
 import { supabase } from "@/lib/supabase";
 import type { UserSubscriptionRow } from "@shared/types/database";
@@ -14,6 +15,7 @@ import type {
 
 export function useSettingsPage(): UseSettingsPageResult {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const { logout } = useLogout();
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [user, setUser] = useState<SettingsUser>(null);
@@ -41,9 +43,7 @@ export function useSettingsPage(): UseSettingsPageResult {
     let cancelled = false;
     const load = async () => {
       setUserLoading(true);
-      const {
-        data: { user: u },
-      } = await supabase.auth.getUser();
+      const u = authUser;
       if (cancelled) return;
       setUser(u ?? null);
       setDisplayName((u?.user_metadata?.full_name as string) ?? "");
@@ -85,7 +85,7 @@ export function useSettingsPage(): UseSettingsPageResult {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [authUser]);
 
   const onBack = useCallback(() => {
     navigate(-1);

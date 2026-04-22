@@ -32,6 +32,11 @@ import {
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
+import {
+  isValidEmail,
+  isValidPassword,
+  MIN_PASSWORD_LENGTH,
+} from "@/lib/validation";
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();
@@ -51,18 +56,34 @@ export default function RegisterScreen() {
       );
       return;
     }
-    if (!email || !password || !name) {
-      Alert.alert("Error", "Please fill in all fields");
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    if (!trimmedName) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setErrorMsg("Add your name so we can greet you.");
+      return;
+    }
+    if (!isValidEmail(trimmedEmail)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setErrorMsg("Enter a valid email address.");
+      return;
+    }
+    if (!isValidPassword(password)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setErrorMsg(
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+      );
       return;
     }
 
     setLoading(true);
+    setErrorMsg(null);
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: trimmedEmail,
       password,
       options: {
         data: {
-          full_name: name,
+          full_name: trimmedName,
         },
       },
     });
@@ -160,9 +181,15 @@ export default function RegisterScreen() {
               <TouchableOpacity
                 onPress={() => {
                   Haptics.selectionAsync();
-                  router.back();
+                  if (router.canGoBack()) {
+                    router.back();
+                  } else {
+                    router.replace("/");
+                  }
                 }}
                 style={styles.backButton}
+                accessibilityRole="button"
+                accessibilityLabel="Back"
               >
                 <BlurView
                   intensity={20}

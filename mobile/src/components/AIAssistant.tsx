@@ -19,6 +19,7 @@ import { MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { invokeFunction } from "@/lib/supabase";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
+import { reportClientError } from "@/lib/sentry";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN } from "@app/(tabs)/_layout";
@@ -59,6 +60,14 @@ export function AIAssistant({ projectId }: Props) {
   const [isTyping, setIsTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const nearBottomRef = useRef(true);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const SUGGESTIONS = [
     "Analyze my budget",
@@ -122,6 +131,7 @@ export function AIAssistant({ projectId }: Props) {
 
       if (error) throw error;
 
+      if (!isMountedRef.current) return;
       setMessages((prev) => [
         ...prev,
         {
@@ -133,7 +143,8 @@ export function AIAssistant({ projectId }: Props) {
         },
       ]);
     } catch (err) {
-      console.error("Chat error:", err);
+      reportClientError("ai_assistant_chat", err);
+      if (!isMountedRef.current) return;
       setMessages((prev) => [
         ...prev,
         {
@@ -143,7 +154,7 @@ export function AIAssistant({ projectId }: Props) {
         },
       ]);
     } finally {
-      setIsTyping(false);
+      if (isMountedRef.current) setIsTyping(false);
     }
   };
 

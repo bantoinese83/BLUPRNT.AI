@@ -6,7 +6,7 @@ import type { ScopeRow } from "@shared/types/database";
 
 interface UseScopeManagementProps {
   projectId: string;
-  onRefresh: () => void;
+  onRefresh: (id?: string) => void;
 }
 
 export function useScopeManagement({
@@ -85,7 +85,7 @@ export function useScopeManagement({
       toast.success("Item updated");
     }
     setEditingId(null);
-    onRefresh();
+    onRefresh(projectId);
   };
 
   const confirmDelete = async () => {
@@ -110,7 +110,7 @@ export function useScopeManagement({
     await recalcProjectTotals();
     setSaving(false);
     toast.success("Item removed");
-    onRefresh();
+    onRefresh(projectId);
   };
 
   const startEdit = (item: ScopeRow) => {
@@ -138,6 +138,7 @@ export function useScopeManagement({
       quantity: newItem.quantity || 1,
       unit: newItem.unit || "ea",
       finish_tier: "mid",
+      source: "text",
       unit_cost_min: newItem.cost,
       unit_cost_max: newItem.cost,
       total_cost_min: newItem.cost * (newItem.quantity || 1),
@@ -154,7 +155,7 @@ export function useScopeManagement({
 
     await recalcProjectTotals();
     toast.success("Item added to budget");
-    onRefresh();
+    onRefresh(projectId);
     setSaving(false);
     setIsAdding(false);
     return true;

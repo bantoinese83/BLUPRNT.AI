@@ -99,6 +99,14 @@ export default function FinanceScreen() {
       return;
     }
 
+    if (scopeForSellerPacket.length === 0 && invoices.length === 0) {
+      Alert.alert(
+        "Nothing to export yet",
+        "Add a scope item or upload an invoice, then try Export Seller Packet again.",
+      );
+      return;
+    }
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setExporting(true);
 
@@ -256,13 +264,23 @@ export default function FinanceScreen() {
         stickySectionHeadersEnabled={false}
         ListEmptyComponent={
           <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
-            <EmptyState
-              icon={Receipt}
-              title="Nothing in your ledger yet"
-              description="Add invoices, quotes, or receipts—they all show up here as your project record."
-              actionTitle="Add to ledger"
-              onAction={openLedgerDocumentCapture}
-            />
+            {invoices.length === 0 ? (
+              <EmptyState
+                icon={Receipt}
+                title="Nothing in your ledger yet"
+                description="Add invoices, quotes, or receipts—they all show up here as your project record."
+                actionTitle="Add to ledger"
+                onAction={openLedgerDocumentCapture}
+              />
+            ) : (
+              <EmptyState
+                icon={Receipt}
+                title="No documents match this filter"
+                description="Switch to “All” to see every invoice, or add a document in this category."
+                actionTitle="Show all"
+                onAction={() => setFilter("all")}
+              />
+            )}
           </View>
         }
         renderSectionHeader={({ section: { title } }) => (

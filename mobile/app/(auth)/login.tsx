@@ -27,6 +27,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { isValidEmail } from "@/lib/validation";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
@@ -49,32 +50,44 @@ export default function LoginScreen() {
   }, [params.email]);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setErrorMsg("Enter the email and password for your account.");
+      return;
+    }
+    if (!isValidEmail(trimmedEmail)) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setErrorMsg("Enter a valid email address.");
       return;
     }
 
     setLoading(true);
     setErrorMsg(null);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
 
-    if (error) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setErrorMsg(
-        friendlyAuthError(
-          error.message || "",
-          "status" in error ? (error as { status?: number }).status : undefined,
-        ),
-      );
-      setLoading(false);
-    } else {
+      if (error) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        setErrorMsg(
+          friendlyAuthError(
+            error.message || "",
+            "status" in error
+              ? (error as { status?: number }).status
+              : undefined,
+          ),
+        );
+        return;
+      }
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const href = await getPostAuthRedirectHref();
       router.replace(href);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,9 +121,15 @@ export default function LoginScreen() {
               <TouchableOpacity
                 onPress={() => {
                   Haptics.selectionAsync();
-                  router.back();
+                  if (router.canGoBack()) {
+                    router.back();
+                  } else {
+                    router.replace("/");
+                  }
                 }}
                 style={styles.backButton}
+                accessibilityRole="button"
+                accessibilityLabel="Back"
               >
                 <BlurView
                   intensity={20}
