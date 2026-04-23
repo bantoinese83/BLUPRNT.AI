@@ -14,7 +14,16 @@ async function removeBucketPrefixRecursive(
   admin: SupabaseClient,
   bucketId: string,
   prefix: string,
+  depth = 0,
 ): Promise<void> {
+  if (depth > 5) {
+    logEdge("warn", "delete-account storage recursion too deep", {
+      bucket: bucketId,
+      prefix,
+    });
+    return;
+  }
+
   const { data: items, error } = await admin.storage
     .from(bucketId)
     .list(prefix, { limit: 500 });
@@ -31,8 +40,9 @@ async function removeBucketPrefixRecursive(
   const filePaths: string[] = [];
   for (const item of items) {
     const path = prefix ? `${prefix}/${item.name}` : item.name;
+    // folder-like items in Supabase Storage list often have null metadata
     if (item.metadata == null) {
-      await removeBucketPrefixRecursive(admin, bucketId, path);
+      await removeBucketPrefixRecursive(admin, bucketId, path, depth + 1);
     } else {
       filePaths.push(path);
     }

@@ -58,8 +58,8 @@ Deno.serve(async (req: Request) => {
     }
 
     const project = projectRes.data;
-    const scope = scopeRes.data || [];
-    const invoices = invoiceRes.data || [];
+    const scope = (scopeRes.data || []).slice(0, 100);
+    const invoices = (invoiceRes.data || []).slice(0, 100);
 
     const contextStr = `
       Project: ${project.name}
