@@ -52,10 +52,6 @@ function PhotoSlot({
   const [editingCaption, setEditingCaption] = useState(false);
   const [captionValue, setCaptionValue] = useState(item?.caption || "");
 
-  useEffect(() => {
-    setCaptionValue(item?.caption || "");
-  }, [item?.caption]);
-
   const showPlaceholder = !signedUrl || error || !item;
 
   const handleSaveCaption = async () => {
@@ -400,6 +396,7 @@ export function TransformationVault({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
         <PhotoSlot
+          key={sets[activeSetIndex].before?.id || `before-${activeSetIndex}`}
           label="Baseline"
           icon={<History className="w-3 h-3 text-white" />}
           item={sets[activeSetIndex].before}
@@ -418,6 +415,7 @@ export function TransformationVault({
           error={false}
         />
         <PhotoSlot
+          key={sets[activeSetIndex].after?.id || `after-${activeSetIndex}`}
           label="Current"
           icon={<Activity className="w-3 h-3 text-teal-400" />}
           item={sets[activeSetIndex].after}
