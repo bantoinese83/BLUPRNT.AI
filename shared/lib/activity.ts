@@ -18,34 +18,50 @@ export function generateActivityEvents(
   invoices: InvoiceRow[],
 ): ActivityEvent[] {
   const events: ActivityEvent[] = [
-    // One event per recent invoice (up to 5)
-    ...(invoices ?? []).slice(0, 5).map((inv) => ({
-      id: `inv-${inv.id}`,
-      type: "upload" as const,
-      title: "Invoice Uploaded",
-      description: `${inv.vendor_name || "Vendor"} invoice for ${
-        inv.total != null && Number.isFinite(inv.total)
-          ? `$${inv.total.toLocaleString()}`
-          : "an unspecified amount"
-      } was added.`,
-      timestamp: inv.created_at || new Date().toISOString(),
-    })),
-    // Base achievement for project creation
-    {
-      id: `init-${project.id}`,
-      type: "project_created" as const,
-      title: "Project Initialized",
-      description: `Blueprint for '${project.name || "Unnamed Project"}' was created${
-        project.estimated_min_total != null &&
-        Number.isFinite(project.estimated_min_total)
-          ? ` with a $${project.estimated_min_total.toLocaleString()} baseline`
-          : ""
-      }.`,
-      timestamp: project.created_at || new Date().toISOString(),
-    },
+    ...generateInvoiceUploadEvents(invoices),
+    generateProjectInitializationEvent(project),
   ];
 
-  return events.sort((a, b) => {
+  return sortEventsByRecency(events);
+}
+
+/** Creates events for the 5 most recent invoice uploads. */
+function generateInvoiceUploadEvents(invoices: InvoiceRow[]): ActivityEvent[] {
+  return (invoices ?? []).slice(0, 5).map((inv) => ({
+    id: `inv-${inv.id}`,
+    type: "upload" as const,
+    title: "Invoice Uploaded",
+    description: `${inv.vendor_name || "Vendor"} invoice for ${
+      inv.total != null && Number.isFinite(inv.total)
+        ? `$${inv.total.toLocaleString()}`
+        : "an unspecified amount"
+    } was added.`,
+    timestamp: inv.created_at || new Date().toISOString(),
+  }));
+}
+
+/** Creates a base achievement event for when the project was first started. */
+function generateProjectInitializationEvent(
+  project: ProjectRow,
+): ActivityEvent {
+  const baseline =
+    project.estimated_min_total != null &&
+    Number.isFinite(project.estimated_min_total)
+      ? ` with a $${project.estimated_min_total.toLocaleString()} baseline`
+      : "";
+
+  return {
+    id: `init-${project.id}`,
+    type: "project_created" as const,
+    title: "Project Initialized",
+    description: `Blueprint for '${project.name || "Unnamed Project"}' was created${baseline}.`,
+    timestamp: project.created_at || new Date().toISOString(),
+  };
+}
+
+/** Sorts events descending (newest first) based on timestamp. */
+function sortEventsByRecency(events: ActivityEvent[]): ActivityEvent[] {
+  return [...events].sort((a, b) => {
     const tA = new Date(a.timestamp).getTime() || 0;
     const tB = new Date(b.timestamp).getTime() || 0;
     return tB - tA;

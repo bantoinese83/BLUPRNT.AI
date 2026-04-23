@@ -6,6 +6,14 @@ import { showAppToast } from "@/lib/app-toast";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
 
+export type UploadResult = {
+  success: boolean;
+  invoice_id?: string;
+  documentType?: DocumentType;
+  error?: string;
+  errorCode?: string;
+};
+
 const ACCEPTED_MIMES = [
   "application/pdf",
   "image/jpeg",
@@ -39,25 +47,21 @@ export async function uploadDocumentWithType(
   fileUri: string,
   mimeType: string,
   projectId: string,
-): Promise<{
-  success: boolean;
-  invoice_id?: string;
-  documentType?: DocumentType;
-  error?: string;
-  errorCode?: string;
-}> {
+): Promise<UploadResult> {
+  const options: DocumentType[] = ["invoice", "quote", "warranty", "permit"];
+
   return new Promise((resolve) => {
-    const options: DocumentType[] = ["invoice", "quote", "warranty", "permit"];
     const buttons = options.map((type) => ({
       text: type.charAt(0).toUpperCase() + type.slice(1),
-      onPress: () =>
-        postDocumentToUploadInvoice(
+      onPress: async () => {
+        const result = await executeUploadWorkflow(
           fileUri,
           mimeType,
           type,
           projectId,
-          resolve,
-        ),
+        );
+        resolve(result);
+      },
     }));
 
     Alert.alert("Document Type", "What type of document are you uploading?", [
@@ -71,56 +75,73 @@ export async function uploadDocumentWithType(
   });
 }
 
-/** Sends multipart form to the `upload-invoice` edge function for one document type. */
-async function postDocumentToUploadInvoice(
+/** Orchestrates the UI feedback, network call, and error mapping for a document upload. */
+async function executeUploadWorkflow(
   uri: string,
   mimeType: string,
   documentType: DocumentType,
   projectId: string,
-  resolve: (r: {
-    success: boolean;
-    invoice_id?: string;
-    documentType?: DocumentType;
-    error?: string;
-    errorCode?: string;
-  }) => void,
-) {
+): Promise<UploadResult> {
   try {
-    const mime = normalizeInvoiceUploadMime(uri, mimeType);
-    const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
-    const formData = new FormData();
-    formData.append("project_id", projectId);
-    formData.append("document_type", documentType);
-    formData.append("file", {
-      uri,
-      name: `doc_${Date.now()}.${ext}`,
-      type: mime,
-    } as unknown as Blob);
-
     showAppToast("Starting upload... please keep the app open.");
 
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Upload timeout")), 60000),
+    const formData = prepareUploadFormData(
+      uri,
+      mimeType,
+      documentType,
+      projectId,
     );
-    const { data, error } = await Promise.race([
-      invokeFunction<{
-        invoice_id?: string;
-        error?: string;
-        error_code?: string;
-      }>("upload-invoice", { body: formData }),
-      timeout,
-    ]);
+    const { data, error } = await invokeUploadWithTimeout(formData);
 
     const failure = extractUploadFailureFromInvokeResult(data, error);
-    if (failure)
-      return resolve({
+    if (failure) {
+      return {
         success: false,
         error: failure.message,
         errorCode: failure.errorCode,
-      });
+      };
+    }
 
-    resolve({ success: true, invoice_id: data?.invoice_id, documentType });
+    return { success: true, invoice_id: data?.invoice_id, documentType };
   } catch (err) {
-    resolve({ success: false, error: friendlyDocumentUploadError(err) });
+    return { success: false, error: friendlyDocumentUploadError(err) };
   }
+}
+
+/** Prepares the multipart/form-data for the Supabase Edge Function. */
+function prepareUploadFormData(
+  uri: string,
+  mimeType: string,
+  documentType: DocumentType,
+  projectId: string,
+): FormData {
+  const mime = normalizeInvoiceUploadMime(uri, mimeType);
+  const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+
+  const formData = new FormData();
+  formData.append("project_id", projectId);
+  formData.append("document_type", documentType);
+  formData.append("file", {
+    uri,
+    name: `doc_${Date.now()}.${ext}`,
+    type: mime,
+  } as unknown as Blob);
+
+  return formData;
+}
+
+/** Calls the Edge Function with a 60-second race-timeout. */
+async function invokeUploadWithTimeout(formData: FormData) {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Upload timeout")), 60000),
+  );
+
+  return await Promise.race([
+    invokeFunction<{
+      invoice_id?: string;
+      error?: string;
+      error_code?: string;
+    }>("upload-invoice", { body: formData }),
+    timeout,
+  ]);
 }

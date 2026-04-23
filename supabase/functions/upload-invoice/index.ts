@@ -14,6 +14,7 @@ import {
   reserveArchitectInvoiceUploadSlot,
 } from "../_shared/entitlements.ts";
 import { extractInvoiceFromPdf } from "../_shared/ocr.ts";
+import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
 function resolvedMimeType(f: File): string {
@@ -28,6 +29,46 @@ function resolvedMimeType(f: File): string {
   return "image/jpeg";
 }
 
+/** Converts an ArrayBuffer to a Base64 string for OCR processing. */
+function bufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+/** Uploads the raw bytes to the project-documents bucket. */
+async function uploadFileToStorage(
+  admin: SupabaseClient,
+  args: {
+    projectId: string;
+    userId: string;
+    docId: string;
+    docType: string;
+    file: File;
+  },
+): Promise<{ path: string; mime: string; error?: string }> {
+  const ext = args.file.name.includes(".")
+    ? args.file.name.slice(args.file.name.lastIndexOf("."))
+    : "";
+  const safeName = `${args.docType}_${args.docId}${ext}`;
+  const storagePath = `${args.projectId}/${args.userId}/${safeName}`;
+  const mime = resolvedMimeType(args.file);
+
+  const { error } = await admin.storage
+    .from("project-documents")
+    .upload(storagePath, await args.file.arrayBuffer(), {
+      contentType: mime,
+      upsert: false,
+    });
+
+  if (error) return { path: "", mime: "", error: error.message };
+  return { path: storagePath, mime };
+}
+
 Deno.serve(async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
@@ -37,84 +78,36 @@ Deno.serve(async (req: Request) => {
 
   const { ok, retryAfter } = await checkRateLimit(req);
   if (!ok) {
-    return jsonResponse(
-      { error: "Too many requests. Please try again later." },
-      429,
-      req,
-      retryAfter ?? 60,
-    );
+    return jsonResponse({ error: "Too many requests." }, 429, req, retryAfter ?? 60);
   }
 
   const userId = await getUserIdFromRequest(req);
   if (!userId) {
-    return jsonResponse(
-      {
-        error: "Please sign in to upload invoices.",
-        error_code: "SESSION_REQUIRED",
-      },
-      401,
-      req,
-    );
+    return jsonResponse({ error: "Unauthorized", error_code: "SESSION_REQUIRED" }, 401, req);
   }
 
   try {
     const formData = await req.formData();
-    const projectId = String(formData.get("project_id") ?? "").trim();
-    const file = formData.get("file");
-    const documentType =
-      String(formData.get("document_type") ?? "invoice").trim() || "invoice";
-    const vendor_hint =
-      String(formData.get("vendor_hint") ?? "").trim() || null;
-    const amount_hint = formData.get("amount_hint");
-
     const parsed = uploadInvoiceSchema.safeParse({
-      project_id: projectId,
-      file,
-      document_type: documentType,
-      vendor_hint: vendor_hint || undefined,
-      amount_hint:
-        amount_hint != null && amount_hint !== "" ? amount_hint : undefined,
+      project_id: formData.get("project_id"),
+      file: formData.get("file"),
+      document_type: formData.get("document_type") || "invoice",
+      vendor_hint: formData.get("vendor_hint"),
+      amount_hint: formData.get("amount_hint") || undefined,
     });
 
     if (!parsed.success) {
-      const msg = parsed.error.errors[0]?.message ?? "Invalid request";
-      return jsonResponse({ error: msg }, 400, req);
+      return jsonResponse({ error: parsed.error.errors[0]?.message ?? "Invalid request" }, 400, req);
     }
 
-    const {
-      project_id,
-      file: validatedFile,
-      document_type: docType,
-      amount_hint: amountNum,
-    } = parsed.data;
-
+    const { project_id, file, document_type: docType, amount_hint: amountNum, vendor_hint } = parsed.data;
     const admin = getServiceClient();
-    try {
-      await assertProjectOwner(admin, project_id, userId);
-    } catch (e) {
-      const m = e instanceof Error ? e.message : "";
-      if (m === "not_found")
-        return jsonResponse({ error: "Project not found" }, 404, req);
-      return jsonResponse({ error: "Access denied" }, 403, req);
-    }
 
-    const entitlement = await checkInvoiceUploadAllowed(
-      admin,
-      userId,
-      project_id,
-      docType,
-    );
+    await assertProjectOwner(admin, project_id, userId);
+
+    const entitlement = await checkInvoiceUploadAllowed(admin, userId, project_id, docType);
     if (!entitlement.allowed) {
-      return jsonResponse(
-        {
-          error:
-            entitlement.reason ?? "Upload limit reached. Upgrade for more.",
-          error_code:
-            entitlement.code ?? "INVOICE_LIMIT_FREE_PROJECT",
-        },
-        403,
-        req,
-      );
+      return jsonResponse({ error: entitlement.reason, error_code: entitlement.code }, 403, req);
     }
 
     let rollbackArchitectSlot = false;
@@ -122,237 +115,92 @@ Deno.serve(async (req: Request) => {
       if (docType === "invoice" && entitlement.reason === "architect_plan") {
         const slot = await reserveArchitectInvoiceUploadSlot(admin, userId);
         if (!slot.ok) {
-          return jsonResponse(
-            {
-              error: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
-              error_code: "INVOICE_LIMIT_ARCHITECT_MONTH",
-            },
-            403,
-            req,
-          );
+          return jsonResponse({
+            error: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} uploads).`,
+            error_code: "INVOICE_LIMIT_ARCHITECT_MONTH",
+          }, 403, req);
         }
         rollbackArchitectSlot = true;
       }
 
       const docId = crypto.randomUUID();
-    const ext = validatedFile.name.includes(".")
-      ? validatedFile.name.slice(validatedFile.name.lastIndexOf("."))
-      : "";
-    const safeName = `${docType}_${docId}${ext}`;
-    const storagePath = `${project_id}/${userId}/${safeName}`;
+      const storage = await uploadFileToStorage(admin, { projectId: project_id, userId, docId, docType: docType, file });
+      if (storage.error) return jsonResponse({ error: "Could not store file." }, 500, req);
 
-    const fileBuf = await validatedFile.arrayBuffer();
-    const buf = new Uint8Array(fileBuf);
-    const mimeForStore = resolvedMimeType(validatedFile);
-
-    const { error: upErr } = await admin.storage
-      .from("project-documents")
-      .upload(storagePath, buf, {
-        contentType: mimeForStore,
-        upsert: false,
-      });
-
-    if (upErr) {
-      console.error(upErr);
-      return jsonResponse({ error: "Could not store file." }, 500, req);
-    }
-
-    const { data: doc, error: docErr } = await admin
-      .from("documents")
-      .insert({
+      const { data: doc, error: docErr } = await admin.from("documents").insert({
         id: docId,
         project_id: project_id,
         type: docType,
-        storage_path: storagePath,
-        original_filename: validatedFile.name,
+        storage_path: storage.path,
+        original_filename: file.name,
         uploaded_by_user_id: userId,
         ocr_status: docType === "invoice" ? "pending" : "success",
-      })
-      .select("id")
-      .single();
+      }).select("id").single();
 
-    if (docErr || !doc) {
-      console.error(docErr);
-      return jsonResponse({ error: "Could not create document." }, 500, req);
-    }
+      if (docErr || !doc) return jsonResponse({ error: "Could not create document." }, 500, req);
 
-    const createInvoiceRecord = async (type: string) => {
       const invoiceId = crypto.randomUUID();
-      let subtotal = amountNum ?? (type === "invoice" ? 1850 : 0);
-      let tax = type === "invoice" ? Math.round(subtotal * 0.08) : 0;
+      let subtotal = amountNum ?? (docType === "invoice" ? 1850 : 0);
+      let tax = docType === "invoice" ? Math.round(subtotal * 0.08) : 0;
       let total = subtotal + tax;
-      let vendorLabel =
-        type === "invoice"
-          ? parsed.data.vendor_hint || "Vendor (review details)"
-          : type === "quote"
-            ? parsed.data.vendor_hint || "Quote (review details)"
-            : type === "warranty"
-              ? "Warranty"
-              : "Permit";
-      let invoiceNumber = `${type.toUpperCase().slice(0, 3)}-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 900) + 100)}`;
-      let issueDate = new Date().toISOString().slice(0, 10);
-      let lineItemsToInsert: Array<{
-        invoice_id: string;
-        description: string;
-        quantity: number;
-        unit_price: number;
-        unit_of_measure: string;
-        tax_rate: number;
-        tax_amount: number;
-        line_total: number;
-        category: string;
-      }> = [];
+      let vendorLabel = vendor_hint || (docType === "invoice" ? "Vendor" : docType === "quote" ? "Quote" : docType.charAt(0).toUpperCase() + docType.slice(1));
+      let lineItems: any[] = [];
 
-      if (type === "invoice") {
-        const bytes = new Uint8Array(fileBuf);
-        let binary = "";
-        const chunkSize = 8192;
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-        }
-        const pdfBase64 = btoa(binary);
-        const ocrResult = await extractInvoiceFromPdf(
-          pdfBase64,
-          mimeForStore || "application/pdf",
-        );
-
-        if (ocrResult) {
-          if (ocrResult.vendor_name) vendorLabel = ocrResult.vendor_name;
-          if (ocrResult.invoice_number)
-            invoiceNumber = ocrResult.invoice_number;
-          if (ocrResult.issue_date) issueDate = ocrResult.issue_date;
-          if (ocrResult.total != null)
-            total = Math.round(ocrResult.total * 100) / 100;
-          if (ocrResult.subtotal != null)
-            subtotal = Math.round(ocrResult.subtotal * 100) / 100;
-          if (ocrResult.tax_total != null)
-            tax = Math.round(ocrResult.tax_total * 100) / 100;
-
-          if (ocrResult.line_items.length > 0) {
-            lineItemsToInsert = ocrResult.line_items.map((li) => ({
-              invoice_id: invoiceId,
-              description: li.description,
-              quantity: li.quantity,
-              unit_price: li.unit_price,
-              unit_of_measure: "ea",
-              tax_rate: 0,
-              tax_amount: 0,
-              line_total: li.line_total,
-              category: "labor",
-            }));
-          }
-        }
-
-        if (lineItemsToInsert.length === 0) {
-          lineItemsToInsert = [
-            {
-              invoice_id: invoiceId,
-              description: parsed.data.vendor_hint
-                ? `Services from ${parsed.data.vendor_hint}`
-                : "Invoice line (details from upload)",
-              quantity: 1,
-              unit_price: subtotal,
-              unit_of_measure: "job",
-              tax_rate: 0.08,
-              tax_amount: tax,
-              line_total: total,
-              category: "labor",
-            },
-          ];
+      if (docType === "invoice") {
+        const ocr = await extractInvoiceFromPdf(bufferToBase64(await file.arrayBuffer()), storage.mime);
+        if (ocr) {
+          if (ocr.vendor_name) vendorLabel = ocr.vendor_name;
+          if (ocr.total != null) total = Math.round(ocr.total * 100) / 100;
+          if (ocr.subtotal != null) subtotal = Math.round(ocr.subtotal * 100) / 100;
+          if (ocr.tax_total != null) tax = Math.round(ocr.tax_total * 100) / 100;
+          lineItems = (ocr.line_items || []).map(li => ({
+            invoice_id: invoiceId,
+            description: li.description,
+            quantity: li.quantity,
+            unit_price: li.unit_price,
+            unit_of_measure: "ea",
+            tax_rate: 0, tax_amount: 0,
+            line_total: li.line_total,
+            category: "labor",
+          }));
         }
       }
 
-      // DB often enforces NOT NULL on total and CHECK on payment_status; permits/warranties
-      // must still insert valid rows (UI hides amount/payment badges for non-invoices).
-      const defaultInvoiceSubtotal = amountNum ?? 1850;
-      const safeSubtotal =
-        type === "invoice"
-          ? Number.isFinite(subtotal)
-            ? subtotal
-            : defaultInvoiceSubtotal
-          : 0;
-      const safeTax =
-        type === "invoice"
-          ? Number.isFinite(tax)
-            ? tax
-            : Math.round(safeSubtotal * 0.08)
-          : 0;
-      const safeTotal =
-        type === "invoice"
-          ? Number.isFinite(total)
-            ? total
-            : safeSubtotal + safeTax
-          : 0;
+      if (lineItems.length === 0) {
+        lineItems = [{
+          invoice_id: invoiceId,
+          description: vendor_hint ? `Services from ${vendor_hint}` : "Invoice line",
+          quantity: 1,
+          unit_price: subtotal,
+          unit_of_measure: "job",
+          tax_rate: 0.08, tax_amount: tax,
+          line_total: total,
+          category: "labor",
+        }];
+      }
 
-      const { error: invErr } = await admin.from("invoices").insert({
-        id: invoiceId,
-        document_id: doc.id,
-        project_id: project_id,
-        document_type: type,
-        vendor_name: vendorLabel,
-        invoice_number: invoiceNumber,
-        issue_date: issueDate,
-        due_date: null,
-        currency: "USD",
-        subtotal: safeSubtotal,
-        tax_total: safeTax,
-        total: safeTotal,
-        payment_status: "unpaid",
+      await admin.from("invoices").insert({
+        id: invoiceId, document_id: doc.id, project_id, document_type: docType,
+        vendor_name: vendorLabel, total: Number.isFinite(total) ? total : 0,
+        subtotal: Number.isFinite(subtotal) ? subtotal : 0,
+        tax_total: Number.isFinite(tax) ? tax : 0,
+        payment_status: "unpaid", currency: "USD", issue_date: new Date().toISOString().slice(0, 10),
       });
 
-      if (invErr) {
-        console.error(invErr);
-        return jsonResponse({ error: "Could not create record." }, 500, req);
-      }
-
-      if (type === "invoice") {
-        const { error: lineErr } = await admin
-          .from("invoice_line_items")
-          .insert(lineItemsToInsert);
-        if (lineErr) {
-          console.error("Line items insert failed:", lineErr);
-          return jsonResponse(
-            { error: "Could not save invoice details." },
-            500,
-            req,
-          );
-        }
-
-        const { error: docUpdateErr } = await admin
-          .from("documents")
-          .update({ ocr_status: "success" })
-          .eq("id", doc.id);
-        if (docUpdateErr) {
-          console.error("Document status update failed:", docUpdateErr);
-          // We don't return 500 here since the invoice is already saved, but we log it.
-        }
+      if (docType === "invoice") {
+        await admin.from("invoice_line_items").insert(lineItems);
+        await admin.from("documents").update({ ocr_status: "success" }).eq("id", doc.id);
       }
 
       rollbackArchitectSlot = false;
-      return jsonResponse(
-        {
-          invoice_id: invoiceId,
-          document_id: doc.id,
-          document_type: docType,
-          ocr_status: type === "invoice" ? "success" : "success",
-        },
-        202,
-        req,
-      );
-    };
-
-      return docType === "invoice"
-        ? await createInvoiceRecord("invoice")
-        : await createInvoiceRecord(docType);
+      return jsonResponse({ invoice_id: invoiceId, document_id: doc.id, document_type: docType }, 202, req);
     } finally {
       if (rollbackArchitectSlot) {
-        await releaseArchitectInvoiceUploadSlot(admin, userId).catch((err) => {
-          console.error("[upload-invoice] release architect slot failed:", err);
-        });
+        await releaseArchitectInvoiceUploadSlot(admin, userId).catch(err => console.error(err));
       }
     }
   } catch (e) {
     console.error(e);
-    return jsonResponse({ error: "Upload failed. Try again." }, 500, req);
+    return jsonResponse({ error: "Upload failed." }, 500, req);
   }
 });
