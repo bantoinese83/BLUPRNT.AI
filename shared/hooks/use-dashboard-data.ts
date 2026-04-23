@@ -151,6 +151,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
     scopeItems: snapshot?.scopeItems ?? [],
     invoices: snapshot?.invoices ?? [],
     spendByCategory: snapshot?.spendByCategory ?? {},
+    reconciliation: snapshot?.reconciliation ?? null,
     isArchitect: snapshot?.isArchitect ?? false,
     subscription: snapshot?.subscription ?? null,
     hasProjectPass: snapshot?.hasProjectPass ?? false,

@@ -9,19 +9,42 @@ export type OcrInvoiceResult = {
     quantity: number;
     unit_price: number;
     line_total: number;
+    mapped_scope_item_id?: string | null;
   }>;
   subtotal: number | null;
   tax_total: number | null;
   total: number | null;
 };
 
+export type ProjectScopeItem = {
+  id: string;
+  category: string;
+  description: string | null;
+};
+
+/**
+ * Extracts structured data from an invoice PDF/image.
+ * If projectScope is provided, it attempts to map each line item to a scope item.
+ */
 export async function extractInvoiceFromPdf(
   pdfBase64: string,
   mimeType: string,
+  projectScope?: ProjectScopeItem[],
 ): Promise<OcrInvoiceResult | null> {
-  const systemInstruction = `Extract structured data from the provided invoice/PDF.
+  let systemInstruction = `Extract structured data from the provided invoice/PDF.
 If a field cannot be extracted, return null. 
 For line_items, ensure each entry has description, quantity, unit_price, and line_total.`;
+
+  if (projectScope && projectScope.length > 0) {
+    const scopeStr = projectScope.map(s => `ID: ${s.id}, Category: ${s.category}, Description: ${s.description || 'N/A'}`).join("\n");
+    systemInstruction += `\n\nYou are also given the project's planned scope items below:
+${scopeStr}
+
+For EACH line_item you extract, find the most relevant planned scope item from the list above. 
+Return the "ID" of the matching scope item in the "mapped_scope_item_id" field. 
+If no reasonable match exists, return null for that field. 
+Be accurate: only map if the line item directly contributes to that scope category or description.`;
+  }
 
   const prompt = "Please process this invoice.";
 
@@ -40,6 +63,7 @@ For line_items, ensure each entry has description, quantity, unit_price, and lin
             quantity: { type: "number" },
             unit_price: { type: "number" },
             line_total: { type: "number" },
+            mapped_scope_item_id: { type: "string", nullable: true },
           },
           required: ["description", "quantity", "unit_price", "line_total"],
         },

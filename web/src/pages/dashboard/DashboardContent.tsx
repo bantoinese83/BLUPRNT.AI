@@ -68,6 +68,8 @@ export function DashboardContent({
   project,
   scopeItems,
   invoices,
+  spendByCategory: _spendByCategory,
+  reconciliation,
   isArchitect,
   subscription,
   hasProjectPass,
@@ -444,15 +446,13 @@ export function DashboardContent({
                     scopeItems={scopeItems}
                     invoices={invoices}
                     activityEvents={activityEvents}
+                    reconciliation={reconciliation}
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}
                     health={health}
                     ledger={ledger}
                     invoicesComp={invoicesComp}
-                    onUpgradeClick={() => {
-                      setUpgradeReason("general");
-                      setShowUpgrade(true);
-                    }}
+                    onUpgradeClick={() => setShowUpgrade(true)}
                   />
                 }
               />

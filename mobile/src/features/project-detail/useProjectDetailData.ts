@@ -13,6 +13,10 @@ import type { InvoiceRow, ProjectRow, ScopeRow } from "@shared/types/database";
 import { groupScopeByCategory, projectHasEstimateTotals } from "./helpers";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
+import {
+  buildReconciliation,
+  type ReconciliationResult,
+} from "@shared/lib/reconciliation";
 
 export function useProjectDetailData() {
   const { id: rawId, focus: rawFocus } = useLocalSearchParams<{
@@ -58,10 +62,13 @@ export function useProjectDetailData() {
     [detailInvoices],
   );
 
+  const [reconciliation, setReconciliation] =
+    useState<ReconciliationResult | null>(null);
+
   const groupedScope = useMemo(() => groupScopeByCategory(scope), [scope]);
 
   const ingestFetchResults = useCallback(
-    (
+    async (
       projRes: {
         data: ProjectRow | null;
         error: { message: string; code?: string } | null;
@@ -96,7 +103,8 @@ export function useProjectDetailData() {
         );
       }
 
-      setScope(scopeRes.data ?? []);
+      const newScopes = (scopeRes.data ?? []) as ScopeRow[];
+      setScope(newScopes);
       if (scopeRes.error) {
         console.warn("[project] scope_items", scopeRes.error.message);
         setScopeLoadWarning(
@@ -121,7 +129,23 @@ export function useProjectDetailData() {
         setInvoiceLoadWarning(null);
       }
 
-      setDetailInvoices((invRes.data ?? []) as unknown as InvoiceRow[]);
+      const newInvoices = (invRes.data ?? []) as unknown as InvoiceRow[];
+      setDetailInvoices(newInvoices);
+
+      // Reconciliation logic for mobile
+      if (newInvoices.length > 0) {
+        const { data: lines } = await supabase
+          .from("invoice_line_items")
+          .select("invoice_id, line_total, scope_item_id")
+          .in(
+            "invoice_id",
+            newInvoices.map((i) => i.id),
+          );
+
+        if (lines) {
+          setReconciliation(buildReconciliation(newScopes, lines));
+        }
+      }
     },
     [],
   );
@@ -159,7 +183,7 @@ export function useProjectDetailData() {
           .order("created_at", { ascending: false }),
       ]);
 
-      ingestFetchResults(
+      await ingestFetchResults(
         projRes as {
           data: ProjectRow | null;
           error: { message: string; code?: string } | null;
@@ -216,8 +240,22 @@ export function useProjectDetailData() {
         return false;
       }
       if (data?.length) {
-        setScope(data);
+        const newScopes = data as ScopeRow[];
+        setScope(newScopes);
         setScopeLoadWarning(null);
+
+        // Refresh reconciliation if scope arrives late
+        if (detailInvoices.length > 0) {
+          const { data: lines } = await supabase
+            .from("invoice_line_items")
+            .select("invoice_id, line_total, scope_item_id")
+            .in(
+              "invoice_id",
+              detailInvoices.map((i) => i.id),
+            );
+          if (lines) setReconciliation(buildReconciliation(newScopes, lines));
+        }
+
         return true;
       }
       return false;
@@ -314,7 +352,7 @@ export function useProjectDetailData() {
         .order("created_at", { ascending: false }),
     ]);
 
-    ingestFetchResults(
+    await ingestFetchResults(
       projRes as {
         data: ProjectRow | null;
         error: { message: string; code?: string } | null;
@@ -385,6 +423,7 @@ export function useProjectDetailData() {
     expandedId,
     setExpandedId,
     detailInvoices,
+    reconciliation,
     includeAppendix,
     setIncludeAppendix,
     isArchitect,

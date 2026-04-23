@@ -11,6 +11,9 @@ import {
   Package,
   Tag,
   Boxes,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
@@ -18,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 
 import type { ProjectRow, ScopeRow } from "@shared/types/database";
+import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
 import { money, getStars as stars } from "@/lib/formatters";
 import { InsightTeaser } from "./InsightTeaser";
@@ -85,12 +89,14 @@ function MaterialDetailList({
 export function EstimateSummary({
   project,
   scopeItems,
+  reconciliation,
   isArchitect,
   hasProjectPass,
   onUpgradeClick,
 }: {
   project: ProjectRow;
   scopeItems: ScopeRow[];
+  reconciliation: ReconciliationResult | null;
   isArchitect?: boolean;
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
@@ -206,6 +212,7 @@ export function EstimateSummary({
               const isExpanded = expandedId === item.id;
               const materials = item.metadata?.materials;
               const hasMaterials = materials && materials.length > 0;
+              const recon = reconciliation?.items[item.id];
 
               return (
                 <div
@@ -231,6 +238,24 @@ export function EstimateSummary({
                             {item.finish_tier}
                           </Badge>
                         )}
+
+                        {recon && recon.total_billed > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "text-[10px] font-black uppercase tracking-tighter border-none px-2 py-0.5",
+                              recon.status === "reconciled"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : recon.status === "over"
+                                  ? "bg-rose-50 text-rose-700"
+                                  : "bg-amber-50 text-amber-700",
+                            )}
+                          >
+                            {recon.status === "reconciled"
+                              ? "Matched"
+                              : recon.status}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">
                         {item.description}
@@ -249,6 +274,27 @@ export function EstimateSummary({
                         <div className="font-bold text-lg text-teal-950 tabular-nums mb-0.5">
                           {money(item.total_cost_min, item.total_cost_max)}
                         </div>
+                        {recon && recon.total_billed > 0 && (
+                          <div
+                            className={cn(
+                              "flex items-center justify-end gap-1 text-[10px] font-bold uppercase tracking-tight",
+                              recon.status === "reconciled"
+                                ? "text-emerald-600"
+                                : recon.status === "over"
+                                  ? "text-rose-600"
+                                  : "text-amber-600",
+                            )}
+                          >
+                            {recon.status === "reconciled" ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : recon.status === "over" ? (
+                              <AlertTriangle className="w-3 h-3" />
+                            ) : (
+                              <Info className="w-3 h-3" />
+                            )}
+                            Billed {money(recon.total_billed)}
+                          </div>
+                        )}
                         {item.quantity != null && item.unit && (
                           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded inline-block">
                             {item.quantity} {item.unit}

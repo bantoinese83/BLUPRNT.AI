@@ -4,6 +4,7 @@ import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
 import type { ProjectRow } from "@shared/types/database";
 import { parseCachedDashboardPayload } from "@shared/lib/dashboard-cache-payload";
+import type { ReconciliationResult } from "@shared/lib/reconciliation";
 import {
   emptyDashboardSnapshot,
   buildDashboardDataForProject,
@@ -20,6 +21,11 @@ async function loadStaleDashboardFromCache(
   if (!c) return null;
   const lastProjectId =
     c.project?.id ?? (await AsyncStorage.getItem("bluprnt_project_id")) ?? null;
+
+  // parseCachedDashboardPayload might not handle reconciliation if it was added recently
+  const recon = (c as Record<string, unknown>)
+    .reconciliation as ReconciliationResult | null;
+
   return {
     configured: true,
     redirectToLogin: null,
@@ -29,6 +35,7 @@ async function loadStaleDashboardFromCache(
     scopeItems: c.scopeItems,
     invoices: c.invoices,
     spendByCategory: c.spendByCategory,
+    reconciliation: recon ?? null,
     isArchitect: c.isArchitect,
     subscription: c.subscription,
     hasProjectPass: c.hasProjectPass,
@@ -118,6 +125,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
         scopeItems: built.scopeItems,
         invoices: built.invoices,
         spendByCategory: built.spendByCategory,
+        reconciliation: built.reconciliation,
         isArchitect: built.isArchitect,
         subscription: built.subscription,
         hasProjectPass: built.hasProjectPass,
@@ -133,6 +141,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
       scopeItems: built.scopeItems,
       invoices: built.invoices,
       spendByCategory: built.spendByCategory,
+      reconciliation: built.reconciliation,
       isArchitect: built.isArchitect,
       subscription: built.subscription,
       hasProjectPass: built.hasProjectPass,

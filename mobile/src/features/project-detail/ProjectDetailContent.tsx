@@ -105,6 +105,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
         {hasScopeRows ? (
           <ProjectScopeGroupedList
             groupedScope={groupedScope}
+            reconciliation={vm.reconciliation}
             expandedId={expandedId}
             setExpandedId={setExpandedId}
             onPersistScopeMaterials={updateScopeItemMaterials}

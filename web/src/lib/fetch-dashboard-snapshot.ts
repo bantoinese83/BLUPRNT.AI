@@ -79,6 +79,7 @@ export async function fetchDashboardSnapshot(options?: {
       scopeItems: built.scopeItems,
       invoices: built.invoices,
       spendByCategory: built.spendByCategory,
+      reconciliation: built.reconciliation,
       isArchitect: built.isArchitect,
       subscription: built.subscription,
       hasProjectPass: built.hasProjectPass,

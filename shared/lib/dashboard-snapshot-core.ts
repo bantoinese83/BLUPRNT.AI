@@ -14,6 +14,10 @@ import type { DashboardSnapshot } from "../types/dashboard-snapshot";
 import { buildSpendByCategory } from "./spend-by-category";
 import { partialDashboardLoadMessage } from "./dashboard-partial-load";
 import { isArchitectPlanEffective } from "./architect-entitlement";
+import {
+  buildReconciliation,
+  type ReconciliationResult,
+} from "./reconciliation";
 
 export function emptyDashboardSnapshot(): DashboardSnapshot {
   return {
@@ -25,6 +29,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
     scopeItems: [],
     invoices: [],
     spendByCategory: {},
+    reconciliation: null,
     isArchitect: false,
     subscription: null,
     hasProjectPass: false,
@@ -33,13 +38,13 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
 }
 
 const PROJECTS_LIST_SELECT =
-  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id)";
+  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id), before_photo_storage_path, after_photo_storage_path";
 
 const SCOPE_SELECT =
-  "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata";
+  "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";
 
 const INVOICE_SELECT =
-  "id, vendor_name, total, created_at, payment_status, document_type, document_id";
+  "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date";
 
 /**
  * All projects the user owns (via property → owner).
@@ -82,6 +87,7 @@ export type BuiltDashboardForProject = {
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
   spendByCategory: Record<string, number>;
+  reconciliation: ReconciliationResult | null;
   loadError: string | null;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
@@ -146,24 +152,30 @@ export async function buildDashboardDataForProject(
 
   const invoiceIds = newInvoices.map((i) => i.id).filter(Boolean);
   let spendByCategory: Record<string, number> = {};
+  let reconciliation: ReconciliationResult | null = null;
+
   if (invoiceIds.length > 0) {
     const linesRes = await supabase
       .from("invoice_line_items")
-      .select("category, line_total, scope_item_id")
+      .select("invoice_id, category, line_total, scope_item_id")
       .in("invoice_id", invoiceIds);
+
     if (!linesRes.error) {
       spendByCategory = buildSpendByCategory(linesRes.data ?? [], newScopes);
+      reconciliation = buildReconciliation(newScopes, linesRes.data ?? []);
     }
   }
 
   const project =
-    allProjects.find((p) => p.id === projectId) ?? allProjects[0]!;
+    allProjects.find((p) => p.id === projectId) ??
+    (allProjects[0] as ProjectRow);
 
   return {
     project,
     scopeItems: newScopes,
     invoices: newInvoices,
     spendByCategory,
+    reconciliation,
     loadError,
     isArchitect,
     subscription: sub,

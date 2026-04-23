@@ -5,6 +5,8 @@ import type {
   UserSubscriptionRow,
 } from "./database";
 
+import type { ReconciliationResult } from "../lib/reconciliation";
+
 /** Dashboard bundle used by web and mobile data layers. */
 export type DashboardSnapshot = {
   configured: boolean;
@@ -16,6 +18,7 @@ export type DashboardSnapshot = {
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
   spendByCategory: Record<string, number>;
+  reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;

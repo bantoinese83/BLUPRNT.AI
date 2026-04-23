@@ -12,12 +12,14 @@ import { TransformationSlider } from "@/components/dashboard/TransformationSlide
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
+import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
 interface DashboardPlanProps {
   project: ProjectRow;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
   activityEvents: ActivityEvent[];
+  reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
   hasProjectPass: boolean;
   health: React.ReactNode;
@@ -31,6 +33,7 @@ export function DashboardPlan({
   scopeItems,
   invoices,
   activityEvents,
+  reconciliation,
   isArchitect,
   hasProjectPass,
   health,
@@ -69,6 +72,7 @@ export function DashboardPlan({
       <EstimateSummary
         project={project}
         scopeItems={scopeItems}
+        reconciliation={reconciliation}
         isArchitect={isArchitect}
         hasProjectPass={hasProjectPass}
         onUpgradeClick={onUpgradeClick}

@@ -21,6 +21,7 @@ export default function Dashboard() {
     scopeItems,
     invoices,
     spendByCategory,
+    reconciliation,
     isArchitect,
     subscription,
     hasProjectPass,
@@ -66,25 +67,27 @@ export default function Dashboard() {
         invoices={invoices}
         spendByCategory={spendByCategory}
       >
-      <DashboardContent
-        projects={projects}
-        project={project}
-        scopeItems={scopeItems}
-        invoices={invoices}
-        isArchitect={isArchitect}
-        subscription={subscription}
-        hasProjectPass={hasProjectPass}
-        load={load}
-        loadError={loadError}
-        refreshing={refreshing}
-        clearLoadError={clearLoadError}
-        handleProjectSelect={handleProjectSelect}
-        setProjects={setProjects}
-        setProject={setProject}
-        setScopeItems={setScopeItems}
-        setInvoices={setInvoices}
-      />
-    </AwarenessProvider>
-  </>
+        <DashboardContent
+          projects={projects}
+          project={project}
+          scopeItems={scopeItems}
+          invoices={invoices}
+          spendByCategory={spendByCategory}
+          reconciliation={reconciliation}
+          isArchitect={isArchitect}
+          subscription={subscription}
+          hasProjectPass={hasProjectPass}
+          load={load}
+          loadError={loadError}
+          refreshing={refreshing}
+          clearLoadError={clearLoadError}
+          handleProjectSelect={handleProjectSelect}
+          setProjects={setProjects}
+          setProject={setProject}
+          setScopeItems={setScopeItems}
+          setInvoices={setInvoices}
+        />
+      </AwarenessProvider>
+    </>
   );
 }

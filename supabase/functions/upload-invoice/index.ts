@@ -13,7 +13,7 @@ import {
   releaseArchitectInvoiceUploadSlot,
   reserveArchitectInvoiceUploadSlot,
 } from "../_shared/entitlements.ts";
-import { extractInvoiceFromPdf } from "../_shared/ocr.ts";
+import { extractInvoiceFromPdf, type ProjectScopeItem } from "../_shared/ocr.ts";
 import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
@@ -147,7 +147,20 @@ Deno.serve(async (req: Request) => {
       let lineItems: any[] = [];
 
       if (docType === "invoice") {
-        const ocr = await extractInvoiceFromPdf(bufferToBase64(await file.arrayBuffer()), storage.mime);
+        // Fetch current project scope for reconciliation mapping
+        const { data: scopeRows } = await admin
+          .from("scope_items")
+          .select("id, category, description")
+          .eq("project_id", project_id);
+
+        const projectScope = (scopeRows || []) as ProjectScopeItem[];
+
+        const ocr = await extractInvoiceFromPdf(
+          bufferToBase64(await file.arrayBuffer()), 
+          storage.mime,
+          projectScope
+        );
+
         if (ocr) {
           if (ocr.vendor_name) vendorLabel = ocr.vendor_name;
           if (ocr.total != null) total = Math.round(ocr.total * 100) / 100;
@@ -162,6 +175,7 @@ Deno.serve(async (req: Request) => {
             tax_rate: 0, tax_amount: 0,
             line_total: li.line_total,
             category: "labor",
+            scope_item_id: li.mapped_scope_item_id || null, // Reconciliation Mapping
           }));
         }
       }

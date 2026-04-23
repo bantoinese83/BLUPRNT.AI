@@ -1,13 +1,24 @@
-import { Pencil, Trash2, Hammer, Loader2 } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Hammer,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { money, getStars as stars } from "@/lib/formatters";
+import { cn } from "@/lib/utils";
 import type { ScopeRow } from "@shared/types/database";
+import type { ReconciliationItem } from "@shared/lib/reconciliation";
 
 const TIERS = ["economy", "mid", "premium"] as const;
 
 interface ScopeItemRowProps {
   item: ScopeRow;
+  reconciliation?: ReconciliationItem | null;
   isEditing: boolean;
   onEdit: (item: ScopeRow) => void;
   onDelete: (item: ScopeRow) => void;
@@ -24,6 +35,7 @@ interface ScopeItemRowProps {
 
 export function ScopeItemRow({
   item,
+  reconciliation,
   isEditing,
   onEdit,
   onDelete,
@@ -192,6 +204,27 @@ export function ScopeItemRow({
           <div className="font-bold text-slate-900">
             {money(item.total_cost_min, item.total_cost_max)}
           </div>
+          {reconciliation && reconciliation.total_billed > 0 && (
+            <div
+              className={cn(
+                "flex items-center justify-end gap-1.5 text-[10px] font-black uppercase tracking-tighter",
+                reconciliation.status === "reconciled"
+                  ? "text-emerald-600"
+                  : reconciliation.status === "over"
+                    ? "text-rose-600"
+                    : "text-amber-600",
+              )}
+            >
+              {reconciliation.status === "reconciled" ? (
+                <CheckCircle2 className="w-3 h-3" />
+              ) : reconciliation.status === "over" ? (
+                <AlertTriangle className="w-3 h-3" />
+              ) : (
+                <Info className="w-3 h-3" />
+              )}
+              Billed {money(reconciliation.total_billed)}
+            </div>
+          )}
           {item.quantity != null && item.unit && (
             <div className="text-xs text-slate-500">
               {item.quantity} {item.unit}

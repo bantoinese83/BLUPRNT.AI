@@ -4,9 +4,11 @@ import { MotiView } from "moti";
 import { projectDetailStyles as styles } from "./project-detail.styles";
 import { ProjectScopeLineCard } from "./ProjectScopeLineCard";
 import type { ScopeRow } from "@shared/types/database";
+import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
 type Props = {
   groupedScope: Record<string, ScopeRow[]>;
+  reconciliation: ReconciliationResult | null;
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
   onPersistScopeMaterials?: (
@@ -17,6 +19,7 @@ type Props = {
 
 export function ProjectScopeGroupedList({
   groupedScope,
+  reconciliation,
   expandedId,
   setExpandedId,
   onPersistScopeMaterials,
@@ -44,6 +47,7 @@ export function ProjectScopeGroupedList({
             <ProjectScopeLineCard
               key={item.id}
               item={item}
+              reconciliation={reconciliation?.items[item.id]}
               catIndex={catIndex}
               index={index}
               expandedId={expandedId}

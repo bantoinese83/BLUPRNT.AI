@@ -5,11 +5,15 @@ import type {
   UserSubscriptionRow,
 } from "@shared/types/database";
 
+import type { ReconciliationResult } from "@shared/lib/reconciliation";
+
 export interface DashboardContentProps {
   projects: ProjectRow[];
   project: ProjectRow;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
+  spendByCategory: Record<string, number>;
+  reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
