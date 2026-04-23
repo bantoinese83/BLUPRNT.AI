@@ -24,7 +24,10 @@ export function ResaleValueImpact({
             Resale Value Impact
           </div>
           {investment > 0 && (
-            <Badge className="bg-emerald-50 text-emerald-700 border-none text-[9px] font-black uppercase tracking-widest">
+            <Badge
+              variant="secondary"
+              className="bg-teal-950 text-emerald-400 border-teal-900 gap-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-teal-900 transition-colors"
+            >
               Ledger Premium Active
             </Badge>
           )}

@@ -451,14 +451,15 @@ export default function DashboardScreen() {
           transition={{ type: "timing", duration: 380, delay: 80 }}
         >
           <TransformationSlider
+            projectId={project.id}
             beforePath={project.before_photo_storage_path}
             afterPath={project.after_photo_storage_path}
             isArchitect={isArchitect}
             hasProjectPass={hasProjectPass}
             onUpgradeClick={onGeneralUpgrade}
+            onRefresh={load}
           />
         </MotiView>
-
         <MotiView
           from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}

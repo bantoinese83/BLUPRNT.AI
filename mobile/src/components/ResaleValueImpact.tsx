@@ -139,15 +139,18 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   badge: {
-    backgroundColor: "rgba(16, 185, 129, 0.08)",
+    backgroundColor: "#042f2e", // Teal-950
     paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingVertical: 4,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#115e59", // Teal-800
   },
   badgeText: {
     fontSize: 8,
     fontFamily: Theme.typography.family.black,
-    color: Theme.colors.status.success,
+    color: "#10b981", // Emerald-500
+    letterSpacing: 0.5,
   },
   impactRow: {
     flexDirection: "row",

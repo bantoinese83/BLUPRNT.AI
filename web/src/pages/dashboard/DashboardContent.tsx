@@ -91,8 +91,6 @@ export function DashboardContent({
   const [_useDiscount, setUseDiscount] = useState(false);
   const [_upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
-  const [hasCelebrated, setHasCelebrated] = useState(false);
-  const [hasCelebratedFirst, setHasCelebratedFirst] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [deleteProject, setDeleteProject] = useState<ProjectRow | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -107,14 +105,7 @@ export function DashboardContent({
     setShowUpgrade,
   );
   useDashboardCheckoutSuccessConfetti(location.search, load);
-  useDashboardMilestoneConfetti(
-    project,
-    invoices,
-    hasCelebrated,
-    setHasCelebrated,
-    hasCelebratedFirst,
-    setHasCelebratedFirst,
-  );
+  useDashboardMilestoneConfetti(project, invoices);
 
   const capitalDocumentedTotal = useMemo(
     () => capitalImprovementTotal(invoices),
@@ -218,11 +209,13 @@ export function DashboardContent({
 
   const transformation = (
     <TransformationSlider
+      projectId={project.id}
       beforePath={project.before_photo_storage_path}
       afterPath={project.after_photo_storage_path}
       isArchitect={isArchitect}
       hasProjectPass={hasProjectPass}
       onUpgradeClick={() => setShowUpgrade(true)}
+      onRefresh={load}
     />
   );
 

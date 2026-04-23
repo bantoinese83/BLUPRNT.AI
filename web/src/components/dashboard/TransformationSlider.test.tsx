@@ -20,7 +20,13 @@ describe("TransformationSlider", () => {
   });
 
   it("renders empty state when no before photo is provided", () => {
-    render(<TransformationSlider beforePath={null} afterPath={null} />);
+    render(
+      <TransformationSlider
+        projectId="p1"
+        beforePath={null}
+        afterPath={null}
+      />,
+    );
 
     expect(screen.getByText("Visual Transformation")).toBeInTheDocument();
     expect(screen.getByText(/Upload a starting photo/i)).toBeInTheDocument();
@@ -29,6 +35,7 @@ describe("TransformationSlider", () => {
   it("renders the interactive slider when paths are provided and unlocked", () => {
     render(
       <TransformationSlider
+        projectId="p1"
         beforePath="before.jpg"
         afterPath="after.jpg"
         isArchitect={true}
@@ -53,6 +60,7 @@ describe("TransformationSlider", () => {
     const onUpgrade = vi.fn();
     render(
       <TransformationSlider
+        projectId="p1"
         beforePath="before.jpg"
         afterPath="after.jpg"
         isArchitect={false}
@@ -74,6 +82,7 @@ describe("TransformationSlider", () => {
   it("handles missing after photo by defaulting to before photo as current", () => {
     render(
       <TransformationSlider
+        projectId="p1"
         beforePath="before.jpg"
         afterPath={null}
         isArchitect={true}

@@ -1,8 +1,8 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import type { NavigateFunction } from "react-router-dom";
-import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { CONFETTI_PALETTES } from "@shared/constants/visualization";
+import { runViewportCelebration } from "@/lib/dashboard-celebration-confetti";
 
 /**
  * Stripe return + deep-link query params on the dashboard.
@@ -42,12 +42,7 @@ export function useDashboardCheckoutSuccessConfetti(
         duration: 8000,
       });
 
-      confetti({
-        particleCount: 200,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: [...CONFETTI_PALETTES.brandMuted],
-      });
+      runViewportCelebration(CONFETTI_PALETTES.brandMuted);
 
       // Refresh to pull new subscription/pass state
       onRefresh?.();

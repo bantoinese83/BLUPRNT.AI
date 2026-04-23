@@ -245,10 +245,10 @@ export function EstimateSummary({
                             className={cn(
                               "text-[10px] font-black uppercase tracking-tighter border-none px-2 py-0.5",
                               recon.status === "reconciled"
-                                ? "bg-emerald-50 text-emerald-700"
+                                ? "bg-teal-950 text-emerald-400"
                                 : recon.status === "over"
-                                  ? "bg-rose-50 text-rose-700"
-                                  : "bg-amber-50 text-amber-700",
+                                  ? "bg-rose-950 text-rose-300"
+                                  : "bg-amber-950 text-amber-300",
                             )}
                           >
                             {recon.status === "reconciled"
