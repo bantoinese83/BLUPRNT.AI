@@ -84,7 +84,7 @@ export function useProjectDetailData() {
         );
         setProject(null);
       } else if (projRes.data) {
-        setProject(projRes.data);
+        setProject(projRes.data as unknown as ProjectRow);
         setProjectLoadError(null);
       } else {
         setProject(null);
@@ -121,7 +121,7 @@ export function useProjectDetailData() {
         setInvoiceLoadWarning(null);
       }
 
-      setDetailInvoices((invRes.data ?? []) as InvoiceRow[]);
+      setDetailInvoices((invRes.data ?? []) as unknown as InvoiceRow[]);
     },
     [],
   );
@@ -154,14 +154,25 @@ export function useProjectDetailData() {
           .order("created_at", { ascending: true }),
         supabase
           .from("invoices")
-          .select(
-            "id, vendor_name, total, created_at, payment_status, document_type, document_id",
-          )
+          .select("*")
           .eq("project_id", id)
           .order("created_at", { ascending: false }),
       ]);
 
-      ingestFetchResults(projRes, scopeRes, invRes);
+      ingestFetchResults(
+        projRes as {
+          data: ProjectRow | null;
+          error: { message: string; code?: string } | null;
+        },
+        scopeRes as {
+          data: ScopeRow[] | null;
+          error: { message: string; code?: string } | null;
+        },
+        invRes as {
+          data: InvoiceRow[] | null;
+          error: { message: string; code?: string } | null;
+        },
+      );
       setLoading(false);
     }
 
@@ -298,14 +309,25 @@ export function useProjectDetailData() {
         .order("created_at", { ascending: true }),
       supabase
         .from("invoices")
-        .select(
-          "id, vendor_name, total, created_at, payment_status, document_type, document_id",
-        )
+        .select("*")
         .eq("project_id", id)
         .order("created_at", { ascending: false }),
     ]);
 
-    ingestFetchResults(projRes, scopeRes, invRes);
+    ingestFetchResults(
+      projRes as {
+        data: ProjectRow | null;
+        error: { message: string; code?: string } | null;
+      },
+      scopeRes as {
+        data: ScopeRow[] | null;
+        error: { message: string; code?: string } | null;
+      },
+      invRes as {
+        data: InvoiceRow[] | null;
+        error: { message: string; code?: string } | null;
+      },
+    );
     setRefreshing(false);
   }, [id, ingestFetchResults]);
 

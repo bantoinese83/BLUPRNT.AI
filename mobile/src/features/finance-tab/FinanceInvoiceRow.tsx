@@ -2,11 +2,11 @@ import React, { useRef } from "react";
 import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Wrench, ShieldCheck, Trash2 } from "lucide-react-native";
+import { Wrench, ShieldCheck, Trash2, Clock } from "lucide-react-native";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
-import { money } from "@shared/lib/formatters";
+import { money, getWarrantyStatus } from "@shared/lib/formatters";
 import type { InvoiceRow } from "@shared/types/database";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 
@@ -26,6 +26,7 @@ export function FinanceInvoiceRow({
   onDelete,
 }: FinanceInvoiceRowProps) {
   const swipeableRef = useRef<Swipeable>(null);
+  const warranty = getWarrantyStatus(inv.warranty_expiry_date);
 
   const renderRightActions = (
     _progress: Animated.AnimatedInterpolation<number>,
@@ -89,6 +90,7 @@ export function FinanceInvoiceRow({
                     <ShieldCheck size={18} color={Theme.colors.text.muted} />
                   )}
                 </View>
+
                 <View style={styles.invoiceText}>
                   <Text
                     style={styles.vendorName}
@@ -97,10 +99,54 @@ export function FinanceInvoiceRow({
                   >
                     {inv.vendor_name || "Uncategorized"}
                   </Text>
-                  <Text style={styles.invoiceDate}>
-                    {new Date(inv.created_at).toLocaleDateString()} •{" "}
-                    {inv.document_type || "Invoice"}
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Text style={styles.invoiceDate}>
+                      {new Date(inv.created_at).toLocaleDateString()} •{" "}
+                      {inv.document_type || "Invoice"}
+                    </Text>
+                    {warranty && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 2,
+                          backgroundColor: warranty.isExpired
+                            ? "rgba(244, 63, 94, 0.1)"
+                            : "rgba(16, 185, 129, 0.1)",
+                          paddingHorizontal: 4,
+                          paddingVertical: 1,
+                          borderRadius: 4,
+                        }}
+                      >
+                        <Clock
+                          size={10}
+                          color={
+                            warranty.isExpired
+                              ? Theme.colors.status.error
+                              : Theme.colors.status.success
+                          }
+                        />
+                        <Text
+                          style={{
+                            fontSize: 9,
+                            fontFamily: Theme.typography.family.bold,
+                            color: warranty.isExpired
+                              ? Theme.colors.status.error
+                              : Theme.colors.status.success,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {warranty.label}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
                 <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
               </View>

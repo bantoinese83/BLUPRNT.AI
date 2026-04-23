@@ -3,18 +3,19 @@ import type { Database } from "@shared/types/supabase.gen";
 type PublicSchema = Database["public"];
 
 /** Subset of `projects` row fields commonly selected in the dashboard (joined selects may omit columns). */
-export type ProjectRow = Pick<
-  PublicSchema["Tables"]["projects"]["Row"],
-  | "id"
-  | "name"
-  | "property_id"
-  | "estimated_min_total"
-  | "estimated_max_total"
-  | "confidence_score"
-  | "stage"
-  | "created_at"
-  | "metadata"
->;
+export type ProjectRow = {
+  id: string;
+  name: string;
+  property_id: string;
+  estimated_min_total: number | null;
+  estimated_max_total: number | null;
+  confidence_score: number | null;
+  stage: string | null;
+  created_at: string;
+  metadata: unknown;
+  before_photo_storage_path: string | null;
+  after_photo_storage_path: string | null;
+};
 
 export type ScopeRow = Pick<
   PublicSchema["Tables"]["scope_items"]["Row"],
@@ -38,16 +39,19 @@ export type ScopeRow = Pick<
   | "metadata"
 >;
 
-export type InvoiceRow = Pick<
-  PublicSchema["Tables"]["invoices"]["Row"],
-  | "id"
-  | "vendor_name"
-  | "total"
-  | "created_at"
-  | "payment_status"
-  | "document_type"
-  | "document_id"
->;
+export type InvoiceRow = {
+  id: string;
+  vendor_name: string | null;
+  total: number | null;
+  created_at: string;
+  payment_status: string;
+  document_type: string | null;
+  document_id: string | null;
+  issue_date: string | null;
+  project_id: string;
+  vendor_contact_info: unknown;
+  warranty_expiry_date: string | null;
+};
 
 export type UserSubscriptionRow =
   PublicSchema["Tables"]["user_subscriptions"]["Row"];

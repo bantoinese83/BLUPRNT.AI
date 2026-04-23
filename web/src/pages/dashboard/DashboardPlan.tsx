@@ -3,8 +3,13 @@ import { ListTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EstimateSummary } from "@/components/dashboard/EstimateSummary";
 import { PlanVsActualCard } from "@/components/dashboard/PlanVsActualCard";
-import { ActivityFeed, type ActivityEvent } from "@/components/dashboard/ActivityFeed";
+import {
+  ActivityFeed,
+  type ActivityEvent,
+} from "@/components/dashboard/ActivityFeed";
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
+import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
+import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
 
@@ -39,13 +44,18 @@ export function DashboardPlan({
   return (
     <DashboardSubPage
       side={
-        <>
+        <div className="space-y-8">
+          <TransformationSlider
+            beforePath={project.before_photo_storage_path}
+            afterPath={project.after_photo_storage_path}
+          />
           {health}
+          <HomeTeamSection invoices={invoices} />
           {location.pathname.endsWith("/plan") && (
-            <ActivityFeed events={activityEvents} className="mt-8" />
+            <ActivityFeed events={activityEvents} />
           )}
           {ledger}
-        </>
+        </div>
       }
     >
       <EstimateSummary

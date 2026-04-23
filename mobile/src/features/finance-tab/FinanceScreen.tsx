@@ -175,7 +175,7 @@ export default function FinanceScreen() {
           .eq("id", result.invoiceId)
           .maybeSingle();
         if (row) {
-          setSelectedInvoice(row as InvoiceRow);
+          setSelectedInvoice(row as unknown as InvoiceRow);
           setIsReviewOpen(true);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
@@ -338,7 +338,7 @@ export default function FinanceScreen() {
             inv={inv}
             index={index}
             onPress={() => {
-              setSelectedInvoice(inv);
+              setSelectedInvoice(inv as unknown as InvoiceRow);
               setIsReviewOpen(true);
               Haptics.selectionAsync();
             }}

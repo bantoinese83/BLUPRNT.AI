@@ -45,6 +45,8 @@ import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
 import { buildDashboardHeaderLines } from "@/features/home-tab/dashboard-greeting";
 import { presentProjectShareSheet } from "@/lib/share-project";
+import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
+import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
@@ -233,7 +235,7 @@ export default function DashboardScreen() {
           .eq("id", result.invoiceId)
           .maybeSingle();
         if (row) {
-          setReviewInvoice(row as InvoiceRow);
+          setReviewInvoice(row as unknown as InvoiceRow);
           setReviewOpen(true);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
@@ -442,6 +444,17 @@ export default function DashboardScreen() {
         <MotiView
           from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 380, delay: 80 }}
+        >
+          <TransformationSlider
+            beforePath={project.before_photo_storage_path}
+            afterPath={project.after_photo_storage_path}
+          />
+        </MotiView>
+
+        <MotiView
+          from={{ opacity: 0, translateY: 12 }}
+          animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 380, delay: 100 }}
         >
           <ProjectHealth
@@ -460,6 +473,14 @@ export default function DashboardScreen() {
             investment={capitalDocumentedTotal}
             projectName={project.name}
           />
+        </MotiView>
+
+        <MotiView
+          from={{ opacity: 0, translateY: 12 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 380, delay: 160 }}
+        >
+          <HomeTeamSection invoices={invoices} />
         </MotiView>
 
         <MotiView

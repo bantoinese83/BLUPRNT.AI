@@ -44,3 +44,35 @@ export function formatShortUsDate(iso: string): string {
     return iso;
   }
 }
+
+/**
+ * Returns days remaining until a warranty expires, or null if expired/unset.
+ */
+export function getWarrantyStatus(expiryIso: string | null | undefined): {
+  daysRemaining: number;
+  isExpired: boolean;
+  label: string;
+} | null {
+  if (!expiryIso) return null;
+  const expiry = new Date(expiryIso).getTime();
+  const now = Date.now();
+  const diffMs = expiry - now;
+  const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (days < 0) {
+    return { daysRemaining: days, isExpired: true, label: "Expired" };
+  }
+  if (days > 365) {
+    const years = (days / 365).toFixed(1);
+    return {
+      daysRemaining: days,
+      isExpired: false,
+      label: `${years}y remaining`,
+    };
+  }
+  return {
+    daysRemaining: days,
+    isExpired: false,
+    label: `${days}d remaining`,
+  };
+}

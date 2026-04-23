@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import { ChevronRight, Receipt, Wallet } from "lucide-react-native";
+import { ChevronRight, Receipt, Wallet, Clock } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
-import { money } from "@shared/lib/formatters";
+import { money, getWarrantyStatus } from "@shared/lib/formatters";
 import { formatRelativeTime } from "@/lib/activity";
 import type { InvoiceRow } from "@shared/types/database";
 
@@ -65,53 +65,91 @@ export function DashboardRecentDocumentsPanel({
         </Text>
 
         <View style={styles.rowsWrap} testID="dashboard-recent-documents">
-          {recent.map((inv, index) => (
-            <Pressable
-              key={inv.id}
-              testID={`dashboard-recent-doc-row-${index}`}
-              onPress={() => {
-                void Haptics.selectionAsync();
-                onOpenInvoice(inv);
-              }}
-              style={({ pressed }) => [
-                styles.docRow,
-                pressed && styles.docRowPressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`Review ${inv.vendor_name?.trim() || "document"}, ${money(inv.total)}`}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: DOC_ICON.bg,
-                    borderColor: DOC_ICON.border,
-                  },
+          {recent.map((inv, index) => {
+            const warranty = getWarrantyStatus(inv.warranty_expiry_date);
+            return (
+              <Pressable
+                key={inv.id}
+                testID={`dashboard-recent-doc-row-${index}`}
+                onPress={() => {
+                  void Haptics.selectionAsync();
+                  onOpenInvoice(inv);
+                }}
+                style={({ pressed }) => [
+                  styles.docRow,
+                  pressed && styles.docRowPressed,
                 ]}
+                accessibilityRole="button"
+                accessibilityLabel={`Review ${inv.vendor_name?.trim() || "document"}, ${money(inv.total)}`}
               >
-                <Receipt size={20} color={DOC_ICON.text} />
-              </View>
-
-              <View style={styles.docContent}>
-                <View style={styles.titleRow}>
-                  <View style={styles.titleWrap}>
-                    <Text style={styles.title} numberOfLines={1}>
-                      {inv.vendor_name?.trim() || "Document"}
-                    </Text>
-                    <ChevronRight
-                      size={14}
-                      color={Theme.colors.text.muted}
-                      style={styles.titleChevron}
-                    />
-                  </View>
-                  <Text style={styles.timeLabel}>
-                    {formatRelativeTime(inv.created_at)}
-                  </Text>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    {
+                      backgroundColor: DOC_ICON.bg,
+                      borderColor: DOC_ICON.border,
+                    },
+                  ]}
+                >
+                  <Receipt size={20} color={DOC_ICON.text} />
                 </View>
-                <Text style={styles.amountLine}>{money(inv.total)}</Text>
-              </View>
-            </Pressable>
-          ))}
+
+                <View style={styles.docContent}>
+                  <View style={styles.titleRow}>
+                    <View style={styles.titleWrap}>
+                      <Text style={styles.title} numberOfLines={1}>
+                        {inv.vendor_name?.trim() || "Document"}
+                      </Text>
+                      <ChevronRight
+                        size={14}
+                        color={Theme.colors.text.muted}
+                        style={styles.titleChevron}
+                      />
+                    </View>
+                    <Text style={styles.timeLabel}>
+                      {formatRelativeTime(inv.created_at)}
+                    </Text>
+                  </View>
+                  <View style={styles.amountRow}>
+                    <Text style={styles.amountLine}>{money(inv.total)}</Text>
+                    {warranty && (
+                      <View
+                        style={[
+                          styles.warrantyBadge,
+                          {
+                            backgroundColor: warranty.isExpired
+                              ? "rgba(244, 63, 94, 0.08)"
+                              : "rgba(13, 148, 136, 0.08)",
+                          },
+                        ]}
+                      >
+                        <Clock
+                          size={10}
+                          color={
+                            warranty.isExpired
+                              ? Theme.colors.status.error
+                              : Theme.colors.brand.primary
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.warrantyText,
+                            {
+                              color: warranty.isExpired
+                                ? Theme.colors.status.error
+                                : Theme.colors.brand.primary,
+                            },
+                          ]}
+                        >
+                          {warranty.label}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
 
         <TouchableOpacity
@@ -253,11 +291,29 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textTransform: "uppercase",
   },
+  amountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   amountLine: {
     fontSize: 12,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
     lineHeight: 18,
+  },
+  warrantyBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  warrantyText: {
+    fontSize: 9,
+    fontFamily: Theme.typography.family.bold,
+    textTransform: "uppercase",
   },
   ledgerCta: {
     marginTop: 4,
