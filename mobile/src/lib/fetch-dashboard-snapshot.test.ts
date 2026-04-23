@@ -186,4 +186,45 @@ describe("fetchMobileDashboardSnapshot", () => {
     expect(snap.project?.id).toBe("p1");
     expect(snap.isArchitect).toBe(true);
   });
+
+  it("populates galleryItems from database", async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session },
+    } as never);
+    vi.mocked(AsyncStorage.getItem).mockResolvedValue(null);
+    vi.mocked(supabase.from).mockImplementation(((table: string) => {
+      if (table === "projects") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: [{ id: "p1", name: "Kitchen" }],
+            error: null,
+          }),
+        };
+      }
+      if (table === "project_gallery") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: [
+              { id: "g1", photo_type: "before", storage_path: "path.jpg" },
+            ],
+            error: null,
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+    }) as unknown as typeof supabase.from);
+
+    const snap = await fetchMobileDashboardSnapshot();
+    expect(snap.galleryItems).toHaveLength(1);
+    expect(snap.galleryItems[0].id).toBe("g1");
+  });
 });

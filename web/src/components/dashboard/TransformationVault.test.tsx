@@ -100,4 +100,51 @@ describe("TransformationVault", () => {
       expect(captureBtns.length).toBeGreaterThan(0);
     });
   });
+
+  it("navigates between angles when multiple sets exist", async () => {
+    const mockItems = [
+      {
+        id: "1",
+        photo_type: "before",
+        storage_path: "b1.jpg",
+        caption: null,
+        created_at: "2026-01-01",
+      },
+      {
+        id: "2",
+        photo_type: "after",
+        storage_path: "a1.jpg",
+        caption: null,
+        created_at: "2026-01-01",
+      },
+      {
+        id: "3",
+        photo_type: "before",
+        storage_path: "b2.jpg",
+        caption: null,
+        created_at: "2026-01-02",
+      },
+    ];
+
+    (vi.mocked(supabase.from) as any).mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: mockItems, error: null }),
+    });
+
+    render(<TransformationVault projectId="p1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Angle 1 of 3")).toBeInTheDocument();
+    });
+
+    const nextBtn = screen.getByLabelText("Next angle");
+
+    if (nextBtn) {
+      nextBtn.click();
+      await waitFor(() => {
+        expect(screen.getByText("Angle 2 of 3")).toBeInTheDocument();
+      });
+    }
+  });
 });

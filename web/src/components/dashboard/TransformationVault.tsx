@@ -57,7 +57,7 @@ function PhotoSlot({
   const handleSaveCaption = async () => {
     if (!item) return;
     try {
-      await onUpdateCaption(item.id, captionValue);
+      onUpdateCaption(item.id, captionValue);
       setEditingCaption(false);
     } catch {
       setCaptionValue(item.caption || "");
@@ -362,6 +362,7 @@ export function TransformationVault({
             variant="outline"
             size="icon"
             className="w-7 h-7 rounded-lg border-slate-200"
+            aria-label="Previous angle"
             disabled={activeSetIndex === 0}
             onClick={() => setActiveSetIndex((prev) => prev - 1)}
           >
@@ -371,6 +372,7 @@ export function TransformationVault({
             variant="outline"
             size="icon"
             className="w-7 h-7 rounded-lg border-slate-200"
+            aria-label="Next angle"
             disabled={activeSetIndex === sets.length - 1}
             onClick={() => setActiveSetIndex((prev) => prev + 1)}
           >
