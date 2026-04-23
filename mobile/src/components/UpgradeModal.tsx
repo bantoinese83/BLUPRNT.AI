@@ -171,7 +171,7 @@ export function UpgradeModal({
                     : reason === "invoice_limit"
                       ? `You’ve used all ${FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt uploads on this project. Upgrade to add more anytime.`
                       : reason === "export"
-                        ? "Upgrade to Pro to build full PDF packets and your complete home file."
+                        ? "Upgrade to Architect to build full PDF packets and your complete home file."
                         : "Keep budgets, photos of bills, and one-tap exports in a single place—built for homeowners."}
             </Text>
             {reason === "invoice_limit" ? (
@@ -271,7 +271,7 @@ export function UpgradeModal({
               <View style={styles.planHeader}>
                 <View style={styles.planTitleRow}>
                   <ArchitectPlanIcon size={22} />
-                  <Text style={styles.planName}>Pro — monthly</Text>
+                  <Text style={styles.planName}>Architect — monthly</Text>
                 </View>
                 {selectedPlan === "monthly" && (
                   <Check size={18} color={Theme.colors.brand.primary} />

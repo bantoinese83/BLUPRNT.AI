@@ -16,7 +16,7 @@ export function ArchitectPlanIcon({ size = 28, style }: Props) {
       style={[{ width: size, height: size }, style]}
       contentFit="contain"
       accessibilityRole="image"
-      accessibilityLabel="Pro plan, Architect tier"
+      accessibilityLabel="Architect plan"
     />
   );
 }

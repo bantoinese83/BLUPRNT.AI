@@ -188,7 +188,13 @@ Deno.serve(async (req: Request) => {
         ocr_status: isInvoiceStyleOcrType(docType) ? "pending" : "success",
       }).select("id").single();
 
-      if (docErr || !doc) return jsonResponse({ error: "Could not create document." }, 500, req);
+      if (docErr || !doc) {
+        console.error("Document insert error:", docErr);
+        return jsonResponse({ 
+          error: "Could not create document.", 
+          details: docErr?.message || "Unknown database error" 
+        }, 500, req);
+      }
 
       // AUTOMATIC TRANSFORMATION SLIDER UPDATES
       if (storage.mime.startsWith("image/")) {

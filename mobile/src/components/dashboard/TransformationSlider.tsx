@@ -40,14 +40,33 @@ export function TransformationSlider({
   const sliderPos = useState(new Animated.Value(0.5))[0];
   const isUnlocked = isArchitect || hasProjectPass;
 
-  const getPublicUrl = (path: string | null) => {
-    if (!path) return null;
-    return supabase.storage.from("project-documents").getPublicUrl(path).data
-      .publicUrl;
-  };
+  const [beforeUrl, setBeforeUrl] = useState<string | null>(null);
+  const [afterUrl, setAfterUrl] = useState<string | null>(null);
+  const [beforeError, setBeforeError] = useState(false);
+  const [afterError, setAfterError] = useState(false);
 
-  const beforeUrl = getPublicUrl(beforePath);
-  const afterUrl = getPublicUrl(afterPath);
+  React.useEffect(() => {
+    const fetchSignedUrls = async () => {
+      if (beforePath) {
+        const { data } = await supabase.storage
+          .from("project-documents")
+          .createSignedUrl(beforePath, 3600);
+        setBeforeUrl(data?.signedUrl ?? null);
+      } else {
+        setBeforeUrl(null);
+      }
+
+      if (afterPath) {
+        const { data } = await supabase.storage
+          .from("project-documents")
+          .createSignedUrl(afterPath, 3600);
+        setAfterUrl(data?.signedUrl ?? null);
+      } else {
+        setAfterUrl(null);
+      }
+    };
+    fetchSignedUrls();
+  }, [beforePath, afterPath, projectId]);
 
   const handlePickPhoto = async (type: "before" | "after") => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -107,6 +126,8 @@ export function TransformationSlider({
 
       if (updateErr) throw updateErr;
 
+      if (type === "before") setBeforeError(false);
+      if (type === "after") setAfterError(false);
       onRefresh?.();
     } catch (err: unknown) {
       console.error(err);
@@ -126,6 +147,15 @@ export function TransformationSlider({
       sliderPos.setValue(newPos);
     },
   });
+
+  const LogoPlaceholder = () => (
+    <View style={styles.placeholderRoot}>
+      <View style={[styles.placeholderIcon, { opacity: 0.2 }]}>
+        <Logo size={32} />
+      </View>
+      <Text style={styles.placeholderText}>Waiting for capture</Text>
+    </View>
+  );
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
@@ -154,6 +184,16 @@ export function TransformationSlider({
     return <EmptyState />;
   }
 
+  const finalAfterUrl = afterUrl || beforeUrl;
+  const finalBeforeUrl = beforeUrl || afterUrl;
+  const showAfterPlaceholder = !finalAfterUrl || afterError;
+  const showBeforePlaceholder = !finalBeforeUrl || beforeError;
+
+  // If both are showing placeholders, we only want the background one to be visible
+  // to prevent "double-vision" logos and layout issues.
+  const hideForegroundPlaceholder =
+    showBeforePlaceholder && showAfterPlaceholder;
+
   const leftWidth = isUnlocked
     ? sliderPos.interpolate({
         inputRange: [0, 1],
@@ -176,18 +216,32 @@ export function TransformationSlider({
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
         {...panResponder.panHandlers}
       >
-        <Image
-          source={{ uri: afterUrl || beforeUrl || "" }}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
-        />
+        {showAfterPlaceholder ? (
+          <LogoPlaceholder />
+        ) : (
+          <Image
+            source={{ uri: finalAfterUrl }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            onError={() => setAfterError(true)}
+          />
+        )}
 
         <Animated.View style={[styles.beforeContainer, { width: leftWidth }]}>
-          <Image
-            source={{ uri: beforeUrl || afterUrl || "" }}
-            style={[styles.beforeImage, { width }]}
-            contentFit="cover"
-          />
+          {showBeforePlaceholder ? (
+            !hideForegroundPlaceholder && (
+              <View style={{ width, height: "100%" }}>
+                <LogoPlaceholder />
+              </View>
+            )
+          ) : (
+            <Image
+              source={{ uri: finalBeforeUrl }}
+              style={[styles.beforeImage, { width }]}
+              contentFit="cover"
+              onError={() => setBeforeError(true)}
+            />
+          )}
         </Animated.View>
 
         {isUnlocked ? (
@@ -415,5 +469,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Theme.typography.family.bold,
     color: "white",
+  },
+  placeholderRoot: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.01)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholderIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
+  },
+  placeholderText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.disabled,
+    textTransform: "uppercase",
+    letterSpacing: 2,
   },
 });

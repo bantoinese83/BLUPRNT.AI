@@ -37,7 +37,7 @@ describe("exportUserData", () => {
     expect(clickSpy).toHaveBeenCalled();
   });
 
-  it("loads projects and related rows when properties exist", async () => {
+  it("loads nested data from projects when properties exist", async () => {
     const projectId = "proj-1";
     const invoiceId = "inv-1";
 
@@ -51,30 +51,18 @@ describe("exportUserData", () => {
         return {
           select: vi.fn().mockReturnValue({
             in: vi.fn().mockResolvedValue({
-              data: [{ id: projectId, property_id: "prop-1" }],
+              data: [
+                {
+                  id: projectId,
+                  property_id: "prop-1",
+                  scope_items: [{ id: "scope-1" }],
+                  invoices: [
+                    { id: invoiceId, invoice_line_items: [{ id: "line-1" }] },
+                  ],
+                  documents: [{ id: "doc-1" }],
+                },
+              ],
             }),
-          }),
-        } as unknown as ReturnType<typeof supabase.from>;
-      }
-      if (
-        table === "scope_items" ||
-        table === "invoices" ||
-        table === "documents"
-      ) {
-        const data =
-          table === "invoices"
-            ? [{ id: invoiceId, project_id: projectId }]
-            : [];
-        return {
-          select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({ data }),
-          }),
-        } as unknown as ReturnType<typeof supabase.from>;
-      }
-      if (table === "invoice_line_items") {
-        return {
-          select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({ data: [{ id: "line-1" }] }),
           }),
         } as unknown as ReturnType<typeof supabase.from>;
       }
@@ -83,46 +71,7 @@ describe("exportUserData", () => {
 
     await exportUserData("user-2", "v@example.com");
 
-    expect(supabase.from).toHaveBeenCalledWith("invoice_line_items");
-    expect(clickSpy).toHaveBeenCalled();
-  });
-
-  it("skips line items when there are no invoices", async () => {
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === "properties") {
-        return {
-          select: vi.fn().mockResolvedValue({ data: [{ id: "prop-1" }] }),
-        } as unknown as ReturnType<typeof supabase.from>;
-      }
-      if (table === "projects") {
-        return {
-          select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({
-              data: [{ id: "proj-x", property_id: "prop-1" }],
-            }),
-          }),
-        } as unknown as ReturnType<typeof supabase.from>;
-      }
-      if (table === "scope_items" || table === "documents") {
-        return {
-          select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({ data: [] }),
-          }),
-        } as unknown as ReturnType<typeof supabase.from>;
-      }
-      if (table === "invoices") {
-        return {
-          select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({ data: [] }),
-          }),
-        } as unknown as ReturnType<typeof supabase.from>;
-      }
-      throw new Error(`unexpected table ${table}`);
-    });
-
-    await exportUserData("user-3", "w@example.com");
-
-    expect(supabase.from).not.toHaveBeenCalledWith("invoice_line_items");
+    expect(supabase.from).toHaveBeenCalledWith("projects");
     expect(clickSpy).toHaveBeenCalled();
   });
 
@@ -136,22 +85,18 @@ describe("exportUserData", () => {
       if (table === "projects") {
         return {
           select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({
-              data: [{ id: "proj-1", property_id: "prop-1" }],
-            }),
+            in: vi
+              .fn()
+              .mockResolvedValue({ data: null, error: new Error("DB Error") }),
           }),
         } as unknown as ReturnType<typeof supabase.from>;
       }
-      return {
-        select: vi.fn().mockReturnValue({
-          in: vi.fn().mockResolvedValue({ data: null, error: new Error("DB Error") }),
-        }),
-      } as unknown as ReturnType<typeof supabase.from>;
+      throw new Error(`unexpected table ${table}`);
     });
 
     await exportUserData("user-4", "x@example.com");
 
-    expect(supabase.from).toHaveBeenCalledWith("scope_items");
+    expect(supabase.from).toHaveBeenCalledWith("projects");
     expect(clickSpy).toHaveBeenCalled();
   });
 });

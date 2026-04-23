@@ -114,8 +114,8 @@ export function LandingFeatures() {
                 Automatic Home Team
               </h3>
               <p className="mt-1 text-sm text-slate-800">
-                AI extracts pro names from your receipts to build a verified
-                directory of everyone who’s worked on your home.
+                AI extracts contractor names from your receipts to build a
+                verified directory of everyone who’s worked on your home.
               </p>
             </div>
           </li>

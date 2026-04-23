@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MoveHorizontal, Lock, Loader2, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -31,17 +31,33 @@ export function TransformationSlider({
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
 
-  const getPublicUrl = (path: string | null) => {
-    if (!path) return null;
-    return supabase.storage.from("project-documents").getPublicUrl(path).data
-      .publicUrl;
-  };
-
+  const [beforeUrl, setBeforeUrl] = useState<string | null>(null);
+  const [afterUrl, setAfterUrl] = useState<string | null>(null);
   const [beforeError, setBeforeError] = useState(false);
   const [afterError, setAfterError] = useState(false);
 
-  const beforeUrl = getPublicUrl(beforePath);
-  const afterUrl = getPublicUrl(afterPath);
+  useEffect(() => {
+    const fetchSignedUrls = async () => {
+      if (beforePath) {
+        const { data } = await supabase.storage
+          .from("project-documents")
+          .createSignedUrl(beforePath, 3600);
+        setBeforeUrl(data?.signedUrl ?? null);
+      } else {
+        setBeforeUrl(null);
+      }
+
+      if (afterPath) {
+        const { data } = await supabase.storage
+          .from("project-documents")
+          .createSignedUrl(afterPath, 3600);
+        setAfterUrl(data?.signedUrl ?? null);
+      } else {
+        setAfterUrl(null);
+      }
+    };
+    void fetchSignedUrls();
+  }, [beforePath, afterPath, projectId]);
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
