@@ -16,6 +16,9 @@ export function useScopeManagement({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState<string>("");
   const [editTier, setEditTier] = useState<string>("");
+  const [editMaterials, setEditMaterials] = useState<
+    NonNullable<ScopeRow["metadata"]>["materials"]
+  >([]);
   const [saving, setSaving] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +57,13 @@ export function useScopeManagement({
     const newTotalMin = Math.round(qty * ucMin);
     const newTotalMax = Math.round(qty * ucMax);
 
+    // Merge materials into metadata
+    const baseMeta = (item.metadata as Record<string, unknown>) || {};
+    const nextMeta = {
+      ...baseMeta,
+      materials: editMaterials,
+    };
+
     const { error: err } = await supabase
       .from("scope_items")
       .update({
@@ -63,6 +73,7 @@ export function useScopeManagement({
         unit_cost_max: ucMax,
         total_cost_min: newTotalMin,
         total_cost_max: newTotalMax,
+        metadata: nextMeta,
       })
       .eq("id", item.id);
 
@@ -117,6 +128,7 @@ export function useScopeManagement({
     setEditingId(item.id);
     setEditQty(String(item.quantity ?? 1));
     setEditTier(item.finish_tier ?? "mid");
+    setEditMaterials(item.metadata?.materials || []);
   };
 
   const addItem = async (newItem: {
@@ -168,6 +180,8 @@ export function useScopeManagement({
     setEditQty,
     editTier,
     setEditTier,
+    editMaterials,
+    setEditMaterials,
     saving,
     error,
     deleteConfirmItem,

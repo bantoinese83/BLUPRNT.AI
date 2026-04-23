@@ -45,6 +45,8 @@ export function ScopeDetail({
     setEditQty,
     editTier,
     setEditTier,
+    editMaterials,
+    setEditMaterials,
     saving,
     error,
     deleteConfirmItem,
@@ -183,6 +185,8 @@ export function ScopeDetail({
                         setEditQty={setEditQty}
                         editTier={editTier}
                         setEditTier={setEditTier}
+                        editMaterials={editMaterials || []}
+                        setEditMaterials={setEditMaterials}
                         saving={saving}
                         isArchitect={isArchitect}
                         hasProjectPass={hasProjectPass}

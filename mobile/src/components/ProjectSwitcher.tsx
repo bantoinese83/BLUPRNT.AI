@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.divider,
   },
   activeCard: {
-    backgroundColor: Theme.colors.brand.primary,
-    borderColor: "transparent",
+    backgroundColor: "rgba(13, 148, 136, 0.1)",
+    borderColor: "rgba(13, 148, 136, 0.2)",
   },
   addCard: {
     justifyContent: "center",
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activeIconContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(13, 148, 136, 0.15)",
   },
   name: {
     flex: 1,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.primary,
   },
   activeName: {
-    color: "white",
+    color: Theme.colors.brand.primary,
   },
   textContainer: {
     flex: 1,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   activeMetaText: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "rgba(13, 148, 136, 0.6)",
   },
   addIconContainer: {
     backgroundColor: Theme.colors.brand.primary,

@@ -117,7 +117,7 @@ export function EstimateSummary({
 
         <div className="space-y-3 relative z-10">
           <div className="flex flex-wrap items-center gap-3">
-            <p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
+            <p className="text-teal-200/70 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
               <Wallet className="w-3.5 h-3.5 shrink-0" aria-hidden />
               Projected Investment
             </p>
@@ -131,7 +131,7 @@ export function EstimateSummary({
           <div className="text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums text-white">
             {money(project.estimated_min_total, project.estimated_max_total)}
           </div>
-          <p className="text-slate-400 text-sm font-medium">
+          <p className="text-teal-100/60 text-sm font-medium">
             Full renovation lifecycle estimate
           </p>
 
@@ -171,7 +171,7 @@ export function EstimateSummary({
 
           <div className="flex flex-col md:items-end">
             <div className="flex gap-0.5 mb-1.5">{stars(conf)}</div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest text-shadow-sm">
+            <p className="text-[11px] font-bold text-teal-200/60 uppercase tracking-widest text-shadow-sm">
               Regional Match
             </p>
           </div>

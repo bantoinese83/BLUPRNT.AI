@@ -160,6 +160,30 @@ export function ProjectMaterialDetailList({ materials, onPersist }: Props) {
         </View>
       )}
 
+      <View style={{ marginTop: 12, alignItems: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <View
+            style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: Theme.colors.status.success,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 9,
+              fontFamily: Theme.typography.family.bold,
+              color: Theme.colors.text.muted,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+            }}
+          >
+            Quantities grounded in regional waste factors
+          </Text>
+        </View>
+      </View>
+
       {onPersist ? (
         <BillOfMaterialEditModal
           visible={editItem != null}

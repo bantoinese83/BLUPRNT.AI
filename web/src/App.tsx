@@ -12,6 +12,7 @@ import { AuthProvider } from "@/contexts/AuthProvider";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { AuthListener } from "@/components/AuthListener";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -94,6 +95,7 @@ export default function App() {
             <QueryClientProvider client={queryClient}>
               <ForceUpdateGate>
                 <BrowserRouter>
+                  <ScrollToTop />
                   <a
                     href="#main-content"
                     className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-24 focus-visible:z-[100] focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-xl focus-visible:bg-teal-950 focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white focus-visible:shadow-lg focus-visible:shadow-teal-950/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"

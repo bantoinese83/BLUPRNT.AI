@@ -100,12 +100,12 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: parsed.error.errors[0]?.message ?? "Invalid request" }, 400, req);
     }
 
-    const { project_id, file, document_type: docType, amount_hint: amountNum, vendor_hint } = parsed.data;
+    const { project_id: projectId, file, document_type: docType, amount_hint: amountNum, vendor_hint } = parsed.data;
     const admin = getServiceClient();
 
-    await assertProjectOwner(admin, project_id, userId);
+    await assertProjectOwner(admin, projectId, userId);
 
-    const entitlement = await checkInvoiceUploadAllowed(admin, userId, project_id, docType);
+    const entitlement = await checkInvoiceUploadAllowed(admin, userId, projectId, docType);
     if (!entitlement.allowed) {
       return jsonResponse({ error: entitlement.reason, error_code: entitlement.code }, 403, req);
     }
@@ -124,12 +124,12 @@ Deno.serve(async (req: Request) => {
       }
 
       const docId = crypto.randomUUID();
-      const storage = await uploadFileToStorage(admin, { projectId: project_id, userId, docId, docType: docType, file });
+      const storage = await uploadFileToStorage(admin, { projectId, userId, docId, docType: docType, file });
       if (storage.error) return jsonResponse({ error: "Could not store file." }, 500, req);
 
       const { data: doc, error: docErr } = await admin.from("documents").insert({
         id: docId,
-        project_id: project_id,
+        project_id: projectId,
         type: docType,
         storage_path: storage.path,
         original_filename: file.name,
@@ -138,6 +138,29 @@ Deno.serve(async (req: Request) => {
       }).select("id").single();
 
       if (docErr || !doc) return jsonResponse({ error: "Could not create document." }, 500, req);
+
+      // AUTOMATIC TRANSFORMATION SLIDER UPDATES
+      if (storage.mime.startsWith("image/")) {
+        const { data: project } = await admin
+          .from("projects")
+          .select("before_photo_storage_path, after_photo_storage_path")
+          .eq("id", projectId)
+          .single();
+
+        if (project) {
+          const updates: Record<string, string> = {};
+          
+          // 1. If no before photo exists yet, this is it.
+          if (!project.before_photo_storage_path) {
+            updates.before_photo_storage_path = storage.path;
+          }
+          
+          // 2. ALWAYS update the after photo to the latest upload
+          updates.after_photo_storage_path = storage.path;
+
+          await admin.from("projects").update(updates).eq("id", projectId);
+        }
+      }
 
       const invoiceId = crypto.randomUUID();
       let subtotal = amountNum ?? (docType === "invoice" ? 1850 : 0);
@@ -151,7 +174,7 @@ Deno.serve(async (req: Request) => {
         const { data: scopeRows } = await admin
           .from("scope_items")
           .select("id, category, description")
-          .eq("project_id", project_id);
+          .eq("project_id", projectId);
 
         const projectScope = (scopeRows || []) as ProjectScopeItem[];
 
@@ -194,7 +217,7 @@ Deno.serve(async (req: Request) => {
       }
 
       await admin.from("invoices").insert({
-        id: invoiceId, document_id: doc.id, project_id, document_type: docType,
+        id: invoiceId, document_id: doc.id, project_id: projectId, document_type: docType,
         vendor_name: vendorLabel, total: Number.isFinite(total) ? total : 0,
         subtotal: Number.isFinite(subtotal) ? subtotal : 0,
         tax_total: Number.isFinite(tax) ? tax : 0,

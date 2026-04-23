@@ -292,12 +292,12 @@ export const projectDetailStyles = StyleSheet.create({
     gap: 6,
   },
   activeViewDetailsBtn: {
-    backgroundColor: Theme.colors.text.primary,
+    backgroundColor: Theme.colors.brand.primary,
   },
   viewDetailsText: {
     fontSize: 11,
     fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.secondary,
+    color: Theme.colors.brand.primary,
     textTransform: "uppercase",
   },
   activeViewDetailsText: {
