@@ -124,7 +124,7 @@ function PhotoSlot({
           </div>
 
           {/* Caption Overlay (Bottom) */}
-          <div className="absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none group-hover:pointer-events-auto">
+          <div className="absolute inset-x-0 bottom-0 z-20 p-4 bg-linear-to-t from-black/80 via-black/40 to-transparent pointer-events-none group-hover:pointer-events-auto">
             {editingCaption ? (
               <div className="flex gap-2 items-center">
                 <input

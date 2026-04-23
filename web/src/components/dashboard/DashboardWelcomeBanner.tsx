@@ -23,7 +23,7 @@ export function DashboardWelcomeBanner() {
     <div
       role="region"
       aria-label="Getting started"
-      className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50 to-slate-100/80 p-5 sm:p-6 shadow-drop-md transition-shadow duration-300 hover:shadow-drop-lg"
+      className="rounded-2xl border border-slate-200/80 bg-linear-to-r from-slate-50 to-slate-100/80 p-5 sm:p-6 shadow-drop-md transition-shadow duration-300 hover:shadow-drop-lg"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-3 min-w-0 flex-1">

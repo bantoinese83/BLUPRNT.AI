@@ -81,7 +81,7 @@ export function CommandPalette() {
       {open && (
         <div
           ref={dialogRef}
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4"
+          className="fixed inset-0 z-100 flex items-start justify-center pt-[15vh] p-4"
           role="dialog"
           aria-modal="true"
           aria-label="Command palette"

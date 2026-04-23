@@ -26,7 +26,7 @@ export function DocumentUploadHeader({
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="absolute -top-8 left-0 right-0 sm:static sm:absolute sm:-left-44 sm:top-1/2 sm:-translate-y-1/2 flex items-center justify-center sm:justify-start gap-2 text-slate-900 text-[10px] font-black overflow-hidden whitespace-nowrap uppercase tracking-widest bg-white/80 backdrop-blur-sm sm:bg-transparent py-1 rounded-full border border-slate-100 sm:border-0 shadow-sm sm:shadow-none"
+              className="absolute -top-8 left-0 right-0 sm:absolute sm:-left-44 sm:top-1/2 sm:-translate-y-1/2 flex items-center justify-center sm:justify-start gap-2 text-slate-900 text-[10px] font-black overflow-hidden whitespace-nowrap uppercase tracking-widest bg-white/80 backdrop-blur-sm sm:bg-transparent py-1 rounded-full border border-slate-100 sm:border-0 shadow-sm sm:shadow-none"
             >
               <div className="relative">
                 <ScanLine className="w-3 h-3 animate-pulse" />

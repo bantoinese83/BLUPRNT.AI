@@ -277,7 +277,7 @@ export function DashboardHeader({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-60 bg-slate-900/40 backdrop-blur-sm lg:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
@@ -285,7 +285,7 @@ export function DashboardHeader({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 z-[70] w-[min(80vw,320px)] bg-white shadow-2xl lg:hidden flex flex-col"
+              className="fixed inset-y-0 right-0 z-70 w-[min(80vw,320px)] bg-white shadow-2xl lg:hidden flex flex-col"
             >
               <div className="flex h-16 items-center border-b border-slate-100 px-6">
                 <span className="text-base font-black italic tracking-tighter text-slate-900">

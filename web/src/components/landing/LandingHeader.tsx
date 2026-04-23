@@ -58,7 +58,7 @@ export function LandingHeader() {
           >
             <Link
               to="/"
-              className="flex min-w-0 items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500 sm:gap-3"
+              className="flex min-w-0 items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline-2 focus-visible:outline-teal-500 sm:gap-3"
               aria-label="BLUPRNT — Home"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-0.5 shadow-md ring-1 ring-slate-200/40 sm:h-14 sm:w-14 sm:rounded-2xl sm:p-1">
@@ -139,7 +139,7 @@ export function LandingHeader() {
 
             <button
               type="button"
-              className="relative z-[60] flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-all hover:bg-slate-50 lg:hidden"
+              className="relative z-60 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-all hover:bg-slate-50 lg:hidden"
               aria-expanded={mobileNavOpen}
               aria-controls="landing-mobile-nav"
               aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
@@ -191,7 +191,7 @@ export function LandingHeader() {
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
                 className="fixed inset-y-0 right-0 z-50 w-[min(85vw,380px)] bg-white shadow-2xl lg:hidden flex flex-col"
               >
-                <div className="flex h-16 items-center border-b border-slate-100 px-6 sm:h-[4.25rem]">
+                <div className="flex h-16 items-center border-b border-slate-100 px-6 sm:h-17">
                   <span className="text-lg font-black italic tracking-tighter text-slate-900">
                     BLUPRNT<span className="text-teal-600">.AI</span>
                   </span>
