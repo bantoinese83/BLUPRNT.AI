@@ -19,16 +19,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
 
           {
-            "bg-teal-950 text-white hover:bg-teal-900 active:scale-[0.98]":
+            "bg-teal-950 text-white hover:bg-teal-900 hover:shadow-md":
               variant === "default",
-            "liquid-metal-button text-white": variant === "primary",
+            "liquid-metal-button text-white hover:shadow-lg hover:shadow-teal-500/10":
+              variant === "primary",
 
-            "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]":
+            "bg-red-600 text-white hover:bg-red-700 hover:shadow-md":
               variant === "destructive",
-            "border border-slate-200 bg-white font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300":
+            "border border-slate-200 bg-white font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm":
               variant === "outline",
             "bg-slate-100 text-slate-900 hover:bg-slate-200":
               variant === "secondary",

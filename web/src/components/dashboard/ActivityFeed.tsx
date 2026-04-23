@@ -42,7 +42,26 @@ const EVENT_ACCENT: Record<ActivityEvent["type"], string> = {
 };
 
 export function ActivityFeed({ events, className }: ActivityFeedProps) {
-  if (events.length === 0) return null;
+  if (events.length === 0) {
+    return (
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/30",
+          className,
+        )}
+      >
+        <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center mb-4 text-slate-300">
+          <History className="w-6 h-6" />
+        </div>
+        <h4 className="text-sm font-bold text-slate-900 mb-1">
+          No activity yet
+        </h4>
+        <p className="text-[11px] text-slate-500 font-medium max-w-[180px]">
+          Upload an invoice or quote to start building your property record.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-6", className)}>

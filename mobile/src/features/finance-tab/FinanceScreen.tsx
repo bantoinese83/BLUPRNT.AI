@@ -249,6 +249,37 @@ export default function FinanceScreen() {
     />
   );
 
+  const handleInvoiceDelete = (id: string) => {
+    Alert.alert(
+      "Remove document?",
+      "This will permanently delete this record and its associated data.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            const { error } = await supabase
+              .from("invoices")
+              .delete()
+              .eq("id", id);
+            if (error) {
+              Alert.alert(
+                "Couldn't remove",
+                "Something went wrong. Try again.",
+              );
+            } else {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              load();
+            }
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <ScreenWrapper edges={["top", "left", "right"]}>
       <SectionList
@@ -312,6 +343,7 @@ export default function FinanceScreen() {
               Haptics.selectionAsync();
             }}
             onViewOriginal={() => setOriginalPreviewInvoiceId(inv.id)}
+            onDelete={handleInvoiceDelete}
           />
         )}
       />

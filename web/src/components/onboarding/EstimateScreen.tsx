@@ -73,7 +73,7 @@ export function EstimateScreen() {
   ];
 
   return (
-    <PageTransition duration={0.5}>
+    <PageTransition>
       <div className="space-y-8 py-4">
         <div className="space-y-2 text-center">
           <motion.div

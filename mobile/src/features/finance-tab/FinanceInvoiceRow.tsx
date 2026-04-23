@@ -1,8 +1,9 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useRef } from "react";
+import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Wrench, ShieldCheck } from "lucide-react-native";
+import { Wrench, ShieldCheck, Trash2 } from "lucide-react-native";
+import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money } from "@shared/lib/formatters";
@@ -14,6 +15,7 @@ type FinanceInvoiceRowProps = {
   index: number;
   onPress: () => void;
   onViewOriginal: () => void;
+  onDelete?: (id: string) => void;
 };
 
 export function FinanceInvoiceRow({
@@ -21,53 +23,101 @@ export function FinanceInvoiceRow({
   index,
   onPress,
   onViewOriginal,
+  onDelete,
 }: FinanceInvoiceRowProps) {
+  const swipeableRef = useRef<Swipeable>(null);
+
+  const renderRightActions = (
+    _progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    const trans = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [0, 100],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <View style={{ width: 80, marginBottom: 12 }}>
+        <Animated.View style={{ flex: 1, transform: [{ translateX: trans }] }}>
+          <RectButton
+            style={{
+              flex: 1,
+              backgroundColor: Theme.colors.status.error,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: Theme.radius.lg,
+              marginLeft: 8,
+            }}
+            onPress={() => {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Warning,
+              );
+              swipeableRef.current?.close();
+              onDelete?.(inv.id);
+            }}
+          >
+            <Trash2 size={20} color="white" />
+          </RectButton>
+        </Animated.View>
+      </View>
+    );
+  };
+
   return (
-    <View style={{ paddingHorizontal: 24, paddingBottom: 12 }}>
+    <View style={{ paddingHorizontal: 24 }}>
       <MotiView
         from={{ opacity: 0, translateY: 10 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ delay: Math.min(index * 50, 400) }}
+        style={{ paddingBottom: 12 }}
       >
-        <GlassCard intensity={8} style={styles.invoiceCard}>
-          <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
-            <View style={styles.invoiceMain}>
-              <View style={styles.invoiceIcon}>
-                {(inv.document_type || "invoice").toLowerCase() ===
-                "invoice" ? (
-                  <Wrench size={18} color={Theme.colors.text.muted} />
-                ) : (
-                  <ShieldCheck size={18} color={Theme.colors.text.muted} />
-                )}
+        <Swipeable
+          ref={swipeableRef}
+          renderRightActions={renderRightActions}
+          friction={2}
+          rightThreshold={40}
+        >
+          <GlassCard intensity={8} style={styles.invoiceCard}>
+            <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
+              <View style={styles.invoiceMain}>
+                <View style={styles.invoiceIcon}>
+                  {(inv.document_type || "invoice").toLowerCase() ===
+                  "invoice" ? (
+                    <Wrench size={18} color={Theme.colors.text.muted} />
+                  ) : (
+                    <ShieldCheck size={18} color={Theme.colors.text.muted} />
+                  )}
+                </View>
+                <View style={styles.invoiceText}>
+                  <Text
+                    style={styles.vendorName}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {inv.vendor_name || "Uncategorized"}
+                  </Text>
+                  <Text style={styles.invoiceDate}>
+                    {new Date(inv.created_at).toLocaleDateString()} •{" "}
+                    {inv.document_type || "Invoice"}
+                  </Text>
+                </View>
+                <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
               </View>
-              <View style={styles.invoiceText}>
-                <Text
-                  style={styles.vendorName}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {inv.vendor_name || "Uncategorized"}
-                </Text>
-                <Text style={styles.invoiceDate}>
-                  {new Date(inv.created_at).toLocaleDateString()} •{" "}
-                  {inv.document_type || "Invoice"}
-                </Text>
-              </View>
-              <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
-            </View>
-          </TouchableOpacity>
-          {inv.document_id ? (
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.selectionAsync();
-                onViewOriginal();
-              }}
-              style={styles.viewOriginalBtn}
-            >
-              <Text style={styles.viewOriginalText}>View original</Text>
             </TouchableOpacity>
-          ) : null}
-        </GlassCard>
+            {inv.document_id ? (
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  onViewOriginal();
+                }}
+                style={styles.viewOriginalBtn}
+              >
+                <Text style={styles.viewOriginalText}>View original</Text>
+              </TouchableOpacity>
+            ) : null}
+          </GlassCard>
+        </Swipeable>
       </MotiView>
     </View>
   );
