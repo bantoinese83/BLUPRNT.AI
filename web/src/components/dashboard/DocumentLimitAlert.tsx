@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
 
-interface InvoiceLimitAlertProps {
+interface DocumentLimitAlertProps {
   isArchitectAtGlobalLimit: boolean;
   freeLimit: number;
   onUpgradeClick: (reason?: "invoice_limit") => void;
 }
 
-export function InvoiceLimitAlert({
+export function DocumentLimitAlert({
   isArchitectAtGlobalLimit,
   freeLimit,
   onUpgradeClick,
-}: InvoiceLimitAlertProps) {
+}: DocumentLimitAlertProps) {
   return (
     <div className="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-2 leading-relaxed">
       <p>
@@ -22,7 +22,7 @@ export function InvoiceLimitAlert({
         ) : (
           <>
             You&apos;ve used all{" "}
-            <strong>{freeLimit} free bill or receipt</strong> uploads on this
+            <strong>{freeLimit} free spending document</strong> uploads on this
             project. Upgrade to add more anytime.
           </>
         )}

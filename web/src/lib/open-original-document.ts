@@ -17,10 +17,11 @@ export type InvoiceOriginalFetchResult =
 
 export async function fetchInvoiceOriginalSignedUrl(
   invoiceId: string,
+  options?: { width?: number; height?: number; resize?: string },
 ): Promise<InvoiceOriginalFetchResult> {
   const { data, error } = await invokeFunction<SignedUrlResponse>(
     "get-document-signed-url",
-    { body: { invoice_id: invoiceId } },
+    { body: { invoice_id: invoiceId, ...options } },
   );
 
   if (error) {

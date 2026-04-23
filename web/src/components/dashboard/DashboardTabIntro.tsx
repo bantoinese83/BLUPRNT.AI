@@ -5,26 +5,26 @@ import { Button } from "@/components/ui/button";
 const TAB_CONFIG = {
   "/dashboard/plan": {
     icon: ClipboardList,
-    title: "Plan your budget",
-    why: "See your estimated range and every line item so you know what the remodel should cost.",
-    cta: "View full scope",
+    title: "Plan your strategy",
+    why: "See your estimated range and every budget item so you know what the remodel should cost.",
+    cta: "View full budget",
     path: "/dashboard/scope",
     variant: "outline" as const,
   },
   "/dashboard/execute": {
     icon: Hammer,
-    title: "Track real spending",
-    why: "Upload invoices and quotes so you can compare actual costs to your estimate.",
-    cta: "Upload a document",
+    title: "Track build spending",
+    why: "Upload project docs so you can compare actual costs to your estimate and track progress.",
+    cta: "Upload project docs",
     path: "/dashboard/execute",
     variant: "primary" as const,
     scrollToUpload: true,
   },
   "/dashboard/record": {
     icon: FileText,
-    title: "Build your resale record",
-    why: "Export a clean PDF of improvements and costs for buyers, agents, or your files.",
-    cta: "Export PDF",
+    title: "Build your Home Archive",
+    why: "Export a clean, verified history of improvements and costs for buyers, agents, or your own files.",
+    cta: "Export Home Archive",
     path: "/dashboard/record",
     variant: "primary" as const,
     scrollToLedger: true,
@@ -71,13 +71,13 @@ export function DashboardTabIntro() {
           onClick={() => {
             if ("scrollToUpload" in cfg && cfg.scrollToUpload) {
               document
-                .getElementById("invoice-upload-anchor")
+                .getElementById("document-upload-anchor")
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
               return;
             }
             if ("scrollToLedger" in cfg && cfg.scrollToLedger) {
               document
-                .getElementById("property-ledger-anchor")
+                .getElementById("document-vault-anchor")
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
               return;
             }

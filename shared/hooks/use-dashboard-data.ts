@@ -67,6 +67,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
     setProject,
     setScopeItems,
     setInvoices,
+    setGalleryItems,
   } = useDashboardSnapshotCache(getSnapshotKey, {
     onLocalProjectIdChange: (id) => {
       setActiveProjectId(id);
@@ -155,11 +156,13 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
     isArchitect: snapshot?.isArchitect ?? false,
     subscription: snapshot?.subscription ?? null,
     hasProjectPass: snapshot?.hasProjectPass ?? false,
+    galleryItems: snapshot?.galleryItems ?? [],
     load,
     handleProjectSelect,
     setProjects,
     setProject,
     setScopeItems,
     setInvoices,
+    setGalleryItems,
   };
 }

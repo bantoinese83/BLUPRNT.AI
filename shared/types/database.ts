@@ -65,3 +65,13 @@ export type OnboardingSyncRow = {
   expires_at: string;
   created_at: string;
 };
+
+export type GalleryItemRow = {
+  id: string;
+  project_id: string;
+  photo_type: "before" | "after" | "progress";
+  storage_path: string;
+  caption: string | null;
+  uploaded_by_user_id: string;
+  created_at: string;
+};

@@ -16,9 +16,9 @@ import {
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
 import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
 
-interface UseInvoiceManagementProps {
+interface UseDocumentManagementProps {
   projectId: string;
-  invoices: InvoiceRow[];
+  documents: InvoiceRow[];
   onUploaded: (id?: string) => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
   subscription: UserSubscriptionRow | null;
@@ -26,25 +26,25 @@ interface UseInvoiceManagementProps {
 }
 
 const FREE_LIMIT = FREE_TIER_BILL_RECEIPT_LIMIT;
-const GUIDE_KEY = "bluprnt_invoice_guide_collapsed";
+const GUIDE_KEY = "bluprnt_document_guide_collapsed";
 
 type ValidDocType = UploadFormDocumentType;
 
-export function useInvoiceManagement({
+export function useDocumentManagement({
   projectId,
-  invoices,
+  documents,
   onUploaded,
   onUpgradeClick,
   subscription,
   hasProjectPass,
-}: UseInvoiceManagementProps) {
+}: UseDocumentManagementProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const reviewQueueRef = useRef<string[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [uploading, setUploading] = useState(false);
   const [batchStatus, setBatchStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [reviewInvoiceId, setReviewInvoiceId] = useState<string | null>(null);
+  const [reviewDocumentId, setReviewDocumentId] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<ValidDocType>("auto");
   const [guideDismissed, setGuideDismissed] = useState(() => {
     try {
@@ -88,7 +88,7 @@ export function useInvoiceManagement({
 
   if (lastResetId !== projectId) {
     setLastResetId(projectId);
-    if (reviewInvoiceId) setReviewInvoiceId(null);
+    if (reviewDocumentId) setReviewDocumentId(null);
     if (uploading) setUploading(false);
     if (error) setError(null);
   }
@@ -98,22 +98,22 @@ export function useInvoiceManagement({
     reviewQueueRef.current = [];
   }, [projectId]);
 
-  const invoiceCount = invoices.filter((i) =>
+  const documentCount = documents.filter((i) =>
     isArchitectQuotaInvoiceType(i.document_type ?? "invoice"),
   ).length;
 
   const architectUploads = subscription?.invoice_uploads_count ?? 0;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
-  const isAtInvoiceUploadLimit =
+  const isAtDocumentUploadLimit =
     !hasProjectPass &&
-    ((!isArchitectActive && invoiceCount >= FREE_LIMIT) ||
+    ((!isArchitectActive && documentCount >= FREE_LIMIT) ||
       (isArchitectActive && architectUploads >= 10));
 
   /** Blocks when the user picked invoice/receipt and is at the cap. */
-  const blockInvoiceOnlyUpload =
+  const blockDocumentOnlyUpload =
     (documentType === "invoice" || documentType === "receipt") &&
-    isAtInvoiceUploadLimit;
+    isAtDocumentUploadLimit;
 
   const isArchitectAtGlobalLimit = isArchitectActive && architectUploads >= 10;
 
@@ -127,10 +127,10 @@ export function useInvoiceManagement({
   };
 
   const closeReviewModal = useCallback(() => {
-    setReviewInvoiceId(null);
+    setReviewDocumentId(null);
     const next = reviewQueueRef.current.shift();
     if (next) {
-      setTimeout(() => setReviewInvoiceId(next), 80);
+      setTimeout(() => setReviewDocumentId(next), 80);
     }
   }, []);
 
@@ -138,7 +138,7 @@ export function useInvoiceManagement({
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files);
 
-    if (blockInvoiceOnlyUpload) {
+    if (blockDocumentOnlyUpload) {
       onUpgradeClick("invoice_limit");
       return;
     }
@@ -171,7 +171,7 @@ export function useInvoiceManagement({
         continue;
       }
 
-      addUserFlowBreadcrumb("invoice_upload_started", {
+      addUserFlowBreadcrumb("document_upload_started", {
         document_type: documentType,
         batch_index: i,
       });
@@ -192,7 +192,7 @@ export function useInvoiceManagement({
 
         const failure = extractUploadFailureFromInvokeResult(data, fnErr);
         if (failure) {
-          addUserFlowBreadcrumb("invoice_upload_failed", {
+          addUserFlowBreadcrumb("document_upload_failed", {
             document_type: documentType,
             error_code: failure.errorCode ?? "unknown",
           });
@@ -223,7 +223,7 @@ export function useInvoiceManagement({
           lastServerDocType = data.document_type as LedgerDocumentType;
         }
         if (newId) {
-          setReviewInvoiceId((prev) => {
+          setReviewDocumentId((prev) => {
             if (prev) {
               reviewQueueRef.current.push(newId);
               return prev;
@@ -231,12 +231,12 @@ export function useInvoiceManagement({
             return newId;
           });
         }
-        addUserFlowBreadcrumb("invoice_upload_succeeded", {
+        addUserFlowBreadcrumb("document_upload_succeeded", {
           document_type: resolvedType,
           opens_review: Boolean(newId),
         });
       } catch (err: unknown) {
-        reportClientError("invoice_upload", err);
+        reportClientError("document_upload", err);
         toast.error(`Unexpected issue uploading ${file.name}`);
         break;
       }
@@ -260,7 +260,7 @@ export function useInvoiceManagement({
   };
 
   const openFileUpload = () => {
-    if (blockInvoiceOnlyUpload) {
+    if (blockDocumentOnlyUpload) {
       onUpgradeClick("invoice_limit");
       return;
     }
@@ -272,17 +272,17 @@ export function useInvoiceManagement({
     uploading,
     batchStatus,
     error,
-    reviewInvoiceId,
-    setReviewInvoiceId,
+    reviewInvoiceId: reviewDocumentId,
+    setReviewInvoiceId: setReviewDocumentId,
     closeReviewModal,
     documentType,
     setDocumentType,
     guideDismissed,
     guideExpanded,
     setGuideExpanded,
-    invoiceCount,
-    atLimit: isAtInvoiceUploadLimit,
-    blockInvoiceOnlyUpload,
+    invoiceCount: documentCount,
+    atLimit: isAtDocumentUploadLimit,
+    blockInvoiceOnlyUpload: blockDocumentOnlyUpload,
     isArchitectAtGlobalLimit,
     dismissGuide,
     handleUploadFile,

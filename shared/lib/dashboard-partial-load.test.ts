@@ -9,6 +9,7 @@ describe("partialDashboardLoadMessage", () => {
         invoicesFailed: false,
         subscriptionFailed: false,
         projectPassFailed: false,
+        galleryFailed: false,
       }),
     ).toBeNull();
   });
@@ -20,6 +21,7 @@ describe("partialDashboardLoadMessage", () => {
         invoicesFailed: true,
         subscriptionFailed: false,
         projectPassFailed: false,
+        galleryFailed: false,
       },
       { variant: "mobile" },
     );

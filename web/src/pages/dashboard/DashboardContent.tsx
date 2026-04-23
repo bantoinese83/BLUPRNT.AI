@@ -14,7 +14,7 @@ import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
-import { InvoicesSection } from "@/components/dashboard/InvoicesSection";
+import { DocumentsSection } from "@/components/dashboard/DocumentsSection";
 import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
 import { PropertyLedger } from "@/components/dashboard/PropertyLedger";
 import { downloadSellerPacket } from "@/lib/seller-packet-download";
@@ -63,6 +63,7 @@ import {
 import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
 import { TransformationVault } from "@/components/dashboard/TransformationVault";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
+import { AIAssistantWidget } from "@/components/AIAssistantWidget";
 
 export function DashboardContent({
   projects,
@@ -95,6 +96,7 @@ export function DashboardContent({
 
   const [deleteProject, setDeleteProject] = useState<ProjectRow | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   const { isSidebarOpen, setIsSidebarOpen } = useAwareness();
 
@@ -195,7 +197,7 @@ export function DashboardContent({
     <DashboardStats
       estimatedMin={project.estimated_min_total}
       estimatedMax={project.estimated_max_total}
-      invoiceTotal={capitalDocumentedTotal}
+      spendingTotal={capitalDocumentedTotal}
       documentRowCount={invoices.length}
     />
   );
@@ -204,18 +206,11 @@ export function DashboardContent({
     <ProjectHealth
       estimatedMin={project.estimated_min_total}
       estimatedMax={project.estimated_max_total}
-      invoiceTotal={capitalDocumentedTotal}
+      spendingTotal={capitalDocumentedTotal}
     />
   );
 
-  const transformationVault = (
-    <TransformationVault
-      projectId={project.id}
-      beforePath={project.before_photo_storage_path}
-      afterPath={project.after_photo_storage_path}
-      onRefresh={load}
-    />
-  );
+  const transformationVault = <TransformationVault projectId={project.id} />;
 
   const homeTeam = (
     <HomeTeamSection
@@ -251,10 +246,10 @@ export function DashboardContent({
     </div>
   );
 
-  const invoicesComp = (
-    <InvoicesSection
+  const documentsComp = (
+    <DocumentsSection
       projectId={project.id}
-      invoices={invoices}
+      documents={invoices}
       onUploaded={load}
       onUpgradeClick={(reason) => {
         setUpgradeReason(
@@ -310,6 +305,7 @@ export function DashboardContent({
         }}
         onExportPDF={handleExportPDF}
         onOpenInsights={() => setIsSidebarOpen(true)}
+        onOpenAssistant={() => setIsAssistantOpen(true)}
       />
 
       <DashboardDataStatus
@@ -436,7 +432,7 @@ export function DashboardContent({
                     homeTeam={homeTeam}
                     transformationVault={transformationVault}
                     ledger={ledger}
-                    invoicesComp={invoicesComp}
+                    documentsComp={documentsComp}
                     onUpgradeClick={() => setShowUpgrade(true)}
                   />
                 }
@@ -464,7 +460,7 @@ export function DashboardContent({
                     project={project}
                     invoices={invoices}
                     health={health}
-                    invoicesComp={invoicesComp}
+                    documentsComp={documentsComp}
                   />
                 }
               />
@@ -508,6 +504,12 @@ export function DashboardContent({
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
         projectName={deleteProject?.name ?? ""}
+      />
+
+      <AIAssistantWidget
+        projectId={project.id}
+        isOpen={isAssistantOpen}
+        onOpenChange={setIsAssistantOpen}
       />
     </div>
   );

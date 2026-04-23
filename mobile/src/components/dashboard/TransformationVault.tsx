@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,54 +6,79 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import {
-  Camera,
   History,
-  Zap,
+  Play,
+  Plus,
+  Camera,
   X,
+  MessageSquare,
+  Check,
+  ChevronLeft,
+  ChevronRight,
   Image as ImageIcon,
 } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
-import { supabase } from "@/lib/supabase";
+import { supabase, invokeFunction } from "@/lib/supabase";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { useAwareness } from "@/contexts/AwarenessContext";
+import { useDashboardData } from "@/hooks/useDashboardData";
+
+type GalleryItem = import("@shared/types/database").GalleryItemRow;
 
 type TransformationVaultProps = {
   projectId: string;
-  beforePath: string | null;
-  afterPath: string | null;
-  onRefresh?: () => void;
+  className?: string; // For compatibility with web props if needed
 };
 
 type PhotoSlotProps = {
   label: string;
   icon: React.ReactNode;
-  path: string | null;
-  url: string | null;
+  item: GalleryItem | null;
+  signedUrl: string | null;
   uploading: boolean;
   onUpload: () => void;
-  onClear: () => void;
-  error: boolean;
+  onClear: (id: string) => void;
+  onUpdateCaption: (id: string, caption: string) => void;
 };
 
 function PhotoSlot({
   label,
   icon,
-  path,
-  url,
+  item,
+  signedUrl,
   uploading,
   onUpload,
   onClear,
-  error,
+  onUpdateCaption,
 }: PhotoSlotProps) {
-  const showPlaceholder = !url || error || !path;
+  const [editingCaption, setEditingCaption] = useState(false);
+  const [captionValue, setCaptionValue] = useState(item?.caption || "");
+
+  useEffect(() => {
+    setCaptionValue(item?.caption || "");
+  }, [item?.caption]);
+
+  const showPlaceholder = !signedUrl || !item;
+
+  const handleSaveCaption = async () => {
+    if (!item) return;
+    try {
+      await onUpdateCaption(item.id, captionValue);
+      setEditingCaption(false);
+    } catch {
+      setCaptionValue(item.caption || "");
+    }
+  };
 
   return (
     <View style={styles.slotContainer}>
       <GlassCard intensity={8} style={styles.slotCard}>
-        <View style={{ height: "100%" }}>
+        <View style={{ flex: 1 }}>
           {showPlaceholder ? (
             <View style={styles.placeholder}>
               <View style={styles.placeholderIcon}>
@@ -68,14 +93,38 @@ function PhotoSlot({
           ) : (
             <View style={StyleSheet.absoluteFill}>
               <Image
-                source={{ uri: url! }}
+                source={{ uri: signedUrl! }}
                 style={StyleSheet.absoluteFill}
                 contentFit="cover"
               />
-              {/* Clear Button */}
-              <TouchableOpacity onPress={onClear} style={styles.clearBtn}>
-                <X size={14} color="white" />
-              </TouchableOpacity>
+
+              {/* Controls Overlay (Top) */}
+              <View style={styles.topControls}>
+                <TouchableOpacity
+                  onPress={() => setEditingCaption(!editingCaption)}
+                  style={[
+                    styles.controlBtn,
+                    editingCaption && styles.controlBtnActive,
+                  ]}
+                >
+                  <MessageSquare size={14} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onClear(item.id)}
+                  style={[styles.controlBtn, styles.clearBtn]}
+                >
+                  <X size={14} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Caption Overlay (Bottom) */}
+              {!editingCaption && item.caption && (
+                <View style={styles.captionContainer}>
+                  <Text style={styles.captionText} numberOfLines={2}>
+                    {item.caption}
+                  </Text>
+                </View>
+              )}
             </View>
           )}
 
@@ -88,92 +137,117 @@ function PhotoSlot({
           </View>
 
           {/* Action Overlay */}
-          <TouchableOpacity
-            style={styles.actionOverlay}
-            onPress={onUpload}
-            disabled={uploading}
-          >
-            <View style={styles.actionBtn}>
-              {uploading ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                <>
-                  <Camera size={16} color="white" />
-                  <Text style={styles.actionText}>
-                    {showPlaceholder ? `Capture` : `Change`}
-                  </Text>
-                </>
-              )}
+          {!editingCaption && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.actionOverlay}
+              onPress={() => {
+                console.log(`[PhotoSlot] Capture pressed for ${label}`);
+                onUpload();
+              }}
+              disabled={uploading}
+            >
+              <View style={styles.actionBtn}>
+                {uploading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={Theme.colors.brand.primary}
+                  />
+                ) : (
+                  <>
+                    <Camera size={16} color={Theme.colors.text.primary} />
+                    <Text style={styles.actionText}>
+                      {showPlaceholder ? `Capture` : `Change`}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Inline Caption Editor */}
+          {editingCaption && (
+            <View style={styles.editorOverlay}>
+              <View style={styles.editorContent}>
+                <TextInput
+                  value={captionValue}
+                  onChangeText={setCaptionValue}
+                  placeholder="Add a caption..."
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  style={styles.captionInput}
+                  autoFocus
+                />
+                <TouchableOpacity
+                  onPress={handleSaveCaption}
+                  style={styles.saveBtn}
+                >
+                  <Check size={18} color={Theme.colors.brand.primary} />
+                </TouchableOpacity>
+              </View>
             </View>
-          </TouchableOpacity>
+          )}
         </View>
       </GlassCard>
     </View>
   );
 }
 
-export function TransformationVault({
-  projectId,
-  beforePath,
-  afterPath,
-  onRefresh,
-}: TransformationVaultProps) {
-  const [uploading, setUploading] = useState<"before" | "after" | null>(null);
-  const [beforeUrl, setBeforeUrl] = useState<string | null>(null);
-  const [afterUrl, setAfterUrl] = useState<string | null>(null);
-  const [beforeError, setBeforeError] = useState(false);
-  const [afterError, setAfterError] = useState(false);
+export function TransformationVault({ projectId }: TransformationVaultProps) {
+  const { galleryItems = [] } = useAwareness();
+  const { load: refreshDashboard } = useDashboardData();
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [activeSetIndex, setActiveSetIndex] = useState(0);
 
-  const failedPathsRef = useRef<Set<string>>(new Set());
+  // Group items into sets
+  const sets = useMemo(() => {
+    const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
+    const befores = safeGallery.filter((i) => i.photo_type === "before");
+    const afters = safeGallery.filter((i) => i.photo_type === "after");
+    const count = Math.max(befores.length, afters.length, 1);
+
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push({
+        before: befores[i] || null,
+        after: afters[i] || null,
+      });
+    }
+    const last = result[result.length - 1];
+    if (last && (last.before || last.after)) {
+      result.push({ before: null, after: null });
+    }
+    return result;
+  }, [galleryItems]);
 
   useEffect(() => {
-    let active = true;
     const fetchSignedUrls = async () => {
-      // 1. Before Path
-      if (beforePath && !failedPathsRef.current.has(beforePath)) {
-        const { data, error } = await supabase.storage
-          .from("project-documents")
-          .createSignedUrl(beforePath, 3600);
-        if (active) {
-          if (error) {
-            setBeforeError(true);
-            failedPathsRef.current.add(beforePath);
-          } else {
-            setBeforeUrl(data?.signedUrl ?? null);
-            setBeforeError(false);
+      const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
+      const paths = safeGallery.map((i) => i.storage_path);
+      const newUrls: Record<string, string> = { ...signedUrls };
+      let changed = false;
+
+      for (const path of paths) {
+        if (!newUrls[path]) {
+          const { data } = await supabase.storage
+            .from("project-photos")
+            .createSignedUrl(path, 3600);
+          if (data?.signedUrl) {
+            newUrls[path] = data.signedUrl;
+            changed = true;
           }
         }
-      } else if (active) {
-        setBeforeUrl(null);
-        setBeforeError(false);
       }
-
-      // 2. After Path
-      if (afterPath && !failedPathsRef.current.has(afterPath)) {
-        const { data, error } = await supabase.storage
-          .from("project-documents")
-          .createSignedUrl(afterPath, 3600);
-        if (active) {
-          if (error) {
-            setAfterError(true);
-            failedPathsRef.current.add(afterPath);
-          } else {
-            setAfterUrl(data?.signedUrl ?? null);
-            setAfterError(false);
-          }
-        }
-      } else if (active) {
-        setAfterUrl(null);
-        setAfterError(false);
-      }
+      if (changed) setSignedUrls(newUrls);
     };
-    void fetchSignedUrls();
-    return () => {
-      active = false;
-    };
-  }, [beforePath, afterPath]);
+    fetchSignedUrls();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [galleryItems]);
 
-  const handlePickPhoto = async (type: "before" | "after") => {
+  const handlePickPhoto = async (type: "before" | "after", index: number) => {
+    console.log(
+      `[TransformationVault] handlePickPhoto for ${type} at index ${index}`,
+    );
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -184,141 +258,200 @@ export function TransformationVault({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
 
     if (!result.canceled && result.assets[0]) {
-      void runUpload(result.assets[0].uri, type);
+      console.log(
+        `[TransformationVault] Photo picked: ${result.assets[0].uri}`,
+      );
+      void runUpload(result.assets[0].uri, type, index);
     }
   };
 
-  const runUpload = async (uri: string, type: "before" | "after") => {
-    setUploading(type);
+  const runUpload = async (
+    uri: string,
+    type: "before" | "after",
+    index: number,
+  ) => {
+    setUploading(`${type}-${index}`);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error("Unauthorized");
-
       const ext = uri.split(".").pop() || "jpg";
-      const path = `${projectId}/${session.user.id}/vault_${type}_${Date.now()}.${ext}`;
-
       const formData = new FormData();
+      formData.append("project_id", projectId);
+      formData.append("type", type);
       formData.append("file", {
         uri,
         name: `vault_${type}.${ext}`,
         type: `image/${ext === "png" ? "png" : "jpeg"}`,
-      } as unknown as Blob);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
 
-      const { error: upErr } = await supabase.storage
-        .from("project-documents")
-        .upload(path, formData, { contentType: "image/jpeg" });
-      if (upErr) throw upErr;
+      const { error: fnErr } = await invokeFunction("upload-gallery-photo", {
+        body: formData,
+      });
 
-      const updateData =
-        type === "before"
-          ? { before_photo_storage_path: path }
-          : { after_photo_storage_path: path };
-
-      const { error: dbErr } = await supabase
-        .from("projects")
-        .update(updateData)
-        .eq("id", projectId);
-      if (dbErr) throw dbErr;
-
-      failedPathsRef.current.delete(path);
-
-      if (type === "before") setBeforeError(false);
-      if (type === "after") setAfterError(false);
-      onRefresh?.();
-    } catch (err: unknown) {
+      if (fnErr) throw fnErr;
+      void refreshDashboard();
+    } catch (err) {
       console.error(err);
-      const msg =
-        err instanceof Error ? err.message : "Failed to update vault photo";
-      Alert.alert("Error", msg);
+      Alert.alert("Error", "Failed to upload photo");
     } finally {
       setUploading(null);
     }
   };
 
-  const handleClear = async (type: "before" | "after") => {
+  const handleClear = async (id: string) => {
     try {
-      const updateData =
-        type === "before"
-          ? { before_photo_storage_path: null }
-          : { after_photo_storage_path: null };
-
       const { error } = await supabase
-        .from("projects")
-        .update(updateData)
-        .eq("id", projectId);
+        .from("project_gallery")
+        .delete()
+        .eq("id", id);
       if (error) throw error;
-
-      if (type === "before") setBeforeUrl(null);
-      else setAfterUrl(null);
-
-      onRefresh?.();
+      void refreshDashboard();
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Could not remove photo");
     }
   };
 
+  const handleUpdateCaption = async (id: string, caption: string) => {
+    try {
+      const { error } = await supabase
+        .from("project_gallery")
+        .update({ caption })
+        .eq("id", id);
+      if (error) throw error;
+      void refreshDashboard();
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Could not update caption");
+      throw err;
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>TRANSFORMATION VAULT</Text>
-        <Zap
-          size={12}
-          color={Theme.colors.brand.primary}
-          fill={Theme.colors.brand.primary}
-        />
+        <View>
+          <Text style={styles.headerTitle}>TRANSFORMATION GALLERY</Text>
+          <Text style={styles.headerSubtitle}>
+            Angle {activeSetIndex + 1} of {sets.length}
+          </Text>
+        </View>
+        <View style={styles.navControls}>
+          <TouchableOpacity
+            disabled={activeSetIndex === 0}
+            onPress={() => setActiveSetIndex((prev) => prev - 1)}
+            style={[
+              styles.navBtn,
+              activeSetIndex === 0 && styles.navBtnDisabled,
+            ]}
+          >
+            <ChevronLeft
+              size={16}
+              color={
+                activeSetIndex === 0
+                  ? Theme.colors.text.disabled
+                  : Theme.colors.text.primary
+              }
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={activeSetIndex === sets.length - 1}
+            onPress={() => setActiveSetIndex((prev) => prev + 1)}
+            style={[
+              styles.navBtn,
+              activeSetIndex === sets.length - 1 && styles.navBtnDisabled,
+            ]}
+          >
+            <ChevronRight
+              size={16}
+              color={
+                activeSetIndex === sets.length - 1
+                  ? Theme.colors.text.disabled
+                  : Theme.colors.text.primary
+              }
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.grid}>
         <PhotoSlot
           label="Baseline"
           icon={<History size={10} color="white" />}
-          path={beforePath}
-          url={beforeUrl}
-          uploading={uploading === "before"}
-          onUpload={() => handlePickPhoto("before")}
-          onClear={() => handleClear("before")}
-          error={beforeError}
+          item={sets[activeSetIndex].before}
+          signedUrl={
+            sets[activeSetIndex].before
+              ? signedUrls[sets[activeSetIndex].before!.storage_path]
+              : null
+          }
+          uploading={uploading === `before-${activeSetIndex}`}
+          onUpload={() => handlePickPhoto("before", activeSetIndex)}
+          onClear={handleClear}
+          onUpdateCaption={handleUpdateCaption}
         />
         <PhotoSlot
           label="Current"
           icon={
-            <Zap
+            <Play
               size={10}
               color={Theme.colors.brand.primary}
               fill={Theme.colors.brand.primary}
             />
           }
-          path={afterPath}
-          url={afterUrl}
-          uploading={uploading === "after"}
-          onUpload={() => handlePickPhoto("after")}
-          onClear={() => handleClear("after")}
-          error={afterError}
+          item={sets[activeSetIndex].after}
+          signedUrl={
+            sets[activeSetIndex].after
+              ? signedUrls[sets[activeSetIndex].after!.storage_path]
+              : null
+          }
+          uploading={uploading === `after-${activeSetIndex}`}
+          onUpload={() => handlePickPhoto("after", activeSetIndex)}
+          onClear={handleClear}
+          onUpdateCaption={handleUpdateCaption}
         />
       </View>
+
+      <View style={styles.dotsContainer}>
+        {sets.map((_, i) => (
+          <View
+            key={i}
+            style={[styles.dot, i === activeSetIndex ? styles.dotActive : null]}
+          />
+        ))}
+      </View>
+
+      {sets.length > 1 && (
+        <TouchableOpacity
+          onPress={() => setActiveSetIndex(sets.length - 1)}
+          style={styles.addSetBtn}
+        >
+          <Plus size={14} color={Theme.colors.text.secondary} />
+          <Text style={styles.addSetText}>Add Another Angle</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  badgeIcon: {
+    marginLeft: 4,
+  },
   container: {
     marginTop: 16,
+    paddingBottom: 16,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 12,
     paddingHorizontal: 4,
   },
   headerTitle: {
@@ -327,9 +460,34 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.muted,
     letterSpacing: 2,
   },
+  headerSubtitle: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    marginTop: 2,
+  },
+  navControls: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  navBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  navBtnDisabled: {
+    backgroundColor: Theme.colors.inputBg,
+    borderColor: Theme.colors.divider,
+  },
   grid: {
     flexDirection: "row",
     gap: 12,
+    paddingHorizontal: 4,
   },
   slotContainer: {
     flex: 1,
@@ -340,37 +498,77 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: Theme.colors.card,
+    height: "100%",
   },
   placeholder: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0,0,0,0.02)",
-    padding: 12,
+    zIndex: 1,
   },
   placeholderIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
   },
   placeholderLabel: {
     fontSize: 10,
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.text.muted,
     textTransform: "uppercase",
+    marginTop: 10,
+    letterSpacing: 1,
+  },
+  topControls: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    flexDirection: "row",
+    gap: 8,
+    zIndex: 20,
+  },
+  controlBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  controlBtnActive: {
+    backgroundColor: Theme.colors.brand.primary,
+  },
+  clearBtn: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  captionContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+    paddingTop: 24,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  captionText: {
+    color: "white",
+    fontSize: 11,
+    fontFamily: Theme.typography.family.medium,
   },
   badgeContainer: {
     position: "absolute",
-    top: 10,
-    left: 10,
+    top: 12,
+    left: 12,
+    zIndex: 10,
   },
   badge: {
     flexDirection: "row",
@@ -389,38 +587,100 @@ const styles = StyleSheet.create({
   },
   actionOverlay: {
     position: "absolute",
-    bottom: 10,
-    left: 10,
-    right: 10,
+    bottom: 12,
+    left: 12,
+    right: 12,
+    zIndex: 25,
   },
   actionBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+    paddingVertical: 10,
+    borderRadius: 14,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 4,
   },
   actionText: {
     fontSize: 10,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
   },
-  clearBtn: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: "rgba(0,0,0,0.3)",
+  editorOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.6)",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 20,
+    padding: 12,
+    zIndex: 30,
+  },
+  editorContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 12,
+    padding: 8,
+    width: "100%",
+  },
+  captionInput: {
+    flex: 1,
+    color: "white",
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    paddingHorizontal: 8,
+    height: 36,
+  },
+  saveBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 16,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Theme.colors.divider,
+  },
+  dotActive: {
+    backgroundColor: Theme.colors.brand.primary,
+    width: 16,
+  },
+  addSetBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+    alignSelf: "center",
+  },
+  addSetText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });

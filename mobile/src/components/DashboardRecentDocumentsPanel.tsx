@@ -6,14 +6,9 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import {
-  ChevronRight,
-  Receipt,
-  Wallet,
-  Clock,
-  Lock,
-} from "lucide-react-native";
+import { ChevronRight, Clock, Lock, Wallet } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
+import { DocumentThumbnail } from "@/components/DocumentThumbnail";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money, getWarrantyStatus } from "@shared/lib/formatters";
@@ -21,11 +16,6 @@ import { formatRelativeTime } from "@/lib/activity";
 import type { InvoiceRow } from "@shared/types/database";
 
 /** Matches Activity feed upload row (opaque tile + spine in gap). */
-const DOC_ICON = {
-  text: "#2563eb",
-  bg: "#eff6ff",
-  border: "#bfdbfe",
-} as const;
 
 type Props = {
   invoices: InvoiceRow[];
@@ -61,7 +51,7 @@ export function DashboardRecentDocumentsPanel({
     return (
       <GlassCard intensity={10} style={styles.card}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeaderTitle}>Recent documents</Text>
+          <Text style={styles.sectionHeaderTitle}>Recent Vault Items</Text>
           <View style={styles.sectionHeaderLine} />
         </View>
         <Text style={styles.sectionSubcopy}>
@@ -88,17 +78,7 @@ export function DashboardRecentDocumentsPanel({
                 accessibilityRole="button"
                 accessibilityLabel={`Review ${inv.vendor_name?.trim() || "document"}, ${money(inv.total)}`}
               >
-                <View
-                  style={[
-                    styles.iconContainer,
-                    {
-                      backgroundColor: DOC_ICON.bg,
-                      borderColor: DOC_ICON.border,
-                    },
-                  ]}
-                >
-                  <Receipt size={20} color={DOC_ICON.text} />
-                </View>
+                <DocumentThumbnail invoiceId={inv.id} size={44} />
 
                 <View style={styles.docContent}>
                   <View style={styles.titleRow}>
@@ -176,12 +156,12 @@ export function DashboardRecentDocumentsPanel({
             onOpenLedger();
           }}
           accessibilityRole="button"
-          accessibilityLabel="Open full ledger"
+          accessibilityLabel="Open full vault"
           activeOpacity={0.85}
         >
           <Wallet size={18} color={Theme.colors.brand.deep} />
           <View style={styles.ledgerCtaLabelWrap}>
-            <Text style={styles.ledgerCtaText}>Open full ledger</Text>
+            <Text style={styles.ledgerCtaText}>Open full vault</Text>
           </View>
           <ChevronRight size={18} color={Theme.colors.brand.deep} />
         </TouchableOpacity>
@@ -192,7 +172,7 @@ export function DashboardRecentDocumentsPanel({
   return (
     <GlassCard intensity={10} style={styles.card}>
       <View style={styles.sectionHeaderRow}>
-        <Text style={styles.sectionHeaderTitle}>Ledger</Text>
+        <Text style={styles.sectionHeaderTitle}>Vault</Text>
         <View style={styles.sectionHeaderLine} />
       </View>
       <Text style={styles.sectionSubcopy}>

@@ -37,7 +37,7 @@ function TabShell() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
-      <Tabs.Screen name="finance" options={{ title: "Ledger" }} />
+      <Tabs.Screen name="finance" options={{ title: "Vault" }} />
       <Tabs.Screen name="new" options={{ title: "New" }} />
       <Tabs.Screen name="ai" options={{ title: "Ask" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
@@ -85,6 +85,7 @@ export default function TabLayout() {
     spendByCategory,
     isArchitect,
     hasProjectPass,
+    galleryItems,
   } = useDashboardData();
 
   return (
@@ -95,6 +96,7 @@ export default function TabLayout() {
       spendByCategory={spendByCategory}
       isArchitect={isArchitect}
       hasProjectPass={hasProjectPass}
+      galleryItems={galleryItems}
     >
       <TabShell />
       <TabOverlays />

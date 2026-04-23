@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Lock, Lightbulb, ArrowRight } from "lucide-react-native";
+import { Lock, Cpu, ArrowRight } from "lucide-react-native";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
 import { Theme } from "@/constants/Theme";
@@ -20,10 +20,10 @@ export function InsightTeaser({ projectName, onUpgradePress }: Props) {
           </View>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>Premium insights</Text>
-            <Lightbulb
+            <Cpu
               size={12}
               color={Theme.colors.brand.primary}
-              style={styles.badgeSparkle}
+              style={styles.badgeIcon}
             />
           </View>
         </View>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     paddingVertical: Theme.spacing.xs / 2,
     borderRadius: Theme.radius.sm,
   },
-  badgeSparkle: {
+  badgeIcon: {
     marginLeft: Theme.spacing.xs / 2,
   },
   badgeText: {

@@ -25,7 +25,7 @@ interface DashboardPlanProps {
   homeTeam: React.ReactNode;
   transformationVault: React.ReactNode;
   ledger: React.ReactNode;
-  invoicesComp: React.ReactNode;
+  documentsComp: React.ReactNode;
   onUpgradeClick: () => void;
 }
 
@@ -41,7 +41,7 @@ export function DashboardPlan({
   homeTeam,
   transformationVault,
   ledger,
-  invoicesComp,
+  documentsComp,
   onUpgradeClick,
 }: DashboardPlanProps) {
   const navigate = useNavigate();
@@ -82,10 +82,10 @@ export function DashboardPlan({
         type="button"
       >
         <ListTree className="w-5 h-5 shrink-0" aria-hidden />
-        View full scope
+        View full budget
       </Button>
-      <ComponentErrorBoundary name="Invoices Ledger">
-        {invoicesComp}
+      <ComponentErrorBoundary name="Documents Ledger">
+        {documentsComp}
       </ComponentErrorBoundary>
     </DashboardSubPage>
   );

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { useInvoiceManagement } from "@/hooks/useInvoiceManagement";
-import { InvoiceUploadHeader } from "./InvoiceUploadHeader";
-import { InvoiceGuide } from "./InvoiceGuide";
-import { InvoiceLimitAlert } from "./InvoiceLimitAlert";
-import { InvoiceCard } from "./InvoiceCard";
-import { InvoiceReviewModal } from "./InvoiceReviewModal";
+import { useDocumentManagement } from "@/hooks/useDocumentManagement";
+import { DocumentUploadHeader } from "./DocumentUploadHeader";
+import { DocumentGuide } from "./DocumentGuide";
+import { DocumentLimitAlert } from "./DocumentLimitAlert";
+import { DocumentCard } from "./DocumentCard";
+import { DocumentReviewModal } from "./DocumentReviewModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, FileText, Upload } from "lucide-react";
 import { motion } from "motion/react";
@@ -18,32 +18,32 @@ import {
   type LedgerDocumentFilter,
 } from "@/lib/plan-vs-actual";
 
-type InvoicesSectionProps = {
+type DocumentsSectionProps = {
   projectId: string;
-  invoices: InvoiceRow[];
+  documents: InvoiceRow[];
   onUploaded: (id?: string) => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
   subscription?: UserSubscriptionRow | null;
   hasProjectPass?: boolean;
 };
 
-export function InvoicesSection({
+export function DocumentsSection({
   projectId,
-  invoices,
+  documents,
   onUploaded,
   onUpgradeClick,
   subscription = null,
   hasProjectPass = false,
-}: InvoicesSectionProps) {
+}: DocumentsSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const wasUploading = useRef(false);
   const [dropActive, setDropActive] = useState(false);
   const [ledgerFilter, setLedgerFilter] = useState<LedgerDocumentFilter>("all");
 
-  const visibleInvoices = useMemo(
-    () => filterInvoicesByLedgerDocumentFilter(invoices, ledgerFilter),
-    [invoices, ledgerFilter],
+  const visibleDocuments = useMemo(
+    () => filterInvoicesByLedgerDocumentFilter(documents, ledgerFilter),
+    [documents, ledgerFilter],
   );
 
   const {
@@ -51,13 +51,13 @@ export function InvoicesSection({
     uploading,
     batchStatus,
     error,
-    reviewInvoiceId,
-    setReviewInvoiceId,
+    reviewInvoiceId: reviewDocumentId,
+    setReviewInvoiceId: setReviewDocumentId,
     closeReviewModal,
     guideDismissed,
     guideExpanded,
     setGuideExpanded,
-    invoiceCount,
+    invoiceCount: documentCount,
     atLimit,
     blockInvoiceOnlyUpload,
     isArchitectAtGlobalLimit,
@@ -65,9 +65,9 @@ export function InvoicesSection({
     handleUploadFile,
     openFileUpload,
     FREE_LIMIT,
-  } = useInvoiceManagement({
+  } = useDocumentManagement({
     projectId,
-    invoices,
+    documents,
     onUploaded,
     onUpgradeClick,
     subscription,
@@ -75,11 +75,11 @@ export function InvoicesSection({
   });
 
   useEffect(() => {
-    if (wasUploading.current && !uploading && invoices.length > 0) {
+    if (wasUploading.current && !uploading && documents.length > 0) {
       scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }
     wasUploading.current = uploading;
-  }, [uploading, invoices.length]);
+  }, [uploading, documents.length]);
 
   const dropDisabled = uploading || blockInvoiceOnlyUpload;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
@@ -114,7 +114,7 @@ export function InvoicesSection({
   return (
     <div
       ref={scrollRef}
-      id="invoice-upload-anchor"
+      id="document-upload-anchor"
       className="space-y-5 scroll-mt-24"
     >
       <input
@@ -129,7 +129,7 @@ export function InvoicesSection({
       <div
         ref={dropZoneRef}
         role="region"
-        aria-label="Invoice and document upload"
+        aria-label="Document upload"
         onDragOver={onDragOver}
         onDragEnter={onDragOver}
         onDragLeave={onDragLeave}
@@ -141,7 +141,7 @@ export function InvoicesSection({
             "bg-teal-50/40 ring-2 ring-teal-400/80 ring-offset-2 ring-offset-slate-50",
         )}
       >
-        <InvoiceUploadHeader
+        <DocumentUploadHeader
           uploading={uploading}
           batchStatus={batchStatus}
           onUploadClick={openFileUpload}
@@ -153,8 +153,8 @@ export function InvoicesSection({
           </p>
         )}
 
-        {invoices.length === 0 && !guideDismissed && (
-          <InvoiceGuide
+        {documents.length === 0 && !guideDismissed && (
+          <DocumentGuide
             expanded={guideExpanded}
             setExpanded={setGuideExpanded}
             onUploadClick={openFileUpload}
@@ -169,7 +169,7 @@ export function InvoicesSection({
           </p>
         )}
 
-        {invoices.length > 0 ? (
+        {documents.length > 0 ? (
           <div
             className="flex flex-wrap gap-2"
             role="tablist"
@@ -178,8 +178,8 @@ export function InvoicesSection({
             {(
               [
                 { id: "all" as const, label: "All" },
-                { id: "capital" as const, label: "Capital" },
-                { id: "maintenance" as const, label: "Records" },
+                { id: "capital" as const, label: "Spending" },
+                { id: "maintenance" as const, label: "Logs & Certs" },
               ] as const
             ).map(({ id, label }) => (
               <button
@@ -201,29 +201,30 @@ export function InvoicesSection({
           </div>
         ) : null}
 
-        {invoices.length > 0 && visibleInvoices.length === 0 ? (
+        {documents.length > 0 && visibleDocuments.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-6 text-center">
             <p className="text-sm font-semibold text-slate-800">
               {ledgerFilter === "capital"
                 ? "No invoices, quotes, or receipts in this view"
-                : "No permits, contracts, or other project records here yet"}
+                : "No permits, logs, or other project records here yet"}
             </p>
             <p className="mt-1 text-xs text-slate-500 leading-relaxed">
               {ledgerFilter === "capital"
-                ? "Switch to All or Records, or upload a capital document (invoice, quote, or receipt)."
-                : "Upload warranties, liens, inspections, insurance, HOA letters, and more — they show here and in your seller packet."}
+                ? "Switch to All or Logs & Certs, or upload a spending document (invoice, quote, or receipt)."
+                : "Upload warranties, liens, inspections, insurance, HOA letters, and more — they show here and in your archive."}
             </p>
           </div>
         ) : null}
 
         {!isArchitectActive &&
           !hasProjectPass &&
-          invoiceCount > 0 &&
-          invoiceCount < FREE_LIMIT && (
+          documentCount > 0 &&
+          documentCount < FREE_LIMIT && (
             <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
               <span className="font-medium text-slate-700">
-                {invoiceCount} of {FREE_LIMIT} free bill or receipt uploads used
-                on this project (quotes &amp; other records don&apos;t count).
+                {documentCount} of {FREE_LIMIT} free spending document uploads
+                used on this project (quotes &amp; other records don&apos;t
+                count).
               </span>{" "}
               <button
                 type="button"
@@ -236,7 +237,7 @@ export function InvoicesSection({
           )}
 
         {atLimit && (
-          <InvoiceLimitAlert
+          <DocumentLimitAlert
             isArchitectAtGlobalLimit={isArchitectAtGlobalLimit}
             freeLimit={FREE_LIMIT}
             onUpgradeClick={onUpgradeClick}
@@ -269,7 +270,7 @@ export function InvoicesSection({
             </motion.div>
           )}
 
-          {invoices.length === 0 && !uploading && (
+          {documents.length === 0 && !uploading && (
             <div className="sm:col-span-2 rounded-2xl border-2 border-dashed border-slate-200 bg-white/60">
               <DashboardEmptyPanel
                 density="compact"
@@ -278,8 +279,8 @@ export function InvoicesSection({
                 description={
                   <>
                     <strong className="text-slate-700">Next step:</strong>{" "}
-                    Upload an invoice or quote. After upload, we&apos;ll open it
-                    so you can line items up with your estimate.
+                    Upload an invoice, quote, or other record. After upload,
+                    we&apos;ll open it so you can review and organize.
                   </>
                 }
                 action={
@@ -299,19 +300,19 @@ export function InvoicesSection({
             </div>
           )}
 
-          {visibleInvoices.map((inv, idx) => (
-            <InvoiceCard
-              key={inv.id}
-              invoice={inv}
+          {visibleDocuments.map((doc, idx) => (
+            <DocumentCard
+              key={doc.id}
+              document={doc}
               index={idx}
               isArchitect={isArchitectActive}
               hasProjectPass={hasProjectPass}
               onUpgradeClick={() => onUpgradeClick()}
-              onClick={(id) => setReviewInvoiceId(id)}
+              onClick={(id) => setReviewDocumentId(id)}
             />
           ))}
 
-          {invoices.length > 0 && visibleInvoices.length > 0 && (
+          {documents.length > 0 && visibleDocuments.length > 0 && (
             <button
               type="button"
               className="border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center text-slate-500 hover:bg-slate-50/80 hover:border-slate-300 transition-all min-h-[140px]"
@@ -326,9 +327,9 @@ export function InvoicesSection({
         </div>
       </div>
 
-      {reviewInvoiceId && (
-        <InvoiceReviewModal
-          invoiceId={reviewInvoiceId}
+      {reviewDocumentId && (
+        <DocumentReviewModal
+          documentId={reviewDocumentId}
           projectId={projectId}
           onClose={closeReviewModal}
           onSaved={onUploaded}

@@ -10,7 +10,7 @@ import {
   LayoutDashboard,
   FileText,
   Shield,
-  Zap,
+  Cpu,
   LogOut,
   ChevronRight,
   ListTree,
@@ -278,7 +278,7 @@ export function CommandPalette() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-400">
-                  <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
+                  <Cpu className="w-3 h-3 text-amber-400 fill-amber-400" />
                   Powered by BLUPRNT AI
                 </div>
               </div>

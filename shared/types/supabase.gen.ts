@@ -193,6 +193,16 @@ type OnboardingSyncRow = {
   created_at: string;
 };
 
+type ProjectGalleryRow = {
+  id: string;
+  project_id: string;
+  photo_type: "before" | "after" | "progress";
+  storage_path: string;
+  caption: string | null;
+  uploaded_by_user_id: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -209,6 +219,7 @@ export type Database = {
       marketing_leads: TableRow<MarketingLeadsRow>;
       seller_packets: TableRow<SellerPacketsRow>;
       project_view_tokens: TableRow<ProjectViewTokensRow>;
+      project_gallery: TableRow<ProjectGalleryRow>;
     };
     Views: Record<string, never>;
     Functions: {

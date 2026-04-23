@@ -1,5 +1,6 @@
-import { createElement, useState } from "react";
+import { useState } from "react";
 import { Eye, Clock, Lock } from "lucide-react";
+import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,10 +13,9 @@ import {
   ledgerDocumentVisualGroup,
 } from "@shared/lib/ledger-document-labels";
 import { isPlanVsActualDocumentType } from "@shared/lib/infer-document-type";
-import { cardIconForDocumentType } from "@/lib/ledger-type-icons";
 
-interface InvoiceCardProps {
-  invoice: InvoiceRow;
+interface DocumentCardProps {
+  document: InvoiceRow;
   index: number;
   isArchitect?: boolean;
   hasProjectPass?: boolean;
@@ -23,24 +23,24 @@ interface InvoiceCardProps {
   onClick: (id: string) => void;
 }
 
-export function InvoiceCard({
-  invoice,
+export function DocumentCard({
+  document,
   index,
   hasProjectPass,
   onUpgradeClick,
   onClick,
-}: InvoiceCardProps) {
+}: DocumentCardProps) {
   const [originalPreviewId, setOriginalPreviewId] = useState<string | null>(
     null,
   );
 
-  const visual = ledgerDocumentVisualGroup(invoice.document_type);
+  const visual = ledgerDocumentVisualGroup(document.document_type);
   const isSpend = visual === "spend";
   const isWarrantyCare = visual === "warranty_care";
   const showPaymentBadge = isPlanVsActualDocumentType(
-    invoice.document_type ?? "invoice",
+    document.document_type ?? "invoice",
   );
-  const warranty = getWarrantyStatus(invoice.warranty_expiry_date);
+  const warranty = getWarrantyStatus(document.warranty_expiry_date);
   const isWarrantyUnlocked = hasProjectPass;
 
   return (
@@ -52,46 +52,29 @@ export function InvoiceCard({
       >
         <Card
           className="border-slate-200/80 shadow-drop-sm hover:shadow-drop-lg hover:border-slate-400 transition-all duration-300 cursor-pointer overflow-hidden group relative"
-          onClick={() => onClick(invoice.id)}
+          onClick={() => onClick(document.id)}
         >
           <div className="absolute top-0 left-0 w-1 h-full bg-teal-600 opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="p-4 flex items-start space-x-4">
-            <div
-              className={cn(
-                "w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                isSpend
-                  ? "bg-red-50 group-hover:bg-red-100"
-                  : isWarrantyCare
-                    ? "bg-teal-50 group-hover:bg-teal-100"
-                    : "bg-slate-100 group-hover:bg-slate-200",
-              )}
-            >
-              {createElement(cardIconForDocumentType(invoice.document_type), {
-                className: cn(
-                  "h-5 w-5",
-                  isSpend
-                    ? "text-red-500"
-                    : isWarrantyCare
-                      ? "text-teal-600"
-                      : "text-slate-600",
-                ),
-                "aria-hidden": true,
-              })}
-            </div>
+            <DocumentThumbnail
+              invoiceId={document.id}
+              size="sm"
+              className="mt-0.5"
+            />
             <div className="space-y-1 min-w-0 flex-1">
               <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
-                {invoice.vendor_name ?? "Invoice"}
+                {document.vendor_name ?? "Document"}
               </h4>
               <p className="text-xs text-slate-500">
-                {new Date(invoice.created_at).toLocaleDateString(undefined, {
+                {new Date(document.created_at).toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
                   year: "numeric",
                 })}
               </p>
-              {invoice.total != null && (
+              {showPaymentBadge && document.total != null && (
                 <p className="text-sm font-bold text-slate-900 tabular-nums">
-                  {money(invoice.total)}
+                  {money(document.total)}
                 </p>
               )}
               <div className="pt-2 flex flex-wrap gap-1.5 items-center">
@@ -106,7 +89,7 @@ export function InvoiceCard({
                         : "bg-slate-100 text-slate-700",
                   )}
                 >
-                  {ledgerDocumentTypeLabel(invoice.document_type ?? "invoice")}
+                  {ledgerDocumentTypeLabel(document.document_type ?? "invoice")}
                 </Badge>
 
                 {warranty &&
@@ -140,18 +123,18 @@ export function InvoiceCard({
                     variant="secondary"
                     className="bg-slate-100 text-slate-700 capitalize text-[10px] font-black tracking-widest"
                   >
-                    {invoice.payment_status === "unpaid"
+                    {document.payment_status === "unpaid"
                       ? "Unpaid"
-                      : invoice.payment_status}
+                      : document.payment_status}
                   </Badge>
                 )}
               </div>
-              {invoice.document_id ? (
+              {document.document_id ? (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOriginalPreviewId(invoice.id);
+                    setOriginalPreviewId(document.id);
                   }}
                   className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2"
                 >

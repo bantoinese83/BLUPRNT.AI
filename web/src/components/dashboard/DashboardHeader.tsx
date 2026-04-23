@@ -8,6 +8,7 @@ import {
   Plus,
   Menu,
   X,
+  Bot,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ type DashboardHeaderProps = {
   onUpgradeClick?: () => void;
   onExportPDF?: () => void;
   onOpenInsights?: () => void;
+  onOpenAssistant?: () => void;
 };
 
 export function DashboardHeader({
@@ -36,6 +38,7 @@ export function DashboardHeader({
   onUpgradeClick,
   onExportPDF,
   onOpenInsights,
+  onOpenAssistant,
 }: DashboardHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -139,6 +142,20 @@ export function DashboardHeader({
             </Button>
           )}
 
+          {onOpenAssistant && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 rounded-xl px-2 text-teal-600 hover:bg-teal-50 hover:text-teal-700 sm:px-3"
+              onClick={onOpenAssistant}
+              type="button"
+              aria-label="Ask AI Assistant"
+            >
+              <Bot className="h-4 w-4 mr-1.5 shrink-0" aria-hidden />
+              <span className="hidden font-bold sm:inline">Ask AI</span>
+            </Button>
+          )}
+
           <div className="hidden items-center gap-1 lg:flex">
             <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
 
@@ -149,14 +166,14 @@ export function DashboardHeader({
                 className="h-9 rounded-xl px-3 text-slate-600 hover:bg-slate-100/90 hover:text-slate-900"
                 onClick={onExportPDF}
                 type="button"
-                title="Download seller packet PDF"
-                aria-label="Download seller packet PDF"
+                title="Download Home Archive PDF"
+                aria-label="Download Home Archive PDF"
               >
                 <FileDown
                   className="h-4 w-4 text-slate-500 mr-1.5"
                   aria-hidden
                 />
-                <span className="font-semibold">Export packet</span>
+                <span className="font-semibold">Export Archive</span>
                 {!isArchitect && (
                   <span className="ml-1.5 rounded-md bg-teal-950 px-1 py-0.5 text-[8px] font-black uppercase tracking-tighter text-white">
                     Architect
@@ -290,7 +307,7 @@ export function DashboardHeader({
                       className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
                     >
                       <FileDown className="h-5 w-5 text-slate-400" />
-                      Export Packet
+                      Export Archive
                     </button>
                   )}
                   {!isArchitect && onUpgradeClick && (

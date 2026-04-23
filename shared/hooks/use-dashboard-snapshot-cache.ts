@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "../types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  InvoiceRow,
+  GalleryItemRow,
+} from "../types/database";
 import type { DashboardSnapshot } from "../types/dashboard-snapshot";
 import { applyDashboardSnapshotPatch } from "../lib/apply-dashboard-snapshot-patch";
 
@@ -70,11 +75,21 @@ export function useDashboardSnapshotCache(
     [getQueryKey, queryClient],
   );
 
+  const setGalleryItems = useCallback(
+    (galleryItems: GalleryItemRow[]) => {
+      queryClient.setQueryData<DashboardSnapshot>(getQueryKey(), (prev) =>
+        applyDashboardSnapshotPatch(prev, { galleryItems }),
+      );
+    },
+    [getQueryKey, queryClient],
+  );
+
   return {
     clearLoadError,
     setProjects,
     setProject,
     setScopeItems,
     setInvoices,
+    setGalleryItems,
   };
 }

@@ -1,7 +1,7 @@
 import { Hammer, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface InvoiceGuideProps {
+interface DocumentGuideProps {
   expanded: boolean;
   setExpanded: (e: boolean) => void;
   onUploadClick: () => void;
@@ -9,13 +9,13 @@ interface InvoiceGuideProps {
   disabled?: boolean;
 }
 
-export function InvoiceGuide({
+export function DocumentGuide({
   expanded,
   setExpanded,
   onUploadClick,
   onDismiss,
   disabled,
-}: InvoiceGuideProps) {
+}: DocumentGuideProps) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-5 space-y-3">
       <button

@@ -66,5 +66,6 @@ export function useDashboardData() {
     configurationMissing,
     addItem,
     recalcProjectTotals,
+    galleryItems: publicCore.galleryItems,
   };
 }

@@ -6,19 +6,19 @@ const tabs = [
   {
     to: "/dashboard/plan",
     label: "Plan",
-    subtitle: "Budget & scope",
+    subtitle: "Overview",
     icon: ClipboardList,
   },
   {
     to: "/dashboard/execute",
-    label: "Execute",
-    subtitle: "Track invoices",
+    label: "Tracker",
+    subtitle: "Build progress",
     icon: Hammer,
   },
   {
     to: "/dashboard/record",
-    label: "Record",
-    subtitle: "Seller packet",
+    label: "Vault",
+    subtitle: "Home Archive",
     icon: FileText,
   },
 ] as const;

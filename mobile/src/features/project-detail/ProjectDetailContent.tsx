@@ -115,12 +115,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
 
         {project ? (
           <View style={{ paddingHorizontal: 24, paddingTop: 0, gap: 16 }}>
-            <TransformationVault
-              projectId={project.id}
-              beforePath={project.before_photo_storage_path}
-              afterPath={project.after_photo_storage_path}
-              onRefresh={handleRefresh}
-            />
+            <TransformationVault projectId={project.id} />
             <ProjectDetailInsightCards
               project={project}
               invoiceTotal={vm.invoiceTotal}

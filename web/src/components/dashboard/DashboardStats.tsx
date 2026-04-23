@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 type DashboardStatsProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
-  invoiceTotal: number;
+  spendingTotal: number;
   /** All ledger files (invoices, quotes, permits, every type) — not the Free 3 "bill" cap. */
   documentRowCount: number;
   isLoading?: boolean;
@@ -34,7 +34,7 @@ function StatSkeleton() {
 export function DashboardStats({
   estimatedMin,
   estimatedMax,
-  invoiceTotal,
+  spendingTotal,
   documentRowCount,
   isLoading = false,
 }: DashboardStatsProps) {
@@ -54,7 +54,7 @@ export function DashboardStats({
       : 0;
   const budgetPct =
     estimatedMid > 0
-      ? Math.min(100, Math.round((invoiceTotal / estimatedMid) * 100))
+      ? Math.min(100, Math.round((spendingTotal / estimatedMid) * 100))
       : 0;
 
   return (
@@ -104,7 +104,7 @@ export function DashboardStats({
           </span>
         </p>
         <p className="text-xs text-slate-400 font-bold">
-          Invoices, quotes, permits, and all other types combined
+          All project records combined
         </p>
       </motion.div>
 
@@ -125,9 +125,9 @@ export function DashboardStats({
 
         <div className="flex items-baseline gap-2 mb-1.5">
           <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none">
-            {formatCurrency(invoiceTotal)}
+            {formatCurrency(spendingTotal)}
           </p>
-          {estimatedMid > 0 && invoiceTotal > 0 && (
+          {estimatedMid > 0 && spendingTotal > 0 && (
             <motion.span
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
@@ -138,7 +138,7 @@ export function DashboardStats({
           )}
         </div>
         <p className="text-xs text-slate-400 font-bold">
-          Invoices &amp; quotes vs your estimate
+          Spending &amp; quotes vs your estimate
         </p>
       </motion.div>
     </div>

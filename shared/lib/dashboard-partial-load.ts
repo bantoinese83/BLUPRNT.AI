@@ -7,6 +7,7 @@ export function partialDashboardLoadMessage(
     invoicesFailed: boolean;
     subscriptionFailed: boolean;
     projectPassFailed: boolean;
+    galleryFailed: boolean;
   },
   options?: { variant?: "mobile" | "web" },
 ): string | null {
@@ -15,6 +16,7 @@ export function partialDashboardLoadMessage(
   if (parts.invoicesFailed) labels.push("documents");
   if (parts.subscriptionFailed) labels.push("plan status");
   if (parts.projectPassFailed) labels.push("project pass");
+  if (parts.galleryFailed) labels.push("transformation photos");
   if (labels.length === 0) return null;
 
   const list =

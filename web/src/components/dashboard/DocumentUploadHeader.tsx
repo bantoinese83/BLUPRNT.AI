@@ -3,21 +3,21 @@ import { Upload, Loader2, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface InvoiceUploadHeaderProps {
+interface DocumentUploadHeaderProps {
   uploading: boolean;
   batchStatus?: string | null;
   onUploadClick: () => void;
 }
 
-export function InvoiceUploadHeader({
+export function DocumentUploadHeader({
   uploading,
   batchStatus,
   onUploadClick,
-}: InvoiceUploadHeaderProps) {
+}: DocumentUploadHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <h3 className="text-xl font-black tracking-tight text-slate-900">
-        Invoices & documents
+        Project documents
       </h3>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 relative">
         <AnimatePresence>
@@ -42,9 +42,9 @@ export function InvoiceUploadHeader({
         </AnimatePresence>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:items-center">
           <p className="text-[11px] text-slate-500 font-medium leading-snug order-2 sm:order-1 sm:max-w-[220px]">
-            We auto-classify capital docs (bills, quotes, receipts) and project
-            records (permits, contracts, liens, inspections, insurance, HOA,
-            etc.) from each file. Change the type in review if needed.
+            We auto-classify spending records (bills, quotes, receipts) and
+            permanent project files (permits, contracts, warranties, etc.) from
+            each file. Change the type in review if needed.
           </p>
           <Button
             variant="outline"

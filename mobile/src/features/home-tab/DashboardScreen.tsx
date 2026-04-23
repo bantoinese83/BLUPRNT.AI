@@ -453,12 +453,7 @@ export default function DashboardScreen() {
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 380, delay: 80 }}
         >
-          <TransformationVault
-            projectId={project.id}
-            beforePath={project.before_photo_storage_path}
-            afterPath={project.after_photo_storage_path}
-            onRefresh={load}
-          />
+          <TransformationVault projectId={project.id} />
         </MotiView>
 
         <MotiView

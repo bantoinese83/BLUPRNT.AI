@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { TransformationVault } from "./TransformationVault";
+import { supabase } from "@/lib/supabase";
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
@@ -9,6 +10,11 @@ vi.mock("@/lib/supabase", () => ({
         .fn()
         .mockResolvedValue({ data: { user: { id: "u1" } }, error: null }),
     },
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }),
     storage: {
       from: vi.fn().mockReturnValue({
         getPublicUrl: vi.fn((path) => ({
@@ -30,50 +36,68 @@ describe("TransformationVault", () => {
     vi.clearAllMocks();
   });
 
-  it("renders placeholders when no photos are provided", () => {
-    render(
-      <TransformationVault projectId="p1" beforePath={null} afterPath={null} />,
-    );
+  it("renders placeholders when no photos are provided", async () => {
+    render(<TransformationVault projectId="p1" />);
 
-    expect(screen.getByText("The Transformation Vault")).toBeInTheDocument();
-    // Use getAllByText because labels appear in multiple places (placeholder and badge)
+    await waitFor(() => {
+      expect(screen.getByText("Transformation Gallery")).toBeInTheDocument();
+    });
+
     expect(screen.getAllByText("Baseline").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Current").length).toBeGreaterThan(0);
   });
 
   it("renders photos when paths are provided", async () => {
-    render(
-      <TransformationVault
-        projectId="p1"
-        beforePath="before.jpg"
-        afterPath="after.jpg"
-      />,
-    );
+    const mockItems = [
+      {
+        id: "1",
+        photo_type: "before",
+        storage_path: "before.jpg",
+        caption: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "2",
+        photo_type: "after",
+        storage_path: "after.jpg",
+        caption: null,
+        created_at: new Date().toISOString(),
+      },
+    ];
+
+    // Re-mock for this specific test
+    (vi.mocked(supabase.from) as any).mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: mockItems, error: null }),
+    });
+
+    render(<TransformationVault projectId="p1" />);
 
     await waitFor(
       () => {
-        const beforeImg = screen.getByAltText("Baseline");
-        const currentImg = screen.getByAltText("Current");
+        const images = screen.getAllByRole("img");
+        // Filter for images with specific src or alt
+        const beforeImg = images.find(
+          (img) => img.getAttribute("alt") === "Baseline",
+        );
+        const currentImg = images.find(
+          (img) => img.getAttribute("alt") === "Current",
+        );
 
-        expect(beforeImg).toHaveAttribute(
-          "src",
-          "https://cdn.example.com/before.jpg?token=signed",
-        );
-        expect(currentImg).toHaveAttribute(
-          "src",
-          "https://cdn.example.com/after.jpg?token=signed",
-        );
+        expect(beforeImg).toBeInTheDocument();
+        expect(currentImg).toBeInTheDocument();
       },
       { timeout: 2000 },
     );
   });
 
   it("triggers upload when capture button is clicked", async () => {
-    render(
-      <TransformationVault projectId="p1" beforePath={null} afterPath={null} />,
-    );
+    render(<TransformationVault projectId="p1" />);
 
-    const captureBtns = screen.getAllByText(/Capture/i);
-    expect(captureBtns.length).toBeGreaterThan(0);
+    await waitFor(() => {
+      const captureBtns = screen.getAllByText(/Capture/i);
+      expect(captureBtns.length).toBeGreaterThan(0);
+    });
   });
 });

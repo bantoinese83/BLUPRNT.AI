@@ -9,6 +9,7 @@ import type {
   InvoiceRow,
   UserSubscriptionRow,
   ProjectPassRow,
+  GalleryItemRow,
 } from "../types/database";
 import type { DashboardSnapshot } from "../types/dashboard-snapshot";
 import { buildSpendByCategory } from "./spend-by-category";
@@ -33,6 +34,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
     isArchitect: false,
     subscription: null,
     hasProjectPass: false,
+    galleryItems: [],
     lastProjectId: null,
   };
 }
@@ -45,6 +47,9 @@ const SCOPE_SELECT =
 
 const INVOICE_SELECT =
   "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date";
+
+const GALLERY_SELECT =
+  "id, project_id, photo_type, storage_path, caption, uploaded_by_user_id, created_at";
 
 /**
  * All projects the user owns (via property → owner).
@@ -84,13 +89,14 @@ export async function fetchLastActiveProjectIdFromPreferences(
 
 export type BuiltDashboardForProject = {
   project: ProjectRow;
-  scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  scopeItems: import("../types/database").ScopeRow[];
+  invoices: import("../types/database").InvoiceRow[];
+  galleryItems: import("../types/database").GalleryItemRow[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
   loadError: string | null;
   isArchitect: boolean;
-  subscription: UserSubscriptionRow | null;
+  subscription: import("../types/database").UserSubscriptionRow | null;
   hasProjectPass: boolean;
   lastProjectId: string;
 };
@@ -110,7 +116,7 @@ export async function buildDashboardDataForProject(
 ): Promise<BuiltDashboardForProject> {
   const { userId, projectId, allProjects, partialMessageVariant } = input;
 
-  const [scopesRes, invRes, subRes, subRes2] = await Promise.all([
+  const [scopesRes, invRes, subRes, subRes2, galleryRes] = await Promise.all([
     supabase
       .from("scope_items")
       .select(SCOPE_SELECT)
@@ -131,6 +137,11 @@ export async function buildDashboardDataForProject(
       .select("*")
       .eq("project_id", projectId)
       .maybeSingle(),
+    supabase
+      .from("project_gallery")
+      .select(GALLERY_SELECT)
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: true }),
   ]);
 
   const loadError = partialDashboardLoadMessage(
@@ -139,12 +150,14 @@ export async function buildDashboardDataForProject(
       invoicesFailed: !!invRes.error,
       subscriptionFailed: !!subRes.error,
       projectPassFailed: !!subRes2.error,
+      galleryFailed: !!galleryRes.error,
     },
     { variant: partialMessageVariant },
   );
 
   const newScopes = (scopesRes.data ?? []) as ScopeRow[];
   const newInvoices = (invRes.data ?? []) as InvoiceRow[];
+  const newGalleryItems = (galleryRes.data ?? []) as GalleryItemRow[];
   const sub = subRes.data as UserSubscriptionRow | null;
   const pass = subRes2.data as ProjectPassRow | null;
   const isArchitect = isArchitectPlanEffective(sub);
@@ -174,6 +187,7 @@ export async function buildDashboardDataForProject(
     project,
     scopeItems: newScopes,
     invoices: newInvoices,
+    galleryItems: newGalleryItems,
     spendByCategory,
     reconciliation,
     loadError,

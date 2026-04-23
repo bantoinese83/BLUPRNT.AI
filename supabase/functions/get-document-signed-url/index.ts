@@ -33,12 +33,17 @@ Deno.serve(async (req: Request) => {
   }
 
   let invoice_id: string | null = null;
+  let width: number | undefined;
+  let height: number | undefined;
+  let resize: "cover" | "contain" | "fill" | undefined;
+
   try {
     const body = await req.json();
     invoice_id = typeof body?.invoice_id === "string" ? body.invoice_id : null;
-  } catch {
-    /* ignore */
-  }
+    width = typeof body?.width === "number" ? body.width : undefined;
+    height = typeof body?.height === "number" ? body.height : undefined;
+    resize = ["cover", "contain", "fill"].includes(body?.resize) ? body.resize : undefined;
+  } catch { /* ignore */ }
 
   if (!invoice_id) {
     return jsonResponse({ error: "invoice_id required" }, 400, req);
@@ -83,7 +88,9 @@ Deno.serve(async (req: Request) => {
 
     const { data: signed, error: signErr } = await admin.storage
       .from("project-documents")
-      .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SEC);
+      .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SEC, {
+        transform: width || height ? { width, height, resize: resize || "contain" } : undefined
+      });
 
     if (signErr || !signed?.signedUrl) {
       console.error(signErr);

@@ -35,7 +35,7 @@ type ProjectInfo = {
   estimated_max_total: number | null;
 };
 
-type PropertyLedgerProps = {
+type ProjectVaultProps = {
   projectId?: string;
   propertyId?: string;
   project?: ProjectInfo;
@@ -46,7 +46,7 @@ type PropertyLedgerProps = {
   onExportNotAllowed?: () => void;
 };
 
-export function PropertyLedger({
+export function ProjectVault({
   projectId,
   propertyId,
   project,
@@ -54,7 +54,7 @@ export function PropertyLedger({
   invoices = [],
   canExportSellerPacket = false,
   onExportNotAllowed,
-}: PropertyLedgerProps) {
+}: ProjectVaultProps) {
   const [exporting, setExporting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [includeOriginalAppendix, setIncludeOriginalAppendix] = useState(false);

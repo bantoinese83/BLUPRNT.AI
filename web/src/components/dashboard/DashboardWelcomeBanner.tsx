@@ -46,8 +46,8 @@ export function DashboardWelcomeBanner() {
           <div className="flex w-full max-w-full flex-row items-center justify-between gap-2 pt-2 sm:justify-evenly sm:gap-3">
             <button
               type="button"
-              title="Upload an invoice"
-              aria-label="Upload an invoice"
+              title="Upload project docs"
+              aria-label="Upload project docs"
               className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-teal-700 bg-teal-950 text-white shadow-sm transition-colors hover:bg-teal-900 hover:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
@@ -58,8 +58,8 @@ export function DashboardWelcomeBanner() {
             </button>
             <button
               type="button"
-              title="See line-by-line scope"
-              aria-label="See line-by-line scope"
+              title="See line-by-line budget"
+              aria-label="See line-by-line budget"
               className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-colors hover:border-teal-400 hover:bg-teal-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
@@ -70,8 +70,8 @@ export function DashboardWelcomeBanner() {
             </button>
             <button
               type="button"
-              title="Export seller packet"
-              aria-label="Export seller packet"
+              title="Export Home Archive"
+              aria-label="Export Home Archive"
               className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-colors hover:border-teal-400 hover:bg-teal-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();

@@ -3,6 +3,7 @@ import type {
   ScopeRow,
   InvoiceRow,
   UserSubscriptionRow,
+  GalleryItemRow,
 } from "../types/database";
 
 /** Shape stored in sessionStorage (web) / AsyncStorage (mobile) after a successful dashboard load. */
@@ -15,6 +16,8 @@ export type CachedDashboardPayload = {
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
+  galleryItems?: GalleryItemRow[];
+  reconciliation: import("../lib/reconciliation").ReconciliationResult | null;
 };
 
 export function parseCachedDashboardPayload(
@@ -28,6 +31,8 @@ export function parseCachedDashboardPayload(
       project: o.project ?? null,
       scopeItems: Array.isArray(o.scopeItems) ? o.scopeItems : [],
       invoices: Array.isArray(o.invoices) ? o.invoices : [],
+      galleryItems: Array.isArray(o.galleryItems) ? o.galleryItems : [],
+      reconciliation: o.reconciliation ?? null,
       spendByCategory:
         o.spendByCategory && typeof o.spendByCategory === "object"
           ? o.spendByCategory

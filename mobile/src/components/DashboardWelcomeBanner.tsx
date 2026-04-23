@@ -83,10 +83,10 @@ export function DashboardWelcomeBanner({ onAction }: Props) {
                   />
                 </TouchableOpacity>
               </WelcomeActionOrb>
-              <WelcomeActionOrb label="Export packet">
+              <WelcomeActionOrb label="Export archive">
                 <TouchableOpacity
                   accessibilityRole="button"
-                  accessibilityLabel="Export seller packet"
+                  accessibilityLabel="Export home archive"
                   activeOpacity={0.88}
                   onPress={() => {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

@@ -22,5 +22,6 @@ export type DashboardSnapshot = {
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
+  galleryItems: import("./database").GalleryItemRow[];
   lastProjectId: string | null;
 };

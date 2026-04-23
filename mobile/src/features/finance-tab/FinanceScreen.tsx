@@ -101,7 +101,7 @@ export default function FinanceScreen() {
     if (scopeForSellerPacket.length === 0 && invoices.length === 0) {
       Alert.alert(
         "Nothing to export yet",
-        "Add a scope item or upload an invoice, then try Export Seller Packet again.",
+        "Add a scope item or upload an invoice, then try Export Home Archive again.",
       );
       return;
     }
@@ -157,7 +157,7 @@ export default function FinanceScreen() {
       const result = await uploadPickedDocumentToProject({
         projectId: project.id,
         files,
-        successToastMessage: "Document added — your ledger is updated.",
+        successToastMessage: "Document added — your vault is updated.",
         onInvoiceLimitUpgrade: () => {
           setUpgradeReason("invoice_limit");
           setShowUpgrade(true);
@@ -216,7 +216,7 @@ export default function FinanceScreen() {
         <EmptyState
           icon={BookOpen}
           title="Your home hub is ready"
-          description="Set up a renovation to track your ledger, equity, and documents — same quick flow as the Home tab."
+          description="Set up a renovation to track your vault, equity, and documents — same quick flow as the Home tab."
           actionTitle="Start your BLUPRNT"
           actionTitleCase="sentence"
           onAction={() => router.push("/onboarding?newProject=1")}
@@ -296,9 +296,9 @@ export default function FinanceScreen() {
             {invoices.length === 0 ? (
               <EmptyState
                 icon={Receipt}
-                title="Nothing in your ledger yet"
+                title="Nothing in your vault yet"
                 description="Add invoices, quotes, or receipts—they all show up here as your project record."
-                actionTitle="Add to ledger"
+                actionTitle="Add to vault"
                 onAction={openLedgerDocumentCapture}
               />
             ) : (

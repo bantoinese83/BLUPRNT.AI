@@ -7,14 +7,14 @@ interface DashboardExecuteProps {
   project: ProjectRow;
   invoices: InvoiceRow[];
   health: React.ReactNode;
-  invoicesComp: React.ReactNode;
+  documentsComp: React.ReactNode;
 }
 
 export function DashboardExecute({
   project,
   invoices,
   health,
-  invoicesComp,
+  documentsComp,
 }: DashboardExecuteProps) {
   return (
     <DashboardSubPage side={health}>
@@ -23,8 +23,8 @@ export function DashboardExecute({
         estimatedMax={project.estimated_max_total}
         invoices={invoices}
       />
-      <ComponentErrorBoundary name="Invoices Ledger">
-        {invoicesComp}
+      <ComponentErrorBoundary name="Documents Ledger">
+        {documentsComp}
       </ComponentErrorBoundary>
     </DashboardSubPage>
   );

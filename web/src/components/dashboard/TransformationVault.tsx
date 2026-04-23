@@ -1,47 +1,72 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Camera,
   Loader2,
   Image as ImageIcon,
+  Activity,
   History,
-  Sparkles,
+  MessageSquare,
+  Check,
+  ChevronRight,
+  ChevronLeft,
   X,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { supabase, invokeFunction } from "@/lib/supabase";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+
+import type { GalleryItemRow } from "@shared/types/database";
+
+type GalleryItem = GalleryItemRow;
 
 type TransformationVaultProps = {
   projectId: string;
-  beforePath: string | null;
-  afterPath: string | null;
-  onRefresh?: () => void;
   className?: string;
 };
 
 type PhotoSlotProps = {
   label: string;
   icon: React.ReactNode;
-  path: string | null;
-  url: string | null;
+  item: GalleryItem | null;
+  signedUrl: string | null;
   uploading: boolean;
   onUpload: () => void;
-  onClear: () => void;
+  onClear: (id: string) => void;
+  onUpdateCaption: (id: string, caption: string) => void;
   error: boolean;
-  type: "before" | "after";
 };
 
 function PhotoSlot({
   label,
   icon,
-  path,
-  url,
+  item,
+  signedUrl,
   uploading,
   onUpload,
   onClear,
+  onUpdateCaption,
   error,
 }: PhotoSlotProps) {
-  const showPlaceholder = !url || error || !path;
+  const [editingCaption, setEditingCaption] = useState(false);
+  const [captionValue, setCaptionValue] = useState(item?.caption || "");
+
+  useEffect(() => {
+    setCaptionValue(item?.caption || "");
+  }, [item?.caption]);
+
+  const showPlaceholder = !signedUrl || error || !item;
+
+  const handleSaveCaption = async () => {
+    if (!item) return;
+    try {
+      await onUpdateCaption(item.id, captionValue);
+      setEditingCaption(false);
+    } catch {
+      setCaptionValue(item.caption || "");
+    }
+  };
 
   return (
     <div className="relative group aspect-square sm:aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/10 shadow-lg transition-all duration-300 hover:shadow-xl hover:ring-2 hover:ring-teal-500/20">
@@ -59,27 +84,77 @@ function PhotoSlot({
             {label}
           </p>
           <p className="text-[10px] text-slate-400 mt-1 max-w-[140px]">
-            No hero image selected yet
+            No image selected yet
           </p>
         </div>
       ) : (
         <>
           <img
-            src={url!}
+            src={signedUrl!}
             alt={label}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          {/* Clear Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onClear();
-            }}
-            className="absolute top-3 right-3 z-20 p-1.5 rounded-lg bg-black/20 hover:bg-rose-500/80 backdrop-blur-md border border-white/10 text-white transition-all opacity-0 group-hover:opacity-100"
-            title={`Clear ${label} photo`}
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
+          {/* Controls Overlay (Top) */}
+          <div className="absolute top-3 right-3 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-[-4px] group-hover:translate-y-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingCaption(!editingCaption);
+              }}
+              className={cn(
+                "p-1.5 rounded-lg backdrop-blur-md border transition-all",
+                editingCaption
+                  ? "bg-teal-500 text-white border-teal-400"
+                  : "bg-black/20 border-white/10 text-white hover:bg-black/40",
+              )}
+              title="Edit caption"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear(item.id);
+              }}
+              className="p-1.5 rounded-lg bg-black/20 hover:bg-rose-500/80 backdrop-blur-md border border-white/10 text-white transition-all"
+              title={`Remove photo`}
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Caption Overlay (Bottom) */}
+          <div className="absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none group-hover:pointer-events-auto">
+            {editingCaption ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={captionValue}
+                  onChange={(e) => setCaptionValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveCaption()}
+                  placeholder="Add a caption..."
+                  className="flex-1 h-8 bg-white/20 backdrop-blur-lg border border-white/20 rounded-lg px-3 text-xs text-white placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/40"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSaveCaption();
+                  }}
+                  className="w-8 h-8 rounded-lg bg-white text-slate-900 flex items-center justify-center hover:bg-teal-50"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              item.caption && (
+                <p className="text-[11px] text-white/90 font-medium line-clamp-2 drop-shadow-sm">
+                  {item.caption}
+                </p>
+              )
+            )}
+          </div>
         </>
       )}
 
@@ -95,18 +170,20 @@ function PhotoSlot({
 
       {/* Upload/Change Action Overlay */}
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[2px]">
-        <button
-          onClick={onUpload}
-          disabled={uploading}
-          className="bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-bold shadow-xl hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-2"
-        >
-          {uploading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Camera className="w-4 h-4" />
-          )}
-          {showPlaceholder ? `Capture ${label}` : `Change ${label}`}
-        </button>
+        {!editingCaption && (
+          <button
+            onClick={onUpload}
+            disabled={uploading}
+            className="bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-bold shadow-xl hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-2"
+          >
+            {uploading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Camera className="w-4 h-4" />
+            )}
+            {showPlaceholder ? `Capture ${label}` : `Change ${label}`}
+          </button>
+        )}
       </div>
 
       {uploading && (
@@ -120,159 +197,190 @@ function PhotoSlot({
 
 export function TransformationVault({
   projectId,
-  beforePath,
-  afterPath,
-  onRefresh,
   className,
 }: TransformationVaultProps) {
-  const [uploading, setUploading] = useState<"before" | "after" | null>(null);
+  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState<string | null>(null); // "type-index"
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
+  const [targetIndex, setTargetIndex] = useState<number>(0);
 
-  const [beforeUrl, setBeforeUrl] = useState<string | null>(null);
-  const [afterUrl, setAfterUrl] = useState<string | null>(null);
-  const [beforeError, setBeforeError] = useState(false);
-  const [afterError, setAfterError] = useState(false);
-
-  // Use a cache to avoid repeated failed lookups for the same session
-  const failedPathsRef = useRef<Set<string>>(new Set());
+  const fetchGallery = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("project_gallery")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      setItems(data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not load gallery");
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
 
   useEffect(() => {
-    let active = true;
+    fetchGallery();
+  }, [fetchGallery]);
+
+  // Group items into sets
+  // A set is a logical grouping. For now, we'll just group them by their sequence.
+  const sets = useMemo(() => {
+    const befores = items.filter((i) => i.photo_type === "before");
+    const afters = items.filter((i) => i.photo_type === "after");
+    const count = Math.max(befores.length, afters.length, 1);
+
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push({
+        before: befores[i] || null,
+        after: afters[i] || null,
+      });
+    }
+    // Always provide an empty set at the end to allow adding a new one if the last one is full
+    const last = result[result.length - 1];
+    if (last && (last.before || last.after)) {
+      result.push({ before: null, after: null });
+    }
+
+    return result;
+  }, [items]);
+
+  useEffect(() => {
     const fetchSignedUrls = async () => {
-      // 1. Before Path
-      if (beforePath && !failedPathsRef.current.has(beforePath)) {
-        const { data, error } = await supabase.storage
-          .from("project-documents")
-          .createSignedUrl(beforePath, 3600);
-        if (active) {
-          if (error) {
-            setBeforeError(true);
-            failedPathsRef.current.add(beforePath);
-          } else {
-            setBeforeUrl(data?.signedUrl ?? null);
-            setBeforeError(false);
-          }
-        }
-      } else if (active) {
-        setBeforeUrl(null);
-        setBeforeError(false);
-      }
+      const paths = items.map((i) => i.storage_path);
+      if (paths.length === 0) return;
 
-      // 2. After Path
-      if (afterPath && !failedPathsRef.current.has(afterPath)) {
-        const { data, error } = await supabase.storage
-          .from("project-documents")
-          .createSignedUrl(afterPath, 3600);
-        if (active) {
-          if (error) {
-            setAfterError(true);
-            failedPathsRef.current.add(afterPath);
-          } else {
-            setAfterUrl(data?.signedUrl ?? null);
-            setAfterError(false);
-          }
+      const newUrls: Record<string, string> = {};
+      for (const path of paths) {
+        if (signedUrls[path]) {
+          newUrls[path] = signedUrls[path];
+          continue;
         }
-      } else if (active) {
-        setAfterUrl(null);
-        setAfterError(false);
+        const { data } = await supabase.storage
+          .from("project-photos")
+          .createSignedUrl(path, 3600);
+        if (data?.signedUrl) {
+          newUrls[path] = data.signedUrl;
+        }
       }
+      setSignedUrls(newUrls);
     };
 
-    void fetchSignedUrls();
-    return () => {
-      active = false;
-    };
-  }, [beforePath, afterPath]);
+    fetchSignedUrls();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "before" | "after",
+    index: number,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Photo too large (max 10MB)");
-      return;
-    }
-
-    setUploading(type);
+    setUploading(`${type}-${index}`);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Unauthorized");
+      const fd = new FormData();
+      fd.set("project_id", projectId);
+      fd.set("file", file);
+      fd.set("type", type);
 
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${projectId}/${user.id}/vault_${type}_${Date.now()}.${ext}`;
-
-      const { error: upErr } = await supabase.storage
-        .from("project-documents")
-        .upload(path, file);
-      if (upErr) throw upErr;
-
-      const updateData =
-        type === "before"
-          ? { before_photo_storage_path: path }
-          : { after_photo_storage_path: path };
-
-      const { error: dbErr } = await supabase
-        .from("projects")
-        .update(updateData)
-        .eq("id", projectId);
-      if (dbErr) throw dbErr;
-
-      // Remove from failed cache since we have a new path
-      failedPathsRef.current.delete(path);
-
-      toast.success(
-        `${type === "before" ? "Baseline" : "Current state"} updated`,
+      const { error: fnErr } = await invokeFunction<{ storagePath: string }>(
+        "upload-gallery-photo",
+        { body: fd },
       );
-      onRefresh?.();
-    } catch (err: unknown) {
+
+      if (fnErr) throw fnErr;
+      toast.success("Photo uploaded successfully.");
+      fetchGallery();
+    } catch (err) {
       console.error(err);
-      const msg = err instanceof Error ? err.message : "Failed to save photo";
-      toast.error(msg);
+      toast.error("Failed to upload photo");
     } finally {
       setUploading(null);
       if (e.target) e.target.value = "";
     }
   };
 
-  const handleClear = async (type: "before" | "after") => {
+  const handleClear = async (id: string) => {
     try {
-      const updateData =
-        type === "before"
-          ? { before_photo_storage_path: null }
-          : { after_photo_storage_path: null };
-
       const { error } = await supabase
-        .from("projects")
-        .update(updateData)
-        .eq("id", projectId);
+        .from("project_gallery")
+        .delete()
+        .eq("id", id);
       if (error) throw error;
-
-      if (type === "before") setBeforeUrl(null);
-      else setAfterUrl(null);
-
-      toast.success(
-        `${type === "before" ? "Baseline" : "Current"} photo removed`,
-      );
-      onRefresh?.();
+      toast.success("Photo removed");
+      fetchGallery();
     } catch (err) {
       console.error(err);
       toast.error("Could not remove photo");
     }
   };
 
+  const handleUpdateCaption = async (id: string, caption: string) => {
+    try {
+      const { error } = await supabase
+        .from("project_gallery")
+        .update({ caption })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Caption updated");
+      fetchGallery();
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not update caption");
+      throw err;
+    }
+  };
+
+  const [activeSetIndex, setActiveSetIndex] = useState(0);
+
+  if (loading) {
+    return (
+      <div className="h-48 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-teal-600/20" />
+      </div>
+    );
+  }
+
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-6", className)}>
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-          The Transformation Vault
-        </h3>
-        <Sparkles className="w-3.5 h-3.5 text-teal-500 animate-pulse" />
+        <div className="space-y-1">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+            Transformation Gallery
+          </h3>
+          <p className="text-[10px] text-slate-500 font-medium">
+            Angle {activeSetIndex + 1} of {sets.length}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-7 h-7 rounded-lg border-slate-200"
+            disabled={activeSetIndex === 0}
+            onClick={() => setActiveSetIndex((prev) => prev - 1)}
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-7 h-7 rounded-lg border-slate-200"
+            disabled={activeSetIndex === sets.length - 1}
+            onClick={() => setActiveSetIndex((prev) => prev + 1)}
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Button>
+        </div>
       </div>
 
       <input
@@ -280,40 +388,82 @@ export function TransformationVault({
         ref={beforeInputRef}
         className="hidden"
         accept="image/*"
-        onChange={(e) => handleFileChange(e, "before")}
+        onChange={(e) => handleFileChange(e, "before", targetIndex)}
       />
       <input
         type="file"
         ref={afterInputRef}
         className="hidden"
         accept="image/*"
-        onChange={(e) => handleFileChange(e, "after")}
+        onChange={(e) => handleFileChange(e, "after", targetIndex)}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
         <PhotoSlot
-          type="before"
           label="Baseline"
           icon={<History className="w-3 h-3 text-white" />}
-          path={beforePath}
-          url={beforeUrl}
-          uploading={uploading === "before"}
-          onUpload={() => beforeInputRef.current?.click()}
-          onClear={() => handleClear("before")}
-          error={beforeError}
+          item={sets[activeSetIndex].before}
+          signedUrl={
+            sets[activeSetIndex].before
+              ? signedUrls[sets[activeSetIndex].before!.storage_path]
+              : null
+          }
+          uploading={uploading === `before-${activeSetIndex}`}
+          onUpload={() => {
+            setTargetIndex(activeSetIndex);
+            beforeInputRef.current?.click();
+          }}
+          onClear={handleClear}
+          onUpdateCaption={handleUpdateCaption}
+          error={false}
         />
         <PhotoSlot
-          type="after"
           label="Current"
-          icon={<Sparkles className="w-3 h-3 text-teal-400" />}
-          path={afterPath}
-          url={afterUrl}
-          uploading={uploading === "after"}
-          onUpload={() => afterInputRef.current?.click()}
-          onClear={() => handleClear("after")}
-          error={afterError}
+          icon={<Activity className="w-3 h-3 text-teal-400" />}
+          item={sets[activeSetIndex].after}
+          signedUrl={
+            sets[activeSetIndex].after
+              ? signedUrls[sets[activeSetIndex].after!.storage_path]
+              : null
+          }
+          uploading={uploading === `after-${activeSetIndex}`}
+          onUpload={() => {
+            setTargetIndex(activeSetIndex);
+            afterInputRef.current?.click();
+          }}
+          onClear={handleClear}
+          onUpdateCaption={handleUpdateCaption}
+          error={false}
         />
+
+        {/* Pagination Dots */}
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {sets.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveSetIndex(i)}
+              className={cn(
+                "w-1.5 h-1.5 rounded-full transition-all",
+                i === activeSetIndex
+                  ? "bg-teal-500 w-4"
+                  : "bg-slate-200 hover:bg-slate-300",
+              )}
+            />
+          ))}
+        </div>
       </div>
+
+      {sets.length > 1 && (
+        <div className="pt-6 flex justify-center">
+          <button
+            onClick={() => setActiveSetIndex(sets.length - 1)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            Add Another Angle
+          </button>
+        </div>
+      )}
     </div>
   );
 }

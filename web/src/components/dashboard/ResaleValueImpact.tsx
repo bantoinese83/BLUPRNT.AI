@@ -28,7 +28,7 @@ export function ResaleValueImpact({
               variant="secondary"
               className="bg-teal-950 text-emerald-400 border-teal-900 gap-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-teal-900 transition-colors"
             >
-              Ledger Premium Active
+              Vault Premium Active
             </Badge>
           )}
         </CardTitle>
@@ -56,10 +56,10 @@ export function ResaleValueImpact({
           <div className="bg-teal-50/50 border border-teal-100/50 rounded-xl p-3 flex items-center justify-between">
             <div className="space-y-0.5">
               <p className="text-[10px] font-black text-teal-900 uppercase tracking-widest">
-                Ledger Premium
+                Vault Premium
               </p>
               <p className="text-xs text-teal-600 font-medium">
-                Earned through documentation
+                Earned through verification
               </p>
             </div>
             <div className="text-teal-900 font-black text-sm">

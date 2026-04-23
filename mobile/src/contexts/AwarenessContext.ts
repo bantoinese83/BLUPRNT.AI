@@ -26,6 +26,7 @@ export interface AwarenessState {
   /** Mirrors dashboard snapshot — paywall should respect subscription state. */
   isArchitect: boolean;
   hasProjectPass: boolean;
+  galleryItems: import("@shared/types/database").GalleryItemRow[];
 }
 
 export const AwarenessContext = createContext<AwarenessState | undefined>(

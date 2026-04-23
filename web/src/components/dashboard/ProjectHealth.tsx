@@ -7,11 +7,11 @@ import { VIZ_GRADIENT } from "@shared/constants/visualization";
 type ProjectHealthProps = {
   estimatedMin?: number | null;
   estimatedMax?: number | null;
-  invoiceTotal?: number;
+  spendingTotal?: number;
 };
 
 function calculateHealthScore(
-  invoiceTotal: number,
+  spendingTotal: number,
   min: number,
   max: number,
 ): {
@@ -22,7 +22,7 @@ function calculateHealthScore(
   stop1: string;
   stop2: string;
 } {
-  if (min === 0 || invoiceTotal === 0) {
+  if (min === 0 || spendingTotal === 0) {
     const g = VIZ_GRADIENT.healthAnalyzing;
     return {
       score: 0,
@@ -34,8 +34,8 @@ function calculateHealthScore(
     };
   }
 
-  const progressPct = (invoiceTotal / min) * 100;
-  const budgetUtilization = (invoiceTotal / max) * 100;
+  const progressPct = (spendingTotal / min) * 100;
+  const budgetUtilization = (spendingTotal / max) * 100;
 
   if (budgetUtilization > 100) {
     const overPct = budgetUtilization - 100;
@@ -166,12 +166,12 @@ const CircleProgress = ({
 export function ProjectHealth({
   estimatedMin = 0,
   estimatedMax = 0,
-  invoiceTotal = 0,
+  spendingTotal = 0,
 }: ProjectHealthProps) {
   const min = estimatedMin || 0;
   const max = estimatedMax || 0;
   const { score, status, color, message, stop1, stop2 } = calculateHealthScore(
-    invoiceTotal,
+    spendingTotal,
     min,
     max,
   );
@@ -218,7 +218,7 @@ export function ProjectHealth({
               >
                 {status}
               </motion.div>
-              {invoiceTotal > 0 && (
+              {spendingTotal > 0 && (
                 <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
                   <TrendingUp className="w-3 h-3" />
                   Live
@@ -257,14 +257,14 @@ export function ProjectHealth({
           </p>
         </motion.div>
 
-        {invoiceTotal > 0 && (
+        {spendingTotal > 0 && (
           <div className="space-y-2 pt-2">
             <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 px-1">
               <span>Project Completion</span>
               <span className="text-slate-900">
                 {Math.min(
                   100,
-                  Math.round((invoiceTotal / (estimatedMin || 1)) * 100),
+                  Math.round((spendingTotal / (estimatedMin || 1)) * 100),
                 )}
                 %
               </span>
@@ -274,13 +274,13 @@ export function ProjectHealth({
                 className="absolute inset-y-0 left-0 bg-teal-600 rounded-full"
                 initial={{ width: 0 }}
                 animate={{
-                  width: `${Math.min(100, (invoiceTotal / (estimatedMin || 1)) * 100)}%`,
+                  width: `${Math.min(100, (spendingTotal / (estimatedMin || 1)) * 100)}%`,
                 }}
                 transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
               />
             </div>
             <p className="text-[9px] text-slate-400 font-bold text-center uppercase tracking-widest pt-1">
-              Based on paid invoices vs. the low end of your estimate
+              Based on documented spending vs. the low end of your estimate
             </p>
           </div>
         )}

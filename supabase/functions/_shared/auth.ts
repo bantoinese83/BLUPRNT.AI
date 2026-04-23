@@ -25,16 +25,14 @@ export async function assertProjectOwner(
   projectId: string,
   userId: string,
 ): Promise<void> {
-  const { data: project, error: e1 } = await admin
+  const { data, error } = await admin
     .from("projects")
-    .select("property_id")
+    .select("id, properties!inner(owner_user_id)")
     .eq("id", projectId)
-    .single();
-  if (e1 || !project) throw new Error("not_found");
-  const { data: prop, error: e2 } = await admin
-    .from("properties")
-    .select("owner_user_id")
-    .eq("id", project.property_id)
-    .single();
-  if (e2 || !prop || prop.owner_user_id !== userId) throw new Error("forbidden");
+    .eq("properties.owner_user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error("forbidden");
+  }
 }

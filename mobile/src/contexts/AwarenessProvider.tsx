@@ -15,6 +15,7 @@ export function AwarenessProvider({
   spendByCategory,
   isArchitect,
   hasProjectPass,
+  galleryItems,
 }: {
   children: React.ReactNode;
   project: ProjectRow | null;
@@ -23,6 +24,7 @@ export function AwarenessProvider({
   spendByCategory: Record<string, number>;
   isArchitect: boolean;
   hasProjectPass: boolean;
+  galleryItems: import("@shared/types/database").GalleryItemRow[];
 }) {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -154,6 +156,7 @@ export function AwarenessProvider({
       activeProjectId: project?.id ?? null,
       isArchitect,
       hasProjectPass,
+      galleryItems,
     }),
     [
       awarenessData,
@@ -163,6 +166,7 @@ export function AwarenessProvider({
       project?.id,
       isArchitect,
       hasProjectPass,
+      galleryItems,
     ],
   );
 

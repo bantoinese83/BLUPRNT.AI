@@ -87,7 +87,7 @@ export function PlanVsActualCard({
               </div>
               <div className="min-w-0 space-y-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  Plan vs documented spend
+                  Plan vs Actual Spending
                 </p>
                 <h3
                   className={cn(
@@ -115,7 +115,7 @@ export function PlanVsActualCard({
             </div>
             <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
               <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
-                Invoices &amp; quotes logged
+                Project Docs logged
               </p>
               <p className="mt-1 text-lg font-black tabular-nums text-slate-900">
                 {money(capital)}
@@ -130,7 +130,7 @@ export function PlanVsActualCard({
               size="sm"
               className="w-full gap-2 rounded-xl border-slate-200 sm:w-auto"
               onClick={() => {
-                const el = document.getElementById("property-ledger-anchor");
+                const el = document.getElementById("document-vault-anchor");
                 if (el) {
                   el.scrollIntoView({ behavior: "smooth", block: "start" });
                 } else {
@@ -138,7 +138,7 @@ export function PlanVsActualCard({
                 }
               }}
             >
-              Seller packet includes this story
+              Home Archive includes this story
               <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
             </Button>
             <Button
@@ -148,7 +148,7 @@ export function PlanVsActualCard({
               className="w-full text-slate-500 hover:text-slate-800 sm:w-auto"
               onClick={() => navigate("/dashboard/record")}
             >
-              Open ledger
+              Open Vault
             </Button>
           </div>
         </CardContent>

@@ -7,7 +7,7 @@ import {
   Pencil,
   Check,
   X,
-  Zap,
+  Activity,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,7 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
             variant="secondary"
             className="bg-teal-950 text-white border-teal-900 gap-1.5 font-medium hover:bg-teal-900 transition-colors"
           >
-            <Zap className="w-3 h-3 text-teal-400 fill-teal-400" />
+            <Activity className="w-3 h-3 text-teal-400 fill-teal-400" />
             Active project
           </Badge>
           {project.estimated_max_total &&

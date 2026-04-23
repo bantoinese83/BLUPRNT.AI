@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Loader2, Link2, AlertTriangle } from "lucide-react";
+import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import {
   ledgerDocumentTypeLabel,
   ledgerDocumentVisualGroup,
   reviewDocumentModalTitle,
+  defaultVendorNameForDocumentType,
 } from "@shared/lib/ledger-document-labels";
 import { ledgerDocumentSelectOptions } from "@shared/lib/ledger-document-pickers";
 import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
@@ -37,7 +39,7 @@ type ScopeSuggestion = {
   reason: string;
 };
 
-type InvoiceData = {
+type DocumentData = {
   id: string;
   vendor_name: string | null;
   total: number | null;
@@ -49,20 +51,20 @@ type InvoiceData = {
   document_type?: string | null;
 };
 
-export function InvoiceReviewModal({
-  invoiceId,
+export function DocumentReviewModal({
+  documentId,
   projectId,
   onClose,
   onSaved,
 }: {
-  invoiceId: string;
+  documentId: string;
   projectId: string;
   onClose: () => void;
   onSaved?: (id?: string) => void;
 }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [invoice, setInvoice] = useState<InvoiceData | null>(null);
+  const [document, setDocument] = useState<DocumentData | null>(null);
   const [scopeItems, setScopeItems] = useState<
     { id: string; category: string; description: string }[]
   >([]);
@@ -79,20 +81,20 @@ export function InvoiceReviewModal({
       setError(null);
       try {
         const { data: invData, error: invErr } = await invokeFunction<{
-          invoice: InvoiceData;
+          invoice: DocumentData;
           line_items: LineItem[];
           budget_mapping_suggestions?: ScopeSuggestion[];
         }>("get-invoice", {
-          body: { invoice_id: invoiceId },
+          body: { invoice_id: documentId },
         });
         if (cancelled) return;
         if (invErr || !invData) {
-          setError("Couldn't load invoice.");
+          setError("Couldn't load document.");
           setLoading(false);
           return;
         }
         const inv = invData as unknown as {
-          invoice: InvoiceData;
+          invoice: DocumentData;
           line_items: LineItem[];
           budget_mapping_suggestions?: ScopeSuggestion[];
         };
@@ -101,7 +103,7 @@ export function InvoiceReviewModal({
           line_items: inv.line_items ?? [],
           budget_mapping_suggestions: inv.budget_mapping_suggestions,
         };
-        setInvoice(merged);
+        setDocument(merged);
         setLedgerDocType(coerceLedgerDocumentType(merged.document_type));
 
         const { data: scope, error: scopeErr } = await supabase
@@ -110,7 +112,7 @@ export function InvoiceReviewModal({
           .eq("project_id", projectId);
         if (cancelled) return;
         if (scopeErr) {
-          reportClientError("invoice_review_scope_list", scopeErr);
+          reportClientError("document_review_scope_list", scopeErr);
           toast.error(
             "We couldn’t load your budget breakdown, so some line links may be missing. You can still review amounts—try again shortly or check your connection.",
             { duration: 8000 },
@@ -140,10 +142,10 @@ export function InvoiceReviewModal({
     return () => {
       cancelled = true;
     };
-  }, [invoiceId, projectId]);
+  }, [documentId, projectId]);
 
   async function handleSaveMappings() {
-    if (!invoice) return;
+    if (!document) return;
     setSaving(true);
     try {
       for (const [lineId, scopeItemId] of Object.entries(mappings)) {
@@ -154,24 +156,24 @@ export function InvoiceReviewModal({
         if (lineErr) throw lineErr;
       }
 
-      const prevType = coerceLedgerDocumentType(invoice.document_type);
+      const prevType = coerceLedgerDocumentType(document.document_type);
       const typeChanged = ledgerDocType !== prevType;
       if (typeChanged) {
         const { error: invErr } = await supabase
           .from("invoices")
           .update({ document_type: ledgerDocType })
-          .eq("id", invoice.id);
+          .eq("id", document.id);
         if (invErr) throw invErr;
-        if (invoice.document_id) {
+        if (document.document_id) {
           const { error: docErr } = await supabase
             .from("documents")
             .update({ type: ledgerDocType })
-            .eq("id", invoice.document_id);
+            .eq("id", document.document_id);
           if (docErr) throw docErr;
         }
       }
 
-      setInvoice((prev) =>
+      setDocument((prev) =>
         prev ? { ...prev, document_type: ledgerDocType } : prev,
       );
       toast.success(
@@ -204,7 +206,7 @@ export function InvoiceReviewModal({
     );
   }
 
-  if (error || !invoice) {
+  if (error || !document) {
     return (
       <ModalFocusSurface
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50"
@@ -239,14 +241,14 @@ export function InvoiceReviewModal({
     <>
       <ModalFocusSurface
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50 overflow-y-auto"
-        titleId="invoice-review-title"
+        titleId="document-review-title"
         onEscape={onClose}
         active={!originalPreviewOpen}
       >
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
             <h3
-              id="invoice-review-title"
+              id="document-review-title"
               className="text-lg font-semibold text-slate-900 flex items-center gap-2"
             >
               <HeaderIcon
@@ -272,76 +274,98 @@ export function InvoiceReviewModal({
                 budget.
               </p>
             ) : null}
-            {invoice.document_id ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto gap-2 rounded-xl"
-                onClick={() => setOriginalPreviewOpen(true)}
-              >
-                <Link2 className="w-4 h-4" aria-hidden />
-                View original upload
-              </Button>
-            ) : null}
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              {document.id && (
+                <DocumentThumbnail
+                  invoiceId={document.id}
+                  size="lg"
+                  className="w-full sm:w-32 sm:h-32 rounded-2xl shadow-drop-md border-slate-200"
+                />
+              )}
+              <div className="flex-1 w-full space-y-4">
+                {document.document_id ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto gap-2 rounded-xl"
+                    onClick={() => setOriginalPreviewOpen(true)}
+                  >
+                    <Link2 className="w-4 h-4" aria-hidden />
+                    View original upload
+                  </Button>
+                ) : null}
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
-              <label
-                htmlFor="invoice-review-doc-type"
-                className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
-              >
-                Document type
-              </label>
-              <select
-                id="invoice-review-doc-type"
-                value={ledgerDocType}
-                onChange={(e) =>
-                  setLedgerDocType(e.target.value as LedgerDocumentType)
-                }
-                className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
-              >
-                {ledgerDocumentSelectOptions().map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-              <p className="text-[11px] text-slate-500 leading-snug">
-                Fix a misclassification here — no need to re-upload. This
-                updates your ledger and seller packet grouping.
-              </p>
+                <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
+                  <label
+                    htmlFor="document-review-doc-type"
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                  >
+                    Document type
+                  </label>
+                  <select
+                    id="document-review-doc-type"
+                    value={ledgerDocType}
+                    onChange={(e) =>
+                      setLedgerDocType(e.target.value as LedgerDocumentType)
+                    }
+                    className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
+                  >
+                    {ledgerDocumentSelectOptions().map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-slate-500 leading-snug">
+                    Fix a misclassification here — no need to re-upload. This
+                    updates your ledger and seller packet grouping.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <h4 className="font-medium text-slate-900 flex items-center gap-2">
-                  {invoice.vendor_name ?? "Vendor"}
-                  {!invoice.vendor_name && (
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] text-amber-700 border-amber-200 bg-amber-50"
-                    >
-                      Needs a quick check
-                    </Badge>
-                  )}
+                  {document.vendor_name &&
+                  document.vendor_name !== "Vendor" &&
+                  document.vendor_name !== "Document"
+                    ? document.vendor_name
+                    : defaultVendorNameForDocumentType(ledgerDocType)}
+                  {(!document.vendor_name ||
+                    document.vendor_name === "Vendor" ||
+                    document.vendor_name === "Document") &&
+                    showCapitalLineLink && (
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] text-amber-700 border-amber-200 bg-amber-50"
+                      >
+                        Needs a quick check
+                      </Badge>
+                    )}
                 </h4>
-                <Badge variant="secondary" className="capitalize">
-                  {invoice.payment_status}
-                </Badge>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-slate-900">
-                  {new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }).format(invoice.total ?? 0)}
-                </p>
-                {(!invoice.total || invoice.total === 0) && (
-                  <p className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">
-                    Verify Total
-                  </p>
+                {showCapitalLineLink && (
+                  <Badge variant="secondary" className="capitalize">
+                    {document.payment_status}
+                  </Badge>
                 )}
               </div>
+              {showCapitalLineLink && (
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-slate-900">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }).format(document.total ?? 0)}
+                  </p>
+                  {(!document.total || document.total === 0) && (
+                    <p className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">
+                      Verify Total
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {showCapitalLineLink ? (
@@ -351,10 +375,10 @@ export function InvoiceReviewModal({
                   Link to budget line (optional)
                 </h5>
                 <p className="text-xs text-slate-500">
-                  Link invoice lines to your budget breakdown to track actual
+                  Link document lines to your budget breakdown to track actual
                   vs. estimate.
                 </p>
-                {invoice.line_items.map((line) => {
+                {document.line_items.map((line) => {
                   const isUnmapped = !(mappings[line.id] ?? line.scope_item_id);
                   const showOverrunHint = isUnmapped && scopeItems.length > 0;
                   return (
@@ -426,8 +450,8 @@ export function InvoiceReviewModal({
       </ModalFocusSurface>
       {originalPreviewOpen ? (
         <OriginalUploadPreviewModal
-          key={invoiceId}
-          invoiceId={invoiceId}
+          key={documentId}
+          invoiceId={documentId}
           onClose={() => setOriginalPreviewOpen(false)}
         />
       ) : null}

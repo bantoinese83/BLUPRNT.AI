@@ -11,7 +11,7 @@ export function GroundingSourcesSection({ project }: { project: ProjectRow }) {
     <div className="space-y-4">
       <div className="flex items-center gap-2 px-2">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-          Trust & Grounding
+          Project Context
         </h3>
         <div className="h-px flex-1 bg-slate-100" />
       </div>
