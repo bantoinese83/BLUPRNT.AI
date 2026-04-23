@@ -235,7 +235,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     alignItems: "center",
-    paddingBottom: Theme.spacing.lg,
+    /* Room below last content so card shadow/elevation isn’t covered by the fixed footer (sits above in z-order) */
+    paddingBottom: Theme.spacing.xxl,
   },
   progressRow: {
     flexDirection: "row",
@@ -317,20 +318,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   slideIconContainer: {
-    /* Inset + slightly larger box: rounded rect clips stroke art at corners (esp. bottom-left) */
-    width: 88,
-    height: 88,
+    /* Inner padding: rounded rect clips stroke at corners; keep 80×80 so we don’t push into footer */
+    width: 80,
+    height: 80,
     borderRadius: 24,
     backgroundColor: Theme.colors.card,
-    padding: 8,
+    padding: 6,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-    marginTop: 20,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginTop: 16,
+    marginBottom: 4,
   },
   footer: {
     width: "100%",

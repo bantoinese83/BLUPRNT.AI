@@ -1,4 +1,12 @@
-import { BarChart3, Shield, Landmark, TrendingUp } from "lucide-react";
+import {
+  BarChart3,
+  Shield,
+  Landmark,
+  TrendingUp,
+  Users,
+  MoveHorizontal,
+  Clock,
+} from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import {
   LANDING_HIGHLIGHT_SOFT,
@@ -59,7 +67,7 @@ export function LandingFeatures() {
               </h3>
               <p className="mt-1 text-sm text-slate-800">
                 Your to-do list, checks you wrote, and files—together, not
-                scattered across apps. They still make the final call.
+                scattered across apps.
               </p>
             </div>
           </li>
@@ -94,6 +102,55 @@ export function LandingFeatures() {
               <p className="mt-1 text-sm text-slate-800">
                 Watch planned vs. actual spend so surprises don’t arrive in a
                 lump at the end.
+              </p>
+            </div>
+          </li>
+
+          {/* New Row */}
+          <li className="flex items-start gap-4">
+            <Users className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+            <div>
+              <h3 className="font-semibold text-slate-900">
+                Automatic Home Team
+              </h3>
+              <p className="mt-1 text-sm text-slate-800">
+                AI extracts pro names from your receipts to build a verified
+                directory of everyone who’s worked on your home.
+              </p>
+            </div>
+          </li>
+          <li className="flex items-start gap-4">
+            <MoveHorizontal
+              className="h-6 w-6 shrink-0 text-slate-900"
+              aria-hidden
+            />
+            <div>
+              <h3 className="font-semibold text-slate-900">Visual Proof</h3>
+              <p className="mt-1 text-sm text-slate-800">
+                Swipe between your "Before" and "Now" photos to see the
+                transformation and prove the value you've added.
+              </p>
+            </div>
+          </li>
+          <li className="flex items-start gap-4">
+            <Clock className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+            <div>
+              <h3 className="font-semibold text-slate-900">
+                Warranty Tracking
+              </h3>
+              <p className="mt-1 text-sm text-slate-800">
+                Never lose a warranty again. We track expiration dates for your
+                systems and appliances in your permanent record.
+              </p>
+            </div>
+          </li>
+          <li className="flex items-start gap-4 opacity-40 grayscale group cursor-help">
+            <Shield className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+            <div>
+              <h3 className="font-semibold text-slate-900">Private Vault</h3>
+              <p className="mt-1 text-sm text-slate-800 italic">
+                Securely store paint lids, tile box codes, and finish details.
+                Coming soon.
               </p>
             </div>
           </li>

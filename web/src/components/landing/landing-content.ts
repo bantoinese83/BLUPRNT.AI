@@ -82,6 +82,24 @@ export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
     hint: "What you bought, next to each line item",
   },
   {
+    feature: "The Home Team",
+    architect: "Full contact & history",
+    pass: "Full contact & history",
+    hint: "Automatically directory of every contractor who has billed you",
+  },
+  {
+    feature: "Transformation Slider",
+    architect: "Interactive Before/After",
+    pass: "Interactive Before/After",
+    hint: "Visual proof of your property's evolution",
+  },
+  {
+    feature: "Warranty Tracking",
+    architect: "Active alerts",
+    pass: "10-year countdowns",
+    hint: "Expiry tracking for appliances and systems",
+  },
+  {
     feature: "Open your records later",
     architect: "Anytime",
     pass: "View-only after pass",
@@ -117,6 +135,27 @@ export const COMPARISON_FEATURES = [
     visualizers: false,
     proTools: false,
     static: true,
+  },
+  {
+    name: "Auto-contractor directory",
+    bluprnt: true,
+    visualizers: false,
+    proTools: false,
+    static: false,
+  },
+  {
+    name: "Visual before/after slider",
+    bluprnt: true,
+    visualizers: true,
+    proTools: false,
+    static: false,
+  },
+  {
+    name: "Warranty expiry tracking",
+    bluprnt: true,
+    visualizers: false,
+    proTools: false,
+    static: false,
   },
   {
     name: "Share link (read-only)",
