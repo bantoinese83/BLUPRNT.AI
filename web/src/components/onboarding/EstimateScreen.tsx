@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { motion } from "motion/react";
 import {
@@ -9,6 +9,13 @@ import {
   SlidersHorizontal,
   ArrowRight,
   Wrench,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Package,
+  Boxes,
+  Tag,
+  Check,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +40,7 @@ export function EstimateScreen() {
   const navigate = useNavigate();
   const { estimate, estimateError, locationInput, runPhotoToScope, setPhotos } =
     useOnboarding();
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   useEffect(() => {
     if (estimate) {
@@ -163,25 +171,152 @@ export function EstimateScreen() {
             </div>
             <CardContent className="p-8 pt-0 space-y-6">
               <div className="h-px bg-slate-100 w-full" />
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-teal-500" />
-                  Analysis Breakdown
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                  {Array.from(new Set(bullets)).map((item, i) => (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 1.2 + i * 0.1 }}
-                      key={`${item}-${i}`}
-                      className="flex items-center space-x-2 text-sm text-slate-600 font-medium"
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-teal-500" />
+                    <span className="text-sm font-medium text-slate-600">
+                      Typical labor near you
+                    </span>
+                  </div>
+                  {estimate?.scope_items && estimate.scope_items.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowBreakdown(!showBreakdown)}
+                      className={`h-8 px-3 rounded-full gap-2 transition-all duration-300 ${
+                        showBreakdown
+                          ? "bg-teal-600 text-white hover:bg-teal-700 shadow-md"
+                          : "bg-teal-50 text-teal-700 hover:bg-teal-100"
+                      }`}
                     >
-                      <div className="h-1.5 w-1.5 rounded-full bg-teal-400" />
-                      <span>{item}</span>
-                    </motion.div>
-                  ))}
+                      <span className="text-xs font-bold uppercase tracking-wider">
+                        {showBreakdown ? "Hide Breakdown" : "View Breakdown"}
+                      </span>
+                      {showBreakdown ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </Button>
+                  )}
                 </div>
+
+                {showBreakdown && estimate?.scope_items && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    className="space-y-6 overflow-hidden"
+                  >
+                    {/* Cost Breakdown */}
+                    <div className="rounded-2xl bg-slate-50/80 border border-slate-100 p-4 sm:p-6 space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Layers className="w-4 h-4 text-teal-600" />
+                        <h4 className="text-[11px] font-black text-teal-700 uppercase tracking-[0.15em]">
+                          Cost Breakdown
+                        </h4>
+                      </div>
+                      <div className="divide-y divide-slate-200/60">
+                        {estimate.scope_items.map((item, i) => (
+                          <div
+                            key={i}
+                            className="py-4 first:pt-0 last:pb-0 flex justify-between gap-4"
+                          >
+                            <div className="space-y-1">
+                              <p className="text-sm font-bold text-slate-900">
+                                {item.category}
+                              </p>
+                              <p className="text-xs text-slate-500 leading-relaxed max-w-md">
+                                {item.description}
+                              </p>
+                              <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                                {item.quantity} {item.unit}
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-sm font-black text-slate-900 tracking-tight">
+                                {formatMoney(item.total_cost_min || 0)} –{" "}
+                                {formatMoney(item.total_cost_max || 0)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Bill of Materials */}
+                    {estimate.scope_items.some(
+                      (s) => s.metadata?.materials?.length,
+                    ) && (
+                      <div className="rounded-2xl bg-teal-50/30 border border-teal-100/50 p-4 sm:p-6 space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Package className="w-4 h-4 text-teal-600" />
+                          <h4 className="text-[11px] font-black text-teal-700 uppercase tracking-[0.15em]">
+                            Bill of Materials
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {estimate.scope_items
+                            .flatMap((s) => s.metadata?.materials || [])
+                            .map((m, i) => (
+                              <div
+                                key={i}
+                                className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                                  <Boxes className="w-4 h-4 text-slate-400" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-900 truncate">
+                                    {m.name}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    {m.brand && (
+                                      <div className="flex items-center gap-1">
+                                        <Tag className="w-2.5 h-2.5 text-teal-500" />
+                                        <span className="text-[9px] font-black text-teal-600 uppercase">
+                                          {m.brand}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {m.quantity && (
+                                      <span className="text-[9px] font-medium text-slate-400">
+                                        {m.quantity} {m.unit || "units"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {!showBreakdown && (
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-teal-500" />
+                      Analysis Breakdown
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                      {Array.from(new Set(bullets)).map((item, i) => (
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 1.2 + i * 0.1 }}
+                          key={`${item}-${i}`}
+                          className="flex items-center space-x-2 text-sm text-slate-600 font-medium"
+                        >
+                          <div className="h-1.5 w-1.5 rounded-full bg-teal-400" />
+                          <span>{item}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
 

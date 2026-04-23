@@ -8,7 +8,7 @@ import { AddScopeItemModal } from "@/components/AddScopeItemModal";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ProjectSwitcher } from "@/components/ProjectSwitcher";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
-import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
+import { TransformationVault } from "@/components/dashboard/TransformationVault";
 import { ProjectDetailHeader } from "./ProjectDetailHeader";
 import { ProjectDetailInsightCards } from "./ProjectDetailInsightCards";
 import { ProjectScopeGroupedList } from "./ProjectScopeGroupedList";
@@ -115,13 +115,10 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
 
         {project ? (
           <View style={{ paddingHorizontal: 24, paddingTop: 0, gap: 16 }}>
-            <TransformationSlider
+            <TransformationVault
               projectId={project.id}
               beforePath={project.before_photo_storage_path}
               afterPath={project.after_photo_storage_path}
-              isArchitect={vm.isArchitect}
-              hasProjectPass={vm.hasProjectPass}
-              onUpgradeClick={() => setShowUpgrade(true)}
               onRefresh={handleRefresh}
             />
             <ProjectDetailInsightCards

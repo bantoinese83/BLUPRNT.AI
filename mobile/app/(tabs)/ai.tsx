@@ -1,7 +1,9 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { router } from "expo-router";
+import { Zap } from "lucide-react-native";
 import { AIAssistant } from "@/components/AIAssistant";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
@@ -47,22 +49,21 @@ export default function AIScreen() {
         </View>
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            {loading
-              ? "Loading project..."
-              : loadError
-                ? loadError
-                : "Create a project to start chatting with your AI assistant."}
-          </Text>
-          {!loading && !loadError ? (
-            <TouchableOpacity
-              style={styles.emptyCta}
-              onPress={() => router.push("/onboarding?newProject=1")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.emptyCtaText}>Start a project</Text>
-            </TouchableOpacity>
-          ) : null}
+          {loading ? (
+            <Text style={styles.emptyText}>Loading project...</Text>
+          ) : (
+            <EmptyState
+              icon={Zap}
+              title="Project Assistant"
+              description={
+                loadError ||
+                "Create a project to start chatting with your AI assistant."
+              }
+              actionTitle="Start a project"
+              actionTitleCase="sentence"
+              onAction={() => router.push("/onboarding?newProject=1")}
+            />
+          )}
         </View>
       )}
     </ScreenWrapper>
@@ -108,10 +109,11 @@ const styles = StyleSheet.create({
   },
   emptyCta: {
     marginTop: 20,
-    backgroundColor: Theme.colors.text.primary,
+    backgroundColor: Theme.colors.brand.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 14,
+    ...Theme.shadows.brand,
   },
   emptyCtaText: {
     color: "#ffffff",

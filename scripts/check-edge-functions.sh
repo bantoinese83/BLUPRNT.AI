@@ -24,7 +24,7 @@ FILES=(
   supabase/functions/photo-to-scope/index.ts
   supabase/functions/send-email/index.ts
   supabase/functions/stripe-webhook/index.ts
-  supabase/functions/upload-invoice/index.ts
+  supabase/functions/upload-document/index.ts
   supabase/functions/submit-marketing-lead/index.ts
 )
 

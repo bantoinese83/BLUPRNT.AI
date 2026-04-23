@@ -188,7 +188,7 @@ export function useInvoiceManagement({
           document_type?: string;
           error?: string;
           error_code?: string;
-        }>("upload-invoice", { body: fd });
+        }>("upload-document", { body: fd });
 
         const failure = extractUploadFailureFromInvokeResult(data, fnErr);
         if (failure) {

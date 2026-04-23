@@ -305,11 +305,11 @@ export const onboardingStyles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(15, 23, 42, 0.08)",
-    backgroundColor: "rgba(255, 255, 255, 0.72)",
+    borderTopColor: "rgba(15, 23, 42, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.55)",
+    overflow: "hidden",
   },
   visionContainer: {
     flex: 1,

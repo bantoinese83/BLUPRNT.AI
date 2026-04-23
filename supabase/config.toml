@@ -9,8 +9,9 @@
 [functions.photo-to-scope]
 verify_jwt = false
 
-[functions.upload-invoice]
-verify_jwt = false
+[functions.upload-document]
+verify_jwt = true
+
 
 [functions.get-invoice]
 verify_jwt = false

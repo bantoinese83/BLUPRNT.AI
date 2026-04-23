@@ -1,5 +1,5 @@
 /**
- * Stable codes returned by `upload-invoice` (403/401 JSON body) so clients
+ * Stable codes returned by `upload-document` (403/401 JSON body) so clients
  * don’t rely on substring-matching user-facing strings.
  */
 export const UPLOAD_ERROR_CODES = {

@@ -23,7 +23,7 @@ interface DashboardPlanProps {
   hasProjectPass: boolean;
   health: React.ReactNode;
   homeTeam: React.ReactNode;
-  transformation: React.ReactNode;
+  transformationVault: React.ReactNode;
   ledger: React.ReactNode;
   invoicesComp: React.ReactNode;
   onUpgradeClick: () => void;
@@ -39,7 +39,7 @@ export function DashboardPlan({
   hasProjectPass,
   health,
   homeTeam,
-  transformation,
+  transformationVault,
   ledger,
   invoicesComp,
   onUpgradeClick,
@@ -51,7 +51,7 @@ export function DashboardPlan({
     <DashboardSubPage
       side={
         <div className="space-y-8">
-          {transformation}
+          {transformationVault}
           {health}
           <GroundingSourcesSection project={project} />
           {homeTeam}

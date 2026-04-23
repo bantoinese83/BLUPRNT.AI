@@ -14,40 +14,46 @@ export interface GeminiResponse {
   data?: Record<string, unknown>;
 }
 
+/** 
+ * Strips markdown code blocks and attempts to parse JSON.
+ * High-fidelity fallback for when Gemini includes conversational text or markers.
+ */
+function tryParseJson(text: string): Record<string, unknown> | null {
+  try {
+    let clean = text.trim();
+    // Remove markdown code blocks if present
+    if (clean.includes("```")) {
+      const match = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (match && match[1]) clean = match[1];
+    }
+    // Remove leading/trailing non-json chars (like extra text Gemini might add)
+    const firstBrace = clean.indexOf("{");
+    const lastBrace = clean.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      clean = clean.substring(firstBrace, lastBrace + 1);
+    }
+    
+    return JSON.parse(clean);
+  } catch (e) {
+    console.warn("[gemini-util] JSON Parse failed:", e.message);
+    return null;
+  }
+}
+
 /** Some Edge responses omit `text` but still include candidates — merge parts manually. */
-function extractTextFromGenerateContentResponse(response: unknown): string | null {
+function extractTextFromGenerateContentResponse(response: any): string | null {
   if (!response || typeof response !== "object") return null;
 
-  const r = response as {
-    text?: string;
-    promptFeedback?: { blockReason?: string; blockReasonMessage?: string };
-    candidates?: Array<{
-      content?: { parts?: Array<{ text?: string }> };
-      finishReason?: string;
-    }>;
-  };
-
-  if (typeof r.text === "string" && r.text.trim()) {
-    return r.text.trim();
+  if (typeof response.text === "string" && response.text.trim()) {
+    return response.text.trim();
   }
 
-  const blockReason = r.promptFeedback?.blockReason;
-  if (blockReason) {
-    console.warn("[callGemini] Prompt blocked:", blockReason);
-    return "I can’t reply to that. Ask about your project’s budget, scope, timeline, or documents instead.";
-  }
-
-  const parts = r.candidates?.[0]?.content?.parts;
+  const parts = response.candidates?.[0]?.content?.parts;
   if (parts?.length) {
     const combined = parts
-      .map((p) => (p && typeof p.text === "string" ? p.text : ""))
+      .map((p: any) => (p && typeof p.text === "string" ? p.text : ""))
       .join("");
     if (combined.trim()) return combined.trim();
-  }
-
-  const finish = r.candidates?.[0]?.finishReason;
-  if (finish && finish !== "STOP" && finish !== "MAX_TOKENS") {
-    console.warn("[callGemini] Unexpected finishReason:", finish);
   }
 
   return null;
@@ -56,30 +62,11 @@ function extractTextFromGenerateContentResponse(response: unknown): string | nul
 /** True when Google returns overload / rate limits — safe to retry with backoff. */
 function isRetryableGeminiError(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);
-  if (
-    /503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|heavy load|try again later|temporarily unavailable/i
-      .test(msg)
-  ) {
-    return true;
-  }
-  const codeMatch = msg.match(/"code"\s*:\s*(\d+)/);
-  if (codeMatch) {
-    const c = parseInt(codeMatch[1], 10);
-    return c === 503 || c === 429;
-  }
-  return false;
+  return /503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|heavy load|try again later|temporarily unavailable/i.test(msg);
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
-
-/**
- * Default when `GEMINI_MODEL` is unset. Use a current Flash id — not `gemini-1.5-flash`
- * (deprecated per Google’s model lifecycle).
- *
- * Common overrides via `GEMINI_MODEL`: `gemini-2.5-flash` (default), `gemini-2.5-flash-lite`,
- * `gemini-flash-latest` (alias to Google’s latest Flash). Confirm ids in the official models doc.
- */
-const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
 
 export async function callGemini(params: {
   parts: GeminiPart[];
@@ -87,9 +74,7 @@ export async function callGemini(params: {
   responseMimeType?: "application/json" | "text/plain";
   responseSchema?: Record<string, unknown>;
   temperature?: number;
-  /** Lower for faster responses on Edge (wall-clock limits). Default 8192. */
   maxOutputTokens?: number;
-  /** Wall-clock guard for the SDK call (ms). Default 90s for vision JSON. */
   timeoutMs?: number;
 }): Promise<GeminiResponse | null> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
@@ -104,34 +89,26 @@ export async function callGemini(params: {
     responseMimeType = "application/json",
     responseSchema,
     temperature = 0.1,
-    maxOutputTokens = 8192,
+    maxOutputTokens = 4096,
     timeoutMs = 90_000,
   } = params;
 
-  const model =
+  const modelName =
     (Deno.env.get("GEMINI_MODEL") ?? DEFAULT_GEMINI_MODEL).trim() ||
     DEFAULT_GEMINI_MODEL;
 
-  const maxAttempts = Math.max(
-    1,
-    Math.min(
-      5,
-      parseInt(Deno.env.get("GEMINI_RETRY_ATTEMPTS") ?? "", 10) ||
-        DEFAULT_MAX_ATTEMPTS,
-    ),
-  );
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  for (let attempt = 1; attempt <= DEFAULT_MAX_ATTEMPTS; attempt++) {
     if (attempt > 1) {
       const delayMs = Math.min(4000, 400 * Math.pow(2, attempt - 2));
-      console.warn(
-        `[callGemini] Retry ${attempt}/${maxAttempts} after ${delayMs}ms (transient Gemini error)`,
-      );
       await new Promise((r) => setTimeout(r, delayMs));
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const genAI = new GoogleGenAI(apiKey);
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: systemInstruction,
+      });
 
       const sdkContents = parts.map((p) => {
         if ("inline_data" in p) {
@@ -145,10 +122,6 @@ export async function callGemini(params: {
         return { text: p.text };
       });
 
-      console.log(
-        `[callGemini] generateContent (model: ${model}, attempt ${attempt}/${maxAttempts})`,
-      );
-
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(
           () => reject(new Error(`Gemini API Timeout (${timeoutMs / 1000}s)`)),
@@ -156,52 +129,35 @@ export async function callGemini(params: {
         ),
       );
 
-      const contentsArg =
-        parts.length === 1 && "text" in parts[0] && !("inline_data" in parts[0])
-          ? parts[0].text
-          : sdkContents;
-
-      const callPromise = ai.models.generateContent({
-        model,
-        contents: contentsArg,
-        config: {
-          systemInstruction: systemInstruction,
-          temperature: temperature,
+      const callPromise = model.generateContent({
+        contents: [{ role: "user", parts: sdkContents }],
+        generationConfig: {
+          temperature,
           maxOutputTokens,
-          responseMimeType: responseMimeType,
-          responseSchema: responseSchema,
+          responseMimeType,
+          responseSchema: responseSchema as any,
         },
       });
 
-      callPromise.catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.warn("[callGemini] Background request settled after race:", msg);
-      });
-
-      const response = await Promise.race([callPromise, timeoutPromise]);
-
-      const text = extractTextFromGenerateContentResponse(response);
+      const result = await Promise.race([callPromise, timeoutPromise]);
+      const response = await result.response;
+      
+      const text = response.text();
       if (!text) {
         console.warn("[callGemini] No usable text in response");
         return null;
       }
 
-      const data =
-        response && typeof response === "object" && "data" in response
-          ? (response as { data?: Record<string, unknown> }).data
-          : undefined;
+      let data: Record<string, unknown> | undefined;
+      if (responseMimeType === "application/json") {
+        data = tryParseJson(text) ?? undefined;
+      }
 
-      return {
-        text,
-        data,
-      };
+      return { text, data };
     } catch (e: unknown) {
       const error = e as Error;
-      console.error("[callGemini] New SDK Error:", error.name, error.message);
-      const retry = isRetryableGeminiError(e) && attempt < maxAttempts;
-      if (!retry) {
-        return null;
-      }
+      console.error(`[callGemini] Attempt ${attempt} failed:`, error.name, error.message);
+      if (!isRetryableGeminiError(e) || attempt === DEFAULT_MAX_ATTEMPTS) return null;
     }
   }
 

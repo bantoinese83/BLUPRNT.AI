@@ -33,8 +33,7 @@ import {
   DASHBOARD_SECTION_PLAN_SPENDING,
 } from "@shared/copy/dashboard";
 import { ShareModal } from "@/components/dashboard/ShareModal";
-import { countBillOrReceiptUploadsInProject } from "@shared/lib/invoice-quota";
-import type { ProjectRow } from "@shared/types/database";
+import type { InvoiceRow, ProjectRow } from "@shared/types/database";
 import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
@@ -62,7 +61,7 @@ import {
   useDashboardUpgradeQueryEffect,
 } from "./useDashboardLocationEffects";
 import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
-import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
+import { TransformationVault } from "@/components/dashboard/TransformationVault";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 
 export function DashboardContent({
@@ -89,10 +88,11 @@ export function DashboardContent({
   const location = useLocation();
   const { logout } = useLogout();
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [useDiscount, setUseDiscount] = useState(false);
-  const [upgradeReason, setUpgradeReason] =
+  const [_useDiscount, setUseDiscount] = useState(false);
+  const [_upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
   const [shareOpen, setShareOpen] = useState(false);
+
   const [deleteProject, setDeleteProject] = useState<ProjectRow | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -112,20 +112,6 @@ export function DashboardContent({
     () => capitalImprovementTotal(invoices),
     [invoices],
   );
-
-  const upgradeEstimatedMid = useMemo(() => {
-    const min = project.estimated_min_total;
-    const max = project.estimated_max_total;
-    if (
-      min != null &&
-      max != null &&
-      Number.isFinite(min) &&
-      Number.isFinite(max)
-    ) {
-      return (min + max) / 2;
-    }
-    return min ?? max ?? null;
-  }, [project.estimated_min_total, project.estimated_max_total]);
 
   const handleSignOut = useCallback(async () => {
     await logout();
@@ -222,14 +208,11 @@ export function DashboardContent({
     />
   );
 
-  const transformation = (
-    <TransformationSlider
+  const transformationVault = (
+    <TransformationVault
       projectId={project.id}
       beforePath={project.before_photo_storage_path}
       afterPath={project.after_photo_storage_path}
-      isArchitect={isArchitect}
-      hasProjectPass={hasProjectPass}
-      onUpgradeClick={() => setShowUpgrade(true)}
       onRefresh={load}
     />
   );
@@ -393,7 +376,7 @@ export function DashboardContent({
                 stage={project.stage || "planning"}
                 onAction={(id) => {
                   if (id === "review-scope") navigate("/dashboard/scope");
-                  if (id === "upload-quote" || id === "upload-invoice") {
+                  if (id === "upload-quote" || id === "upload-document") {
                     navigate("/dashboard/execute");
                   }
                   if (id === "export-packet") handleExportPDF();
@@ -411,7 +394,11 @@ export function DashboardContent({
 
         <motion.div variants={itemVariants}>
           <UpgradeBanner
-            invoiceCount={countBillOrReceiptUploadsInProject(invoices)}
+            invoiceCount={
+              invoices.filter(
+                (i: InvoiceRow) => (i.document_type ?? "invoice") === "invoice",
+              ).length
+            }
             onUpgradeClick={() => {
               setUpgradeReason("invoice_limit");
               setShowUpgrade(true);
@@ -447,7 +434,7 @@ export function DashboardContent({
                     hasProjectPass={hasProjectPass}
                     health={health}
                     homeTeam={homeTeam}
-                    transformation={transformation}
+                    transformationVault={transformationVault}
                     ledger={ledger}
                     invoicesComp={invoicesComp}
                     onUpgradeClick={() => setShowUpgrade(true)}
@@ -465,7 +452,7 @@ export function DashboardContent({
                     hasProjectPass={hasProjectPass}
                     health={health}
                     homeTeam={homeTeam}
-                    transformation={transformation}
+                    transformationVault={transformationVault}
                     ledger={ledger}
                   />
                 }
@@ -500,12 +487,6 @@ export function DashboardContent({
             setUseDiscount(false);
             setUpgradeReason("general");
           }}
-          isArchitect={isArchitect}
-          hasProjectPass={hasProjectPass}
-          openReason={upgradeReason}
-          estimatedAmount={upgradeEstimatedMid}
-          projectId={project.id}
-          showDiscount={useDiscount}
         />
       </ComponentErrorBoundary>
 

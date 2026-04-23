@@ -45,7 +45,7 @@ import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
 import { buildDashboardHeaderLines } from "@/features/home-tab/dashboard-greeting";
 import { presentProjectShareSheet } from "@/lib/share-project";
-import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
+import { TransformationVault } from "@/components/dashboard/TransformationVault";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { ConfidenceDisplay } from "@/components/ui/ConfidenceDisplay";
@@ -277,6 +277,7 @@ export default function DashboardScreen() {
     return (
       <ScreenWrapper
         withLogo
+        withScroll
         onRefresh={load}
         refreshing={refreshing}
         style={styles.centerContainer}
@@ -287,8 +288,6 @@ export default function DashboardScreen() {
           description={DASHBOARD_EMPTY_STATE.description}
           actionTitle={DASHBOARD_EMPTY_STATE.primaryCta}
           onAction={() => router.push("/onboarding?newProject=1")}
-          secondaryTitle={DASHBOARD_EMPTY_STATE.secondaryCta}
-          onSecondary={() => router.push("/onboarding")}
           withRoadmap
         />
       </ScreenWrapper>
@@ -407,7 +406,7 @@ export default function DashboardScreen() {
             } else if (id === "review-scope") {
               router.push(`/project/${project.id}?focus=scope`);
             }
-            if (id === "upload-quote" || id === "upload-invoice") {
+            if (id === "upload-quote" || id === "upload-document") {
               openDashboardDocumentCapture();
             }
             if (id === "export-packet") {
@@ -438,6 +437,7 @@ export default function DashboardScreen() {
         invoiceTotal={capitalDocumentedTotal}
         documentRowCount={invoices.length}
       />
+
       <View style={{ marginTop: 20 }}>
         <PlanVsActualCard
           estimatedMin={project.estimated_min_total}
@@ -453,13 +453,10 @@ export default function DashboardScreen() {
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 380, delay: 80 }}
         >
-          <TransformationSlider
+          <TransformationVault
             projectId={project.id}
             beforePath={project.before_photo_storage_path}
             afterPath={project.after_photo_storage_path}
-            isArchitect={isArchitect}
-            hasProjectPass={hasProjectPass}
-            onUpgradeClick={onGeneralUpgrade}
             onRefresh={load}
           />
         </MotiView>

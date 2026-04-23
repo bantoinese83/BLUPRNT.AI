@@ -210,7 +210,7 @@ export function isArchitectQuotaInvoiceType(docType: string): boolean {
   return t === "invoice" || t === "receipt";
 }
 
-/** `document_type` form values for upload-invoice (includes `auto` for auto-detect). */
+/** `document_type` form values for upload-document (includes `auto` for auto-detect). */
 export const UPLOAD_FORM_DOCUMENT_TYPES = [
   ...LEDGER_DOCUMENT_TYPES,
   "auto",

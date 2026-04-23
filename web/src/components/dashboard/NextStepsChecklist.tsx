@@ -49,7 +49,7 @@ export function NextStepsChecklist({
   } else {
     steps.push(
       {
-        id: "upload-invoice",
+        id: "upload-document",
         label: "Track an invoice",
         description: "Start building your property ledger.",
         icon: FileText,

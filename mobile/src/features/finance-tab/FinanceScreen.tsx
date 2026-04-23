@@ -208,6 +208,7 @@ export default function FinanceScreen() {
     return (
       <ScreenWrapper
         style={styles.centerContainer}
+        withLogo
         withScroll
         onRefresh={load}
         refreshing={refreshing}
@@ -277,7 +278,7 @@ export default function FinanceScreen() {
   };
 
   return (
-    <ScreenWrapper edges={["top", "left", "right"]}>
+    <ScreenWrapper withLogo edges={["top", "left", "right"]}>
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}

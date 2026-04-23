@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   card: {
-    padding: 32,
+    padding: 24,
     alignItems: "center",
     width: "100%",
     borderRadius: 32,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     color: "#64748b",
     textAlign: "center",
     lineHeight: 22,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   button: {
     width: "100%",
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40,
-    paddingTop: 32,
+    marginTop: 24,
+    paddingTop: 24,
     borderTopWidth: 1,
     borderTopColor: "rgba(0,0,0,0.05)",
     width: "100%",

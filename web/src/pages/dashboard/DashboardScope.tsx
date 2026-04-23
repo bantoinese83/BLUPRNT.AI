@@ -11,7 +11,7 @@ interface DashboardScopeProps {
   hasProjectPass: boolean;
   health: React.ReactNode;
   homeTeam: React.ReactNode;
-  transformation: React.ReactNode;
+  transformationVault: React.ReactNode;
   ledger: React.ReactNode;
 }
 
@@ -23,14 +23,14 @@ export function DashboardScope({
   hasProjectPass,
   health,
   homeTeam,
-  transformation,
+  transformationVault,
   ledger,
 }: DashboardScopeProps) {
   return (
     <DashboardSubPage
       side={
         <div className="space-y-8">
-          {transformation}
+          {transformationVault}
           {health}
           <GroundingSourcesSection project={project} />
           {homeTeam}

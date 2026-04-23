@@ -46,8 +46,6 @@ If no reasonable match exists, return null for that field.
 Be accurate: only map if the line item directly contributes to that scope category or description.`;
   }
 
-  const prompt = "Please process this invoice.";
-
   const responseSchema = {
     type: "object",
     properties: {
@@ -84,36 +82,28 @@ Be accurate: only map if the line item directly contributes to that scope catego
   };
 
   const parts: GeminiPart[] = [
-    { text: prompt },
     {
       inline_data: {
         mime_type: mimeType || "application/pdf",
         data: pdfBase64,
       },
     },
+    { text: "Please process this invoice and return ONLY a valid JSON object." },
   ];
 
   try {
     const result = await callGemini({
       parts,
       systemInstruction,
-      responseSchema,
+      responseSchema: responseSchema as any,
       temperature: 0.1,
     });
 
     if (!result) return null;
 
-    if (result.text.startsWith("ERROR:")) {
-      console.error("Gemini API reported error in OCR:", result.text);
-      return null;
-    }
-
-    let parsed: OcrInvoiceResult;
-    if (result.data && typeof result.data === "object") {
-      parsed = result.data as OcrInvoiceResult;
-    } else {
-      parsed = JSON.parse(result.text) as OcrInvoiceResult;
-    }
+    // Use data if already parsed by callGemini, otherwise parse text
+    const parsed = (result.data || JSON.parse(result.text)) as OcrInvoiceResult;
+    
     if (!parsed || typeof parsed !== "object") return null;
 
     return {

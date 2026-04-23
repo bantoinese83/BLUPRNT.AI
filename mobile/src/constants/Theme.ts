@@ -25,8 +25,8 @@ export const Theme = {
     },
 
     cta: {
-      from: BLUPRNT_COLORS.teal950,
-      to: BLUPRNT_COLORS.primary,
+      from: BLUPRNT_COLORS.teal600,
+      to: BLUPRNT_COLORS.accent,
     },
 
     text: {

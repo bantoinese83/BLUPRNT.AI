@@ -136,7 +136,7 @@ async function invokeUploadWithTimeout(formData: FormData) {
       document_type?: string;
       error?: string;
       error_code?: string;
-    }>("upload-invoice", { body: formData }),
+    }>("upload-document", { body: formData }),
     timeout,
   ]);
 }

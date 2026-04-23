@@ -1,10 +1,18 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { AnimatePresence, MotiView, MotiText } from "moti";
+import { BlurView } from "expo-blur";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/auth-context";
@@ -186,13 +194,11 @@ export default function OnboardingScreen() {
 
       // Automatically switch to the new project so it loads on the dashboard
       await AsyncStorage.setItem("bluprnt_project_id", newProjectId);
-      await supabase
-        .from("user_preferences")
-        .upsert({
-          user_id: user!.id,
-          last_active_project_id: newProjectId,
-          updated_at: new Date().toISOString(),
-        });
+      await supabase.from("user_preferences").upsert({
+        user_id: user!.id,
+        last_active_project_id: newProjectId,
+        updated_at: new Date().toISOString(),
+      });
 
       await clearOnboardingDraft();
       setLoading(false);
@@ -256,9 +262,8 @@ export default function OnboardingScreen() {
   return (
     <ScreenWrapper
       withScroll={false}
-      withTabBar={false}
       withKeyboard
-      edges={["top", "bottom", "left", "right"]}
+      edges={["top", "left", "right"]}
     >
       <StatusBar style="dark" />
       <View style={onboardingStyles.screenColumn}>
@@ -366,9 +371,14 @@ export default function OnboardingScreen() {
           <View
             style={[
               onboardingStyles.footer,
-              { paddingBottom: Math.max(insets.bottom, 14) },
+              { paddingBottom: Math.max(insets.bottom, 20) },
             ]}
           >
+            <BlurView
+              intensity={80}
+              tint="light"
+              style={StyleSheet.absoluteFill}
+            />
             <Button
               title="Continue"
               titleCase="sentence"
