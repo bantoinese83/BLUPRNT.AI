@@ -28,7 +28,7 @@ export function AppSimpleHeader({
           to="/"
           className="flex items-center gap-2.5 transition-opacity hover:opacity-90 sm:gap-3"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200 sm:h-10 sm:w-10 sm:rounded-2xl sm:p-2">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200 sm:h-12 sm:w-12 sm:rounded-2xl sm:p-1.5">
             <img
               src="/bluprnt_logo.webp"
               alt=""

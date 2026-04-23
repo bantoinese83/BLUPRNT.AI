@@ -7,7 +7,7 @@ interface Props {
   style?: ViewStyle;
 }
 
-export function Logo({ size = 40, style }: Props) {
+export function Logo({ size = 60, style }: Props) {
   return (
     <View style={[{ width: size, height: size }, style]}>
       <Image

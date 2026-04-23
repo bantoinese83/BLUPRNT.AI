@@ -61,7 +61,7 @@ export function LandingHeader() {
               className="flex min-w-0 items-center gap-2.5 rounded-xl outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-500 sm:gap-3"
               aria-label="BLUPRNT — Home"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/40 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-1.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-0.5 shadow-md ring-1 ring-slate-200/40 sm:h-14 sm:w-14 sm:rounded-2xl sm:p-1">
                 <img
                   src="/bluprnt_logo.webp"
                   alt="BLUPRNT.AI Logo"

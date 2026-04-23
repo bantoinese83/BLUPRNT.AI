@@ -150,7 +150,7 @@ function SnurraSpinner({
         >
           <div
             className={cn(
-              "relative flex items-center justify-center p-4",
+              "relative flex items-center justify-center p-2",
               logoSizeClass,
             )}
           >
@@ -183,7 +183,7 @@ export function Loader({
       subtitleClass: "text-xs/relaxed",
       spacing: "space-y-2",
       maxWidth: "max-w-48",
-      logoSize: "h-8 w-8",
+      logoSize: "h-10 w-10",
     },
     md: {
       sizePx: 128,
@@ -191,7 +191,7 @@ export function Loader({
       subtitleClass: "text-sm/relaxed",
       spacing: "space-y-3",
       maxWidth: "max-w-56",
-      logoSize: "h-12 w-12",
+      logoSize: "h-16 w-16",
     },
     lg: {
       sizePx: 224,
@@ -199,7 +199,7 @@ export function Loader({
       subtitleClass: "text-base/relaxed",
       spacing: "space-y-4",
       maxWidth: "max-w-xs",
-      logoSize: "h-20 w-20",
+      logoSize: "h-24 w-24",
     },
     xl: {
       sizePx: 288,
@@ -207,7 +207,7 @@ export function Loader({
       subtitleClass: "text-lg/relaxed",
       spacing: "space-y-6",
       maxWidth: "max-w-sm",
-      logoSize: "h-28 w-28",
+      logoSize: "h-32 w-32",
     },
   };
 

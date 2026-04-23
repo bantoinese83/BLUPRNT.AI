@@ -127,7 +127,7 @@ export function SnurraLoader({
   }));
 
   const strokeUrl = useMemo(() => `url(#${gradId})`, [gradId]);
-  const logoSize = logoSizeProp ?? Math.max(40, Math.round(size * 0.36));
+  const logoSize = logoSizeProp ?? Math.max(40, Math.round(size * 0.5));
 
   const gradient = (
     <Defs>

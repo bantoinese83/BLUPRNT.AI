@@ -48,13 +48,13 @@ export function DashboardHeader({
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-3.5">
           <Link
             to="/dashboard"
-            className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-1 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-11 sm:w-11"
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-0.5 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-14 sm:w-14"
             aria-label="BLUPRNT — Dashboard home"
           >
             <img
               src="/bluprnt_logo.webp"
               alt=""
-              className="h-full w-full object-contain scale-110"
+              className="h-full w-full object-contain"
             />
           </Link>
 

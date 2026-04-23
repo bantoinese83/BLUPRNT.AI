@@ -85,7 +85,7 @@ export function ScreenWrapper({
       <SafeAreaView style={styles.container} edges={edges}>
         {withLogo && (
           <View style={styles.logoHeader}>
-            <Logo size={32} />
+            <Logo size={54} />
             <Text style={styles.brandingText}>BLUPRNT.AI</Text>
           </View>
         )}

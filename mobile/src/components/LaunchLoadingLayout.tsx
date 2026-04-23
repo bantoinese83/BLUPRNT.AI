@@ -113,7 +113,7 @@ export function LaunchLoadingLayout({
   );
 }
 
-const LOGO = 88;
+const LOGO = 120;
 
 const styles = StyleSheet.create({
   standRoot: {
