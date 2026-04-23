@@ -104,7 +104,7 @@ export function EmptyState({
 
         {/* Decorative elements */}
         <div className="absolute -top-4 -right-4 w-12 h-12 bg-teal-500 rounded-2xl -rotate-12 opacity-20 blur-xl animate-pulse" />
-        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-10 blur-xl" />
+        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-emerald-500 rounded-full opacity-10 blur-xl" />
       </div>
 
       <div className="max-w-xs space-y-3 mb-10">

@@ -78,7 +78,7 @@ function calculateHealthScore(
   return {
     score: 88,
     status: "Healthy",
-    color: "from-teal-500 to-blue-600",
+    color: "from-teal-500 to-emerald-600",
     stop1: g.stop1,
     stop2: g.stop2,
     message: "Your project spending is pacing well against estimates.",

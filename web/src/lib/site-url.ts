@@ -14,32 +14,37 @@ export const LANDING_FAQ = [
   {
     question: "What is BLUPRNT?",
     answer:
-      "BLUPRNT is an app for homeowners planning or mid-renovation. It turns rough ideas and photos into a local cost range, helps you log invoices and quotes against that plan, and keeps one clear file you can share with buyers, agents, or lenders.",
+      "BLUPRNT is an intelligent partner for homeowners. It turns photos into local cost estimates, helps you log invoices against that plan, and automatically builds a contractor directory and home manual for future resale.",
   },
   {
-    question: "How does home renovation cost estimation work?",
+    question: "How accurate are the cost estimates?",
     answer:
-      "You share your project type, location (ZIP or area), and optional photos or notes. BLUPRNT uses regional signals and structured scope data to produce an estimated cost range—not a contractor bid, but a realistic starting point for budgeting and conversations with pros.",
+      "Our AI estimates are anchored in real-world data points specifically for your area—including regional labor rates and current material costs from sources like RSMeans and HomeAdvisor. We cite these sources directly so you can trust the grounding behind the numbers.",
   },
   {
-    question: "Can I track renovation spending and documents in one place?",
+    question: "Can I upload multiple receipts and quotes at once?",
     answer:
-      "Yes. You can upload invoices, quotes, and related documents, map them to your budget where it helps, and see spending against your estimate over time—so your renovation stays a trackable financial asset, not a pile of PDFs.",
+      "Yes. BLUPRNT features a batch processing engine that lets you select and upload dozens of invoices, quotes, or warranties simultaneously. Our AI reads them in the background, extracting totals and mapping them to your project scope automatically.",
+  },
+  {
+    question: "How does the Reconciliation Engine work?",
+    answer:
+      "When you upload an invoice, BLUPRNT automatically maps each line item to your planned budget. You’ll see real-time status badges (Matched, Under, or Over) that show exactly where your money is going versus where you planned it to go.",
+  },
+  {
+    question: "Does BLUPRNT track my contractors and warranties?",
+    answer:
+      "Every time you upload an invoice, BLUPRNT identifies the contractor and adds them to your 'Home Team' directory. It also tracks warranty expiry dates from your receipts and provides a countdown on your dashboard so you never miss a coverage window.",
   },
   {
     question: "Is BLUPRNT free to try?",
     answer:
-      "You can sign up and get an estimate without a credit card. The free tier includes core workflows with up to three invoice uploads per project (other document types don’t count toward that cap). Paid plans add higher limits; prices are shown before you pay at checkout.",
+      "You can sign up and get an estimate without a credit card. The free tier includes core workflows with up to three invoice uploads per project. Architect and Project Pass plans add higher limits, automated pro directories, and interactive comparison tools.",
   },
   {
-    question: "Who is BLUPRNT for?",
+    question: "How does the 'Before & After' slider work?",
     answer:
-      "Homeowners who want clarity on remodel costs, organized records for resale, and a single place to connect estimates, actuals, and improvement history—not generic contractor software built for job sites.",
-  },
-  {
-    question: "How does “plan vs actual” work?",
-    answer:
-      "Your plan is the regional lifecycle estimate BLUPRNT builds from your project and location. “Actual” is the total from invoices and quotes you upload (capital improvements). We compare the two in the app and in your seller packet so you can explain the gap—whether you are still in progress, under-logged, or over scope.",
+      "Snap a photo at the start of your project and again as you make progress. BLUPRNT creates an interactive 'Transformation Slider' that lets you visualize your home's evolution—a powerful tool for documenting improvements for potential buyers.",
   },
 ] as const;
 

@@ -51,7 +51,7 @@ export function HelpWidget() {
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className={`fixed bottom-20 ${location.pathname.startsWith("/dashboard") ? "left-6 sm:left-8" : "right-6 sm:right-8"} z-40 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden`}
           >
-            <div className="bg-slate-900 p-4 text-white relative">
+            <div className="bg-teal-950 p-4 text-white relative">
               <div className="flex items-center gap-2 mb-1">
                 <h4 className="font-bold text-lg">Hello there!</h4>
                 <div className="w-8 h-8 rounded-lg bg-white/10 p-1 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0">
@@ -62,12 +62,12 @@ export function HelpWidget() {
                   />
                 </div>
               </div>
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-teal-100">
                 How can we help you today?
               </p>
               <button
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1"
+                className="absolute top-4 right-4 text-teal-400 hover:text-white transition-colors p-1"
                 aria-label="Close help"
               >
                 <X className="w-4 h-4" />

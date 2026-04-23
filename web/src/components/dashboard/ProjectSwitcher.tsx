@@ -87,10 +87,10 @@ export function ProjectSwitcher({
           aria-expanded={open}
         >
           <div
-            className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-teal-600" : "bg-slate-50 group-hover:bg-slate-100"}`}
+            className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-teal-500/20" : "bg-teal-500/10 group-hover:bg-teal-500/20"}`}
           >
             {getProjectIcon(label)({
-              className: `w-3.5 h-3.5 object-contain transition-all ${open ? "brightness-0 invert opacity-100" : "opacity-95"}`,
+              className: "w-3.5 h-3.5 object-contain opacity-100",
             })}
           </div>
           <span className="min-w-0 truncate font-bold text-slate-700">
@@ -126,7 +126,7 @@ export function ProjectSwitcher({
                       aria-selected={isActive}
                       className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-left text-sm rounded-xl transition-all ${
                         isActive
-                          ? "bg-teal-600 text-white font-bold"
+                          ? "bg-teal-500/10 text-teal-900 font-bold ring-1 ring-teal-500/20"
                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                       onClick={() => {
@@ -136,17 +136,17 @@ export function ProjectSwitcher({
                       data-testid={`project-option-${p.name}`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/20" : "bg-slate-100 ring-1 ring-slate-200/80 group-hover:bg-slate-200/70"}`}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/40 shadow-sm" : "bg-teal-500/10 ring-1 ring-teal-500/20 group-hover:bg-teal-500/20"}`}
                       >
                         {getProjectIcon(p.name)({
-                          className: `w-4 h-4 object-contain transition-all ${isActive ? "brightness-0 invert opacity-100" : "opacity-100"}`,
+                          className: `w-4 h-4 object-contain transition-all ${isActive ? "opacity-100" : "opacity-90"}`,
                         })}
                       </div>
 
                       <div className="flex flex-col min-w-0 pr-6">
                         <span className="truncate">{p.name}</span>
                         <span
-                          className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-teal-200" : "text-slate-400"}`}
+                          className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-teal-600/80" : "text-slate-400"}`}
                         >
                           {p.created_at
                             ? new Date(p.created_at).toLocaleDateString(

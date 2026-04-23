@@ -37,9 +37,9 @@ const toneStyles: Record<
     accent: "text-emerald-800",
   },
   below_min: {
-    border: "border-sky-200/80",
-    iconBg: "bg-sky-50 text-sky-800",
-    accent: "text-sky-900",
+    border: "border-teal-200/80",
+    iconBg: "bg-teal-50 text-teal-800",
+    accent: "text-teal-900",
   },
   above_max: {
     border: "border-amber-200/90",

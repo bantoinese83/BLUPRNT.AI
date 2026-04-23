@@ -81,16 +81,24 @@ export default function Support() {
           <div className="mx-auto w-full max-th space-y-4">
             {[
               {
-                q: "How does the AI estimate work?",
-                a: "BLUPRNT uses your photos and project details together with AI and regional cost context to suggest scope lines and a planning range. Treat it as a budgeting guide—not a contractor bid. Compare any range with local quotes.",
+                q: "How does the AI cost estimate work?",
+                a: "BLUPRNT uses your photos and project details together with regional cost context to suggest scope lines and a planning range. Every estimate is anchored in real-world data points like regional labor rates and current material costs, which we cite directly to ensure accuracy and trust.",
+              },
+              {
+                q: "How do I track my budget against the estimate?",
+                a: "Our Reconciliation Engine automatically maps line items from your uploaded invoices to your planned budget. You'll see status badges (Matched, Under, or Over) that show precisely how your actual spending compares to the AI's initial predictions.",
               },
               {
                 q: "Can I use my subscription on web and mobile?",
-                a: "Yes—sign in with the same account everywhere. Web subscriptions are billed through Stripe; the iOS app is billed through the App Store (via RevenueCat). If you subscribe on both web and iOS, you can be billed twice—cancel the extra subscription where you bought it. The app can warn you if it detects both.",
+                a: "Yes—sign in with the same account everywhere. Web subscriptions are billed through Stripe; the iOS app is billed through the App Store (via RevenueCat). All features, including your Home Team directory and Transformation Slider, sync perfectly across all your devices.",
+              },
+              {
+                q: "What is the 'Home Team' directory?",
+                a: "BLUPRNT automatically builds a directory of every contractor and vendor you've worked with based on the invoices you upload. It merges contact info and tracks total spend per pro, giving you a ready-made rolodex for future maintenance or resale documentation.",
               },
               {
                 q: "How do I request a refund?",
-                a: "For purchases made in the iOS app, use Apple’s subscription management or Report a Problem. For web (Stripe) purchases, email support and we’ll help.",
+                a: "For purchases made in the iOS app, use Apple’s subscription management or Report a Problem flow. For web (Stripe) purchases, simply email our support team and we’ll help you out immediately.",
               },
             ].map((faq, i) => (
               <details

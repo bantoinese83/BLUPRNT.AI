@@ -7,6 +7,7 @@ import {
   Pencil,
   Check,
   X,
+  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,12 +52,9 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <Badge
             variant="secondary"
-            className="bg-teal-950 text-white border-teal-900 gap-1.5 font-medium"
+            className="bg-teal-950 text-white border-teal-900 gap-1.5 font-medium hover:bg-teal-900 transition-colors"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-            </span>
+            <Zap className="w-3 h-3 text-teal-400 fill-teal-400" />
             Active project
           </Badge>
           {project.estimated_max_total &&
