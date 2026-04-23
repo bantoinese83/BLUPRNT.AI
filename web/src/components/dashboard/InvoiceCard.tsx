@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, FileText, ShieldCheck, Clock } from "lucide-react";
+import { Eye, FileText, ShieldCheck, Clock, Lock } from "lucide-react";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,16 +11,26 @@ import { cn } from "@/lib/utils";
 interface InvoiceCardProps {
   invoice: InvoiceRow;
   index: number;
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
+  onUpgradeClick?: () => void;
   onClick: (id: string) => void;
 }
 
-export function InvoiceCard({ invoice, index, onClick }: InvoiceCardProps) {
+export function InvoiceCard({
+  invoice,
+  index,
+  hasProjectPass,
+  onUpgradeClick,
+  onClick,
+}: InvoiceCardProps) {
   const [originalPreviewId, setOriginalPreviewId] = useState<string | null>(
     null,
   );
 
   const isWarranty = (invoice.document_type || "").toLowerCase() === "warranty";
   const warranty = getWarrantyStatus(invoice.warranty_expiry_date);
+  const isWarrantyUnlocked = hasProjectPass;
 
   return (
     <>
@@ -78,19 +88,31 @@ export function InvoiceCard({ invoice, index, onClick }: InvoiceCardProps) {
                   {invoice.document_type ?? "invoice"}
                 </Badge>
 
-                {warranty && (
-                  <div
-                    className={cn(
-                      "flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ring-1",
-                      warranty.isExpired
-                        ? "bg-rose-50 text-rose-600 ring-rose-100"
-                        : "bg-teal-50 text-teal-600 ring-teal-100",
-                    )}
-                  >
-                    <Clock className="w-2.5 h-2.5" />
-                    {warranty.label}
-                  </div>
-                )}
+                {warranty &&
+                  (isWarrantyUnlocked ? (
+                    <div
+                      className={cn(
+                        "flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ring-1",
+                        warranty.isExpired
+                          ? "bg-rose-50 text-rose-600 ring-rose-100"
+                          : "bg-teal-50 text-teal-600 ring-teal-100",
+                      )}
+                    >
+                      <Clock className="w-2.5 h-2.5" />
+                      {warranty.label}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpgradeClick?.();
+                      }}
+                      className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded-md text-[9px] font-black uppercase tracking-wider ring-1 ring-amber-100 hover:bg-amber-100 transition-colors"
+                    >
+                      <Lock className="w-2 h-2" />
+                      Track Warranty
+                    </button>
+                  ))}
 
                 {(invoice.document_type ?? "invoice") === "invoice" && (
                   <Badge

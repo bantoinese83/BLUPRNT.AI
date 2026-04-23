@@ -317,10 +317,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   slideIconContainer: {
-    width: 80,
-    height: 80,
+    /* Inset + slightly larger box: rounded rect clips stroke art at corners (esp. bottom-left) */
+    width: 88,
+    height: 88,
     borderRadius: 24,
     backgroundColor: Theme.colors.card,
+    padding: 8,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",

@@ -1,11 +1,22 @@
-import { Users, Phone, Mail, ExternalLink } from "lucide-react";
+import { Users, Phone, Mail, ExternalLink, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { deriveHomeTeam } from "@shared/lib/home-team";
 import type { InvoiceRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
 
-export function HomeTeamSection({ invoices }: { invoices: InvoiceRow[] }) {
+export function HomeTeamSection({
+  invoices,
+  isArchitect,
+  hasProjectPass,
+  onUpgradeClick,
+}: {
+  invoices: InvoiceRow[];
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
+  onUpgradeClick?: () => void;
+}) {
   const team = deriveHomeTeam(invoices);
+  const isUnlocked = isArchitect || hasProjectPass;
 
   if (team.length === 0) {
     return (
@@ -59,21 +70,36 @@ export function HomeTeamSection({ invoices }: { invoices: InvoiceRow[] }) {
                 </div>
 
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {pro.contact_info.phone && (
-                    <a
-                      href={`tel:${pro.contact_info.phone}`}
-                      className="p-2 hover:bg-teal-50 rounded-lg text-teal-600 transition-colors"
+                  {isUnlocked ? (
+                    <>
+                      {pro.contact_info.phone && (
+                        <a
+                          href={`tel:${pro.contact_info.phone}`}
+                          className="p-2 hover:bg-teal-50 rounded-lg text-teal-600 transition-colors"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </a>
+                      )}
+                      {pro.contact_info.email && (
+                        <a
+                          href={`mailto:${pro.contact_info.email}`}
+                          className="p-2 hover:bg-teal-50 rounded-lg text-teal-600 transition-colors"
+                        >
+                          <Mail className="w-4 h-4" />
+                        </a>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onUpgradeClick?.();
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-[9px] font-black uppercase tracking-wider hover:bg-teal-100 transition-colors"
                     >
-                      <Phone className="w-4 h-4" />
-                    </a>
-                  )}
-                  {pro.contact_info.email && (
-                    <a
-                      href={`mailto:${pro.contact_info.email}`}
-                      className="p-2 hover:bg-teal-50 rounded-lg text-teal-600 transition-colors"
-                    >
-                      <Mail className="w-4 h-4" />
-                    </a>
+                      <Lock className="w-3 h-3" />
+                      Unlock Contact
+                    </button>
                   )}
                   <div className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 transition-colors">
                     <ExternalLink className="w-4 h-4" />

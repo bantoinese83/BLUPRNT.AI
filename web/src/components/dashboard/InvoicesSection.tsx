@@ -306,6 +306,9 @@ export function InvoicesSection({
               key={inv.id}
               invoice={inv}
               index={idx}
+              isArchitect={isArchitectActive}
+              hasProjectPass={hasProjectPass}
+              onUpgradeClick={() => onUpgradeClick()}
               onClick={(id) => setReviewInvoiceId(id)}
             />
           ))}

@@ -6,15 +6,26 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import { Users, Phone, Mail } from "lucide-react-native";
+import { Users, Phone, Mail, Lock } from "lucide-react-native";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { deriveHomeTeam } from "@shared/lib/home-team";
 import type { InvoiceRow } from "@shared/types/database";
 import { money } from "@shared/lib/formatters";
 
-export function HomeTeamSection({ invoices }: { invoices: InvoiceRow[] }) {
+export function HomeTeamSection({
+  invoices,
+  isArchitect,
+  hasProjectPass,
+  onUpgradeClick,
+}: {
+  invoices: InvoiceRow[];
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
+  onUpgradeClick?: () => void;
+}) {
   const team = deriveHomeTeam(invoices);
+  const isUnlocked = isArchitect || hasProjectPass;
 
   if (team.length === 0) {
     return (
@@ -60,37 +71,42 @@ export function HomeTeamSection({ invoices }: { invoices: InvoiceRow[] }) {
               </View>
 
               <View style={styles.actions}>
-                {pro.contact_info.phone && (
+                {isUnlocked ? (
+                  <>
+                    {pro.contact_info.phone && (
+                      <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={() =>
+                          Linking.openURL(`tel:${pro.contact_info.phone}`)
+                        }
+                      >
+                        <Phone size={16} color={Theme.colors.brand.primary} />
+                      </TouchableOpacity>
+                    )}
+                    {pro.contact_info.email && (
+                      <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={() =>
+                          Linking.openURL(`mailto:${pro.contact_info.email}`)
+                        }
+                      >
+                        <Mail size={16} color={Theme.colors.brand.primary} />
+                      </TouchableOpacity>
+                    )}
+                  </>
+                ) : (
                   <TouchableOpacity
-                    style={styles.actionBtn}
-                    onPress={() =>
-                      Linking.openURL(`tel:${pro.contact_info.phone}`)
-                    }
+                    style={styles.lockBtn}
+                    onPress={onUpgradeClick}
                   >
-                    <Phone size={16} color={Theme.colors.brand.primary} />
-                  </TouchableOpacity>
-                )}
-                {pro.contact_info.email && (
-                  <TouchableOpacity
-                    style={styles.actionBtn}
-                    onPress={() =>
-                      Linking.openURL(`mailto:${pro.contact_info.email}`)
-                    }
-                  >
-                    <Mail size={16} color={Theme.colors.brand.primary} />
+                    <Lock size={12} color={Theme.colors.brand.primary} />
+                    <Text style={styles.lockBtnText}>Unlock</Text>
                   </TouchableOpacity>
                 )}
               </View>
             </View>
           </GlassCard>
         ))}
-        {team.length > 3 && (
-          <TouchableOpacity style={styles.moreBtn}>
-            <Text style={styles.moreBtnText}>
-              View all {team.length} contractors
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
@@ -175,14 +191,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  moreBtn: {
+  lockBtn: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "rgba(13, 148, 136, 0.05)",
   },
-  moreBtnText: {
-    fontSize: 12,
-    fontFamily: Theme.typography.family.bold,
+  lockBtnText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
     color: Theme.colors.brand.primary,
+    textTransform: "uppercase",
   },
   emptyContainer: {
     padding: 24,

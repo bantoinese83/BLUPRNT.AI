@@ -245,6 +245,11 @@ export default function DashboardScreen() {
     }
   };
 
+  const onGeneralUpgrade = () => {
+    setUpgradeReason("general");
+    setShowUpgrade(true);
+  };
+
   if (configurationMissing) {
     return (
       <ScreenWrapper withLogo style={styles.centerContainer}>
@@ -449,6 +454,9 @@ export default function DashboardScreen() {
           <TransformationSlider
             beforePath={project.before_photo_storage_path}
             afterPath={project.after_photo_storage_path}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={onGeneralUpgrade}
           />
         </MotiView>
 
@@ -480,7 +488,12 @@ export default function DashboardScreen() {
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 380, delay: 160 }}
         >
-          <HomeTeamSection invoices={invoices} />
+          <HomeTeamSection
+            invoices={invoices}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={onGeneralUpgrade}
+          />
         </MotiView>
 
         <MotiView
@@ -500,6 +513,8 @@ export default function DashboardScreen() {
             invoices={invoices}
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={onGeneralUpgrade}
             onOpenInvoice={(inv) => {
               void Haptics.selectionAsync();
               setReviewInvoice(inv);

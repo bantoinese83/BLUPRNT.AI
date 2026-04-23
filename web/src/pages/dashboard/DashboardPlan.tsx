@@ -48,9 +48,17 @@ export function DashboardPlan({
           <TransformationSlider
             beforePath={project.before_photo_storage_path}
             afterPath={project.after_photo_storage_path}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={onUpgradeClick}
           />
           {health}
-          <HomeTeamSection invoices={invoices} />
+          <HomeTeamSection
+            invoices={invoices}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={onUpgradeClick}
+          />
           {location.pathname.endsWith("/plan") && (
             <ActivityFeed events={activityEvents} />
           )}

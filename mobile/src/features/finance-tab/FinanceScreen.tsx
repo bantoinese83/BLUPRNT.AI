@@ -337,6 +337,11 @@ export default function FinanceScreen() {
           <FinanceInvoiceRow
             inv={inv}
             index={index}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={() => {
+              setUpgradeReason("general");
+              setShowUpgrade(true);
+            }}
             onPress={() => {
               setSelectedInvoice(inv as unknown as InvoiceRow);
               setIsReviewOpen(true);

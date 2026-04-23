@@ -6,7 +6,13 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import { ChevronRight, Receipt, Wallet, Clock } from "lucide-react-native";
+import {
+  ChevronRight,
+  Receipt,
+  Wallet,
+  Clock,
+  Lock,
+} from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
@@ -25,6 +31,8 @@ type Props = {
   invoices: InvoiceRow[];
   estimatedMin: number | null;
   estimatedMax: number | null;
+  hasProjectPass?: boolean;
+  onUpgradeClick?: () => void;
   onOpenInvoice: (invoice: InvoiceRow) => void;
   onOpenLedger: () => void;
   onAddDocument: () => void;
@@ -32,8 +40,8 @@ type Props = {
 
 export function DashboardRecentDocumentsPanel({
   invoices,
-  estimatedMin,
-  estimatedMax,
+  hasProjectPass,
+  onUpgradeClick,
   onOpenInvoice,
   onOpenLedger,
   onAddDocument,
@@ -49,10 +57,6 @@ export function DashboardRecentDocumentsPanel({
     [invoices],
   );
 
-  const hasEstimate =
-    (estimatedMin != null && Number.isFinite(estimatedMin)) ||
-    (estimatedMax != null && Number.isFinite(estimatedMax));
-
   if (invoices.length > 0) {
     return (
       <GlassCard intensity={10} style={styles.card}>
@@ -67,6 +71,8 @@ export function DashboardRecentDocumentsPanel({
         <View style={styles.rowsWrap} testID="dashboard-recent-documents">
           {recent.map((inv, index) => {
             const warranty = getWarrantyStatus(inv.warranty_expiry_date);
+            const isWarrantyUnlocked = hasProjectPass;
+
             return (
               <Pressable
                 key={inv.id}
@@ -112,39 +118,49 @@ export function DashboardRecentDocumentsPanel({
                   </View>
                   <View style={styles.amountRow}>
                     <Text style={styles.amountLine}>{money(inv.total)}</Text>
-                    {warranty && (
-                      <View
-                        style={[
-                          styles.warrantyBadge,
-                          {
-                            backgroundColor: warranty.isExpired
-                              ? "rgba(244, 63, 94, 0.08)"
-                              : "rgba(13, 148, 136, 0.08)",
-                          },
-                        ]}
-                      >
-                        <Clock
-                          size={10}
-                          color={
-                            warranty.isExpired
-                              ? Theme.colors.status.error
-                              : Theme.colors.brand.primary
-                          }
-                        />
-                        <Text
+
+                    {warranty &&
+                      (isWarrantyUnlocked ? (
+                        <View
                           style={[
-                            styles.warrantyText,
+                            styles.warrantyBadge,
                             {
-                              color: warranty.isExpired
-                                ? Theme.colors.status.error
-                                : Theme.colors.brand.primary,
+                              backgroundColor: warranty.isExpired
+                                ? "rgba(244, 63, 94, 0.08)"
+                                : "rgba(13, 148, 136, 0.08)",
                             },
                           ]}
                         >
-                          {warranty.label}
-                        </Text>
-                      </View>
-                    )}
+                          <Clock
+                            size={10}
+                            color={
+                              warranty.isExpired
+                                ? Theme.colors.status.error
+                                : Theme.colors.brand.primary
+                            }
+                          />
+                          <Text
+                            style={[
+                              styles.warrantyText,
+                              {
+                                color: warranty.isExpired
+                                  ? Theme.colors.status.error
+                                  : Theme.colors.brand.primary,
+                              },
+                            ]}
+                          >
+                            {warranty.label}
+                          </Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={onUpgradeClick}
+                          style={styles.lockBadge}
+                        >
+                          <Lock size={8} color="#d97706" />
+                          <Text style={styles.lockText}>Track Warranty</Text>
+                        </TouchableOpacity>
+                      ))}
                   </View>
                 </View>
               </Pressable>
@@ -180,9 +196,8 @@ export function DashboardRecentDocumentsPanel({
         <View style={styles.sectionHeaderLine} />
       </View>
       <Text style={styles.sectionSubcopy}>
-        {hasEstimate
-          ? "Your next quote or invoice keeps documented spend aligned with your plan."
-          : "Upload quotes or invoices here — we pull totals so you can compare to your estimate."}
+        Upload quotes or invoices here — we pull totals so you can compare to
+        your estimate.
       </Text>
 
       <TouchableOpacity
@@ -208,7 +223,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 18,
   },
-  /** Mirrors `ActivityFeed` header row + line. */
   sectionHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -239,7 +253,6 @@ const styles = StyleSheet.create({
   rowsWrap: {
     paddingLeft: 4,
   },
-  /** Mirrors `ActivityFeed` `eventRow` + icon + text column. */
   docRow: {
     flexDirection: "row",
     marginBottom: 24,
@@ -313,6 +326,21 @@ const styles = StyleSheet.create({
   warrantyText: {
     fontSize: 9,
     fontFamily: Theme.typography.family.bold,
+    textTransform: "uppercase",
+  },
+  lockBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: "rgba(245, 158, 11, 0.08)",
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  lockText: {
+    fontSize: 8,
+    fontFamily: Theme.typography.family.black,
+    color: "#d97706",
     textTransform: "uppercase",
   },
   ledgerCta: {

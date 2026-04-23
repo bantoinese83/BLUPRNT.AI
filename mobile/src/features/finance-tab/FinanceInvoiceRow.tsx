@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Wrench, ShieldCheck, Trash2, Clock } from "lucide-react-native";
+import { Wrench, ShieldCheck, Trash2, Clock, Lock } from "lucide-react-native";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
@@ -13,6 +13,8 @@ import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.s
 type FinanceInvoiceRowProps = {
   inv: InvoiceRow;
   index: number;
+  hasProjectPass?: boolean;
+  onUpgradeClick?: () => void;
   onPress: () => void;
   onViewOriginal: () => void;
   onDelete?: (id: string) => void;
@@ -21,12 +23,15 @@ type FinanceInvoiceRowProps = {
 export function FinanceInvoiceRow({
   inv,
   index,
+  hasProjectPass,
+  onUpgradeClick,
   onPress,
   onViewOriginal,
   onDelete,
 }: FinanceInvoiceRowProps) {
   const swipeableRef = useRef<Swipeable>(null);
   const warranty = getWarrantyStatus(inv.warranty_expiry_date);
+  const isWarrantyUnlocked = hasProjectPass;
 
   const renderRightActions = (
     _progress: Animated.AnimatedInterpolation<number>,
@@ -90,7 +95,6 @@ export function FinanceInvoiceRow({
                     <ShieldCheck size={18} color={Theme.colors.text.muted} />
                   )}
                 </View>
-
                 <View style={styles.invoiceText}>
                   <Text
                     style={styles.vendorName}
@@ -110,42 +114,69 @@ export function FinanceInvoiceRow({
                       {new Date(inv.created_at).toLocaleDateString()} •{" "}
                       {inv.document_type || "Invoice"}
                     </Text>
-                    {warranty && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 2,
-                          backgroundColor: warranty.isExpired
-                            ? "rgba(244, 63, 94, 0.1)"
-                            : "rgba(16, 185, 129, 0.1)",
-                          paddingHorizontal: 4,
-                          paddingVertical: 1,
-                          borderRadius: 4,
-                        }}
-                      >
-                        <Clock
-                          size={10}
-                          color={
-                            warranty.isExpired
-                              ? Theme.colors.status.error
-                              : Theme.colors.status.success
-                          }
-                        />
-                        <Text
+
+                    {warranty &&
+                      (isWarrantyUnlocked ? (
+                        <View
                           style={{
-                            fontSize: 9,
-                            fontFamily: Theme.typography.family.bold,
-                            color: warranty.isExpired
-                              ? Theme.colors.status.error
-                              : Theme.colors.status.success,
-                            textTransform: "uppercase",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 2,
+                            backgroundColor: warranty.isExpired
+                              ? "rgba(244, 63, 94, 0.1)"
+                              : "rgba(16, 185, 129, 0.1)",
+                            paddingHorizontal: 4,
+                            paddingVertical: 1,
+                            borderRadius: 4,
                           }}
                         >
-                          {warranty.label}
-                        </Text>
-                      </View>
-                    )}
+                          <Clock
+                            size={10}
+                            color={
+                              warranty.isExpired
+                                ? Theme.colors.status.error
+                                : Theme.colors.status.success
+                            }
+                          />
+                          <Text
+                            style={{
+                              fontSize: 9,
+                              fontFamily: Theme.typography.family.bold,
+                              color: warranty.isExpired
+                                ? Theme.colors.status.error
+                                : Theme.colors.status.success,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {warranty.label}
+                          </Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={onUpgradeClick}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 2,
+                            backgroundColor: "rgba(245, 158, 11, 0.1)",
+                            paddingHorizontal: 5,
+                            paddingVertical: 1,
+                            borderRadius: 4,
+                          }}
+                        >
+                          <Lock size={8} color="#d97706" />
+                          <Text
+                            style={{
+                              fontSize: 8,
+                              fontFamily: Theme.typography.family.black,
+                              color: "#d97706",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Track Warranty
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
                   </View>
                 </View>
                 <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>

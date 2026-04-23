@@ -1,21 +1,35 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, PanResponder, Animated } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  PanResponder,
+  Animated,
+  TouchableOpacity,
+} from "react-native";
 import { Image } from "expo-image";
-import { Camera, MoveHorizontal } from "lucide-react-native";
+import { Camera, MoveHorizontal, Lock } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { supabase } from "@/lib/supabase";
 
 type TransformationSliderProps = {
   beforePath: string | null;
   afterPath: string | null;
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
+  onUpgradeClick?: () => void;
 };
 
 export function TransformationSlider({
   beforePath,
   afterPath,
+  isArchitect,
+  hasProjectPass,
+  onUpgradeClick,
 }: TransformationSliderProps) {
   const [width, setWidth] = useState(0);
   const sliderPos = useState(new Animated.Value(0.5))[0];
+  const isUnlocked = isArchitect || hasProjectPass;
 
   const getPublicUrl = (path: string | null) => {
     if (!path) return null;
@@ -27,9 +41,9 @@ export function TransformationSlider({
   const afterUrl = getPublicUrl(afterPath);
 
   const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: () => !!isUnlocked,
     onPanResponderMove: (_, gestureState) => {
-      if (width === 0) return;
+      if (width === 0 || !isUnlocked) return;
       const newPos = Math.max(0, Math.min(gestureState.moveX / width, 1));
       sliderPos.setValue(newPos);
     },
@@ -49,10 +63,12 @@ export function TransformationSlider({
     );
   }
 
-  const leftWidth = sliderPos.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "100%"],
-  });
+  const leftWidth = isUnlocked
+    ? sliderPos.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["0%", "100%"],
+      })
+    : "100%";
 
   return (
     <View style={styles.container}>
@@ -64,7 +80,9 @@ export function TransformationSlider({
         </View>
       </View>
 
-      <View
+      <TouchableOpacity
+        activeOpacity={isUnlocked ? 1 : 0.9}
+        onPress={() => !isUnlocked && onUpgradeClick?.()}
         style={styles.sliderRoot}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
         {...panResponder.panHandlers}
@@ -83,12 +101,21 @@ export function TransformationSlider({
           />
         </Animated.View>
 
-        <Animated.View style={[styles.handle, { left: leftWidth }]}>
-          <View style={styles.handleCircle}>
-            <MoveHorizontal size={14} color={Theme.colors.brand.primary} />
+        {isUnlocked ? (
+          <Animated.View style={[styles.handle, { left: leftWidth }]}>
+            <View style={styles.handleCircle}>
+              <MoveHorizontal size={14} color={Theme.colors.brand.primary} />
+            </View>
+          </Animated.View>
+        ) : (
+          <View style={styles.lockedOverlay}>
+            <View style={styles.lockedBadge}>
+              <Lock size={14} color={Theme.colors.brand.primary} />
+              <Text style={styles.lockedText}>Upgrade to compare</Text>
+            </View>
           </View>
-        </Animated.View>
-      </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
@@ -166,6 +193,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 10,
+  },
+  lockedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lockedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+  },
+  lockedText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
   },
   emptyContainer: {
     height: 160,
