@@ -14,17 +14,6 @@ import {
   reserveArchitectInvoiceUploadSlot,
 } from "../_shared/entitlements.ts";
 import { extractInvoiceFromPdf, type ProjectScopeItem } from "../_shared/ocr.ts";
-import { classifyLedgerDocumentType } from "../_shared/classify-document.ts";
-import {
-  inferDocumentTypeFromFilename,
-  isArchitectQuotaInvoiceType,
-  isInvoiceStyleOcrType,
-  type LedgerDocumentType,
-} from "../../../shared/lib/infer-document-type.ts";
-import {
-  defaultLineDescriptionForUpload,
-  defaultVendorNameForDocumentType,
-} from "../../../shared/lib/ledger-document-labels.ts";
 import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
@@ -40,7 +29,7 @@ function resolvedMimeType(f: File): string {
   return "image/jpeg";
 }
 
-/** Converts an ArrayBuffer to a Base64 string for OCR processing. */
+/** Converts a Buffer to a Base64 string for OCR processing. */
 function bufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = "";
@@ -59,25 +48,26 @@ async function uploadFileToStorage(
     userId: string;
     docId: string;
     docType: string;
-    file: File;
+    fileName: string;
+    fileBuffer: ArrayBuffer;
+    mime: string;
   },
-): Promise<{ path: string; mime: string; error?: string }> {
-  const ext = args.file.name.includes(".")
-    ? args.file.name.slice(args.file.name.lastIndexOf("."))
+): Promise<{ path: string; error?: string }> {
+  const ext = args.fileName.includes(".")
+    ? args.fileName.slice(args.fileName.lastIndexOf("."))
     : "";
   const safeName = `${args.docType}_${args.docId}${ext}`;
   const storagePath = `${args.projectId}/${args.userId}/${safeName}`;
-  const mime = resolvedMimeType(args.file);
 
   const { error } = await admin.storage
     .from("project-documents")
-    .upload(storagePath, await args.file.arrayBuffer(), {
-      contentType: mime,
+    .upload(storagePath, args.fileBuffer, {
+      contentType: args.mime,
       upsert: false,
     });
 
-  if (error) return { path: "", mime: "", error: error.message };
-  return { path: storagePath, mime };
+  if (error) return { path: "", error: error.message };
+  return { path: storagePath };
 }
 
 Deno.serve(async (req: Request) => {
@@ -102,7 +92,7 @@ Deno.serve(async (req: Request) => {
     const parsed = uploadInvoiceSchema.safeParse({
       project_id: formData.get("project_id"),
       file: formData.get("file"),
-      document_type: formData.get("document_type") ?? "auto",
+      document_type: formData.get("document_type") || "invoice",
       vendor_hint: formData.get("vendor_hint"),
       amount_hint: formData.get("amount_hint") || undefined,
     });
@@ -111,44 +101,10 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: parsed.error.errors[0]?.message ?? "Invalid request" }, 400, req);
     }
 
-    const {
-      project_id: projectId,
-      file,
-      document_type: docTypeInput,
-      amount_hint: amountNum,
-      vendor_hint,
-    } = parsed.data;
-
-    const fileBytes = new Uint8Array(await file.arrayBuffer());
-    const mimeForFile = resolvedMimeType(file);
-    const fileForPipeline = new File([fileBytes], file.name || "upload", {
-      type: mimeForFile,
-    });
-
+    const { project_id: projectId, file, document_type: docType, amount_hint: amountNum, vendor_hint } = parsed.data;
     const admin = getServiceClient();
 
     await assertProjectOwner(admin, projectId, userId);
-
-    let docType: LedgerDocumentType;
-    if (docTypeInput === "auto") {
-      const fromName = inferDocumentTypeFromFilename(fileForPipeline.name);
-      if (fromName) {
-        docType = fromName;
-      } else {
-        const vision = await classifyLedgerDocumentType(
-          bufferToBase64(
-            fileBytes.byteOffset === 0 &&
-                fileBytes.byteLength === fileBytes.buffer.byteLength
-              ? fileBytes.buffer
-              : fileBytes.slice().buffer,
-          ),
-          mimeForFile,
-        );
-        docType = vision ?? "other";
-      }
-    } else {
-      docType = docTypeInput as LedgerDocumentType;
-    }
 
     const entitlement = await checkInvoiceUploadAllowed(admin, userId, projectId, docType);
     if (!entitlement.allowed) {
@@ -157,7 +113,7 @@ Deno.serve(async (req: Request) => {
 
     let rollbackArchitectSlot = false;
     try {
-      if (isArchitectQuotaInvoiceType(docType) && entitlement.reason === "architect_plan") {
+      if (docType === "invoice" && entitlement.reason === "architect_plan") {
         const slot = await reserveArchitectInvoiceUploadSlot(admin, userId);
         if (!slot.ok) {
           return jsonResponse({
@@ -168,15 +124,22 @@ Deno.serve(async (req: Request) => {
         rollbackArchitectSlot = true;
       }
 
+      // Buffer read once
+      const fileBuffer = await file.arrayBuffer();
+      const mime = resolvedMimeType(file);
       const docId = crypto.randomUUID();
-      const storage = await uploadFileToStorage(admin, {
-        projectId,
-        userId,
-        docId,
-        docType: docType,
-        file: fileForPipeline,
+
+      const storage = await uploadFileToStorage(admin, { 
+        projectId, 
+        userId, 
+        docId, 
+        docType, 
+        fileName: file.name, 
+        fileBuffer,
+        mime
       });
-      if (storage.error) return jsonResponse({ error: "Could not store file." }, 500, req);
+      
+      if (storage.error) return jsonResponse({ error: `Could not store file: ${storage.error}` }, 500, req);
 
       const { data: doc, error: docErr } = await admin.from("documents").insert({
         id: docId,
@@ -185,50 +148,21 @@ Deno.serve(async (req: Request) => {
         storage_path: storage.path,
         original_filename: file.name,
         uploaded_by_user_id: userId,
-        ocr_status: isInvoiceStyleOcrType(docType) ? "pending" : "success",
+        ocr_status: docType === "invoice" ? "pending" : "success",
       }).select("id").single();
 
-      if (docErr || !doc) {
-        console.error("Document insert error:", docErr);
-        return jsonResponse({ 
-          error: "Could not create document.", 
-          details: docErr?.message || "Unknown database error" 
-        }, 500, req);
-      }
+      if (docErr || !doc) return jsonResponse({ error: "Could not create document." }, 500, req);
 
-      // AUTOMATIC TRANSFORMATION SLIDER UPDATES
-      if (storage.mime.startsWith("image/")) {
-        const { data: project } = await admin
-          .from("projects")
-          .select("before_photo_storage_path, after_photo_storage_path")
-          .eq("id", projectId)
-          .single();
-
-        if (project) {
-          const updates: Record<string, string> = {};
-          
-          // 1. If no before photo exists yet, this is it.
-          if (!project.before_photo_storage_path) {
-            updates.before_photo_storage_path = storage.path;
-          }
-          
-          // 2. ALWAYS update the after photo to the latest upload
-          updates.after_photo_storage_path = storage.path;
-
-          await admin.from("projects").update(updates).eq("id", projectId);
-        }
-      }
+      // --- ALL TRANSFORMATION SLIDER LOGIC REMOVED FROM HERE ---
 
       const invoiceId = crypto.randomUUID();
       let subtotal = amountNum ?? (docType === "invoice" ? 1850 : 0);
       let tax = docType === "invoice" ? Math.round(subtotal * 0.08) : 0;
       let total = subtotal + tax;
-      let vendorLabel =
-        vendor_hint || defaultVendorNameForDocumentType(docType);
+      let vendorLabel = vendor_hint || (docType === "invoice" ? "Vendor" : docType === "quote" ? "Quote" : docType.charAt(0).toUpperCase() + docType.slice(1));
       let lineItems: any[] = [];
 
-      if (isInvoiceStyleOcrType(docType)) {
-        // Fetch current project scope for reconciliation mapping
+      if (docType === "invoice") {
         const { data: scopeRows } = await admin
           .from("scope_items")
           .select("id, category, description")
@@ -236,16 +170,10 @@ Deno.serve(async (req: Request) => {
 
         const projectScope = (scopeRows || []) as ProjectScopeItem[];
 
-        const ocrBase64 = bufferToBase64(
-          fileBytes.byteOffset === 0 &&
-            fileBytes.byteLength === fileBytes.buffer.byteLength
-            ? fileBytes.buffer
-            : fileBytes.slice().buffer,
-        );
         const ocr = await extractInvoiceFromPdf(
-          ocrBase64,
-          storage.mime,
-          projectScope,
+          bufferToBase64(fileBuffer), 
+          mime,
+          projectScope
         );
 
         if (ocr) {
@@ -262,19 +190,15 @@ Deno.serve(async (req: Request) => {
             tax_rate: 0, tax_amount: 0,
             line_total: li.line_total,
             category: "labor",
-            scope_item_id: li.mapped_scope_item_id || null, // Reconciliation Mapping
+            scope_item_id: li.mapped_scope_item_id || null,
           }));
         }
       }
 
       if (lineItems.length === 0) {
-        const defaultLineDesc = defaultLineDescriptionForUpload(
-          docType,
-          vendor_hint,
-        );
         lineItems = [{
           invoice_id: invoiceId,
-          description: defaultLineDesc,
+          description: vendor_hint ? `Services from ${vendor_hint}` : "Invoice line",
           quantity: 1,
           unit_price: subtotal,
           unit_of_measure: "job",
@@ -292,7 +216,7 @@ Deno.serve(async (req: Request) => {
         payment_status: "unpaid", currency: "USD", issue_date: new Date().toISOString().slice(0, 10),
       });
 
-      if (isInvoiceStyleOcrType(docType)) {
+      if (docType === "invoice") {
         await admin.from("invoice_line_items").insert(lineItems);
         await admin.from("documents").update({ ocr_status: "success" }).eq("id", doc.id);
       }
