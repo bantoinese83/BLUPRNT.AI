@@ -4,12 +4,6 @@
 # JWT verification at gateway: off for user functions that validate the bearer in Deno;
 # off for webhooks and public/anon endpoints. See README Edge Functions table.
 
-[auth]
-# Enables leaked password protection (HIBP).
-# Note: In hosted Supabase, also verify this in Dashboard -> Auth -> Password Protection.
-[auth.password]
-hibp_enabled = true
-
 # Gateway JWT verify often returns 401 "Invalid JWT" for valid ES256 session tokens
 # (browser + supabase-js). Auth is enforced in-handler via getUserIdFromRequest + RLS patterns.
 [functions.photo-to-scope]
