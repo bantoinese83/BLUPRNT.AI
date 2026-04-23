@@ -130,7 +130,7 @@ export function DashboardStats({
             <motion.span
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
-              className="text-[10px] font-black text-white bg-slate-900 px-1.5 py-0.5 rounded-md"
+              className="text-[10px] font-black text-white bg-teal-600 px-1.5 py-0.5 rounded-md"
             >
               {budgetPct}%
             </motion.span>

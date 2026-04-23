@@ -47,7 +47,7 @@ function MaterialDetailList({
               <Boxes className="w-4 h-4 text-slate-400 group-hover:text-teal-500" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-slate-900 leading-tight">
+              <p className="text-[13px] font-bold text-teal-950 leading-tight">
                 {m.name}
               </p>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
@@ -218,7 +218,7 @@ export function EstimateSummary({
                   <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
                     <div className="space-y-2 min-w-0 flex-1">
                       <div className="flex items-center flex-wrap gap-2.5">
-                        <h4 className="font-bold text-slate-900 tracking-tight group-hover:text-slate-950 transition-colors uppercase">
+                        <h4 className="font-bold text-teal-950 tracking-tight group-hover:text-teal-800 transition-colors uppercase">
                           {item.category}
                         </h4>
 
@@ -245,7 +245,7 @@ export function EstimateSummary({
                     </div>
                     <div className="flex flex-col items-start sm:items-end shrink-0 gap-3">
                       <div className="text-left sm:text-right">
-                        <div className="font-bold text-lg text-slate-900 tabular-nums mb-0.5">
+                        <div className="font-bold text-lg text-teal-950 tabular-nums mb-0.5">
                           {money(item.total_cost_min, item.total_cost_max)}
                         </div>
                         {item.quantity != null && item.unit && (
@@ -265,7 +265,7 @@ export function EstimateSummary({
                           className={cn(
                             "h-8 px-3 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all",
                             isExpanded
-                              ? "bg-slate-900 text-white hover:bg-black"
+                              ? "bg-teal-600 text-white hover:bg-teal-500"
                               : "bg-white text-slate-600 shadow-sm border border-slate-100 hover:bg-slate-50",
                           )}
                         >
@@ -301,7 +301,7 @@ export function EstimateSummary({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-slate-900 font-bold tracking-tight hover:bg-slate-100"
+                  className="text-teal-900 font-bold tracking-tight hover:bg-teal-50"
                   onClick={() => navigate("/dashboard/scope")}
                 >
                   View {scopeItems.length - 10} more line items

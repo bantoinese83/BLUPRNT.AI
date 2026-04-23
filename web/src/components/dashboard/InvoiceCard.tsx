@@ -28,7 +28,7 @@ export function InvoiceCard({ invoice, index, onClick }: InvoiceCardProps) {
           className="border-slate-200/80 shadow-drop-sm hover:shadow-drop-lg hover:border-slate-400 transition-all duration-300 cursor-pointer overflow-hidden group relative"
           onClick={() => onClick(invoice.id)}
         >
-          <div className="absolute top-0 left-0 w-1 h-full bg-slate-900 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute top-0 left-0 w-1 h-full bg-teal-600 opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="p-4 flex items-start space-x-4">
             <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
               <FileText className="w-5 h-5 text-red-500" />

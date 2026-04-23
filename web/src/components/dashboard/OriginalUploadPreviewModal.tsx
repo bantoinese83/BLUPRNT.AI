@@ -56,7 +56,7 @@ export function OriginalUploadPreviewModal({
       open
       onClose={onClose}
       titleId="original-upload-preview-title"
-      overlayClassName="bg-slate-900/60"
+      overlayClassName="bg-teal-950/60"
       panelClassName="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden border border-slate-200/80"
       paddingClassName="p-4"
     >

@@ -191,7 +191,7 @@ export function InvoicesSection({
                 className={cn(
                   "rounded-full px-4 py-2 text-xs font-bold transition-colors",
                   ledgerFilter === id
-                    ? "bg-slate-900 text-white shadow-sm"
+                    ? "bg-teal-600 text-white shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200",
                 )}
                 onClick={() => setLedgerFilter(id)}

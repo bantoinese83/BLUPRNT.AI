@@ -221,7 +221,7 @@ export function UpgradeModal({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Door A */}
           <Card className="border-slate-200 shadow-md shadow-slate-100/50 relative overflow-hidden flex flex-col">
-            <div className="absolute top-0 inset-x-0 h-1 bg-slate-900"></div>
+            <div className="absolute top-0 inset-x-0 h-1 bg-teal-600"></div>
 
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl text-slate-900">

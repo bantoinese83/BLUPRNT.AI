@@ -84,7 +84,7 @@ export function DashboardSkeleton() {
           <div className="lg:col-span-2 space-y-8">
             {/* Estimate summary skeleton */}
             <Card className="relative overflow-hidden">
-              <div className="bg-slate-900 p-6 space-y-4 relative overflow-hidden">
+              <div className="bg-teal-950 p-6 space-y-4 relative overflow-hidden">
                 <Shimmer />
                 <div className="h-4 w-24 bg-slate-700/50 rounded relative overflow-hidden" />
                 <div className="h-10 w-40 bg-slate-700/50 rounded relative overflow-hidden" />

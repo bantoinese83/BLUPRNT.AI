@@ -157,7 +157,7 @@ const CircleProgress = ({
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-2.5 h-2.5 rounded-full bg-slate-900 shadow-lg shadow-black/20" />
+        <div className="w-2.5 h-2.5 rounded-full bg-teal-600 shadow-lg shadow-teal-900/20" />
       </div>
     </div>
   );
@@ -271,7 +271,7 @@ export function ProjectHealth({
             </div>
             <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative">
               <motion.div
-                className="absolute inset-y-0 left-0 bg-slate-900 rounded-full"
+                className="absolute inset-y-0 left-0 bg-teal-600 rounded-full"
                 initial={{ width: 0 }}
                 animate={{
                   width: `${Math.min(100, (invoiceTotal / (estimatedMin || 1)) * 100)}%`,

@@ -74,7 +74,7 @@ export function ShareModal({ isOpen, onClose, projectId }: ShareModalProps) {
       open={isOpen}
       onClose={onClose}
       titleId="share-project-title"
-      overlayClassName="bg-slate-900/60 backdrop-blur-md"
+      overlayClassName="bg-teal-950/60 backdrop-blur-md"
       panelClassName="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full p-8 space-y-6 relative overflow-hidden border border-slate-100 ring-1 ring-slate-200/50"
       paddingClassName="p-4"
     >
@@ -126,7 +126,7 @@ export function ShareModal({ isOpen, onClose, projectId }: ShareModalProps) {
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
           <div className="bg-slate-50 border border-slate-100/80 rounded-2xl p-4">
             <div className="flex gap-3 mb-2.5">
-              <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-4 h-4 text-white" />
               </div>
               <h4 className="font-bold text-slate-900 text-sm">

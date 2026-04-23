@@ -87,7 +87,7 @@ export function ProjectSwitcher({
           aria-expanded={open}
         >
           <div
-            className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-slate-900" : "bg-slate-50 group-hover:bg-slate-100"}`}
+            className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-teal-600" : "bg-slate-50 group-hover:bg-slate-100"}`}
           >
             {getProjectIcon(label)({
               className: `w-3.5 h-3.5 object-contain transition-all ${open ? "brightness-0 invert opacity-100" : "opacity-95"}`,
@@ -126,7 +126,7 @@ export function ProjectSwitcher({
                       aria-selected={isActive}
                       className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-left text-sm rounded-xl transition-all ${
                         isActive
-                          ? "bg-slate-900 text-white font-bold"
+                          ? "bg-teal-600 text-white font-bold"
                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                       onClick={() => {

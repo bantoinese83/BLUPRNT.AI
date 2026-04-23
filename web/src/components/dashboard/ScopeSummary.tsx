@@ -13,7 +13,7 @@ export function ScopeSummary({
   confidenceScore,
 }: ScopeSummaryProps) {
   return (
-    <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="bg-teal-600 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div className="space-y-1">
         <p className="text-slate-400 text-sm font-medium">Estimated total</p>
         <div className="text-3xl font-bold tracking-tight">

@@ -54,7 +54,7 @@ export function DashboardTabIntro() {
     <div className="rounded-2xl border border-slate-200/90 bg-white/90 backdrop-blur-sm p-5 sm:p-6 shadow-drop-md transition-shadow duration-300 hover:shadow-drop-lg">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex gap-4 min-w-0">
-          <div className="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0">
             <Icon className="w-5 h-5" aria-hidden />
           </div>
           <div className="min-w-0 space-y-1">

@@ -148,7 +148,7 @@ export function InvoiceReviewModal({
   if (loading) {
     return (
       <ModalFocusSurface
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50"
         ariaLabel="Loading invoice review"
         onEscape={onClose}
       >
@@ -164,7 +164,7 @@ export function InvoiceReviewModal({
   if (error || !invoice) {
     return (
       <ModalFocusSurface
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50"
         ariaLabel="Invoice review error"
         onEscape={onClose}
       >
@@ -184,7 +184,7 @@ export function InvoiceReviewModal({
   return (
     <>
       <ModalFocusSurface
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50 overflow-y-auto"
         titleId="invoice-review-title"
         onEscape={onClose}
         active={!originalPreviewOpen}
