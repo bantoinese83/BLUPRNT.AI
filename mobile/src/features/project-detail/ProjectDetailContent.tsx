@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, type ScrollView } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
+import { router } from "expo-router";
 import { DashboardLoadErrorBanner } from "@/components/DashboardLoadErrorBanner";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { AddScopeItemModal } from "@/components/AddScopeItemModal";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
+import { ProjectSwitcher } from "@/components/ProjectSwitcher";
 import { ProjectDetailHeader } from "./ProjectDetailHeader";
 import { ProjectDetailInsightCards } from "./ProjectDetailInsightCards";
 import { ProjectScopeGroupedList } from "./ProjectScopeGroupedList";
@@ -80,6 +82,18 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
           onShare={handleShare}
           onAddPress={() => setShowAddModal(true)}
         />
+
+        <View style={{ marginTop: 4, marginBottom: 16 }}>
+          <ProjectSwitcher
+            projects={vm.projects}
+            currentId={id ?? ""}
+            onSelect={(newId) => {
+              vm.handleProjectSelect(newId);
+              router.setParams({ id: newId });
+            }}
+            onAdd={() => router.push("/onboarding?newProject=1")}
+          />
+        </View>
 
         {detailDataWarning ? (
           <View style={{ paddingHorizontal: 24, paddingBottom: 8 }}>

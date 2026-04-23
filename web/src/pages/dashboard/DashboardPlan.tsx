@@ -8,8 +8,6 @@ import {
   type ActivityEvent,
 } from "@/components/dashboard/ActivityFeed";
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
-import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
-import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
@@ -23,6 +21,8 @@ interface DashboardPlanProps {
   isArchitect: boolean;
   hasProjectPass: boolean;
   health: React.ReactNode;
+  homeTeam: React.ReactNode;
+  transformation: React.ReactNode;
   ledger: React.ReactNode;
   invoicesComp: React.ReactNode;
   onUpgradeClick: () => void;
@@ -37,6 +37,8 @@ export function DashboardPlan({
   isArchitect,
   hasProjectPass,
   health,
+  homeTeam,
+  transformation,
   ledger,
   invoicesComp,
   onUpgradeClick,
@@ -48,20 +50,9 @@ export function DashboardPlan({
     <DashboardSubPage
       side={
         <div className="space-y-8">
-          <TransformationSlider
-            beforePath={project.before_photo_storage_path}
-            afterPath={project.after_photo_storage_path}
-            isArchitect={isArchitect}
-            hasProjectPass={hasProjectPass}
-            onUpgradeClick={onUpgradeClick}
-          />
+          {transformation}
           {health}
-          <HomeTeamSection
-            invoices={invoices}
-            isArchitect={isArchitect}
-            hasProjectPass={hasProjectPass}
-            onUpgradeClick={onUpgradeClick}
-          />
+          {homeTeam}
           {location.pathname.endsWith("/plan") && (
             <ActivityFeed events={activityEvents} />
           )}

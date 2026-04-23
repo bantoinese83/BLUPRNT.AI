@@ -42,7 +42,6 @@ import { reportClientError } from "@/lib/sentry";
 import { useLogout } from "@/hooks/use-logout";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
-import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { DashboardPlan } from "./DashboardPlan";
@@ -62,6 +61,8 @@ import {
   useDashboardUpgradeQueryEffect,
 } from "./useDashboardLocationEffects";
 import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
+import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
+import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 
 export function DashboardContent({
   projects,
@@ -87,8 +88,8 @@ export function DashboardContent({
   const location = useLocation();
   const { logout } = useLogout();
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [useDiscount, setUseDiscount] = useState(false);
-  const [upgradeReason, setUpgradeReason] =
+  const [_useDiscount, setUseDiscount] = useState(false);
+  const [_upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const [hasCelebratedFirst, setHasCelebratedFirst] = useState(false);
@@ -115,70 +116,39 @@ export function DashboardContent({
     setHasCelebratedFirst,
   );
 
-  async function handleSignOut() {
-    await logout("/onboarding");
-  }
-
-  /** Capital improvements only — aligns with Plan vs Actual and maintenance log split. */
   const capitalDocumentedTotal = useMemo(
     () => capitalImprovementTotal(invoices),
     [invoices],
   );
 
-  const handleExportPDF = useCallback(async () => {
-    if (!project) return;
+  const handleSignOut = useCallback(async () => {
+    await logout();
+    navigate("/");
+  }, [logout, navigate]);
+
+  const handleExportPDF = useCallback(() => {
     if (!isArchitect && !hasProjectPass) {
       setUpgradeReason("export");
       setShowUpgrade(true);
       return;
     }
-    if (!project.property_id) {
-      toast.error(
-        "We need your project’s property record to export. Try refreshing the page.",
-      );
-      return;
-    }
-
-    const dismiss = toast.loading("Generating seller packet…");
-    try {
-      const scopeForPdf = scopeItems.map((s) => ({
-        category: s.category,
-        description: s.description,
-        total_cost_min: s.total_cost_min,
-        total_cost_max: s.total_cost_max,
-      }));
-      const { savedToProject } = await downloadSellerPacket({
-        projectId: project.id,
-        propertyId: project.property_id,
-        project: {
-          name: project.name,
-          estimated_min_total: project.estimated_min_total,
-          estimated_max_total: project.estimated_max_total,
-        },
-        scopeItems: scopeForPdf,
-        invoices,
-        includeAppendix: false,
-      });
-      toast.dismiss(dismiss);
-      toast.success(
-        savedToProject
-          ? "Seller packet downloaded. A copy was saved with this project."
-          : "Seller packet downloaded. Cloud copy wasn’t saved—open the Record tab and export again if you need it in your account.",
-      );
-    } catch {
-      toast.dismiss(dismiss);
-      toast.error(
-        "We couldn’t generate the PDF. Check your connection and try again.",
-      );
-    }
+    void downloadSellerPacket({
+      projectId: project.id,
+      propertyId: project.property_id,
+      project: {
+        name: project.name,
+        estimated_min_total: project.estimated_min_total,
+        estimated_max_total: project.estimated_max_total,
+      },
+      scopeItems,
+      invoices,
+    });
   }, [project, scopeItems, invoices, isArchitect, hasProjectPass]);
 
-  function handleProjectDelete(id: string) {
-    const p = projects.find((x) => x.id === id);
-    if (!p) return;
+  const handleProjectDelete = (p: ProjectRow) => {
     setDeleteProject(p);
     setShowDeleteModal(true);
-  }
+  };
 
   async function handleConfirmDelete() {
     if (!deleteProject || !isSupabaseConfigured()) return;
@@ -243,6 +213,25 @@ export function DashboardContent({
       estimatedMin={project.estimated_min_total}
       estimatedMax={project.estimated_max_total}
       invoiceTotal={capitalDocumentedTotal}
+    />
+  );
+
+  const transformation = (
+    <TransformationSlider
+      beforePath={project.before_photo_storage_path}
+      afterPath={project.after_photo_storage_path}
+      isArchitect={isArchitect}
+      hasProjectPass={hasProjectPass}
+      onUpgradeClick={() => setShowUpgrade(true)}
+    />
+  );
+
+  const homeTeam = (
+    <HomeTeamSection
+      invoices={invoices}
+      isArchitect={isArchitect}
+      hasProjectPass={hasProjectPass}
+      onUpgradeClick={() => setShowUpgrade(true)}
     />
   );
 
@@ -360,7 +349,10 @@ export function DashboardContent({
             }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
-            onDelete={handleProjectDelete}
+            onDelete={(id) => {
+              const p = projects.find((proj) => proj.id === id);
+              if (p) handleProjectDelete(p);
+            }}
           />
         </motion.div>
         <motion.div variants={itemVariants}>
@@ -450,6 +442,8 @@ export function DashboardContent({
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}
                     health={health}
+                    homeTeam={homeTeam}
+                    transformation={transformation}
                     ledger={ledger}
                     invoicesComp={invoicesComp}
                     onUpgradeClick={() => setShowUpgrade(true)}
@@ -465,6 +459,10 @@ export function DashboardContent({
                     onRefresh={load}
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}
+                    health={health}
+                    homeTeam={homeTeam}
+                    transformation={transformation}
+                    ledger={ledger}
                   />
                 }
               />
@@ -498,41 +496,21 @@ export function DashboardContent({
             setUseDiscount(false);
             setUpgradeReason("general");
           }}
-          showDiscount={useDiscount}
-          openReason={upgradeReason}
-          estimatedAmount={
-            project.estimated_min_total != null &&
-            project.estimated_max_total != null
-              ? (project.estimated_min_total + project.estimated_max_total) / 2
-              : (project.estimated_min_total ?? project.estimated_max_total)
-          }
-          projectId={project.id}
-          isArchitect={isArchitect}
-          hasProjectPass={hasProjectPass}
         />
       </ComponentErrorBoundary>
 
-      {!isArchitect && !hasProjectPass && (
-        <LeadCaptureModal
-          onPlanSelect={(_plan) => {
-            setUseDiscount(true);
-            setUpgradeReason("general");
-            setShowUpgrade(true);
-          }}
-        />
-      )}
+      <LeadCaptureModal />
+
       <ShareModal
         isOpen={shareOpen}
         onClose={() => setShareOpen(false)}
-        projectId={project?.id ?? ""}
+        projectId={project.id}
       />
+
       <SmartSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
-      <ComponentErrorBoundary name="AI Assistant">
-        <AIAssistant projectId={project?.id ?? ""} />
-      </ComponentErrorBoundary>
 
       <DeleteProjectModal
         isOpen={showDeleteModal}

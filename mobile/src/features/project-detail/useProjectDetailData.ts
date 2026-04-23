@@ -35,7 +35,15 @@ export function useProjectDetailData() {
   const [detailInvoices, setDetailInvoices] = useState<InvoiceRow[]>([]);
   const [includeAppendix, setIncludeAppendix] = useState(false);
   const queryClient = useQueryClient();
-  const { isArchitect, hasProjectPass, addItem } = useDashboardData();
+
+  const {
+    isArchitect,
+    hasProjectPass,
+    addItem,
+    projects,
+    handleProjectSelect,
+  } = useDashboardData();
+
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [scopePollDone, setScopePollDone] = useState(false);
@@ -419,6 +427,8 @@ export function useProjectDetailData() {
     refreshing,
     projectLoadError,
     project,
+    projects,
+    handleProjectSelect,
     scope,
     expandedId,
     setExpandedId,
