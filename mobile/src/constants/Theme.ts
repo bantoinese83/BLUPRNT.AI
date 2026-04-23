@@ -50,9 +50,11 @@ export const Theme = {
     inputBorder: BLUPRNT_COLORS.borderDefault,
 
     glass: {
-      bg: "rgba(255, 255, 255, 0.8)",
-      border: BLUPRNT_COLORS.glassBorder,
-      highlight: "rgba(255, 255, 255, 0.5)",
+      bg: "rgba(255, 255, 255, 0.7)",
+      border: "rgba(255, 255, 255, 0.15)",
+      highlight: "rgba(255, 255, 255, 0.25)",
+      intensity: 80,
+      tint: "light" as const,
     },
   },
 
@@ -136,6 +138,14 @@ export const Theme = {
       shadowOpacity: 0.12,
       shadowRadius: 28,
       elevation: 8,
+    },
+    /** Physical depth shadow for 2026 aesthetic */
+    spatial: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 20 },
+      shadowOpacity: 0.25,
+      shadowRadius: 30,
+      elevation: 15,
     },
   },
 };

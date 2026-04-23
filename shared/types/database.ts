@@ -15,6 +15,7 @@ export type ProjectRow = {
   metadata: unknown;
   before_photo_storage_path: string | null;
   after_photo_storage_path: string | null;
+  grounding_sources: Array<{ title: string; url?: string }> | null;
 };
 
 export type ScopeRow = Pick<

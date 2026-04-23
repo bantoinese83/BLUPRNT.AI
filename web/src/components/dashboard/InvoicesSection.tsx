@@ -49,6 +49,7 @@ export function InvoicesSection({
   const {
     inputRef,
     uploading,
+    batchStatus,
     error,
     reviewInvoiceId,
     setReviewInvoiceId,
@@ -123,6 +124,7 @@ export function InvoicesSection({
         accept=".pdf,image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={(e) => handleUploadFile(e.target.files)}
+        multiple
       />
 
       <div
@@ -142,6 +144,7 @@ export function InvoicesSection({
       >
         <InvoiceUploadHeader
           uploading={uploading}
+          batchStatus={batchStatus}
           documentType={documentType}
           setDocumentType={setDocumentType}
           onUploadClick={openFileUpload}
@@ -149,7 +152,7 @@ export function InvoicesSection({
 
         {!dropDisabled && (
           <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400 -mt-2 sm:-mt-1">
-            Or drop a PDF or photo here
+            Or drop multiple PDFs or photos here
           </p>
         )}
 
@@ -263,9 +266,9 @@ export function InvoicesSection({
                   </div>
                 </CardContent>
               </Card>
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center text-center px-4">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] bg-white px-3 py-1 rounded-full border border-slate-100 shadow-sm">
-                  AI Reading...
+                  {batchStatus || "AI Reading..."}
                 </span>
               </div>
             </motion.div>
@@ -294,7 +297,7 @@ export function InvoicesSection({
                     className="gap-2 rounded-xl"
                   >
                     <Upload className="w-4 h-4" />
-                    Upload your first document
+                    Upload documents
                   </Button>
                 }
               />
@@ -321,8 +324,8 @@ export function InvoicesSection({
               disabled={uploading || atLimit}
             >
               <Upload className="w-6 h-6 mb-2 text-slate-400" />
-              <span className="text-sm font-medium">Add another</span>
-              <span className="text-xs">PDF or image</span>
+              <span className="text-sm font-medium">Add more</span>
+              <span className="text-xs">Select multiple files</span>
             </button>
           )}
         </div>

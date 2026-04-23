@@ -68,6 +68,19 @@ describe("AuthListener", () => {
     );
   });
 
+  it("does not redirect if on a public path during SIGNED_OUT", () => {
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<AuthListener />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    authCallback("SIGNED_OUT", null);
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
   it("does nothing when Supabase is not configured", () => {
     vi.mocked(isSupabaseConfigured).mockReturnValue(false);
 

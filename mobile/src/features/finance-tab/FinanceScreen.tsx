@@ -144,14 +144,13 @@ export default function FinanceScreen() {
       return;
     }
 
-    presentDocumentCapturePrompt(DOCUMENT_CAPTURE_LEDGER_COPY, (uri, mime) => {
-      void runLedgerDocumentUpload(uri, mime);
+    presentDocumentCapturePrompt(DOCUMENT_CAPTURE_LEDGER_COPY, (files) => {
+      void runLedgerDocumentUpload(files);
     });
   };
 
   const runLedgerDocumentUpload = async (
-    fileUri: string,
-    mimeType?: string,
+    files: Array<{ uri: string; mimeType?: string }>,
   ) => {
     if (!project) return;
 
@@ -159,8 +158,7 @@ export default function FinanceScreen() {
     try {
       const result = await uploadPickedDocumentToProject({
         projectId: project.id,
-        fileUri,
-        mimeType,
+        files,
         successToastMessage: "Document added — your ledger is updated.",
         onInvoiceLimitUpgrade: () => {
           setUpgradeReason("invoice_limit");
@@ -168,11 +166,11 @@ export default function FinanceScreen() {
         },
         refreshProjectData: load,
       });
-      if (result.ok && result.invoiceId) {
+      if (result.ok && result.lastInvoiceId && files.length === 1) {
         const { data: row } = await supabase
           .from("invoices")
           .select("*")
-          .eq("id", result.invoiceId)
+          .eq("id", result.lastInvoiceId)
           .maybeSingle();
         if (row) {
           setSelectedInvoice(row as unknown as InvoiceRow);

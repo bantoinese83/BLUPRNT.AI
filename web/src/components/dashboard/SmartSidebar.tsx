@@ -43,14 +43,14 @@ export function SmartSidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-white/20 backdrop-blur-md z-[100]"
+            className="fixed inset-0 bg-white/10 backdrop-blur-2xl z-[100]"
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-white/95 backdrop-blur-xl border-l border-slate-200 z-[101] p-6 flex flex-col gap-6 shadow-[0_0_50px_rgba(0,0,0,0.1)] overflow-hidden"
+            className="fixed right-4 top-4 bottom-4 w-full max-w-md bg-white/40 backdrop-blur-3xl border border-white/20 z-[101] p-6 flex flex-col gap-6 shadow-spatial rounded-[2.5rem] overflow-hidden"
           >
             <div className="noise-overlay" />
 

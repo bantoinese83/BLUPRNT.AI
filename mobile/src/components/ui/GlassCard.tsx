@@ -2,7 +2,6 @@ import {
   StyleSheet,
   View,
   type ViewStyle,
-  Platform,
   type StyleProp,
   TouchableOpacity,
 } from "react-native";
@@ -23,7 +22,7 @@ interface Props {
 export function GlassCard({
   children,
   style,
-  intensity = 20,
+  intensity = Theme.colors.glass.intensity,
   onPress,
   activeOpacity = 0.85,
 }: Props) {
@@ -31,7 +30,7 @@ export function GlassCard({
     <View style={[styles.container, style]}>
       <BlurView
         intensity={intensity}
-        tint="systemUltraThinMaterial"
+        tint={Theme.colors.glass.tint}
         style={StyleSheet.absoluteFill}
       />
 
@@ -58,9 +57,9 @@ export function GlassCard({
 
       {/* Internal Polish / Depth Glow */}
       <LinearGradient
-        colors={["rgba(255, 255, 255, 0.15)", "transparent"]}
+        colors={[Theme.colors.glass.highlight, "transparent"]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 0.5, y: 0.5 }}
+        end={{ x: 0.6, y: 0.6 }}
         style={StyleSheet.absoluteFill}
       />
 
@@ -90,29 +89,19 @@ export function GlassCard({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: Theme.radius.xl, // Slightly rounder for premium feel
+    borderRadius: Theme.radius.xl,
     overflow: "hidden",
     backgroundColor: Theme.colors.glass.bg,
     borderWidth: 1,
     borderColor: Theme.colors.glass.border,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#042f2e",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    ...Theme.shadows.spatial,
   },
   borderHighlight: {
-    borderWidth: 1.2,
+    borderWidth: 1.5,
     borderColor: "transparent",
-    borderTopColor: "rgba(255,255,255,0.3)",
-    borderLeftColor: "rgba(255,255,255,0.15)",
-    borderRightColor: "rgba(0,0,0,0.01)",
+    borderTopColor: "rgba(255,255,255,0.4)",
+    borderLeftColor: "rgba(255,255,255,0.2)",
+    borderRightColor: "rgba(0,0,0,0.02)",
     borderRadius: Theme.radius.xl,
   },
   childContainer: {

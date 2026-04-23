@@ -167,9 +167,9 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
   },
   premiumBox: {
-    backgroundColor: Theme.colors.inputBg,
+    backgroundColor: "rgba(13, 148, 136, 0.04)",
     borderWidth: 1,
-    borderColor: Theme.colors.divider,
+    borderColor: "rgba(13, 148, 136, 0.12)",
     borderRadius: 14,
     padding: 12,
     flexDirection: "row",
@@ -209,11 +209,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-    shadowColor: Theme.colors.brand.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.22,
-    shadowRadius: 5,
-    elevation: 3,
+    ...Theme.shadows.brand,
   },
   peakText: {
     fontSize: 9,
@@ -223,11 +219,11 @@ const styles = StyleSheet.create({
   infoBox: {
     flexDirection: "row",
     gap: 12,
-    backgroundColor: Theme.colors.inputBg,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Theme.colors.divider,
+    borderColor: "rgba(15, 23, 42, 0.05)",
   },
   infoText: {
     flex: 1,

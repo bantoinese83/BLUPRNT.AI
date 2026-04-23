@@ -2,6 +2,11 @@ import { Alert, ActionSheetIOS, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 
+export type PickedFile = {
+  uri: string;
+  mimeType?: string;
+};
+
 /** Copy for the camera / files sheet (screens differ slightly in tone). */
 export type DocumentCapturePromptCopy = {
   title: string;
@@ -14,7 +19,7 @@ export type DocumentCapturePromptCopy = {
 
 async function openCamera(
   copy: DocumentCapturePromptCopy,
-  onPickedFile: (fileUri: string, mimeType: string) => void,
+  onPickedFiles: (files: PickedFile[]) => void,
 ): Promise<void> {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
   if (status !== "granted") {
@@ -28,12 +33,12 @@ async function openCamera(
   });
 
   if (!result.canceled && result.assets[0]) {
-    onPickedFile(result.assets[0].uri, "image/jpeg");
+    onPickedFiles([{ uri: result.assets[0].uri, mimeType: "image/jpeg" }]);
   }
 }
 
 async function openPhotoLibrary(
-  onPickedFile: (fileUri: string, mimeType: string) => void,
+  onPickedFiles: (files: PickedFile[]) => void,
 ): Promise<void> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== "granted") {
@@ -47,38 +52,46 @@ async function openPhotoLibrary(
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],
     quality: 0.85,
-    allowsMultipleSelection: false,
+    allowsMultipleSelection: true,
   });
 
-  if (!result.canceled && result.assets[0]) {
-    const asset = result.assets[0];
-    const mime = asset.mimeType?.startsWith("image/")
-      ? asset.mimeType
-      : "image/jpeg";
-    onPickedFile(asset.uri, mime);
+  if (!result.canceled && result.assets.length) {
+    onPickedFiles(
+      result.assets.map((asset) => ({
+        uri: asset.uri,
+        mimeType: asset.mimeType?.startsWith("image/")
+          ? asset.mimeType
+          : "image/jpeg",
+      })),
+    );
   }
 }
 
 async function openDocumentPicker(
-  onPickedFile: (fileUri: string, mimeType: string) => void,
+  onPickedFiles: (files: PickedFile[]) => void,
 ): Promise<void> {
   const result = await DocumentPicker.getDocumentAsync({
     type: ["application/pdf", "image/*"],
+    multiple: true,
   });
 
-  if (!result.canceled && result.assets[0]) {
-    const asset = result.assets[0];
-    onPickedFile(asset.uri, asset.mimeType || "image/jpeg");
+  if (!result.canceled && result.assets.length) {
+    onPickedFiles(
+      result.assets.map((asset) => ({
+        uri: asset.uri,
+        mimeType: asset.mimeType || "image/jpeg",
+      })),
+    );
   }
 }
 
 /**
- * Shows camera, photo library, or files and returns the chosen file to the
+ * Shows camera, photo library, or files and returns the chosen file(s) to the
  * callback. Does not upload — call `uploadPickedDocumentToProject` next.
  */
 export function presentDocumentCapturePrompt(
   copy: DocumentCapturePromptCopy,
-  onPickedFile: (fileUri: string, mimeType: string) => void,
+  onPickedFiles: (files: PickedFile[]) => void,
 ): void {
   const run = (action: () => Promise<void>) => () => {
     void action();
@@ -100,9 +113,9 @@ export function presentDocumentCapturePrompt(
         userInterfaceStyle: "light",
       },
       (index) => {
-        if (index === 1) void openCamera(copy, onPickedFile);
-        else if (index === 2) void openPhotoLibrary(onPickedFile);
-        else if (index === 3) void openDocumentPicker(onPickedFile);
+        if (index === 1) void openCamera(copy, onPickedFiles);
+        else if (index === 2) void openPhotoLibrary(onPickedFiles);
+        else if (index === 3) void openDocumentPicker(onPickedFiles);
       },
     );
     return;
@@ -110,14 +123,14 @@ export function presentDocumentCapturePrompt(
 
   // Android (and other platforms): Alert supports at most three buttons — three sources; dismiss with the system back control.
   Alert.alert(copy.title, copy.message, [
-    { text: "Take Photo", onPress: run(() => openCamera(copy, onPickedFile)) },
+    { text: "Take Photo", onPress: run(() => openCamera(copy, onPickedFiles)) },
     {
       text: "Photo Library",
-      onPress: run(() => openPhotoLibrary(onPickedFile)),
+      onPress: run(() => openPhotoLibrary(onPickedFiles)),
     },
     {
       text: copy.pickFilesLabel,
-      onPress: run(() => openDocumentPicker(onPickedFile)),
+      onPress: run(() => openDocumentPicker(onPickedFiles)),
     },
   ]);
 }

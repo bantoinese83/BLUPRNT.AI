@@ -47,6 +47,7 @@ import { buildDashboardHeaderLines } from "@/features/home-tab/dashboard-greetin
 import { presentProjectShareSheet } from "@/lib/share-project";
 import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
+import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
@@ -204,14 +205,13 @@ export default function DashboardScreen() {
       return;
     }
 
-    presentDocumentCapturePrompt(DOCUMENT_CAPTURE_HOME_COPY, (uri, mime) => {
-      void runDashboardDocumentUpload(uri, mime);
+    presentDocumentCapturePrompt(DOCUMENT_CAPTURE_HOME_COPY, (files) => {
+      void runDashboardDocumentUpload(files);
     });
   };
 
   const runDashboardDocumentUpload = async (
-    fileUri: string,
-    mimeType?: string,
+    files: Array<{ uri: string; mimeType?: string }>,
   ) => {
     if (!project) return;
 
@@ -219,8 +219,7 @@ export default function DashboardScreen() {
     try {
       const result = await uploadPickedDocumentToProject({
         projectId: project.id,
-        fileUri,
-        mimeType,
+        files,
         successToastMessage: "Document added — your dashboard is updated.",
         onInvoiceLimitUpgrade: () => {
           setUpgradeReason("invoice_limit");
@@ -228,11 +227,11 @@ export default function DashboardScreen() {
         },
         refreshProjectData: load,
       });
-      if (result.ok && result.invoiceId) {
+      if (result.ok && result.lastInvoiceId && files.length === 1) {
         const { data: row } = await supabase
           .from("invoices")
           .select("*")
-          .eq("id", result.invoiceId)
+          .eq("id", result.lastInvoiceId)
           .maybeSingle();
         if (row) {
           setReviewInvoice(row as unknown as InvoiceRow);
@@ -494,6 +493,14 @@ export default function DashboardScreen() {
             hasProjectPass={hasProjectPass}
             onUpgradeClick={onGeneralUpgrade}
           />
+        </MotiView>
+
+        <MotiView
+          from={{ opacity: 0, translateY: 12 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 380, delay: 170 }}
+        >
+          <GroundingSourcesSection project={project} />
         </MotiView>
 
         <MotiView

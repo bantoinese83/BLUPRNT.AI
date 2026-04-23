@@ -88,7 +88,7 @@ export function ProjectHealth({
   const gradId = `healthRing-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   return (
-    <GlassCard intensity={20} style={styles.card}>
+    <GlassCard style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Health Index</Text>
         <Shield size={14} color={Theme.colors.text.secondary} />
@@ -252,13 +252,13 @@ const styles = StyleSheet.create({
   messageBox: {
     marginTop: Theme.spacing.xl,
     padding: 14,
-    backgroundColor: Theme.colors.inputBg,
+    backgroundColor: "rgba(15, 23, 42, 0.03)",
     borderRadius: Theme.radius.lg,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     borderWidth: 1,
-    borderColor: Theme.colors.divider,
+    borderColor: "rgba(15, 23, 42, 0.05)",
   },
   dot: {
     width: 6,

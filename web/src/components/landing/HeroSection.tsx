@@ -141,8 +141,8 @@ export function HeroSection({
 
           <div className="animate-float relative z-[1] w-full">
             <Iphone
-              src="/images/mobile-app-hero.webp"
-              screenSrcSetWebp="/images/mobile-app-hero-480.webp"
+              src="/images/hero-iphone-screenshot.png"
+              screenSrcSetWebp="/images/hero-iphone-screenshot-480.webp"
               screenImagePriority="high"
               className="rotate-[0.5deg]"
             />

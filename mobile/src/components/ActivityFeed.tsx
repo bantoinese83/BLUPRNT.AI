@@ -34,23 +34,23 @@ const COLOR_MAP: Record<
 > = {
   upload: {
     text: "#2563eb",
-    bg: "#eff6ff",
-    border: "#bfdbfe",
+    bg: "rgba(37, 99, 235, 0.08)",
+    border: "rgba(37, 99, 235, 0.15)",
   },
   status_change: {
     text: "#b45309",
-    bg: "#fffbeb",
-    border: "#fde68a",
+    bg: "rgba(180, 83, 9, 0.08)",
+    border: "rgba(180, 83, 9, 0.15)",
   },
   project_created: {
     text: "#047857",
-    bg: "#ecfdf5",
-    border: "#a7f3d0",
+    bg: "rgba(4, 120, 87, 0.08)",
+    border: "rgba(4, 120, 87, 0.15)",
   },
   goal_reached: {
     text: "#6d28d9",
-    bg: "#f5f3ff",
-    border: "#ddd6fe",
+    bg: "rgba(109, 40, 217, 0.08)",
+    border: "rgba(109, 40, 217, 0.15)",
   },
 };
 

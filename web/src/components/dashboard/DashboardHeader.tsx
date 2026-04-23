@@ -40,8 +40,8 @@ export function DashboardHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl transition-shadow duration-300",
-        scrolled && "shadow-sm shadow-slate-200/40",
+        "sticky top-0 z-50 border-b border-white/20 bg-white/40 backdrop-blur-2xl transition-all duration-300",
+        scrolled && "shadow-spatial",
       )}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-[4.25rem] sm:gap-4 sm:px-6">

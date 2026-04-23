@@ -6,7 +6,7 @@ import { AwarenessProvider } from "@/contexts/AwarenessProvider";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { InsightsDrawer } from "@/components/InsightsDrawer";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { NotchedTabBar } from "@/components/NotchedTabBar";
+import { FloatingGlassBar } from "@/components/FloatingGlassBar";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 
 /**
@@ -17,7 +17,7 @@ import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 function TabShell() {
   return (
     <Tabs
-      tabBar={(props) => <NotchedTabBar {...props} />}
+      tabBar={(props) => <FloatingGlassBar {...props} />}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {

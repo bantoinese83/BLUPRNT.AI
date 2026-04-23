@@ -110,6 +110,7 @@ export interface EstimatePayload {
     value_engineering_tips?: string[];
     regional_context?: string;
     regional_signal?: string; // e.g., "Matched to 2026 Material Costs in Austin"
+    grounding_sources?: Array<{ title: string; url?: string }>;
   };
   scope_items: Array<{
     category: string;
@@ -160,6 +161,12 @@ export function sanitizeEstimate(
       : [],
     regional_context: String(parsed.summary?.regional_context || ""),
     regional_signal: String(parsed.summary?.regional_signal || ""),
+    grounding_sources: Array.isArray(parsed.summary?.grounding_sources)
+      ? parsed.summary.grounding_sources.map((src: any) => ({
+          title: String(src.title || "Data Source"),
+          url: src.url ? String(src.url) : undefined,
+        }))
+      : [],
   };
 
   const scope_items = (
@@ -264,6 +271,9 @@ export function getFallbackEstimate(
         "Consider mid-range materials for better ROI.",
         "Refurbish existing cabinets instead of replacing.",
       ],
+      grounding_sources: [
+        { title: "National Construction Cost Database (2026 Averages)" }
+      ]
     },
     scope_items: [
       {
@@ -315,10 +325,11 @@ Rules:
 1. Exactly **4** line items, grouped by phase (prep → rough → finish). Each item: clear description, justification, priority (high/medium/low), confidence_reason, maintenance_tips, phase.
 2. **Materials**: 3–8 key SKUs per line item (name, brand optional, quantity, unit). Match finish tier (${finish_preference}). No empty materials arrays.
 3. Summary: estimated_min_total, estimated_max_total, confidence_score (1–5), value_engineering_tips (2–4 strings), regional_context (${area}, ${dateStr}), regional_signal (one concrete line).
-4. Math: total_cost_min = quantity * unit_cost_min (same for max).
-5. Photos: call out only what you can see; set verification_required true if unsure.
-6. Text-only (no photos): infer a plausible scope from the user description + ${area} norms.
-7. Prefer shorter sentences so the model finishes within a tight latency budget.`;
+4. **Grounding**: Under summary, provide "grounding_sources" (array of {title, url?}). Cite 2-3 specific real-world data points you used to anchor these prices (e.g. HomeAdvisor labor rates for ${zip_code}, current tile prices at Floor & Decor, or RSMeans construction data).
+5. Math: total_cost_min = quantity * unit_cost_min (same for max).
+6. Photos: call out only what you can see; set verification_required true if unsure.
+7. Text-only (no photos): infer a plausible scope from the user description + ${area} norms.
+8. Prefer shorter sentences so the model finishes within a tight latency budget.`;
 
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
@@ -343,12 +354,24 @@ Please generate the detailed blueprint.`;
           value_engineering_tips: { type: "array", items: { type: "string" } },
           regional_context: { type: "string" },
           regional_signal: { type: "string" },
+          grounding_sources: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                url: { type: "string" },
+              },
+              required: ["title"],
+            },
+          },
         },
         required: [
           "estimated_min_total",
           "estimated_max_total",
           "confidence_score",
           "regional_signal",
+          "grounding_sources",
         ],
       },
       scope_items: {

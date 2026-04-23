@@ -32,7 +32,7 @@ export function DashboardWelcomeBanner({ onAction }: Props) {
           transition={{ type: "timing", duration: 320 }}
           style={styles.container}
         >
-          <GlassCard intensity={4} style={styles.card}>
+          <GlassCard style={styles.card}>
             <View style={styles.header}>
               <View style={styles.textContainer}>
                 <Text style={styles.title}>Your estimate is saved</Text>
@@ -116,9 +116,6 @@ const styles = StyleSheet.create({
   card: {
     padding: 20,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
   },
   header: {
     flexDirection: "row",

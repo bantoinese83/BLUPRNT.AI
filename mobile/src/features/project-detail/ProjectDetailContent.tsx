@@ -7,6 +7,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { AddScopeItemModal } from "@/components/AddScopeItemModal";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ProjectSwitcher } from "@/components/ProjectSwitcher";
+import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { ProjectDetailHeader } from "./ProjectDetailHeader";
 import { ProjectDetailInsightCards } from "./ProjectDetailInsightCards";
 import { ProjectScopeGroupedList } from "./ProjectScopeGroupedList";
@@ -111,6 +112,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
               project={project}
               invoiceTotal={vm.invoiceTotal}
             />
+            <GroundingSourcesSection project={project} />
           </View>
         ) : null}
       </View>

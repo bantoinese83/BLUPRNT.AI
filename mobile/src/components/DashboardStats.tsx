@@ -49,7 +49,7 @@ function StatItem({
       transition={{ type: "timing", duration: 500, delay }}
       style={styles.cardWrapper}
     >
-      <GlassCard intensity={8} style={styles.card}>
+      <GlassCard style={styles.card}>
         <View style={styles.header}>
           <View style={styles.iconContainer}>
             <Icon size={18} color={Theme.colors.brand.primary} />
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingRight: 40,
     gap: 12,
-    paddingVertical: 4,
+    paddingVertical: 12,
   },
   cardWrapper: {
     width: 220,
@@ -149,8 +149,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     height: 140,
     justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
   },
   header: {
     flexDirection: "row",

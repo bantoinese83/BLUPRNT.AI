@@ -49,6 +49,8 @@
     0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.08);
   --shadow-drop-lg:
     0 4px 8px rgba(15, 23, 42, 0.06), 0 16px 40px rgba(15, 23, 42, 0.12);
+  --shadow-spatial:
+    0 20px 40px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
   --glass-border: rgba(15, 23, 42, 0.08);
   --glow-color: rgba(148, 163, 184, 0.1);
 
@@ -90,15 +92,15 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-[var(--glass-border)] shadow-glass transition-all duration-300;
+    @apply bg-white/40 backdrop-blur-2xl border border-white/20 shadow-glass transition-all duration-300;
   }
 
   .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 shadow-glass;
+    @apply bg-slate-900/60 backdrop-blur-3xl border border-white/10 shadow-spatial;
   }
 
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-[var(--glass-border)] shadow-glass transition-all duration-500 rounded-2xl p-6 hover:-translate-y-1 hover:bg-white/90 hover:border-teal-500/20 hover:shadow-elevated;
+    @apply bg-white/40 backdrop-blur-2xl border border-white/20 shadow-spatial transition-all duration-500 rounded-3xl p-6 hover:-translate-y-1.5 hover:bg-white/60 hover:border-teal-500/30 hover:shadow-elevated;
     background-image: radial-gradient(
       circle at top left,
       var(--glow-color),

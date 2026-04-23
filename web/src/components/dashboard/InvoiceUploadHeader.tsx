@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface InvoiceUploadHeaderProps {
   uploading: boolean;
+  batchStatus?: string | null;
   documentType: "invoice" | "quote" | "warranty" | "permit";
   setDocumentType: (type: "invoice" | "quote" | "warranty" | "permit") => void;
   onUploadClick: () => void;
@@ -12,6 +13,7 @@ interface InvoiceUploadHeaderProps {
 
 export function InvoiceUploadHeader({
   uploading,
+  batchStatus,
   documentType,
   setDocumentType,
   onUploadClick,
@@ -28,7 +30,7 @@ export function InvoiceUploadHeader({
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="absolute -top-8 left-0 right-0 sm:static sm:absolute sm:-left-36 sm:top-1/2 sm:-translate-y-1/2 flex items-center justify-center sm:justify-start gap-2 text-slate-900 text-[10px] font-black overflow-hidden whitespace-nowrap uppercase tracking-widest bg-white/80 backdrop-blur-sm sm:bg-transparent py-1 rounded-full border border-slate-100 sm:border-0 shadow-sm sm:shadow-none"
+              className="absolute -top-8 left-0 right-0 sm:static sm:absolute sm:-left-44 sm:top-1/2 sm:-translate-y-1/2 flex items-center justify-center sm:justify-start gap-2 text-slate-900 text-[10px] font-black overflow-hidden whitespace-nowrap uppercase tracking-widest bg-white/80 backdrop-blur-sm sm:bg-transparent py-1 rounded-full border border-slate-100 sm:border-0 shadow-sm sm:shadow-none"
             >
               <div className="relative">
                 <ScanLine className="w-3 h-3 animate-pulse" />
@@ -38,7 +40,7 @@ export function InvoiceUploadHeader({
                   className="absolute inset-x-0 top-0 h-0.5 bg-slate-950 shadow-[0_0_4px_black]"
                 />
               </div>
-              <span>AI READING...</span>
+              <span>{batchStatus || "AI READING..."}</span>
             </motion.div>
           )}
         </AnimatePresence>

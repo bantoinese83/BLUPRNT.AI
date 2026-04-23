@@ -1,5 +1,6 @@
 import { ScopeDetail } from "@/components/dashboard/ScopeDetail";
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
+import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import type { ProjectRow, ScopeRow } from "@shared/types/database";
 
 interface DashboardScopeProps {
@@ -31,6 +32,7 @@ export function DashboardScope({
         <div className="space-y-8">
           {transformation}
           {health}
+          <GroundingSourcesSection project={project} />
           {homeTeam}
           {ledger}
         </div>

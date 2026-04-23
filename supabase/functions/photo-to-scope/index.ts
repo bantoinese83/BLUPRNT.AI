@@ -275,9 +275,11 @@ Deno.serve(async (req: Request) => {
             estimated_min_total: payload.summary.estimated_min_total,
             estimated_max_total: payload.summary.estimated_max_total,
             confidence_score: payload.summary.confidence_score,
+            grounding_sources: payload.summary.grounding_sources || [],
             metadata: {
               value_engineering_tips: payload.summary.value_engineering_tips,
               regional_context: payload.summary.regional_context,
+              regional_signal: payload.summary.regional_signal,
             },
             updated_at: new Date().toISOString(),
           })

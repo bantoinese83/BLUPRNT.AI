@@ -38,7 +38,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
 }
 
 const PROJECTS_LIST_SELECT =
-  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id), before_photo_storage_path, after_photo_storage_path";
+  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id), before_photo_storage_path, after_photo_storage_path, grounding_sources";
 
 const SCOPE_SELECT =
   "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";

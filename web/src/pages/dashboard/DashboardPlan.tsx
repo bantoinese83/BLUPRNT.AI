@@ -8,6 +8,7 @@ import {
   type ActivityEvent,
 } from "@/components/dashboard/ActivityFeed";
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
+import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
@@ -52,6 +53,7 @@ export function DashboardPlan({
         <div className="space-y-8">
           {transformation}
           {health}
+          <GroundingSourcesSection project={project} />
           {homeTeam}
           {location.pathname.endsWith("/plan") && (
             <ActivityFeed events={activityEvents} />

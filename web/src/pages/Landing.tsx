@@ -104,7 +104,7 @@ export default function Landing() {
         <link
           rel="preload"
           as="image"
-          href="/images/mobile-app-hero-480.webp"
+          href="/images/hero-iphone-screenshot-480.webp"
           type="image/webp"
         />
         <link rel="alternate" hrefLang="en-US" href={metaBase} />
@@ -112,7 +112,7 @@ export default function Landing() {
         <link
           rel="preload"
           as="image"
-          href="/images/mobile-app-hero-480.webp"
+          href="/images/hero-iphone-screenshot-480.webp"
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={metaBase} />
