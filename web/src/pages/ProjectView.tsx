@@ -31,7 +31,7 @@ const itemVariants = {
 } as const;
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
-import { ProjectRow, ScopeRow } from "@shared/types/database";
+import { type ProjectRow, type ScopeRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
 import { PublicViewCrossSell } from "@/components/PublicViewCrossSell";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
@@ -167,7 +167,7 @@ export default function ProjectView() {
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
                     <img
-                      src="/bluprnt_logo.png"
+                      src="/bluprnt_logo.webp"
                       alt="BLUPRNT logo"
                       className="h-full w-full object-contain"
                     />
@@ -222,7 +222,7 @@ export default function ProjectView() {
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-sm border border-slate-100 overflow-hidden shrink-0">
                     <img
-                      src="/bluprnt_logo.png"
+                      src="/bluprnt_logo.webp"
                       alt="BLUPRNT logo"
                       className="h-full w-full object-contain"
                     />

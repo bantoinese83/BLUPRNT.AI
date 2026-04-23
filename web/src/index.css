@@ -226,10 +226,33 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
     .bluprnt-snurra-halvan,
     .bluprnt-snurra-strecken,
-    .animate-float {
-      animation: none;
+    .animate-float,
+    .animate-pulse-subtle,
+    .animate-shimmer,
+    .liquid-metal-text,
+    .page-fade-in,
+    .slide-up-fade {
+      animation: none !important;
+    }
+
+    .page-fade-in,
+    .slide-up-fade {
+      opacity: 1;
+      transform: none;
+    }
+
+    .glass-card {
+      transition: none;
+    }
+
+    .glass-card:hover {
+      transform: none;
     }
   }
 
@@ -313,6 +336,14 @@
   );
   pointer-events: none;
   animation: shine-slow 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-gradient::before,
+  .metal-surface::before,
+  .liquid-metal-button::after {
+    animation: none !important;
+  }
 }
 
 @keyframes shine-slow {

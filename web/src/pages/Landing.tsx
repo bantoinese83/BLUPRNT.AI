@@ -11,12 +11,7 @@ import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingFooter } from "@/components/landing/LandingFooter";
-
-const LandingBelowFold = lazy(() =>
-  import("@/components/landing/LandingBelowFold").then((m) => ({
-    default: m.LandingBelowFold,
-  })),
-);
+import { LandingBelowFold } from "@/components/landing/LandingBelowFold";
 
 const SITE_URL =
   getPublicSiteUrl() ||
@@ -114,6 +109,11 @@ export default function Landing() {
         />
         <link rel="alternate" hrefLang="en-US" href={metaBase} />
         <link rel="alternate" hrefLang="x-default" href={metaBase} />
+        <link
+          rel="preload"
+          as="image"
+          href="/images/mobile-app-hero-480.webp"
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={metaBase} />
         <meta property="og:locale" content="en_US" />
@@ -166,12 +166,10 @@ export default function Landing() {
             }}
           />
 
-          <Suspense fallback={null}>
-            <LandingBelowFold
-              isArchitect={isArchitect}
-              onPlanSelect={handlePlanSelect}
-            />
-          </Suspense>
+          <LandingBelowFold
+            isArchitect={isArchitect}
+            onPlanSelect={handlePlanSelect}
+          />
         </main>
 
         <LandingFooter />

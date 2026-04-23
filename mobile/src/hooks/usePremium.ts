@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Purchases, {
-  CustomerInfo,
-  PurchasesOffering,
-  PurchasesPackage,
+  type CustomerInfo,
+  type PurchasesOffering,
+  type PurchasesPackage,
 } from "react-native-purchases";
 import { ARCHITECT_ENTITLEMENT_ID } from "@shared/lib/architect-entitlement";
 

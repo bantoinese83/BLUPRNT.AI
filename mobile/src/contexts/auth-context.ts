@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { Session, User } from "@supabase/supabase-js";
+import { type Session, type User } from "@supabase/supabase-js";
 
 export interface AuthContextType {
   session: Session | null;

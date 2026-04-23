@@ -33,7 +33,7 @@ export function LandingStory() {
             <figure className="mx-auto flex max-w-[14rem] flex-col items-center text-center sm:mx-0">
               <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full bg-white shadow-xl shadow-slate-300/40 ring-[3px] ring-white sm:h-36 sm:w-36">
                 <img
-                  src="/headshot-bryan.PNG"
+                  src="/headshot-bryan.webp"
                   alt="Portrait of Bryan Antoine, co-founder of BLUPRNT"
                   aria-label="Bryan Antoine, Co-founder"
                   className="h-full w-full object-cover object-[center_15%]"
@@ -55,7 +55,7 @@ export function LandingStory() {
             <figure className="mx-auto flex max-w-[14rem] flex-col items-center text-center sm:mx-0">
               <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full bg-white shadow-xl shadow-slate-300/40 ring-[3px] ring-white sm:h-36 sm:w-36">
                 <img
-                  src="/headshot-lauren.PNG"
+                  src="/headshot-lauren.webp"
                   alt="Portrait of Lauren Antoine, co-founder of BLUPRNT"
                   aria-label="Lauren Antoine, Co-founder"
                   className="h-full w-full object-cover object-[center_15%]"

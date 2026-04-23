@@ -41,14 +41,31 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
         "@shared": path.resolve(__dirname, "../shared"),
       },
+      /** One React instance (workspace hoisting can otherwise duplicate in odd setups). */
+      dedupe: ["react", "react-dom"],
     },
     server: {
+      port: 3000,
+      /** Fail fast with a clear error instead of silently using another port (common DX footgun). */
+      strictPort: true,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== "true",
+      /** Monorepo: do not watch unrelated apps — faster cold start & fewer spurious HMRs. (Keep `../shared` watched: web imports it.) */
+      watch: {
+        ignored: [
+          path.resolve(__dirname, "../mobile/**"),
+          path.resolve(__dirname, "../e2e/**"),
+          path.resolve(__dirname, "../supabase/**"),
+          "**/coverage/**",
+          "**/playwright-report/**",
+          "**/test-results/**",
+        ],
+      },
     },
     build: {
       sourcemap: true,
+      target: "es2022",
       // jsPDF is loaded only via dynamic import() in pdf-export; the chunk is large by nature.
       chunkSizeWarningLimit: 650,
       rollupOptions: {
@@ -57,12 +74,14 @@ export default defineConfig(({ mode }) => {
             "vendor-react": ["react", "react-dom", "react-router-dom"],
             "vendor-motion": ["motion", "motion/react"],
             "vendor-lucide": ["lucide-react"],
-            // Do not force jsPDF into a shared manual chunk: Vite's `__vitePreload` helper
-            // can end up in that chunk and the entry bundle then imports the whole PDF stack
-            // on every route (including `/`). jsPDF is loaded only via dynamic import in
-            // `pdf-export.ts` when generating a seller packet.
             "vendor-supabase": ["@supabase/supabase-js"],
             "vendor-rough": ["rough-notation"],
+            "vendor-sentry": [
+              "@sentry/react",
+              "@sentry/core",
+              "@sentry/browser",
+            ],
+            "vendor-ui": ["sonner"],
           },
         },
       },

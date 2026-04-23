@@ -57,7 +57,7 @@ export function LegalPageShell({
         <meta name="twitter:description" content={metaDescription} />
         <meta
           property="og:image"
-          content={`${base.replace(/\/$/, "")}/og-image.png`}
+          content={`${base.replace(/\/$/, "")}/og-image.webp`}
         />
         <meta
           property="og:image:alt"
@@ -65,7 +65,7 @@ export function LegalPageShell({
         />
         <meta
           name="twitter:image"
-          content={`${base.replace(/\/$/, "")}/og-image.png`}
+          content={`${base.replace(/\/$/, "")}/og-image.webp`}
         />
       </Helmet>
 
@@ -77,7 +77,7 @@ export function LegalPageShell({
           <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md ring-1 ring-slate-200/60 sm:h-11 sm:w-11 sm:rounded-2xl sm:p-2">
               <img
-                src="/bluprnt_logo.png"
+                src="/bluprnt_logo.webp"
                 alt=""
                 className="h-full w-full object-contain"
               />

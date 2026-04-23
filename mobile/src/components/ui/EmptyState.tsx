@@ -1,6 +1,6 @@
 import React from "react";
-import { StyleSheet, View, Text, ViewStyle } from "react-native";
-import { LucideIcon } from "lucide-react-native";
+import { StyleSheet, View, Text, type ViewStyle } from "react-native";
+import { type LucideIcon } from "lucide-react-native";
 import { MotiView } from "moti";
 import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";

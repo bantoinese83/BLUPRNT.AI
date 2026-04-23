@@ -110,4 +110,47 @@ describe("buildSellerPacketAppendixHtml", () => {
     const html = await buildSellerPacketAppendixHtml([baseInv as InvoiceRow]);
     expect(html).toContain("couldn’t download");
   });
+
+  it("handles large blobs by showing a note", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: {
+        signed_url: "https://cdn.example.com/big.jpg",
+        filename: "big.jpg",
+      },
+      error: null,
+    });
+    const bigBlob = new Blob([new Uint8Array(3_000_000)], {
+      type: "image/jpeg",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        blob: async () => bigBlob,
+      }),
+    );
+
+    const html = await buildSellerPacketAppendixHtml([baseInv as InvoiceRow]);
+    expect(html).toContain("too large to embed");
+  });
+
+  it("handles unknown file types", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { signed_url: "https://cdn.example.com/r.zip", filename: "r.zip" },
+      error: null,
+    });
+    const unknownBlob = new Blob([new Uint8Array(10)], {
+      type: "application/zip",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        blob: async () => unknownBlob,
+      }),
+    );
+
+    const html = await buildSellerPacketAppendixHtml([baseInv as InvoiceRow]);
+    expect(html).toContain("can’t be embedded");
+  });
 });

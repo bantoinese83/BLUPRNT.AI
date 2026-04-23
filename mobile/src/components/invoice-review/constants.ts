@@ -5,7 +5,7 @@ import {
   ShieldCheck,
   CreditCard,
   Tag,
-  LucideIcon,
+  type LucideIcon,
 } from "lucide-react-native";
 
 export const DOC_ICONS: Record<string, LucideIcon> = {

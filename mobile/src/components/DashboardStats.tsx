@@ -1,6 +1,11 @@
 import React from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
-import { Wallet, FileText, TrendingUp, LucideIcon } from "lucide-react-native";
+import {
+  Wallet,
+  FileText,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react-native";
 import { MotiView } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";

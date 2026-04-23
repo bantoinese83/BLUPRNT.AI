@@ -1,5 +1,9 @@
 import { Loader2, Mail, MapPin, Wand2 } from "lucide-react";
-import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
+import {
+  type UseFormRegister,
+  type FieldErrors,
+  type UseFormWatch,
+} from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 

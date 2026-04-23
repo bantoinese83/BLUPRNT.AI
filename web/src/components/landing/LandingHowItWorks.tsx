@@ -86,7 +86,8 @@ export function LandingHowItWorks() {
           >
             <div className="w-full h-56 mb-8 rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200">
               <img
-                src="/images/modern_transformation_hero.png"
+                loading="lazy"
+                src="/images/modern_transformation_hero.webp"
                 alt="Modern Home Exterior"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
@@ -125,7 +126,8 @@ export function LandingHowItWorks() {
           >
             <div className="w-full h-56 mb-8 rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200">
               <img
-                src="/images/invoice_system_mockup.png"
+                loading="lazy"
+                src="/images/invoice_system_mockup.webp"
                 alt="Invoice Tracking System"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
@@ -174,7 +176,8 @@ export function LandingHowItWorks() {
           >
             <div className="w-full h-56 mb-8 rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200">
               <img
-                src="/images/seller_packet_mockup.png"
+                loading="lazy"
+                src="/images/seller_packet_mockup.webp"
                 alt="Buyer Handover Packet"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />

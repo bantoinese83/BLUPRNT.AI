@@ -1,7 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import type { ProjectTypeOption, StageOption } from "@/lib/onboarding-helpers";
 import type { OnboardingEstimateState } from "@/features/onboarding/hooks/useOnboardingAnalysis";
-import { onboardingStyles } from "@/features/onboarding/onboarding-screen.styles";
+import { type onboardingStyles } from "@/features/onboarding/onboarding-screen.styles";
 
 export type OnboardingStyles = typeof onboardingStyles;
 

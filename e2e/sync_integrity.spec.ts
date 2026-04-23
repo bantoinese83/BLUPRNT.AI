@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { dismissOptionalCookies } from "./helpers/cookie-consent";
 
 /**
  * Sync Integrity Test (Cross-Platform / Realtime)
@@ -11,90 +12,82 @@ test.describe("Realtime Sync Integrity", () => {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://elucgaegaihkklnfoasm.supabase.co";
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
   
-  // We use the service role if possible, but for this simulation, 
-  // we'll just use the client to push an update that the UI should see.
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   test("Dashboard should reflect external project updates instantly", async ({ page }) => {
-    // 1. Logic/Dashboard
-    await page.goto("/dashboard");
-    
-    // 2. Identify an existing project ID or just wait for load
-    // For this test, we'll wait for the dashboard to settle
-    await page.waitForSelector("text=Projects");
+    test.setTimeout(180_000);
 
-    // 3. Get or Create a project ID
+    const suffix = `${Date.now()}.${Math.random().toString(36).slice(2, 10)}`;
+    const email = `e2e.sync.${suffix}@example.com`;
+    const password = `E2E-pw-${suffix}-9a`;
+
+    // 1. Sign up to get a session
+    await page.goto("/register");
+    await dismissOptionalCookies(page);
+    await page.locator("#register-policies").check();
+    await page.locator("#register-email").fill(email);
+    await page.locator("#register-password").fill(password);
+    await page.locator("#register-zip").fill("90210");
+    await page.getByRole("button", { name: "Create account" }).click();
+
+    // 2. Wait for Dashboard
+    await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
+    const projectDisplay = page.getByTestId("project-name-display");
+    await projectDisplay.waitFor({ state: "visible", timeout: 30_000 });
+
+    // 3. Get Project ID
     let activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
-    
-    if (!activeProjectId) {
-      console.log("No active project found, creating one for test...");
-      await page.evaluate(async () => {
-        const sb = (window as any).supabase;
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) return;
-        const { data } = await sb.from("projects").insert({
-          name: "Test Sync Project",
-          user_id: user.id,
-          remodel_type: "kitchen",
-          status: "planning"
-        }).select().single();
-        if (data) {
-          localStorage.setItem("bluprnt_project_id", data.id);
-          window.location.reload();
-        }
-      });
-      await page.waitForNavigation();
-      activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
-    }
+    if (!activeProjectId) throw new Error("Could not find project ID in localStorage");
 
-    if (!activeProjectId) throw new Error("Could not find or create a project for sync test");
+    // 4. Update the project name via "External" API call
+    const newName = `Synced Name ${suffix}`;
+    const { error } = await supabase
+      .from("projects")
+      .update({ name: newName })
+      .eq("id", activeProjectId);
 
-    // 4. Simulate a change to this project name from "Mobile"
-    const newName = `Updated Project ${Date.now()}`;
-    
-    // Note: This requires the session/JWT in the browser to have permission.
-    await page.evaluate(async ({ id, name }) => {
-      const sb = (window as any).supabase;
-      await sb.from("projects").update({ name }).eq("id", id);
-    }, { id: activeProjectId, name: newName });
+    if (error) throw new Error(`Supabase update failed: ${error.message}`);
 
-    // 5. ASSERT: The UI should update the project name without a reload
-    await expect(page.locator(`text=${newName}`)).toBeVisible({ timeout: 10000 });
+    // 5. Assert UI reflects the change (Realtime subscription should catch this)
+    await expect(projectDisplay).toContainText(newName, { timeout: 15_000 });
   });
 
   test("New invoices added externally should appear instantly", async ({ page }) => {
-    await page.goto("/dashboard");
-    let activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
+    test.setTimeout(180_000);
+
+    const suffix = `${Date.now()}.${Math.random().toString(36).slice(2, 10)}`;
+    const email = `e2e.sync.inv.${suffix}@example.com`;
+    const password = `E2E-pw-${suffix}-9a`;
+
+    // 1. Sign up
+    await page.goto("/register");
+    await page.locator("#register-policies").check();
+    await page.locator("#register-email").fill(email);
+    await page.locator("#register-password").fill(password);
+    await page.locator("#register-zip").fill("90210");
+    await page.getByRole("button", { name: "Create account" }).click();
+
+    // 2. Wait for Dashboard
+    await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
+    await page.getByTestId("project-name-display").waitFor({ state: "visible", timeout: 30_000 });
+
+    const activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
+    if (!activeProjectId) throw new Error("No active project found");
     
-    // We already do creation logic in the previous test, but for isolation:
-    if (!activeProjectId) {
-      await page.locator("text=Projects").waitFor();
-      activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
-    }
-    
-    if (!activeProjectId) return;
+    // 3. Insert invoice "externally"
+    const vendorName = `External Vendor ${suffix}`;
+    const { error: invErr } = await supabase.from("invoices").insert({
+      project_id: activeProjectId,
+      vendor_name: vendorName,
+      total: 1250,
+      document_type: "invoice",
+      payment_status: "paid"
+    });
 
-    const invoiceTotal = Math.floor(Math.random() * 5000) + 1000;
-    const vendorName = `External Vendor ${Date.now()}`;
+    if (invErr) throw new Error(`External invoice insert failed: ${invErr.message}`);
 
-    // Insert invoice "from mobile"
-    await page.evaluate(async ({ id, total, vendor }) => {
-      const sb = (window as any).supabase;
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) return;
-
-      await sb.from("invoices").insert({
-        project_id: id,
-        vendor_name: vendor,
-        total: total,
-        document_type: "invoice",
-        payment_status: "unpaid",
-        issue_date: new Date().toISOString().slice(0, 10),
-        invoice_number: `EXT-${Date.now()}`
-      });
-    }, { id: activeProjectId, total: invoiceTotal, vendor: vendorName });
-
-    // ASSERT: Invoice appears in the "Recent Activity" or "Invoices" section
-    await expect(page.locator(`text=${vendorName}`)).toBeVisible({ timeout: 10000 });
+    // 4. Verify it appears in the UI
+    await expect(page.getByText(vendorName)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("$1,250")).toBeVisible();
   });
 });

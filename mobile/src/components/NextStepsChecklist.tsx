@@ -12,7 +12,7 @@ import {
   Hammer,
   Shield,
   Share2,
-  LucideIcon,
+  type LucideIcon,
 } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";

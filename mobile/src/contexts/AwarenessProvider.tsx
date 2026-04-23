@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from "react";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
-import { AwarenessContext, SmartInsight } from "@/contexts/AwarenessContext";
+import {
+  AwarenessContext,
+  type SmartInsight,
+} from "@/contexts/AwarenessContext";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 
 export function AwarenessProvider({

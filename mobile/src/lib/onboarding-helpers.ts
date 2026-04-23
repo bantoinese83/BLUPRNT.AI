@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { type SupabaseClient } from "@supabase/supabase-js";
 import { compressImageForAnalysis } from "@/lib/image-utils";
 import { invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";

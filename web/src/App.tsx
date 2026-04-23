@@ -7,6 +7,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { MotionConfig } from "motion/react";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -24,6 +25,7 @@ import {
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
 import { isHeavyGlobalChromeDeferredPath } from "@/lib/marketing-surfaces";
+import Landing from "./pages/Landing";
 
 const CommandPalette = lazy(() =>
   import("@/components/CommandPalette").then((m) => ({
@@ -46,7 +48,6 @@ function DeferredGlobalChrome() {
   );
 }
 
-const Landing = lazy(() => import("./pages/Landing"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ProjectView = lazy(() => import("./pages/ProjectView"));
@@ -83,117 +84,145 @@ export default function App() {
 
   return (
     <HelmetProvider>
-      <AuthProvider>
-        <ErrorBoundary>
-          <QueryClientProvider client={queryClient}>
-            <ForceUpdateGate>
-              <BrowserRouter>
-                <a
-                  href="#main-content"
-                  className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-24 focus-visible:z-[100] focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-xl focus-visible:bg-teal-950 focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white focus-visible:shadow-lg focus-visible:shadow-teal-950/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
-                  onClick={(e) => {
-                    const main = document.getElementById("main-content");
-                    if (!main) return;
-                    e.preventDefault();
-                    main.focus({ preventScroll: true });
-                    main.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key !== " ") return;
-                    const main = document.getElementById("main-content");
-                    if (!main) return;
-                    e.preventDefault();
-                    main.focus({ preventScroll: true });
-                    main.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                >
-                  Skip to main content
-                </a>
-                <AuthListener />
-                <WebOfflineBanner />
-                <div
-                  id="main-content"
-                  tabIndex={-1}
-                  className="min-h-0 outline-none focus:outline-none"
-                >
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      <Route path="/" element={<Landing />} />
-                      <Route
-                        path="/onboarding/*"
-                        element={
-                          <OnboardingProvider>
-                            <Onboarding />
-                          </OnboardingProvider>
-                        }
-                      />
-                      <Route path="/auth/callback" element={<AuthCallback />} />
-                      <Route path="/signed-out" element={<SignedOut />} />
-                      <Route path="/register" element={<Register />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route
-                        path="/forgot-password"
-                        element={<ForgotPassword />}
-                      />
-                      <Route
-                        path="/auth/reset-password"
-                        element={<ResetPassword />}
-                      />
+      {/*
+        Motion’s default is reducedMotion="never" — opt into OS “reduce motion” for all motion.* / AnimatePresence.
+        Transform and layout animations are then skipped; opacity-style transitions may still run.
+      */}
+      <MotionConfig reducedMotion="user">
+        <AuthProvider>
+          <ErrorBoundary>
+            <QueryClientProvider client={queryClient}>
+              <ForceUpdateGate>
+                <BrowserRouter>
+                  <a
+                    href="#main-content"
+                    className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-24 focus-visible:z-[100] focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-xl focus-visible:bg-teal-950 focus-visible:px-4 focus-visible:py-2.5 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white focus-visible:shadow-lg focus-visible:shadow-teal-950/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+                    onClick={(e) => {
+                      const main = document.getElementById("main-content");
+                      if (!main) return;
+                      e.preventDefault();
+                      main.focus({ preventScroll: true });
+                      main.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== " ") return;
+                      const main = document.getElementById("main-content");
+                      if (!main) return;
+                      e.preventDefault();
+                      main.focus({ preventScroll: true });
+                      main.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }}
+                  >
+                    Skip to main content
+                  </a>
+                  <AuthListener />
+                  <WebOfflineBanner />
+                  <div
+                    id="main-content"
+                    tabIndex={-1}
+                    className="min-h-0 outline-none focus:outline-none"
+                  >
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Landing />} />
+                        <Route
+                          path="/onboarding/*"
+                          element={
+                            <OnboardingProvider>
+                              <Onboarding />
+                            </OnboardingProvider>
+                          }
+                        />
+                        <Route
+                          path="/auth/callback"
+                          element={<AuthCallback />}
+                        />
+                        <Route path="/signed-out" element={<SignedOut />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route
+                          path="/forgot-password"
+                          element={<ForgotPassword />}
+                        />
+                        <Route
+                          path="/auth/reset-password"
+                          element={<ResetPassword />}
+                        />
 
-                      <Route
-                        path="/dashboard/*"
-                        element={
-                          <ProtectedRoute>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route path="/project/:token" element={<ProjectView />} />
-                      <Route
-                        path="/settings"
-                        element={
-                          <ProtectedRoute>
-                            <Settings />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path={WEB_APP_PATH_PRIVACY}
-                        element={<PrivacyPolicy />}
-                      />
-                      <Route
-                        path={WEB_APP_PATH_TERMS}
-                        element={<TermsOfService />}
-                      />
-                      <Route
-                        path={WEB_APP_PATH_SUPPORT}
-                        element={<Support />}
-                      />
-                      {import.meta.env.VITE_E2E === "1" ? (
-                        <>
-                          <Route
-                            path="/__e2e__/popup-probe"
-                            element={<E2EPopupProbe />}
-                          />
-                          <Route
-                            path="/__e2e__/offline-save"
-                            element={<E2EOfflineSaveProbe />}
-                          />
-                        </>
-                      ) : null}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </div>
-                <Toaster position="top-right" expand={false} richColors />
-                <CookieConsent />
-                <DeferredGlobalChrome />
-                <ConsentAwareAnalytics />
-              </BrowserRouter>
-            </ForceUpdateGate>
-          </QueryClientProvider>
-        </ErrorBoundary>
-      </AuthProvider>
+                        <Route
+                          path="/dashboard/*"
+                          element={
+                            <ProtectedRoute>
+                              <Dashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/project/:token"
+                          element={<ProjectView />}
+                        />
+                        <Route
+                          path="/settings"
+                          element={
+                            <ProtectedRoute>
+                              <Settings />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path={WEB_APP_PATH_PRIVACY}
+                          element={<PrivacyPolicy />}
+                        />
+                        <Route
+                          path={WEB_APP_PATH_TERMS}
+                          element={<TermsOfService />}
+                        />
+                        <Route
+                          path={WEB_APP_PATH_SUPPORT}
+                          element={<Support />}
+                        />
+                        {import.meta.env.VITE_E2E === "1" ? (
+                          <>
+                            <Route
+                              path="/__e2e__/popup-probe"
+                              element={<E2EPopupProbe />}
+                            />
+                            <Route
+                              path="/__e2e__/offline-save"
+                              element={<E2EOfflineSaveProbe />}
+                            />
+                          </>
+                        ) : null}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </div>
+                  <Toaster
+                    position="top-right"
+                    expand={false}
+                    richColors
+                    closeButton
+                    visibleToasts={4}
+                    offset="1rem"
+                    toastOptions={{
+                      className: "font-sans text-[15px] leading-snug",
+                    }}
+                  />
+                  <CookieConsent />
+                  <DeferredGlobalChrome />
+                  <ConsentAwareAnalytics />
+                </BrowserRouter>
+              </ForceUpdateGate>
+            </QueryClientProvider>
+          </ErrorBoundary>
+        </AuthProvider>
+      </MotionConfig>
     </HelmetProvider>
   );
 }

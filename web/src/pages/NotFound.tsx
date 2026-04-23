@@ -42,7 +42,7 @@ export default function NotFound() {
               className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-sm border border-slate-200 overflow-hidden"
             >
               <img
-                src="/bluprnt_logo.png"
+                src="/bluprnt_logo.webp"
                 alt="BLUPRNT.AI logo"
                 className="h-full w-full object-contain"
               />

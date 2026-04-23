@@ -406,7 +406,7 @@ export default function Login() {
               <span className="w-full border-t border-slate-100" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-4 font-bold uppercase tracking-widest text-slate-300">
+              <span className="bg-white px-4 font-bold uppercase tracking-widest text-slate-500">
                 New to BLUPRNT?
               </span>
             </div>

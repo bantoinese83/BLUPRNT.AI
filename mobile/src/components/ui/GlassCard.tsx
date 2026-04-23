@@ -1,9 +1,9 @@
 import {
   StyleSheet,
   View,
-  ViewStyle,
+  type ViewStyle,
   Platform,
-  StyleProp,
+  type StyleProp,
   TouchableOpacity,
 } from "react-native";
 import * as Haptics from "expo-haptics";

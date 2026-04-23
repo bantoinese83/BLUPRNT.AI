@@ -2,60 +2,69 @@
  * Plain-language copy for auth, uploads, and API failures (no raw stack traces).
  */
 
+const matches = (haystack: string, needles: string[]) =>
+  needles.some((n) => haystack.toLowerCase().includes(n.toLowerCase()));
+
 export function friendlyAuthError(message: string, status?: number): string {
   const m = (message || "").trim();
-  const lower = m.toLowerCase();
-  if (!m) {
-    return "Something went wrong. Please try again.";
+  if (!m) return "Something went wrong. Please try again.";
+
+  const rules: [string[], string][] = [
+    [
+      [
+        "invalid login credentials",
+        "invalid_credentials",
+        "invalid email or password",
+      ],
+      "That email or password doesn’t match our records. Try again or use Forgot password.",
+    ],
+    [
+      ["email not confirmed", "email_not_confirmed", "email not verified"],
+      "Confirm your email from the link we sent, then sign in.",
+    ],
+    [
+      [
+        "too many requests",
+        "rate limit",
+        "over_email_send_rate_limit",
+        "over_request_rate",
+        "rate_limit_exceeded",
+      ],
+      "Too many attempts. Wait a minute, then try again.",
+    ],
+    [
+      [
+        "user already registered",
+        "already registered",
+        "already been registered",
+        "user_already_exists",
+      ],
+      "That email already has an account. Try signing in instead.",
+    ],
+    [
+      ["signup_disabled", "signups not allowed"],
+      "New sign-ups aren’t available right now. Try again later.",
+    ],
+    [
+      ["network", "failed to fetch", "network request failed", "load failed"],
+      "Check your internet connection and try again.",
+    ],
+    [
+      [
+        "invalid otp",
+        "token has expired",
+        "invalid refresh token",
+        "refresh_token_not_found",
+      ],
+      "That link or code expired. Request a new one and try again.",
+    ],
+  ];
+
+  for (const [needles, friendly] of rules) {
+    if (matches(m, needles)) return friendly;
   }
-  if (
-    lower.includes("invalid login credentials") ||
-    lower.includes("invalid_credentials") ||
-    lower.includes("invalid email or password")
-  ) {
-    return "That email or password doesn’t match our records. Try again or use Forgot password.";
-  }
-  if (
-    lower.includes("email not confirmed") ||
-    lower.includes("email_not_confirmed")
-  ) {
-    return "Confirm your email from the link we sent, then sign in.";
-  }
-  if (
-    lower.includes("too many requests") ||
-    lower.includes("rate limit") ||
-    lower.includes("over_email_send_rate_limit") ||
-    lower.includes("over_request_rate")
-  ) {
-    return "Too many attempts. Wait a minute, then try again.";
-  }
-  if (
-    lower.includes("user already registered") ||
-    lower.includes("already registered") ||
-    lower.includes("already been registered")
-  ) {
-    return "That email already has an account. Try signing in instead.";
-  }
-  if (
-    lower.includes("signup_disabled") ||
-    lower.includes("signups not allowed")
-  ) {
-    return "New sign-ups aren’t available right now. Try again later.";
-  }
-  if (
-    lower.includes("network") ||
-    lower.includes("failed to fetch") ||
-    lower.includes("network request failed")
-  ) {
-    return "Check your internet connection and try again.";
-  }
-  if (lower.includes("invalid otp") || lower.includes("token has expired")) {
-    return "That link or code expired. Request a new one and try again.";
-  }
-  if (
-    status === 400 &&
-    (lower.includes("invalid") || lower.includes("bad request"))
-  ) {
+
+  if (status === 400 && matches(m, ["invalid", "bad request"])) {
     return "We couldn’t complete that request. Check what you entered and try again.";
   }
   if (m.length > 200 || /jwt|sqlstate|postgres|exception|undefined/i.test(m)) {
@@ -74,64 +83,59 @@ export function friendlyDocumentUploadError(
       ? String((err as { message?: string }).message ?? "")
       : "";
   const raw = (body?.error ?? fromErr).trim();
-  const msg = raw;
-  const lower = msg.toLowerCase();
+  if (!raw)
+    return "That didn’t go through. Check your connection and try again—or try a smaller PDF or image.";
 
   if (
-    msg &&
-    (msg.includes("Free plan") ||
-      msg.includes("Free limit") ||
-      msg.includes("10 invoice") ||
-      msg.includes("Architect plan") ||
-      msg.includes("Upload limit reached") ||
-      (msg.includes("Upgrade") && msg.includes("limit")))
+    matches(raw, [
+      "Free plan",
+      "Free limit",
+      "10 invoice",
+      "Architect plan",
+      "Upload limit reached",
+      "Upgrade",
+    ])
   ) {
-    return msg;
+    return raw;
   }
 
-  if (
-    lower.includes("file must be under") ||
-    lower.includes("10mb") ||
-    lower.includes("10 mb")
-  ) {
-    return "That file is too large. Use a file under 10 MB.";
-  }
-  if (
-    lower.includes("unsupported file") ||
-    (lower.includes("pdf") &&
-      lower.includes("jpeg") &&
-      lower.includes("upload"))
-  ) {
-    return "That file type isn’t supported. Use a PDF or a photo (JPEG, PNG, or WebP).";
-  }
-  if (
-    lower.includes("too many requests") ||
-    lower.includes("try again later")
-  ) {
-    return "You’re sending files quickly. Wait a moment, then try again.";
-  }
-  if (lower.includes("sign in to upload")) {
-    return "Please sign in again, then try your upload.";
-  }
-  if (lower.includes("project not found")) {
-    return "We couldn’t find that project. Open it again from your list, then upload.";
-  }
-  if (
-    msg.includes("403") ||
-    lower.includes("access denied") ||
-    lower.includes("could not store file")
-  ) {
-    return "We couldn’t save that file. Check your connection—or try a smaller PDF or photo.";
-  }
-  if (msg.includes("401") || lower.includes("unauthorized")) {
-    return "Your session expired. Sign in again, then try uploading.";
-  }
-  if (
-    lower.includes("network") ||
-    lower.includes("failed to fetch") ||
-    lower.includes("network request failed")
-  ) {
-    return "Check your internet connection and try again.";
+  const rules: [string[], string][] = [
+    [
+      ["file must be under", "10mb", "10 mb", "too large"],
+      "That file is too large. Use a file under 10 MB.",
+    ],
+    [
+      ["unsupported file", "invalid file type", "mime type", "heic"],
+      "That file type isn’t supported. Use a PDF or a photo (JPEG, PNG, WebP, or HEIC).",
+    ],
+    [
+      ["too many requests", "try again later", "rate limit"],
+      "You’re sending files quickly. Wait a moment, then try again.",
+    ],
+    [
+      ["sign in to upload", "session_required"],
+      "Please sign in again, then try your upload.",
+    ],
+    [
+      ["project not found"],
+      "We couldn’t find that project. Open it again from your list, then upload.",
+    ],
+    [
+      ["403", "access denied", "could not store file", "quota exceeded"],
+      "We couldn’t save that file. Check your connection—or try a smaller PDF or photo.",
+    ],
+    [
+      ["401", "unauthorized"],
+      "Your session expired. Sign in again, then try uploading.",
+    ],
+    [
+      ["network", "failed to fetch", "network request failed"],
+      "Check your internet connection and try again.",
+    ],
+  ];
+
+  for (const [needles, friendly] of rules) {
+    if (matches(raw, needles)) return friendly;
   }
 
   return "That didn’t go through. Check your connection and try again—or try a smaller PDF or image.";
@@ -139,23 +143,18 @@ export function friendlyDocumentUploadError(
 
 /** Postgrest / Supabase client errors from table updates (rename, etc.). */
 export function friendlyPostgrestMutationError(err: unknown): string {
-  if (!err || typeof err !== "object") {
+  if (!err || typeof err !== "object")
     return "Something went wrong. Please try again.";
-  }
   const e = err as { message?: string; code?: string };
-  const m = (e.message || "").toLowerCase();
+  const m = e.message || "";
   if (
     e.code === "PGRST301" ||
-    m.includes("jwt") ||
-    m.includes("jwt expired") ||
-    m.includes("permission denied") ||
-    m.includes("not authorized")
+    matches(m, ["jwt", "permission denied", "not authorized"])
   ) {
     return "Your session may have expired. Sign out, sign in again, then try once more.";
   }
-  if (m.includes("network") || m.includes("failed to fetch")) {
+  if (matches(m, ["network", "failed to fetch"]))
     return "Check your internet connection and try again.";
-  }
   return "We couldn’t complete that. Try again in a moment.";
 }
 
@@ -163,17 +162,12 @@ export function friendlyProjectShareError(
   message?: string,
   code?: string,
 ): string {
-  const m = (message || "").toLowerCase();
-  const c = code || "";
-  if (m.includes("network") || m.includes("failed to fetch")) {
+  const m = message || "";
+  if (matches(m, ["network", "failed to fetch"]))
     return "Check your internet connection and try again.";
-  }
   if (
-    c === "42501" ||
-    m.includes("permission") ||
-    m.includes("policy") ||
-    m.includes("row-level security") ||
-    m.includes("rls")
+    code === "42501" ||
+    matches(m, ["permission", "policy", "row-level security", "rls"])
   ) {
     return "We couldn’t create a share link. Sign in again if needed, then try once more.";
   }

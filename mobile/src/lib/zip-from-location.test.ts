@@ -66,6 +66,23 @@ describe("resolveZipFromCurrentLocation", () => {
     if (!r.ok) expect(r.reason).toBe("no_zip");
   });
 
+  it("returns no_zip when postalCode is null", async () => {
+    vi.mocked(Location.requestForegroundPermissionsAsync).mockResolvedValue({
+      status: "granted",
+    } as never);
+    vi.mocked(Location.hasServicesEnabledAsync).mockResolvedValue(true);
+    vi.mocked(Location.getCurrentPositionAsync).mockResolvedValue({
+      coords: { latitude: 1, longitude: 2 },
+    } as never);
+    vi.mocked(Location.reverseGeocodeAsync).mockResolvedValue([
+      { postalCode: null },
+    ] as never);
+
+    const r = await resolveZipFromCurrentLocation();
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("no_zip");
+  });
+
   it("returns no_zip when postal is not 5 digits", async () => {
     vi.mocked(Location.requestForegroundPermissionsAsync).mockResolvedValue({
       status: "granted",

@@ -52,7 +52,7 @@ export function DashboardHeader({
             aria-label="BLUPRNT — Dashboard home"
           >
             <img
-              src="/bluprnt_logo.png"
+              src="/bluprnt_logo.webp"
               alt=""
               className="h-full w-full object-contain scale-110"
             />

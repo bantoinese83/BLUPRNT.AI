@@ -90,7 +90,7 @@ export function Iphone({
                 alt=""
                 width={Math.round(SCREEN_WIDTH)}
                 height={Math.round(SCREEN_HEIGHT)}
-                decoding="async"
+                decoding={screenImagePriority === "high" ? "auto" : "async"}
                 fetchPriority={screenImagePriority}
                 className="block size-full object-cover object-top"
               />
@@ -101,7 +101,7 @@ export function Iphone({
               alt=""
               width={Math.round(SCREEN_WIDTH)}
               height={Math.round(SCREEN_HEIGHT)}
-              decoding="async"
+              decoding={screenImagePriority === "high" ? "auto" : "async"}
               fetchPriority={screenImagePriority}
               className="block size-full object-cover object-top"
             />

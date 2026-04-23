@@ -2,7 +2,7 @@ import React from "react";
 import {
   StyleSheet,
   View,
-  ViewStyle,
+  type ViewStyle,
   ScrollView,
   RefreshControl,
   Text,

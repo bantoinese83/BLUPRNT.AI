@@ -108,7 +108,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white/20 flex items-center justify-center p-6 grayscale brightness-[10]">
             <img
-              src="/bluprnt_logo.png"
+              src="/bluprnt_logo.webp"
               alt="BLUPRNT.AI"
               className="w-full h-auto opacity-100"
             />

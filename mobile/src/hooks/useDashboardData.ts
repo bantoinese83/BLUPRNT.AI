@@ -1,186 +1,70 @@
-import { useCallback } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useDashboardDataShared } from "@shared/hooks/use-dashboard-data";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { reportClientError } from "@/lib/sentry";
 import { dashboardQueryKey } from "@/lib/query-client";
-import { fetchMobileDashboardSnapshot } from "@/lib/fetch-dashboard-snapshot";
-import type { DashboardSnapshot } from "@shared/types/dashboard-snapshot";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
-
-function applyPatch(
-  prev: DashboardSnapshot | undefined,
-  patch: Partial<DashboardSnapshot>,
-): DashboardSnapshot {
-  if (!prev) {
-    return {
-      configured: true,
-      redirectToLogin: null,
-      loadError: null,
-      projects: [],
-      project: null,
-      scopeItems: [],
-      invoices: [],
-      spendByCategory: {},
-      isArchitect: false,
-      subscription: null,
-      hasProjectPass: false,
-      lastProjectId: null,
-      ...patch,
-    };
-  }
-  return { ...prev, ...patch };
-}
+import {
+  buildMobileDashboardAdapter,
+  useMobileDashboardDataInjected,
+} from "./build-mobile-dashboard-adapter";
 
 export function useDashboardData() {
   const client = useQueryClient();
+  const mobileInjected = useMobileDashboardDataInjected();
+  const adapter = useMemo(
+    () => buildMobileDashboardAdapter(mobileInjected),
+    [mobileInjected],
+  );
+  const shared = useDashboardDataShared(adapter);
 
-  const query = useQuery({
-    queryKey: dashboardQueryKey,
-    queryFn: fetchMobileDashboardSnapshot,
-    enabled: isSupabaseConfigured(),
-  });
-
-  const snapshot = query.data;
   const configurationMissing = !isSupabaseConfigured();
 
-  const clearLoadError = useCallback(() => {
-    client.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-      prev ? { ...prev, loadError: null } : prev,
-    );
-  }, [client]);
+  const recalcProjectTotals = useCallback(async (pid: string) => {
+    await supabase.rpc("recalc_project_totals", { p_id: pid });
+  }, []);
 
-  const load = useCallback(async () => {
-    await client.invalidateQueries({ queryKey: dashboardQueryKey });
-  }, [client]);
+  const addItem = useCallback(
+    async (
+      pid: string,
+      newItem: {
+        category: string;
+        description: string;
+        phase: string;
+        cost: number;
+        quantity: number;
+        unit: string;
+      },
+    ) => {
+      const { error: err } = await supabase.from("scope_items").insert({
+        project_id: pid,
+        category: newItem.category,
+        description: newItem.description || "",
+        phase: newItem.phase,
+        quantity: newItem.quantity,
+        unit: newItem.unit,
+        finish_tier: "mid",
+        unit_cost_min: newItem.cost,
+        unit_cost_max: newItem.cost,
+        total_cost_min: newItem.cost * newItem.quantity,
+        total_cost_max: newItem.cost * newItem.quantity,
+      });
 
-  const setProjects = useCallback(
-    (projects: ProjectRow[]) => {
-      client.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, { projects }),
-      );
-    },
-    [client],
-  );
+      if (err) throw err;
 
-  const setProject = useCallback(
-    (project: ProjectRow | null) => {
-      client.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, {
-          project,
-          lastProjectId: project?.id ?? prev?.lastProjectId ?? null,
-        }),
-      );
-    },
-    [client],
-  );
-
-  const setScopeItems = useCallback(
-    (scopeItems: ScopeRow[]) => {
-      client.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, { scopeItems }),
-      );
-    },
-    [client],
-  );
-
-  const setInvoices = useCallback(
-    (invoices: InvoiceRow[]) => {
-      client.setQueryData<DashboardSnapshot>(dashboardQueryKey, (prev) =>
-        applyPatch(prev, { invoices }),
-      );
-    },
-    [client],
-  );
-
-  const handleProjectSelect = useCallback(
-    async (id: string) => {
-      await AsyncStorage.setItem("bluprnt_project_id", id);
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { error: prefErr } = await supabase
-          .from("user_preferences")
-          .upsert({
-            user_id: session.user.id,
-            last_active_project_id: id,
-            updated_at: new Date().toISOString(),
-          });
-        if (prefErr) {
-          reportClientError("dashboard_last_project_preference", prefErr);
-        }
-      }
+      await recalcProjectTotals(pid);
       void client.invalidateQueries({ queryKey: dashboardQueryKey });
     },
-    [client],
+    [client, recalcProjectTotals],
   );
 
-  const recalcProjectTotals = async (pid: string) => {
-    await supabase.rpc("recalc_project_totals", { p_id: pid });
-  };
-
-  const addItem = async (
-    pid: string,
-    newItem: {
-      category: string;
-      description: string;
-      phase: string;
-      cost: number;
-      quantity: number;
-      unit: string;
-    },
-  ) => {
-    const { error: err } = await supabase.from("scope_items").insert({
-      project_id: pid,
-      category: newItem.category,
-      description: newItem.description || "",
-      phase: newItem.phase,
-      quantity: newItem.quantity,
-      unit: newItem.unit,
-      finish_tier: "mid",
-      unit_cost_min: newItem.cost,
-      unit_cost_max: newItem.cost,
-      total_cost_min: newItem.cost * newItem.quantity,
-      total_cost_max: newItem.cost * newItem.quantity,
-    });
-
-    if (err) throw err;
-
-    await recalcProjectTotals(pid);
-    void client.invalidateQueries({ queryKey: dashboardQueryKey });
-  };
-
-  const loading = isSupabaseConfigured()
-    ? query.isPending || query.isLoading
-    : false;
-  const refreshing =
-    isSupabaseConfigured() &&
-    !!snapshot &&
-    query.isFetching &&
-    !query.isLoading;
+  const { activeProjectId, data, ...publicCore } = shared;
+  void activeProjectId;
+  void data;
 
   return {
-    loading,
-    refreshing,
-    loadError: snapshot?.loadError ?? null,
-    clearLoadError,
+    ...publicCore,
     configurationMissing,
-    projects: snapshot?.projects ?? [],
-    project: snapshot?.project ?? null,
-    scopeItems: snapshot?.scopeItems ?? [],
-    invoices: snapshot?.invoices ?? [],
-    spendByCategory: snapshot?.spendByCategory ?? {},
-    isArchitect: snapshot?.isArchitect ?? false,
-    subscription: snapshot?.subscription ?? null,
-    hasProjectPass: snapshot?.hasProjectPass ?? false,
-    load,
-    handleProjectSelect,
     addItem,
     recalcProjectTotals,
-    setProjects,
-    setProject,
-    setScopeItems,
-    setInvoices,
   };
 }

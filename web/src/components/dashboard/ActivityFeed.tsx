@@ -5,7 +5,7 @@ import {
   History,
   ArrowUpRight,
   PlusCircle,
-  LucideIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";

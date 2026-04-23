@@ -22,7 +22,7 @@ export function LandingFooter() {
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-white p-1 shadow-sm">
                 <img
-                  src="/bluprnt_logo.png"
+                  src="/bluprnt_logo.webp"
                   alt=""
                   className="h-full w-full object-contain"
                 />

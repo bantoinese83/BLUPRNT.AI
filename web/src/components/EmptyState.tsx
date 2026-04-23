@@ -1,5 +1,10 @@
 import { motion } from "motion/react";
-import { FolderPlus, FilePlus, AlertCircle, LucideIcon } from "lucide-react";
+import {
+  FolderPlus,
+  FilePlus,
+  AlertCircle,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

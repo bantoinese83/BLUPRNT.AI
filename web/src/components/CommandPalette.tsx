@@ -24,6 +24,12 @@ import { cn } from "@/lib/utils";
 import { useFocusTrap } from "@/lib/use-focus-trap";
 import { WEB_APP_PATH_PRIVACY } from "@shared/constants/public-site";
 
+const paletteKbd = () =>
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
+    ? "⌘K"
+    : "Ctrl+K";
+
 export function CommandPalette() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -84,6 +90,7 @@ export function CommandPalette() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
             aria-hidden="true"
@@ -110,8 +117,21 @@ export function CommandPalette() {
                   value={search}
                   onValueChange={setSearch}
                 />
-                <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/50 border border-slate-700/50 text-[10px] font-black text-slate-400">
-                  <span className="text-xs">ESC</span>
+                <div className="hidden sm:flex items-center gap-2 text-[10px] font-black text-slate-400">
+                  <span
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/50 border border-slate-700/50"
+                    title="Open or close this palette"
+                  >
+                    <span className="text-xs" aria-hidden="true">
+                      {paletteKbd()}
+                    </span>
+                  </span>
+                  <span
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/50 border border-slate-700/50"
+                    title="Close"
+                  >
+                    <span className="text-xs">ESC</span>
+                  </span>
                 </div>
               </div>
 

@@ -27,6 +27,7 @@ vi.mock("@/lib/supabase", () => ({
 
 vi.mock("react-router-dom", () => ({
   useNavigate: vi.fn(),
+  useLocation: () => ({ pathname: "/dashboard", search: "" }),
 }));
 
 function wrapper({ children }: { children: ReactNode }) {

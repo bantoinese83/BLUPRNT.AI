@@ -1,4 +1,10 @@
-import { ArrowRight, FileText, Hammer, Share2, LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  FileText,
+  Hammer,
+  Share2,
+  type LucideIcon,
+} from "lucide-react";
 import { motion } from "motion/react";
 
 type Step = {

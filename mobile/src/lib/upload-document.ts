@@ -6,40 +6,29 @@ import { showAppToast } from "@/lib/app-toast";
 
 export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
 
+const ACCEPTED_MIMES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
+
 /** Ensures camera / library picks send a MIME the edge function accepts (incl. HEIC on iOS). */
 export function normalizeInvoiceUploadMime(
   fileUri: string,
   mimeHint?: string,
 ): string {
-  const lower = (mimeHint || "").trim().toLowerCase();
-  if (
-    [
-      "application/pdf",
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-      "image/heic",
-      "image/heif",
-    ].includes(lower)
-  ) {
-    if (lower === "image/jpg") return "image/jpeg";
-    return lower;
-  }
-  const u = fileUri.toLowerCase();
-  if (u.includes(".heic")) return "image/heic";
-  if (u.includes(".heif")) return "image/heif";
-  if (u.includes(".png")) return "image/png";
-  if (u.includes(".webp")) return "image/webp";
-  if (u.includes(".pdf")) return "application/pdf";
-  return "image/jpeg";
-}
+  const h = (mimeHint || "").toLowerCase();
+  if (ACCEPTED_MIMES.includes(h)) return h === "image/jpg" ? "image/jpeg" : h;
 
-interface UploadResult {
-  invoice_id?: string;
-  ocr_status?: string;
-  error?: string;
-  error_code?: string;
+  const u = fileUri.toLowerCase();
+  if (u.endsWith(".heic") || u.endsWith(".heif")) return "image/heic";
+  if (u.endsWith(".png")) return "image/png";
+  if (u.endsWith(".webp")) return "image/webp";
+  if (u.endsWith(".pdf")) return "application/pdf";
+  return "image/jpeg";
 }
 
 /**
@@ -58,51 +47,21 @@ export async function uploadDocumentWithType(
   errorCode?: string;
 }> {
   return new Promise((resolve) => {
+    const options: DocumentType[] = ["invoice", "quote", "warranty", "permit"];
+    const buttons = options.map((type) => ({
+      text: type.charAt(0).toUpperCase() + type.slice(1),
+      onPress: () =>
+        postDocumentToUploadInvoice(
+          fileUri,
+          mimeType,
+          type,
+          projectId,
+          resolve,
+        ),
+    }));
+
     Alert.alert("Document Type", "What type of document are you uploading?", [
-      {
-        text: "Invoice",
-        onPress: () =>
-          postDocumentToUploadInvoice(
-            fileUri,
-            mimeType,
-            "invoice",
-            projectId,
-            resolve,
-          ),
-      },
-      {
-        text: "Quote",
-        onPress: () =>
-          postDocumentToUploadInvoice(
-            fileUri,
-            mimeType,
-            "quote",
-            projectId,
-            resolve,
-          ),
-      },
-      {
-        text: "Warranty",
-        onPress: () =>
-          postDocumentToUploadInvoice(
-            fileUri,
-            mimeType,
-            "warranty",
-            projectId,
-            resolve,
-          ),
-      },
-      {
-        text: "Permit",
-        onPress: () =>
-          postDocumentToUploadInvoice(
-            fileUri,
-            mimeType,
-            "permit",
-            projectId,
-            resolve,
-          ),
-      },
+      ...buttons,
       {
         text: "Cancel",
         style: "cancel",
@@ -118,7 +77,7 @@ async function postDocumentToUploadInvoice(
   mimeType: string,
   documentType: DocumentType,
   projectId: string,
-  resolve: (result: {
+  resolve: (r: {
     success: boolean;
     invoice_id?: string;
     documentType?: DocumentType;
@@ -128,59 +87,40 @@ async function postDocumentToUploadInvoice(
 ) {
   try {
     const mime = normalizeInvoiceUploadMime(uri, mimeType);
-    const ext = mime.includes("pdf")
-      ? "pdf"
-      : mime.includes("png")
-        ? "png"
-        : mime.includes("webp")
-          ? "webp"
-          : mime.includes("heic") || mime.includes("heif")
-            ? "heic"
-            : "jpg";
-    const fileName = `document_${Date.now()}.${ext}`;
-
+    const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
     const formData = new FormData();
     formData.append("project_id", projectId);
     formData.append("document_type", documentType);
     formData.append("file", {
       uri,
-      name: fileName,
+      name: `doc_${Date.now()}.${ext}`,
       type: mime,
     } as unknown as Blob);
 
     showAppToast("Starting upload... please keep the app open.");
 
-    // Simple timeout wrapper for the invokeFunction
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Upload timed out after 60s")), 60000),
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Upload timeout")), 60000),
     );
-
-    const { data, error } = await (Promise.race([
-      invokeFunction<UploadResult>("upload-invoice", {
-        body: formData,
-      }),
-      timeoutPromise,
-    ]) as Promise<{ data: UploadResult | null; error: Error | null }>);
+    const { data, error } = await Promise.race([
+      invokeFunction<{
+        invoice_id?: string;
+        error?: string;
+        error_code?: string;
+      }>("upload-invoice", { body: formData }),
+      timeout,
+    ]);
 
     const failure = extractUploadFailureFromInvokeResult(data, error);
-    if (failure) {
-      resolve({
+    if (failure)
+      return resolve({
         success: false,
         error: failure.message,
         errorCode: failure.errorCode,
       });
-      return;
-    }
 
-    resolve({
-      success: true,
-      invoice_id: data?.invoice_id,
-      documentType,
-    });
+    resolve({ success: true, invoice_id: data?.invoice_id, documentType });
   } catch (err) {
-    resolve({
-      success: false,
-      error: friendlyDocumentUploadError(err),
-    });
+    resolve({ success: false, error: friendlyDocumentUploadError(err) });
   }
 }

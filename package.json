@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "workspaces": [
     "web",
     "mobile",
@@ -25,6 +28,7 @@
     "test:all": "npm run check && npm run test:coverage && npm run test:e2e",
     "test:run": "npm run test:run -w web && npm run test:run -w mobile",
     "verify:quick": "npm run typecheck && npm run test:run",
+    "typecheck:watch:web": "npm run typecheck:watch -w web",
     "test:coverage": "npm run test:coverage -w web && npm run test:coverage -w mobile",
     "db:types": "bash scripts/gen-db-types.sh",
     "db:types:check": "bash scripts/check-db-types.sh",

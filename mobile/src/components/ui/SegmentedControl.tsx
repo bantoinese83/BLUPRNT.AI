@@ -5,8 +5,8 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
-  StyleProp,
-  ViewStyle,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";

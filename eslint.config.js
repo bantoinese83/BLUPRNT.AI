@@ -7,6 +7,11 @@ import prettier from "eslint-config-prettier";
 
 export default tseslint.config(
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: "warn",
+    },
+  },
+  {
     ignores: [
       "**/coverage/**",
       "**/dist/**",
@@ -50,6 +55,15 @@ export default tseslint.config(
         },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+      /** `import { type X }` for value modules; keep `import('pkg').T` in .d.ts & test mocks. */
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
+          disallowTypeAnnotations: false,
+        },
+      ],
     },
   },
   {

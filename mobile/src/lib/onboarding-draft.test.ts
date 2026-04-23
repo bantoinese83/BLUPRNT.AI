@@ -110,8 +110,27 @@ describe("onboarding draft storage", () => {
     expect(AsyncStorage.removeItem).toHaveBeenCalled();
   });
 
+  it("removes and returns null when savedAt is missing", async () => {
+    const raw = JSON.stringify({
+      v: 1,
+      projectType: null,
+      location: "x",
+      stage: null,
+      photos: [],
+      scopeDescription: "",
+      estimate: null,
+    });
+    vi.mocked(AsyncStorage.getItem).mockResolvedValue(raw);
+
+    const loaded = await loadOnboardingDraft();
+    expect(loaded).toBeNull();
+    expect(AsyncStorage.removeItem).toHaveBeenCalled();
+  });
+
   it("returns null on AsyncStorage or JSON parse error", async () => {
-    vi.mocked(AsyncStorage.getItem).mockRejectedValue(new Error("Storage Error"));
+    vi.mocked(AsyncStorage.getItem).mockRejectedValue(
+      new Error("Storage Error"),
+    );
     const loaded = await loadOnboardingDraft();
     expect(loaded).toBeNull();
   });

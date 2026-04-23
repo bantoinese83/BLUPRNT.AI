@@ -13,7 +13,6 @@ import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { GradientBackground } from "@/components/ui/GradientBackground";
 import { Theme } from "@/constants/Theme";
 import iconMark from "@assets/images/icon.png";
 

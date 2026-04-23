@@ -11,22 +11,28 @@ export type InvoiceLike = {
 };
 
 export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
-  return invoices
+  return (invoices ?? [])
     .filter((i) => {
-      const t = (i.document_type ?? "invoice").toLowerCase();
+      const t = (i?.document_type ?? "invoice").toLowerCase();
       return t === "invoice" || t === "quote";
     })
-    .reduce((s, i) => s + (i.total ?? 0), 0);
+    .reduce((s, i) => {
+      const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
+      return s + val;
+    }, 0);
 }
 
 /** Warranties & permits — maintenance log (excluded from plan vs capital spend). */
 export function maintenanceDocumentTotal(invoices: InvoiceLike[]): number {
-  return invoices
+  return (invoices ?? [])
     .filter((i) => {
-      const t = (i.document_type ?? "").toLowerCase();
+      const t = (i?.document_type ?? "").toLowerCase();
       return t === "warranty" || t === "permit";
     })
-    .reduce((s, i) => s + (i.total ?? 0), 0);
+    .reduce((s, i) => {
+      const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
+      return s + val;
+    }, 0);
 }
 
 export type LedgerDocumentFilter = "all" | "capital" | "maintenance";
@@ -64,6 +70,8 @@ export function planVsActualNarrative(
   body: string;
   kind: PlanVsActualKind;
 } {
+  const total = Math.max(0, capitalTotal);
+
   if (estimatedMin == null && estimatedMax == null) {
     return {
       headline: "Add your estimate to see the full story",
@@ -72,7 +80,7 @@ export function planVsActualNarrative(
     };
   }
 
-  if (capitalTotal <= 0) {
+  if (total <= 0) {
     return {
       headline: "No documented spend yet",
       body: "Upload invoices and quotes to see how real numbers line up with your plan. That trail becomes your resale-ready record.",
@@ -84,7 +92,7 @@ export function planVsActualNarrative(
   let high = estimatedMax ?? estimatedMin ?? low;
   if (low > high) [low, high] = [high, low];
 
-  if (capitalTotal >= low && capitalTotal <= high) {
+  if (total >= low && total <= high) {
     return {
       headline: "Within your estimate range",
       body: "Documented spend sits between your low and high benchmarks—easy to explain when someone asks how the project is tracking.",
@@ -92,8 +100,8 @@ export function planVsActualNarrative(
     };
   }
 
-  if (capitalTotal < low) {
-    const gap = low - capitalTotal;
+  if (total < low) {
+    const gap = low - total;
     return {
       headline: "Below your low estimate so far",
       body: `You’ve logged about ${money(gap)} less than the low end of your range—often work still ahead, or costs not uploaded yet.`,
@@ -101,7 +109,7 @@ export function planVsActualNarrative(
     };
   }
 
-  const gap = capitalTotal - high;
+  const gap = total - high;
   return {
     headline: "Above your high estimate",
     body: `Documented spend is about ${money(gap)} over the top of your range—typical when scopes grow, materials upgrade, or the first plan didn’t capture everything.`,

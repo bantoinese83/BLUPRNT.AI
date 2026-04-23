@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewStyle, Image } from "react-native";
+import { View, type ViewStyle, Image } from "react-native";
 import logoSource from "../../../assets/images/icon.png";
 
 interface Props {

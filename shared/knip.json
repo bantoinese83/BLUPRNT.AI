@@ -4,7 +4,8 @@
     "lib/**/*.ts",
     "types/**/*.ts",
     "constants/**/*.ts",
-    "copy/**/*.ts"
+    "copy/**/*.ts",
+    "hooks/**/*.ts"
   ],
   "ignore": ["**/*.test.ts"],
   "ignoreBinaries": ["tsc", "knip"]

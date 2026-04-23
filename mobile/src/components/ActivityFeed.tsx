@@ -6,10 +6,10 @@ import {
   History,
   ArrowUpRight,
   PlusCircle,
-  LucideIcon,
+  type LucideIcon,
 } from "lucide-react-native";
 import { MotiView } from "moti";
-import { router, Href } from "expo-router";
+import { router, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { formatRelativeTime, type ActivityEvent } from "@/lib/activity";
 import { Theme } from "@/constants/Theme";

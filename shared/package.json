@@ -7,5 +7,17 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "knip": "knip --exclude types,nsTypes,enumMembers,duplicates"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.1"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=19.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.96.2",
+    "@types/react": "^19.2.14",
+    "react": "^19.0.0"
   }
 }

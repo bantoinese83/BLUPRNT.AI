@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, ScrollView } from "react-native";
+import { View, type ScrollView } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import { DashboardLoadErrorBanner } from "@/components/DashboardLoadErrorBanner";
 import { UpgradeModal } from "@/components/UpgradeModal";

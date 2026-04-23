@@ -19,9 +19,14 @@ test.describe("Project Management: Create, Rename, Delete", () => {
     // 2. Wait for Dashboard (Default project "My home project")
     await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
     
-    // Explicitly wait for the project header to appear, as the dashboard might show a skeleton first
+    // Defensive reload if the workspace creation was slightly delayed
     const projectDisplay = page.getByTestId("project-name-display");
-    await projectDisplay.waitFor({ state: "visible", timeout: 30_000 });
+    try {
+      await projectDisplay.waitFor({ state: "visible", timeout: 10_000 });
+    } catch {
+      await page.reload();
+      await projectDisplay.waitFor({ state: "visible", timeout: 20_000 });
+    }
     await expect(projectDisplay).toContainText("My home project");
 
     // 3. Rename Project
@@ -51,7 +56,7 @@ test.describe("Project Management: Create, Rename, Delete", () => {
 
     // Verify success toast and redirection to empty state
     await expect(page.getByText("Project permanently removed")).toBeVisible();
-    await expect(page.getByText("You’re all set")).toBeVisible(); // Empty state title
-    await expect(page.getByText("Add a renovation project to see your estimate")).toBeVisible();
+    await expect(page.getByText("Your estimate and ledger in one story")).toBeVisible(); // Empty state title
+    await expect(page.getByText("Start a project for a local cost range")).toBeVisible();
   });
 });

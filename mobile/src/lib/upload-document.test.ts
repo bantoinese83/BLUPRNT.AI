@@ -17,6 +17,22 @@ describe("normalizeInvoiceUploadMime", () => {
     ).toBe("image/heic");
   });
 
+  it("maps .png paths when MIME is missing", () => {
+    expect(normalizeInvoiceUploadMime("a.png")).toBe("image/png");
+  });
+
+  it("maps .webp paths when MIME is missing", () => {
+    expect(normalizeInvoiceUploadMime("a.webp")).toBe("image/webp");
+  });
+
+  it("maps .pdf paths when MIME is missing", () => {
+    expect(normalizeInvoiceUploadMime("a.pdf")).toBe("application/pdf");
+  });
+
+  it("defaults to image/jpeg for unknown", () => {
+    expect(normalizeInvoiceUploadMime("a.unknown")).toBe("image/jpeg");
+  });
+
   it("keeps declared JPEG", () => {
     expect(normalizeInvoiceUploadMime("file:///a", "image/jpeg")).toBe(
       "image/jpeg",
@@ -132,5 +148,18 @@ describe("uploadDocumentWithType", () => {
     );
     expect(result.success).toBe(false);
     expect(result.error).toBeTruthy();
+  });
+
+  it("handles timeout error", async () => {
+    vi.useFakeTimers();
+    vi.mocked(invokeFunction).mockImplementation(() => new Promise(() => {}));
+
+    const promise = uploadDocumentWithType("file:///a.jpg", "image/jpeg", "p1");
+    vi.advanceTimersByTime(61000);
+
+    const result = await promise;
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Check your connection");
+    vi.useRealTimers();
   });
 });

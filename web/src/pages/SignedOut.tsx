@@ -32,7 +32,7 @@ export default function SignedOut() {
           <meta name="robots" content={META_ROBOTS_NOINDEX} />
         </Helmet>
         <img
-          src="/bluprnt_logo.png"
+          src="/bluprnt_logo.webp"
           alt=""
           className="h-14 w-14 object-contain opacity-90"
           aria-hidden
@@ -58,7 +58,7 @@ export default function SignedOut() {
           <div className="flex justify-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-sm border border-slate-200 overflow-hidden">
               <img
-                src="/bluprnt_logo.png"
+                src="/bluprnt_logo.webp"
                 alt="BLUPRNT.AI logo"
                 className="h-full w-full object-contain"
               />

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, ReactNode } from "react";
-import { Session, User } from "@supabase/supabase-js";
+import React, { useEffect, useState, type ReactNode } from "react";
+import { type Session, type User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Linking from "expo-linking";
