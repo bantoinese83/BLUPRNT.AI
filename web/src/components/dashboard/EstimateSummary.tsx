@@ -111,7 +111,7 @@ export function EstimateSummary({
 
   return (
     <Card className="overflow-hidden border-slate-200/60 shadow-md shadow-slate-100/20 rounded-3xl">
-      <div className="bg-gradient-to-br from-teal-950 via-teal-900 to-teal-950 text-white p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
+      <div className="bg-linear-to-br from-teal-950 via-teal-900 to-teal-950 text-white p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
         {/* Abstract background highlight */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-teal-400/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
 

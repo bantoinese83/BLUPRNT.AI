@@ -13,7 +13,7 @@ export function LandingComparison() {
           <p className="text-lg text-slate-800 max-w-2xl mx-auto font-medium">
             BLUPRNT pairs regional cost ranges with structured scope, invoices,
             and exports—so homeowners get clearer numbers than a lone
-            visualizer, without pro job-site software.
+            visualizer, without professional job-site software.
           </p>
         </div>
 

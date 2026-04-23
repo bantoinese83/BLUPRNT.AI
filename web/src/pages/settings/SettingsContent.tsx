@@ -498,6 +498,7 @@ export function SettingsContent(props: SettingsContentProps) {
         onClose={() => setShowUpgrade(false)}
         openReason="general"
         projectId={upgradeProjectId}
+        isArchitect={isArchitect}
       />
     </div>
   );

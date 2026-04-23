@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Eye, FileText, ShieldCheck, Clock, Lock } from "lucide-react";
+import { createElement, useState } from "react";
+import { Eye, Clock, Lock } from "lucide-react";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,12 @@ import { motion } from "motion/react";
 import type { InvoiceRow } from "@shared/types/database";
 import { money, getWarrantyStatus } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import {
+  ledgerDocumentTypeLabel,
+  ledgerDocumentVisualGroup,
+} from "@shared/lib/ledger-document-labels";
+import { isPlanVsActualDocumentType } from "@shared/lib/infer-document-type";
+import { cardIconForDocumentType } from "@/lib/ledger-type-icons";
 
 interface InvoiceCardProps {
   invoice: InvoiceRow;
@@ -28,7 +34,12 @@ export function InvoiceCard({
     null,
   );
 
-  const isWarranty = (invoice.document_type || "").toLowerCase() === "warranty";
+  const visual = ledgerDocumentVisualGroup(invoice.document_type);
+  const isSpend = visual === "spend";
+  const isWarrantyCare = visual === "warranty_care";
+  const showPaymentBadge = isPlanVsActualDocumentType(
+    invoice.document_type ?? "invoice",
+  );
   const warranty = getWarrantyStatus(invoice.warranty_expiry_date);
   const isWarrantyUnlocked = hasProjectPass;
 
@@ -48,16 +59,24 @@ export function InvoiceCard({
             <div
               className={cn(
                 "w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                isWarranty
-                  ? "bg-teal-50 group-hover:bg-teal-100"
-                  : "bg-red-50 group-hover:bg-red-100",
+                isSpend
+                  ? "bg-red-50 group-hover:bg-red-100"
+                  : isWarrantyCare
+                    ? "bg-teal-50 group-hover:bg-teal-100"
+                    : "bg-slate-100 group-hover:bg-slate-200",
               )}
             >
-              {isWarranty ? (
-                <ShieldCheck className="h-5 w-5 text-teal-600" />
-              ) : (
-                <FileText className="h-5 w-5 text-red-500" />
-              )}
+              {createElement(cardIconForDocumentType(invoice.document_type), {
+                className: cn(
+                  "h-5 w-5",
+                  isSpend
+                    ? "text-red-500"
+                    : isWarrantyCare
+                      ? "text-teal-600"
+                      : "text-slate-600",
+                ),
+                "aria-hidden": true,
+              })}
             </div>
             <div className="space-y-1 min-w-0 flex-1">
               <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
@@ -80,12 +99,14 @@ export function InvoiceCard({
                   variant="secondary"
                   className={cn(
                     "capitalize text-[10px] font-black tracking-widest",
-                    isWarranty
-                      ? "bg-teal-100 text-teal-950"
-                      : "bg-slate-100 text-slate-700",
+                    isSpend
+                      ? "bg-rose-100 text-rose-950"
+                      : isWarrantyCare
+                        ? "bg-teal-100 text-teal-950"
+                        : "bg-slate-100 text-slate-700",
                   )}
                 >
-                  {invoice.document_type ?? "invoice"}
+                  {ledgerDocumentTypeLabel(invoice.document_type ?? "invoice")}
                 </Badge>
 
                 {warranty &&
@@ -114,7 +135,7 @@ export function InvoiceCard({
                     </button>
                   ))}
 
-                {(invoice.document_type ?? "invoice") === "invoice" && (
+                {showPaymentBadge && (
                   <Badge
                     variant="secondary"
                     className="bg-slate-100 text-slate-700 capitalize text-[10px] font-black tracking-widest"

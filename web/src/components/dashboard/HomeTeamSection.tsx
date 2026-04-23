@@ -42,7 +42,7 @@ export function HomeTeamSection({
           The Home Team
         </h3>
         <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full ring-1 ring-teal-100">
-          {team.length} Pros
+          {team.length} Professionals
         </span>
       </div>
 

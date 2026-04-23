@@ -176,7 +176,7 @@ export function ProjectHealth({
     max,
   );
   return (
-    <Card className="overflow-hidden border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/30 rounded-[2rem] metal-surface relative">
+    <Card className="overflow-hidden border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/30 rounded-4xl metal-surface relative">
       <div className="absolute inset-0 noise-overlay opacity-[0.03] pointer-events-none" />
       <CardHeader className="pb-2">
         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center justify-between">
@@ -203,7 +203,7 @@ export function ProjectHealth({
               transition={{ duration: 0.5 }}
             >
               <span
-                className={`text-6xl font-black tracking-tighter tabular-nums bg-gradient-to-br ${color} bg-clip-text text-transparent`}
+                className={`text-6xl font-black tracking-tighter tabular-nums bg-linear-to-br ${color} bg-clip-text text-transparent`}
               >
                 {score}
               </span>
@@ -211,7 +211,7 @@ export function ProjectHealth({
             </motion.div>
             <div className="flex items-center gap-2">
               <motion.div
-                className={`px-2 py-0.5 rounded-full bg-gradient-to-br ${color} text-[10px] font-black uppercase tracking-widest text-white`}
+                className={`px-2 py-0.5 rounded-full bg-linear-to-br ${color} text-[10px] font-black uppercase tracking-widest text-white`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -250,7 +250,7 @@ export function ProjectHealth({
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <div
-            className={`mt-1.5 w-2 h-2 rounded-full bg-gradient-to-br ${color} shrink-0 animate-pulse`}
+            className={`mt-1.5 w-2 h-2 rounded-full bg-linear-to-br ${color} shrink-0 animate-pulse`}
           />
           <p className="text-sm font-medium text-slate-600 leading-relaxed italic group-hover:text-slate-900 transition-colors">
             "{message}"

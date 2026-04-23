@@ -1,4 +1,5 @@
 import { z } from "https://esm.sh/zod@3.23.8";
+import { UPLOAD_FORM_DOCUMENT_TYPES } from "../../../shared/lib/infer-document-type.ts";
 
 const uuidSchema = z.string().uuid();
 
@@ -40,9 +41,21 @@ export const photoToScopeSchema = z.object({
   scope_description: z.string().max(2000).optional().nullable(),
 });
 
-const documentTypeSchema = z
-  .enum(["invoice", "quote", "warranty", "permit"])
-  .default("invoice");
+const documentTypeSchema = z.preprocess(
+  (v) => {
+    const s = String(v ?? "").trim().toLowerCase();
+    if ((UPLOAD_FORM_DOCUMENT_TYPES as readonly string[]).includes(s)) {
+      return s;
+    }
+    return "auto";
+  },
+  z.enum(
+    UPLOAD_FORM_DOCUMENT_TYPES as unknown as [
+      (typeof UPLOAD_FORM_DOCUMENT_TYPES)[number],
+      ...(typeof UPLOAD_FORM_DOCUMENT_TYPES)[number][],
+    ],
+  ),
+);
 
 /** iOS camera/library often produces HEIC; mobile multipart may omit `File.type`. */
 const UPLOAD_MIME_ALLOWLIST = new Set([

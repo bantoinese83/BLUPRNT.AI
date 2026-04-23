@@ -1,7 +1,6 @@
 import { AlertCircle, Hammer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const FREE_INVOICE_LIMIT = 3;
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
 
 interface UpgradeBannerProps {
   invoiceCount: number;
@@ -17,7 +16,7 @@ export function UpgradeBanner({
   hasProjectPass = false,
 }: UpgradeBannerProps) {
   if (isArchitect || hasProjectPass) return null;
-  if (invoiceCount < FREE_INVOICE_LIMIT) return null;
+  if (invoiceCount < FREE_TIER_BILL_RECEIPT_LIMIT) return null;
 
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-drop-md">
@@ -28,12 +27,12 @@ export function UpgradeBanner({
 
         <div>
           <h4 className="font-semibold text-slate-900">
-            You&apos;ve used all {FREE_INVOICE_LIMIT} free invoices on this
-            project.
+            You&apos;ve used all {FREE_TIER_BILL_RECEIPT_LIMIT} free bill or
+            receipt uploads on this project.
           </h4>
           <p className="text-sm text-slate-600 mt-0.5">
-            Quotes, warranties, and permits still upload free. Upgrade for more
-            invoices.
+            Quotes, permits, and other record types don&apos;t use that cap.
+            Upgrade for more invoices and receipts.
           </p>
         </div>
       </div>

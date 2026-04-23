@@ -48,6 +48,7 @@ import { presentProjectShareSheet } from "@/lib/share-project";
 import { TransformationSlider } from "@/components/dashboard/TransformationSlider";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
+import { ConfidenceDisplay } from "@/components/ui/ConfidenceDisplay";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
@@ -336,6 +337,9 @@ export default function DashboardScreen() {
             >
               {dashboardSubline}
             </Text>
+            <View style={{ marginTop: 4 }}>
+              <ConfidenceDisplay score={project.confidence_score} size={10} />
+            </View>
           </TouchableOpacity>
         </View>
         <View style={styles.headerRight}>
@@ -432,9 +436,8 @@ export default function DashboardScreen() {
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
         invoiceTotal={capitalDocumentedTotal}
-        invoiceCount={invoices.length}
+        documentRowCount={invoices.length}
       />
-
       <View style={{ marginTop: 20 }}>
         <PlanVsActualCard
           estimatedMin={project.estimated_min_total}
@@ -460,6 +463,7 @@ export default function DashboardScreen() {
             onRefresh={load}
           />
         </MotiView>
+
         <MotiView
           from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}

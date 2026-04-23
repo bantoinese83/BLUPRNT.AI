@@ -6,16 +6,12 @@ import { cn } from "@/lib/utils";
 interface InvoiceUploadHeaderProps {
   uploading: boolean;
   batchStatus?: string | null;
-  documentType: "invoice" | "quote" | "warranty" | "permit";
-  setDocumentType: (type: "invoice" | "quote" | "warranty" | "permit") => void;
   onUploadClick: () => void;
 }
 
 export function InvoiceUploadHeader({
   uploading,
   batchStatus,
-  documentType,
-  setDocumentType,
   onUploadClick,
 }: InvoiceUploadHeaderProps) {
   return (
@@ -44,22 +40,12 @@ export function InvoiceUploadHeader({
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <select
-            value={documentType}
-            onChange={(e) =>
-              setDocumentType(
-                e.target.value as "invoice" | "quote" | "warranty" | "permit",
-              )
-            }
-            className="flex-1 sm:flex-none text-sm font-bold rounded-xl border border-slate-200 pl-3 pr-8 py-2 bg-white shadow-sm focus:ring-2 focus:ring-slate-950/20 focus:border-slate-950 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.5rem_center] bg-no-repeat"
-            aria-label="Document type"
-          >
-            <option value="invoice">Invoice</option>
-            <option value="quote">Quote</option>
-            <option value="warranty">Warranty</option>
-            <option value="permit">Permit</option>
-          </select>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:items-center">
+          <p className="text-[11px] text-slate-500 font-medium leading-snug order-2 sm:order-1 sm:max-w-[220px]">
+            We auto-classify capital docs (bills, quotes, receipts) and project
+            records (permits, contracts, liens, inspections, insurance, HOA,
+            etc.) from each file. Change the type in review if needed.
+          </p>
           <Button
             variant="outline"
             size="default"
@@ -67,7 +53,7 @@ export function InvoiceUploadHeader({
             disabled={uploading}
             type="button"
             className={cn(
-              "flex-1 sm:flex-none rounded-xl font-bold h-10",
+              "flex-1 sm:flex-none rounded-xl font-bold h-10 order-1 sm:order-2",
               uploading ? "bg-slate-50 border-slate-200" : "",
             )}
           >

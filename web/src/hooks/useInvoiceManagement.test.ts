@@ -54,7 +54,7 @@ describe("useInvoiceManagement", () => {
 
     expect(result.current.invoiceCount).toBe(0);
     expect(result.current.atLimit).toBe(false);
-    expect(result.current.documentType).toBe("invoice");
+    expect(result.current.documentType).toBe("auto");
   });
 
   it("resets state when projectId changes", async () => {

@@ -54,13 +54,12 @@ export function InvoicesSection({
     reviewInvoiceId,
     setReviewInvoiceId,
     closeReviewModal,
-    documentType,
-    setDocumentType,
     guideDismissed,
     guideExpanded,
     setGuideExpanded,
     invoiceCount,
     atLimit,
+    blockInvoiceOnlyUpload,
     isArchitectAtGlobalLimit,
     dismissGuide,
     handleUploadFile,
@@ -82,7 +81,7 @@ export function InvoicesSection({
     wasUploading.current = uploading;
   }, [uploading, invoices.length]);
 
-  const dropDisabled = uploading || atLimit || isArchitectAtGlobalLimit;
+  const dropDisabled = uploading || blockInvoiceOnlyUpload;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
   const onDragOver = useCallback(
@@ -145,8 +144,6 @@ export function InvoicesSection({
         <InvoiceUploadHeader
           uploading={uploading}
           batchStatus={batchStatus}
-          documentType={documentType}
-          setDocumentType={setDocumentType}
           onUploadClick={openFileUpload}
         />
 
@@ -162,8 +159,7 @@ export function InvoicesSection({
             setExpanded={setGuideExpanded}
             onUploadClick={openFileUpload}
             onDismiss={dismissGuide}
-            disabled={uploading}
-            atLimit={atLimit}
+            disabled={uploading || blockInvoiceOnlyUpload}
           />
         )}
 
@@ -183,7 +179,7 @@ export function InvoicesSection({
               [
                 { id: "all" as const, label: "All" },
                 { id: "capital" as const, label: "Capital" },
-                { id: "maintenance" as const, label: "Maintenance" },
+                { id: "maintenance" as const, label: "Records" },
               ] as const
             ).map(({ id, label }) => (
               <button
@@ -209,26 +205,25 @@ export function InvoicesSection({
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-6 text-center">
             <p className="text-sm font-semibold text-slate-800">
               {ledgerFilter === "capital"
-                ? "No invoices or quotes in this view"
-                : "No warranties or permits in your maintenance log yet"}
+                ? "No invoices, quotes, or receipts in this view"
+                : "No permits, contracts, or other project records here yet"}
             </p>
             <p className="mt-1 text-xs text-slate-500 leading-relaxed">
               {ledgerFilter === "capital"
-                ? "Switch to All or Maintenance, or upload a capital document."
-                : "Upload warranty or permit documents — they appear here and in your seller packet."}
+                ? "Switch to All or Records, or upload a capital document (invoice, quote, or receipt)."
+                : "Upload warranties, liens, inspections, insurance, HOA letters, and more — they show here and in your seller packet."}
             </p>
           </div>
         ) : null}
 
-        {documentType === "invoice" &&
-          !isArchitectActive &&
+        {!isArchitectActive &&
           !hasProjectPass &&
           invoiceCount > 0 &&
           invoiceCount < FREE_LIMIT && (
             <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
               <span className="font-medium text-slate-700">
-                {invoiceCount} of {FREE_LIMIT} free invoices used on this
-                project.
+                {invoiceCount} of {FREE_LIMIT} free bill or receipt uploads used
+                on this project (quotes &amp; other records don&apos;t count).
               </span>{" "}
               <button
                 type="button"
@@ -292,7 +287,7 @@ export function InvoicesSection({
                     variant="outline"
                     size="sm"
                     onClick={openFileUpload}
-                    disabled={uploading || atLimit}
+                    disabled={uploading || blockInvoiceOnlyUpload}
                     type="button"
                     className="gap-2 rounded-xl"
                   >
@@ -321,7 +316,7 @@ export function InvoicesSection({
               type="button"
               className="border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center text-slate-500 hover:bg-slate-50/80 hover:border-slate-300 transition-all min-h-[140px]"
               onClick={openFileUpload}
-              disabled={uploading || atLimit}
+              disabled={uploading || blockInvoiceOnlyUpload}
             >
               <Upload className="w-6 h-6 mb-2 text-slate-400" />
               <span className="text-sm font-medium">Add more</span>

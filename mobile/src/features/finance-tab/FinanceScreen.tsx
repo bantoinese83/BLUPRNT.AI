@@ -6,7 +6,6 @@ import { router } from "expo-router";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
-import { UpgradeModal } from "@/components/UpgradeModal";
 import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
 import type { InvoiceRow } from "@shared/types/database";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -54,8 +53,7 @@ export default function FinanceScreen() {
     load,
   } = useDashboardData();
 
-  const { showUpgrade, setShowUpgrade, upgradeReason, setUpgradeReason } =
-    useAwareness();
+  const { setShowUpgrade, setUpgradeReason } = useAwareness();
 
   const [filter, setFilter] = useState<InvoiceLedgerFilter>("all");
   const [exporting, setExporting] = useState(false);
@@ -349,12 +347,6 @@ export default function FinanceScreen() {
             onDelete={handleInvoiceDelete}
           />
         )}
-      />
-
-      <UpgradeModal
-        isOpen={showUpgrade}
-        onClose={() => setShowUpgrade(false)}
-        reason={upgradeReason}
       />
 
       <InvoiceReviewSheet

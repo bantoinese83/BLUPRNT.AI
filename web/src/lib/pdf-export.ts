@@ -290,7 +290,7 @@ export async function generateSellerPacketBlob(
   );
   y += LINE_HEIGHT;
   doc.text(
-    `Maintenance (warranties, permits): ${money(maintenance)}`,
+    `Project records (non-bill / compliance / files): ${money(maintenance)}`,
     MARGIN + 2,
     y,
   );

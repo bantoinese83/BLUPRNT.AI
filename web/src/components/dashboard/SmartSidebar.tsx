@@ -43,14 +43,14 @@ export function SmartSidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-white/10 backdrop-blur-2xl z-[100]"
+            className="fixed inset-0 bg-white/10 backdrop-blur-2xl z-100"
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-4 top-4 bottom-4 w-full max-w-md bg-white/40 backdrop-blur-3xl border border-white/20 z-[101] p-6 flex flex-col gap-6 shadow-spatial rounded-[2.5rem] overflow-hidden"
+            className="fixed right-4 top-4 bottom-4 w-full max-w-md bg-white/40 backdrop-blur-3xl border border-white/20 z-101 p-6 flex flex-col gap-6 shadow-spatial rounded-[2.5rem] overflow-hidden"
           >
             <div className="noise-overlay" />
 
@@ -150,7 +150,7 @@ export function SmartSidebar({
             <div className="mt-auto pt-6 border-t border-slate-100 relative z-10">
               <div className="p-4 rounded-2xl bg-teal-50 border border-teal-100">
                 <p className="text-[10px] text-teal-600 leading-relaxed">
-                  <span className="font-bold font-black">Pro Tip:</span> Keeping
+                  <span className="font-black">Architect Tip:</span> Keeping
                   your project data up to date ensures these insights remain
                   accurate and actionable.
                 </p>

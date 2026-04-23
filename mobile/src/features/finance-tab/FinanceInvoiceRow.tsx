@@ -1,14 +1,16 @@
-import React, { useRef } from "react";
+import React, { createElement, useRef } from "react";
 import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
-import { Wrench, ShieldCheck, Trash2, Clock, Lock } from "lucide-react-native";
+import { Trash2, Clock, Lock } from "lucide-react-native";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money, getWarrantyStatus } from "@shared/lib/formatters";
 import type { InvoiceRow } from "@shared/types/database";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
+import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
+import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
 
 type FinanceInvoiceRowProps = {
   inv: InvoiceRow;
@@ -88,11 +90,12 @@ export function FinanceInvoiceRow({
             <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
               <View style={styles.invoiceMain}>
                 <View style={styles.invoiceIcon}>
-                  {(inv.document_type || "invoice").toLowerCase() ===
-                  "invoice" ? (
-                    <Wrench size={18} color={Theme.colors.text.muted} />
-                  ) : (
-                    <ShieldCheck size={18} color={Theme.colors.text.muted} />
+                  {createElement(
+                    rowIconForLedgerDocumentType(inv.document_type),
+                    {
+                      size: 18,
+                      color: Theme.colors.text.muted,
+                    },
                   )}
                 </View>
                 <View style={styles.invoiceText}>
@@ -112,7 +115,7 @@ export function FinanceInvoiceRow({
                   >
                     <Text style={styles.invoiceDate}>
                       {new Date(inv.created_at).toLocaleDateString()} •{" "}
-                      {inv.document_type || "Invoice"}
+                      {ledgerDocumentTypeLabel(inv.document_type ?? "invoice")}
                     </Text>
 
                     {warranty &&

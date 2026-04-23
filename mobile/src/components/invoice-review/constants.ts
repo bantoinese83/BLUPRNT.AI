@@ -1,21 +1,7 @@
 import { Dimensions } from "react-native";
-import {
-  Receipt,
-  Wrench,
-  ShieldCheck,
-  CreditCard,
-  Tag,
-  type LucideIcon,
-} from "lucide-react-native";
+import { Receipt, type LucideIcon } from "lucide-react-native";
 
-export const DOC_ICONS: Record<string, LucideIcon> = {
-  invoice: Wrench,
-  quote: Tag,
-  warranty: ShieldCheck,
-  permit: CreditCard,
-};
-
-export const DEFAULT_DOC_ICON = Receipt;
+export const DEFAULT_DOC_ICON: LucideIcon = Receipt;
 
 export const STATUS_COLORS: Record<string, string> = {
   paid: "#10b981",

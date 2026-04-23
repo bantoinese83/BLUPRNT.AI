@@ -5,7 +5,8 @@ type DashboardStatsProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
   invoiceTotal: number;
-  invoiceCount: number;
+  /** All ledger files (invoices, quotes, permits, every type) — not the Free 3 "bill" cap. */
+  documentRowCount: number;
   isLoading?: boolean;
 };
 
@@ -34,7 +35,7 @@ export function DashboardStats({
   estimatedMin,
   estimatedMax,
   invoiceTotal,
-  invoiceCount,
+  documentRowCount,
   isLoading = false,
 }: DashboardStatsProps) {
   if (isLoading) {
@@ -97,13 +98,13 @@ export function DashboardStats({
         </div>
 
         <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5">
-          {invoiceCount}{" "}
+          {documentRowCount}{" "}
           <span className="text-sm font-bold text-slate-400">
-            {invoiceCount === 1 ? "item" : "items"}
+            {documentRowCount === 1 ? "file" : "files"}
           </span>
         </p>
         <p className="text-xs text-slate-400 font-bold">
-          Includes maintenance &amp; permits
+          Invoices, quotes, permits, and all other types combined
         </p>
       </motion.div>
 

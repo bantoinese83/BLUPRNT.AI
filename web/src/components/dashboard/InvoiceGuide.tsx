@@ -7,7 +7,6 @@ interface InvoiceGuideProps {
   onUploadClick: () => void;
   onDismiss: () => void;
   disabled?: boolean;
-  atLimit?: boolean;
 }
 
 export function InvoiceGuide({
@@ -16,7 +15,6 @@ export function InvoiceGuide({
   onUploadClick,
   onDismiss,
   disabled,
-  atLimit,
 }: InvoiceGuideProps) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-5 space-y-3">
@@ -40,12 +38,12 @@ export function InvoiceGuide({
         <>
           <ol className="text-sm text-slate-900/90 space-y-2 list-decimal list-inside pl-1">
             <li>
-              <strong>Pick a type</strong> above (invoice—including store
-              receipts—quote, warranty, or permit).
+              <strong>Upload</strong> a PDF or photo—we detect whether it&apos;s
+              an invoice (including store receipts), quote, warranty, or permit.
             </li>
             <li>
-              <strong>Upload</strong> a PDF or photo—we&apos;ll open it next so
-              you can match lines to your estimate.
+              <strong>Review</strong> the next screen to line items up with your
+              estimate when it&apos;s a bill or quote.
             </li>
           </ol>
 
@@ -56,7 +54,7 @@ export function InvoiceGuide({
               variant="primary"
               className="rounded-xl"
               onClick={onUploadClick}
-              disabled={disabled || atLimit}
+              disabled={disabled}
             >
               Choose file
             </Button>

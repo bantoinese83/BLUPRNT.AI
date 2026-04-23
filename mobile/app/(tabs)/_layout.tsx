@@ -47,7 +47,13 @@ function TabShell() {
 }
 
 function TabOverlays() {
-  const { showUpgrade, setShowUpgrade, upgradeReason } = useAwareness();
+  const {
+    showUpgrade,
+    setShowUpgrade,
+    upgradeReason,
+    isArchitect,
+    hasProjectPass,
+  } = useAwareness();
 
   const handleCloseUpgrade = useCallback(() => {
     setShowUpgrade(false);
@@ -63,6 +69,8 @@ function TabOverlays() {
           isOpen={showUpgrade}
           onClose={handleCloseUpgrade}
           reason={upgradeReason || "general"}
+          isArchitect={isArchitect}
+          hasProjectPass={hasProjectPass}
         />
       </ComponentErrorBoundary>
     </>
@@ -70,7 +78,14 @@ function TabOverlays() {
 }
 
 export default function TabLayout() {
-  const { project, scopeItems, invoices, spendByCategory } = useDashboardData();
+  const {
+    project,
+    scopeItems,
+    invoices,
+    spendByCategory,
+    isArchitect,
+    hasProjectPass,
+  } = useDashboardData();
 
   return (
     <AwarenessProvider
@@ -78,6 +93,8 @@ export default function TabLayout() {
       scopeItems={scopeItems}
       invoices={invoices}
       spendByCategory={spendByCategory}
+      isArchitect={isArchitect}
+      hasProjectPass={hasProjectPass}
     >
       <TabShell />
       <TabOverlays />

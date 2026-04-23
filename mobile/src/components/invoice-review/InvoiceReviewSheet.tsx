@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { createElement, useState } from "react";
 import {
   Modal,
   View,
@@ -27,7 +27,12 @@ import type { InvoiceRow } from "@/types/database";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { useInvoiceReviewDetail } from "@/hooks/useInvoiceReviewDetail";
 
-import { DOC_ICONS, DEFAULT_DOC_ICON, STATUS_COLORS } from "./constants";
+import {
+  isCapitalLedgerDocumentType,
+  ledgerDocumentTypeLabel,
+} from "@shared/lib/ledger-document-labels";
+import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
+import { DEFAULT_DOC_ICON, STATUS_COLORS } from "./constants";
 import { Theme } from "@/constants/Theme";
 import { invoiceReviewSheetStyles as styles } from "./invoiceReviewSheet.styles";
 import { InvoiceReviewDetailRow } from "./InvoiceReviewDetailRow";
@@ -36,6 +41,7 @@ import {
   type ScopeItemOption,
 } from "./InvoiceReviewLineItemRow";
 import { InvoiceReviewScopePicker } from "./InvoiceReviewScopePicker";
+import { InvoiceReviewDocTypePicker } from "./InvoiceReviewDocTypePicker";
 
 export type InvoiceReviewSheetProps = {
   invoice: InvoiceRow | null;
@@ -64,18 +70,22 @@ export function InvoiceReviewSheet({
     setMappings,
     saving,
     saveMappings,
+    ledgerDocType,
+    setLedgerDocType,
+    typeDirty,
   } = useInvoiceReviewDetail(invoice, projectId, isOpen);
 
   const [deleting, setDeleting] = useState(false);
   const [scopePickerLineId, setScopePickerLineId] = useState<string | null>(
     null,
   );
+  const [docTypePickerOpen, setDocTypePickerOpen] = useState(false);
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
 
   if (!invoice) return null;
 
-  const docType = (invoice.document_type || "invoice").toLowerCase();
-  const Icon = DOC_ICONS[docType] || DEFAULT_DOC_ICON;
+  const docType = ledgerDocType;
+  const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
   const statusColor =
     STATUS_COLORS[detail?.payment_status ?? invoice.payment_status ?? ""] ||
     "#64748b";
@@ -167,7 +177,14 @@ export function InvoiceReviewSheet({
             >
               <View style={styles.header}>
                 <View style={styles.docIconContainer}>
-                  <Icon size={28} color={Theme.colors.brand.primary} />
+                  {createElement(
+                    rowIconForLedgerDocumentType(ledgerDocType) ??
+                      DEFAULT_DOC_ICON,
+                    {
+                      size: 28,
+                      color: Theme.colors.brand.primary,
+                    },
+                  )}
                 </View>
                 <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
                   <X size={20} color={Theme.colors.text.secondary} />
@@ -221,16 +238,31 @@ export function InvoiceReviewSheet({
                         },
                       )}
                     />
-                    <InvoiceReviewDetailRow
-                      icon={
+                    <TouchableOpacity
+                      style={styles.docTypeRow}
+                      onPress={() => {
+                        void Haptics.selectionAsync();
+                        setDocTypePickerOpen(true);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Change document type"
+                    >
+                      <View style={styles.docTypeRowLeft}>
                         <Receipt
                           size={16}
                           color={Theme.colors.text.secondary}
                         />
-                      }
-                      label="Document Type"
-                      value={docType.charAt(0).toUpperCase() + docType.slice(1)}
-                    />
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text style={styles.detailLabelText}>
+                            Document type
+                          </Text>
+                          <Text style={styles.detailValue}>
+                            {ledgerDocumentTypeLabel(docType)}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.docTypeChange}>Change</Text>
+                    </TouchableOpacity>
                     <InvoiceReviewDetailRow
                       icon={<ShieldCheck size={16} color={statusColor} />}
                       label="Payment Status"
@@ -259,7 +291,7 @@ export function InvoiceReviewSheet({
                     </TouchableOpacity>
                   ) : null}
 
-                  {projectId && lineItems.length > 0 ? (
+                  {projectId && showCapitalLineLink && lineItems.length > 0 ? (
                     <View style={styles.linesSection}>
                       <View style={styles.linesSectionHeader}>
                         <Link2 size={16} color={Theme.colors.text.muted} />
@@ -297,19 +329,25 @@ export function InvoiceReviewSheet({
                     </View>
                   ) : null}
 
-                  {lineItems.length === 0 && !loadingDetail && !loadError && (
-                    <Text style={styles.noLines}>
-                      No line items yet. Totals above still update your ledger.
-                    </Text>
-                  )}
+                  {showCapitalLineLink &&
+                    lineItems.length === 0 &&
+                    !loadingDetail &&
+                    !loadError && (
+                      <Text style={styles.noLines}>
+                        No line items yet. Totals above still update your
+                        ledger.
+                      </Text>
+                    )}
 
                   <Text style={styles.reviewDismissHint}>
                     You can close anytime — the document stays in your ledger.
                   </Text>
 
                   {projectId &&
-                    lineItems.length > 0 &&
-                    scopeItems.length > 0 && (
+                    (typeDirty ||
+                      (showCapitalLineLink &&
+                        lineItems.length > 0 &&
+                        scopeItems.length > 0)) && (
                       <TouchableOpacity
                         style={[
                           styles.saveBtn,
@@ -324,7 +362,16 @@ export function InvoiceReviewSheet({
                             tone="onPrimary"
                           />
                         ) : (
-                          <Text style={styles.saveBtnText}>Save links</Text>
+                          <Text style={styles.saveBtnText}>
+                            {typeDirty &&
+                            !(
+                              showCapitalLineLink &&
+                              lineItems.length > 0 &&
+                              scopeItems.length > 0
+                            )
+                              ? "Save type"
+                              : "Save changes"}
+                          </Text>
                         )}
                       </TouchableOpacity>
                     )}
@@ -363,6 +410,13 @@ export function InvoiceReviewSheet({
                 [lineId]: scopeId,
               }));
             }}
+          />
+
+          <InvoiceReviewDocTypePicker
+            visible={docTypePickerOpen}
+            value={ledgerDocType}
+            onSelect={(next) => setLedgerDocType(next)}
+            onClose={() => setDocTypePickerOpen(false)}
           />
 
           {originalPreviewOpen ? (

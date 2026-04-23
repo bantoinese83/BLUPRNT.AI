@@ -5,6 +5,7 @@ import {
   type SmartInsight,
 } from "@/contexts/AwarenessContext";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
+import { money } from "@shared/lib/formatters";
 
 export function AwarenessProvider({
   children,
@@ -12,12 +13,16 @@ export function AwarenessProvider({
   scopeItems,
   invoices,
   spendByCategory,
+  isArchitect,
+  hasProjectPass,
 }: {
   children: React.ReactNode;
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
   invoices: InvoiceRow[];
   spendByCategory: Record<string, number>;
+  isArchitect: boolean;
+  hasProjectPass: boolean;
 }) {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -47,7 +52,7 @@ export function AwarenessProvider({
           id: `budget-over-${item.id}`,
           type: "anomaly",
           title: `Budget Alert: ${item.category}`,
-          description: `You've spent $${actual.toLocaleString()} which exceeds the estimated max of $${item.total_cost_max.toLocaleString()}.`,
+          description: `You've spent ${money(actual)} which exceeds the estimated max of ${money(item.total_cost_max)}.`,
           category: item.category,
         });
         health = "critical";
@@ -75,7 +80,7 @@ export function AwarenessProvider({
         id: "budget-aggregate-over",
         type: "anomaly",
         title: "Spend above total scope",
-        description: `Documented capital (invoices and quotes) is about $${capitalDocumentedTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
+        description: `Documented capital (invoices and quotes) is about ${money(capitalDocumentedTotal)}, above the roughly ${money(scopeMaxSum)} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
       });
       health = health === "optimal" ? "warning" : health;
     }
@@ -147,8 +152,18 @@ export function AwarenessProvider({
       upgradeReason,
       setUpgradeReason,
       activeProjectId: project?.id ?? null,
+      isArchitect,
+      hasProjectPass,
     }),
-    [awarenessData, isInsightsOpen, showUpgrade, upgradeReason, project?.id],
+    [
+      awarenessData,
+      isInsightsOpen,
+      showUpgrade,
+      upgradeReason,
+      project?.id,
+      isArchitect,
+      hasProjectPass,
+    ],
   );
 
   return (

@@ -21,15 +21,16 @@ export function InvoiceLimitAlert({
           </>
         ) : (
           <>
-            You&apos;ve used all <strong>{freeLimit} free invoices</strong> on
-            this project. Upgrade to add more anytime.
+            You&apos;ve used all{" "}
+            <strong>{freeLimit} free bill or receipt</strong> uploads on this
+            project. Upgrade to add more anytime.
           </>
         )}
       </p>
       <p className="text-slate-600">
-        <strong>Good news:</strong> quotes, warranties, and permits don&apos;t
-        count toward that limit—change the document type and upload those for
-        free.
+        <strong>Good news:</strong> quotes, estimates, permits, warranties, and
+        other record types don&apos;t count toward that cap—only vendor invoices
+        and store receipts do.
       </p>
       <Button
         type="button"

@@ -14,6 +14,17 @@ import {
   reserveArchitectInvoiceUploadSlot,
 } from "../_shared/entitlements.ts";
 import { extractInvoiceFromPdf, type ProjectScopeItem } from "../_shared/ocr.ts";
+import { classifyLedgerDocumentType } from "../_shared/classify-document.ts";
+import {
+  inferDocumentTypeFromFilename,
+  isArchitectQuotaInvoiceType,
+  isInvoiceStyleOcrType,
+  type LedgerDocumentType,
+} from "../../../shared/lib/infer-document-type.ts";
+import {
+  defaultLineDescriptionForUpload,
+  defaultVendorNameForDocumentType,
+} from "../../../shared/lib/ledger-document-labels.ts";
 import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
@@ -91,7 +102,7 @@ Deno.serve(async (req: Request) => {
     const parsed = uploadInvoiceSchema.safeParse({
       project_id: formData.get("project_id"),
       file: formData.get("file"),
-      document_type: formData.get("document_type") || "invoice",
+      document_type: formData.get("document_type") ?? "auto",
       vendor_hint: formData.get("vendor_hint"),
       amount_hint: formData.get("amount_hint") || undefined,
     });
@@ -100,10 +111,44 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: parsed.error.errors[0]?.message ?? "Invalid request" }, 400, req);
     }
 
-    const { project_id: projectId, file, document_type: docType, amount_hint: amountNum, vendor_hint } = parsed.data;
+    const {
+      project_id: projectId,
+      file,
+      document_type: docTypeInput,
+      amount_hint: amountNum,
+      vendor_hint,
+    } = parsed.data;
+
+    const fileBytes = new Uint8Array(await file.arrayBuffer());
+    const mimeForFile = resolvedMimeType(file);
+    const fileForPipeline = new File([fileBytes], file.name || "upload", {
+      type: mimeForFile,
+    });
+
     const admin = getServiceClient();
 
     await assertProjectOwner(admin, projectId, userId);
+
+    let docType: LedgerDocumentType;
+    if (docTypeInput === "auto") {
+      const fromName = inferDocumentTypeFromFilename(fileForPipeline.name);
+      if (fromName) {
+        docType = fromName;
+      } else {
+        const vision = await classifyLedgerDocumentType(
+          bufferToBase64(
+            fileBytes.byteOffset === 0 &&
+                fileBytes.byteLength === fileBytes.buffer.byteLength
+              ? fileBytes.buffer
+              : fileBytes.slice().buffer,
+          ),
+          mimeForFile,
+        );
+        docType = vision ?? "other";
+      }
+    } else {
+      docType = docTypeInput as LedgerDocumentType;
+    }
 
     const entitlement = await checkInvoiceUploadAllowed(admin, userId, projectId, docType);
     if (!entitlement.allowed) {
@@ -112,7 +157,7 @@ Deno.serve(async (req: Request) => {
 
     let rollbackArchitectSlot = false;
     try {
-      if (docType === "invoice" && entitlement.reason === "architect_plan") {
+      if (isArchitectQuotaInvoiceType(docType) && entitlement.reason === "architect_plan") {
         const slot = await reserveArchitectInvoiceUploadSlot(admin, userId);
         if (!slot.ok) {
           return jsonResponse({
@@ -124,7 +169,13 @@ Deno.serve(async (req: Request) => {
       }
 
       const docId = crypto.randomUUID();
-      const storage = await uploadFileToStorage(admin, { projectId, userId, docId, docType: docType, file });
+      const storage = await uploadFileToStorage(admin, {
+        projectId,
+        userId,
+        docId,
+        docType: docType,
+        file: fileForPipeline,
+      });
       if (storage.error) return jsonResponse({ error: "Could not store file." }, 500, req);
 
       const { data: doc, error: docErr } = await admin.from("documents").insert({
@@ -134,7 +185,7 @@ Deno.serve(async (req: Request) => {
         storage_path: storage.path,
         original_filename: file.name,
         uploaded_by_user_id: userId,
-        ocr_status: docType === "invoice" ? "pending" : "success",
+        ocr_status: isInvoiceStyleOcrType(docType) ? "pending" : "success",
       }).select("id").single();
 
       if (docErr || !doc) return jsonResponse({ error: "Could not create document." }, 500, req);
@@ -166,10 +217,11 @@ Deno.serve(async (req: Request) => {
       let subtotal = amountNum ?? (docType === "invoice" ? 1850 : 0);
       let tax = docType === "invoice" ? Math.round(subtotal * 0.08) : 0;
       let total = subtotal + tax;
-      let vendorLabel = vendor_hint || (docType === "invoice" ? "Vendor" : docType === "quote" ? "Quote" : docType.charAt(0).toUpperCase() + docType.slice(1));
+      let vendorLabel =
+        vendor_hint || defaultVendorNameForDocumentType(docType);
       let lineItems: any[] = [];
 
-      if (docType === "invoice") {
+      if (isInvoiceStyleOcrType(docType)) {
         // Fetch current project scope for reconciliation mapping
         const { data: scopeRows } = await admin
           .from("scope_items")
@@ -178,10 +230,16 @@ Deno.serve(async (req: Request) => {
 
         const projectScope = (scopeRows || []) as ProjectScopeItem[];
 
+        const ocrBase64 = bufferToBase64(
+          fileBytes.byteOffset === 0 &&
+            fileBytes.byteLength === fileBytes.buffer.byteLength
+            ? fileBytes.buffer
+            : fileBytes.slice().buffer,
+        );
         const ocr = await extractInvoiceFromPdf(
-          bufferToBase64(await file.arrayBuffer()), 
+          ocrBase64,
           storage.mime,
-          projectScope
+          projectScope,
         );
 
         if (ocr) {
@@ -204,9 +262,13 @@ Deno.serve(async (req: Request) => {
       }
 
       if (lineItems.length === 0) {
+        const defaultLineDesc = defaultLineDescriptionForUpload(
+          docType,
+          vendor_hint,
+        );
         lineItems = [{
           invoice_id: invoiceId,
-          description: vendor_hint ? `Services from ${vendor_hint}` : "Invoice line",
+          description: defaultLineDesc,
           quantity: 1,
           unit_price: subtotal,
           unit_of_measure: "job",
@@ -224,7 +286,7 @@ Deno.serve(async (req: Request) => {
         payment_status: "unpaid", currency: "USD", issue_date: new Date().toISOString().slice(0, 10),
       });
 
-      if (docType === "invoice") {
+      if (isInvoiceStyleOcrType(docType)) {
         await admin.from("invoice_line_items").insert(lineItems);
         await admin.from("documents").update({ ocr_status: "success" }).eq("id", doc.id);
       }

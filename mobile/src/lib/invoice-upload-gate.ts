@@ -1,9 +1,11 @@
+import { isArchitectQuotaInvoiceType } from "@shared/lib/infer-document-type";
 import type { InvoiceRow } from "@shared/types/database";
 
-/** Invoices whose stored type is the default “invoice” document. */
+/** Bills & receipts (both count toward the same per-project / Architect cap). */
 export function countInvoiceDocuments(invoices: InvoiceRow[]): number {
-  return invoices.filter((i) => (i.document_type ?? "invoice") === "invoice")
-    .length;
+  return invoices.filter((i) =>
+    isArchitectQuotaInvoiceType(i.document_type ?? "invoice"),
+  ).length;
 }
 
 /**

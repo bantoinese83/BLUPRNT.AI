@@ -79,8 +79,8 @@ Deno.test("Stripe co-existence guard — only entitlement flag should change", (
 
 Deno.test("webhook auth — rejects when Authorization header mismatches secret", () => {
   const secret = "my-webhook-secret";
-  const incomingHeader = "Bearer wrong-secret";
-  const expected = `Bearer ${secret}`;
+  const incomingHeader: string = "Bearer wrong-secret";
+  const expected: string = `Bearer ${secret}`;
   assertEquals(incomingHeader === expected, false);
 });
 

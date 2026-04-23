@@ -184,10 +184,10 @@ export function PropertyLedger({
             </div>
             <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-100/50">
               <span className="text-slate-900 block mb-1 uppercase text-[8.5px] tracking-tighter leading-tight font-black">
-                Maintenance Log
+                Project records
               </span>
               <span className="font-medium text-slate-500 normal-case tracking-normal">
-                Essential upkeep to prove home health to buyers.
+                Permits, warranties, inspections, liens, &amp; compliance files.
               </span>
             </div>
           </div>
@@ -210,7 +210,7 @@ export function PropertyLedger({
                 <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center shrink-0">
                   <BookOpen className="w-4 h-4" strokeWidth={2.5} aria-hidden />
                 </div>
-                <span className="truncate">Maintenance Log</span>
+                <span className="truncate">Project records</span>
               </div>
               <span className="font-bold text-slate-950 tabular-nums text-lg tracking-tight shrink-0">
                 {money(maintenanceTotal)}

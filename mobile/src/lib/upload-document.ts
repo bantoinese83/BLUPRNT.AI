@@ -1,10 +1,11 @@
-import { Alert } from "react-native";
 import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { invokeFunction } from "@/lib/supabase";
 import { showAppToast } from "@/lib/app-toast";
 
-export type DocumentType = "invoice" | "quote" | "warranty" | "permit";
+import type { UploadFormDocumentType } from "@shared/lib/infer-document-type";
+
+export type DocumentType = UploadFormDocumentType;
 
 export type UploadResult = {
   success: boolean;
@@ -40,39 +41,22 @@ export function normalizeInvoiceUploadMime(
 }
 
 /**
- * Prompts the user for a document type then uploads the file to the
- * upload-invoice edge function. Returns the invoice_id on success.
+ * Uploads via `upload-invoice` with `document_type=auto` so the server classifies
+ * from filename + document contents.
  */
 export async function uploadDocumentWithType(
   fileUri: string,
   mimeType: string,
   projectId: string,
+  options?: { fileName?: string },
 ): Promise<UploadResult> {
-  const options: DocumentType[] = ["invoice", "quote", "warranty", "permit"];
-
-  return new Promise((resolve) => {
-    const buttons = options.map((type) => ({
-      text: type.charAt(0).toUpperCase() + type.slice(1),
-      onPress: async () => {
-        const result = await executeUploadWorkflow(
-          fileUri,
-          mimeType,
-          type,
-          projectId,
-        );
-        resolve(result);
-      },
-    }));
-
-    Alert.alert("Document Type", "What type of document are you uploading?", [
-      ...buttons,
-      {
-        text: "Cancel",
-        style: "cancel",
-        onPress: () => resolve({ success: false }),
-      },
-    ]);
-  });
+  return executeUploadWorkflow(
+    fileUri,
+    mimeType,
+    "auto",
+    projectId,
+    options?.fileName,
+  );
 }
 
 /** Orchestrates the UI feedback, network call, and error mapping for a document upload. */
@@ -81,6 +65,7 @@ async function executeUploadWorkflow(
   mimeType: string,
   documentType: DocumentType,
   projectId: string,
+  originalFileName?: string,
 ): Promise<UploadResult> {
   try {
     showAppToast("Starting upload... please keep the app open.");
@@ -90,6 +75,7 @@ async function executeUploadWorkflow(
       mimeType,
       documentType,
       projectId,
+      originalFileName,
     );
     const { data, error } = await invokeUploadWithTimeout(formData);
 
@@ -102,7 +88,12 @@ async function executeUploadWorkflow(
       };
     }
 
-    return { success: true, invoice_id: data?.invoice_id, documentType };
+    const resolved = data?.document_type as DocumentType | undefined;
+    return {
+      success: true,
+      invoice_id: data?.invoice_id,
+      documentType: resolved,
+    };
   } catch (err) {
     return { success: false, error: friendlyDocumentUploadError(err) };
   }
@@ -114,16 +105,19 @@ function prepareUploadFormData(
   mimeType: string,
   documentType: DocumentType,
   projectId: string,
+  originalFileName?: string,
 ): FormData {
   const mime = normalizeInvoiceUploadMime(uri, mimeType);
   const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+  const safeName =
+    (originalFileName && originalFileName.trim()) || `doc_${Date.now()}.${ext}`;
 
   const formData = new FormData();
   formData.append("project_id", projectId);
   formData.append("document_type", documentType);
   formData.append("file", {
     uri,
-    name: `doc_${Date.now()}.${ext}`,
+    name: safeName,
     type: mime,
   } as unknown as Blob);
 
@@ -139,6 +133,7 @@ async function invokeUploadWithTimeout(formData: FormData) {
   return await Promise.race([
     invokeFunction<{
       invoice_id?: string;
+      document_type?: string;
       error?: string;
       error_code?: string;
     }>("upload-invoice", { body: formData }),

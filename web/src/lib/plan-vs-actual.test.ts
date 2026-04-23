@@ -8,48 +8,57 @@ import {
 } from "./plan-vs-actual";
 
 describe("capitalImprovementTotal", () => {
-  it("sums invoice and quote types only", () => {
+  it("sums invoice, quote, and receipt only", () => {
     expect(
       capitalImprovementTotal([
         { total: 100, document_type: "invoice" },
         { total: 50, document_type: "quote" },
+        { total: 20, document_type: "receipt" },
         { total: 999, document_type: "warranty" },
+        { total: 1, document_type: "permit" },
+        { total: 5, document_type: "other" },
       ]),
-    ).toBe(150);
+    ).toBe(170);
   });
 });
 
 describe("maintenanceDocumentTotal", () => {
-  it("sums warranty and permit types only", () => {
+  it("sums non–plan-vs-actual types (record / compliance bucket)", () => {
     expect(
       maintenanceDocumentTotal([
         { total: 100, document_type: "invoice" },
         { total: 40, document_type: "warranty" },
         { total: 25, document_type: "permit" },
+        { total: 12, document_type: "maintenance" },
+        { total: 7, document_type: "insurance" },
       ]),
-    ).toBe(65);
+    ).toBe(84);
   });
 });
 
 describe("filterInvoicesByLedgerDocumentFilter", () => {
   const rows = [
     { total: 1, document_type: "invoice" as const },
+    { total: 2, document_type: "receipt" as const },
     { total: 2, document_type: "warranty" as const },
+    { total: 3, document_type: "other" as const },
   ];
 
   it("returns all when filter is all", () => {
-    expect(filterInvoicesByLedgerDocumentFilter(rows, "all").length).toBe(2);
+    expect(filterInvoicesByLedgerDocumentFilter(rows, "all").length).toBe(4);
   });
 
-  it("returns capital subset", () => {
+  it("returns capital subset (invoice, quote, receipt)", () => {
     expect(filterInvoicesByLedgerDocumentFilter(rows, "capital")).toEqual([
       rows[0],
+      rows[1],
     ]);
   });
 
-  it("returns maintenance subset", () => {
+  it("returns records subset", () => {
     expect(filterInvoicesByLedgerDocumentFilter(rows, "maintenance")).toEqual([
-      rows[1],
+      rows[2],
+      rows[3],
     ]);
   });
 });

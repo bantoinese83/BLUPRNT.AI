@@ -30,11 +30,17 @@ import {
   ArchitectPlanIcon,
   ProjectPassIcon,
 } from "@/components/icons/PlanMarks";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
+
+const ARCHITECT_INVOICE_LIMIT = 10;
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   reason?: "general" | "invoice_limit" | "export";
+  /** When true, monthly (Architect) is already active — align with web paywall. */
+  isArchitect?: boolean;
+  hasProjectPass?: boolean;
 }
 
 /**
@@ -42,7 +48,13 @@ interface Props {
  * Shows a custom designed UI by default, with RevenueCat Paywall overlay
  * as the functional layer for production builds.
  */
-export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
+export function UpgradeModal({
+  isOpen,
+  onClose,
+  reason = "general",
+  isArchitect = false,
+  hasProjectPass = false,
+}: Props) {
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">(
     "monthly",
@@ -61,6 +73,10 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
 
   const canPurchase =
     !loading && !offeringsError && !noProductsConfigured && packages.length > 0;
+
+  const selectionMatchesCurrentPlan =
+    (selectedPlan === "monthly" && isArchitect) ||
+    (selectedPlan === "projectPass" && hasProjectPass);
 
   const handlePurchaseCompleted = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -146,16 +162,29 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
             </View>
             <Text style={styles.heroTitle}>Level up your remodel file</Text>
             <Text style={styles.heroSubtitle}>
-              {reason === "invoice_limit"
-                ? "You’ve used the free invoice slots for this project. Upgrade to keep snapping receipts without hitting a wall."
-                : reason === "export"
-                  ? "Upgrade to Pro to build full PDF packets and your complete home file."
-                  : "Keep budgets, photos of bills, and one-tap exports in a single place—built for homeowners."}
+              {reason === "export" && (isArchitect || hasProjectPass)
+                ? "You already have full access to exports and premium tools on this account."
+                : reason === "invoice_limit" && isArchitect
+                  ? `You’ve used your ${ARCHITECT_INVOICE_LIMIT} bill or receipt uploads for this billing period. Your limit resets when your subscription renews.`
+                  : reason === "invoice_limit" && hasProjectPass
+                    ? "You’ve reached the upload limit for this project while your Project Pass is active."
+                    : reason === "invoice_limit"
+                      ? `You’ve used all ${FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt uploads on this project. Upgrade to add more anytime.`
+                      : reason === "export"
+                        ? "Upgrade to Pro to build full PDF packets and your complete home file."
+                        : "Keep budgets, photos of bills, and one-tap exports in a single place—built for homeowners."}
             </Text>
             {reason === "invoice_limit" ? (
               <Text style={styles.invoiceLimitHint}>
-                Only invoice uploads count toward this limit—not quotes,
-                warranties, or permits.
+                Only vendor invoices and store receipts count toward this
+                cap—not quotes, estimates, or permits.
+              </Text>
+            ) : null}
+            {reason === "export" && !isArchitect && !hasProjectPass ? (
+              <Text style={styles.invoiceLimitHint}>
+                The full seller packet PDF is included with Architect or a
+                Project Pass. You can still browse your project on the free
+                plan.
               </Text>
             ) : null}
           </MotiView>
@@ -258,6 +287,9 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               <Text style={styles.planTagline}>
                 Best for active renovations
               </Text>
+              {isArchitect ? (
+                <Text style={styles.currentPlanPill}>Current plan</Text>
+              ) : null}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -290,6 +322,9 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               <View style={styles.popularBadge}>
                 <Text style={styles.popularText}>POPULAR</Text>
               </View>
+              {hasProjectPass ? (
+                <Text style={styles.currentPlanPillPass}>Current plan</Text>
+              ) : null}
             </TouchableOpacity>
           </View>
 
@@ -302,9 +337,12 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
             <TouchableOpacity
               style={[
                 styles.continueButton,
-                (isPurchasing || !canPurchase) && styles.continueButtonDisabled,
+                (isPurchasing || !canPurchase || selectionMatchesCurrentPlan) &&
+                  styles.continueButtonDisabled,
               ]}
-              disabled={isPurchasing || !canPurchase}
+              disabled={
+                isPurchasing || !canPurchase || selectionMatchesCurrentPlan
+              }
               onPress={async () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setIsPurchasing(true);
@@ -336,7 +374,11 @@ export function UpgradeModal({ isOpen, onClose, reason = "general" }: Props) {
               }}
             >
               <Text style={styles.continueButtonText}>
-                {isPurchasing ? "Securing plan…" : "Continue"}
+                {selectionMatchesCurrentPlan
+                  ? "Current plan"
+                  : isPurchasing
+                    ? "Securing plan…"
+                    : "Continue"}
               </Text>
             </TouchableOpacity>
 
@@ -516,6 +558,20 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: Theme.typography.family.black,
     letterSpacing: 1,
+  },
+  currentPlanPill: {
+    marginTop: 10,
+    alignSelf: "flex-start",
+    fontSize: 12,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.status.success,
+  },
+  currentPlanPillPass: {
+    marginTop: 10,
+    alignSelf: "flex-start",
+    fontSize: 12,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.status.success,
   },
   footer: {
     alignItems: "center",

@@ -5,6 +5,8 @@ import * as DocumentPicker from "expo-document-picker";
 export type PickedFile = {
   uri: string;
   mimeType?: string;
+  /** Original name when available — improves server-side document-type detection. */
+  fileName?: string;
 };
 
 /** Copy for the camera / files sheet (screens differ slightly in tone). */
@@ -33,7 +35,13 @@ async function openCamera(
   });
 
   if (!result.canceled && result.assets[0]) {
-    onPickedFiles([{ uri: result.assets[0].uri, mimeType: "image/jpeg" }]);
+    onPickedFiles([
+      {
+        uri: result.assets[0].uri,
+        mimeType: "image/jpeg",
+        fileName: result.assets[0].fileName ?? undefined,
+      },
+    ]);
   }
 }
 
@@ -62,6 +70,7 @@ async function openPhotoLibrary(
         mimeType: asset.mimeType?.startsWith("image/")
           ? asset.mimeType
           : "image/jpeg",
+        fileName: asset.fileName ?? undefined,
       })),
     );
   }
@@ -80,6 +89,7 @@ async function openDocumentPicker(
       result.assets.map((asset) => ({
         uri: asset.uri,
         mimeType: asset.mimeType || "image/jpeg",
+        fileName: asset.name ?? undefined,
       })),
     );
   }

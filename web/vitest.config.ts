@@ -38,6 +38,8 @@ export default defineConfig({
         "**/*.{test,spec}.{ts,tsx}",
         /** Large PDF pipeline — exercised via manual QA / E2E; keep threshold realistic. */
         "src/lib/pdf-export.ts",
+        /** Canvas / animation — covered by manual QA; jsdom has no real canvas timing. */
+        "src/lib/dashboard-celebration-confetti.ts",
         "src/lib/onboarding-icons.tsx",
         "src/lib/onboarding-custom-icon.tsx",
         /** Multi-step wizard — smoke-tested; full flow covered by E2E. */

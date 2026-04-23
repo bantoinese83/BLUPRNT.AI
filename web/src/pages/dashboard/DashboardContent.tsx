@@ -33,7 +33,8 @@ import {
   DASHBOARD_SECTION_PLAN_SPENDING,
 } from "@shared/copy/dashboard";
 import { ShareModal } from "@/components/dashboard/ShareModal";
-import type { InvoiceRow, ProjectRow } from "@shared/types/database";
+import { countBillOrReceiptUploadsInProject } from "@shared/lib/invoice-quota";
+import type { ProjectRow } from "@shared/types/database";
 import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
@@ -88,8 +89,8 @@ export function DashboardContent({
   const location = useLocation();
   const { logout } = useLogout();
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [_useDiscount, setUseDiscount] = useState(false);
-  const [_upgradeReason, setUpgradeReason] =
+  const [useDiscount, setUseDiscount] = useState(false);
+  const [upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
   const [shareOpen, setShareOpen] = useState(false);
   const [deleteProject, setDeleteProject] = useState<ProjectRow | null>(null);
@@ -111,6 +112,20 @@ export function DashboardContent({
     () => capitalImprovementTotal(invoices),
     [invoices],
   );
+
+  const upgradeEstimatedMid = useMemo(() => {
+    const min = project.estimated_min_total;
+    const max = project.estimated_max_total;
+    if (
+      min != null &&
+      max != null &&
+      Number.isFinite(min) &&
+      Number.isFinite(max)
+    ) {
+      return (min + max) / 2;
+    }
+    return min ?? max ?? null;
+  }, [project.estimated_min_total, project.estimated_max_total]);
 
   const handleSignOut = useCallback(async () => {
     await logout();
@@ -195,7 +210,7 @@ export function DashboardContent({
       estimatedMin={project.estimated_min_total}
       estimatedMax={project.estimated_max_total}
       invoiceTotal={capitalDocumentedTotal}
-      invoiceCount={invoices.length}
+      documentRowCount={invoices.length}
     />
   );
 
@@ -396,11 +411,7 @@ export function DashboardContent({
 
         <motion.div variants={itemVariants}>
           <UpgradeBanner
-            invoiceCount={
-              invoices.filter(
-                (i: InvoiceRow) => (i.document_type ?? "invoice") === "invoice",
-              ).length
-            }
+            invoiceCount={countBillOrReceiptUploadsInProject(invoices)}
             onUpgradeClick={() => {
               setUpgradeReason("invoice_limit");
               setShowUpgrade(true);
@@ -489,6 +500,12 @@ export function DashboardContent({
             setUseDiscount(false);
             setUpgradeReason("general");
           }}
+          isArchitect={isArchitect}
+          hasProjectPass={hasProjectPass}
+          openReason={upgradeReason}
+          estimatedAmount={upgradeEstimatedMid}
+          projectId={project.id}
+          showDiscount={useDiscount}
         />
       </ComponentErrorBoundary>
 

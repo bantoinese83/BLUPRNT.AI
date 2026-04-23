@@ -5,6 +5,10 @@ import { supabase, invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import { showAppToast } from "@/lib/app-toast";
 import type { InvoiceRow } from "@/types/database";
+import {
+  coerceLedgerDocumentType,
+  type LedgerDocumentType,
+} from "@shared/lib/infer-document-type";
 
 export type LineItem = {
   id: string;
@@ -21,6 +25,7 @@ export type InvoiceDetail = {
   total: number | null;
   payment_status: string;
   document_id?: string | null;
+  document_type?: string | null;
 };
 
 export function useInvoiceReviewDetail(
@@ -37,6 +42,10 @@ export function useInvoiceReviewDetail(
   >([]);
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [ledgerDocType, setLedgerDocType] =
+    useState<LedgerDocumentType>("invoice");
+  const [serverLedgerDocType, setServerLedgerDocType] =
+    useState<LedgerDocumentType>("invoice");
 
   const reset = useCallback(() => {
     setError(null);
@@ -44,6 +53,8 @@ export function useInvoiceReviewDetail(
     setLineItems([]);
     setScopeItems([]);
     setMappings({});
+    setLedgerDocType("invoice");
+    setServerLedgerDocType("invoice");
   }, []);
 
   useEffect(() => {
@@ -58,7 +69,10 @@ export function useInvoiceReviewDetail(
       setError(null);
       try {
         const { data: invData, error: invErr } = await invokeFunction<{
-          invoice: InvoiceDetail & { id: string };
+          invoice: InvoiceDetail & {
+            id: string;
+            document_type?: string | null;
+          };
           line_items: LineItem[];
         }>("get-invoice", {
           body: { invoice_id: invoice.id },
@@ -74,6 +88,9 @@ export function useInvoiceReviewDetail(
         setDetail(invData.invoice);
         const lines = invData.line_items ?? [];
         setLineItems(lines);
+        const t = coerceLedgerDocumentType(invData.invoice.document_type);
+        setLedgerDocType(t);
+        setServerLedgerDocType(t);
 
         const { data: scope, error: scopeErr } = await supabase
           .from("scope_items")
@@ -117,14 +134,17 @@ export function useInvoiceReviewDetail(
     };
   }, [isOpen, invoice?.id, projectId, reset]);
 
+  const typeDirty = ledgerDocType !== serverLedgerDocType;
+
   const saveMappings = async () => {
-    if (!projectId) return false;
+    if (!projectId || !invoice?.id) return false;
     setSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      // OPTIMIZATION: Use Promise.all to run updates in parallel instead of a sequential waterfall
-      const updatePromises = Object.entries(mappings).map(
+      const docKindChanged = ledgerDocType !== serverLedgerDocType;
+
+      const lineUpdatePromises = Object.entries(mappings).map(
         ([lineId, scopeItemId]) =>
           supabase
             .from("invoice_line_items")
@@ -132,19 +152,49 @@ export function useInvoiceReviewDetail(
             .eq("id", lineId),
       );
 
-      const results = await Promise.all(updatePromises);
+      const typeUpdatePromises =
+        docKindChanged && invoice.id
+          ? [
+              supabase
+                .from("invoices")
+                .update({ document_type: ledgerDocType })
+                .eq("id", invoice.id),
+              ...(detail?.document_id
+                ? [
+                    supabase
+                      .from("documents")
+                      .update({ type: ledgerDocType })
+                      .eq("id", detail.document_id),
+                  ]
+                : []),
+            ]
+          : [];
+
+      const results = await Promise.all([
+        ...lineUpdatePromises,
+        ...typeUpdatePromises,
+      ]);
       const firstError = results.find((r) => r.error)?.error;
       if (firstError) throw firstError;
 
+      if (docKindChanged) {
+        setServerLedgerDocType(ledgerDocType);
+      }
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      showAppToast("Line links saved.", { type: "success" });
+      const didLines = lineUpdatePromises.length > 0;
+      showAppToast(
+        docKindChanged && didLines
+          ? "Changes saved."
+          : docKindChanged
+            ? "Document type updated."
+            : "Line links saved.",
+        { type: "success" },
+      );
       return true;
     } catch (err) {
       reportClientError("useInvoiceReviewDetail_save", err);
-      Alert.alert(
-        "Couldn’t save",
-        "We couldn’t save your line links. Try again.",
-      );
+      Alert.alert("Couldn’t save", "We couldn’t save your changes. Try again.");
       return false;
     } finally {
       setSaving(false);
@@ -161,5 +211,8 @@ export function useInvoiceReviewDetail(
     setMappings,
     saving,
     saveMappings,
+    ledgerDocType,
+    setLedgerDocType,
+    typeDirty,
   };
 }

@@ -23,6 +23,9 @@ export interface AwarenessState {
   upgradeReason: "export" | "invoice_limit" | "general";
   setUpgradeReason: (reason: "export" | "invoice_limit" | "general") => void;
   activeProjectId: string | null;
+  /** Mirrors dashboard snapshot — paywall should respect subscription state. */
+  isArchitect: boolean;
+  hasProjectPass: boolean;
 }
 
 export const AwarenessContext = createContext<AwarenessState | undefined>(

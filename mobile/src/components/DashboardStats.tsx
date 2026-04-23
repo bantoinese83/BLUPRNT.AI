@@ -9,21 +9,15 @@ import {
 import { MotiView } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
+import { money } from "@shared/lib/formatters";
 
 type DashboardStatsProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
   invoiceTotal: number;
-  invoiceCount: number;
+  /** All document rows in the project (all types) — not the Free-tier bill cap. */
+  documentRowCount: number;
 };
-
-function formatCurrency(n: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
 
 interface StatItemProps {
   label: string;
@@ -79,7 +73,7 @@ export function DashboardStats({
   estimatedMin,
   estimatedMax,
   invoiceTotal,
-  invoiceCount,
+  documentRowCount,
 }: DashboardStatsProps) {
   const estimatedMid =
     (estimatedMin ?? 0) + (estimatedMax ?? 0)
@@ -101,7 +95,7 @@ export function DashboardStats({
         label="Estimate"
         value={
           estimatedMin != null && estimatedMax != null
-            ? `${formatCurrency(estimatedMin)} – ${formatCurrency(estimatedMax)}`
+            ? money(estimatedMin, estimatedMax)
             : "—"
         }
         subValue="Total project range"
@@ -110,16 +104,20 @@ export function DashboardStats({
 
       <StatItem
         label="Documents"
-        value={invoiceCount.toString()}
-        subValue={invoiceCount === 1 ? "item tracked" : "items tracked"}
+        value={documentRowCount.toString()}
+        subValue={
+          documentRowCount === 1
+            ? "file in your ledger"
+            : "files in your ledger"
+        }
         icon={FileText}
         delay={100}
       />
 
       <StatItem
         label="Invested"
-        value={formatCurrency(invoiceTotal)}
-        subValue="Invoices & quotes vs estimate"
+        value={money(invoiceTotal)}
+        subValue="Logged capital spend"
         icon={TrendingUp}
         delay={200}
         badge={

@@ -9,8 +9,8 @@ import {
   ArchitectPlanIcon,
   ProjectPassIcon,
 } from "@/components/icons/PlanMarks";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
 
-const FREE_INVOICE_LIMIT = 3;
 const ARCHITECT_INVOICE_LIMIT = 10;
 
 export type UpgradeOpenReason = "general" | "invoice_limit" | "export";
@@ -138,39 +138,39 @@ export function UpgradeModal({
         )}
         {openReason === "invoice_limit" && (
           <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Only <strong>invoice</strong> uploads count toward this limit.
-            Quotes, warranties, and permits don&apos;t.
+            Only <strong>vendor invoices</strong> and{" "}
+            <strong>store receipts</strong> count toward this cap. Quotes,
+            estimates, permits, and other records don&apos;t.
           </p>
         )}
         {showDiscount && (
           <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
             Use promo code <strong>BLUEPRINT35</strong> on the Stripe checkout
             page if you have one. List prices:{" "}
-            <strong>${PRICING.architectUsdPerMonth}/mo</strong> Pro (Architect
-            tier), <strong>${PRICING.projectPassUsdOneTime}</strong> Project
-            Pass.
+            <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect tier,{" "}
+            <strong>${PRICING.projectPassUsdOneTime}</strong> Project Pass.
           </p>
         )}
 
         {openReason === "invoice_limit" && isArchitect && (
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             You&apos;ve used your{" "}
-            <strong>{ARCHITECT_INVOICE_LIMIT} invoice uploads</strong> for this
-            billing period. Your limit will reset when your subscription renews.{" "}
+            <strong>{ARCHITECT_INVOICE_LIMIT} bill or receipt uploads</strong>{" "}
+            for this billing period. Your limit will reset when your
+            subscription renews.{" "}
             <span className="text-slate-600">
-              Quotes, warranties, and permits don&apos;t count toward this
-              limit.
+              Quotes, permits, and other record types don&apos;t count.
             </span>
           </p>
         )}
         {openReason === "invoice_limit" && !isArchitect && !hasProjectPass && (
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             You&apos;ve used all{" "}
-            <strong>{FREE_INVOICE_LIMIT} free invoices</strong> on this project.
-            Upgrade to add more invoices anytime.{" "}
+            <strong>{FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt</strong>{" "}
+            uploads on this project. Upgrade to add more anytime.{" "}
             <span className="text-slate-600">
-              Quotes, warranties, and permits don&apos;t count toward that
-              limit—you can still upload those for free.
+              Quotes, estimates, permits, and other records don&apos;t use that
+              cap.
             </span>
           </p>
         )}
@@ -178,9 +178,8 @@ export function UpgradeModal({
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             The full <strong>seller packet PDF</strong> (estimate scope, plan vs
             documented spend, and recorded costs) is included with{" "}
-            <strong>Pro</strong> (Architect tier) or a{" "}
-            <strong>Project Pass</strong>. You can still browse your project on
-            the free plan.
+            <strong>Architect</strong> tier or a <strong>Project Pass</strong>.
+            You can still browse your project on the free plan.
           </p>
         )}
         <h2
@@ -225,15 +224,12 @@ export function UpgradeModal({
 
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                <ArchitectPlanIcon
-                  className="h-8 w-8"
-                  title="Pro plan, Architect tier"
-                />
-                Pro
+                <ArchitectPlanIcon className="h-8 w-8" title="Architect Plan" />
+                Architect
               </CardTitle>
               <p className="text-xs text-slate-500 font-medium leading-snug">
-                Monthly subscription — full app access (Architect tier), for
-                homeowners and renovators.
+                Monthly subscription — full app access for homeowners and
+                renovators.
               </p>
 
               <div className="mt-2 flex items-baseline text-slate-900">
@@ -279,7 +275,7 @@ export function UpgradeModal({
                 ) : isArchitect ? (
                   "Current Plan"
                 ) : (
-                  "Subscribe to Pro"
+                  "Subscribe to Architect"
                 )}
               </Button>
             </div>
@@ -302,7 +298,7 @@ export function UpgradeModal({
             <CardContent className="space-y-4 flex-1">
               <ul className="space-y-3">
                 {[
-                  "6 months of Pro features",
+                  "6 months of Architect features",
                   "Unlimited invoice uploads for this project while your pass is active",
                   "No subscription – one-time payment",
                   "Perfect for one big remodel",
@@ -351,7 +347,7 @@ export function UpgradeModal({
               One big remodel?{" "}
               <span className="font-semibold text-slate-700">Project Pass</span>
               . Ongoing maintenance?{" "}
-              <span className="font-semibold text-slate-700">Pro</span>.
+              <span className="font-semibold text-slate-700">Architect</span>.
             </p>
           </div>
 

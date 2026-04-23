@@ -6,12 +6,14 @@
  */
 
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { isArchitectQuotaInvoiceType } from "../../../shared/lib/infer-document-type.ts";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "../../../shared/lib/invoice-quota.ts";
 import {
   isArchitectGlobalUploadQuotaAvailable,
   isArchitectPlanEffective,
 } from "./architect-entitlement.ts";
 
-const FREE_INVOICE_LIMIT = 3;
+const FREE_INVOICE_LIMIT = FREE_TIER_BILL_RECEIPT_LIMIT;
 export const ARCHITECT_UPLOADS_PER_MONTH = 10;
 
 export type EntitlementResult = {
@@ -27,8 +29,8 @@ export async function checkInvoiceUploadAllowed(
   projectId: string,
   documentType: string,
 ): Promise<EntitlementResult> {
-  // Only invoices count toward the limit (quotes, warranties, permits are unlimited)
-  if (documentType !== "invoice") {
+  // Invoices and receipts count toward the project / Architect upload limits; other record types do not
+  if (!isArchitectQuotaInvoiceType(documentType)) {
     return { allowed: true };
   }
 
@@ -61,7 +63,7 @@ export async function checkInvoiceUploadAllowed(
       .from("invoices")
       .select("id", { count: "exact", head: true })
       .eq("project_id", projectId)
-      .eq("document_type", "invoice"),
+      .in("document_type", ["invoice", "receipt"]),
   ]);
 
   const sub = subRes.data;
@@ -98,7 +100,7 @@ export async function checkInvoiceUploadAllowed(
 
   return {
     allowed: false,
-    reason: `Free tier limit reached (${FREE_INVOICE_LIMIT} invoices for this project). Upgrade for more uploads and premium features.`,
+    reason: `Free tier limit reached (${FREE_INVOICE_LIMIT} bill or receipt uploads for this project). Upgrade for more uploads and premium features.`,
     code: "INVOICE_LIMIT_FREE_PROJECT",
   };
 }

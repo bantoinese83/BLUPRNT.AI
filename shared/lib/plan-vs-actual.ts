@@ -3,6 +3,7 @@
  * Shared across Web and Mobile.
  */
 
+import { isPlanVsActualDocumentType } from "./infer-document-type";
 import { money } from "./formatters";
 
 export type InvoiceLike = {
@@ -14,7 +15,7 @@ export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
   return (invoices ?? [])
     .filter((i) => {
       const t = (i?.document_type ?? "invoice").toLowerCase();
-      return t === "invoice" || t === "quote";
+      return isPlanVsActualDocumentType(t);
     })
     .reduce((s, i) => {
       const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
@@ -22,12 +23,15 @@ export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
     }, 0);
 }
 
-/** Warranties & permits — maintenance log (excluded from plan vs capital spend). */
+/**
+ * Sums all non–plan-vs-actual documents (warranties, permits, records, other).
+ * Shown in the "Records" side of the ledger, not the capital improvement track.
+ */
 export function maintenanceDocumentTotal(invoices: InvoiceLike[]): number {
   return (invoices ?? [])
     .filter((i) => {
       const t = (i?.document_type ?? "").toLowerCase();
-      return t === "warranty" || t === "permit";
+      return t ? !isPlanVsActualDocumentType(t) : false;
     })
     .reduce((s, i) => {
       const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
@@ -45,12 +49,12 @@ export function filterInvoicesByLedgerDocumentFilter<T extends InvoiceLike>(
   if (filter === "capital") {
     return invoices.filter((i) => {
       const t = (i.document_type ?? "invoice").toLowerCase();
-      return t === "invoice" || t === "quote";
+      return isPlanVsActualDocumentType(t);
     });
   }
   return invoices.filter((i) => {
-    const t = (i.document_type ?? "").toLowerCase();
-    return t === "warranty" || t === "permit";
+    const t = (i.document_type ?? "invoice").toLowerCase();
+    return !isPlanVsActualDocumentType(t);
   });
 }
 
@@ -75,7 +79,7 @@ export function planVsActualNarrative(
   if (estimatedMin == null && estimatedMax == null) {
     return {
       headline: "Add your estimate to see the full story",
-      body: "Once you have a cost range, we compare it to invoices and quotes you upload—so you can explain the gap in one glance.",
+      body: "Once you have a cost range, we compare it to invoices, quotes, and receipts you upload—so you can explain the gap in one glance.",
       kind: "no_estimate",
     };
   }
@@ -83,7 +87,7 @@ export function planVsActualNarrative(
   if (total <= 0) {
     return {
       headline: "No documented spend yet",
-      body: "Upload invoices and quotes to see how real numbers line up with your plan. That trail becomes your resale-ready record.",
+      body: "Upload invoices, quotes, or receipts to see how real numbers line up with your plan. That trail becomes your resale-ready record.",
       kind: "no_documents",
     };
   }
@@ -143,7 +147,7 @@ export function planVsActualPdfLines(
 
   return [
     `Estimated range (lifecycle): ${estimateRangeLabel(estimatedMin, estimatedMax)}`,
-    `Documented capital (invoices & quotes): ${money(capitalTotal)}`,
+    `Documented capital (invoices, quotes & receipts): ${money(capitalTotal)}`,
     `Summary: ${narrative.headline}`,
     narrative.body,
     "Note: Documented amounts reflect files you uploaded; they may not include every cash expense.",

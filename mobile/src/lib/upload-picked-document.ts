@@ -37,7 +37,9 @@ export async function uploadPickedDocumentToProject(
   const fileCount = options.files.length;
   if (fileCount === 0) return { ok: false, uploadedCount: 0 };
 
+  // Initial feedback for starting the process
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
   let successCount = 0;
   let lastId: string | undefined;
 
@@ -73,8 +75,6 @@ export async function uploadPickedDocumentToProject(
             options.onInvoiceLimitUpgrade();
             break; // Stop batch on limit
           } else {
-            // For batch, we might not want to show 10 alerts.
-            // Show one alert and stop if it's a fatal-looking error?
             Alert.alert(
               "Upload didn’t go through",
               `Issue with file ${i + 1}: ${friendlyDocumentUploadError(undefined, { error: result.error })}`,
@@ -88,6 +88,12 @@ export async function uploadPickedDocumentToProject(
       successCount++;
       lastId = result.invoice_id;
       addUserFlowBreadcrumb("document_upload_succeeded", { kind });
+
+      // Minor tick feedback for each file in a small batch,
+      // but skip for large batches to avoid vibrating too much.
+      if (fileCount <= 3) {
+        Haptics.selectionAsync();
+      }
     } catch (err) {
       addUserFlowBreadcrumb("document_upload_exception", { kind });
       Alert.alert("Upload issue", friendlyDocumentUploadError(err));
@@ -96,13 +102,17 @@ export async function uploadPickedDocumentToProject(
   }
 
   if (successCount > 0) {
+    // FINAL batch success notification
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
     const msg =
       successCount === 1
         ? options.successToastMessage
         : `Successfully uploaded ${successCount} documents.`;
+
     showAppToast(msg, { type: "success" });
     options.refreshProjectData();
+
     return {
       ok: true,
       uploadedCount: successCount,

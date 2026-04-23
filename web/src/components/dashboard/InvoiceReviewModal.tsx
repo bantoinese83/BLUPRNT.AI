@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react";
-import { X, Loader2, Link2, FileText, AlertTriangle } from "lucide-react";
+import { X, Loader2, Link2, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
+import {
+  coerceLedgerDocumentType,
+  type LedgerDocumentType,
+} from "@shared/lib/infer-document-type";
+import {
+  isCapitalLedgerDocumentType,
+  ledgerDocumentTypeLabel,
+  ledgerDocumentVisualGroup,
+  reviewDocumentModalTitle,
+} from "@shared/lib/ledger-document-labels";
+import { ledgerDocumentSelectOptions } from "@shared/lib/ledger-document-pickers";
+import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { ModalFocusSurface } from "@/components/ui/modal-dialog";
 
@@ -57,6 +69,8 @@ export function InvoiceReviewModal({
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
+  const [ledgerDocType, setLedgerDocType] =
+    useState<LedgerDocumentType>("invoice");
 
   useEffect(() => {
     let cancelled = false;
@@ -82,11 +96,13 @@ export function InvoiceReviewModal({
           line_items: LineItem[];
           budget_mapping_suggestions?: ScopeSuggestion[];
         };
-        setInvoice({
+        const merged = {
           ...inv.invoice,
           line_items: inv.line_items ?? [],
           budget_mapping_suggestions: inv.budget_mapping_suggestions,
-        });
+        };
+        setInvoice(merged);
+        setLedgerDocType(coerceLedgerDocumentType(merged.document_type));
 
         const { data: scope, error: scopeErr } = await supabase
           .from("scope_items")
@@ -127,6 +143,7 @@ export function InvoiceReviewModal({
   }, [invoiceId, projectId]);
 
   async function handleSaveMappings() {
+    if (!invoice) return;
     setSaving(true);
     try {
       for (const [lineId, scopeItemId] of Object.entries(mappings)) {
@@ -136,10 +153,36 @@ export function InvoiceReviewModal({
           .eq("id", lineId);
         if (lineErr) throw lineErr;
       }
+
+      const prevType = coerceLedgerDocumentType(invoice.document_type);
+      const typeChanged = ledgerDocType !== prevType;
+      if (typeChanged) {
+        const { error: invErr } = await supabase
+          .from("invoices")
+          .update({ document_type: ledgerDocType })
+          .eq("id", invoice.id);
+        if (invErr) throw invErr;
+        if (invoice.document_id) {
+          const { error: docErr } = await supabase
+            .from("documents")
+            .update({ type: ledgerDocType })
+            .eq("id", invoice.document_id);
+          if (docErr) throw docErr;
+        }
+      }
+
+      setInvoice((prev) =>
+        prev ? { ...prev, document_type: ledgerDocType } : prev,
+      );
+      toast.success(
+        typeChanged
+          ? `Document type updated to ${ledgerDocumentTypeLabel(ledgerDocType)}.`
+          : "Changes saved.",
+      );
       onSaved?.(projectId);
       onClose();
     } catch {
-      setError("We couldn’t save your line links. Try again.");
+      setError("We couldn’t save your changes. Try again.");
     } finally {
       setSaving(false);
     }
@@ -149,13 +192,13 @@ export function InvoiceReviewModal({
     return (
       <ModalFocusSurface
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50"
-        ariaLabel="Loading invoice review"
+        ariaLabel="Loading document review"
         onEscape={onClose}
       >
         <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-slate-900 animate-spin" />
 
-          <p className="text-slate-600">Loading invoice…</p>
+          <p className="text-slate-600">Loading document…</p>
         </div>
       </ModalFocusSurface>
     );
@@ -165,7 +208,7 @@ export function InvoiceReviewModal({
     return (
       <ModalFocusSurface
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50"
-        ariaLabel="Invoice review error"
+        ariaLabel="Document review error"
         onEscape={onClose}
       >
         <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4">
@@ -181,6 +224,17 @@ export function InvoiceReviewModal({
     );
   }
 
+  const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
+  const modalTitle = reviewDocumentModalTitle(ledgerDocType);
+  const vg = ledgerDocumentVisualGroup(ledgerDocType);
+  const headerIconClass =
+    vg === "spend"
+      ? "text-red-500"
+      : vg === "warranty_care"
+        ? "text-teal-600"
+        : "text-slate-700";
+  const HeaderIcon = reviewModalIconForDocumentType(ledgerDocType);
+
   return (
     <>
       <ModalFocusSurface
@@ -195,8 +249,11 @@ export function InvoiceReviewModal({
               id="invoice-review-title"
               className="text-lg font-semibold text-slate-900 flex items-center gap-2"
             >
-              <FileText className="w-5 h-5 text-red-500" />
-              Review invoice
+              <HeaderIcon
+                className={`w-5 h-5 shrink-0 ${headerIconClass}`}
+                aria-hidden
+              />
+              {modalTitle}
             </h3>
             <button
               type="button"
@@ -208,11 +265,13 @@ export function InvoiceReviewModal({
             </button>
           </div>
           <div className="p-4 space-y-4">
-            <p className="text-sm text-slate-600 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
-              <strong className="text-slate-800">Tip:</strong> Match each line
-              to your estimate below so you can see what&apos;s on or off
-              budget.
-            </p>
+            {showCapitalLineLink ? (
+              <p className="text-sm text-slate-600 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
+                <strong className="text-slate-800">Tip:</strong> Match each line
+                to your estimate below so you can see what&apos;s on or off
+                budget.
+              </p>
+            ) : null}
             {invoice.document_id ? (
               <Button
                 type="button"
@@ -225,6 +284,34 @@ export function InvoiceReviewModal({
                 View original upload
               </Button>
             ) : null}
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
+              <label
+                htmlFor="invoice-review-doc-type"
+                className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+              >
+                Document type
+              </label>
+              <select
+                id="invoice-review-doc-type"
+                value={ledgerDocType}
+                onChange={(e) =>
+                  setLedgerDocType(e.target.value as LedgerDocumentType)
+                }
+                className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
+              >
+                {ledgerDocumentSelectOptions().map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-slate-500 leading-snug">
+                Fix a misclassification here — no need to re-upload. This
+                updates your ledger and seller packet grouping.
+              </p>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <h4 className="font-medium text-slate-900 flex items-center gap-2">
@@ -257,66 +344,68 @@ export function InvoiceReviewModal({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                <Link2 className="w-4 h-4" />
-                Link to budget line (optional)
-              </h5>
-              <p className="text-xs text-slate-500">
-                Link invoice lines to your budget breakdown to track actual vs.
-                estimate.
-              </p>
-              {invoice.line_items.map((line) => {
-                const isUnmapped = !(mappings[line.id] ?? line.scope_item_id);
-                const showOverrunHint = isUnmapped && scopeItems.length > 0;
-                return (
-                  <Card
-                    key={line.id}
-                    className={`p-3 ${showOverrunHint ? "border-amber-200 bg-amber-50/50" : ""}`}
-                  >
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-slate-900">
-                          {line.description}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(line.line_total)}
-                        </p>
-                        {showOverrunHint && (
-                          <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-700 font-medium">
-                            <AlertTriangle
-                              className="w-3.5 h-3.5 shrink-0"
-                              aria-hidden
-                            />
-                            Not in your original budget
+            {showCapitalLineLink ? (
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <Link2 className="w-4 h-4" />
+                  Link to budget line (optional)
+                </h5>
+                <p className="text-xs text-slate-500">
+                  Link invoice lines to your budget breakdown to track actual
+                  vs. estimate.
+                </p>
+                {invoice.line_items.map((line) => {
+                  const isUnmapped = !(mappings[line.id] ?? line.scope_item_id);
+                  const showOverrunHint = isUnmapped && scopeItems.length > 0;
+                  return (
+                    <Card
+                      key={line.id}
+                      className={`p-3 ${showOverrunHint ? "border-amber-200 bg-amber-50/50" : ""}`}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-slate-900">
+                            {line.description}
                           </p>
-                        )}
+                          <p className="text-sm text-slate-500">
+                            {new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: "USD",
+                            }).format(line.line_total)}
+                          </p>
+                          {showOverrunHint && (
+                            <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-700 font-medium">
+                              <AlertTriangle
+                                className="w-3.5 h-3.5 shrink-0"
+                                aria-hidden
+                              />
+                              Not in your original budget
+                            </p>
+                          )}
+                        </div>
+                        <select
+                          value={mappings[line.id] ?? line.scope_item_id ?? ""}
+                          onChange={(e) =>
+                            setMappings((m) => ({
+                              ...m,
+                              [line.id]: e.target.value,
+                            }))
+                          }
+                          className="text-sm rounded-lg border border-slate-300 px-2 py-1 shrink-0"
+                        >
+                          <option value="">— Not linked</option>
+                          {scopeItems.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.category}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                      <select
-                        value={mappings[line.id] ?? line.scope_item_id ?? ""}
-                        onChange={(e) =>
-                          setMappings((m) => ({
-                            ...m,
-                            [line.id]: e.target.value,
-                          }))
-                        }
-                        className="text-sm rounded-lg border border-slate-300 px-2 py-1 shrink-0"
-                      >
-                        <option value="">— Not linked</option>
-                        {scopeItems.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.category}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : null}
 
             <div className="flex gap-2 pt-4">
               <Button variant="outline" onClick={onClose} className="flex-1">
@@ -329,7 +418,7 @@ export function InvoiceReviewModal({
                 className="flex-1 gap-2"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Save
+                Save changes
               </Button>
             </div>
           </div>

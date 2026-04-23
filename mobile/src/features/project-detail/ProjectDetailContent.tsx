@@ -69,6 +69,11 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
     return () => clearTimeout(t);
   }, [scrollFocus, preScopeBlockHeight, scopePollDone, hasScopeRows]);
 
+  const isTrustHighPriority =
+    project?.stage === "planning" ||
+    project?.stage === "collecting_quotes" ||
+    !project?.stage;
+
   return (
     <ScreenWrapper
       withScroll
@@ -83,6 +88,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
           title={project?.name}
           onShare={handleShare}
           onAddPress={() => setShowAddModal(true)}
+          stage={project?.stage}
         />
 
         <View style={{ marginTop: 4, marginBottom: 16 }}>
@@ -122,7 +128,9 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
               project={project}
               invoiceTotal={vm.invoiceTotal}
             />
-            <GroundingSourcesSection project={project} />
+            {isTrustHighPriority && (
+              <GroundingSourcesSection project={project} />
+            )}
           </View>
         ) : null}
       </View>
@@ -142,6 +150,12 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
             scopePollDone={scopePollDone}
             onRefresh={handleRefresh}
           />
+        )}
+
+        {!isTrustHighPriority && project && (
+          <View style={{ paddingHorizontal: 24, paddingVertical: 16 }}>
+            <GroundingSourcesSection project={project} />
+          </View>
         )}
 
         <ProjectDetailFooterActions

@@ -7,6 +7,14 @@ import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { addUserFlowBreadcrumb, reportClientError } from "@/lib/sentry";
+import {
+  isArchitectQuotaInvoiceType,
+  LEDGER_DOCUMENT_TYPES,
+  type LedgerDocumentType,
+  type UploadFormDocumentType,
+} from "@shared/lib/infer-document-type";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
+import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
 
 interface UseInvoiceManagementProps {
   projectId: string;
@@ -17,10 +25,10 @@ interface UseInvoiceManagementProps {
   hasProjectPass: boolean;
 }
 
-const FREE_LIMIT = 3;
+const FREE_LIMIT = FREE_TIER_BILL_RECEIPT_LIMIT;
 const GUIDE_KEY = "bluprnt_invoice_guide_collapsed";
 
-type ValidDocType = "invoice" | "quote" | "warranty" | "permit";
+type ValidDocType = UploadFormDocumentType;
 
 export function useInvoiceManagement({
   projectId,
@@ -37,7 +45,7 @@ export function useInvoiceManagement({
   const [batchStatus, setBatchStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reviewInvoiceId, setReviewInvoiceId] = useState<string | null>(null);
-  const [documentType, setDocumentType] = useState<ValidDocType>("invoice");
+  const [documentType, setDocumentType] = useState<ValidDocType>("auto");
   const [guideDismissed, setGuideDismissed] = useState(() => {
     try {
       return localStorage.getItem(GUIDE_KEY) === "1";
@@ -50,9 +58,11 @@ export function useInvoiceManagement({
   // Derive target type from search params
   const targetTypeFromUrl = useMemo(() => {
     const typeParam = searchParams.get("type");
-    const validTypes = ["quote", "warranty", "permit"];
-    return validTypes.includes(typeParam ?? "")
-      ? (typeParam as ValidDocType)
+    if (!typeParam) return null;
+    return (LEDGER_DOCUMENT_TYPES as readonly string[]).includes(
+      typeParam.toLowerCase(),
+    )
+      ? (typeParam.toLowerCase() as LedgerDocumentType)
       : null;
   }, [searchParams]);
 
@@ -88,18 +98,22 @@ export function useInvoiceManagement({
     reviewQueueRef.current = [];
   }, [projectId]);
 
-  const invoiceCount = invoices.filter(
-    (i) => (i.document_type ?? "invoice") === "invoice",
+  const invoiceCount = invoices.filter((i) =>
+    isArchitectQuotaInvoiceType(i.document_type ?? "invoice"),
   ).length;
 
   const architectUploads = subscription?.invoice_uploads_count ?? 0;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
-  const atLimit =
-    documentType === "invoice" &&
+  const isAtInvoiceUploadLimit =
     !hasProjectPass &&
     ((!isArchitectActive && invoiceCount >= FREE_LIMIT) ||
       (isArchitectActive && architectUploads >= 10));
+
+  /** Blocks when the user picked invoice/receipt and is at the cap. */
+  const blockInvoiceOnlyUpload =
+    (documentType === "invoice" || documentType === "receipt") &&
+    isAtInvoiceUploadLimit;
 
   const isArchitectAtGlobalLimit = isArchitectActive && architectUploads >= 10;
 
@@ -124,7 +138,7 @@ export function useInvoiceManagement({
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files);
 
-    if (atLimit) {
+    if (blockInvoiceOnlyUpload) {
       onUpgradeClick("invoice_limit");
       return;
     }
@@ -132,6 +146,7 @@ export function useInvoiceManagement({
     setUploading(true);
     setError(null);
     let successTotal = 0;
+    let lastServerDocType: LedgerDocumentType | null = null;
 
     for (let i = 0; i < fileArray.length; i++) {
       const file = fileArray[i];
@@ -170,6 +185,7 @@ export function useInvoiceManagement({
         const { data, error: fnErr } = await invokeFunction<{
           invoice_id?: string;
           ocr_status?: string;
+          document_type?: string;
           error?: string;
           error_code?: string;
         }>("upload-invoice", { body: fd });
@@ -196,6 +212,16 @@ export function useInvoiceManagement({
         successTotal++;
         onUploaded(projectId);
         const newId = data?.invoice_id;
+        const resolvedType = (data?.document_type ??
+          documentType) as ValidDocType;
+        if (
+          data?.document_type &&
+          (LEDGER_DOCUMENT_TYPES as readonly string[]).includes(
+            data.document_type,
+          )
+        ) {
+          lastServerDocType = data.document_type as LedgerDocumentType;
+        }
         if (newId) {
           setReviewInvoiceId((prev) => {
             if (prev) {
@@ -206,7 +232,7 @@ export function useInvoiceManagement({
           });
         }
         addUserFlowBreadcrumb("invoice_upload_succeeded", {
-          document_type: documentType,
+          document_type: resolvedType,
           opens_review: Boolean(newId),
         });
       } catch (err: unknown) {
@@ -218,10 +244,13 @@ export function useInvoiceManagement({
 
     if (successTotal > 0) {
       dismissGuide();
+      const labelForType = (t: string) => ledgerDocumentTypeLabel(t);
       const msg =
-        successTotal === 1
-          ? `${documentType === "invoice" ? "Invoice" : "Document"} uploaded successfully`
-          : `Successfully uploaded ${successTotal} documents.`;
+        successTotal === 1 && lastServerDocType
+          ? `${labelForType(lastServerDocType)} uploaded (detected automatically)`
+          : successTotal === 1
+            ? "Document uploaded successfully"
+            : `Successfully uploaded ${successTotal} documents.`;
       toast.success(msg);
     }
 
@@ -231,7 +260,7 @@ export function useInvoiceManagement({
   };
 
   const openFileUpload = () => {
-    if (atLimit) {
+    if (blockInvoiceOnlyUpload) {
       onUpgradeClick("invoice_limit");
       return;
     }
@@ -252,7 +281,8 @@ export function useInvoiceManagement({
     guideExpanded,
     setGuideExpanded,
     invoiceCount,
-    atLimit,
+    atLimit: isAtInvoiceUploadLimit,
+    blockInvoiceOnlyUpload,
     isArchitectAtGlobalLimit,
     dismissGuide,
     handleUploadFile,

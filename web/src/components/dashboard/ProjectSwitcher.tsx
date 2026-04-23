@@ -50,7 +50,7 @@ export function ProjectSwitcher({
   const newProjectButton = (
     <Link
       to="/onboarding"
-      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:border-teal-200 hover:bg-teal-50/80 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:px-4"
+      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all hover:border-teal-200 hover:bg-teal-50/80 hover:text-teal-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:px-4"
     >
       <Plus className="h-4 w-4 shrink-0" aria-hidden />
       <span>Start a BLUPRNT</span>

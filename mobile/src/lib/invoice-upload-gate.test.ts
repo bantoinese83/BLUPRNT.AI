@@ -18,13 +18,14 @@ function invoiceRow(partial: Partial<InvoiceRow> = {}): InvoiceRow {
 }
 
 describe("countInvoiceDocuments", () => {
-  it("counts rows with default invoice type", () => {
+  it("counts invoice and receipt toward cap, not quote-only rows", () => {
     expect(
       countInvoiceDocuments([
         invoiceRow({ document_type: "invoice" }),
+        invoiceRow({ document_type: "receipt" }),
         invoiceRow({ document_type: "quote" }),
       ]),
-    ).toBe(1);
+    ).toBe(2);
   });
 });
 

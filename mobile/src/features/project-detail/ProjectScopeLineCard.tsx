@@ -14,6 +14,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { projectDetailStyles as styles } from "./project-detail.styles";
 import { ProjectMaterialDetailList } from "./ProjectMaterialDetailList";
+import { ConfidenceDisplay } from "@/components/ui/ConfidenceDisplay";
 import type { ScopeRow } from "@shared/types/database";
 import type { ReconciliationItem } from "@shared/lib/reconciliation";
 import { money } from "@shared/lib/formatters";
@@ -59,13 +60,18 @@ export function ProjectScopeLineCard({
         style={[styles.scopeCard, isOpen && styles.expandedScopeCard]}
       >
         <View style={styles.scopeHeader}>
-          <Text
-            style={styles.scopeDescription}
-            numberOfLines={3}
-            ellipsizeMode="tail"
-          >
-            {item.description}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={styles.scopeDescription}
+              numberOfLines={3}
+              ellipsizeMode="tail"
+            >
+              {item.description}
+            </Text>
+            <View style={{ marginTop: 4 }}>
+              <ConfidenceDisplay score={item.confidence_score} size={8} />
+            </View>
+          </View>
           <View style={styles.tierBadge}>
             <Text style={styles.tierText}>{item.finish_tier}</Text>
           </View>
@@ -110,8 +116,7 @@ export function ProjectScopeLineCard({
             )}
           </View>
           <Text style={styles.scopePrice}>
-            ${(item.total_cost_min || 0).toLocaleString()} - $
-            {(item.total_cost_max || 0).toLocaleString()}
+            {money(item.total_cost_min, item.total_cost_max)}
           </Text>
         </View>
 

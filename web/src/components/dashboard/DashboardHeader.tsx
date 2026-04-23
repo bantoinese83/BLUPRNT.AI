@@ -44,11 +44,11 @@ export function DashboardHeader({
         scrolled && "shadow-spatial",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-[4.25rem] sm:gap-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-17 sm:gap-4 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-3.5">
           <Link
             to="/dashboard"
-            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-0.5 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-14 sm:w-14"
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-0.5 shadow-md ring-1 ring-slate-200/50 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-14 sm:w-14"
             aria-label="BLUPRNT — Dashboard home"
           >
             <img
@@ -69,13 +69,13 @@ export function DashboardHeader({
               {isArchitect ? (
                 <span
                   className="inline-flex items-center gap-1 rounded-full bg-teal-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-teal-700 ring-1 ring-teal-100"
-                  title="Pro subscription (Architect tier)—full app access for homeowners"
+                  title="Architect subscription—full app access for homeowners"
                 >
                   <ArchitectPlanIcon
                     className="h-4 w-4"
-                    title="Pro plan, Architect tier"
+                    title="Architect Plan"
                   />
-                  Pro
+                  Architect
                 </span>
               ) : hasProjectPass ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 py-0.5 pl-1 pr-2 text-[10px] font-black uppercase tracking-wider text-slate-700 ring-1 ring-slate-100">
@@ -89,14 +89,6 @@ export function DashboardHeader({
                 projectName={projectName}
                 className="mt-0.5 text-xs sm:text-sm"
               />
-              {projectName && (
-                <div className="hidden items-center gap-1.5 sm:flex">
-                  <div className="h-1 w-1 animate-pulse rounded-full bg-emerald-500" />
-                  <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">
-                    Live Sync
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -160,7 +152,7 @@ export function DashboardHeader({
               </span>
               {!isArchitect && (
                 <span className="ml-1.5 hidden rounded-md bg-teal-950 px-1 py-0.5 text-[8px] font-black uppercase tracking-tighter text-white sm:inline">
-                  Pro
+                  Architect
                 </span>
               )}
             </Button>
@@ -170,7 +162,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={onUpgradeClick}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-slate-900 transition-colors hover:bg-teal-50/80 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-14 sm:w-14"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-slate-900 transition-colors hover:bg-teal-50/80 active:scale-[0.97] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:h-14 sm:w-14"
               aria-label="Upgrade plan"
             >
               <img

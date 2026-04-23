@@ -91,6 +91,17 @@ type ScopeItemsRow = {
   updated_at: string | null;
 };
 
+type DocumentsRow = {
+  id: string;
+  project_id: string;
+  type: string;
+  storage_path: string;
+  original_filename: string | null;
+  uploaded_by_user_id: string;
+  ocr_status: string;
+  created_at: string;
+};
+
 type InvoicesRow = {
   id: string;
   project_id: string;
@@ -189,6 +200,7 @@ export type Database = {
       projects: TableRow<ProjectsRow>;
       properties: TableRow<PropertiesRow>;
       scope_items: TableRow<ScopeItemsRow>;
+      documents: TableRow<DocumentsRow>;
       invoices: TableRow<InvoicesRow>;
       invoice_line_items: TableRow<InvoiceLineItemsRow>;
       user_subscriptions: TableRow<UserSubscriptionsRow>;

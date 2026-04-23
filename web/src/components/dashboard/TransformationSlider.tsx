@@ -37,6 +37,9 @@ export function TransformationSlider({
       .publicUrl;
   };
 
+  const [beforeError, setBeforeError] = useState(false);
+  const [afterError, setAfterError] = useState(false);
+
   const beforeUrl = getPublicUrl(beforePath);
   const afterUrl = getPublicUrl(afterPath);
 
@@ -81,6 +84,8 @@ export function TransformationSlider({
       if (updateErr) throw updateErr;
 
       toast.success(`${type === "before" ? "Before" : "After"} photo updated`);
+      if (type === "before") setBeforeError(false);
+      if (type === "after") setAfterError(false);
       onRefresh?.();
     } catch (err: unknown) {
       console.error(err);
@@ -92,10 +97,25 @@ export function TransformationSlider({
     }
   };
 
+  const LogoPlaceholder = () => (
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+      <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center p-3 ring-1 ring-white/20">
+        <img
+          src="/bluprnt_logo.webp"
+          alt="BLUPRNT"
+          className="w-full h-full object-contain opacity-50"
+        />
+      </div>
+      <p className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+        Waiting for capture
+      </p>
+    </div>
+  );
+
   const EmptyState = () => (
     <div
       className={cn(
-        "relative rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 aspect-[16/10] flex flex-col items-center justify-center text-center p-8",
+        "relative rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 aspect-16/10 flex flex-col items-center justify-center text-center p-8",
         className,
       )}
     >
@@ -138,6 +158,11 @@ export function TransformationSlider({
     return <EmptyState />;
   }
 
+  const finalAfterUrl = afterUrl || beforeUrl;
+  const finalBeforeUrl = beforeUrl || afterUrl;
+  const showAfterPlaceholder = !finalAfterUrl || afterError;
+  const showBeforePlaceholder = !finalBeforeUrl || beforeError;
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between px-2">
@@ -156,7 +181,7 @@ export function TransformationSlider({
 
       <div
         className={cn(
-          "relative rounded-3xl overflow-hidden bg-slate-900 aspect-[16/10] group select-none touch-none",
+          "relative rounded-3xl overflow-hidden bg-slate-950 aspect-16/10 group select-none touch-none",
           !isUnlocked && "cursor-pointer",
         )}
       >
@@ -177,25 +202,35 @@ export function TransformationSlider({
         />
 
         {/* Background Image (Now) */}
-        <img
-          src={afterUrl || beforeUrl || ""}
-          alt="Current state"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {showAfterPlaceholder ? (
+          <LogoPlaceholder />
+        ) : (
+          <img
+            src={finalAfterUrl}
+            alt="Current state"
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => setAfterError(true)}
+          />
+        )}
 
         {/* Foreground Image (Before) */}
         <div
           className="absolute inset-0 w-full h-full overflow-hidden border-r-2 border-white shadow-[4px_0_15px_rgba(0,0,0,0.3)]"
           style={{ width: `${isUnlocked ? sliderPos : 100}%` }}
         >
-          <img
-            src={beforeUrl || afterUrl || ""}
-            alt="Before"
-            className="absolute inset-0 w-auto h-full object-cover max-w-none"
-            style={{
-              width: isUnlocked ? `${100 / (sliderPos / 100)}%` : "100%",
-            }}
-          />
+          {showBeforePlaceholder ? (
+            <LogoPlaceholder />
+          ) : (
+            <img
+              src={finalBeforeUrl}
+              alt="Before"
+              className="absolute inset-0 w-auto h-full object-cover max-w-none"
+              style={{
+                width: isUnlocked ? `${100 / (sliderPos / 100)}%` : "100%",
+              }}
+              onError={() => setBeforeError(true)}
+            />
+          )}
         </div>
 
         {/* Handle */}
@@ -239,7 +274,7 @@ export function TransformationSlider({
         {/* Main Slider Interaction Layer (Invisible) */}
         {isUnlocked && (
           <div
-            className="absolute inset-0 z-[5] cursor-ew-resize"
+            className="absolute inset-0 z-5 cursor-ew-resize"
             onMouseMove={(e) => {
               if (e.buttons !== 1) return;
               const rect = e.currentTarget.getBoundingClientRect();

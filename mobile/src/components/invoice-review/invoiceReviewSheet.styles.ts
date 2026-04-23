@@ -130,6 +130,27 @@ export const invoiceReviewSheetStyles = StyleSheet.create({
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
   },
+  docTypeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Theme.colors.divider,
+    gap: 12,
+  },
+  docTypeRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
+  },
+  docTypeChange: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
+  },
   viewOriginalBtn: {
     flexDirection: "row",
     alignItems: "center",
