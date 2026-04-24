@@ -111,6 +111,8 @@ type InvoicesRow = {
   payment_status: string;
   document_type: string | null;
   document_id: string | null;
+  issue_date: string | null;
+  warranty_expiry_date: string | null;
   updated_at: string | null;
 };
 

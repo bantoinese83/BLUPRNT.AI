@@ -31,7 +31,6 @@ import { Theme } from "@/constants/Theme";
 import { PRICING } from "@shared/constants/pricing";
 import {
   WEB_APP_PATH_PRIVACY,
-  WEB_APP_PATH_SUPPORT,
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
 import {

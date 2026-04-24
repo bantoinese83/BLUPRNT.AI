@@ -20,7 +20,8 @@ export const initPostHog = () => {
 
 export const captureEvent = (
   event: string,
-  properties?: Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  properties?: any,
 ) => {
   if (localStorage.getItem("bluprnt_analytics_opt_in") !== "true") return;
   posthog.capture(event, properties);

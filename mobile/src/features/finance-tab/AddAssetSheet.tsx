@@ -11,7 +11,7 @@ import {
   Alert,
   Image,
 } from "react-native";
-import { Camera, X, ChevronDown, Loader2 } from "lucide-react-native";
+import { Camera, X, ChevronDown } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import { Theme } from "@/constants/Theme";
@@ -97,6 +97,7 @@ export function AddAssetSheet({
           uri: imageUri,
           name: fileName,
           type: "image/jpeg",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
 
         const { error: uploadError } = await supabase.storage

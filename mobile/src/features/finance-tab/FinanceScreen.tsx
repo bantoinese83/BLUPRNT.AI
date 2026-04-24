@@ -212,7 +212,7 @@ export default function FinanceScreen() {
               { label: "Home Specs", value: "specs" },
             ]}
             value={currentTab}
-            onChange={(val: any) => {
+            onChange={(val: "ledger" | "specs") => {
               setCurrentTab(val);
               Haptics.selectionAsync();
             }}

@@ -13,7 +13,6 @@ import {
   Grid,
   Lightbulb,
   MoreHorizontal,
-  Plus,
   Trash2,
   MapPin,
   Camera,
@@ -21,7 +20,6 @@ import {
 import * as Haptics from "expo-haptics";
 import { Theme } from "@/constants/Theme";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { captureEvent } from "@/lib/posthog";
@@ -92,7 +90,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
     };
 
     fetchSignedUrls();
-  }, [assets]);
+  }, [assets, signedUrls]);
 
   const filteredAssets = assets.filter(
     (a) => activeCategory === "all" || a.category === activeCategory,

@@ -61,7 +61,8 @@ export function trackProductEvent(
 ): void {
   if (!isProductAnalyticsConsentGranted()) return;
   sdkHandler?.(name, properties);
-  posthog.capture(name, properties);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  posthog.capture(name, properties as any);
 
   // Fallback to Sentry breadcrumbs for production observability
   if (!__DEV__) {
