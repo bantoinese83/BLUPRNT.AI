@@ -372,7 +372,10 @@ export function DashboardContent({
             }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
-            onDelete={handleProjectDelete}
+            onDelete={(id) => {
+              const p = projects.find((p: ProjectRow) => p.id === id);
+              if (p) handleProjectDelete(p);
+            }}
           />
         </motion.div>
         <motion.div variants={itemVariants}>
