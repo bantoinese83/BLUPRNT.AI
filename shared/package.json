@@ -6,6 +6,7 @@
   "description": "Shared TypeScript modules for web and mobile",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

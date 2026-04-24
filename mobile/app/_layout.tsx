@@ -1,7 +1,11 @@
 import "../global.css";
 import { LogBox, Platform } from "react-native";
 
-LogBox.ignoreLogs([]);
+LogBox.ignoreLogs([
+  "Constants.manifest has been deprecated",
+  "Sending `onAnimatedValueUpdate` with no listeners",
+  "Multiple instances of Three.js being imported",
+]);
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { initMobileSentry, isSentryConfigured, Sentry } from "@/lib/sentry";

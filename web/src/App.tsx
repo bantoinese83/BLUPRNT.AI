@@ -7,7 +7,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { MotionConfig } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -125,9 +125,12 @@ export default function App() {
                   </a>
                   <AuthListener />
                   <WebOfflineBanner />
-                  <div
+                  <motion.div
                     id="main-content"
                     tabIndex={-1}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     className="min-h-0 outline-none focus:outline-none"
                   >
                     <Suspense fallback={<PageLoader />}>
@@ -204,16 +207,20 @@ export default function App() {
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Suspense>
-                  </div>
+                  </motion.div>
                   <Toaster
                     position="top-right"
                     expand={false}
                     richColors
                     closeButton
                     visibleToasts={4}
-                    offset="1rem"
+                    offset="1.5rem"
                     toastOptions={{
-                      className: "font-sans text-[15px] leading-snug",
+                      className:
+                        "glass !border-white/20 !bg-white/40 backdrop-blur-xl !shadow-elevated font-sans text-[15px] leading-snug",
+                      style: {
+                        borderRadius: "1rem",
+                      },
                     }}
                   />
                   <CookieConsent />
