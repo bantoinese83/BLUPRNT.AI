@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
-import { supabase } from "@/lib/supabase";
+import { buildSellerPacketAppendixHtml } from "./seller-packet-appendix";
+import { supabase } from "./supabase";
 
 vi.mock("./supabase", () => ({
   supabase: {
@@ -38,7 +38,7 @@ describe("buildSellerPacketAppendixHtml", () => {
   });
 
   it("includes error block when download fails", async () => {
-    vi.mocked(supabase.storage.download).mockResolvedValue({
+    vi.mocked((supabase.storage as any).download).mockResolvedValue({
       data: null,
       error: new Error("network"),
     } as any);
@@ -50,7 +50,7 @@ describe("buildSellerPacketAppendixHtml", () => {
 
   it("embeds small JPEG when download succeeds", async () => {
     const blob = new Blob([new Uint8Array(10)], { type: "image/jpeg" });
-    vi.mocked(supabase.storage.download).mockResolvedValue({
+    vi.mocked((supabase.storage as any).download).mockResolvedValue({
       data: blob,
       error: null,
     } as any);
@@ -62,7 +62,7 @@ describe("buildSellerPacketAppendixHtml", () => {
 
   it("notes PDFs instead of embedding", async () => {
     const blob = new Blob([new Uint8Array(10)], { type: "application/pdf" });
-    vi.mocked(supabase.storage.download).mockResolvedValue({
+    vi.mocked((supabase.storage as any).download).mockResolvedValue({
       data: blob,
       error: null,
     } as any);
@@ -73,7 +73,7 @@ describe("buildSellerPacketAppendixHtml", () => {
   });
 
   it("handles non-OK download result", async () => {
-    vi.mocked(supabase.storage.download).mockResolvedValue({
+    vi.mocked((supabase.storage as any).download).mockResolvedValue({
       data: null,
       error: new Error("download error"),
     } as any);
@@ -83,7 +83,7 @@ describe("buildSellerPacketAppendixHtml", () => {
   });
 
   it("handles download throw", async () => {
-    vi.mocked(supabase.storage.download).mockRejectedValue(
+    vi.mocked((supabase.storage as any).download).mockRejectedValue(
       new Error("offline"),
     );
 
@@ -95,7 +95,7 @@ describe("buildSellerPacketAppendixHtml", () => {
     const unknownBlob = new Blob([new Uint8Array(10)], {
       type: "application/zip",
     });
-    vi.mocked(supabase.storage.download).mockResolvedValue({
+    vi.mocked((supabase.storage as any).download).mockResolvedValue({
       data: unknownBlob,
       error: null,
     } as any);

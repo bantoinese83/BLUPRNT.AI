@@ -12,12 +12,6 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json"],
-      all: true,
-      /**
-       * Critical pure / testable `src/lib` modules. Native-heavy or integration-only
-       * files (`supabase`, `push`, `fetch-dashboard-snapshot`, `onboarding-helpers` save flows)
-       * stay covered by tests but are not part of the coverage gate.
-       */
       include: [
         "src/lib/activity.ts",
         "src/lib/app-toast.ts",

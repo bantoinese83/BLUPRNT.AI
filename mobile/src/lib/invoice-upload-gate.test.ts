@@ -7,14 +7,19 @@ import type { InvoiceRow } from "@shared/types/database";
 
 function invoiceRow(partial: Partial<InvoiceRow> = {}): InvoiceRow {
   return {
-    id: partial.id ?? "i1",
-    vendor_name: partial.vendor_name ?? null,
-    total: partial.total ?? 0,
-    created_at: partial.created_at ?? new Date().toISOString(),
-    payment_status: partial.payment_status ?? null,
-    document_type: partial.document_type ?? "invoice",
-    document_id: partial.document_id ?? null,
-  };
+    id: "i1",
+    vendor_name: null,
+    total: 0,
+    created_at: new Date().toISOString(),
+    payment_status: "unpaid",
+    document_type: "invoice",
+    document_id: null,
+    issue_date: null,
+    project_id: "p1",
+    vendor_contact_info: {},
+    warranty_expiry_date: null,
+    ...partial,
+  } as InvoiceRow;
 }
 
 describe("countInvoiceDocuments", () => {
