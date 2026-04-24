@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
+  Activity,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
@@ -78,7 +79,7 @@ function MaterialDetailList({
       </div>
       <div className="pt-2 flex items-center justify-center">
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-          <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+          <Activity className="w-2.5 h-2.5 text-emerald-500" />
           Quantities grounded in regional waste factors
         </p>
       </div>

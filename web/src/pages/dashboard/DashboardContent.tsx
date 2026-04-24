@@ -137,10 +137,10 @@ export function DashboardContent({
     });
   }, [project, scopeItems, invoices, isArchitect, hasProjectPass]);
 
-  const handleProjectDelete = (p: ProjectRow) => {
+  const handleProjectDelete = useCallback((p: ProjectRow) => {
     setDeleteProject(p);
     setShowDeleteModal(true);
-  };
+  }, []);
 
   async function handleConfirmDelete() {
     if (!deleteProject || !isSupabaseConfigured()) return;
@@ -191,73 +191,111 @@ export function DashboardContent({
     [project, invoices],
   );
 
-  const stats = (
-    <DashboardStats
-      estimatedMin={project.estimated_min_total}
-      estimatedMax={project.estimated_max_total}
-      spendingTotal={capitalDocumentedTotal}
-      documentRowCount={invoices.length}
-    />
-  );
-
-  const health = (
-    <ProjectHealth
-      estimatedMin={project.estimated_min_total}
-      estimatedMax={project.estimated_max_total}
-      spendingTotal={capitalDocumentedTotal}
-    />
-  );
-
-  const transformationVault = <TransformationVault projectId={project.id} />;
-
-  const homeTeam = (
-    <HomeTeamSection
-      invoices={invoices}
-      isArchitect={isArchitect}
-      hasProjectPass={hasProjectPass}
-      onUpgradeClick={() => setShowUpgrade(true)}
-    />
-  );
-
-  const ledger = (
-    <div className="space-y-6">
-      <ResaleValueImpact
-        investment={capitalDocumentedTotal}
-        projectName={project.name}
+  const stats = useMemo(
+    () => (
+      <DashboardStats
+        estimatedMin={project.estimated_min_total}
+        estimatedMax={project.estimated_max_total}
+        spendingTotal={capitalDocumentedTotal}
+        documentRowCount={invoices.length}
       />
-      <PropertyLedger
-        projectId={project.id}
-        propertyId={project.property_id}
-        project={{
-          name: project.name,
-          estimated_min_total: project.estimated_min_total,
-          estimated_max_total: project.estimated_max_total,
-        }}
-        scopeItems={scopeItems}
+    ),
+    [
+      project.estimated_min_total,
+      project.estimated_max_total,
+      capitalDocumentedTotal,
+      invoices.length,
+    ],
+  );
+
+  const health = useMemo(
+    () => (
+      <ProjectHealth
+        estimatedMin={project.estimated_min_total}
+        estimatedMax={project.estimated_max_total}
+        spendingTotal={capitalDocumentedTotal}
+      />
+    ),
+    [
+      project.estimated_min_total,
+      project.estimated_max_total,
+      capitalDocumentedTotal,
+    ],
+  );
+
+  const transformationVault = useMemo(
+    () => <TransformationVault projectId={project.id} />,
+    [project.id],
+  );
+
+  const homeTeam = useMemo(
+    () => (
+      <HomeTeamSection
         invoices={invoices}
-        canExportSellerPacket={isArchitect || hasProjectPass}
-        onExportNotAllowed={() => {
-          setUpgradeReason("export");
+        isArchitect={isArchitect}
+        hasProjectPass={hasProjectPass}
+        onUpgradeClick={() => setShowUpgrade(true)}
+      />
+    ),
+    [invoices, isArchitect, hasProjectPass],
+  );
+
+  const ledger = useMemo(
+    () => (
+      <div className="space-y-6">
+        <ResaleValueImpact
+          investment={capitalDocumentedTotal}
+          projectName={project.name}
+        />
+        <PropertyLedger
+          projectId={project.id}
+          propertyId={project.property_id}
+          project={{
+            name: project.name,
+            estimated_min_total: project.estimated_min_total,
+            estimated_max_total: project.estimated_max_total,
+          }}
+          scopeItems={scopeItems}
+          invoices={invoices}
+          canExportSellerPacket={isArchitect || hasProjectPass}
+          onExportNotAllowed={() => {
+            setUpgradeReason("export");
+            setShowUpgrade(true);
+          }}
+        />
+      </div>
+    ),
+    [
+      capitalDocumentedTotal,
+      project.name,
+      project.id,
+      project.property_id,
+      project.estimated_min_total,
+      project.estimated_max_total,
+      scopeItems,
+      invoices,
+      isArchitect,
+      hasProjectPass,
+    ],
+  );
+
+  const documentsComp = useMemo(
+    () => (
+      <DocumentsSection
+        projectId={project.id}
+        documents={invoices}
+        onUploaded={load}
+        onUpgradeClick={(reason) => {
+          setUpgradeReason(
+            reason === "invoice_limit" ? "invoice_limit" : "general",
+          );
           setShowUpgrade(true);
         }}
+        subscription={subscription}
+        hasProjectPass={hasProjectPass}
       />
-    </div>
-  );
-
-  const documentsComp = (
-    <DocumentsSection
-      projectId={project.id}
-      documents={invoices}
-      onUploaded={load}
-      onUpgradeClick={(reason) => {
-        setUpgradeReason(
-          reason === "invoice_limit" ? "invoice_limit" : "general",
-        );
-        setShowUpgrade(true);
-      }}
-      subscription={subscription}
-      hasProjectPass={hasProjectPass}
-    />
+    ),
+    [project.id, invoices, load, subscription, hasProjectPass],
   );
 
   const handleProjectRename = async (id: string, newName: string) => {
@@ -334,10 +372,7 @@ export function DashboardContent({
             }))}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
-            onDelete={(id) => {
-              const p = projects.find((proj) => proj.id === id);
-              if (p) handleProjectDelete(p);
-            }}
+            onDelete={handleProjectDelete}
           />
         </motion.div>
         <motion.div variants={itemVariants}>

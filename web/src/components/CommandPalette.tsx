@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 
 import { useNavigate } from "react-router-dom";
 import { Command } from "cmdk";
@@ -30,7 +30,7 @@ const paletteKbd = () =>
     ? "⌘K"
     : "Ctrl+K";
 
-export function CommandPalette() {
+export const CommandPalette = memo(function CommandPalette() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   useFocusTrap(open, dialogRef);
@@ -289,63 +289,59 @@ export function CommandPalette() {
       )}
     </AnimatePresence>
   );
-}
+});
 
-function Item({
-  icon,
-  label,
-  shortcut,
-  onSelect,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  shortcut?: string;
-  onSelect: () => void;
-}) {
-  return (
-    <Command.Item
-      onSelect={onSelect}
-      className={cn(
-        "flex items-center justify-between px-3 py-3.5 rounded-2xl cursor-pointer transition-all duration-200 group outline-none",
-        "aria-selected:bg-white/5 aria-selected:translate-x-1",
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-400 group-aria-selected:bg-white group-aria-selected:text-slate-950 transition-colors shadow-sm border border-slate-700/30">
-          {React.isValidElement(icon)
-            ? React.cloneElement(
-                icon as React.ReactElement<{
-                  className?: string;
-                  strokeWidth?: number;
-                }>,
-                {
-                  className: "w-5 h-5",
-                  strokeWidth: 2.5,
-                },
-              )
-            : icon}
-        </div>
-
-        <span className="text-sm font-bold text-slate-300 group-aria-selected:text-white">
-          {label}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-4">
-        {shortcut && (
-          <div className="flex items-center gap-1">
-            {shortcut.split(" ").map((s) => (
-              <span
-                key={s}
-                className="px-1.5 py-0.5 rounded-md bg-slate-800/80 border border-slate-700/50 text-[10px] font-black text-slate-500 group-aria-selected:text-slate-300"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
+const Item = memo(
+  ({
+    icon,
+    label,
+    shortcut,
+    onSelect,
+  }: {
+    icon: React.ReactNode;
+    label: string;
+    shortcut?: string;
+    onSelect: () => void;
+  }) => {
+    return (
+      <Command.Item
+        onSelect={onSelect}
+        className={cn(
+          "flex items-center justify-between px-3 py-3.5 rounded-2xl cursor-pointer transition-all duration-200 group outline-none",
+          "aria-selected:bg-white/5 aria-selected:translate-x-1",
         )}
-        <ChevronRight className="w-4 h-4 text-slate-600 opacity-0 group-aria-selected:opacity-100 transition-all translate-x-[-10px] group-aria-selected:translate-x-0" />
-      </div>
-    </Command.Item>
-  );
-}
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-slate-800/50 text-slate-400 group-aria-selected:bg-amber-500/10 group-aria-selected:text-amber-400 transition-colors">
+            {icon}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-slate-200 group-aria-selected:text-white transition-colors">
+              {label}
+            </span>
+            {shortcut && (
+              <span className="text-[10px] font-medium text-slate-500">
+                {shortcut}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          {shortcut && (
+            <div className="hidden sm:flex items-center gap-1">
+              {shortcut.split(" ").map((key, i) => (
+                <kbd
+                  key={i}
+                  className="px-1.5 py-0.5 rounded-md bg-slate-800/50 border border-slate-700/50 text-[9px] font-black text-slate-500"
+                >
+                  {key}
+                </kbd>
+              ))}
+            </div>
+          )}
+          <ChevronRight className="w-4 h-4 text-slate-600 opacity-0 group-aria-selected:opacity-100 transition-all translate-x-[-10px] group-aria-selected:translate-x-0" />
+        </div>
+      </Command.Item>
+    );
+  },
+);

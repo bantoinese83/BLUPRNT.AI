@@ -1,7 +1,7 @@
 import { Component, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { reportClientError } from "@/lib/report-error";
+import { reportClientError } from "@/lib/sentry";
 
 type Props = {
   children: ReactNode;

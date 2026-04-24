@@ -1,4 +1,10 @@
-import React, { useEffect, useState, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { type Session, type User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -103,15 +109,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
     } catch (error) {
       reportClientError("auth_sign_out", error);
     }
-  };
+  }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       const redirectUri = getAuthRedirectUrl();
 
@@ -147,8 +153,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (__DEV__) console.warn("Google sign in error:", error);
       throw error;
     }
-  };
-  const signInWithApple = async () => {
+  }, []);
+
+  const signInWithApple = useCallback(async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -179,20 +186,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (__DEV__) console.warn("Apple sign in error:", error);
       throw error;
     }
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      session,
+      user,
+      loading,
+      signOut,
+      signInWithGoogle,
+      signInWithApple,
+    }),
+    [session, user, loading, signOut, signInWithGoogle, signInWithApple],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        session,
-        user,
-        loading,
-        signOut,
-        signInWithGoogle,
-        signInWithApple,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }

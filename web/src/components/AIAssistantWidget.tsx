@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Send, Bot, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
@@ -12,7 +12,7 @@ interface Message {
   content: string;
 }
 
-export function AIAssistantWidget({
+export const AIAssistantWidget = memo(function AIAssistantWidget({
   projectId,
   isOpen,
   onOpenChange,
@@ -43,54 +43,58 @@ export function AIAssistantWidget({
     }
   }, [messages, isOpen, scrollToBottom]);
 
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const msg = input.trim();
-    if (!msg || isTyping) return;
+  const handleSend = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      const msg = input.trim();
+      if (!msg || isTyping) return;
 
-    setInput("");
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: msg,
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setIsTyping(true);
+      setInput("");
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: msg,
+      };
+      setMessages((prev) => [...prev, userMsg]);
+      setIsTyping(true);
 
-    try {
-      const { data, error } = await invokeFunction<{ reply?: string }>(
-        "chat-with-project",
-        {
-          body: { query: msg, projectId },
-        },
-      );
+      try {
+        const { data, error } = await invokeFunction<{ reply?: string }>(
+          "chat-with-project",
+          {
+            body: { query: msg, projectId },
+          },
+        );
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content:
-            data?.reply?.trim() || "I couldn't process that. Please try again.",
-        },
-      ]);
-    } catch (err) {
-      reportClientError("ai_assistant_web", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content:
-            "Sorry, I'm having trouble connecting. Check your connection and try again.",
-        },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content:
+              data?.reply?.trim() ||
+              "I couldn't process that. Please try again.",
+          },
+        ]);
+      } catch (err) {
+        reportClientError("ai_assistant_web", err);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content:
+              "Sorry, I'm having trouble connecting. Check your connection and try again.",
+          },
+        ]);
+      } finally {
+        setIsTyping(false);
+      }
+    },
+    [input, isTyping, projectId],
+  );
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
@@ -132,28 +136,7 @@ export function AIAssistantWidget({
               aria-label="Chat history"
             >
               {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
-                      m.role === "user"
-                        ? "bg-teal-600 text-white rounded-br-none"
-                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
-                    }`}
-                  >
-                    {m.role === "assistant" ? (
-                      <div className="markdown-content prose prose-sm prose-slate">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {m.content}
-                        </ReactMarkdown>
-                      </div>
-                    ) : (
-                      m.content
-                    )}
-                  </div>
-                </div>
+                <ChatMessage key={m.id} message={m} />
               ))}
               {isTyping && (
                 <div className="flex justify-start">
@@ -178,6 +161,7 @@ export function AIAssistantWidget({
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask a question..."
+                  aria-label="Ask a question"
                   className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                   disabled={isTyping}
                 />
@@ -202,7 +186,7 @@ export function AIAssistantWidget({
         whileTap={{ scale: 0.95 }}
         onClick={() => onOpenChange(!isOpen)}
         aria-label={isOpen ? "Close AI Assistant" : "Open AI Assistant"}
-        className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 ${
+        className={`group flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 ${
           isOpen
             ? "bg-slate-900 text-white"
             : "bg-teal-600 text-white shadow-teal-600/20"
@@ -214,14 +198,37 @@ export function AIAssistantWidget({
           <MessageSquare className="w-6 h-6" />
         )}
         {!isOpen && (
-          <div className="absolute -top-1 -right-1">
-            <span className="flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
-            </span>
+          <div className="absolute -top-1.5 -right-1.5 bg-white rounded-md p-1 shadow-lg border border-slate-200/60 transition-transform group-hover:scale-110">
+            <Bot className="w-3.5 h-3.5 text-emerald-600" />
           </div>
         )}
       </motion.button>
     </div>
   );
-}
+});
+
+const ChatMessage = memo(({ message: m }: { message: Message }) => {
+  return (
+    <div
+      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+    >
+      <div
+        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
+          m.role === "user"
+            ? "bg-teal-600 text-white rounded-br-none"
+            : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
+        }`}
+      >
+        {m.role === "assistant" ? (
+          <div className="markdown-content prose prose-sm prose-slate">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {m.content}
+            </ReactMarkdown>
+          </div>
+        ) : (
+          m.content
+        )}
+      </div>
+    </div>
+  );
+});

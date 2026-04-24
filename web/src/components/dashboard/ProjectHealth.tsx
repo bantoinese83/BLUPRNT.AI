@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, TrendingUp } from "lucide-react";
+import { Shield, TrendingUp, Activity } from "lucide-react";
 import { motion } from "motion/react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { VIZ_GRADIENT } from "@shared/constants/visualization";
@@ -249,8 +249,8 @@ export function ProjectHealth({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div
-            className={`mt-1.5 w-2 h-2 rounded-full bg-linear-to-br ${color} shrink-0 animate-pulse`}
+          <Activity
+            className={`mt-1.5 w-3 h-3 text-slate-500 shrink-0 opacity-50`}
           />
           <p className="text-sm font-medium text-slate-600 leading-relaxed italic group-hover:text-slate-900 transition-colors">
             "{message}"

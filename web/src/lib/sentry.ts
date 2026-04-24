@@ -65,18 +65,38 @@ function initBrowserSentry(): void {
 /**
  * Surfaces unexpected client errors in dev (always) and in Sentry when configured.
  * Use for catch blocks that still show friendly UI — avoids silent production failures.
+ * Returns a unique event ID for user reference.
  */
-export function reportClientError(scope: string, error: unknown): void {
-  if (import.meta.env.DEV) {
-    console.error(`[${scope}]`, error);
+export function reportClientError(
+  scope: string,
+  error: unknown,
+  extra?: Record<string, unknown>,
+): string {
+  const err =
+    error instanceof Error ? error : new Error(`${scope}: ${String(error)}`);
+
+  if (initialized && dsn) {
+    Sentry.captureException(err, { tags: { client_flow: scope }, extra });
   }
-  if (!dsn || !initialized) {
-    return;
-  }
-  Sentry.captureException(
-    error instanceof Error ? error : new Error(`${scope}: ${String(error)}`),
-    { tags: { client_flow: scope } },
-  );
+
+  const eventId =
+    initialized && dsn
+      ? (Sentry.lastEventId() ?? crypto.randomUUID())
+      : crypto.randomUUID();
+
+  // Structured log for local debugging and log aggregation
+  const line = {
+    ts: new Date().toISOString(),
+    level: "error" as const,
+    source: scope,
+    eventId,
+    message: err.message,
+    stack: err.stack,
+    ...extra,
+  };
+  console.error(JSON.stringify(line));
+
+  return eventId;
 }
 
 export function captureEdgeInvokeFailure(

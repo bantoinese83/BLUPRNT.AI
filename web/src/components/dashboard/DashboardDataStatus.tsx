@@ -18,15 +18,18 @@ export function DashboardDataStatus({
     <>
       {refreshing && (
         <div
-          className="pointer-events-none fixed left-0 right-0 top-0 z-[60] h-0.5 overflow-hidden bg-slate-200/90"
+          className="pointer-events-none fixed left-0 right-0 top-0 z-60 h-0.5 overflow-hidden bg-slate-200/90"
           aria-hidden
         >
-          <div className="h-full w-2/5 min-w-[120px] animate-pulse bg-teal-500" />
+          <div
+            className="h-full w-full bg-teal-500/50 transition-all duration-1000 ease-in-out"
+            style={{ width: refreshing ? "100%" : "0%" }}
+          />
         </div>
       )}
       {loadError && (
         <div
-          className="sticky top-16 z-40 border-b border-amber-200/80 bg-amber-50/95 px-4 py-3 backdrop-blur-sm sm:top-[4.25rem]"
+          className="sticky top-16 z-40 border-b border-amber-200/80 bg-amber-50/95 px-4 py-3 backdrop-blur-sm sm:top-17"
           role="alert"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

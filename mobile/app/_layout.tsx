@@ -30,6 +30,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
 import "react-native-reanimated";
 import { BrandedSplash } from "@/components/BrandedSplash";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { useAuth } from "@/contexts/auth-context";
@@ -49,12 +50,11 @@ import {
   setProductAnalyticsHandler,
 } from "@/lib/product-analytics";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+// export {
+//   // Catch any errors thrown by the Layout component.
+//   ErrorBoundary,
+// } from "expo-router";
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "index",
@@ -152,18 +152,20 @@ function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <AuthProvider>
-            <RootLayoutNav />
-            <AppToastHost />
-            <OfflineBannerHost />
-            {isOutdated && <LockScreen type="update-required" />}
-          </AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <RootLayoutNav />
+              <AppToastHost />
+              <OfflineBannerHost />
+              {isOutdated && <LockScreen type="update-required" />}
+            </AuthProvider>
+          </QueryClientProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
-    </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

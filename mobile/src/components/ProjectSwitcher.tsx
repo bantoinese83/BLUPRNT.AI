@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, memo } from "react";
 import {
   StyleSheet,
   View,
@@ -23,14 +23,51 @@ type ProjectSwitcherProps = {
   onAdd: () => void;
 };
 
-export function ProjectSwitcher({
+export const ProjectSwitcher = memo(function ProjectSwitcher({
   projects,
   currentId,
   onSelect,
   onAdd,
 }: ProjectSwitcherProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  // Always show switcher if there is at least 1 project, so we can see the "Add" button
+
+  const renderItem = useCallback(
+    ({ item: p }: { item: ProjectRow }) => (
+      <ProjectCard
+        project={p}
+        isActive={p.id === currentId}
+        isDeleting={deletingId === p.id}
+        onSelect={onSelect}
+        setDeletingId={setDeletingId}
+        isAnyDeleting={!!deletingId}
+      />
+    ),
+    [currentId, deletingId, onSelect],
+  );
+
+  const keyExtractor = useCallback((p: ProjectRow) => p.id, []);
+
+  const ListFooter = useCallback(
+    () => (
+      <TouchableOpacity
+        style={styles.addCardWrapper}
+        accessibilityLabel="Add new project"
+        accessibilityRole="button"
+        onPress={() => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          onAdd();
+        }}
+      >
+        <GlassCard intensity={12} style={[styles.card, styles.addCard]}>
+          <View style={[styles.iconContainer, styles.addIconContainer]}>
+            <PlusCircle size={18} color="white" />
+          </View>
+        </GlassCard>
+      </TouchableOpacity>
+    ),
+    [onAdd],
+  );
+
   if (projects.length === 0) return null;
 
   return (
@@ -44,122 +81,123 @@ export function ProjectSwitcher({
           { paddingHorizontal: 24, paddingRight: 112 },
         ]}
         data={projects}
-        keyExtractor={(p) => p.id}
-        renderItem={({ item: p }) => (
-          <TouchableOpacity
-            testID={`project-card-${p.name}`}
-            style={styles.cardWrapper}
-            disabled={deletingId === p.id}
-            onPress={() => {
-              if (deletingId === p.id) return;
-              Haptics.selectionAsync();
-              onSelect(p.id);
-            }}
-            onLongPress={() => {
-              if (deletingId) return;
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Warning,
-              );
-              Alert.alert(
-                "Delete Project",
-                `Are you sure you want to delete "${p.name}"? This will remove all associated invoices and scope items.`,
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                      setDeletingId(p.id);
-                      const { error } = await supabase
-                        .from("projects")
-                        .delete()
-                        .eq("id", p.id);
-                      setDeletingId(null);
-                      if (error) {
-                        Alert.alert(
-                          "Couldn't delete project",
-                          "Please check your connection and try again.",
-                        );
-                      } else {
-                        Haptics.notificationAsync(
-                          Haptics.NotificationFeedbackType.Success,
-                        );
-                        Alert.alert("Deleted", "Project has been removed.");
-                      }
-                    },
-                  },
-                ],
-              );
-            }}
-          >
-            <GlassCard
-              intensity={p.id === currentId ? 0 : 8}
-              style={[styles.card, p.id === currentId && styles.activeCard]}
-            >
-              <MotiView
-                from={{ scale: 1 }}
-                animate={{ scale: p.id === currentId ? 1.1 : 1 }}
-                transition={{
-                  type: "spring",
-                  damping: 10,
-                  loop: p.id === currentId ? true : false,
-                }}
-                style={[
-                  styles.iconContainer,
-                  p.id === currentId && styles.activeIconContainer,
-                ]}
-              >
-                <ProjectIcon name={p.name} size={14} />
-              </MotiView>
-              <View style={styles.textContainer}>
-                <Text
-                  style={[styles.name, p.id === currentId && styles.activeName]}
-                  numberOfLines={1}
-                >
-                  {p.name}
-                </Text>
-                <Text
-                  style={[
-                    styles.metaText,
-                    p.id === currentId && styles.activeMetaText,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {p.created_at
-                    ? new Date(p.created_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : ""}
-                  {p.estimated_min_total
-                    ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
-                    : " • Planning"}
-                </Text>
-              </View>
-            </GlassCard>
-          </TouchableOpacity>
-        )}
-        ListFooterComponent={
-          <TouchableOpacity
-            style={styles.addCardWrapper}
-            onPress={() => {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              onAdd();
-            }}
-          >
-            <GlassCard intensity={12} style={[styles.card, styles.addCard]}>
-              <View style={[styles.iconContainer, styles.addIconContainer]}>
-                <PlusCircle size={18} color="white" />
-              </View>
-            </GlassCard>
-          </TouchableOpacity>
-        }
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListFooterComponent={ListFooter}
       />
     </View>
   );
-}
+});
+
+const ProjectCard = memo(
+  ({
+    project: p,
+    isActive,
+    isDeleting,
+    onSelect,
+    setDeletingId,
+    isAnyDeleting,
+  }: {
+    project: ProjectRow;
+    isActive: boolean;
+    isDeleting: boolean;
+    onSelect: (id: string) => void;
+    setDeletingId: (id: string | null) => void;
+    isAnyDeleting: boolean;
+  }) => {
+    return (
+      <TouchableOpacity
+        testID={`project-card-${p.name}`}
+        accessibilityLabel={`${p.name} project ${isActive ? "(Current)" : ""}`}
+        accessibilityRole="button"
+        style={styles.cardWrapper}
+        disabled={isDeleting}
+        onPress={() => {
+          if (isDeleting) return;
+          Haptics.selectionAsync();
+          onSelect(p.id);
+        }}
+        onLongPress={() => {
+          if (isAnyDeleting) return;
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          Alert.alert(
+            "Delete Project",
+            `Are you sure you want to delete "${p.name}"? This will remove all associated invoices and scope items.`,
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Delete",
+                style: "destructive",
+                onPress: async () => {
+                  setDeletingId(p.id);
+                  const { error } = await supabase
+                    .from("projects")
+                    .delete()
+                    .eq("id", p.id);
+                  setDeletingId(null);
+                  if (error) {
+                    Alert.alert(
+                      "Couldn't delete project",
+                      "Please check your connection and try again.",
+                    );
+                  } else {
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Success,
+                    );
+                    Alert.alert("Deleted", "Project has been removed.");
+                  }
+                },
+              },
+            ],
+          );
+        }}
+      >
+        <GlassCard
+          intensity={isActive ? 0 : 8}
+          style={[styles.card, isActive && styles.activeCard]}
+        >
+          <MotiView
+            from={{ scale: 1 }}
+            animate={{ scale: isActive ? 1.1 : 1 }}
+            transition={{
+              type: "spring",
+              damping: 10,
+              loop: isActive ? true : false,
+            }}
+            style={[
+              styles.iconContainer,
+              isActive && styles.activeIconContainer,
+            ]}
+          >
+            <ProjectIcon name={p.name} size={14} />
+          </MotiView>
+          <View style={styles.textContainer}>
+            <Text
+              style={[styles.name, isActive && styles.activeName]}
+              numberOfLines={1}
+            >
+              {p.name}
+            </Text>
+            <Text
+              style={[styles.metaText, isActive && styles.activeMetaText]}
+              numberOfLines={1}
+            >
+              {p.created_at
+                ? new Date(p.created_at).toLocaleDateString(undefined, {
+                    month: "short",
+                    year: "numeric",
+                  })
+                : ""}
+              {p.estimated_min_total
+                ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
+                : " • Planning"}
+            </Text>
+          </View>
+        </GlassCard>
+      </TouchableOpacity>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   container: {

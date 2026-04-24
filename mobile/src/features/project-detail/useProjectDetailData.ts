@@ -17,6 +17,7 @@ import {
   buildReconciliation,
   type ReconciliationResult,
 } from "@shared/lib/reconciliation";
+import { buildSpendByCategory } from "@shared/lib/spend-by-category";
 
 export function useProjectDetailData() {
   const { id: rawId, focus: rawFocus } = useLocalSearchParams<{
@@ -42,6 +43,7 @@ export function useProjectDetailData() {
     addItem,
     projects,
     handleProjectSelect,
+    galleryItems,
   } = useDashboardData();
 
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -72,6 +74,9 @@ export function useProjectDetailData() {
 
   const [reconciliation, setReconciliation] =
     useState<ReconciliationResult | null>(null);
+  const [spendByCategory, setSpendByCategory] = useState<
+    Record<string, number>
+  >({});
 
   const groupedScope = useMemo(() => groupScopeByCategory(scope), [scope]);
 
@@ -144,7 +149,7 @@ export function useProjectDetailData() {
       if (newInvoices.length > 0) {
         const { data: lines } = await supabase
           .from("invoice_line_items")
-          .select("invoice_id, line_total, scope_item_id")
+          .select("invoice_id, line_total, scope_item_id, category")
           .in(
             "invoice_id",
             newInvoices.map((i) => i.id),
@@ -152,6 +157,16 @@ export function useProjectDetailData() {
 
         if (lines) {
           setReconciliation(buildReconciliation(newScopes, lines));
+          setSpendByCategory(
+            buildSpendByCategory(
+              lines.map((l) => ({
+                category: l.category,
+                line_total: l.line_total,
+                scope_item_id: l.scope_item_id,
+              })),
+              newScopes,
+            ),
+          );
         }
       }
     },
@@ -256,12 +271,24 @@ export function useProjectDetailData() {
         if (detailInvoices.length > 0) {
           const { data: lines } = await supabase
             .from("invoice_line_items")
-            .select("invoice_id, line_total, scope_item_id")
+            .select("invoice_id, line_total, scope_item_id, category")
             .in(
               "invoice_id",
               detailInvoices.map((i) => i.id),
             );
-          if (lines) setReconciliation(buildReconciliation(newScopes, lines));
+          if (lines) {
+            setReconciliation(buildReconciliation(newScopes, lines));
+            setSpendByCategory(
+              buildSpendByCategory(
+                lines.map((l) => ({
+                  category: l.category,
+                  line_total: l.line_total,
+                  scope_item_id: l.scope_item_id,
+                })),
+                newScopes,
+              ),
+            );
+          }
         }
 
         return true;
@@ -346,7 +373,7 @@ export function useProjectDetailData() {
     if (!id) return;
     setRefreshing(true);
     setScopePollDone(false);
-    const [projRes, scopeRes, invRes] = await Promise.all([
+    const [projRes, scopeRes, invRes, linesRes] = await Promise.all([
       supabase.from("projects").select("*").eq("id", id).single(),
       supabase
         .from("scope_items")
@@ -358,6 +385,13 @@ export function useProjectDetailData() {
         .select("*")
         .eq("project_id", id)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("invoice_line_items")
+        .select("invoice_id, line_total, scope_item_id, category")
+        .in(
+          "invoice_id",
+          detailInvoices.map((i) => i.id),
+        ),
     ]);
 
     await ingestFetchResults(
@@ -374,8 +408,21 @@ export function useProjectDetailData() {
         error: { message: string; code?: string } | null;
       },
     );
+
+    if (linesRes?.data) {
+      setSpendByCategory(
+        buildSpendByCategory(
+          linesRes.data.map((l) => ({
+            category: l.category,
+            line_total: l.line_total,
+            scope_item_id: l.scope_item_id,
+          })),
+          (scopeRes.data as unknown as ScopeRow[]) ?? [],
+        ),
+      );
+    }
     setRefreshing(false);
-  }, [id, ingestFetchResults]);
+  }, [id, ingestFetchResults, detailInvoices]);
 
   const exportSellerPacket = useCallback(async () => {
     if (!project || !id) return;
@@ -438,6 +485,8 @@ export function useProjectDetailData() {
     setIncludeAppendix,
     isArchitect,
     hasProjectPass,
+    spendByCategory,
+    galleryItems,
     addItem,
     showUpgrade,
     setShowUpgrade,

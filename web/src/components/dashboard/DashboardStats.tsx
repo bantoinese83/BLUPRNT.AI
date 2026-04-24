@@ -20,7 +20,7 @@ function formatCurrency(n: number) {
 
 function StatSkeleton() {
   return (
-    <div className="glass-card flex flex-col items-start p-5 sm:p-6 animate-pulse">
+    <div className="glass-card flex flex-col items-start p-5 sm:p-6 bg-slate-50/30">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-xl bg-slate-100" />
         <div className="h-3 w-16 bg-slate-100 rounded" />

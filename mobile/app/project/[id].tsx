@@ -12,6 +12,8 @@ import {
   useProjectDetailData,
 } from "@/features/project-detail";
 
+import { AwarenessProvider } from "@/contexts/AwarenessProvider";
+
 function ProjectDetailScreenInner() {
   const vm = useProjectDetailData();
 
@@ -48,7 +50,19 @@ function ProjectDetailScreenInner() {
     );
   }
 
-  return <ProjectDetailContent {...vm} />;
+  return (
+    <AwarenessProvider
+      project={vm.project}
+      scopeItems={vm.scope}
+      invoices={vm.detailInvoices}
+      spendByCategory={vm.spendByCategory}
+      isArchitect={vm.isArchitect}
+      hasProjectPass={vm.hasProjectPass}
+      galleryItems={vm.galleryItems}
+    >
+      <ProjectDetailContent {...vm} />
+    </AwarenessProvider>
+  );
 }
 
 export default function ProjectDetailScreen() {

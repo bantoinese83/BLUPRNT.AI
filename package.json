@@ -39,7 +39,9 @@
     "functions:deploy:marketing-lead": "supabase functions deploy submit-marketing-lead --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:chat": "supabase functions deploy chat-with-project --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:rate-limited": "supabase functions deploy photo-to-scope get-document-signed-url send-email upload-document delete-account get-invoice create-checkout get-project-view submit-marketing-lead chat-with-project --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
-    "prepare": "node -e \"if (process.env.VERCEL || process.env.CI) process.exit(0); const { spawnSync } = require('child_process'); const r = spawnSync('husky', { shell: true, stdio: 'inherit' }); process.exit(r.status ?? 1);\""
+    "prepare": "node -e \"if (process.env.VERCEL || process.env.CI) process.exit(0); const { spawnSync } = require('child_process'); const r = spawnSync('husky', { shell: true, stdio: 'inherit' }); process.exit(r.status ?? 1);\"",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.2",
@@ -82,5 +84,10 @@
     "*.{json,css,md,html}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "expo": "~54.0.33",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   }
 }

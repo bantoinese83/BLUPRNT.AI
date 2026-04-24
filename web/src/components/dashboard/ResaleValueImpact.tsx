@@ -115,7 +115,8 @@ export function ResaleValueImpact({
             </svg>
           </div>
           <div className="flex justify-end">
-            <div className="rounded-lg bg-teal-950 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white animate-pulse">
+            <div className="rounded-lg bg-teal-950 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+              <TrendingUp className="w-3 h-3 text-teal-400" />
               Peak ROI
             </div>
           </div>

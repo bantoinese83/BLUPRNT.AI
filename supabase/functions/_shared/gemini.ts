@@ -1,9 +1,8 @@
-import { GoogleGenerativeAI as GoogleGenAI } from "npm:@google/generative-ai";
-
+import { GoogleGenAI } from "npm:@google/genai";
 
 /**
  * Shared Gemini AI utilities for Supabase Edge Functions.
- * Migrated to the LATEST Google GenAI SDK architecture (2025/2026).
+ * Fully migrated to the NEW Google GenAI SDK architecture (2025/2026).
  */
 
 export type GeminiPart =
@@ -39,25 +38,6 @@ function tryParseJson(text: string): Record<string, unknown> | null {
     console.warn("[gemini-util] JSON Parse failed:", e.message);
     return null;
   }
-}
-
-/** Some Edge responses omit `text` but still include candidates — merge parts manually. */
-function extractTextFromGenerateContentResponse(response: any): string | null {
-  if (!response || typeof response !== "object") return null;
-
-  if (typeof response.text === "string" && response.text.trim()) {
-    return response.text.trim();
-  }
-
-  const parts = response.candidates?.[0]?.content?.parts;
-  if (parts?.length) {
-    const combined = parts
-      .map((p: any) => (p && typeof p.text === "string" ? p.text : ""))
-      .join("");
-    if (combined.trim()) return combined.trim();
-  }
-
-  return null;
 }
 
 /** True when Google returns overload / rate limits — safe to retry with backoff. */
@@ -105,14 +85,11 @@ export async function callGemini(params: {
     }
 
     try {
-      const genAI = new GoogleGenAI(apiKey);
+      // New SDK uses GoogleGenAI client architecture
+      const client = new GoogleGenAI({ apiKey });
 
-      const model = genAI.getGenerativeModel({ 
-        model: modelName,
-        systemInstruction: systemInstruction,
-      });
-
-      const sdkContents = parts.map((p) => {
+      // Transform parts to the format expected by @google/genai
+      const contents = parts.map((p) => {
         if ("inline_data" in p) {
           return {
             inlineData: {
@@ -131,9 +108,11 @@ export async function callGemini(params: {
         ),
       );
 
-      const callPromise = model.generateContent({
-        contents: [{ role: "user", parts: sdkContents }],
-        generationConfig: {
+      const callPromise = client.models.generateContent({
+        model: modelName,
+        contents,
+        config: {
+          systemInstruction,
           temperature,
           maxOutputTokens,
           responseMimeType,
@@ -141,10 +120,9 @@ export async function callGemini(params: {
         },
       });
 
-      const result = await Promise.race([callPromise, timeoutPromise]);
-      const response = await result.response;
+      const response = await Promise.race([callPromise, timeoutPromise]);
       
-      const text = response.text();
+      const text = response.text;
       if (!text) {
         console.warn("[callGemini] No usable text in response");
         return null;
@@ -159,6 +137,10 @@ export async function callGemini(params: {
     } catch (e: unknown) {
       const error = e as Error;
       console.error(`[callGemini] Attempt ${attempt} failed:`, error.name, error.message);
+      
+      // Detailed logging for SDK errors
+      if (error.stack) console.error(error.stack);
+
       if (!isRetryableGeminiError(e) || attempt === DEFAULT_MAX_ATTEMPTS) return null;
     }
   }

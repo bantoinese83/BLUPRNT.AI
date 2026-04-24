@@ -307,7 +307,7 @@ export function DocumentsSection({
               animate={{ opacity: 1, scale: 1 }}
               className="relative"
             >
-              <Card className="border-slate-200 bg-slate-50/50 border-dashed animate-pulse h-[100px]">
+              <Card className="border-slate-200 bg-slate-50/50 border-dashed h-[100px]">
                 <CardContent className="p-4 flex items-center space-x-4 h-full">
                   <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center shrink-0">
                     <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
