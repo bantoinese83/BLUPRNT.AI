@@ -51,7 +51,20 @@ describe("dashboard-snapshot-core", () => {
             if (table === "scope_items")
               data = [{ id: "s1", category: "Test" }];
             if (table === "invoices")
-              data = [{ id: "i1", vendor_name: "Vendor" }];
+              data = [
+                {
+                  id: "i1",
+                  vendor_name: "Vendor",
+                  invoice_line_items: [
+                    {
+                      invoice_id: "i1",
+                      category: "Test",
+                      line_total: 100,
+                      scope_item_id: "s1",
+                    },
+                  ],
+                },
+              ];
             if (table === "project_gallery")
               data = [{ id: "g1", photo_type: "before" }];
             return Promise.resolve({ data, error: null }).then(callback);

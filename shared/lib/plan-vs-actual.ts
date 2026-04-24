@@ -12,15 +12,14 @@ export type InvoiceLike = {
 };
 
 export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
-  return (invoices ?? [])
-    .filter((i) => {
-      const t = (i?.document_type ?? "invoice").toLowerCase();
-      return isPlanVsActualDocumentType(t);
-    })
-    .reduce((s, i) => {
+  return (invoices ?? []).reduce((s, i) => {
+    const t = (i?.document_type ?? "invoice").toLowerCase();
+    if (isPlanVsActualDocumentType(t)) {
       const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
       return s + val;
-    }, 0);
+    }
+    return s;
+  }, 0);
 }
 
 /**
@@ -28,15 +27,15 @@ export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
  * Shown in the "Records" side of the ledger, not the capital improvement track.
  */
 export function maintenanceDocumentTotal(invoices: InvoiceLike[]): number {
-  return (invoices ?? [])
-    .filter((i) => {
-      const t = (i?.document_type ?? "").toLowerCase();
-      return t ? !isPlanVsActualDocumentType(t) : false;
-    })
-    .reduce((s, i) => {
+  return (invoices ?? []).reduce((s, i) => {
+    const t = (i?.document_type ?? "").toLowerCase();
+    const isCapital = t ? isPlanVsActualDocumentType(t) : false;
+    if (t && !isCapital) {
       const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
       return s + val;
-    }, 0);
+    }
+    return s;
+  }, 0);
 }
 
 export type LedgerDocumentFilter = "all" | "capital" | "maintenance";

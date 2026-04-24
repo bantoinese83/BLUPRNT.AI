@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ListTree, Rocket, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,24 +62,26 @@ export function ScopeDetail({
 
   const conf = project.confidence_score ?? 4.5;
 
-  const groupedItems = scopeItems.reduce(
-    (acc, item) => {
-      const phase = item.phase || item.metadata?.phase || "General";
-      if (!acc[phase]) acc[phase] = [];
-      acc[phase].push(item);
-      return acc;
-    },
-    {} as Record<string, ScopeRow[]>,
-  );
+  const sortedPhases = useMemo(() => {
+    const grouped = scopeItems.reduce(
+      (acc, item) => {
+        const phase = item.phase || item.metadata?.phase || "General";
+        if (!acc[phase]) acc[phase] = [];
+        acc[phase].push(item);
+        return acc;
+      },
+      {} as Record<string, ScopeRow[]>,
+    );
 
-  const sortedPhases = Object.entries(groupedItems).sort(([a], [b]) => {
-    const idxA = PHASE_ORDER.indexOf(a);
-    const idxB = PHASE_ORDER.indexOf(b);
-    if (idxA === -1 && idxB === -1) return a.localeCompare(b);
-    if (idxA === -1) return 1;
-    if (idxB === -1) return -1;
-    return idxA - idxB;
-  });
+    return Object.entries(grouped).sort(([a], [b]) => {
+      const idxA = PHASE_ORDER.indexOf(a);
+      const idxB = PHASE_ORDER.indexOf(b);
+      if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+      if (idxA === -1) return 1;
+      if (idxB === -1) return -1;
+      return idxA - idxB;
+    });
+  }, [scopeItems]);
 
   return (
     <div className="space-y-6">

@@ -33,6 +33,19 @@ export function buildReconciliation(
     unreconciled_billed: 0,
   };
 
+  if (!scopeItems.length || !lineItems.length) {
+    // If we have no scope items, we can't reconcile anything.
+    // If we have no lines, total_reconciled is 0.
+    // However, if we have lines but no scope items, they all go to unreconciled_billed.
+    if (!scopeItems.length && lineItems.length) {
+      result.unreconciled_billed = lineItems.reduce(
+        (s, l) => s + (l.line_total || 0),
+        0,
+      );
+    }
+    return result;
+  }
+
   const scopeMap = new Map<string, ScopeRow>(scopeItems.map((s) => [s.id, s]));
   const itemMap: Record<string, ReconciliationItem> = {};
 

@@ -8,11 +8,14 @@ import {
   Check,
   X,
   Activity,
+  Copy,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShareModal } from "./ShareModal";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 import type { ProjectRow } from "@shared/types/database";
 
@@ -25,6 +28,7 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
   const [shareOpen, setShareOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(project.name);
+  const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,6 +48,20 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
   const handleCancel = () => {
     setTempName(project.name);
     setIsEditing(false);
+  };
+
+  const copyProjectId = async () => {
+    try {
+      await navigator.clipboard.writeText(project.id);
+      setCopied(true);
+      toast.success("Project ID copied to clipboard", {
+        description: project.id,
+        duration: 2000,
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy project ID");
+    }
   };
 
   return (
@@ -67,6 +85,23 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
                 High Value Project
               </Badge>
             )}
+          <button
+            onClick={copyProjectId}
+            className={cn(
+              "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+              "bg-slate-50 text-slate-400 border border-slate-100 hover:border-slate-200 hover:text-slate-600 hover:bg-slate-100",
+              copied && "text-emerald-600 border-emerald-100 bg-emerald-50",
+            )}
+            title="Copy project ID"
+            aria-label="Copy project ID"
+          >
+            {copied ? (
+              <Check className="w-2.5 h-2.5" />
+            ) : (
+              <Copy className="w-2.5 h-2.5" />
+            )}
+            ID: {project.id.split("-")[0]}...
+          </button>
         </div>
 
         {isEditing ? (

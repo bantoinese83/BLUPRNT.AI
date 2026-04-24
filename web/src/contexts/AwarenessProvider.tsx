@@ -125,15 +125,18 @@ export function AwarenessProvider({
     };
   }, [project, scopeItems, invoices, spendByCategory]);
 
+  const value = useMemo(
+    () => ({
+      ...awarenessData,
+      isSidebarOpen,
+      setIsSidebarOpen,
+      activeProjectId: project?.id ?? null,
+    }),
+    [awarenessData, isSidebarOpen, project?.id],
+  );
+
   return (
-    <AwarenessContext.Provider
-      value={{
-        ...awarenessData,
-        isSidebarOpen,
-        setIsSidebarOpen,
-        activeProjectId: project?.id ?? null,
-      }}
-    >
+    <AwarenessContext.Provider value={value}>
       {children}
     </AwarenessContext.Provider>
   );

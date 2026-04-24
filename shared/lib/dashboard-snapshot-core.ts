@@ -48,6 +48,8 @@ const SCOPE_SELECT =
 const INVOICE_SELECT =
   "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date";
 
+const INVOICE_WITH_LINES_SELECT = `${INVOICE_SELECT}, invoice_line_items(invoice_id, category, line_total, scope_item_id)`;
+
 const GALLERY_SELECT =
   "id, project_id, photo_type, storage_path, caption, uploaded_by_user_id, created_at";
 
@@ -124,7 +126,7 @@ export async function buildDashboardDataForProject(
       .order("created_at", { ascending: true }),
     supabase
       .from("invoices")
-      .select(INVOICE_SELECT)
+      .select(INVOICE_WITH_LINES_SELECT)
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
     supabase
@@ -156,28 +158,19 @@ export async function buildDashboardDataForProject(
   );
 
   const newScopes = (scopesRes.data ?? []) as ScopeRow[];
-  const newInvoices = (invRes.data ?? []) as InvoiceRow[];
+  const newInvoicesRaw = (invRes.data ?? []) as any[];
+  const newInvoices = newInvoicesRaw as InvoiceRow[];
   const newGalleryItems = (galleryRes.data ?? []) as GalleryItemRow[];
   const sub = subRes.data as UserSubscriptionRow | null;
   const pass = subRes2.data as ProjectPassRow | null;
   const isArchitect = isArchitectPlanEffective(sub);
   const hasProjectPass = !!pass;
 
-  const invoiceIds = newInvoices.map((i) => i.id).filter(Boolean);
-  let spendByCategory: Record<string, number> = {};
-  let reconciliation: ReconciliationResult | null = null;
-
-  if (invoiceIds.length > 0) {
-    const linesRes = await supabase
-      .from("invoice_line_items")
-      .select("invoice_id, category, line_total, scope_item_id")
-      .in("invoice_id", invoiceIds);
-
-    if (!linesRes.error) {
-      spendByCategory = buildSpendByCategory(linesRes.data ?? [], newScopes);
-      reconciliation = buildReconciliation(newScopes, linesRes.data ?? []);
-    }
-  }
+  const allLineItems = newInvoicesRaw.flatMap(
+    (inv) => inv.invoice_line_items || [],
+  );
+  const spendByCategory = buildSpendByCategory(allLineItems, newScopes);
+  const reconciliation = buildReconciliation(newScopes, allLineItems);
 
   const project =
     allProjects.find((p) => p.id === projectId) ??

@@ -54,7 +54,9 @@ const COLOR_MAP: Record<
   },
 };
 
-export function ActivityFeed({ events }: Props) {
+export const ActivityFeed = React.memo(function ActivityFeed({
+  events,
+}: Props) {
   if (events.length === 0) return null;
 
   return (
@@ -126,7 +128,7 @@ export function ActivityFeed({ events }: Props) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -61,11 +61,14 @@ export function useDashboardData() {
   void activeProjectId;
   void data;
 
-  return {
-    ...publicCore,
-    configurationMissing,
-    addItem,
-    recalcProjectTotals,
-    galleryItems: publicCore.galleryItems,
-  };
+  return useMemo(
+    () => ({
+      ...publicCore,
+      configurationMissing,
+      addItem,
+      recalcProjectTotals,
+      galleryItems: publicCore.galleryItems,
+    }),
+    [publicCore, configurationMissing, addItem, recalcProjectTotals],
+  );
 }

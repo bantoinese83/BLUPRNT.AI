@@ -318,7 +318,11 @@ export function DashboardHeader({
                       }}
                       className="flex w-full items-center gap-3 rounded-xl bg-teal-50 px-4 py-3 text-sm font-bold text-teal-700"
                     >
-                      <img src="/upgrade-icon.svg" alt="" className="h-5 w-5" />
+                      <img
+                        src="/upgrade-icon.svg"
+                        alt="Architect plan icon"
+                        className="h-5 w-5"
+                      />
                       Upgrade to Architect
                     </button>
                   )}

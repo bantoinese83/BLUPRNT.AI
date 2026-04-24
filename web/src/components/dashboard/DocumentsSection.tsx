@@ -6,9 +6,10 @@ import { DocumentLimitAlert } from "./DocumentLimitAlert";
 import { DocumentCard } from "./DocumentCard";
 import { DocumentReviewModal } from "./DocumentReviewModal";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FileText, Upload } from "lucide-react";
+import { Loader2, FileText, Upload, Search, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
@@ -40,11 +41,25 @@ export function DocumentsSection({
   const wasUploading = useRef(false);
   const [dropActive, setDropActive] = useState(false);
   const [ledgerFilter, setLedgerFilter] = useState<LedgerDocumentFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const visibleDocuments = useMemo(
-    () => filterInvoicesByLedgerDocumentFilter(documents, ledgerFilter),
-    [documents, ledgerFilter],
-  );
+  const visibleDocuments = useMemo(() => {
+    let filtered = filterInvoicesByLedgerDocumentFilter(
+      documents,
+      ledgerFilter,
+    );
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(
+        (doc) =>
+          doc.vendor_name?.toLowerCase().includes(q) ||
+          doc.document_type?.toLowerCase().includes(q),
+      );
+    }
+
+    return filtered;
+  }, [documents, ledgerFilter, searchQuery]);
 
   const {
     inputRef,
@@ -170,49 +185,90 @@ export function DocumentsSection({
         )}
 
         {documents.length > 0 ? (
-          <div
-            className="flex flex-wrap gap-2"
-            role="tablist"
-            aria-label="Filter ledger documents"
-          >
-            {(
-              [
-                { id: "all" as const, label: "All" },
-                { id: "capital" as const, label: "Spending" },
-                { id: "maintenance" as const, label: "Logs & Certs" },
-              ] as const
-            ).map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={ledgerFilter === id}
-                className={cn(
-                  "rounded-full px-4 py-2 text-xs font-bold transition-colors",
-                  ledgerFilter === id
-                    ? "bg-teal-600 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                )}
-                onClick={() => setLedgerFilter(id)}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div
+              className="flex flex-wrap gap-2"
+              role="tablist"
+              aria-label="Filter ledger documents"
+            >
+              {(
+                [
+                  { id: "all" as const, label: "All" },
+                  { id: "capital" as const, label: "Spending" },
+                  { id: "maintenance" as const, label: "Logs & Certs" },
+                ] as const
+              ).map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={ledgerFilter === id}
+                  className={cn(
+                    "rounded-full px-4 py-2 text-xs font-bold transition-colors",
+                    ledgerFilter === id
+                      ? "bg-teal-600 text-white shadow-sm"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                  )}
+                  onClick={() => setLedgerFilter(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full sm:max-w-[240px]">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search className="h-3.5 w-3.5 text-slate-400" />
+              </div>
+              <Input
+                type="text"
+                placeholder="Search vendor or type..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-8 h-9 text-xs rounded-full border-slate-200 bg-white/50 focus:bg-white transition-all shadow-sm"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         ) : null}
 
         {documents.length > 0 && visibleDocuments.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-6 text-center">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-10 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-4 text-slate-400">
+              <Search className="w-6 h-6" />
+            </div>
             <p className="text-sm font-semibold text-slate-800">
-              {ledgerFilter === "capital"
-                ? "No invoices, quotes, or receipts in this view"
-                : "No permits, logs, or other project records here yet"}
+              {searchQuery
+                ? `No results for "${searchQuery}"`
+                : ledgerFilter === "capital"
+                  ? "No invoices, quotes, or receipts in this view"
+                  : "No permits, logs, or other project records here yet"}
             </p>
-            <p className="mt-1 text-xs text-slate-500 leading-relaxed">
-              {ledgerFilter === "capital"
-                ? "Switch to All or Logs & Certs, or upload a spending document (invoice, quote, or receipt)."
-                : "Upload warranties, liens, inspections, insurance, HOA letters, and more — they show here and in your archive."}
+            <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+              {searchQuery
+                ? "Try a different search term or clear the filter."
+                : ledgerFilter === "capital"
+                  ? "Switch to All or Logs & Certs, or upload a spending document (invoice, quote, or receipt)."
+                  : "Upload warranties, liens, inspections, insurance, HOA letters, and more — they show here and in your archive."}
             </p>
+            {searchQuery && (
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setSearchQuery("")}
+                className="mt-2 text-teal-600"
+              >
+                Clear search
+              </Button>
+            )}
           </div>
         ) : null}
 

@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { View, Text, Alert, SectionList } from "react-native";
-import { BookOpen, Receipt } from "lucide-react-native";
+import { Receipt } from "lucide-react-native";
+
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
@@ -89,7 +89,7 @@ export default function FinanceScreen() {
     [groupedInvoices],
   );
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     if (!project) return;
 
     if (!isArchitect && !hasProjectPass) {
@@ -131,9 +131,53 @@ export default function FinanceScreen() {
     } finally {
       setExporting(false);
     }
-  };
+  }, [
+    project,
+    isArchitect,
+    hasProjectPass,
+    scopeForSellerPacket,
+    invoices,
+    includeAppendix,
+    setUpgradeReason,
+    setShowUpgrade,
+  ]);
 
-  const openLedgerDocumentCapture = () => {
+  const runLedgerDocumentUpload = useCallback(
+    async (files: Array<{ uri: string; mimeType?: string }>) => {
+      if (!project) return;
+
+      setIsUploading(true);
+      try {
+        const result = await uploadPickedDocumentToProject({
+          projectId: project.id,
+          files,
+          successToastMessage: "Document added — your vault is updated.",
+          onInvoiceLimitUpgrade: () => {
+            setUpgradeReason("invoice_limit");
+            setShowUpgrade(true);
+          },
+          refreshProjectData: load,
+        });
+        if (result.ok && result.lastInvoiceId && files.length === 1) {
+          const { data: row } = await supabase
+            .from("invoices")
+            .select("*")
+            .eq("id", result.lastInvoiceId)
+            .maybeSingle();
+          if (row) {
+            setSelectedInvoice(row as unknown as InvoiceRow);
+            setIsReviewOpen(true);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        }
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [project, load, setUpgradeReason, setShowUpgrade],
+  );
+
+  const openLedgerDocumentCapture = useCallback(() => {
     Haptics.selectionAsync();
 
     if (isFreeTierInvoiceLimitReached(invoices, isArchitect, hasProjectPass)) {
@@ -145,41 +189,55 @@ export default function FinanceScreen() {
     presentDocumentCapturePrompt(DOCUMENT_CAPTURE_LEDGER_COPY, (files) => {
       void runLedgerDocumentUpload(files);
     });
-  };
+  }, [
+    invoices,
+    isArchitect,
+    hasProjectPass,
+    runLedgerDocumentUpload,
+    setUpgradeReason,
+    setShowUpgrade,
+  ]);
 
-  const runLedgerDocumentUpload = async (
-    files: Array<{ uri: string; mimeType?: string }>,
-  ) => {
-    if (!project) return;
-
-    setIsUploading(true);
-    try {
-      const result = await uploadPickedDocumentToProject({
-        projectId: project.id,
-        files,
-        successToastMessage: "Document added — your vault is updated.",
-        onInvoiceLimitUpgrade: () => {
-          setUpgradeReason("invoice_limit");
-          setShowUpgrade(true);
-        },
-        refreshProjectData: load,
-      });
-      if (result.ok && result.lastInvoiceId && files.length === 1) {
-        const { data: row } = await supabase
-          .from("invoices")
-          .select("*")
-          .eq("id", result.lastInvoiceId)
-          .maybeSingle();
-        if (row) {
-          setSelectedInvoice(row as unknown as InvoiceRow);
-          setIsReviewOpen(true);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-      }
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  const renderHeader = useCallback(
+    () => (
+      <FinanceLedgerHeader
+        loadError={loadError}
+        onRetryLoad={() => void load()}
+        onDismissLoadError={clearLoadError}
+        projects={projects}
+        project={project}
+        onProjectSelect={handleProjectSelect}
+        onPressAddDocument={openLedgerDocumentCapture}
+        isUploading={isUploading}
+        stats={stats}
+        includeAppendix={includeAppendix}
+        onIncludeAppendixChange={setIncludeAppendix}
+        exporting={exporting}
+        onExport={handleExport}
+        invoices={invoices}
+        filter={filter}
+        onFilterChange={setFilter}
+      />
+    ),
+    [
+      loadError,
+      load,
+      clearLoadError,
+      projects,
+      project,
+      handleProjectSelect,
+      openLedgerDocumentCapture,
+      isUploading,
+      stats,
+      includeAppendix,
+      setIncludeAppendix,
+      exporting,
+      handleExport,
+      invoices,
+      filter,
+      setFilter,
+    ],
+  );
 
   if (configurationMissing) {
     return (
@@ -214,7 +272,7 @@ export default function FinanceScreen() {
         refreshing={refreshing}
       >
         <EmptyState
-          icon={BookOpen}
+          icon={Receipt}
           title="Your home hub is ready"
           description="Set up a renovation to track your vault, equity, and documents — same quick flow as the Home tab."
           actionTitle="Start your BLUPRNT"
@@ -224,27 +282,6 @@ export default function FinanceScreen() {
       </ScreenWrapper>
     );
   }
-
-  const renderHeader = () => (
-    <FinanceLedgerHeader
-      loadError={loadError}
-      onRetryLoad={() => void load()}
-      onDismissLoadError={clearLoadError}
-      projects={projects}
-      project={project}
-      onProjectSelect={handleProjectSelect}
-      onPressAddDocument={openLedgerDocumentCapture}
-      isUploading={isUploading}
-      stats={stats}
-      includeAppendix={includeAppendix}
-      onIncludeAppendixChange={setIncludeAppendix}
-      exporting={exporting}
-      onExport={handleExport}
-      invoices={invoices}
-      filter={filter}
-      onFilterChange={setFilter}
-    />
-  );
 
   const handleInvoiceDelete = (id: string) => {
     Alert.alert(

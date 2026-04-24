@@ -118,13 +118,19 @@ export function AIAssistantWidget({
               <button
                 onClick={() => onOpenChange(false)}
                 className="text-white/60 hover:text-white p-1 transition-colors"
+                aria-label="Close assistant"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50">
+            <div
+              className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50"
+              role="log"
+              aria-live="polite"
+              aria-label="Chat history"
+            >
               {messages.map((m) => (
                 <div
                   key={m.id}
@@ -195,6 +201,7 @@ export function AIAssistantWidget({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onOpenChange(!isOpen)}
+        aria-label={isOpen ? "Close AI Assistant" : "Open AI Assistant"}
         className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 ${
           isOpen
             ? "bg-slate-900 text-white"

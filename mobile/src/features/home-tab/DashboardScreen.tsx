@@ -82,6 +82,16 @@ export default function DashboardScreen() {
     setUpgradeReason,
   } = useAwareness();
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [celebratedProjectId, setCelebratedProjectId] = useState<string | null>(
+    null,
+  );
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [renameVisible, setRenameVisible] = useState(false);
+  const [reviewInvoice, setReviewInvoice] = useState<InvoiceRow | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+
   const capitalDocumentedTotal = useMemo(
     () => capitalImprovementTotal(invoices),
     [invoices],
@@ -111,23 +121,17 @@ export default function DashboardScreen() {
     ],
   );
 
-  const [isUploading, setIsUploading] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [celebratedProjectId, setCelebratedProjectId] = useState<string | null>(
-    null,
+  const activityEvents = useMemo(
+    () => generateActivityEvents(project, invoices),
+    [project, invoices],
   );
-  const [isCelebrating, setIsCelebrating] = useState(false);
-  const [renameVisible, setRenameVisible] = useState(false);
-  const [reviewInvoice, setReviewInvoice] = useState<InvoiceRow | null>(null);
-  const [reviewOpen, setReviewOpen] = useState(false);
 
   useEffect(() => {
     if (!project) return;
-    const alreadyCelebrated = celebratedProjectId === project.id;
     if (
       invoices.length > 0 &&
       project.estimated_min_total != null &&
-      !alreadyCelebrated &&
+      celebratedProjectId !== project.id &&
       capitalDocumentedTotal >= project.estimated_min_total
     ) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -136,28 +140,34 @@ export default function DashboardScreen() {
     }
   }, [project, invoices.length, capitalDocumentedTotal, celebratedProjectId]);
 
-  const handleRenameProject = () => {
+  const handleRenameProject = useCallback(() => {
     if (!project) return;
     Haptics.selectionAsync();
     setRenameVisible(true);
-  };
+  }, [project]);
 
-  const handleRenameSave = async (newName: string) => {
-    if (!project) return;
-    try {
-      const { error } = await supabase
-        .from("projects")
-        .update({ name: newName })
-        .eq("id", project.id);
-      if (error) throw error;
-      setRenameVisible(false);
-      load();
-    } catch (e) {
-      Alert.alert("Couldn't rename project", friendlyPostgrestMutationError(e));
-    }
-  };
+  const handleRenameSave = useCallback(
+    async (newName: string) => {
+      if (!project) return;
+      try {
+        const { error } = await supabase
+          .from("projects")
+          .update({ name: newName })
+          .eq("id", project.id);
+        if (error) throw error;
+        setRenameVisible(false);
+        load();
+      } catch (e) {
+        Alert.alert(
+          "Couldn't rename project",
+          friendlyPostgrestMutationError(e),
+        );
+      }
+    },
+    [project, load],
+  );
 
-  const handleExportSellerPacket = async () => {
+  const handleExportSellerPacket = useCallback(async () => {
     if (!project) return;
     if (!isArchitect && !hasProjectPass) {
       setUpgradeReason("export");
@@ -195,9 +205,52 @@ export default function DashboardScreen() {
     } finally {
       setIsExporting(false);
     }
-  };
+  }, [
+    project,
+    isArchitect,
+    hasProjectPass,
+    scopeItems,
+    invoices,
+    setUpgradeReason,
+    setShowUpgrade,
+  ]);
 
-  const openDashboardDocumentCapture = () => {
+  const runDashboardDocumentUpload = useCallback(
+    async (files: Array<{ uri: string; mimeType?: string }>) => {
+      if (!project) return;
+
+      setIsUploading(true);
+      try {
+        const result = await uploadPickedDocumentToProject({
+          projectId: project.id,
+          files,
+          successToastMessage: "Document added — your dashboard is updated.",
+          onInvoiceLimitUpgrade: () => {
+            setUpgradeReason("invoice_limit");
+            setShowUpgrade(true);
+          },
+          refreshProjectData: load,
+        });
+        if (result.ok && result.lastInvoiceId && files.length === 1) {
+          const { data: row } = await supabase
+            .from("invoices")
+            .select("*")
+            .eq("id", result.lastInvoiceId)
+            .maybeSingle();
+          if (row) {
+            setReviewInvoice(row as unknown as InvoiceRow);
+            setReviewOpen(true);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        }
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [project, load, setUpgradeReason, setShowUpgrade],
+  );
+
+  const openDashboardDocumentCapture = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     if (isFreeTierInvoiceLimitReached(invoices, isArchitect, hasProjectPass)) {
@@ -209,46 +262,19 @@ export default function DashboardScreen() {
     presentDocumentCapturePrompt(DOCUMENT_CAPTURE_HOME_COPY, (files) => {
       void runDashboardDocumentUpload(files);
     });
-  };
+  }, [
+    invoices,
+    isArchitect,
+    hasProjectPass,
+    runDashboardDocumentUpload,
+    setUpgradeReason,
+    setShowUpgrade,
+  ]);
 
-  const runDashboardDocumentUpload = async (
-    files: Array<{ uri: string; mimeType?: string }>,
-  ) => {
-    if (!project) return;
-
-    setIsUploading(true);
-    try {
-      const result = await uploadPickedDocumentToProject({
-        projectId: project.id,
-        files,
-        successToastMessage: "Document added — your dashboard is updated.",
-        onInvoiceLimitUpgrade: () => {
-          setUpgradeReason("invoice_limit");
-          setShowUpgrade(true);
-        },
-        refreshProjectData: load,
-      });
-      if (result.ok && result.lastInvoiceId && files.length === 1) {
-        const { data: row } = await supabase
-          .from("invoices")
-          .select("*")
-          .eq("id", result.lastInvoiceId)
-          .maybeSingle();
-        if (row) {
-          setReviewInvoice(row as unknown as InvoiceRow);
-          setReviewOpen(true);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-      }
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const onGeneralUpgrade = () => {
+  const onGeneralUpgrade = useCallback(() => {
     setUpgradeReason("general");
     setShowUpgrade(true);
-  };
+  }, [setUpgradeReason, setShowUpgrade]);
 
   if (configurationMissing) {
     return (
@@ -505,7 +531,7 @@ export default function DashboardScreen() {
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 380, delay: 180 }}
         >
-          <ActivityFeed events={generateActivityEvents(project, invoices)} />
+          <ActivityFeed events={activityEvents} />
         </MotiView>
 
         <MotiView

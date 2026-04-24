@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient, type QueryKey } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DashboardSnapshot } from "../types/dashboard-snapshot";
@@ -140,29 +140,46 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
     adapter.isSupabaseConfigured(),
   );
 
-  return {
-    activeProjectId,
-    data,
-    loading,
-    refreshing,
-    loadError: snapshot?.loadError ?? null,
-    clearLoadError,
-    projects: snapshot?.projects ?? [],
-    project: snapshot?.project ?? null,
-    scopeItems: snapshot?.scopeItems ?? [],
-    invoices: snapshot?.invoices ?? [],
-    spendByCategory: snapshot?.spendByCategory ?? {},
-    reconciliation: snapshot?.reconciliation ?? null,
-    isArchitect: snapshot?.isArchitect ?? false,
-    subscription: snapshot?.subscription ?? null,
-    hasProjectPass: snapshot?.hasProjectPass ?? false,
-    galleryItems: snapshot?.galleryItems ?? [],
-    load,
-    handleProjectSelect,
-    setProjects,
-    setProject,
-    setScopeItems,
-    setInvoices,
-    setGalleryItems,
-  };
+  return useMemo(
+    () => ({
+      activeProjectId,
+      data,
+      loading,
+      refreshing,
+      loadError: snapshot?.loadError ?? null,
+      clearLoadError,
+      projects: snapshot?.projects ?? [],
+      project: snapshot?.project ?? null,
+      scopeItems: snapshot?.scopeItems ?? [],
+      invoices: snapshot?.invoices ?? [],
+      spendByCategory: snapshot?.spendByCategory ?? {},
+      reconciliation: snapshot?.reconciliation ?? null,
+      isArchitect: snapshot?.isArchitect ?? false,
+      subscription: snapshot?.subscription ?? null,
+      hasProjectPass: snapshot?.hasProjectPass ?? false,
+      galleryItems: snapshot?.galleryItems ?? [],
+      load,
+      handleProjectSelect,
+      setProjects,
+      setProject,
+      setScopeItems,
+      setInvoices,
+      setGalleryItems,
+    }),
+    [
+      activeProjectId,
+      data,
+      loading,
+      refreshing,
+      snapshot,
+      clearLoadError,
+      load,
+      handleProjectSelect,
+      setProjects,
+      setProject,
+      setScopeItems,
+      setInvoices,
+      setGalleryItems,
+    ],
+  );
 }

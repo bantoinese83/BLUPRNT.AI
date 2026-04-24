@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
@@ -42,6 +43,21 @@ export function ProjectTypeScreen() {
   const navigate = useNavigate();
   const { projectType, setProjectType } = useOnboarding();
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = parseInt(e.key);
+      if (key >= 1 && key <= options.length) {
+        setProjectType(options[key - 1]);
+      }
+      if (e.key === "Enter" && projectType) {
+        navigate("/onboarding/location");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [projectType, setProjectType, navigate]);
+
   return (
     <PageTransition>
       <div className="space-y-8">
@@ -57,9 +73,12 @@ export function ProjectTypeScreen() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500"
+            className="text-slate-500 flex items-center gap-2"
           >
             You can add more projects later.
+            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-black bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+              Press 1-6 to pick
+            </span>
           </motion.p>
         </div>
 
@@ -69,7 +88,7 @@ export function ProjectTypeScreen() {
           animate="show"
           className="grid grid-cols-2 gap-3 sm:gap-4"
         >
-          {options.map((opt) => {
+          {options.map((opt, idx) => {
             const Icon = PROJECT_TYPE_ICON[opt];
             const selected = projectType === opt;
             return (
@@ -91,6 +110,17 @@ export function ProjectTypeScreen() {
                   onClick={() => setProjectType(opt)}
                 >
                   <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-[6rem] sm:min-h-[7.5rem] text-center relative z-10">
+                    <div className="absolute top-2 right-2 hidden sm:block">
+                      <span
+                        className={`text-[9px] font-black px-1.5 py-0.5 rounded border transition-colors ${
+                          selected
+                            ? "bg-teal-600 text-white border-teal-500"
+                            : "bg-slate-50 text-slate-300 border-slate-100"
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                    </div>
                     <div
                       className={`rounded-xl sm:rounded-2xl p-2.5 sm:p-3 transition-all duration-300 ${
                         selected

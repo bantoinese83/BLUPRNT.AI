@@ -23,5 +23,6 @@ export function useDashboardData() {
   const { activeProjectId: _a, data: _d, ...publicApi } = shared;
   void _a;
   void _d;
-  return publicApi;
+
+  return useMemo(() => publicApi, [publicApi]);
 }
