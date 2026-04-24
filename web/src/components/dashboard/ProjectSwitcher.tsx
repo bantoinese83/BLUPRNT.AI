@@ -21,7 +21,7 @@ export function ProjectSwitcher({
   projects: ProjectOption[];
   currentId: string | null;
   onSelect: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string) => void | Promise<void>;
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);

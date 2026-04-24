@@ -62,7 +62,7 @@ describe("reportClientError", () => {
     // Since we can't easily mock the 'initialized' variable inside sentry.ts from here
     // without more complex setup, we'll assume the structured logging part works.
 
-    const _id = reportClientError("checkout", new Error("pay"), { cart: 1 });
+    reportClientError("checkout", new Error("pay"), { cart: 1 });
 
     // Note: mockCaptureException might not be called if initialized is false in the test environment
     // But the eventId fallback and console.error should work.
