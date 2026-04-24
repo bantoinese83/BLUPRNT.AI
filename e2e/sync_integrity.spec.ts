@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { dismissOptionalCookies } from "./helpers/cookie-consent";
+import crypto from "node:crypto";
 
 /**
  * Sync Integrity Test (Cross-Platform / Realtime)

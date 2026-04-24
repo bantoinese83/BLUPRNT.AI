@@ -12,7 +12,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
 });
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
@@ -219,4 +219,8 @@ Deno.serve(async (req: Request) => {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

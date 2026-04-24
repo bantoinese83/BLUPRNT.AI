@@ -44,7 +44,7 @@ function bufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const perfTotal = Date.now();
   
   // 1. Handle Options/CORS immediately
@@ -218,4 +218,8 @@ Deno.serve(async (req: Request) => {
     console.error("[upload-document] Critical Failure:", e.message);
     return jsonResponse({ error: e.message || "An unexpected error occurred during upload" }, 500, req);
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

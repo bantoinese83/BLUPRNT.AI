@@ -4,6 +4,28 @@
  * Run with: deno test --allow-env supabase/functions/upload-document/index.test.ts
  */
 import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { handler } from "./index.ts";
+import { setupTestEnv } from "../_shared/test-utils.ts";
+
+Deno.test("upload-document - returns 401 when no session", async () => {
+  setupTestEnv();
+  const req = new Request("http://localhost/upload-document", {
+    method: "POST",
+  });
+
+  const res = await handler(req);
+  assertEquals(res.status, 401);
+});
+
+Deno.test("upload-document - returns 405 for GET", async () => {
+  setupTestEnv();
+  const req = new Request("http://localhost/upload-document", {
+    method: "GET",
+  });
+
+  const res = await handler(req);
+  assertEquals(res.status, 405);
+});
 
 function calculateInvoiceTotals(params: {
   amount_hint?: number;

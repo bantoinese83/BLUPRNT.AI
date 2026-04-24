@@ -1,0 +1,24 @@
+# Test sharing a project
+appId: ai.bluprnt.mobile
+---
+- runFlow:
+    file: common/launch-app.active.yaml
+- waitForAnimationToEnd:
+    timeout: 10000
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Get Started"
+- assertVisible: "What are you working on?"
+# Assuming user is already logged in or we bypass login for smoke
+- tapOn:
+    id: "tab-home"
+- assertVisible: "My home project"
+- tapOn:
+    id: "share-project-button"
+- assertVisible: "Share access"
+- tapOn: "Generate view link"
+- waitForAnimationToEnd:
+- assertVisible: "Link copied"
+- tapOn: "Done"
+- assertNotVisible: "Share access"
