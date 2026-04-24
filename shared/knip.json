@@ -8,5 +8,5 @@
     "hooks/**/*.ts"
   ],
   "ignore": ["**/*.test.ts"],
-  "ignoreBinaries": ["tsc", "knip"]
+  "ignoreBinaries": ["tsc", "knip", "eslint", "vitest"]
 }
