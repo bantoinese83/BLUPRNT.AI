@@ -1,21 +1,12 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["app/**/*.{ts,tsx}", "src/**/*.{ts,tsx}"],
-  "ignore": ["babel.config.cjs", "metro.config.cjs"],
-  "ignoreDependencies": [
-    "@expo/vector-icons",
-    "clsx",
-    "expo-auth-session",
-    "expo-symbols",
-    "tailwind-merge",
-    "react-dom",
-    "react-native-screens",
-    "react-native-web",
-    "react-native-worklets",
-    "expo-updates",
-    "expo-system-ui",
-    "@react-navigation/bottom-tabs"
+  "ignoreDependencies": ["@bluprnt/shared", "expo-router"],
+  "ignore": [
+    "src/test/**",
+    "babel.config.cjs",
+    "metro.config.cjs",
+    "src/constants/Theme.ts"
   ],
   "ignoreBinaries": ["expo", "eslint", "vitest", "knip"],
-  "expo": true
+  "entry": ["app/_layout.tsx", "src/lib/push.ts"]
 }

@@ -1,7 +1,6 @@
 export {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
-  filterInvoicesByLedgerDocumentFilter,
   planVsActualNarrative,
   planVsActualPdfLines,
 } from "@shared/lib/plan-vs-actual";

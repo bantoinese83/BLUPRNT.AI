@@ -27,9 +27,3 @@ export const itemVariants = {
     },
   },
 } as const;
-
-export const pageFadeVariants = {
-  hidden: { opacity: 0, x: 10 },
-  show: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -10 },
-} as const;

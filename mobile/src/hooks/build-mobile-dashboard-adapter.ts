@@ -6,7 +6,7 @@ import { reportClientError } from "@/lib/sentry";
 import { dashboardQueryKey } from "@/lib/query-client";
 import { fetchMobileDashboardSnapshot } from "@/lib/fetch-dashboard-snapshot";
 
-export const MOBILE_DASHBOARD_PROJECT_ID_KEY = "bluprnt_project_id";
+const MOBILE_DASHBOARD_PROJECT_ID_KEY = "bluprnt_project_id";
 
 /** Injected storage for last project id; swap in tests with an in-memory mock. */
 export type MobileDashboardDataInjected = {

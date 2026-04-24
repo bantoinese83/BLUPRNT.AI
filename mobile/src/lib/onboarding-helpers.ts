@@ -99,8 +99,6 @@ export async function saveOnboardingProject(params: {
 }
 
 export {
-  DEFAULT_ESTIMATE_MIN,
-  DEFAULT_ESTIMATE_MAX,
   DEFAULT_ESTIMATE_CONFIDENCE,
   normalizeStageFromDraft,
   projectTypeToRoomType,

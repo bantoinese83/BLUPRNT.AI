@@ -26,7 +26,7 @@ export async function setProductAnalyticsConsent(
   consentCache = enabled;
 }
 
-export function isProductAnalyticsConsentGranted(): boolean {
+function isProductAnalyticsConsentGranted(): boolean {
   return consentCache === true;
 }
 

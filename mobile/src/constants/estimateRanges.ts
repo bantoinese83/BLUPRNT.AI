@@ -5,7 +5,7 @@
  * These are broad industry ranges — not AI estimates. The UI must
  * communicate this clearly to avoid a bait-and-switch perception.
  */
-export const ESTIMATE_RANGES: Record<
+const ESTIMATE_RANGES: Record<
   string,
   { min: number; max: number; label: string }
 > = {
@@ -17,7 +17,7 @@ export const ESTIMATE_RANGES: Record<
   "Something else": { min: 5000, max: 50000, label: "$5k – $50k" },
 };
 
-export const DEFAULT_RANGE = { min: 5000, max: 50000, label: "$5k – $50k" };
+const DEFAULT_RANGE = { min: 5000, max: 50000, label: "$5k – $50k" };
 
 export function getRangeForType(projectType: string | null): {
   min: number;
