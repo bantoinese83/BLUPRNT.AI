@@ -52,9 +52,9 @@ async function clearServiceWorkerAndCaches(): Promise<void> {
 
 function mount() {
   initPostHog();
-  // Hydrate initial opt-in state from localStorage
+  // Hydrate initial opt-in state from localStorage (default to true)
   const stored = localStorage.getItem("bluprnt_analytics_opt_in");
-  setAnalyticsEnabled(stored === "true");
+  setAnalyticsEnabled(stored !== "false");
 
   createRoot(document.getElementById("root")!, {
     onUncaughtError: reactErrorHandler(),

@@ -23,12 +23,12 @@ export const captureEvent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties?: any,
 ) => {
-  if (localStorage.getItem("bluprnt_analytics_opt_in") !== "true") return;
+  if (localStorage.getItem("bluprnt_analytics_opt_in") === "false") return;
   posthog.capture(event, properties);
 };
 
 export const identifyUser = (userId: string, email?: string, name?: string) => {
-  if (localStorage.getItem("bluprnt_analytics_opt_in") !== "true") return;
+  if (localStorage.getItem("bluprnt_analytics_opt_in") === "false") return;
   posthog.identify(userId, {
     email,
     name,
