@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { View, Text, Alert, SectionList } from "react-native";
 import { Receipt } from "lucide-react-native";
-
+import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -199,26 +199,27 @@ export default function FinanceScreen() {
   ]);
 
   const renderHeader = useCallback(
-    () => (
-      <FinanceLedgerHeader
-        loadError={loadError}
-        onRetryLoad={() => void load()}
-        onDismissLoadError={clearLoadError}
-        projects={projects}
-        project={project}
-        onProjectSelect={handleProjectSelect}
-        onPressAddDocument={openLedgerDocumentCapture}
-        isUploading={isUploading}
-        stats={stats}
-        includeAppendix={includeAppendix}
-        onIncludeAppendixChange={setIncludeAppendix}
-        exporting={exporting}
-        onExport={handleExport}
-        invoices={invoices}
-        filter={filter}
-        onFilterChange={setFilter}
-      />
-    ),
+    () =>
+      project ? (
+        <FinanceLedgerHeader
+          loadError={loadError}
+          onRetryLoad={() => void load()}
+          onDismissLoadError={clearLoadError}
+          projects={projects}
+          project={project}
+          onProjectSelect={handleProjectSelect}
+          onPressAddDocument={openLedgerDocumentCapture}
+          isUploading={isUploading}
+          stats={stats}
+          includeAppendix={includeAppendix}
+          onIncludeAppendixChange={setIncludeAppendix}
+          exporting={exporting}
+          onExport={handleExport}
+          invoices={invoices}
+          filter={filter}
+          onFilterChange={setFilter}
+        />
+      ) : null,
     [
       loadError,
       load,

@@ -1,3 +1,4 @@
+import { InteractionManager } from "react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { money, formatShortUsDate } from "@shared/lib/formatters";
@@ -194,37 +195,46 @@ export async function generateSellerPacketPDF(
     const { uri } = await Print.printToFileAsync({ html });
     const fileName = `property-ledger-${project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`;
 
-    // Cloud Save Sync
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (session?.user) {
-      const storagePath = `${project.id}/${session.user.id}/${fileName}`;
-
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
-      const { error: uploadErr } = await supabase.storage
-        .from("project-documents")
-        .upload(storagePath, blob, {
-          contentType: "application/pdf",
-          upsert: true,
-        });
-
-      if (!uploadErr) {
-        await supabase.from("seller_packets").upsert(
-          {
-            project_id: project.id,
-            property_id: project.property_id || "",
-            storage_path: storagePath,
-            generated_at: new Date().toISOString(),
-          },
-          { onConflict: "project_id" },
-        );
-      }
-    }
-
+    // 1. Immediately show the share sheet for better perceived performance
     await Sharing.shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
+
+    // 2. Defer Cloud Save Sync to background to avoid blocking or lagging the UI
+    InteractionManager.runAfterInteractions(async () => {
+      try {
+        // Small additional delay to ensure share sheet transition is smooth
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        const storagePath = `${project.id}/${session.user.id}/${fileName}`;
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        const { error: uploadErr } = await supabase.storage
+          .from("project-documents")
+          .upload(storagePath, blob, {
+            contentType: "application/pdf",
+            upsert: true,
+          });
+
+        if (!uploadErr) {
+          await supabase.from("seller_packets").upsert(
+            {
+              project_id: project.id,
+              property_id: project.property_id || "",
+              storage_path: storagePath,
+              generated_at: new Date().toISOString(),
+            },
+            { onConflict: "project_id" },
+          );
+        }
+      } catch (e) {
+        console.warn("Background PDF sync failed:", e);
+      }
+    });
   } catch (error) {
     console.error("PDF Generation Error:", error);
     throw error;

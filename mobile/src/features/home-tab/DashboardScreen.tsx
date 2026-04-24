@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
 import { MotiView } from "moti";
@@ -122,7 +122,7 @@ export default function DashboardScreen() {
   );
 
   const activityEvents = useMemo(
-    () => generateActivityEvents(project, invoices),
+    () => (project ? generateActivityEvents(project, invoices) : []),
     [project, invoices],
   );
 
