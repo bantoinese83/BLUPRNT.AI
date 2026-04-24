@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import "../global.css";
 import { LogBox, Platform } from "react-native";
 
@@ -12,11 +13,10 @@ import { initMobileSentry, isSentryConfigured, Sentry } from "@/lib/sentry";
 import { queryClient } from "@/lib/query-client";
 import Purchases from "react-native-purchases";
 import Constants, { ExecutionEnvironment } from "expo-constants";
+import * as Device from "expo-device";
 
 initMobileSentry();
 
-import * as Device from "expo-device";
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import {
   useFonts,
   Outfit_400Regular,
@@ -25,35 +25,21 @@ import {
   Outfit_700Bold,
   Outfit_800ExtraBold,
 } from "@expo-google-fonts/outfit";
-import { Stack, router, useSegments, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState, useRef } from "react";
+import { useEffect } from "react";
 import "react-native-reanimated";
 import { BrandedSplash } from "@/components/BrandedSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { AuthProvider } from "@/contexts/AuthProvider";
-import { useAuth } from "@/contexts/auth-context";
 import { AppToastHost } from "@/components/AppToastHost";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
-import NetInfo from "@react-native-community/netinfo";
-import { View, Text, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Theme } from "@/constants/Theme";
-import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
-import { isNetworkReachable } from "@/lib/network-status";
-import { WifiOff } from "lucide-react-native";
 import {
   getProductAnalyticsConsent,
   setProductAnalyticsHandler,
 } from "@/lib/product-analytics";
-
-// export {
-//   // Catch any errors thrown by the Layout component.
-//   ErrorBoundary,
-// } from "expo-router";
 
 import {
   OfflineBannerHost,
@@ -100,8 +86,6 @@ function RootLayout() {
     void getProductAnalyticsConsent();
 
     // Wire a production analytics SDK here when available.
-    // Example (Segment): setProductAnalyticsHandler((name, props) => analytics.track(name, props));
-    // For now only DEV console output is active (handled inside trackProductEvent).
     if (__DEV__) {
       setProductAnalyticsHandler((name, props) => {
         console.log(`[analytics:dev] ${name}`, props ?? {});
