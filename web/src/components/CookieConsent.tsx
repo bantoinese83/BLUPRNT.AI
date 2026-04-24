@@ -30,15 +30,13 @@ export function CookieConsent() {
   });
 
   useEffect(() => {
-    const checkConsent = () => {
-      const stored = localStorage.getItem(CONSENT_KEY);
-      if (!stored) {
-        // Delay appearance for better UX
-        const timer = setTimeout(() => setIsVisible(true), 1500);
-        return () => clearTimeout(timer);
-      }
-    };
-    checkConsent();
+    const stored = localStorage.getItem(CONSENT_KEY);
+    if (!stored) {
+      // Delay appearance for better UX
+      const timer = setTimeout(() => setIsVisible(true), 1500);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
   }, []);
 
   useEffect(() => {
@@ -180,7 +178,7 @@ export function CookieConsent() {
 
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

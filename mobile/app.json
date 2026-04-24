@@ -14,7 +14,7 @@
       "backgroundColor": "#0F172A"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "ai.bluprnt.mobile",
       "associatedDomains": ["applinks:bluprnt.ai"],
       "infoPlist": {

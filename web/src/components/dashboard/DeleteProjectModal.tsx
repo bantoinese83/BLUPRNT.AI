@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ModalDialog } from "../ui/modal-dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -21,18 +21,18 @@ export function DeleteProjectModal({
   const isMatch = confirmText.trim() === projectName;
 
   return (
-    <ModalDialog
-      open={isOpen}
-      onClose={onClose}
-      titleId="delete-project-title"
-    >
+    <ModalDialog open={isOpen} onClose={onClose} titleId="delete-project-title">
       <div className="space-y-6 pt-4">
         <div>
-          <h2 id="delete-project-title" className="text-xl font-black text-slate-900 leading-tight">
+          <h2
+            id="delete-project-title"
+            className="text-xl font-black text-slate-900 leading-tight"
+          >
             Permanently remove project?
           </h2>
           <p className="text-sm text-slate-500 mt-2">
-            This action cannot be undone. All associated invoices, estimates, and property records will be lost forever.
+            This action cannot be undone. All associated invoices, estimates,
+            and property records will be lost forever.
           </p>
         </div>
 
@@ -41,8 +41,11 @@ export function DeleteProjectModal({
           <div className="space-y-1">
             <p className="font-bold">DANGER ZONE</p>
             <p className="font-medium opacity-90">
-              You are about to delete <strong className="font-black underline decoration-red-500/50">{projectName}</strong>. 
-              This will immediately purge all data from our servers.
+              You are about to delete{" "}
+              <strong className="font-black underline decoration-red-500/50">
+                {projectName}
+              </strong>
+              . This will immediately purge all data from our servers.
             </p>
           </div>
         </div>

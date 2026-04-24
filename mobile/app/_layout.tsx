@@ -61,6 +61,8 @@ SplashScreen.preventAutoHideAsync();
 
 // SplashScreen hide logic handled inside RootLayout hook
 
+import { LockScreen } from "@/components/LockScreen";
+
 function RootLayout() {
   const [loaded, error] = useFonts({
     Outfit_400Regular,
@@ -70,7 +72,7 @@ function RootLayout() {
     Outfit_800ExtraBold,
   });
 
-  useVersionCheck();
+  const { isOutdated } = useVersionCheck();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -153,6 +155,7 @@ function RootLayout() {
             <RootLayoutNav />
             <AppToastHost />
             <OfflineBannerHost />
+            {isOutdated && <LockScreen type="update-required" />}
           </AuthProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

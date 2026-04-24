@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, Linking, Platform } from "react-native";
 import Constants from "expo-constants";
 import { supabase } from "@/lib/supabase";
-import { IOS_APP_STORE_URL } from "@shared/constants/app-links";
 import {
   compareSemverParts,
   minSemverFromAppConfigValue,
@@ -43,7 +41,6 @@ export function useVersionCheck() {
 
         if (compareSemverParts(currentVersion, minVersion) < 0) {
           setIsOutdated(true);
-          showUpdateAlert();
         }
       } catch (err) {
         console.error("[VersionCheck] Unexpected error:", err);
@@ -56,24 +53,4 @@ export function useVersionCheck() {
   }, []);
 
   return { isChecking, isOutdated };
-}
-
-function showUpdateAlert() {
-  Alert.alert(
-    "Update Required",
-    "A new version of BlueprintAI is available. Please update to continue using the app.",
-    [
-      {
-        text: "Update Now",
-        onPress: () => {
-          const url =
-            Platform.OS === "ios"
-              ? IOS_APP_STORE_URL
-              : "https://play.google.com/store/apps/details?id=ai.bluprnt.mobile";
-          void Linking.openURL(url);
-        },
-      },
-    ],
-    { cancelable: false },
-  );
 }

@@ -16,6 +16,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@bluprnt/shared": "workspace:*",
     "@sentry/react": "^9.47.1",
     "@sentry/vite-plugin": "^5.1.1",
     "@supabase/supabase-js": "^2.100.1",

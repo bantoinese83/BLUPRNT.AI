@@ -65,10 +65,11 @@ export function CommandPalette() {
   useEffect(() => {
     if (open) {
       const timer = setTimeout(() => {
-        fetchProjects();
+        void fetchProjects();
       }, 0);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [open, fetchProjects]);
 
   const runCommand = useCallback((command: () => void) => {

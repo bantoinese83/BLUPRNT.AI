@@ -17,6 +17,11 @@ Notifications.setNotificationHandler({
   }),
 });
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const LAST_PUSH_SYNC_KEY = "bluprnt_last_push_sync";
+const LAST_PUSH_TOKEN_KEY = "bluprnt_last_push_token";
+
 /**
  * Registers the device for push notifications and syncs the token to Supabase.
  */
@@ -56,8 +61,20 @@ export async function registerForPushNotificationsAsync(userId: string) {
       });
     }
 
+    // Local check to reduce backend noise: only sync if token changed or > 24h since last sync
+    const now = Date.now();
+    const [lastSyncStr, lastToken] = await Promise.all([
+      AsyncStorage.getItem(LAST_PUSH_SYNC_KEY),
+      AsyncStorage.getItem(LAST_PUSH_TOKEN_KEY),
+    ]);
+    const lastSync = lastSyncStr ? parseInt(lastSyncStr, 10) : 0;
+    const isExpired = now - lastSync > 24 * 60 * 60 * 1000;
+
+    if (token === lastToken && !isExpired) {
+      return token;
+    }
+
     // Sync token to user_preferences table
-    // user_preferences.push_token (see supabase/migrations consolidated schema)
     const { error } = await supabase.from("user_preferences").upsert(
       {
         user_id: userId,
@@ -69,6 +86,11 @@ export async function registerForPushNotificationsAsync(userId: string) {
 
     if (error) {
       console.warn("[Push] Failed to sync token to Supabase:", error);
+    } else {
+      await Promise.all([
+        AsyncStorage.setItem(LAST_PUSH_SYNC_KEY, now.toString()),
+        AsyncStorage.setItem(LAST_PUSH_TOKEN_KEY, token),
+      ]);
     }
 
     return token;

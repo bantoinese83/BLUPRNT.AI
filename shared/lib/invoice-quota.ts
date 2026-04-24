@@ -1,4 +1,4 @@
-import { isArchitectQuotaInvoiceType } from "./infer-document-type.ts";
+import { isArchitectQuotaInvoiceType } from "./infer-document-type";
 
 /**
  * Free tier: max combined vendor invoice + store receipt uploads per project.

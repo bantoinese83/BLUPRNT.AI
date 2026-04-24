@@ -53,6 +53,7 @@ describe("ensureUserHasWorkspace", () => {
             .mockResolvedValue({ data: [mockProject], error: null }),
         };
       }
+      return { select: vi.fn().mockReturnThis() };
     });
 
     const result = await ensureUserHasWorkspace(userId);
@@ -93,6 +94,13 @@ describe("ensureUserHasWorkspace", () => {
           }),
         } as any;
       }
+      return {
+        select: () => ({
+          eq: () => ({
+            limit: () => Promise.resolve({ data: [], error: null }),
+          }),
+        }),
+      } as any;
     });
 
     const result = await ensureUserHasWorkspace(userId);

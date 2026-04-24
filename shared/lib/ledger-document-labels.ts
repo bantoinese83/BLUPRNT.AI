@@ -1,7 +1,7 @@
 import {
   coerceLedgerDocumentType,
   type LedgerDocumentType,
-} from "./infer-document-type.ts";
+} from "./infer-document-type";
 
 /** Human-readable label for chips, lists, toasts, and pickers. */
 export function ledgerDocumentTypeLabel(t: string | null | undefined): string {
@@ -57,7 +57,7 @@ export function reviewDocumentModalTitle(t: string | null | undefined): string {
  * @deprecated use isPlanVsActualDocumentType from infer-document-type — same behavior.
  * Line-to-budget linking: invoices, quotes, receipts only.
  */
-export { isCapitalLedgerDocumentType } from "./infer-document-type.ts";
+export { isCapitalLedgerDocumentType } from "./infer-document-type";
 
 /** Card / row styling: spend docs vs. warranty+maintenance vs. other records. */
 export function ledgerDocumentVisualGroup(

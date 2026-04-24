@@ -1,10 +1,10 @@
-import React from "react";
+// Redundant React import removed
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 function Shimmer() {
   return (
-    <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+    <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-shimmer" />
   );
 }
 

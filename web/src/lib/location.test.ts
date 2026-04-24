@@ -234,7 +234,7 @@ describe("location library", () => {
 
     it("permission denied", async () => {
       const mockGeolocation = {
-        getCurrentPosition: vi.fn().mockImplementationOnce((success, error) =>
+        getCurrentPosition: vi.fn().mockImplementationOnce((_success, error) =>
           error({
             code: 1,
             PERMISSION_DENIED: 1,
@@ -250,7 +250,7 @@ describe("location library", () => {
 
     it("timeout", async () => {
       const mockGeolocation = {
-        getCurrentPosition: vi.fn().mockImplementationOnce((success, error) =>
+        getCurrentPosition: vi.fn().mockImplementationOnce((_success, error) =>
           error({
             code: 3,
             TIMEOUT: 3,
@@ -264,7 +264,7 @@ describe("location library", () => {
 
     it("unavailable", async () => {
       const mockGeolocation = {
-        getCurrentPosition: vi.fn().mockImplementationOnce((success, error) =>
+        getCurrentPosition: vi.fn().mockImplementationOnce((_success, error) =>
           error({
             code: 2,
             POSITION_UNAVAILABLE: 2,
@@ -278,7 +278,7 @@ describe("location library", () => {
 
     it("unknown error", async () => {
       const mockGeolocation = {
-        getCurrentPosition: vi.fn().mockImplementationOnce((success, error) =>
+        getCurrentPosition: vi.fn().mockImplementationOnce((_success, error) =>
           error({
             code: 0,
           }),

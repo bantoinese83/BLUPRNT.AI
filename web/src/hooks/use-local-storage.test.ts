@@ -56,7 +56,7 @@ describe("useLocalStorage", () => {
 
   it("should handle SSR environment where window is undefined", () => {
     // Mock window to be undefined specifically for this test
-    const _originalWindow = window;
+    // Use global window directly
     // We don't delete global.window here because React-testing-library needs it.
     // Instead we can mock the behavior if we want to test SSR,
     // but since we're in jsdom, window is always defined.

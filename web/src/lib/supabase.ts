@@ -1,6 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 import { captureEdgeInvokeFailure } from "@/lib/sentry";
-import type { Database } from "@shared/types/supabase.gen";
+
+import {
+  createSupabaseClient,
+  invokeSharedFunction,
+} from "@bluprnt/shared/lib/supabase-client";
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -11,13 +14,11 @@ if (!url || !anonKey) {
   );
 }
 
-export const supabase = createClient<Database>(url ?? "", anonKey ?? "", {
-  auth: {
-    flowType: "pkce",
-    detectSessionInUrl: true,
-    autoRefreshToken: true,
-    persistSession: true,
-  },
+export const supabase = createSupabaseClient({
+  url: url ?? "",
+  anonKey: anonKey ?? "",
+  flowType: "pkce",
+  detectSessionInUrl: true,
 });
 
 export function isSupabaseConfigured(): boolean {
@@ -59,67 +60,14 @@ export async function invokeFunction<T = unknown>(
   },
   retries = 2,
 ) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const headers = {
-    ...options?.headers,
-    ...(session?.access_token
-      ? { Authorization: `Bearer ${session.access_token}` }
-      : {}),
-  };
-
-  let lastResult: {
-    data: T | null;
-    error: { status: number; message: string } | Error | null;
-  } = { data: null, error: null };
-
-  for (let i = 0; i <= retries; i++) {
-    try {
-      lastResult = await supabase.functions.invoke<T>(name, {
-        ...options,
-        headers,
-      });
-
-      if (!lastResult.error) {
-        return lastResult;
-      }
-
-      // Retry on 5xx errors
-      const status =
-        lastResult.error && "status" in lastResult.error
-          ? (lastResult.error as { status: number }).status
-          : 0;
-      if (status >= 500 && i < retries) {
-        const delay = Math.pow(2, i) * 1000;
-        devWarn(
-          `[invokeFunction] ${name} failed with ${status}. Retrying in ${delay}ms...`,
-        );
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        continue;
-      }
-
-      if (lastResult.error) {
-        captureEdgeInvokeFailure(name, lastResult.error);
-      }
-      return lastResult;
-    } catch (err) {
-      lastResult = { data: null, error: err as Error };
-      if (i < retries) {
-        const delay = Math.pow(2, i) * 1000;
-        devWarn(
-          `[invokeFunction] ${name} threw error. Retrying in ${delay}ms...`,
-          err,
-        );
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        continue;
-      }
-    }
-  }
-
-  if (lastResult.error) {
-    captureEdgeInvokeFailure(name, lastResult.error);
-  }
-  return lastResult;
+  return invokeSharedFunction<T>(
+    supabase,
+    name,
+    options,
+    {
+      onCaptureError: captureEdgeInvokeFailure,
+      onDevWarn: devWarn,
+    },
+    retries,
+  );
 }
