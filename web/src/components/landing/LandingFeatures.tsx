@@ -152,14 +152,16 @@ export function LandingFeatures() {
             />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-slate-900">Private Vault</h3>
+                <h3 className="font-semibold text-slate-900">
+                  Home Spec Vault
+                </h3>
                 <span className="inline-flex items-center rounded-full bg-teal-100 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter text-teal-700 ring-1 ring-inset ring-teal-200/50">
                   New
                 </span>
               </div>
               <p className="mt-1 text-sm text-slate-800">
                 Securely store paint lids, tile box codes, and finish details.
-                Your permanent home spec record.
+                Your comprehensive home spec record.
               </p>
             </div>
           </li>
