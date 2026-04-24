@@ -6,6 +6,9 @@
   "description": "Shared TypeScript modules for web and mobile",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "knip": "knip --exclude types,nsTypes,enumMembers,duplicates"
   },
   "dependencies": {

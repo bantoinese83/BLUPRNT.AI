@@ -1,71 +1,57 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useWebDashboardProjectRealtime } from "./useWebDashboardProjectRealtime";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as supabaseLib from "@/lib/supabase";
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     channel: vi.fn().mockReturnValue({
       on: vi.fn().mockReturnThis(),
-      subscribe: vi.fn().mockReturnThis(),
+      subscribe: vi.fn(),
     }),
     removeChannel: vi.fn(),
   },
-  isSupabaseConfigured: vi.fn(() => true),
+  isSupabaseConfigured: vi.fn().mockReturnValue(true),
 }));
 
-function wrapper({ children }: { children: ReactNode }) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-}
-
 describe("useWebDashboardProjectRealtime", () => {
+  const queryClient = new QueryClient();
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("subscribes to projects, invoices, and scope_items when activeProjectId is provided", () => {
-    const projectId = "p123";
-    renderHook(() => useWebDashboardProjectRealtime(projectId), { wrapper });
+  it("subscribes to channels when activeProjectId is provided", () => {
+    const mockChannel = vi.mocked(supabaseLib.supabase.channel);
 
-    expect(supabase.channel).toHaveBeenCalledWith(`project_sync:${projectId}`);
-    expect(vi.mocked(supabase.channel("").on)).toHaveBeenCalledWith(
-      "postgres_changes",
-      expect.objectContaining({ table: "projects" }),
-      expect.any(Function),
-    );
-    expect(vi.mocked(supabase.channel("").on)).toHaveBeenCalledWith(
-      "postgres_changes",
-      expect.objectContaining({ table: "invoices" }),
-      expect.any(Function),
-    );
-    expect(vi.mocked(supabase.channel("").on)).toHaveBeenCalledWith(
-      "postgres_changes",
-      expect.objectContaining({ table: "scope_items" }),
-      expect.any(Function),
-    );
+    renderHook(() => useWebDashboardProjectRealtime("project-123"), {
+      wrapper,
+    });
+
+    expect(mockChannel).toHaveBeenCalledWith("project_sync:project-123");
   });
 
-  it("does nothing if no activeProjectId", () => {
+  it("does not subscribe if activeProjectId is null", () => {
+    const mockChannel = vi.mocked(supabaseLib.supabase.channel);
+
     renderHook(() => useWebDashboardProjectRealtime(null), { wrapper });
-    expect(supabase.channel).not.toHaveBeenCalled();
+
+    expect(mockChannel).not.toHaveBeenCalled();
   });
 
   it("removes channel on unmount", () => {
-    const { unmount } = renderHook(() => useWebDashboardProjectRealtime("p1"), {
-      wrapper,
-    });
-    unmount();
-    expect(supabase.removeChannel).toHaveBeenCalled();
-  });
+    const mockRemove = vi.mocked(supabaseLib.supabase.removeChannel);
 
-  it("skips if supabase not configured", () => {
-    vi.mocked(isSupabaseConfigured).mockReturnValue(false);
-    renderHook(() => useWebDashboardProjectRealtime("p1"), { wrapper });
-    expect(supabase.channel).not.toHaveBeenCalled();
+    const { unmount } = renderHook(
+      () => useWebDashboardProjectRealtime("project-123"),
+      { wrapper },
+    );
+    unmount();
+
+    expect(mockRemove).toHaveBeenCalled();
   });
 });

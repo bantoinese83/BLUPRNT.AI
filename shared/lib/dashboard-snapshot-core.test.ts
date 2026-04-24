@@ -121,4 +121,78 @@ describe("dashboard-snapshot-core", () => {
       expect(result.loadError).toContain("We couldn’t load"); // From partialDashboardLoadMessage
     });
   });
+
+  describe("fetchDashboardProjectsList", () => {
+    it("returns projects list for user", async () => {
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi
+            .fn()
+            .mockResolvedValue({ data: [{ id: "p1" }], error: null }),
+        }),
+      } as unknown as SupabaseClient;
+
+      const res = await import("./dashboard-snapshot-core").then((m) =>
+        m.fetchDashboardProjectsList(mockSupabase, "u1"),
+      );
+      expect(res.rows).toHaveLength(1);
+      expect(res.rows[0].id).toBe("p1");
+    });
+
+    it("returns error when fetch fails", async () => {
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi
+            .fn()
+            .mockResolvedValue({ data: null, error: { message: "Fail" } }),
+        }),
+      } as unknown as SupabaseClient;
+
+      const res = await import("./dashboard-snapshot-core").then((m) =>
+        m.fetchDashboardProjectsList(mockSupabase, "u1"),
+      );
+      expect(res.error?.message).toBe("Fail");
+    });
+  });
+
+  describe("fetchLastActiveProjectIdFromPreferences", () => {
+    it("returns project id when found", async () => {
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi
+            .fn()
+            .mockResolvedValue({
+              data: { last_active_project_id: "p1" },
+              error: null,
+            }),
+        }),
+      } as unknown as SupabaseClient;
+
+      const res = await import("./dashboard-snapshot-core").then((m) =>
+        m.fetchLastActiveProjectIdFromPreferences(mockSupabase, "u1"),
+      );
+      expect(res).toBe("p1");
+    });
+
+    it("returns null when not found", async () => {
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        }),
+      } as unknown as SupabaseClient;
+
+      const res = await import("./dashboard-snapshot-core").then((m) =>
+        m.fetchLastActiveProjectIdFromPreferences(mockSupabase, "u1"),
+      );
+      expect(res).toBeNull();
+    });
+  });
 });
