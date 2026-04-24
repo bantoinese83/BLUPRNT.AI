@@ -218,10 +218,10 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
             <Text style={styles.sectionHeader}>Security & Data</Text>
             <ProfileSettingItem
               testID="profile-row-help-support"
-              icon={<HelpCircle size={20} color={Theme.colors.text.muted} />}
-              title="Help & Support"
-              subtitle="FAQs and contact"
-              onPress={() => router.push(WEB_APP_PATH_SUPPORT)}
+              icon={<HelpCircle size={20} color={Theme.colors.brand.primary} />}
+              title="Concierge Support"
+              subtitle="Chat with our AI-powered team"
+              onPress={() => router.push("/(tabs)/ai")}
             />
             <View
               style={styles.analyticsRow}

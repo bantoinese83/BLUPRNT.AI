@@ -6,6 +6,7 @@ import {
   Users,
   MoveHorizontal,
   Clock,
+  FolderLock,
 } from "lucide-react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import {
@@ -144,19 +145,21 @@ export function LandingFeatures() {
               </p>
             </div>
           </li>
-          <li className="flex items-start gap-4 group">
-            <div className="rounded-xl bg-slate-100 p-2 grayscale opacity-60">
-              <Shield className="h-6 w-6 text-slate-600" aria-hidden />
-            </div>
+          <li className="flex items-start gap-4">
+            <FolderLock
+              className="h-6 w-6 shrink-0 text-slate-900"
+              aria-hidden
+            />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-slate-600">Private Vault</h3>
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter text-slate-500 ring-1 ring-inset ring-slate-200/50">
-                  Coming soon
+                <h3 className="font-semibold text-slate-900">Private Vault</h3>
+                <span className="inline-flex items-center rounded-full bg-teal-100 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter text-teal-700 ring-1 ring-inset ring-teal-200/50">
+                  New
                 </span>
               </div>
-              <p className="mt-1 text-sm text-slate-500 italic leading-relaxed">
+              <p className="mt-1 text-sm text-slate-800">
                 Securely store paint lids, tile box codes, and finish details.
+                Your permanent home spec record.
               </p>
             </div>
           </li>

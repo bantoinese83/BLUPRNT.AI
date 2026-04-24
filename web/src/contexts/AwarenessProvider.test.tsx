@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { AwarenessProvider } from "./AwarenessProvider";
 import { useAwareness } from "./AwarenessContext";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
@@ -11,6 +11,15 @@ function Consumer() {
       <span data-testid="health">{a.projectHealth}</span>
       <span data-testid="count">{a.insights.length}</span>
       <span data-testid="next">{a.nextBestAction ?? ""}</span>
+      <span data-testid="assistant-open">
+        {a.isAssistantOpen ? "open" : "closed"}
+      </span>
+      <button
+        data-testid="toggle-assistant"
+        onClick={() => a.setIsAssistantOpen(!a.isAssistantOpen)}
+      >
+        Toggle
+      </button>
     </div>
   );
 }
@@ -180,5 +189,21 @@ describe("AwarenessProvider", () => {
       </AwarenessProvider>,
     );
     expect(screen.getByTestId("next")).toHaveTextContent("Review Insights");
+  });
+
+  it("manages assistant open/closed state", async () => {
+    render(
+      <AwarenessProvider
+        project={baseProject}
+        scopeItems={[]}
+        invoices={[]}
+        spendByCategory={{}}
+      >
+        <Consumer />
+      </AwarenessProvider>,
+    );
+    expect(screen.getByTestId("assistant-open")).toHaveTextContent("closed");
+    fireEvent.click(screen.getByTestId("toggle-assistant"));
+    await screen.findByText("open"); // findBy is async and waits
   });
 });

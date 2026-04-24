@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AnalyticsEvent } from "@shared/constants/analytics-events";
+import { posthog } from "@/lib/posthog";
 import {
   clearProductAnalyticsConsentCache,
   getProductAnalyticsConsent,
@@ -13,6 +14,14 @@ vi.mock("@react-native-async-storage/async-storage", () => ({
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),
+  },
+}));
+
+vi.mock("@/lib/posthog", () => ({
+  posthog: {
+    capture: vi.fn(),
+    optIn: vi.fn(),
+    optOut: vi.fn(),
   },
 }));
 
@@ -44,16 +53,22 @@ describe("product-analytics", () => {
     log.mockRestore();
   });
 
-  it("setProductAnalyticsConsent persists and updates cache", async () => {
+  it("setProductAnalyticsConsent persists and updates cache and posthog", async () => {
     vi.mocked(AsyncStorage.setItem).mockResolvedValue();
     await setProductAnalyticsConsent(true);
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       "@bluprnt/product_analytics_consent_v1",
       "1",
     );
+    expect(posthog.optIn).toHaveBeenCalled();
+
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     trackProductEvent(AnalyticsEvent.Tap);
     expect(log).toHaveBeenCalled();
+    expect(posthog.capture).toHaveBeenCalledWith(AnalyticsEvent.Tap, undefined);
     log.mockRestore();
+
+    await setProductAnalyticsConsent(false);
+    expect(posthog.optOut).toHaveBeenCalled();
   });
 });

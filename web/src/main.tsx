@@ -5,6 +5,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { initPostHog, setAnalyticsEnabled } from "./lib/posthog";
 
 /** Recover from chunk load failures after deployment by forcing a reload to get the latest index.html/manifest. */
 window.addEventListener(
@@ -50,6 +51,11 @@ async function clearServiceWorkerAndCaches(): Promise<void> {
 }
 
 function mount() {
+  initPostHog();
+  // Hydrate initial opt-in state from localStorage
+  const stored = localStorage.getItem("bluprnt_analytics_opt_in");
+  setAnalyticsEnabled(stored === "true");
+
   createRoot(document.getElementById("root")!, {
     onUncaughtError: reactErrorHandler(),
     onCaughtError: reactErrorHandler(),

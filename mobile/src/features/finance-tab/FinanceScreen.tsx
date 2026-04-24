@@ -34,6 +34,8 @@ import { reportClientError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import { FinanceLedgerHeader } from "@/features/finance-tab/FinanceLedgerHeader";
 import { FinanceInvoiceRow } from "@/features/finance-tab/FinanceInvoiceRow";
+import { HomeSpecsTab } from "@/features/finance-tab/HomeSpecsTab";
+import { AddAssetSheet } from "@/features/finance-tab/AddAssetSheet";
 import { Theme } from "@/constants/Theme";
 
 export default function FinanceScreen() {
@@ -66,6 +68,8 @@ export default function FinanceScreen() {
   const [originalPreviewInvoiceId, setOriginalPreviewInvoiceId] = useState<
     string | null
   >(null);
+  const [currentTab, setCurrentTab] = useState<"ledger" | "specs">("ledger");
+  const [isAddAssetOpen, setIsAddAssetOpen] = useState(false);
 
   const stats = useMemo(() => computeLedgerStats(invoices), [invoices]);
 
@@ -201,31 +205,52 @@ export default function FinanceScreen() {
   const renderHeader = useCallback(
     () =>
       project ? (
-        <FinanceLedgerHeader
-          loadError={loadError}
-          onRetryLoad={() => void load()}
-          onDismissLoadError={clearLoadError}
-          projects={projects}
-          project={project}
-          onProjectSelect={handleProjectSelect}
-          onPressAddDocument={openLedgerDocumentCapture}
-          isUploading={isUploading}
-          stats={stats}
-          includeAppendix={includeAppendix}
-          onIncludeAppendixChange={setIncludeAppendix}
-          exporting={exporting}
-          onExport={handleExport}
-          invoices={invoices}
-          filter={filter}
-          onFilterChange={setFilter}
-        />
+        <View>
+          <SegmentedControl
+            options={[
+              { label: "Financials", value: "ledger" },
+              { label: "Home Specs", value: "specs" },
+            ]}
+            value={currentTab}
+            onChange={(val: any) => {
+              setCurrentTab(val);
+              Haptics.selectionAsync();
+            }}
+            containerStyle={{ marginHorizontal: 24, marginTop: 16 }}
+          />
+          {currentTab === "ledger" && (
+            <FinanceLedgerHeader
+              loadError={loadError}
+              onRetryLoad={() => void load()}
+              onDismissLoadError={clearLoadError}
+              projects={projects}
+              project={project}
+              onProjectSelect={handleProjectSelect}
+              onPressAddDocument={
+                currentTab === "ledger"
+                  ? openLedgerDocumentCapture
+                  : () => setIsAddAssetOpen(true)
+              }
+              isUploading={isUploading}
+              stats={stats}
+              includeAppendix={includeAppendix}
+              onIncludeAppendixChange={setIncludeAppendix}
+              exporting={exporting}
+              onExport={handleExport}
+              invoices={invoices}
+              filter={filter}
+              onFilterChange={setFilter}
+            />
+          )}
+        </View>
       ) : null,
     [
+      project,
+      currentTab,
       loadError,
       load,
       clearLoadError,
       projects,
-      project,
       handleProjectSelect,
       openLedgerDocumentCapture,
       isUploading,
@@ -317,76 +342,106 @@ export default function FinanceScreen() {
 
   return (
     <ScreenWrapper withLogo edges={["top", "left", "right"]}>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        refreshing={refreshing}
-        onRefresh={load}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={renderHeader}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        contentContainerStyle={{ paddingBottom: FINANCE_TAB_BAR_OFFSET + 20 }}
-        stickySectionHeadersEnabled
-        ListEmptyComponent={
-          <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
-            {invoices.length === 0 ? (
-              <EmptyState
-                icon={Receipt}
-                title="Nothing in your vault yet"
-                description="Add invoices, quotes, or receipts—they all show up here as your project record."
-                actionTitle="Add to vault"
-                onAction={openLedgerDocumentCapture}
-              />
-            ) : (
-              <EmptyState
-                icon={Receipt}
-                title="No documents match this filter"
-                description="Switch to “All” to see every invoice, or add a document in this category."
-                actionTitle="Show all"
-                onAction={() => setFilter("all")}
-              />
-            )}
-          </View>
-        }
-        renderSectionHeader={({ section: { title } }) => (
-          <View
-            style={[
-              styles.monthGroup,
-              {
-                paddingHorizontal: 24,
-                paddingTop: 6,
-                paddingBottom: 4,
-                backgroundColor: Theme.colors.background,
-              },
-            ]}
-          >
-            <View style={styles.monthHeader}>
-              <Text style={styles.monthHeaderText}>{title}</Text>
-              <View style={styles.monthHeaderLine} />
+      {currentTab === "ledger" && (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          refreshing={refreshing}
+          onRefresh={load}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={renderHeader}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          contentContainerStyle={{ paddingBottom: FINANCE_TAB_BAR_OFFSET + 20 }}
+          stickySectionHeadersEnabled
+          ListEmptyComponent={
+            <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+              {invoices.length === 0 ? (
+                <EmptyState
+                  icon={Receipt}
+                  title="Nothing in your vault yet"
+                  description="Add invoices, quotes, or receipts—they all show up here as your project record."
+                  actionTitle="Add to vault"
+                  onAction={openLedgerDocumentCapture}
+                />
+              ) : (
+                <EmptyState
+                  icon={Receipt}
+                  title="No documents match this filter"
+                  description="Switch to “All” to see every invoice, or add a document in this category."
+                  actionTitle="Show all"
+                  onAction={() => setFilter("all")}
+                />
+              )}
             </View>
-          </View>
-        )}
-        renderItem={({ item: inv, index }) => (
-          <FinanceInvoiceRow
-            inv={inv}
-            index={index}
-            hasProjectPass={hasProjectPass}
-            onUpgradeClick={() => {
-              setUpgradeReason("general");
-              setShowUpgrade(true);
+          }
+          renderSectionHeader={({ section: { title } }) => (
+            <View
+              style={[
+                styles.monthGroup,
+                {
+                  paddingHorizontal: 24,
+                  paddingTop: 6,
+                  paddingBottom: 4,
+                  backgroundColor: Theme.colors.background,
+                },
+              ]}
+            >
+              <View style={styles.monthHeader}>
+                <Text style={styles.monthHeaderText}>{title}</Text>
+                <View style={styles.monthHeaderLine} />
+              </View>
+            </View>
+          )}
+          renderItem={({ item: inv, index }) => (
+            <FinanceInvoiceRow
+              inv={inv}
+              index={index}
+              hasProjectPass={hasProjectPass}
+              onUpgradeClick={() => {
+                setUpgradeReason("general");
+                setShowUpgrade(true);
+              }}
+              onPress={() => {
+                setSelectedInvoice(inv as unknown as InvoiceRow);
+                setIsReviewOpen(true);
+                Haptics.selectionAsync();
+              }}
+              onViewOriginal={() => setOriginalPreviewInvoiceId(inv.id)}
+              onDelete={handleInvoiceDelete}
+            />
+          )}
+        />
+      )}
+
+      {currentTab === "specs" && project && (
+        <View style={{ flex: 1, backgroundColor: Theme.colors.background }}>
+          <HomeSpecsTab projectId={project.id} />
+          <TouchableOpacity
+            onPress={() => setIsAddAssetOpen(true)}
+            testID="add-spec-fab"
+            style={{
+              position: "absolute",
+              bottom: FINANCE_TAB_BAR_OFFSET + 20,
+              right: 24,
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: Theme.colors.text.primary,
+              alignItems: "center",
+              justifyContent: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5,
             }}
-            onPress={() => {
-              setSelectedInvoice(inv as unknown as InvoiceRow);
-              setIsReviewOpen(true);
-              Haptics.selectionAsync();
-            }}
-            onViewOriginal={() => setOriginalPreviewInvoiceId(inv.id)}
-            onDelete={handleInvoiceDelete}
-          />
-        )}
-      />
+          >
+            <Plus size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
 
       <InvoiceReviewSheet
         invoice={selectedInvoice}
@@ -411,6 +466,16 @@ export default function FinanceScreen() {
           onClose={() => setOriginalPreviewInvoiceId(null)}
         />
       ) : null}
+
+      <AddAssetSheet
+        isOpen={isAddAssetOpen}
+        onClose={() => setIsAddAssetOpen(false)}
+        onSuccess={() => {
+          setIsAddAssetOpen(false);
+          load();
+        }}
+        projectId={project?.id ?? ""}
+      />
     </ScreenWrapper>
   );
 }

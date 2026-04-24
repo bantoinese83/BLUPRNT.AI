@@ -10,7 +10,10 @@ import {
   Loader2,
   CreditCard,
   HelpCircle,
+  TrendingUp,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { AIAssistantWidget } from "@/components/AIAssistantWidget";
 
 import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
 import { Button } from "@/components/ui/button";
@@ -62,6 +65,10 @@ export function SettingsContent(props: SettingsContentProps) {
     signOutLoading,
     onSignOut,
     onBack,
+    analyticsEnabled,
+    onAnalyticsToggle,
+    isAssistantOpen,
+    setIsAssistantOpen,
   } = props;
 
   return (
@@ -403,6 +410,28 @@ export function SettingsContent(props: SettingsContentProps) {
             <div className="border-t border-slate-100 pt-8 space-y-4">
               <div className="space-y-1">
                 <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-teal-500" />
+                  Product Analytics
+                </h4>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Share anonymous usage data to help us improve BLUPRNT. We
+                  never track personal project details or identity.
+                </p>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
+                <span className="text-sm font-bold text-slate-700">
+                  Allow usage insights
+                </span>
+                <Switch
+                  checked={analyticsEnabled}
+                  onCheckedChange={onAnalyticsToggle}
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-8 space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
                   Danger Zone
                 </h4>
                 <p className="text-sm text-slate-500 font-medium leading-relaxed">
@@ -461,18 +490,14 @@ export function SettingsContent(props: SettingsContentProps) {
               Have questions or need assistance with your project strategy? Our
               team is ready to help you optimize your renovation budget.
             </p>
-            <a
-              href="mailto:connect@monarch-labs.com"
-              className="inline-block w-full sm:w-auto"
+            <Button
+              variant="outline"
+              className="w-full gap-2 text-teal-600 border-teal-200 hover:bg-teal-50 hover:border-teal-300 rounded-xl"
+              type="button"
+              onClick={() => setIsAssistantOpen(true)}
             >
-              <Button
-                variant="outline"
-                className="w-full gap-2 text-teal-600 border-teal-200 hover:bg-teal-50 hover:border-teal-300 rounded-xl"
-                type="button"
-              >
-                Contact Concierge Support
-              </Button>
-            </a>
+              Chat with Concierge Support
+            </Button>
           </CardContent>
         </Card>
 
@@ -499,6 +524,12 @@ export function SettingsContent(props: SettingsContentProps) {
         openReason="general"
         projectId={upgradeProjectId}
         isArchitect={isArchitect}
+      />
+
+      <AIAssistantWidget
+        projectId={upgradeProjectId ?? ""}
+        isOpen={isAssistantOpen}
+        onOpenChange={setIsAssistantOpen}
       />
     </div>
   );

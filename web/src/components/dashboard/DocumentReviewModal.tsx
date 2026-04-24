@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Loader2, Link2, AlertTriangle } from "lucide-react";
+import { X, Loader2, Link2, AlertTriangle, Calendar } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ type DocumentData = {
   budget_mapping_suggestions?: ScopeSuggestion[];
   document_id?: string | null;
   document_type?: string | null;
+  warranty_expiry_date?: string | null;
 };
 
 export function DocumentReviewModal({
@@ -74,6 +75,7 @@ export function DocumentReviewModal({
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
   const [ledgerDocType, setLedgerDocType] =
     useState<LedgerDocumentType>("invoice");
+  const [warrantyExpiryDate, setWarrantyExpiryDate] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +108,7 @@ export function DocumentReviewModal({
         };
         setDocument(merged);
         setLedgerDocType(coerceLedgerDocumentType(merged.document_type));
+        setWarrantyExpiryDate(merged.warranty_expiry_date || "");
 
         const { data: scope, error: scopeErr } = await supabase
           .from("scope_items")
@@ -163,13 +166,20 @@ export function DocumentReviewModal({
 
       const prevType = coerceLedgerDocumentType(document.document_type);
       const typeChanged = ledgerDocType !== prevType;
-      if (typeChanged) {
+      const dateChanged =
+        warrantyExpiryDate !== (document.warranty_expiry_date || "");
+
+      if (typeChanged || dateChanged) {
         const { error: invErr } = await supabase
           .from("invoices")
-          .update({ document_type: ledgerDocType })
+          .update({
+            document_type: ledgerDocType,
+            warranty_expiry_date: warrantyExpiryDate || null,
+          })
           .eq("id", document.id);
         if (invErr) throw invErr;
-        if (document.document_id) {
+
+        if (typeChanged && document.document_id) {
           const { error: docErr } = await supabase
             .from("documents")
             .update({ type: ledgerDocType })
@@ -325,6 +335,26 @@ export function DocumentReviewModal({
                   <p className="text-[11px] text-slate-500 leading-snug">
                     Fix a misclassification here — no need to re-upload. This
                     updates your ledger and seller packet grouping.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
+                  <label
+                    htmlFor="document-review-warranty-expiry"
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wide flex items-center gap-1.5"
+                  >
+                    <Calendar className="w-3 h-3" />
+                    Warranty Expiration
+                  </label>
+                  <input
+                    id="document-review-warranty-expiry"
+                    type="date"
+                    value={warrantyExpiryDate}
+                    onChange={(e) => setWarrantyExpiryDate(e.target.value)}
+                    className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
+                  />
+                  <p className="text-[11px] text-slate-500 leading-snug">
+                    Optional. We'll notify you 30 days before this date.
                   </p>
                 </div>
               </div>

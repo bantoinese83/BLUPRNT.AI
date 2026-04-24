@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Sentry } from "@/lib/sentry";
+import { posthog } from "@/lib/posthog";
 
 const STORAGE_KEY = "@bluprnt/product_analytics_consent_v1";
 
@@ -24,6 +25,11 @@ export async function setProductAnalyticsConsent(
 ): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, enabled ? "1" : "0");
   consentCache = enabled;
+  if (enabled) {
+    posthog.optIn();
+  } else {
+    posthog.optOut();
+  }
 }
 
 function isProductAnalyticsConsentGranted(): boolean {
@@ -55,6 +61,7 @@ export function trackProductEvent(
 ): void {
   if (!isProductAnalyticsConsentGranted()) return;
   sdkHandler?.(name, properties);
+  posthog.capture(name, properties);
 
   // Fallback to Sentry breadcrumbs for production observability
   if (!__DEV__) {

@@ -1,0 +1,35 @@
+appId: ${APP_ID}
+---
+- runFlow: common/launch-app-keep.yaml
+
+# Navigate to Vault
+- tapOn: "Vault"
+
+# Verify default "Financials" state
+- assertVisible: "Property record"
+- assertVisible: "Property equity tracking"
+
+# Toggle to Home Specs
+- tapOn: "Home Specs"
+
+# Verify Specs state
+- assertVisible: "No specs recorded"
+- assertVisible: "Store paint codes and hardware details here for easy reference later."
+
+# Add a new spec
+- tapOn:
+    id: "add-spec-fab" # I should add this testID to the button
+- assertVisible: "New Home Spec"
+
+# Fill the form
+- tapOn: "e.g. Living Room Walls"
+- inputText: "Maestro Test Paint"
+- tapOn: "e.g. Benjamin Moore"
+- inputText: "Maestro Brand"
+
+# Save
+- tapOn: "Save to Vault"
+
+# Verify it appears
+- assertVisible: "Maestro Test Paint"
+- assertVisible: "Maestro Brand"

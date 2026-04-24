@@ -23,6 +23,6 @@ export function ConsentAwareAnalytics() {
     };
   }, []);
 
-  if (!enabled) return null;
+  if (!enabled || window.location.hostname === "localhost") return null;
   return <Analytics />;
 }

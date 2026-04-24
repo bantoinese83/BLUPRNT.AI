@@ -24,6 +24,7 @@ interface DashboardPlanProps {
   health: React.ReactNode;
   homeTeam: React.ReactNode;
   transformationVault: React.ReactNode;
+  homeSpecsVault: React.ReactNode;
   ledger: React.ReactNode;
   documentsComp: React.ReactNode;
   onUpgradeClick: () => void;
@@ -40,6 +41,7 @@ export function DashboardPlan({
   health,
   homeTeam,
   transformationVault,
+  homeSpecsVault,
   ledger,
   documentsComp,
   onUpgradeClick,
@@ -52,6 +54,7 @@ export function DashboardPlan({
       side={
         <div className="space-y-8">
           {transformationVault}
+          {homeSpecsVault}
           {health}
           <GroundingSourcesSection project={project} />
           {homeTeam}

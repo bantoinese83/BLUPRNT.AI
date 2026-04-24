@@ -37,6 +37,10 @@ export type SettingsContentProps = {
   setShowUpgrade: (v: boolean) => void;
   upgradeProjectId: string | null;
 
+  analyticsEnabled: boolean;
+  onAnalyticsToggle: (v: boolean) => void;
+  isAssistantOpen: boolean;
+  setIsAssistantOpen: (v: boolean) => void;
   signOutLoading: boolean;
   onSignOut: () => void | Promise<void>;
   onBack: () => void;

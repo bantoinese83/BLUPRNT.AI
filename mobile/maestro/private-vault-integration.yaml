@@ -1,0 +1,40 @@
+appId: ${APP_ID}
+---
+- runFlow: common/launch-app-keep.yaml
+
+# 1. Navigation
+- tapOn: "Vault"
+- assertVisible: "Property record"
+
+# 2. Tab Switching
+- tapOn: "Home Specs"
+- assertVisible: "All"
+- assertVisible: "No specs recorded"
+
+# 3. Add Spec Flow
+- tapOn: { id: "add-spec-fab" }
+- assertVisible: "New Home Spec"
+
+# 4. Form Entry
+- tapOn: "e.g. Living Room Walls"
+- inputText: "Integration Test Asset"
+- tapOn: "Paint" # Category
+- tapOn: "e.g. Benjamin Moore"
+- inputText: "Test Brand"
+- tapOn: "e.g. Eggshell"
+- inputText: "Test Finish"
+- tapOn: "e.g. Master Bedroom"
+- inputText: "Test Location"
+
+# 5. Save and Verify
+- tapOn: "Save to Vault"
+- extendedWaitUntil:
+    visible: "Integration Test Asset"
+    timeout: 10000
+- assertVisible: "TEST BRAND"
+- assertVisible: "TEST LOCATION"
+
+# 6. Deletion
+- tapOn: { id: "delete-spec-btn" } # I need to add this ID to the delete button
+- tapOn: "Remove"
+- assertNotVisible: "Integration Test Asset"

@@ -100,6 +100,12 @@ export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
     hint: "Expiry tracking for appliances and systems",
   },
   {
+    feature: "Private Vault",
+    architect: "Unlimited specs",
+    pass: "Unlimited specs",
+    hint: "Store paint lids, tile box codes, and finish details forever",
+  },
+  {
     feature: "Open your records later",
     architect: "Anytime",
     pass: "View-only after pass",
@@ -162,6 +168,13 @@ export const COMPARISON_FEATURES = [
     bluprnt: true,
     visualizers: false,
     proTools: false,
+    static: false,
+  },
+  {
+    name: "Private Vault (Home Specs)",
+    bluprnt: true,
+    visualizers: false,
+    proTools: true,
     static: false,
   },
   {

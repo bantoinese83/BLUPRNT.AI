@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     setupFiles: ["./src/test/vitest-setup.ts"],
     environment: "node",
-    include: ["src/**/*.{test,spec}.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json"],
@@ -40,6 +40,15 @@ export default defineConfig({
         branches: 65,
         functions: 80,
         statements: 80,
+      },
+    },
+    server: {
+      deps: {
+        inline: [
+          "lucide-react-native",
+          "expo-haptics",
+          "@testing-library/react-native",
+        ],
       },
     },
   },

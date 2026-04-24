@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import type { UserSubscriptionRow } from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { setAnalyticsEnabled as setPostHogCapturing } from "@/lib/posthog";
 
 import type {
   SettingsUser,
@@ -38,6 +39,10 @@ export function useSettingsPage(): UseSettingsPageResult {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(() => {
+    return localStorage.getItem("bluprnt_analytics_opt_in") === "true";
+  });
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -245,6 +250,15 @@ export function useSettingsPage(): UseSettingsPageResult {
     }
   }, [deleteConfirm, navigate]);
 
+  const onAnalyticsToggle = useCallback((enabled: boolean) => {
+    setAnalyticsEnabled(enabled);
+    localStorage.setItem(
+      "bluprnt_analytics_opt_in",
+      enabled ? "true" : "false",
+    );
+    setPostHogCapturing(enabled);
+  }, []);
+
   return {
     userLoading,
     user,
@@ -277,6 +291,11 @@ export function useSettingsPage(): UseSettingsPageResult {
     showUpgrade,
     setShowUpgrade,
     upgradeProjectId,
+
+    analyticsEnabled,
+    onAnalyticsToggle,
+    isAssistantOpen,
+    setIsAssistantOpen,
 
     signOutLoading,
     onSignOut,

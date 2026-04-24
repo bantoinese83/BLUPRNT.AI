@@ -78,3 +78,19 @@ export type GalleryItemRow = {
   uploaded_by_user_id: string;
   created_at: string;
 };
+
+export type PhysicalAssetRow = {
+  id: string;
+  project_id: string;
+  name: string;
+  category: string;
+  brand: string | null;
+  color_name: string | null;
+  color_code: string | null;
+  finish: string | null;
+  location_in_home: string | null;
+  notes: string | null;
+  storage_path: string | null;
+  created_at: string;
+  updated_at: string;
+};

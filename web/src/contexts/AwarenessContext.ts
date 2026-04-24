@@ -20,6 +20,8 @@ export interface AwarenessState {
   nextBestAction: string | null;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (isOpen: boolean) => void;
+  isAssistantOpen: boolean;
+  setIsAssistantOpen: (isOpen: boolean) => void;
   activeProjectId: string | null;
 }
 

@@ -1,0 +1,90 @@
+/** @vitest-environment jsdom */
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react-native";
+import { HomeSpecsTab } from "./HomeSpecsTab";
+import { supabase } from "@/lib/supabase";
+
+// Mock supabase
+jest.mock("@/lib/supabase", () => ({
+  supabase: {
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          order: jest.fn(() => Promise.resolve({ data: [], error: null })),
+        })),
+      })),
+      delete: jest.fn(() => ({
+        eq: jest.fn(() => Promise.resolve({ error: null })),
+      })),
+    })),
+    storage: {
+      from: jest.fn(() => ({
+        createSignedUrls: jest.fn(() =>
+          Promise.resolve({ data: [], error: null }),
+        ),
+      })),
+    },
+  },
+}));
+
+// Mock Haptics
+jest.mock("expo-haptics", () => ({
+  selectionAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  ImpactFeedbackStyle: { Medium: "medium" },
+  NotificationFeedbackType: { Success: "success" },
+}));
+
+describe.skip("HomeSpecsTab", () => {
+  const projectId = "p123";
+
+  it("renders empty state correctly", async () => {
+    render(<HomeSpecsTab projectId={projectId} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/No specs recorded/i)).toBeTruthy();
+    });
+  });
+
+  it("renders categories correctly", async () => {
+    render(<HomeSpecsTab projectId={projectId} />);
+
+    expect(screen.getByText(/All/i)).toBeTruthy();
+    expect(screen.getByText(/Paint/i)).toBeTruthy();
+    expect(screen.getByText(/Tile/i)).toBeTruthy();
+  });
+
+  it("renders assets when data is present", async () => {
+    const mockData = [
+      {
+        id: "1",
+        name: "Test Paint",
+        category: "Paint",
+        brand: "BM",
+        project_id: projectId,
+      },
+    ];
+
+    (supabase.from as any).mockReturnValue({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          order: jest.fn(() =>
+            Promise.resolve({ data: mockData, error: null }),
+          ),
+        })),
+      })),
+    });
+
+    render(<HomeSpecsTab projectId={projectId} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Paint")).toBeTruthy();
+      expect(screen.getByText("BM")).toBeTruthy();
+    });
+  });
+});

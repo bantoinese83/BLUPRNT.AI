@@ -55,7 +55,7 @@ export function LandingPricing({
             viewport={{ once: true }}
             className="relative group p-8 rounded-3xl bg-white border border-slate-200 shadow-xl shadow-slate-100/50 flex flex-col"
           >
-            <div className="absolute -top-6 -right-4 z-20 rotate-[14deg]">
+            <div className="absolute -top-6 -right-4 z-20 rotate-14">
               <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-900/10 bg-white/90 shadow-[0_14px_30px_rgba(15,23,42,0.18)] ring-4 ring-slate-100/80 backdrop-blur-sm sm:h-24 sm:w-24">
                 <ArchitectPlanIcon className="h-14 w-14 sm:h-16 sm:w-16" />
               </div>
@@ -83,6 +83,7 @@ export function LandingPricing({
                 "10 invoice uploads per billing month, total across all projects you track",
                 "Up to 2 remodels at the same time",
                 "Full home file + listing-ready PDF export",
+                "Private Vault for paint lids, tile codes, and finishes",
                 "Cloud backup of your packet (PDF)",
               ].map((feature, i) => (
                 <li
@@ -117,7 +118,7 @@ export function LandingPricing({
             transition={{ delay: 0.1 }}
             className="relative group p-8 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col"
           >
-            <div className="absolute -top-6 -right-4 z-20 -rotate-[10deg]">
+            <div className="absolute -top-6 -right-4 z-20 -rotate-10">
               <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-200 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.12)] ring-4 ring-white/90 sm:h-24 sm:w-24">
                 <ProjectPassIcon className="h-14 w-14 sm:h-16 sm:w-16" />
               </div>
@@ -206,7 +207,7 @@ export function LandingPricing({
                   <tr className="border-b border-slate-200/90">
                     <th
                       scope="col"
-                      className="sticky left-0 z-20 min-w-[10.5rem] bg-gradient-to-b from-slate-50 to-slate-50/90 px-4 py-5 text-left align-bottom shadow-[6px_0_14px_-8px_rgba(15,23,42,0.12)] sm:min-w-[13rem] sm:px-6 sm:py-6"
+                      className="sticky left-0 z-20 min-w-42 bg-linear-to-b from-slate-50 to-slate-50/90 px-4 py-5 text-left align-bottom shadow-[6px_0_14px_-8px_rgba(15,23,42,0.12)] sm:min-w-52 sm:px-6 sm:py-6"
                     >
                       <span className="text-[12px] font-black uppercase tracking-[0.18em] text-slate-800">
                         What you get
@@ -214,7 +215,7 @@ export function LandingPricing({
                     </th>
                     <th
                       scope="col"
-                      className="bg-gradient-to-b from-teal-50 to-teal-50/80 px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
+                      className="bg-linear-to-b from-teal-50 to-teal-50/80 px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
                     >
                       <div className="flex flex-col items-center gap-1.5">
                         <span className="text-xs font-black uppercase tracking-[0.14em] text-teal-900">
@@ -231,7 +232,7 @@ export function LandingPricing({
                     </th>
                     <th
                       scope="col"
-                      className="bg-gradient-to-b from-slate-50 to-white px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
+                      className="bg-linear-to-b from-slate-50 to-white px-4 py-5 text-center align-bottom sm:px-6 sm:py-6"
                     >
                       <div className="flex flex-col items-center gap-1.5">
                         <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-800">
@@ -256,7 +257,7 @@ export function LandingPricing({
                     >
                       <th
                         scope="row"
-                        className="sticky left-0 z-10 min-w-[10.5rem] border-r border-slate-100/90 bg-white px-4 py-4 text-left align-top shadow-[4px_0_12px_-6px_rgba(15,23,42,0.08)] transition-colors group-hover:bg-slate-50/95 sm:min-w-[13rem] sm:px-6 sm:py-5"
+                        className="sticky left-0 z-10 min-w-42 border-r border-slate-100/90 bg-white px-4 py-4 text-left align-top shadow-[4px_0_12px_-6px_rgba(15,23,42,0.08)] transition-colors group-hover:bg-slate-50/95 sm:min-w-52 sm:px-6 sm:py-5"
                       >
                         <span className="block text-sm font-bold text-slate-900">
                           {row.feature}

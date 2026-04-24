@@ -16,6 +16,7 @@ export function AwarenessProvider({
   spendByCategory: Record<string, number>;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   const awarenessData = useMemo(() => {
     if (!project)
@@ -130,9 +131,11 @@ export function AwarenessProvider({
       ...awarenessData,
       isSidebarOpen,
       setIsSidebarOpen,
+      isAssistantOpen,
+      setIsAssistantOpen,
       activeProjectId: project?.id ?? null,
     }),
-    [awarenessData, isSidebarOpen, project?.id],
+    [awarenessData, isSidebarOpen, isAssistantOpen, project?.id],
   );
 
   return (

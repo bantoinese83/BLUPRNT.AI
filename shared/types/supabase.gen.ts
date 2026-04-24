@@ -203,6 +203,22 @@ type ProjectGalleryRow = {
   created_at: string;
 };
 
+type PhysicalAssetsRow = {
+  id: string;
+  project_id: string;
+  name: string;
+  category: string;
+  brand: string | null;
+  color_name: string | null;
+  color_code: string | null;
+  finish: string | null;
+  location_in_home: string | null;
+  notes: string | null;
+  storage_path: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -220,6 +236,7 @@ export type Database = {
       seller_packets: TableRow<SellerPacketsRow>;
       project_view_tokens: TableRow<ProjectViewTokensRow>;
       project_gallery: TableRow<ProjectGalleryRow>;
+      physical_assets: TableRow<PhysicalAssetsRow>;
     };
     Views: Record<string, never>;
     Functions: {

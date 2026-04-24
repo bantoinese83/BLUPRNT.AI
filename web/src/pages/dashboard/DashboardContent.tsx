@@ -60,6 +60,7 @@ import {
 import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
 import { TransformationVault } from "@/components/dashboard/TransformationVault";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
+import { HomeSpecsVault } from "@/components/dashboard/HomeSpecsVault";
 import { AIAssistantWidget } from "@/components/AIAssistantWidget";
 
 export function DashboardContent({
@@ -225,6 +226,11 @@ export function DashboardContent({
 
   const transformationVault = useMemo(
     () => <TransformationVault projectId={project.id} />,
+    [project.id],
+  );
+
+  const homeSpecsVault = useMemo(
+    () => <HomeSpecsVault projectId={project.id} />,
     [project.id],
   );
 
@@ -467,6 +473,7 @@ export function DashboardContent({
                     health={health}
                     homeTeam={homeTeam}
                     transformationVault={transformationVault}
+                    homeSpecsVault={homeSpecsVault}
                     ledger={ledger}
                     documentsComp={documentsComp}
                     onUpgradeClick={() => setShowUpgrade(true)}
