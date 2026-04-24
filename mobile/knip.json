@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": ["@bluprnt/shared", "expo-router"],
+  "ignoreDependencies": [
+    "@bluprnt/shared",
+    "react-native-screens",
+    "react-native-web",
+    "react-native-worklets"
+  ],
   "ignore": [
     "src/test/**",
     "babel.config.cjs",
@@ -8,5 +13,5 @@
     "src/constants/Theme.ts"
   ],
   "ignoreBinaries": ["expo", "eslint", "vitest", "knip"],
-  "entry": ["app/_layout.tsx", "src/lib/push.ts"]
+  "entry": ["src/lib/push.ts"]
 }
