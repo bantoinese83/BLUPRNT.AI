@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateActivityEvents, formatRelativeTime } from "./activity";
+import type { InvoiceRow, ProjectRow } from "../types/database";
 
 describe("activity shared logic", () => {
   describe("generateActivityEvents", () => {
@@ -8,7 +9,7 @@ describe("activity shared logic", () => {
       name: "Kitchen Reno",
       created_at: "2026-04-20T10:00:00Z",
       estimated_min_total: 5000,
-    } as any;
+    } as unknown as ProjectRow;
 
     const mockInvoices = [
       {
@@ -23,7 +24,7 @@ describe("activity shared logic", () => {
         total: 3000,
         created_at: "2026-04-22T10:00:00Z",
       },
-    ] as any;
+    ] as unknown as InvoiceRow[];
 
     it("includes project initialization and invoice uploads", () => {
       const events = generateActivityEvents(mockProject, mockInvoices);
@@ -43,7 +44,7 @@ describe("activity shared logic", () => {
       const manyInvoices = Array.from({ length: 10 }, (_, i) => ({
         id: `i${i}`,
         created_at: `2026-04-${10 + i}T10:00:00Z`,
-      })) as any;
+      })) as unknown as InvoiceRow[];
       const events = generateActivityEvents(mockProject, manyInvoices);
       expect(events.filter((e) => e.type === "upload")).toHaveLength(5);
     });

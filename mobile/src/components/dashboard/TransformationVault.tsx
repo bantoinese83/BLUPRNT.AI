@@ -1,196 +1,23 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  TextInput,
-} from "react-native";
-import { Image } from "expo-image";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import {
   History,
   Play,
   Plus,
-  Camera,
-  X,
-  MessageSquare,
-  Check,
   ChevronLeft,
   ChevronRight,
-  Image as ImageIcon,
 } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { supabase, invokeFunction } from "@/lib/supabase";
-import { GlassCard } from "@/components/ui/GlassCard";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
-
-type GalleryItem = import("@shared/types/database").GalleryItemRow;
+import { PhotoSlot } from "./PhotoSlot";
 
 type TransformationVaultProps = {
   projectId: string;
   className?: string; // For compatibility with web props if needed
 };
-
-type PhotoSlotProps = {
-  label: string;
-  icon: React.ReactNode;
-  item: GalleryItem | null;
-  signedUrl: string | null;
-  uploading: boolean;
-  onUpload: () => void;
-  onClear: (id: string) => void;
-  onUpdateCaption: (id: string, caption: string) => void;
-};
-
-function PhotoSlot({
-  label,
-  icon,
-  item,
-  signedUrl,
-  uploading,
-  onUpload,
-  onClear,
-  onUpdateCaption,
-}: PhotoSlotProps) {
-  const [editingCaption, setEditingCaption] = useState(false);
-  const [captionValue, setCaptionValue] = useState(item?.caption || "");
-
-  useEffect(() => {
-    setCaptionValue(item?.caption || "");
-  }, [item?.caption]);
-
-  const showPlaceholder = !signedUrl || !item;
-
-  const handleSaveCaption = async () => {
-    if (!item) return;
-    try {
-      await onUpdateCaption(item.id, captionValue);
-      setEditingCaption(false);
-    } catch {
-      setCaptionValue(item.caption || "");
-    }
-  };
-
-  return (
-    <View style={styles.slotContainer}>
-      <GlassCard intensity={8} style={styles.slotCard}>
-        <View style={{ flex: 1 }}>
-          {showPlaceholder ? (
-            <View style={styles.placeholder}>
-              <View style={styles.placeholderIcon}>
-                {uploading ? (
-                  <ActivityIndicator color={Theme.colors.brand.primary} />
-                ) : (
-                  <ImageIcon size={24} color={Theme.colors.text.disabled} />
-                )}
-              </View>
-              <Text style={styles.placeholderLabel}>{label}</Text>
-            </View>
-          ) : (
-            <View style={StyleSheet.absoluteFill}>
-              <Image
-                source={{ uri: signedUrl! }}
-                style={StyleSheet.absoluteFill}
-                contentFit="cover"
-              />
-
-              {/* Controls Overlay (Top) */}
-              <View style={styles.topControls}>
-                <TouchableOpacity
-                  onPress={() => setEditingCaption(!editingCaption)}
-                  style={[
-                    styles.controlBtn,
-                    editingCaption && styles.controlBtnActive,
-                  ]}
-                >
-                  <MessageSquare size={14} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => onClear(item.id)}
-                  style={[styles.controlBtn, styles.clearBtn]}
-                >
-                  <X size={14} color="white" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Caption Overlay (Bottom) */}
-              {!editingCaption && item.caption && (
-                <View style={styles.captionContainer}>
-                  <Text style={styles.captionText} numberOfLines={2}>
-                    {item.caption}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Label Badge */}
-          <View style={styles.badgeContainer}>
-            <View style={styles.badge}>
-              {icon}
-              <Text style={styles.badgeText}>{label}</Text>
-            </View>
-          </View>
-
-          {/* Action Overlay */}
-          {!editingCaption && (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.actionOverlay}
-              onPress={() => {
-                console.log(`[PhotoSlot] Capture pressed for ${label}`);
-                onUpload();
-              }}
-              disabled={uploading}
-            >
-              <View style={styles.actionBtn}>
-                {uploading ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={Theme.colors.brand.primary}
-                  />
-                ) : (
-                  <>
-                    <Camera size={16} color={Theme.colors.text.primary} />
-                    <Text style={styles.actionText}>
-                      {showPlaceholder ? `Capture` : `Change`}
-                    </Text>
-                  </>
-                )}
-              </View>
-            </TouchableOpacity>
-          )}
-
-          {/* Inline Caption Editor */}
-          {editingCaption && (
-            <View style={styles.editorOverlay}>
-              <View style={styles.editorContent}>
-                <TextInput
-                  value={captionValue}
-                  onChangeText={setCaptionValue}
-                  placeholder="Add a caption..."
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  style={styles.captionInput}
-                  autoFocus
-                />
-                <TouchableOpacity
-                  onPress={handleSaveCaption}
-                  style={styles.saveBtn}
-                >
-                  <Check size={18} color={Theme.colors.brand.primary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        </View>
-      </GlassCard>
-    </View>
-  );
-}
 
 export function TransformationVault({ projectId }: TransformationVaultProps) {
   const { galleryItems = [] } = useAwareness();
@@ -256,9 +83,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   }, [galleryItems]);
 
   const handlePickPhoto = async (type: "before" | "after", index: number) => {
-    console.log(
-      `[TransformationVault] handlePickPhoto for ${type} at index ${index}`,
-    );
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -276,9 +100,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
     });
 
     if (!result.canceled && result.assets[0]) {
-      console.log(
-        `[TransformationVault] Photo picked: ${result.assets[0].uri}`,
-      );
       void runUpload(result.assets[0].uri, type, index);
     }
   };
@@ -451,9 +272,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
 }
 
 const styles = StyleSheet.create({
-  badgeIcon: {
-    marginLeft: 4,
-  },
   container: {
     marginTop: 16,
     paddingBottom: 16,
@@ -499,163 +317,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     paddingHorizontal: 4,
-  },
-  slotContainer: {
-    flex: 1,
-    aspectRatio: 1,
-  },
-  slotCard: {
-    flex: 1,
-    borderRadius: 24,
-    overflow: "hidden",
-    backgroundColor: Theme.colors.card,
-    height: "100%",
-  },
-  placeholder: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.02)",
-    zIndex: 1,
-  },
-  placeholderIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  placeholderLabel: {
-    fontSize: 10,
-    fontFamily: Theme.typography.family.black,
-    color: Theme.colors.text.muted,
-    textTransform: "uppercase",
-    marginTop: 10,
-    letterSpacing: 1,
-  },
-  topControls: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    flexDirection: "row",
-    gap: 8,
-    zIndex: 20,
-  },
-  controlBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  controlBtnActive: {
-    backgroundColor: Theme.colors.brand.primary,
-  },
-  clearBtn: {
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  captionContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 12,
-    paddingTop: 24,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  captionText: {
-    color: "white",
-    fontSize: 11,
-    fontFamily: Theme.typography.family.medium,
-  },
-  badgeContainer: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    zIndex: 10,
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  badgeText: {
-    fontSize: 8,
-    fontFamily: Theme.typography.family.black,
-    color: "white",
-    textTransform: "uppercase",
-  },
-  actionOverlay: {
-    position: "absolute",
-    bottom: 12,
-    left: 12,
-    right: 12,
-    zIndex: 25,
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
-    paddingVertical: 10,
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  actionText: {
-    fontSize: 10,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-  },
-  editorOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 12,
-    zIndex: 30,
-  },
-  editorContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 12,
-    padding: 8,
-    width: "100%",
-  },
-  captionInput: {
-    flex: 1,
-    color: "white",
-    fontSize: 12,
-    fontFamily: Theme.typography.family.medium,
-    paddingHorizontal: 8,
-    height: 36,
-  },
-  saveBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
   },
   dotsContainer: {
     flexDirection: "row",

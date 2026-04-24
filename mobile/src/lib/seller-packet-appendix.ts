@@ -1,120 +1,53 @@
-import { invokeFunction } from "@/lib/supabase";
-import type { InvoiceRow } from "@shared/types/database";
+import { escapeHtml } from "./image-utils";
+import { supabase } from "./supabase";
+import type { InvoiceRow, ScopeRow } from "@shared/types/database";
 
-const MAX_BYTES_PER_FILE = 2_500_000;
+/**
+ * PDF Template Part: Appendix
+ * Renders full-page images of original receipt uploads.
+ */
 
-type SignedUrlResponse = {
-  signed_url?: string;
-  filename?: string;
-  error?: string;
-};
-
-function uint8ToBase64(bytes: Uint8Array): string {
+function uint8ToBase64(arr: Uint8Array): string {
   let binary = "";
-  const chunk = 8192;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  for (let i = 0; i < arr.byteLength; i++) {
+    binary += String.fromCharCode(arr[i]);
   }
   return btoa(binary);
 }
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function appendixTitle(inv: InvoiceRow): string {
-  const vendor = inv.vendor_name?.trim() || "Document";
-  return `${formatDate(inv.created_at)} — ${vendor}`;
-}
-
-function isProbablyPdf(mime: string, filename: string): boolean {
-  if (mime.toLowerCase().includes("pdf")) return true;
-  return filename.toLowerCase().endsWith(".pdf");
-}
-
-function isImageMime(mime: string, filename: string): boolean {
-  const m = mime.toLowerCase();
-  if (m.startsWith("image/")) return true;
-  const lower = filename.toLowerCase();
-  return /\.(jpe?g|png|webp)$/i.test(lower);
-}
-
-/**
- * HTML fragment for expo-print: optional appendix with embedded images or notes.
- */
 export async function buildSellerPacketAppendixHtml(
-  invoices: InvoiceRow[],
-): Promise<string> {
-  const withDocs = invoices.filter((i) => i.document_id);
-  if (withDocs.length === 0) return "";
+  invoices: (InvoiceRow & { storage_path?: string | null })[],
+  _scopeItems?: ScopeRow[],
+) {
+  const images = invoices.filter(
+    (inv) =>
+      inv.storage_path &&
+      (inv.storage_path.toLowerCase().endsWith(".jpg") ||
+        inv.storage_path.toLowerCase().endsWith(".jpeg") ||
+        inv.storage_path.toLowerCase().endsWith(".png") ||
+        inv.storage_path.toLowerCase().endsWith(".pdf")),
+  );
 
-  const blocks: string[] = await Promise.all(
-    withDocs.map(async (inv) => {
-      const title = appendixTitle(inv);
+  if (images.length === 0) return "";
+
+  // Parallel fetch and process all images to speed up generation
+  const blocks = await Promise.all(
+    images.map(async (inv) => {
+      const title = `${inv.vendor_name || "Unknown Vendor"} — ${new Date(
+        inv.issue_date || "",
+      ).toLocaleDateString()}`;
+
       try {
-        const { data, error } = await invokeFunction<SignedUrlResponse>(
-          "get-document-signed-url",
-          { body: { invoice_id: inv.id } },
-        );
+        const { data, error } = await supabase.storage
+          .from("project-documents")
+          .download(inv.storage_path!);
 
-        if (error || (data as SignedUrlResponse | null)?.error || !data) {
-          return `
-            <div style="page-break-before: always; margin-top: 24px;">
-              <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-              <p class="plan-line">We couldn’t load this file for the appendix. Use View original in the app.</p>
-            </div>`;
-        }
+        if (error || !data) throw error || new Error("No data");
 
-        const signedUrl = (data as SignedUrlResponse).signed_url;
-        const filename = (data as SignedUrlResponse).filename ?? "document";
+        const blob = data as Blob;
+        const mime = blob.type || "image/jpeg";
 
-        if (!signedUrl) {
-          return `
-            <div style="page-break-before: always; margin-top: 24px;">
-              <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-              <p class="plan-line">We couldn’t load this file for the appendix.</p>
-            </div>`;
-        }
-
-        const response = await fetch(signedUrl);
-        if (!response.ok) throw new Error("Fetch failed");
-
-        const blob = await response.blob();
-        if (blob.size > MAX_BYTES_PER_FILE) {
-          return `
-            <div style="page-break-before: always; margin-top: 24px;">
-              <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-              <p class="plan-line">${escapeHtml(filename)} is too large to embed (${Math.round(blob.size / 1_000_000)} MB). Open the original in the app.</p>
-            </div>`;
-        }
-
-        const mime = blob.type || "application/octet-stream";
-        if (isProbablyPdf(mime, filename)) {
-          return `
-            <div style="page-break-before: always; margin-top: 24px;">
-              <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-              <p class="plan-line">${escapeHtml(`Original file: ${filename}`)}</p>
-              <p class="plan-line">PDFs aren’t pasted into this export to keep the file smaller. Use View original in the app.</p>
-            </div>`;
-        }
-
-        if (!isImageMime(mime, filename)) {
+        if (mime === "application/pdf") {
           return `
             <div style="page-break-before: always; margin-top: 24px;">
               <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
@@ -130,7 +63,7 @@ export async function buildSellerPacketAppendixHtml(
             <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
             <img src="${dataUrl}" style="max-width: 100%; height: auto; margin-top: 12px;" alt="" />
           </div>`;
-      } catch (err) {
+      } catch (_err) {
         return `
           <div style="page-break-before: always; margin-top: 24px;">
             <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>

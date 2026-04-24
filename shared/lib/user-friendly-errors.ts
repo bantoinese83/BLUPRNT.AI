@@ -174,8 +174,10 @@ export function friendlyProjectShareError(
   return "We couldn’t create a share link right now. Try again in a moment.";
 }
 
-export function getUserFriendlyErrorMessage(error: any): string {
+export function getUserFriendlyErrorMessage(error: unknown): string {
   if (typeof error === "string") return error;
-  if (error?.message) return error.message;
+  if (error && typeof error === "object" && "message" in error) {
+    return String(error.message);
+  }
   return "An unexpected error occurred.";
 }

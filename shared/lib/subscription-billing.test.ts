@@ -4,13 +4,15 @@ import {
   architectBillingChannel,
 } from "./subscription-billing";
 
+import type { UserSubscriptionRow } from "../types/database";
+
 describe("subscription-billing shared logic", () => {
   describe("hasDuplicateWebAndStoreSubscriptions", () => {
     it("returns true when both stripe and revenuecat are active", () => {
       const sub = {
         stripe_subscription_id: "sub_123",
         revenuecat_entitlement_active: true,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(hasDuplicateWebAndStoreSubscriptions(sub)).toBe(true);
     });
 
@@ -18,7 +20,7 @@ describe("subscription-billing shared logic", () => {
       const sub = {
         stripe_subscription_id: "sub_123",
         revenuecat_entitlement_active: false,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(hasDuplicateWebAndStoreSubscriptions(sub)).toBe(false);
     });
 
@@ -26,7 +28,7 @@ describe("subscription-billing shared logic", () => {
       const sub = {
         stripe_subscription_id: null,
         revenuecat_entitlement_active: true,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(hasDuplicateWebAndStoreSubscriptions(sub)).toBe(false);
     });
 
@@ -41,7 +43,7 @@ describe("subscription-billing shared logic", () => {
         stripe_subscription_id: "sub_123",
         status: "active",
         revenuecat_entitlement_active: false,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(architectBillingChannel(sub)).toBe("stripe");
     });
 
@@ -49,7 +51,7 @@ describe("subscription-billing shared logic", () => {
       const sub = {
         stripe_subscription_id: null,
         revenuecat_entitlement_active: true,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(architectBillingChannel(sub)).toBe("store");
     });
 
@@ -58,7 +60,7 @@ describe("subscription-billing shared logic", () => {
         stripe_subscription_id: "sub_123",
         status: "active",
         revenuecat_entitlement_active: true,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(architectBillingChannel(sub)).toBe("mixed");
     });
 
@@ -67,7 +69,7 @@ describe("subscription-billing shared logic", () => {
         stripe_subscription_id: "sub_123",
         status: "canceled",
         revenuecat_entitlement_active: false,
-      } as any;
+      } as unknown as UserSubscriptionRow;
       expect(architectBillingChannel(sub)).toBe("unknown");
     });
 

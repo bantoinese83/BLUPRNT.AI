@@ -179,8 +179,11 @@ export default function Register() {
 
       try {
         localStorage.setItem("bluprnt_project_id", proj.id);
-      } catch {
-        /* ignore */
+      } catch (e) {
+        console.warn(
+          "[register] Could not store project ID in localStorage:",
+          e,
+        );
       }
       const next = resolvePostLoginHref(redirectParam);
       navigate(next, { replace: true });

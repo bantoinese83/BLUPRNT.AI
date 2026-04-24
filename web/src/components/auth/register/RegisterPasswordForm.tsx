@@ -7,6 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
+import {
+  PASSWORD_VALIDATION_RULES,
+  PASSWORD_MIN_LENGTH,
+} from "@shared/lib/validation";
 
 type RegisterFormValues = {
   email: string;
@@ -83,8 +87,8 @@ export function RegisterPasswordForm({
             {...register("password", {
               required: "Enter a password.",
               minLength: {
-                value: 8,
-                message: "Use at least 8 characters for your password.",
+                value: PASSWORD_MIN_LENGTH,
+                message: PASSWORD_VALIDATION_RULES.message,
               },
             })}
           />

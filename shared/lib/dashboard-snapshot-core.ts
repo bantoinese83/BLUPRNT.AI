@@ -158,7 +158,9 @@ export async function buildDashboardDataForProject(
   );
 
   const newScopes = (scopesRes.data ?? []) as ScopeRow[];
-  const newInvoicesRaw = (invRes.data ?? []) as any[];
+  const newInvoicesRaw = (invRes.data ?? []) as (InvoiceRow & {
+    invoice_line_items?: import("../types/database").InvoiceLineItemRow[];
+  })[];
   const newInvoices = newInvoicesRaw as InvoiceRow[];
   const newGalleryItems = (galleryRes.data ?? []) as GalleryItemRow[];
   const sub = subRes.data as UserSubscriptionRow | null;

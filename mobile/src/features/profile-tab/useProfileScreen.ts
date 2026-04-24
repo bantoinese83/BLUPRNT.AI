@@ -11,6 +11,7 @@ import { reportClientError } from "@/lib/sentry";
 import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
 import { showAppToast } from "@/lib/app-toast";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { validatePassword } from "@shared/lib/validation";
 import {
   getProductAnalyticsConsent,
   setProductAnalyticsConsent,
@@ -101,11 +102,9 @@ export function useProfileScreen(): UseProfileScreenResult {
   }, [user?.email]);
 
   const onUpdatePasswordInApp = useCallback(async () => {
-    if (newPassword.length < 8) {
-      Alert.alert(
-        "Check password",
-        "Use at least 8 characters for your new password.",
-      );
+    const validationError = validatePassword(newPassword);
+    if (validationError) {
+      Alert.alert("Check password", validationError);
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -165,7 +164,7 @@ export function useProfileScreen(): UseProfileScreenResult {
       const json = JSON.stringify(exportData, null, 2);
       await Share.share({
         message: json,
-        title: "BLUPRNT Data Export",
+        title: "BLUPRNT.AI Data Export",
       });
     } catch (err: unknown) {
       reportClientError("profile_data_export", err);

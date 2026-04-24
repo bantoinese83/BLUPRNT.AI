@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { PASSWORD_MIN_LENGTH } from "@shared/lib/validation";
 
 interface PasswordStrengthMeterProps {
   password: string;
@@ -13,11 +14,11 @@ function getStrength(password: string): {
   const tips: string[] = [];
   let score = 0;
 
-  if (password.length >= 8) score++;
-  else tips.push("Use at least 8 characters");
+  if (password.length >= PASSWORD_MIN_LENGTH) score++;
+  else tips.push(`Use at least ${PASSWORD_MIN_LENGTH} characters`);
 
   if (password.length >= 12) score++;
-  else if (password.length >= 8)
+  else if (password.length >= PASSWORD_MIN_LENGTH)
     tips.push("Use 12+ characters for extra safety");
 
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;

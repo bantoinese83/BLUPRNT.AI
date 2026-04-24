@@ -13,6 +13,7 @@ import { Loader } from "@/components/ui/Loader";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 import { reportClientError } from "@/lib/sentry";
+import { validatePassword } from "@shared/lib/validation";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -51,8 +52,9 @@ export default function ResetPassword() {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    const validationError = validatePassword(password);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 

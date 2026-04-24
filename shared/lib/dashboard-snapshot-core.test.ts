@@ -26,6 +26,7 @@ describe("dashboard-snapshot-core", () => {
           in: vi.fn().mockResolvedValue({ data: [], error: null }),
           maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
           // Default mock implementation
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           then: (callback: any) =>
             Promise.resolve({ data: [], error: null }).then(callback),
         }),
@@ -46,7 +47,9 @@ describe("dashboard-snapshot-core", () => {
               });
             return Promise.resolve({ data: null, error: null });
           }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           then: (callback: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let data: any[] = [];
             if (table === "scope_items")
               data = [{ id: "s1", category: "Test" }];
@@ -70,12 +73,14 @@ describe("dashboard-snapshot-core", () => {
             return Promise.resolve({ data, error: null }).then(callback);
           },
         };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return chain as any;
       });
 
       const result = await buildDashboardDataForProject(mockSupabase, {
         userId: "u1",
         projectId: "p1",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         allProjects: [{ id: "p1", name: "Project 1" } as any],
         partialMessageVariant: "web",
       });
@@ -96,6 +101,7 @@ describe("dashboard-snapshot-core", () => {
           maybeSingle: vi
             .fn()
             .mockResolvedValue({ data: null, error: { message: "Fail" } }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           then: (callback: any) =>
             Promise.resolve({ data: null, error: { message: "Fail" } }).then(
               callback,
@@ -106,6 +112,7 @@ describe("dashboard-snapshot-core", () => {
       const result = await buildDashboardDataForProject(mockSupabase, {
         userId: "u1",
         projectId: "p1",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         allProjects: [{ id: "p1", name: "Project 1" } as any],
         partialMessageVariant: "web",
       });

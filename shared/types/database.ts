@@ -54,6 +54,9 @@ export type InvoiceRow = {
   warranty_expiry_date: string | null;
 };
 
+export type InvoiceLineItemRow =
+  PublicSchema["Tables"]["invoice_line_items"]["Row"];
+
 export type UserSubscriptionRow =
   PublicSchema["Tables"]["user_subscriptions"]["Row"];
 export type ProjectPassRow = PublicSchema["Tables"]["project_passes"]["Row"];
