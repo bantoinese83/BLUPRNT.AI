@@ -136,7 +136,7 @@ export function AddAssetSheet({
         <View style={styles.header}>
           <Text style={styles.title}>New Home Spec</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <X size={20} color={Theme.colors.text.tertiary} />
+            <X size={20} color={Theme.colors.text.muted} />
           </TouchableOpacity>
         </View>
 
@@ -150,7 +150,7 @@ export function AddAssetSheet({
             <TextInput
               style={styles.input}
               placeholder="e.g. Living Room Walls"
-              placeholderTextColor={Theme.colors.text.tertiary + "80"}
+              placeholderTextColor={Theme.colors.text.muted + "80"}
               value={formData.name}
               onChangeText={(t) => setFormData({ ...formData, name: t })}
             />
@@ -173,7 +173,7 @@ export function AddAssetSheet({
                 }}
               >
                 <Text style={styles.selectText}>{formData.category}</Text>
-                <ChevronDown size={14} color={Theme.colors.text.tertiary} />
+                <ChevronDown size={14} color={Theme.colors.text.muted} />
               </TouchableOpacity>
             </View>
             <View style={[styles.section, { flex: 1 }]}>
@@ -181,7 +181,7 @@ export function AddAssetSheet({
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Kitchen"
-                placeholderTextColor={Theme.colors.text.tertiary + "80"}
+                placeholderTextColor={Theme.colors.text.muted + "80"}
                 value={formData.location_in_home}
                 onChangeText={(t) =>
                   setFormData({ ...formData, location_in_home: t })
@@ -196,7 +196,7 @@ export function AddAssetSheet({
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Sherwin Williams"
-                placeholderTextColor={Theme.colors.text.tertiary + "80"}
+                placeholderTextColor={Theme.colors.text.muted + "80"}
                 value={formData.brand}
                 onChangeText={(t) => setFormData({ ...formData, brand: t })}
               />
@@ -206,7 +206,7 @@ export function AddAssetSheet({
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Eggshell"
-                placeholderTextColor={Theme.colors.text.tertiary + "80"}
+                placeholderTextColor={Theme.colors.text.muted + "80"}
                 value={formData.finish}
                 onChangeText={(t) => setFormData({ ...formData, finish: t })}
               />
@@ -219,7 +219,7 @@ export function AddAssetSheet({
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Agreeable Gray"
-                placeholderTextColor={Theme.colors.text.tertiary + "80"}
+                placeholderTextColor={Theme.colors.text.muted + "80"}
                 value={formData.color_name}
                 onChangeText={(t) =>
                   setFormData({ ...formData, color_name: t })
@@ -234,7 +234,7 @@ export function AddAssetSheet({
                   { fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" },
                 ]}
                 placeholder="e.g. SW 7029"
-                placeholderTextColor={Theme.colors.text.tertiary + "80"}
+                placeholderTextColor={Theme.colors.text.muted + "80"}
                 value={formData.color_code}
                 onChangeText={(t) =>
                   setFormData({ ...formData, color_code: t })
@@ -248,7 +248,7 @@ export function AddAssetSheet({
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Any extra details..."
-              placeholderTextColor={Theme.colors.text.tertiary + "80"}
+              placeholderTextColor={Theme.colors.text.muted + "80"}
               multiline
               numberOfLines={3}
               value={formData.notes}
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 10,
     fontWeight: "900",
-    color: Theme.colors.text.tertiary,
+    color: Theme.colors.text.muted,
     letterSpacing: 0.8,
     marginLeft: 4,
   },

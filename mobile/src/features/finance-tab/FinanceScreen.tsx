@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { View, Text, Alert, SectionList } from "react-native";
-import { Receipt } from "lucide-react-native";
+import { View, Text, Alert, SectionList, TouchableOpacity } from "react-native";
+import { Receipt, Plus } from "lucide-react-native";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
@@ -37,6 +37,7 @@ import { FinanceInvoiceRow } from "@/features/finance-tab/FinanceInvoiceRow";
 import { HomeSpecsTab } from "@/features/finance-tab/HomeSpecsTab";
 import { AddAssetSheet } from "@/features/finance-tab/AddAssetSheet";
 import { Theme } from "@/constants/Theme";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 
 export default function FinanceScreen() {
   const {
@@ -212,8 +213,8 @@ export default function FinanceScreen() {
               { label: "Home Specs", value: "specs" },
             ]}
             value={currentTab}
-            onChange={(val: "ledger" | "specs") => {
-              setCurrentTab(val);
+            onChange={(val) => {
+              setCurrentTab(val as "ledger" | "specs");
               Haptics.selectionAsync();
             }}
             containerStyle={{ marginHorizontal: 24, marginTop: 16 }}

@@ -1,30 +1,26 @@
 /** @vitest-environment jsdom */
 import React from "react";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react-native";
+import { render, screen, waitFor } from "@testing-library/react-native";
 import { HomeSpecsTab } from "./HomeSpecsTab";
 import { supabase } from "@/lib/supabase";
+import { describe, it, expect, vi } from "vitest";
 
 // Mock supabase
-jest.mock("@/lib/supabase", () => ({
+vi.mock("@/lib/supabase", () => ({
   supabase: {
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          order: jest.fn(() => Promise.resolve({ data: [], error: null })),
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          order: vi.fn(() => Promise.resolve({ data: [], error: null })),
         })),
       })),
-      delete: jest.fn(() => ({
-        eq: jest.fn(() => Promise.resolve({ error: null })),
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => Promise.resolve({ error: null })),
       })),
     })),
     storage: {
-      from: jest.fn(() => ({
-        createSignedUrls: jest.fn(() =>
+      from: vi.fn(() => ({
+        createSignedUrls: vi.fn(() =>
           Promise.resolve({ data: [], error: null }),
         ),
       })),
@@ -33,9 +29,9 @@ jest.mock("@/lib/supabase", () => ({
 }));
 
 // Mock Haptics
-jest.mock("expo-haptics", () => ({
-  selectionAsync: jest.fn(),
-  notificationAsync: jest.fn(),
+vi.mock("expo-haptics", () => ({
+  selectionAsync: vi.fn(),
+  notificationAsync: vi.fn(),
   ImpactFeedbackStyle: { Medium: "medium" },
   NotificationFeedbackType: { Success: "success" },
 }));
@@ -71,11 +67,9 @@ describe.skip("HomeSpecsTab", () => {
     ];
 
     (supabase.from as any).mockReturnValue({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          order: jest.fn(() =>
-            Promise.resolve({ data: mockData, error: null }),
-          ),
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          order: vi.fn(() => Promise.resolve({ data: mockData, error: null })),
         })),
       })),
     });

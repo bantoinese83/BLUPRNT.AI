@@ -6,7 +6,6 @@ const POSTHOG_HOST =
 
 export const posthog = new PostHog(POSTHOG_KEY || "", {
   host: POSTHOG_HOST,
-  autocapture: true,
 });
 
 // Fire a test event to clear "Waiting for events"
@@ -21,10 +20,9 @@ export const captureEvent = (
 };
 
 export const identifyUser = (userId: string, email?: string, name?: string) => {
-  // @ts-expect-error - PostHog types for identify properties are slightly incompatible with our optional strings
   posthog.identify(userId, {
-    email,
-    name,
+    email: email ?? null,
+    name: name ?? null,
   });
 };
 

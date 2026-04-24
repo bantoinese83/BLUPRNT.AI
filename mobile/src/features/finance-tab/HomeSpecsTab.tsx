@@ -129,11 +129,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
           />
         ) : (
           <View style={styles.assetImagePlaceholder}>
-            <Camera
-              size={24}
-              color={Theme.colors.text.tertiary}
-              opacity={0.3}
-            />
+            <Camera size={24} color={Theme.colors.text.muted} opacity={0.3} />
           </View>
         )}
         <View style={styles.categoryBadge}>
@@ -156,7 +152,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
         </Text>
         {item.location_in_home && (
           <View style={styles.locationRow}>
-            <MapPin size={10} color={Theme.colors.text.tertiary} />
+            <MapPin size={10} color={Theme.colors.text.muted} />
             <Text style={styles.locationText}>{item.location_in_home}</Text>
           </View>
         )}
@@ -204,7 +200,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
-        <SnurraLoader size={SnurraSize.medium} />
+        <SnurraLoader size={SnurraSize.sheet} />
       </View>
     );
   }
@@ -372,7 +368,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 11,
     fontWeight: "600",
-    color: Theme.colors.text.tertiary,
+    color: Theme.colors.text.muted,
   },
   specsGrid: {
     flexDirection: "row",
@@ -386,7 +382,7 @@ const styles = StyleSheet.create({
   specLabel: {
     fontSize: 9,
     fontWeight: "900",
-    color: Theme.colors.text.tertiary,
+    color: Theme.colors.text.muted,
     letterSpacing: 0.5,
     marginBottom: 2,
   },
@@ -405,7 +401,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     fontStyle: "italic",
-    color: Theme.colors.text.tertiary,
+    color: Theme.colors.text.muted,
     lineHeight: 18,
   },
   emptyContainer: {
@@ -420,7 +416,7 @@ const styles = StyleSheet.create({
   },
   emptySubtitle: {
     fontSize: 13,
-    color: Theme.colors.text.tertiary,
+    color: Theme.colors.text.muted,
     textAlign: "center",
     lineHeight: 20,
   },
