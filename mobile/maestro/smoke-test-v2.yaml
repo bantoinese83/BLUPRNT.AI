@@ -1,0 +1,10 @@
+appId: ai.bluprnt.mobile
+---
+- launchApp
+- assertVisible: "Documents tracked"
+- tapOn: "Vault"
+- assertVisible: "Property Ledger"
+- tapOn: "Profile"
+- assertVisible: "Account Settings"
+- tapOn: "Home"
+- assertVisible: "Documents tracked"
