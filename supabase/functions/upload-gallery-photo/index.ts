@@ -7,7 +7,7 @@ import {
   getUserIdFromRequest,
 } from "../_shared/auth.ts";
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
 
@@ -81,4 +81,8 @@ Deno.serve(async (req: Request) => {
     console.error("[upload-gallery-photo] Failure:", e.message);
     return jsonResponse({ error: e.message || "An unexpected error occurred" }, 500, req);
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

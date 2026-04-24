@@ -10,7 +10,7 @@ import {
 
 const SIGNED_URL_TTL_SEC = 3600;
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
   if (req.method !== "POST") {
@@ -121,4 +121,8 @@ Deno.serve(async (req: Request) => {
     console.error(e);
     return jsonResponse({ error: "Something went wrong." }, 500, req);
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

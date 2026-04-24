@@ -26,6 +26,15 @@ vi.mock("@/lib/supabase", () => ({
             error: null,
           }),
         ),
+        createSignedUrls: vi.fn((paths) =>
+          Promise.resolve({
+            data: paths.map((path: string) => ({
+              path,
+              signedUrl: `https://cdn.example.com/${path}?token=signed`,
+            })),
+            error: null,
+          }),
+        ),
       }),
     },
   },

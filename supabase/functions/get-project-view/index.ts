@@ -7,7 +7,7 @@ import { getServiceClient } from "../_shared/auth.ts";
  * Public endpoint: fetch project summary + scope by share token.
  * No auth required. Rate limited.
  */
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
   if (req.method !== "GET") {
@@ -98,4 +98,8 @@ Deno.serve(async (req: Request) => {
       req,
     );
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

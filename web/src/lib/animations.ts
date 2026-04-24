@@ -1,3 +1,9 @@
+/**
+ * Shared Framer Motion variants for consistent entry/exit animations
+ * across the platform. Use staggerChildren on containers to create
+ * high-performance cascading entry effects.
+ */
+
 export const containerVariants = {
   hidden: { opacity: 0 },
   show: {
@@ -20,4 +26,10 @@ export const itemVariants = {
       damping: 20,
     },
   },
+} as const;
+
+export const pageFadeVariants = {
+  hidden: { opacity: 0, x: 10 },
+  show: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -10 },
 } as const;

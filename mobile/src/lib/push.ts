@@ -22,7 +22,6 @@ Notifications.setNotificationHandler({
  */
 export async function registerForPushNotificationsAsync(userId: string) {
   if (!Device.isDevice) {
-    console.log("Push notifications are not supported on virtual devices.");
     return null;
   }
 
@@ -37,7 +36,6 @@ export async function registerForPushNotificationsAsync(userId: string) {
     }
 
     if (finalStatus !== "granted") {
-      console.log("Failed to get push token for push notification!");
       return null;
     }
 

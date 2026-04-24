@@ -9,7 +9,7 @@ import {
 import { callGemini } from "../_shared/gemini.ts";
 import { chatWithProjectSchema } from "../_shared/validation.ts";
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
 
@@ -119,4 +119,8 @@ Deno.serve(async (req: Request) => {
       req,
     );
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

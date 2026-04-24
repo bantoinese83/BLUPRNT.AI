@@ -50,7 +50,7 @@ function normalizeRecipients(
   return { ok: true, emails: [...new Set(emails)] };
 }
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
 
@@ -146,4 +146,8 @@ Deno.serve(async (req: Request) => {
       req,
     );
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

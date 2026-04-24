@@ -223,22 +223,33 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   useEffect(() => {
     const fetchSignedUrls = async () => {
       const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
-      const paths = safeGallery.map((i) => i.storage_path);
-      const newUrls: Record<string, string> = { ...signedUrls };
-      let changed = false;
+      const pathsToFetch = safeGallery
+        .map((i) => i.storage_path)
+        .filter((path) => !signedUrls[path]);
 
-      for (const path of paths) {
-        if (!newUrls[path]) {
-          const { data } = await supabase.storage
-            .from("project-photos")
-            .createSignedUrl(path, 3600);
-          if (data?.signedUrl) {
-            newUrls[path] = data.signedUrl;
-            changed = true;
-          }
-        }
+      if (pathsToFetch.length === 0) return;
+
+      const { data, error } = await supabase.storage
+        .from("project-photos")
+        .createSignedUrls(pathsToFetch, 3600);
+
+      if (error) {
+        console.error(
+          "[TransformationVault] Error creating signed URLs:",
+          error,
+        );
+        return;
       }
-      if (changed) setSignedUrls(newUrls);
+
+      if (data) {
+        const newUrls: Record<string, string> = { ...signedUrls };
+        data.forEach((item) => {
+          if (item.signedUrl && item.path) {
+            newUrls[item.path] = item.signedUrl;
+          }
+        });
+        setSignedUrls(newUrls);
+      }
     };
     fetchSignedUrls();
     // eslint-disable-next-line react-hooks/exhaustive-deps

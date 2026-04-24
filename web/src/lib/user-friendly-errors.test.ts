@@ -3,6 +3,7 @@ import {
   friendlyAuthError,
   friendlyDocumentUploadError,
   friendlyProjectShareError,
+  getUserFriendlyErrorMessage,
 } from "@shared/lib/user-friendly-errors";
 
 describe("friendlyAuthError", () => {
@@ -54,5 +55,26 @@ describe("friendlyProjectShareError", () => {
     expect(
       friendlyProjectShareError("new row violates row-level security"),
     ).toContain("share link");
+  });
+});
+
+describe("getUserFriendlyErrorMessage", () => {
+  it("returns string errors directly", () => {
+    const msg = "Something went wrong";
+    expect(getUserFriendlyErrorMessage(msg)).toBe(msg);
+  });
+
+  it("extracts message from error objects", () => {
+    const error = { message: "Internal server error" };
+    expect(getUserFriendlyErrorMessage(error)).toBe(error.message);
+  });
+
+  it("returns default message for unknown errors", () => {
+    expect(getUserFriendlyErrorMessage(null)).toBe(
+      "An unexpected error occurred.",
+    );
+    expect(getUserFriendlyErrorMessage({})).toBe(
+      "An unexpected error occurred.",
+    );
   });
 });

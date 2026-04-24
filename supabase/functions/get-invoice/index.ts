@@ -8,7 +8,7 @@ import {
   getUserIdFromRequest,
 } from "../_shared/auth.ts";
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
   if (req.method !== "POST" && req.method !== "GET") {
@@ -149,4 +149,8 @@ Deno.serve(async (req: Request) => {
     console.error(e);
     return jsonResponse({ error: "Could not load invoice" }, 500, req);
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

@@ -1,0 +1,407 @@
+
+ RUN  v4.1.4 /Users/monarchlabsinc./Desktop/Projects/blueprintai-v3/web
+
+stderr | src/components/dashboard/TransformationVault.test.tsx > TransformationVault > navigates between angles when multiple sets exist
+An update to TransformationVault inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ❯ src/components/dashboard/TransformationVault.test.tsx (4 tests | 1 failed) 2058ms
+     ✓ renders placeholders when no photos are provided 20ms
+     × renders photos when paths are provided 2008ms
+     ✓ triggers upload when capture button is clicked 10ms
+     ✓ navigates between angles when multiple sets exist 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/dashboard/TransformationVault.test.tsx > TransformationVault > renders photos when paths are provided
+TestingLibraryElementError: Unable to find role="img"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"space-y-6"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex items-center justify-between px-2"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"space-y-1"[39m
+        [36m>[39m
+          [36m<h3[39m
+            [33mclass[39m=[32m"text-[10px] font-black uppercase tracking-[0.2em] text-slate-400"[39m
+          [36m>[39m
+            [0mTransformation Gallery[0m
+          [36m</h3>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-[10px] text-slate-500 font-medium"[39m
+          [36m>[39m
+            [0mAngle [0m
+            [0m1[0m
+            [0m of [0m
+            [0m2[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-2"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Previous angle"[39m
+            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] border bg-white font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm shrink-0 w-7 h-7 rounded-lg border-slate-200"[39m
+            [33mdisabled[39m=[32m""[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-chevron-left w-3.5 h-3.5"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m15 18-6-6 6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Next angle"[39m
+            [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] border bg-white font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm shrink-0 w-7 h-7 rounded-lg border-slate-200"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-chevron-right w-3.5 h-3.5"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 18 6-6-6-6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<input[39m
+        [33maccept[39m=[32m"image/*"[39m
+        [33mclass[39m=[32m"hidden"[39m
+        [33mtype[39m=[32m"file"[39m
+      [36m/>[39m
+      [36m<input[39m
+        [33maccept[39m=[32m"image/*"[39m
+        [33mclass[39m=[32m"hidden"[39m
+        [33mtype[39m=[32m"file"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid grid-cols-1 sm:grid-cols-2 gap-6 relative"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative group aspect-square sm:aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/10 shadow-lg transition-all duration-300 hover:shadow-xl hover:ring-2 hover:ring-teal-500/20"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute inset-0 flex flex-col items-center justify-center bg-slate-100/50 backdrop-blur-sm p-6 text-center"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-3 text-slate-300"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-image w-6 h-6"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"18"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mry[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"18"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"3"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"9"[39m
+                  [33mcy[39m=[32m"9"[39m
+                  [33mr[39m=[32m"2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-[11px] font-bold text-slate-500 uppercase tracking-widest"[39m
+            [36m>[39m
+              [0mBaseline[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-[10px] text-slate-400 mt-1 max-w-[140px]"[39m
+            [36m>[39m
+              [0mNo image selected yet[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute top-3 left-3 z-10"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"px-2 py-1...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"space-y-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center justify-between px-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-1"[39m
+          [36m>[39m
+            [36m<h3[39m
+              [33mclass[39m=[32m"text-[10px] font-black uppercase tracking-[0.2em] text-slate-400"[39m
+            [36m>[39m
+              [0mTransformation Gallery[0m
+            [36m</h3>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-[10px] text-slate-500 font-medium"[39m
+            [36m>[39m
+              [0mAngle [0m
+              [0m1[0m
+              [0m of [0m
+              [0m2[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Previous angle"[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] border bg-white font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm shrink-0 w-7 h-7 rounded-lg border-slate-200"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-chevron-left w-3.5 h-3.5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m15 18-6-6 6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Next angle"[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] border bg-white font-semibold text-slate-800 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm shrink-0 w-7 h-7 rounded-lg border-slate-200"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-chevron-right w-3.5 h-3.5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m9 18 6-6-6-6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<input[39m
+          [33maccept[39m=[32m"image/*"[39m
+          [33mclass[39m=[32m"hidden"[39m
+          [33mtype[39m=[32m"file"[39m
+        [36m/>[39m
+        [36m<input[39m
+          [33maccept[39m=[32m"image/*"[39m
+          [33mclass[39m=[32m"hidden"[39m
+          [33mtype[39m=[32m"file"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid grid-cols-1 sm:grid-cols-2 gap-6 relative"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative group aspect-square sm:aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/10 shadow-lg transition-all duration-300 hover:shadow-xl hover:ring-2 hover:ring-teal-500/20"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"absolute inset-0 flex flex-col items-center justify-center bg-slate-100/50 backdrop-blur-sm p-6 text-center"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-3 text-slate-300"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-image w-6 h-6"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<rect[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mrx[39m=[32m"2"[39m
+                    [33mry[39m=[32m"2"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                    [33mx[39m=[32m"3"[39m
+                    [33my[39m=[32m"3"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"9"[39m
+                    [33mcy[39m=[32m"9"[39m
+                    [33mr[39m=[32m"2"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-[11px] font-bold text-slate-500 uppercase tracking-widest"[39m
+              [36m>[39m
+                [0mBaseline[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-[10px] text-slate-400 mt-1 max-w-[140px]"[39m
+...
+ ❯ Proxy.waitForWrapper ../node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ src/components/dashboard/TransformationVault.test.tsx:77:11
+     75|     render(<TransformationVault projectId="p1" />);
+     76|
+     77|     await waitFor(
+       |           ^
+     78|       () => {
+     79|         const images = screen.getAllByRole("img");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 3 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: supabase.storage.from(...).createSignedUrls is not a function
+ ❯ fetchSignedUrls src/components/dashboard/TransformationVault.tsx:261:10
+    259|       const { data, error } = await supabase.storage
+    260|         .from("project-photos")
+    261|         .createSignedUrls(pathsToFetch, 3600);
+       |          ^
+    262|
+    263|       if (error) {
+ ❯ src/components/dashboard/TransformationVault.tsx:279:5
+ ❯ Object.react-stack-bottom-frame ../node_modules/react-dom/cjs/react-dom-client.development.js:23949:20
+ ❯ runWithFiberInDEV ../node_modules/react-dom/cjs/react-dom-client.development.js:1522:13
+ ❯ commitHookEffectListMount ../node_modules/react-dom/cjs/react-dom-client.development.js:11905:29
+ ❯ commitHookPassiveMountEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:12028:11
+ ❯ commitPassiveMountOnFiber ../node_modules/react-dom/cjs/react-dom-client.development.js:13841:13
+ ❯ recursivelyTraversePassiveMountEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:13815:11
+ ❯ commitPassiveMountOnFiber ../node_modules/react-dom/cjs/react-dom-client.development.js:13853:11
+ ❯ flushPassiveEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:15737:9
+
+This error originated in "src/components/dashboard/TransformationVault.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "renders photos when paths are provided". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: supabase.storage.from(...).createSignedUrls is not a function
+ ❯ fetchSignedUrls src/components/dashboard/TransformationVault.tsx:261:10
+    259|       const { data, error } = await supabase.storage
+    260|         .from("project-photos")
+    261|         .createSignedUrls(pathsToFetch, 3600);
+       |          ^
+    262|
+    263|       if (error) {
+ ❯ src/components/dashboard/TransformationVault.tsx:279:5
+ ❯ Object.react-stack-bottom-frame ../node_modules/react-dom/cjs/react-dom-client.development.js:23949:20
+ ❯ runWithFiberInDEV ../node_modules/react-dom/cjs/react-dom-client.development.js:1522:13
+ ❯ commitHookEffectListMount ../node_modules/react-dom/cjs/react-dom-client.development.js:11905:29
+ ❯ commitHookPassiveMountEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:12028:11
+ ❯ commitPassiveMountOnFiber ../node_modules/react-dom/cjs/react-dom-client.development.js:13841:13
+ ❯ recursivelyTraversePassiveMountEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:13815:11
+ ❯ commitPassiveMountOnFiber ../node_modules/react-dom/cjs/react-dom-client.development.js:13853:11
+ ❯ flushPassiveEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:15737:9
+
+This error originated in "src/components/dashboard/TransformationVault.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "triggers upload when capture button is clicked". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: supabase.storage.from(...).createSignedUrls is not a function
+ ❯ fetchSignedUrls src/components/dashboard/TransformationVault.tsx:261:10
+    259|       const { data, error } = await supabase.storage
+    260|         .from("project-photos")
+    261|         .createSignedUrls(pathsToFetch, 3600);
+       |          ^
+    262|
+    263|       if (error) {
+ ❯ src/components/dashboard/TransformationVault.tsx:279:5
+ ❯ Object.react-stack-bottom-frame ../node_modules/react-dom/cjs/react-dom-client.development.js:23949:20
+ ❯ runWithFiberInDEV ../node_modules/react-dom/cjs/react-dom-client.development.js:1522:13
+ ❯ commitHookEffectListMount ../node_modules/react-dom/cjs/react-dom-client.development.js:11905:29
+ ❯ commitHookPassiveMountEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:12028:11
+ ❯ commitPassiveMountOnFiber ../node_modules/react-dom/cjs/react-dom-client.development.js:13841:13
+ ❯ recursivelyTraversePassiveMountEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:13815:11
+ ❯ commitPassiveMountOnFiber ../node_modules/react-dom/cjs/react-dom-client.development.js:13853:11
+ ❯ flushPassiveEffects ../node_modules/react-dom/cjs/react-dom-client.development.js:15737:9
+
+This error originated in "src/components/dashboard/TransformationVault.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "navigates between angles when multiple sets exist". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+     Errors  3 errors
+   Start at  22:31:47
+   Duration  2.52s (transform 45ms, setup 30ms, import 117ms, tests 2.06s, environment 259ms)
+

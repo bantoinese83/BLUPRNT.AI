@@ -50,10 +50,7 @@ import { DashboardExecute } from "./DashboardExecute";
 import { DashboardRecord } from "./DashboardRecord";
 import { DeleteProjectModal } from "@/components/dashboard/DeleteProjectModal";
 import { DashboardDataStatus } from "@/components/dashboard/DashboardDataStatus";
-import {
-  containerVariants,
-  itemVariants,
-} from "@/components/dashboard/dashboard-animations";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 import type { DashboardContentProps } from "./dashboard-content.types";
 import {

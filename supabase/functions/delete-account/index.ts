@@ -64,9 +64,11 @@ async function removePhotosForProjects(
   admin: SupabaseClient,
   projectIds: string[],
 ): Promise<void> {
-  for (const pid of projectIds) {
-    await removeBucketPrefixRecursive(admin, PROJECT_PHOTOS_BUCKET, pid);
-  }
+  await Promise.all(
+    projectIds.map((pid) =>
+      removeBucketPrefixRecursive(admin, PROJECT_PHOTOS_BUCKET, pid)
+    ),
+  );
 }
 
 /**
@@ -146,7 +148,7 @@ async function cancelStripeForUser(
   }
 }
 
-Deno.serve(async (req: Request) => {
+export const handler = async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
   if (req.method !== "POST") {
@@ -193,24 +195,26 @@ Deno.serve(async (req: Request) => {
       await removeStorageForProjects(admin, projectIds);
       await removePhotosForProjects(admin, projectIds);
 
-      for (const pid of projectIds) {
-        const { data: invs } = await admin
-          .from("invoices")
-          .select("id")
-          .eq("project_id", pid);
-        const invIds = (invs ?? []).map((i) => i.id);
-        if (invIds.length > 0) {
-          await admin
-            .from("invoice_line_items")
-            .delete()
-            .in("invoice_id", invIds);
-        }
-        await admin.from("invoices").delete().eq("project_id", pid);
-        await admin.from("documents").delete().eq("project_id", pid);
-        await admin.from("scope_items").delete().eq("project_id", pid);
-        await admin.from("project_view_tokens").delete().eq("project_id", pid);
-        await admin.from("seller_packets").delete().eq("project_id", pid);
+      const { data: invs } = await admin
+        .from("invoices")
+        .select("id")
+        .in("project_id", projectIds);
+      const invIds = (invs ?? []).map((i) => i.id);
+
+      if (invIds.length > 0) {
+        await admin
+          .from("invoice_line_items")
+          .delete()
+          .in("invoice_id", invIds);
       }
+
+      await Promise.all([
+        admin.from("invoices").delete().in("project_id", projectIds),
+        admin.from("documents").delete().in("project_id", projectIds),
+        admin.from("scope_items").delete().in("project_id", projectIds),
+        admin.from("project_view_tokens").delete().in("project_id", projectIds),
+        admin.from("seller_packets").delete().in("project_id", projectIds),
+      ]);
 
       await admin.from("projects").delete().in("property_id", propertyIds);
       await admin.from("properties").delete().eq("owner_user_id", userId);
@@ -239,4 +243,8 @@ Deno.serve(async (req: Request) => {
       req,
     );
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

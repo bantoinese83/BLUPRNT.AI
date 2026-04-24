@@ -22,6 +22,7 @@ import { ledgerDocumentSelectOptions } from "@shared/lib/ledger-document-pickers
 import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { ModalFocusSurface } from "@/components/ui/modal-dialog";
+import { getUserFriendlyErrorMessage } from "@shared/lib/user-friendly-errors";
 
 type LineItem = {
   id: string;
@@ -148,13 +149,17 @@ export function DocumentReviewModal({
     if (!document) return;
     setSaving(true);
     try {
-      for (const [lineId, scopeItemId] of Object.entries(mappings)) {
-        const { error: lineErr } = await supabase
-          .from("invoice_line_items")
-          .update({ scope_item_id: scopeItemId || null })
-          .eq("id", lineId);
-        if (lineErr) throw lineErr;
-      }
+      const lineUpdates = Object.entries(mappings).map(
+        ([lineId, scopeItemId]) =>
+          supabase
+            .from("invoice_line_items")
+            .update({ scope_item_id: scopeItemId || null })
+            .eq("id", lineId),
+      );
+
+      const results = await Promise.all(lineUpdates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
 
       const prevType = coerceLedgerDocumentType(document.document_type);
       const typeChanged = ledgerDocType !== prevType;
@@ -183,8 +188,8 @@ export function DocumentReviewModal({
       );
       onSaved?.(projectId);
       onClose();
-    } catch {
-      setError("We couldn’t save your changes. Try again.");
+    } catch (err) {
+      setError(getUserFriendlyErrorMessage(err));
     } finally {
       setSaving(false);
     }

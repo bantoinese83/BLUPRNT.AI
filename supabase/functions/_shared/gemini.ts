@@ -1,4 +1,5 @@
-import { GoogleGenAI } from "npm:@google/genai";
+import { GoogleGenerativeAI as GoogleGenAI } from "npm:@google/generative-ai";
+
 
 /**
  * Shared Gemini AI utilities for Supabase Edge Functions.
@@ -105,6 +106,7 @@ export async function callGemini(params: {
 
     try {
       const genAI = new GoogleGenAI(apiKey);
+
       const model = genAI.getGenerativeModel({ 
         model: modelName,
         systemInstruction: systemInstruction,

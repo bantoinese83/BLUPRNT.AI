@@ -250,23 +250,30 @@ export function TransformationVault({
 
   useEffect(() => {
     const fetchSignedUrls = async () => {
-      const paths = items.map((i) => i.storage_path);
-      if (paths.length === 0) return;
+      const pathsToFetch = items
+        .map((i) => i.storage_path)
+        .filter((path) => !signedUrls[path]);
 
-      const newUrls: Record<string, string> = {};
-      for (const path of paths) {
-        if (signedUrls[path]) {
-          newUrls[path] = signedUrls[path];
-          continue;
-        }
-        const { data } = await supabase.storage
-          .from("project-photos")
-          .createSignedUrl(path, 3600);
-        if (data?.signedUrl) {
-          newUrls[path] = data.signedUrl;
-        }
+      if (pathsToFetch.length === 0) return;
+
+      const { data, error } = await supabase.storage
+        .from("project-photos")
+        .createSignedUrls(pathsToFetch, 3600);
+
+      if (error) {
+        console.error("Error creating signed URLs:", error);
+        return;
       }
-      setSignedUrls(newUrls);
+
+      if (data) {
+        const newUrls: Record<string, string> = { ...signedUrls };
+        data.forEach((item) => {
+          if (item.signedUrl && item.path) {
+            newUrls[item.path] = item.signedUrl;
+          }
+        });
+        setSignedUrls(newUrls);
+      }
     };
 
     fetchSignedUrls();
