@@ -1,0 +1,43 @@
+
+Running 2 tests using 2 workers
+
+  ✘  2 [chromium] › e2e/sync_integrity.spec.ts:58:3 › Realtime Sync Integrity › New invoices added externally should appear instantly (7.3s)
+  ✘  1 [chromium] › e2e/sync_integrity.spec.ts:17:3 › Realtime Sync Integrity › Dashboard should reflect external project updates instantly (34.8s)
+
+
+  1) [chromium] › e2e/sync_integrity.spec.ts:17:3 › Realtime Sync Integrity › Dashboard should reflect external project updates instantly 
+
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('project-name-display') to be visible[22m
+
+
+      34 |     await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
+      35 |     const projectDisplay = page.getByTestId("project-name-display");
+    > 36 |     await projectDisplay.waitFor({ state: "visible", timeout: 30_000 });
+         |                          ^
+      37 |
+      38 |     // 3. Get Project ID
+      39 |     let activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
+        at /Users/monarchlabsinc./Desktop/Projects/blueprintai-v3/e2e/sync_integrity.spec.ts:36:26
+
+    Error Context: test-results/sync_integrity-Realtime-Sy-894da-l-project-updates-instantly-chromium/error-context.md
+
+  2) [chromium] › e2e/sync_integrity.spec.ts:58:3 › Realtime Sync Integrity › New invoices added externally should appear instantly 
+
+    Error: External document insert failed: null value in column "original_filename" of relation "documents" violates not-null constraint
+
+      94 |     });
+      95 |     if (docErr)
+    > 96 |       throw new Error(`External document insert failed: ${docErr.message}`);
+         |             ^
+      97 |
+      98 |     // 5. Insert invoice "externally"
+      99 |     const vendorName = `External Vendor ${suffix}`;
+        at /Users/monarchlabsinc./Desktop/Projects/blueprintai-v3/e2e/sync_integrity.spec.ts:96:13
+
+    Error Context: test-results/sync_integrity-Realtime-Sy-16f00-lly-should-appear-instantly-chromium/error-context.md
+
+  2 failed
+    [chromium] › e2e/sync_integrity.spec.ts:17:3 › Realtime Sync Integrity › Dashboard should reflect external project updates instantly 
+    [chromium] › e2e/sync_integrity.spec.ts:58:3 › Realtime Sync Integrity › New invoices added externally should appear instantly 

@@ -1,0 +1,25 @@
+
+Running 2 tests using 2 workers
+
+  ✘  1 [chromium] › e2e/sync_integrity.spec.ts:58:3 › Realtime Sync Integrity › New invoices added externally should appear instantly (2.1s)
+  ✓  2 [chromium] › e2e/sync_integrity.spec.ts:17:3 › Realtime Sync Integrity › Dashboard should reflect external project updates instantly (4.8s)
+
+
+  1) [chromium] › e2e/sync_integrity.spec.ts:58:3 › Realtime Sync Integrity › New invoices added externally should appear instantly 
+
+    Error: External invoice insert failed: null value in column "document_id" of relation "invoices" violates not-null constraint
+
+      91 |     });
+      92 |
+    > 93 |     if (invErr) throw new Error(`External invoice insert failed: ${invErr.message}`);
+         |                       ^
+      94 |
+      95 |
+      96 |     // 4. Verify it appears in the UI
+        at /Users/monarchlabsinc./Desktop/Projects/blueprintai-v3/e2e/sync_integrity.spec.ts:93:23
+
+    Error Context: test-results/sync_integrity-Realtime-Sy-16f00-lly-should-appear-instantly-chromium/error-context.md
+
+  1 failed
+    [chromium] › e2e/sync_integrity.spec.ts:58:3 › Realtime Sync Integrity › New invoices added externally should appear instantly 
+  1 passed (5.4s)

@@ -144,13 +144,19 @@ export function LandingFeatures() {
               </p>
             </div>
           </li>
-          <li className="flex items-start gap-4 opacity-40 grayscale group cursor-help">
-            <Shield className="h-6 w-6 shrink-0 text-slate-900" aria-hidden />
+          <li className="flex items-start gap-4 group">
+            <div className="rounded-xl bg-slate-100 p-2 grayscale opacity-60">
+              <Shield className="h-6 w-6 text-slate-600" aria-hidden />
+            </div>
             <div>
-              <h3 className="font-semibold text-slate-900">Private Vault</h3>
-              <p className="mt-1 text-sm text-slate-800 italic">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-slate-600">Private Vault</h3>
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-tighter text-slate-500 ring-1 ring-inset ring-slate-200/50">
+                  Coming soon
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-slate-500 italic leading-relaxed">
                 Securely store paint lids, tile box codes, and finish details.
-                Coming soon.
               </p>
             </div>
           </li>

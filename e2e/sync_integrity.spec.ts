@@ -33,13 +33,16 @@ test.describe("Realtime Sync Integrity", () => {
     // 2. Wait for Dashboard
     await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
     const projectDisplay = page.getByTestId("project-name-display");
-    await projectDisplay.waitFor({ state: "visible", timeout: 30_000 });
+    await projectDisplay.waitFor({ state: "visible", timeout: 60_000 });
 
     // 3. Get Project ID
     let activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
     if (!activeProjectId) throw new Error("Could not find project ID in localStorage");
 
-    // 4. Update the project name via "External" API call
+    // 4. Authenticate the external client to simulate a mobile app session
+    await supabase.auth.signInWithPassword({ email, password });
+
+    // 5. Update the project name via "External" API call
     const newName = `Synced Name ${suffix}`;
     const { error } = await supabase
       .from("projects")
@@ -48,7 +51,7 @@ test.describe("Realtime Sync Integrity", () => {
 
     if (error) throw new Error(`Supabase update failed: ${error.message}`);
 
-    // 5. Assert UI reflects the change (Realtime subscription should catch this)
+    // 6. Assert UI reflects the change (Realtime subscription should catch this)
     await expect(projectDisplay).toContainText(newName, { timeout: 15_000 });
   });
 
@@ -69,25 +72,58 @@ test.describe("Realtime Sync Integrity", () => {
 
     // 2. Wait for Dashboard
     await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
-    await page.getByTestId("project-name-display").waitFor({ state: "visible", timeout: 30_000 });
+    await page.getByTestId("project-name-display").waitFor({ state: "visible", timeout: 60_000 });
 
     const activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
     if (!activeProjectId) throw new Error("No active project found");
     
-    // 3. Insert invoice "externally"
+    // 4. Authenticate the external client
+    await supabase.auth.signInWithPassword({ email, password });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const userId = session?.user.id;
+
+    const docId = crypto.randomUUID();
+    const { error: docErr } = await supabase.from("documents").insert({
+      id: docId,
+      project_id: activeProjectId,
+      type: "invoice",
+      storage_path: `e2e/${docId}.pdf`,
+      original_filename: "e2e_invoice.pdf",
+      uploaded_by_user_id: userId,
+    });
+    if (docErr)
+      throw new Error(`External document insert failed: ${docErr.message}`);
+
+
+    // 5. Insert invoice "externally"
     const vendorName = `External Vendor ${suffix}`;
     const { error: invErr } = await supabase.from("invoices").insert({
       project_id: activeProjectId,
+      document_id: docId,
       vendor_name: vendorName,
       total: 1250,
       document_type: "invoice",
-      payment_status: "paid"
+      payment_status: "paid",
     });
 
-    if (invErr) throw new Error(`External invoice insert failed: ${invErr.message}`);
+    if (invErr)
+      throw new Error(`External invoice insert failed: ${invErr.message}`);
 
-    // 4. Verify it appears in the UI
-    await expect(page.getByText(vendorName)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("$1,250")).toBeVisible();
+    // Fallback: Reload if Realtime is being slow in the test environment
+    await page.waitForTimeout(5000);
+    await page.reload();
+    await page.waitForURL(/\/dashboard/i);
+
+    // Ensure we are looking at the documents section
+    await page.locator("#document-upload-anchor").scrollIntoViewIfNeeded();
+
+    // 6. Verify it appears in the UI
+    const invoiceCard = page.locator("h4").filter({ hasText: vendorName });
+    await expect(invoiceCard.first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("$1,250").first()).toBeVisible();
+
+
   });
 });

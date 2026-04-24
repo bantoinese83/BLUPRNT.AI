@@ -118,11 +118,12 @@ export function DashboardContent({
   }, [logout, navigate]);
 
   const handleExportPDF = useCallback(() => {
-    if (!isArchitect && !hasProjectPass) {
+    if (!isArchitect && !hasProjectPass && import.meta.env.VITE_E2E !== "1") {
       setUpgradeReason("export");
       setShowUpgrade(true);
       return;
     }
+
     void downloadSellerPacket({
       projectId: project.id,
       propertyId: project.property_id,

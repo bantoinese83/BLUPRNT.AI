@@ -1,0 +1,136 @@
+
+Running 3 tests using 3 workers
+
+  ✓  3 [webkit] › e2e/accessibility.spec.ts:18:3 › Accessibility (WCAG 2.1) › Dashboard should have no automatically detectable a11y issues (813ms)
+  ✓  2 [webkit] › e2e/accessibility.spec.ts:32:3 › Accessibility (WCAG 2.1) › Pricing Page a11y (1.3s)
+  ✘  1 [webkit] › e2e/accessibility.spec.ts:5:3 › Accessibility (WCAG 2.1) › Landing Page should have no automatically detectable a11y issues (2.1s)
+
+
+  1) [webkit] › e2e/accessibility.spec.ts:5:3 › Accessibility (WCAG 2.1) › Landing Page should have no automatically detectable a11y issues 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  -   1[39m
+    [31m+ Received  + 105[39m
+
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   Object {[39m
+    [31m+     "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",[39m
+    [31m+     "help": "Elements must meet minimum color contrast ratio thresholds",[39m
+    [31m+     "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",[39m
+    [31m+     "id": "color-contrast",[39m
+    [31m+     "impact": "serious",[39m
+    [31m+     "nodes": Array [[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#f8fafc",[39m
+    [31m+               "contrastRatio": 2.5,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#9ca0a7",[39m
+    [31m+               "fontSize": "12.0pt (16px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 2.5 (foreground color: #9ca0a7, background color: #f8fafc, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<section id=\"features\" class=\"border-t border-slate-200/80 bg-slate-50/50 px-4 py-20 sm:px-6 scroll-mt-24 sm:scroll-mt-28\" aria-labelledby=\"features-heading\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   "#features",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"min-h-screen bg-slate-50 text-slate-900\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".min-h-screen",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 2.5 (foreground color: #9ca0a7, background color: #f8fafc, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<h3 class=\"font-semibold text-slate-900\">Private Vault</h3>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".grayscale > div > h3",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#f8fafc",[39m
+    [31m+               "contrastRatio": 2.34,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#a0a6b0",[39m
+    [31m+               "fontSize": "10.5pt (14px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 2.34 (foreground color: #a0a6b0, background color: #f8fafc, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<section id=\"features\" class=\"border-t border-slate-200/80 bg-slate-50/50 px-4 py-20 sm:px-6 scroll-mt-24 sm:scroll-mt-28\" aria-labelledby=\"features-heading\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   "#features",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"min-h-screen bg-slate-50 text-slate-900\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".min-h-screen",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 2.34 (foreground color: #a0a6b0, background color: #f8fafc, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<p class=\"mt-1 text-sm text-slate-800 italic\">Securely store paint lids, tile box codes, and finish details. Coming soon.</p>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".italic.mt-1",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+     ],[39m
+    [31m+     "tags": Array [[39m
+    [31m+       "cat.color",[39m
+    [31m+       "wcag2aa",[39m
+    [31m+       "wcag143",[39m
+    [31m+       "TTv5",[39m
+    [31m+       "TT13.c",[39m
+    [31m+       "EN-301-549",[39m
+    [31m+       "EN-9.1.4.3",[39m
+    [31m+       "ACT",[39m
+    [31m+       "RGAAv4",[39m
+    [31m+       "RGAA-3.2.1",[39m
+    [31m+     ],[39m
+    [31m+   },[39m
+    [31m+ ][39m
+
+      13 |       .analyze();
+      14 |
+    > 15 |     expect(accessibilityScanResults.violations).toEqual([]);
+         |                                                 ^
+      16 |   });
+      17 |
+      18 |   test("Dashboard should have no automatically detectable a11y issues", async ({ page }) => {
+        at /Users/monarchlabsinc./Desktop/Projects/blueprintai-v3/e2e/accessibility.spec.ts:15:49
+
+    Error Context: test-results/accessibility-Accessibilit-cfad2-ally-detectable-a11y-issues-webkit/error-context.md
+
+  1 failed
+    [webkit] › e2e/accessibility.spec.ts:5:3 › Accessibility (WCAG 2.1) › Landing Page should have no automatically detectable a11y issues 
+  2 passed (6.5s)

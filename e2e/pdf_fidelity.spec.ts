@@ -1,26 +1,30 @@
 import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
-import { createRequire } from "module";
+import { fileURLToPath } from "url";
+import { signUpForE2E } from "./helpers/auth";
 
-const require = createRequire(import.meta.url);
-const pdf = require("pdf-parse");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 
 test.describe("PDF Export Fidelity", () => {
   test("Exported PDF should contain correct project data", async ({ page }) => {
-    // 1. Setup/Login (using existing patterns)
-    await page.goto("/dashboard");
+    // 1. Sign up and get to dashboard
+    await signUpForE2E(page);
     
-    // Assume we've navigated to a project detail page
-    // For this test, we search for the 'Export' button
-    // (In a real test, we would seed a project first)
+    // 2. Wait for the project to load and the export button to be ready
+    await expect(page.getByTestId("project-name-display")).toBeVisible({ timeout: 30_000 });
+
     
     const downloadPromise = page.waitForEvent("download");
     
-    // Look for Export PDF button - using ID if possible for robustness
-    const exportBtn = page.locator('button:has-text("Export")');
-    if (await exportBtn.isVisible()) {
-      await exportBtn.click();
+    // Look for Export PDF button - using ARIA label for uniqueness
+    const exportBtn = page.getByRole("button", { name: "Download Home Archive PDF" });
+    await exportBtn.waitFor({ state: "visible", timeout: 15_000 });
+    await exportBtn.click();
+
       
       const download = await downloadPromise;
       const downloadPath = path.join(__dirname, "../test-results", download.suggestedFilename());
@@ -31,18 +35,17 @@ test.describe("PDF Export Fidelity", () => {
       const stats = fs.statSync(downloadPath);
       expect(stats.size).toBeGreaterThan(1000); // At least 1KB
 
-      // Parse PDF content
+      // Verify file content starts with PDF signature
       const dataBuffer = fs.readFileSync(downloadPath);
-      const data = await pdf(dataBuffer);
+      expect(dataBuffer.toString().startsWith("%PDF")).toBe(true);
       
-      // Basic text checks
-      expect(data.text).toContain("BLUPRNT.AI");
+      // Basic text checks - search for BLUPRNT.AI in the raw stream (often visible in PDFs)
+      expect(dataBuffer.toString()).toContain("BLUPRNT.AI");
+
       // expect(data.text).toContain("Project Summary"); // Adjust based on actual PDF template
       
       // Cleanup
       fs.unlinkSync(downloadPath);
-    } else {
-      console.log("Export button not found, skipping PDF content verification.");
-    }
+
   });
 });
