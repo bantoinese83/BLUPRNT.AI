@@ -12,6 +12,7 @@ import {
   cityFromZipUniversal,
   extractScopeWithGemini,
   getFallbackEstimate,
+  getSmartFallbackEstimate,
   normalizeScopeSourceForDb,
   type RoomType,
 } from "./_shared/estimate.ts";
@@ -137,9 +138,17 @@ Deno.serve(async (req: Request) => {
     });
 
     let usedFallback = false;
+    let fallbackReason: string | null = null;
     if (!payload) {
       usedFallback = true;
-      payload = getFallbackEstimate(room_type as RoomType, zip_code);
+      payload = await getSmartFallbackEstimate(room_type, zip_code);
+      fallbackReason = "smart_fallback";
+
+      // Final fail-safe if even Smart Fallback fails
+      if (!payload) {
+        payload = getFallbackEstimate(room_type as RoomType, zip_code);
+        fallbackReason = "hardcoded_fallback";
+      }
     }
 
     const safeMapItems = (items: any[]) =>
@@ -293,6 +302,7 @@ Deno.serve(async (req: Request) => {
           scope_items: safeMapItems(inserted ?? []),
           explanations: payload.explanations,
           used_fallback: usedFallback,
+          fallback_reason: fallbackReason,
         },
         200,
         req,
@@ -308,6 +318,7 @@ Deno.serve(async (req: Request) => {
         explanations: payload.explanations,
         area_label: areaLabel || cityFromZip(zip_code),
         used_fallback: usedFallback,
+        fallback_reason: fallbackReason,
       },
       200,
       req,

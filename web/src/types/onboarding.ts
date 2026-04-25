@@ -29,6 +29,12 @@ export type OnboardingContextValue = {
   estimate: PhotoToScopeResult | null;
   estimateError: string | null;
   estimateLoading: boolean;
+  onboardingContext: {
+    status_messages: string[];
+    market_bulletin: string;
+    value_tips: string[];
+  } | null;
+  fetchOnboardingContext: () => Promise<void>;
   runPhotoToScope: (opts?: {
     textOnly?: boolean;
     maxRetries?: number;

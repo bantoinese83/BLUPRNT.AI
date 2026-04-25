@@ -273,6 +273,49 @@ export function sanitizeEstimate(
  * Provides a high-fidelity 'Best Guess' estimate when AI analysis fails.
  * Ensures the user experiences zero downtime even if the LLM is overloaded.
  */
+export async function getSmartFallbackEstimate(
+  roomType: string,
+  zip: string,
+): Promise<EstimatePayload | null> {
+  const city = await cityFromZipUniversal(zip);
+  
+  const systemInstruction = `
+    You are a regional construction estimator for BLUPRNT.AI.
+    The user is asking for a "blind" regional benchmark estimate for a renovation in ${city} (ZIP: ${zip}).
+    We don't have photos yet, so provide a broad but professional range based on current 2026 market data.
+    
+    Project Type: ${roomType}
+    Location: ${city}
+    
+    Return a JSON object conforming to the EstimatePayload schema:
+    - summary: {
+        estimated_min_total: number,
+        estimated_max_total: number,
+        confidence_score: 2, // Always 2 for blind estimates
+        regional_context: string, // One sentence about the local market
+        regional_signal: string, // One sentence about what's driving costs in this ZIP
+        value_engineering_tips: string[], // 3 specific tips for this project type
+        grounding_sources: []
+      }
+    - scope_items: [{ category: "General", description: "Regional benchmark for " + roomType, ... }]
+    - explanations: ["This is a regional benchmark based on local market data while we wait for detailed analysis."]
+  `;
+
+  const response = await callGemini({
+    parts: [{ text: `Generate a smart regional fallback estimate for a ${roomType} in ${city}` }],
+    systemInstruction,
+    responseMimeType: "application/json",
+    temperature: 0.1,
+  });
+
+  if (!response || !response.data) return null;
+
+  return sanitizeEstimate(response.data, "mid", false);
+}
+
+/**
+ * Provides a hardcoded 'Best Guess' estimate if even the Smart Fallback fails.
+ */
 export function getFallbackEstimate(
   roomType: RoomType,
   zip: string,

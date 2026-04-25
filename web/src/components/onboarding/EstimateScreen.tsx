@@ -164,6 +164,11 @@ export function EstimateScreen() {
               </div>
 
               <div className="space-y-1">
+                {summary?.regional_signal && (
+                  <p className="text-[10px] text-teal-700/70 font-black uppercase tracking-[0.15em] bg-teal-50/50 px-2.5 py-1 rounded-full border border-teal-100/30">
+                    {summary.regional_signal}
+                  </p>
+                )}
                 <p className="text-xs text-teal-600 font-black uppercase tracking-[0.2em]">
                   Investment Range
                 </p>
@@ -193,7 +198,7 @@ export function EstimateScreen() {
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-teal-500" />
                     <span className="text-sm font-medium text-slate-600">
-                      Typical labor near you
+                      {summary?.regional_context || "Typical labor near you"}
                     </span>
                   </div>
                   {estimate?.scope_items && estimate.scope_items.length > 0 && (

@@ -7,27 +7,31 @@ import { Loader } from "@/components/ui/Loader";
 import { loadingScreenMessages } from "@shared/constants/onboarding";
 
 export function LoadingScreen() {
+  const { onboardingContext, fetchOnboardingContext } = useOnboarding();
   const navigate = useNavigate();
-  const { runPhotoToScope, projectType, estimateError, locationInput } =
-    useOnboarding();
   const [messageIdx, setMessageIdx] = useState(0);
 
-  const messages = useMemo(
+  const staticMessages = useMemo(
     () => loadingScreenMessages(projectType, locationInput),
     [projectType, locationInput],
   );
 
+  const activeMessages = onboardingContext?.status_messages || staticMessages;
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setMessageIdx((prev) => (prev + 1) % messages.length);
+      setMessageIdx((prev) => (prev + 1) % activeMessages.length);
     }, 2500);
     return () => clearInterval(interval);
-  }, [messages.length]);
+  }, [activeMessages.length]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Trigger both in parallel: one for the "busy work" (fast), one for the "real work" (slow)
+      void fetchOnboardingContext();
       await runPhotoToScope();
+
       // Brief beat so the route transition doesn’t feel abrupt after a fast response
       await new Promise((resolve) => setTimeout(resolve, 350));
 
@@ -37,7 +41,7 @@ export function LoadingScreen() {
     return () => {
       cancelled = true;
     };
-  }, [navigate, runPhotoToScope]);
+  }, [runPhotoToScope, fetchOnboardingContext]);
 
   return (
     <PageTransition>
@@ -45,7 +49,10 @@ export function LoadingScreen() {
         <div className="relative mb-8">
           <Loader
             title="Building your BLUPRNT"
-            subtitle="Generating real-world market data"
+            subtitle={
+              onboardingContext?.market_bulletin ||
+              "Generating real-world market data"
+            }
             size="xl"
             showLogo={true}
           />
@@ -55,14 +62,14 @@ export function LoadingScreen() {
         <div className="h-12 flex flex-col items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.p
-              key={messages[messageIdx]}
+              key={activeMessages[messageIdx]}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.5 }}
               className="text-slate-600 font-medium text-lg"
             >
-              {estimateError ? "Almost there..." : messages[messageIdx]}
+              {estimateError ? "Almost there..." : activeMessages[messageIdx]}
             </motion.p>
           </AnimatePresence>
         </div>

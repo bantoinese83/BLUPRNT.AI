@@ -56,6 +56,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   });
   const [estimateError, setEstimateError] = useState<string | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
+  const [onboardingContext, setOnboardingContext] = useState<{
+    status_messages: string[];
+    market_bulletin: string;
+    value_tips: string[];
+  } | null>(null);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
 
   // Sync from cross-device handoff (e.g. mobile to web)
@@ -219,6 +224,27 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     },
     [photos, projectType, zipFromLocation, locationUnset, scopeDescription],
   );
+
+  const fetchOnboardingContext = useCallback(async () => {
+    try {
+      const { data, error } = await invokeFunction<{
+        status_messages: string[];
+        market_bulletin: string;
+        value_tips: string[];
+      }>("get-onboarding-context", {
+        body: {
+          projectType,
+          zipCode: zipFromLocation(),
+        },
+      });
+
+      if (!error && data) {
+        setOnboardingContext(data);
+      }
+    } catch (err) {
+      console.warn("[OnboardingProvider] Failed to fetch context:", err);
+    }
+  }, [projectType, zipFromLocation]);
 
   const persistProject = useCallback(async () => {
     if (!isSupabaseConfigured()) {
@@ -424,6 +450,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       estimate,
       estimateError,
       estimateLoading,
+      onboardingContext,
+      fetchOnboardingContext,
       runPhotoToScope,
       persistProject,
       persistProjectAfterSignup,
@@ -449,6 +477,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       estimate,
       estimateError,
       estimateLoading,
+      onboardingContext,
+      fetchOnboardingContext,
       runPhotoToScope,
       persistProject,
       persistProjectAfterSignup,
