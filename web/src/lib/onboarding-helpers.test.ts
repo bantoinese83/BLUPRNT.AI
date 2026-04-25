@@ -226,6 +226,95 @@ describe("onboarding-helpers", () => {
       expect(mockSupabase.from).toHaveBeenCalledWith("scope_items");
     });
 
+    it("inserts scope items with grounding_sources and regional data in summary", async () => {
+      mockSupabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        limit: vi
+          .fn()
+          .mockResolvedValue({ data: [{ id: "prop-1" }], error: null }),
+      });
+
+      mockSupabase.from.mockReturnValueOnce({
+        insert: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        single: vi
+          .fn()
+          .mockResolvedValue({ data: { id: "proj-grounded" }, error: null }),
+      });
+
+      // Mock scope items insertion
+      mockSupabase.from.mockReturnValueOnce({
+        insert: vi.fn().mockResolvedValue({ error: null }),
+      });
+
+      // Estimate with grounding data from Google Search
+      const groundedEstimate = {
+        summary: {
+          estimated_min_total: 12000,
+          estimated_max_total: 18000,
+          confidence_score: 5,
+          grounding_sources: [
+            {
+              title: "Home Depot Tile Pricing 2026",
+              url: "https://homedepot.com/tile",
+            },
+            {
+              title: "Lowe's Flooring",
+              url: "https://lowes.com/flooring",
+            },
+          ],
+          regional_context:
+            "Austin TX market experiencing material cost increases",
+          regional_signal: "Matched $85/hr labor from BLS Austin 2026",
+          value_engineering_tips: [
+            "Use stock tile to reduce material cost by 20%",
+          ],
+        },
+        scope_items: [
+          {
+            category: "Flooring",
+            description: "Hardwood installation",
+            finish_tier: "premium",
+            quantity: 200,
+            unit: "sqft",
+            unit_cost_min: 8,
+            unit_cost_max: 12,
+            total_cost_min: 1600,
+            total_cost_max: 2400,
+            confidence_score: 5,
+            source: "text",
+            metadata: {
+              materials: [
+                {
+                  name: "Bruce Hardwood Plank",
+                  brand: "Bruce",
+                  quantity: 200,
+                  unit: "sqft",
+                  estimated_cost: 4.5,
+                },
+              ],
+            },
+          },
+        ],
+        explanations: ["Market-verified using Google Search for ZIP 78701"],
+      } as any;
+
+      const result = await saveOnboardingProject({
+        supabase: mockSupabase,
+        userId: "user-grounded",
+        projectType: "Flooring",
+        stage: "Collecting quotes",
+        locationInput: "78701",
+        zipCode: "78701",
+        estimate: groundedEstimate,
+        photos: [],
+      });
+
+      expect(result).toBe("proj-grounded");
+      expect(mockSupabase.from).toHaveBeenCalledWith("scope_items");
+    });
+
     it("triggers photo-to-scope function if photos provided", async () => {
       mockSupabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),

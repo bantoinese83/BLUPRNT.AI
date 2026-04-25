@@ -107,10 +107,10 @@ export interface EstimatePayload {
     estimated_min_total: number;
     estimated_max_total: number;
     confidence_score: number;
-    value_engineering_tips?: string[];
-    regional_context?: string;
-    regional_signal?: string; // e.g., "Matched to 2026 Material Costs in Austin"
-    grounding_sources?: Array<{ title: string; url?: string }>;
+    value_engineering_tips: string[];
+    regional_context: string;
+    regional_signal: string;
+    grounding_sources: Array<{ title: string; url?: string }>;
   };
   scope_items: Array<{
     category: string;
@@ -178,7 +178,7 @@ export function sanitizeEstimate(
       if (chunk.web?.uri) {
         const title = chunk.web.title || new URL(chunk.web.uri).hostname;
         // Avoid duplicates
-        if (!summary.grounding_sources.some((s) => s.url === chunk.web.uri)) {
+        if (!summary.grounding_sources.some((s: { url?: string }) => s.url === chunk.web.uri)) {
           summary.grounding_sources.push({
             title,
             url: chunk.web.uri,
@@ -289,6 +289,7 @@ export function getFallbackEstimate(
       regional_context: `Standard mid-tier averages for the ${
         cityFromZip(zip)
       }.`,
+      regional_signal: "Based on national construction cost database averages.",
       value_engineering_tips: [
         "Consider mid-range materials for better ROI.",
         "Refurbish existing cabinets instead of replacing.",
