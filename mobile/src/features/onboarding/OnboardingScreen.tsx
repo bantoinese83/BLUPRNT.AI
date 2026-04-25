@@ -225,7 +225,7 @@ export default function OnboardingScreen() {
 
       Alert.alert(
         "Couldn’t save yet",
-        "We couldn’t finish saving. Check your connection and tap Save again—your project details are still on this screen.",
+        `We couldn’t finish saving: ${error.message || "Unknown error"}. Check your connection and tap Save again—your project details are still on this screen.`,
       );
     }
   };
