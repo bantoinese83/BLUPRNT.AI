@@ -69,7 +69,7 @@ export function GlassCard({
       <View
         style={[
           styles.childContainer,
-          style && (style as any).flex ? { flex: 1 } : null,
+          StyleSheet.flatten(style)?.flex ? { flex: 1 } : null,
         ]}
       >
         {children}
