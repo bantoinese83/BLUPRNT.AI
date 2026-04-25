@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
@@ -30,26 +30,30 @@ Deno.test({
   fn: async () => {
     setupTestEnv();
     Deno.env.set("GEMINI_API_KEY", "test-key");
-    
+
     const mockUser = { id: USER_1, email: "test@example.com" };
-    const mockProject = { id: PROJECT_1, name: "Test Project", stage: "Planning" };
-    
+    const mockProject = {
+      id: PROJECT_1,
+      name: "Test Project",
+      stage: "Planning",
+    };
+
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: mockUser },
       "/rest/v1/projects": (url: string) => {
-          if (url.includes("properties.owner_user_id")) {
-              return [{ id: PROJECT_1, properties: { owner_user_id: USER_1 } }];
-          }
-          return mockProject;
+        if (url.includes("properties.owner_user_id")) {
+          return [{ id: PROJECT_1, properties: { owner_user_id: USER_1 } }];
+        }
+        return mockProject;
       },
       "/rest/v1/scope_items": [],
       "/rest/v1/invoices": [],
       "googleapis.com": {
         candidates: [{
           content: { parts: [{ text: "This is a test reply from Gemini." }] },
-          finishReason: "STOP"
-        }]
-      }
+          finishReason: "STOP",
+        }],
+      },
     });
 
     try {
@@ -59,9 +63,9 @@ Deno.test({
           "Authorization": "Bearer some-jwt",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          projectId: PROJECT_1, 
-          query: "What is my budget?" 
+        body: JSON.stringify({
+          projectId: PROJECT_1,
+          query: "What is my budget?",
         }),
       });
 
@@ -72,7 +76,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -83,7 +87,7 @@ Deno.test({
     setupTestEnv();
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
-      "/rest/v1/projects": [] 
+      "/rest/v1/projects": [],
     });
     try {
       const req = new Request("http://localhost/chat-with-project", {
@@ -92,9 +96,9 @@ Deno.test({
           "Authorization": "Bearer some-jwt",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          projectId: PROJECT_1, 
-          query: "hi" 
+        body: JSON.stringify({
+          projectId: PROJECT_1,
+          query: "hi",
         }),
       });
       const res = await handler(req);
@@ -102,7 +106,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -114,11 +118,14 @@ Deno.test({
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
       "/rest/v1/projects": (url: string) => {
-          if (url.includes(`properties.owner_user_id=eq.${USER_1}`)) {
-              return []; 
-          }
-          return { id: PROJECT_1, properties: { owner_user_id: "550e8400-e29b-41d4-a716-446655440001" } };
-      }
+        if (url.includes(`properties.owner_user_id=eq.${USER_1}`)) {
+          return [];
+        }
+        return {
+          id: PROJECT_1,
+          properties: { owner_user_id: "550e8400-e29b-41d4-a716-446655440001" },
+        };
+      },
     });
     try {
       const req = new Request("http://localhost/chat-with-project", {
@@ -127,9 +134,9 @@ Deno.test({
           "Authorization": "Bearer some-jwt",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          projectId: PROJECT_1, 
-          query: "hi" 
+        body: JSON.stringify({
+          projectId: PROJECT_1,
+          query: "hi",
         }),
       });
       const res = await handler(req);
@@ -137,5 +144,5 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });

@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
@@ -22,14 +22,26 @@ Deno.test({
   fn: async () => {
     setupTestEnv();
     const mockUser = { id: USER_1, email: "test@example.com" };
-    const mockInvoice = { project_id: PROJECT_1, document_id: "6ba7b812-9dad-11d1-80b4-00c04fd430c8" };
-    const mockDoc = { storage_path: "path/to/doc.pdf", original_filename: "invoice.pdf" };
+    const mockInvoice = {
+      project_id: PROJECT_1,
+      document_id: "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+    };
+    const mockDoc = {
+      storage_path: "path/to/doc.pdf",
+      original_filename: "invoice.pdf",
+    };
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: mockUser },
       "/rest/v1/invoices": mockInvoice,
-      "/rest/v1/projects": { id: PROJECT_1, properties: { owner_user_id: USER_1 } },
+      "/rest/v1/projects": {
+        id: PROJECT_1,
+        properties: { owner_user_id: USER_1 },
+      },
       "/rest/v1/documents": mockDoc,
-      "/storage/v1/object/sign/project-documents": { signedUrl: "/signed-url", signedURL: "/signed-url" }
+      "/storage/v1/object/sign/project-documents": {
+        signedUrl: "/signed-url",
+        signedURL: "/signed-url",
+      },
     });
 
     try {
@@ -47,7 +59,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -58,7 +70,8 @@ Deno.test({
     setupTestEnv();
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
-      "/rest/v1/invoices": () => new Response(JSON.stringify({ error: "Not Found" }), { status: 404 })
+      "/rest/v1/invoices": () =>
+        new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }),
     });
     try {
       const req = new Request("http://localhost/get-document-signed-url", {
@@ -74,7 +87,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -86,7 +99,7 @@ Deno.test({
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
       "/rest/v1/invoices": { project_id: PROJECT_1 },
-      "/rest/v1/projects": [] 
+      "/rest/v1/projects": [],
     });
     try {
       const req = new Request("http://localhost/get-document-signed-url", {
@@ -102,5 +115,5 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });

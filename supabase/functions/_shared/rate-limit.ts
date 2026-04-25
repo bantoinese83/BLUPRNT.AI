@@ -6,8 +6,8 @@
  * - `marketing` — stricter for public lead capture (default 10/hour)
  * - `ai` — chat / LLM endpoints (default 20/min)
  */
-import { Redis } from "npm:@upstash/redis@1.34.3";
-import { Ratelimit } from "npm:@upstash/ratelimit@2.0.5";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 export type RateLimitKind = "default" | "marketing" | "ai";
 
@@ -22,11 +22,10 @@ function specFor(kind: RateLimitKind): {
         requests:
           parseInt(Deno.env.get("RATE_LIMIT_MARKETING_REQUESTS") ?? "10", 10) ||
           10,
-        windowMs:
-          parseInt(
-            Deno.env.get("RATE_LIMIT_MARKETING_WINDOW_MS") ?? "3600000",
-            10,
-          ) || 3_600_000,
+        windowMs: parseInt(
+          Deno.env.get("RATE_LIMIT_MARKETING_WINDOW_MS") ?? "3600000",
+          10,
+        ) || 3_600_000,
         prefix: "blueprint-edge-marketing",
       };
     case "ai":
@@ -40,8 +39,8 @@ function specFor(kind: RateLimitKind): {
       };
     default:
       return {
-        requests:
-          parseInt(Deno.env.get("RATE_LIMIT_REQUESTS") ?? "60", 10) || 60,
+        requests: parseInt(Deno.env.get("RATE_LIMIT_REQUESTS") ?? "60", 10) ||
+          60,
         windowMs:
           parseInt(Deno.env.get("RATE_LIMIT_WINDOW_MS") ?? "60000", 10) ||
           60_000,
@@ -81,7 +80,9 @@ function getRedisLimit(kind: RateLimitKind): Ratelimit | null {
     }
 
     console.log(
-      `[rate-limit] Initializing Upstash Redis for ${kind} (URL: ${url.substring(0, 15)}...)`,
+      `[rate-limit] Initializing Upstash Redis for ${kind} (URL: ${
+        url.substring(0, 15)
+      }...)`,
     );
 
     const redis = new Redis({ url, token });
@@ -104,9 +105,9 @@ function getRedisLimit(kind: RateLimitKind): Ratelimit | null {
 export function getClientId(req: Request): string {
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("cf-connecting-ip") ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
+      req.headers.get("cf-connecting-ip") ??
+      req.headers.get("x-real-ip") ??
+      "unknown"
   );
 }
 
@@ -145,7 +146,7 @@ export async function checkRateLimit(
     const rl = getRedisLimit(kind);
     if (rl) {
       const id = getClientId(req);
-      const { success, reset, limit, remaining } = await rl.limit(id);
+      const { success, reset, limit, remaining: _remaining } = await rl.limit(id);
 
       if (!success) {
         const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));

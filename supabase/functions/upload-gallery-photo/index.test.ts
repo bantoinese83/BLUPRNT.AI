@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
@@ -26,15 +26,26 @@ Deno.test({
   sanitizeOps: false,
   fn: async () => {
     setupTestEnv();
-    
-    const mockUser = { id: "550e8400-e29b-41d4-a716-446655440000", email: "test@example.com" };
-    const mockProject = { id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8", owner_user_id: "550e8400-e29b-41d4-a716-446655440000" };
-    
+
+    const mockUser = {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      email: "test@example.com",
+    };
+    const _mockProject = {
+      id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+      owner_user_id: "550e8400-e29b-41d4-a716-446655440000",
+    };
+
     const restoreFetch = mockFetch({
       "http://localhost:54321/auth/v1/user": { user: mockUser },
-      "http://localhost:54321/rest/v1/projects": { id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8", properties: { owner_user_id: "550e8400-e29b-41d4-a716-446655440000" } },
-      "http://localhost:54321/storage/v1/object/project-photos": { Key: "some-key" },
-      "http://localhost:54321/rest/v1/project_gallery": { id: "gallery-1" }
+      "http://localhost:54321/rest/v1/projects": {
+        id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+        properties: { owner_user_id: "550e8400-e29b-41d4-a716-446655440000" },
+      },
+      "http://localhost:54321/storage/v1/object/project-photos": {
+        Key: "some-key",
+      },
+      "http://localhost:54321/rest/v1/project_gallery": { id: "gallery-1" },
     });
 
     try {
@@ -59,6 +70,5 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
-

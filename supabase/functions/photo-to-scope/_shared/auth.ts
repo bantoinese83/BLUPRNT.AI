@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export function getServiceClient(): SupabaseClient {
   const url = Deno.env.get("SUPABASE_URL");
@@ -7,7 +7,9 @@ export function getServiceClient(): SupabaseClient {
   return createClient(url, key);
 }
 
-export async function getUserIdFromRequest(req: Request): Promise<string | null> {
+export async function getUserIdFromRequest(
+  req: Request,
+): Promise<string | null> {
   const auth = req.headers.get("Authorization");
   if (!auth?.startsWith("Bearer ")) return null;
   const jwt = auth.slice(7);
@@ -36,5 +38,7 @@ export async function assertProjectOwner(
     .select("owner_user_id")
     .eq("id", project.property_id)
     .single();
-  if (e2 || !prop || prop.owner_user_id !== userId) throw new Error("forbidden");
+  if (e2 || !prop || prop.owner_user_id !== userId) {
+    throw new Error("forbidden");
+  }
 }

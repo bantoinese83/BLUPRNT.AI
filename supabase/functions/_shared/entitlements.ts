@@ -5,7 +5,7 @@
  * Project Pass: unlimited invoices for that project while pass is valid.
  */
 
-import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { isArchitectQuotaInvoiceType } from "../../../shared/lib/infer-document-type.ts";
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "../../../shared/lib/invoice-quota.ts";
 import {
@@ -93,14 +93,16 @@ export async function checkInvoiceUploadAllowed(
   ) {
     return {
       allowed: false,
-      reason: `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
+      reason:
+        `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
       code: "INVOICE_LIMIT_ARCHITECT_MONTH",
     };
   }
 
   return {
     allowed: false,
-    reason: `Free tier limit reached (${FREE_INVOICE_LIMIT} bill or receipt uploads for this project). Upgrade for more uploads and premium features.`,
+    reason:
+      `Free tier limit reached (${FREE_INVOICE_LIMIT} bill or receipt uploads for this project). Upgrade for more uploads and premium features.`,
     code: "INVOICE_LIMIT_FREE_PROJECT",
   };
 }
@@ -110,12 +112,18 @@ export async function reserveArchitectInvoiceUploadSlot(
   admin: SupabaseClient,
   userId: string,
 ): Promise<{ ok: boolean; invoice_uploads_count?: number }> {
-  const { data, error } = await admin.rpc("reserve_architect_invoice_upload_slot", {
-    p_user_id: userId,
-    p_max_uploads: ARCHITECT_UPLOADS_PER_MONTH,
-  });
+  const { data, error } = await admin.rpc(
+    "reserve_architect_invoice_upload_slot",
+    {
+      p_user_id: userId,
+      p_max_uploads: ARCHITECT_UPLOADS_PER_MONTH,
+    },
+  );
   if (error) {
-    console.error("[entitlements] reserve_architect_invoice_upload_slot:", error);
+    console.error(
+      "[entitlements] reserve_architect_invoice_upload_slot:",
+      error,
+    );
     return { ok: false };
   }
   const row = Array.isArray(data) ? data[0] : data;
@@ -136,6 +144,9 @@ export async function releaseArchitectInvoiceUploadSlot(
     p_user_id: userId,
   });
   if (error) {
-    console.error("[entitlements] release_architect_invoice_upload_slot:", error);
+    console.error(
+      "[entitlements] release_architect_invoice_upload_slot:",
+      error,
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "npm:@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
 /**
  * Shared Gemini AI utilities for Supabase Edge Functions.
@@ -14,7 +14,7 @@ export interface GeminiResponse {
   data?: Record<string, unknown>;
 }
 
-/** 
+/**
  * Strips markdown code blocks and attempts to parse JSON.
  * High-fidelity fallback for when Gemini includes conversational text or markers.
  */
@@ -32,10 +32,11 @@ function tryParseJson(text: string): Record<string, unknown> | null {
     if (firstBrace !== -1 && lastBrace !== -1) {
       clean = clean.substring(firstBrace, lastBrace + 1);
     }
-    
+
     return JSON.parse(clean);
   } catch (e) {
-    console.warn("[gemini-util] JSON Parse failed:", e.message);
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn("[gemini-util] JSON Parse failed:", msg);
     return null;
   }
 }
@@ -43,7 +44,8 @@ function tryParseJson(text: string): Record<string, unknown> | null {
 /** True when Google returns overload / rate limits — safe to retry with backoff. */
 function isRetryableGeminiError(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);
-  return /503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|heavy load|try again later|temporarily unavailable/i.test(msg);
+  return /503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|heavy load|try again later|temporarily unavailable/i
+    .test(msg);
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -105,7 +107,7 @@ export async function callGemini(params: {
         setTimeout(
           () => reject(new Error(`Gemini API Timeout (${timeoutMs / 1000}s)`)),
           timeoutMs,
-        ),
+        )
       );
 
       const callPromise = client.models.generateContent({
@@ -121,7 +123,7 @@ export async function callGemini(params: {
       });
 
       const response = await Promise.race([callPromise, timeoutPromise]);
-      
+
       const text = response.text;
       if (!text) {
         console.warn("[callGemini] No usable text in response");
@@ -136,12 +138,18 @@ export async function callGemini(params: {
       return { text, data };
     } catch (e: unknown) {
       const error = e as Error;
-      console.error(`[callGemini] Attempt ${attempt} failed:`, error.name, error.message);
-      
+      console.error(
+        `[callGemini] Attempt ${attempt} failed:`,
+        error.name,
+        error.message,
+      );
+
       // Detailed logging for SDK errors
       if (error.stack) console.error(error.stack);
 
-      if (!isRetryableGeminiError(e) || attempt === DEFAULT_MAX_ATTEMPTS) return null;
+      if (!isRetryableGeminiError(e) || attempt === DEFAULT_MAX_ATTEMPTS) {
+        return null;
+      }
     }
   }
 

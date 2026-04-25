@@ -19,9 +19,7 @@ export function isStripeArchitectSubscriptionEntitled(
   if (!sub) return false;
   const st = sub.status;
   if (st !== "active" && st !== "trialing") return false;
-  const pe = sub.current_period_end
-    ? new Date(sub.current_period_end)
-    : null;
+  const pe = sub.current_period_end ? new Date(sub.current_period_end) : null;
   if (!pe) return true;
   return pe > now;
 }
@@ -33,9 +31,7 @@ export function isStripeArchitectUploadPeriodOpen(
   if (!sub) return false;
   const st = sub.status;
   if (st !== "active" && st !== "trialing") return false;
-  const pe = sub.current_period_end
-    ? new Date(sub.current_period_end)
-    : null;
+  const pe = sub.current_period_end ? new Date(sub.current_period_end) : null;
   return Boolean(pe && pe > now);
 }
 

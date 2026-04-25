@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { setupTestEnv } from "../_shared/test-utils.ts";
 
@@ -15,11 +15,11 @@ Deno.test("stripe-webhook - returns 500 when no signature or secret", async () =
   setupTestEnv();
   // Ensure secrets are NOT set
   Deno.env.delete("STRIPE_WEBHOOK_SECRET");
-  
+
   const req = new Request("http://localhost/stripe-webhook", {
     method: "POST",
     headers: {
-        "Content-Type": "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ id: "evt_123" }),
   });

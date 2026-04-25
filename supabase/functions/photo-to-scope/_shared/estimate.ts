@@ -155,17 +155,17 @@ export function sanitizeEstimate(
     ),
     confidence_score: Number(parsed.summary?.confidence_score || 3),
     value_engineering_tips: Array.isArray(
-      parsed.summary?.value_engineering_tips,
-    )
+        parsed.summary?.value_engineering_tips,
+      )
       ? parsed.summary.value_engineering_tips.map(String)
       : [],
     regional_context: String(parsed.summary?.regional_context || ""),
     regional_signal: String(parsed.summary?.regional_signal || ""),
     grounding_sources: Array.isArray(parsed.summary?.grounding_sources)
       ? parsed.summary.grounding_sources.map((src: any) => ({
-          title: String(src.title || "Data Source"),
-          url: src.url ? String(src.url) : undefined,
-        }))
+        title: String(src.title || "Data Source"),
+        url: src.url ? String(src.url) : undefined,
+      }))
       : [],
   };
 
@@ -199,15 +199,15 @@ export function sanitizeEstimate(
       maintenance_tips: String(s.maintenance_tips || ""),
       materials: Array.isArray(s.materials)
         ? s.materials.map((m: any) => ({
-            name: String(m.name || "Material"),
-            brand: m.brand ? String(m.brand) : undefined,
-            model: m.model ? String(m.model) : undefined,
-            quantity: Number(m.quantity || 1),
-            unit: String(m.unit || "pc"),
-            estimated_cost: m.estimated_cost
-              ? Number(m.estimated_cost)
-              : undefined,
-          }))
+          name: String(m.name || "Material"),
+          brand: m.brand ? String(m.brand) : undefined,
+          model: m.model ? String(m.model) : undefined,
+          quantity: Number(m.quantity || 1),
+          unit: String(m.unit || "pc"),
+          estimated_cost: m.estimated_cost
+            ? Number(m.estimated_cost)
+            : undefined,
+        }))
         : [],
     };
   });
@@ -226,7 +226,7 @@ export function sanitizeEstimate(
   if (
     summary.estimated_min_total === 0 ||
     Math.abs(summary.estimated_min_total - calculated_min) /
-      (summary.estimated_min_total || 1) >
+          (summary.estimated_min_total || 1) >
       0.05
   ) {
     summary.estimated_min_total = calculated_min;
@@ -234,7 +234,7 @@ export function sanitizeEstimate(
   if (
     summary.estimated_max_total === 0 ||
     Math.abs(summary.estimated_max_total - calculated_max) /
-      (summary.estimated_max_total || 1) >
+          (summary.estimated_max_total || 1) >
       0.05
   ) {
     summary.estimated_max_total = calculated_max;
@@ -266,14 +266,16 @@ export function getFallbackEstimate(
       estimated_min_total: min,
       estimated_max_total: max,
       confidence_score: 2,
-      regional_context: `Standard mid-tier averages for the ${cityFromZip(zip)}.`,
+      regional_context: `Standard mid-tier averages for the ${
+        cityFromZip(zip)
+      }.`,
       value_engineering_tips: [
         "Consider mid-range materials for better ROI.",
         "Refurbish existing cabinets instead of replacing.",
       ],
       grounding_sources: [
-        { title: "National Construction Cost Database (2026 Averages)" }
-      ]
+        { title: "National Construction Cost Database (2026 Averages)" },
+      ],
     },
     scope_items: [
       {
@@ -318,7 +320,8 @@ export async function extractScopeWithGemini(input: {
     month: "long",
   });
 
-  const systemInstruction = `You are a Senior Residential Construction Estimator for ${area}.
+  const systemInstruction =
+    `You are a Senior Residential Construction Estimator for ${area}.
 Produce a concise, accurate renovation scope-budget JSON. Speed matters: be thorough but avoid unnecessary verbosity.
 
 Rules:
@@ -334,11 +337,21 @@ Rules:
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
 Location: ${zip_code} (${area})
-Analysis Mode: ${hasPhotos ? "Vision & Text Integration" : "Text-Only Estimation"}
+Analysis Mode: ${
+    hasPhotos ? "Vision & Text Integration" : "Text-Only Estimation"
+  }
 Target Finish Tier: ${finish_preference}
-User Description: ${scopeDescription || (hasPhotos ? "Analyze photos for full scope" : "Standard renovation for this room type")}.
+User Description: ${
+    scopeDescription || (hasPhotos
+      ? "Analyze photos for full scope"
+      : "Standard renovation for this room type")
+  }.
 
-${hasPhotos ? "Analyze the attached photos deeply first, then use the description for context." : "Construct a high-fidelity estimate based EXCLUSIVELY on the text description provided."}
+${
+    hasPhotos
+      ? "Analyze the attached photos deeply first, then use the description for context."
+      : "Construct a high-fidelity estimate based EXCLUSIVELY on the text description provided."
+  }
 
 Please generate the detailed blueprint.`;
 

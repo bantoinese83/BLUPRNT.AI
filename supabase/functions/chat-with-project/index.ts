@@ -1,10 +1,10 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import {
+  assertProjectOwner,
   getServiceClient,
   getUserIdFromRequest,
-  assertProjectOwner,
 } from "../_shared/auth.ts";
 import { callGemini } from "../_shared/gemini.ts";
 import { chatWithProjectSchema } from "../_shared/validation.ts";
@@ -67,10 +67,27 @@ export const handler = async (req: Request) => {
       Budget Estimate: $${project.estimated_min_total} - $${project.estimated_max_total}
       
       Scope Items:
-      ${(scope as Array<{ category: string; description: string; total_cost_min: number; total_cost_max: number }>).map((s) => `- ${s.category}: ${s.description} ($${s.total_cost_min}-$${s.total_cost_max})`).join("\n")}
+      ${
+      (scope as Array<
+        {
+          category: string;
+          description: string;
+          total_cost_min: number;
+          total_cost_max: number;
+        }
+      >).map((s) =>
+        `- ${s.category}: ${s.description} ($${s.total_cost_min}-$${s.total_cost_max})`
+      ).join("\n")
+    }
       
       Current Invoices:
-      ${(invoices as Array<{ vendor_name: string; total: number; payment_status: string }>).map((i) => `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`).join("\n")}
+      ${
+      (invoices as Array<
+        { vendor_name: string; total: number; payment_status: string }
+      >).map((i) =>
+        `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`
+      ).join("\n")
+    }
     `;
 
     const systemInstruction = `
@@ -97,8 +114,7 @@ export const handler = async (req: Request) => {
 
     return jsonResponse(
       {
-        reply:
-          result?.text ??
+        reply: result?.text ??
           "I couldn’t answer that just now. Check your connection and try again in a moment.",
       },
       200,

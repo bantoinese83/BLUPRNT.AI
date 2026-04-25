@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import {
@@ -18,7 +18,12 @@ export const handler = async (req: Request) => {
 
     const { ok, retryAfter } = await checkRateLimit(req);
     if (!ok) {
-      return jsonResponse({ error: "Too many requests." }, 429, req, retryAfter ?? 60);
+      return jsonResponse(
+        { error: "Too many requests." },
+        429,
+        req,
+        retryAfter ?? 60,
+      );
     }
 
     const userId = await getUserIdFromRequest(req);
@@ -31,9 +36,11 @@ export const handler = async (req: Request) => {
     const file = formData.get("file");
     const projectId = formData.get("project_id") as string;
     const type = formData.get("type") as string;
-    const caption = formData.get("caption") as string | null;
+    const _caption = formData.get("caption") as string | null;
 
-    console.log(`[upload-gallery-photo] Uploading ${type} for project ${projectId}`);
+    console.log(
+      `[upload-gallery-photo] Uploading ${type} for project ${projectId}`,
+    );
 
     if (!file || !(file instanceof File)) {
       console.error("[upload-gallery-photo] No file in FormData");
@@ -41,7 +48,11 @@ export const handler = async (req: Request) => {
     }
 
     if (!projectId || !type) {
-      return jsonResponse({ error: "project_id and type are required" }, 400, req);
+      return jsonResponse(
+        { error: "project_id and type are required" },
+        400,
+        req,
+      );
     }
 
     const admin = getServiceClient();
@@ -49,7 +60,8 @@ export const handler = async (req: Request) => {
 
     const fileBuffer = await file.arrayBuffer();
     const ext = file.name.split(".").pop() || "jpg";
-    const storagePath = `${projectId}/${userId}/vault_${type}_${Date.now()}.${ext}`;
+    const storagePath =
+      `${projectId}/${userId}/vault_${type}_${Date.now()}.${ext}`;
 
     // 1. Upload to storage using service role
     const { error: storageErr } = await admin.storage
@@ -78,8 +90,13 @@ export const handler = async (req: Request) => {
 
     return jsonResponse({ storagePath, id: galleryEntry.id }, 200, req);
   } catch (e) {
-    console.error("[upload-gallery-photo] Failure:", e.message);
-    return jsonResponse({ error: e.message || "An unexpected error occurred" }, 500, req);
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.error("[upload-gallery-photo] Failure:", error.message);
+    return jsonResponse(
+      { error: error.message || "An unexpected error occurred" },
+      500,
+      req,
+    );
   }
 };
 

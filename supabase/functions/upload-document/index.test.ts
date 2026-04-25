@@ -3,7 +3,7 @@
  *
  * Run with: deno test --allow-env supabase/functions/upload-document/index.test.ts
  */
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { setupTestEnv } from "../_shared/test-utils.ts";
 

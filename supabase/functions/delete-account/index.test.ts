@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
@@ -34,7 +34,7 @@ Deno.test({
       "/rest/v1/invoices": [],
       "/rest/v1/seller_packets": [],
       "/storage/v1/object/list/project-photos": [],
-      "/storage/v1/object/list/project-documents": []
+      "/storage/v1/object/list/project-documents": [],
     });
 
     try {
@@ -48,7 +48,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -60,7 +60,8 @@ Deno.test({
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
       "/rest/v1/properties": [],
-      "/auth/v1/admin/users": () => new Response(JSON.stringify({ error: "Auth failed" }), { status: 500 })
+      "/auth/v1/admin/users": () =>
+        new Response(JSON.stringify({ error: "Auth failed" }), { status: 500 }),
     });
     try {
       const req = new Request("http://localhost/delete-account", {
@@ -72,5 +73,5 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });

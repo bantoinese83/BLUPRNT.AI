@@ -1,10 +1,10 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "https://esm.sh/stripe@14?target=denonext";
+import "@supabase/functions-js/edge-runtime.d.ts";
+import Stripe from "stripe";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import {
-  getUserIdFromRequest,
   assertProjectOwner,
   getServiceClient,
+  getUserIdFromRequest,
 } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
@@ -16,10 +16,12 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
 /** Price IDs permitted for Checkout (Edge secrets — not VITE_*). */
 function resolveAllowedPriceIds(): Set<string> {
   const ids = new Set<string>();
-  for (const key of [
-    "STRIPE_ARCHITECT_PRICE_ID",
-    "STRIPE_PROJECT_PASS_PRICE_ID",
-  ] as const) {
+  for (
+    const key of [
+      "STRIPE_ARCHITECT_PRICE_ID",
+      "STRIPE_PROJECT_PASS_PRICE_ID",
+    ] as const
+  ) {
     const v = Deno.env.get(key)?.trim();
     if (v) {
       ids.add(v);
@@ -77,10 +79,12 @@ Deno.serve(async (req: Request) => {
       priceId?: string;
       projectId?: string;
     } | null;
-    const priceId =
-      typeof body?.priceId === "string" ? body.priceId.trim() : "";
-    const projectId =
-      typeof body?.projectId === "string" ? body.projectId.trim() : "";
+    const priceId = typeof body?.priceId === "string"
+      ? body.priceId.trim()
+      : "";
+    const projectId = typeof body?.projectId === "string"
+      ? body.projectId.trim()
+      : "";
 
     if (!priceId) {
       return jsonResponse({ error: "Missing priceId" }, 400, req);
@@ -97,7 +101,9 @@ Deno.serve(async (req: Request) => {
         const msg = (ownershipErr as Error).message;
         if (msg === "forbidden") {
           return jsonResponse(
-            { error: "You don't have permission to purchase for that project." },
+            {
+              error: "You don't have permission to purchase for that project.",
+            },
             403,
             req,
           );

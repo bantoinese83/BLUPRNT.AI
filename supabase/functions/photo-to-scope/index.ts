@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { photoToScopeSchema } from "../_shared/validation.ts";
@@ -110,8 +110,9 @@ Deno.serve(async (req: Request) => {
         await assertProjectOwner(admin, project_id, userId);
       } catch (e) {
         const m = e instanceof Error ? e.message : "";
-        if (m === "not_found")
+        if (m === "not_found") {
           return jsonResponse({ error: "Project not found" }, 404, req);
+        }
         return jsonResponse({ error: "Access denied" }, 403, req);
       }
     }
@@ -148,8 +149,8 @@ Deno.serve(async (req: Request) => {
         const materials = Array.isArray(metadata.materials)
           ? metadata.materials
           : Array.isArray(r.materials)
-            ? r.materials
-            : [];
+          ? r.materials
+          : [];
 
         return {
           id: isFromDB ? r.id : `scope_${i + 1}`,
@@ -207,14 +208,18 @@ Deno.serve(async (req: Request) => {
         .insert(rows)
         .select();
 
-      if (insErr) return jsonResponse({ error: "Could not save scope" }, 500, req);
+      if (insErr) {
+        return jsonResponse({ error: "Could not save scope" }, 500, req);
+      }
 
       // Handle onboarding photo storage for the Transformation Slider
       let firstPhotoPath: string | null = null;
       if (photoFiles.length > 0) {
         // Upload the first photo to projects bucket as the initial "Before" state
         const first = photoFiles[0];
-        const ext = first.name.includes(".") ? first.name.slice(first.name.lastIndexOf(".")) : ".jpg";
+        const ext = first.name.includes(".")
+          ? first.name.slice(first.name.lastIndexOf("."))
+          : ".jpg";
         const path = `${project_id}/${userId}/before_photo${ext}`;
         const { error: uploadErr } = await admin.storage
           .from("project-documents")
@@ -222,7 +227,7 @@ Deno.serve(async (req: Request) => {
             contentType: first.type || "image/jpeg",
             upsert: true,
           });
-        
+
         if (!uploadErr) {
           firstPhotoPath = path;
           // Create a record in documents table too
@@ -232,7 +237,7 @@ Deno.serve(async (req: Request) => {
             storage_path: path,
             original_filename: first.name,
             uploaded_by_user_id: userId,
-            ocr_status: "success"
+            ocr_status: "success",
           });
         }
       }

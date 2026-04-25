@@ -16,7 +16,8 @@ export async function classifyLedgerDocumentType(
   fileBase64: string,
   mimeType: string,
 ): Promise<LedgerDocumentType | null> {
-  const systemInstruction = `You classify documents for a home renovation / resale / homeowner project vault.
+  const systemInstruction =
+    `You classify documents for a home renovation / resale / homeowner project vault.
 
 Return JSON with exactly one field document_type, using exactly one of these values:
 ${LEDGER_DOCUMENT_TYPES.join(", ")}.
@@ -72,8 +73,7 @@ Heuristics: maintenance log ≠ warranty. Receipt ≠ full invoice. Ambiguous be
       timeoutMs: 28_000,
     });
     if (!result) return null;
-    const raw =
-      (result.data?.document_type as string | undefined) ||
+    const raw = (result.data?.document_type as string | undefined) ||
       (() => {
         try {
           const j = JSON.parse(result.text) as { document_type?: string };

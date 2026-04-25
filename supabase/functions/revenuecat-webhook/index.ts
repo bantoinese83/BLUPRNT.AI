@@ -1,12 +1,11 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const webhookSecret = (
   Deno.env.get("REVENUECAT_WEBHOOK_SECRET") ||
-    Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN") ||
-    ""
+  Deno.env.get("REVENUECAT_WEBHOOK_AUTH_TOKEN") ||
+  ""
 ).trim();
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -18,7 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  *
  * Required secret: REVENUECAT_WEBHOOK_SECRET (set in Supabase Edge Function secrets).
  */
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   try {
     if (!webhookSecret) {
       console.error(
@@ -52,8 +51,8 @@ serve(async (req: Request) => {
       status = "past_due";
     }
 
-    const rcEntitlementActive =
-      type !== "EXPIRATION" && type !== "CANCELLATION";
+    const rcEntitlementActive = type !== "EXPIRATION" &&
+      type !== "CANCELLATION";
 
     const { data: existing } = await supabase
       .from("user_subscriptions")

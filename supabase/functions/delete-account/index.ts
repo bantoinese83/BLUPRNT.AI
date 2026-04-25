@@ -1,6 +1,6 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "https://esm.sh/stripe@14?target=denonext";
-import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import "@supabase/functions-js/edge-runtime.d.ts";
+import Stripe from "stripe";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";

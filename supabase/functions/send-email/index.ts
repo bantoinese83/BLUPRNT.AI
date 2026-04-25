@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
@@ -84,12 +84,12 @@ export const handler = async (req: Request) => {
       to?: string | string[];
     } | null;
 
-    const subject =
-      typeof body?.subject === "string"
-        ? body.subject.slice(0, MAX_SUBJECT_LEN)
-        : "";
-    const rawHtml =
-      typeof body?.html === "string" ? body.html.slice(0, MAX_HTML_LEN) : "";
+    const subject = typeof body?.subject === "string"
+      ? body.subject.slice(0, MAX_SUBJECT_LEN)
+      : "";
+    const rawHtml = typeof body?.html === "string"
+      ? body.html.slice(0, MAX_HTML_LEN)
+      : "";
     const html = rawHtml ? sanitizeUserEmailHtml(rawHtml) : "";
 
     if (!subject || !html) {

@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { getInvoiceSchema } from "../_shared/validation.ts";
@@ -34,8 +34,9 @@ export const handler = async (req: Request) => {
   if (req.method === "POST") {
     try {
       const body = await req.json();
-      invoice_id =
-        typeof body?.invoice_id === "string" ? body.invoice_id : null;
+      invoice_id = typeof body?.invoice_id === "string"
+        ? body.invoice_id
+        : null;
     } catch {
       /* ignore */
     }
@@ -144,8 +145,9 @@ export const handler = async (req: Request) => {
     );
   } catch (e) {
     const m = e instanceof Error ? e.message : "";
-    if (m === "forbidden")
+    if (m === "forbidden") {
       return jsonResponse({ error: "Access denied" }, 403, req);
+    }
     console.error(e);
     return jsonResponse({ error: "Could not load invoice" }, 500, req);
   }

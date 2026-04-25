@@ -31,13 +31,19 @@ export async function extractInvoiceFromPdf(
   mimeType: string,
   projectScope?: ProjectScopeItem[],
 ): Promise<OcrInvoiceResult | null> {
-  let systemInstruction = `Extract structured data from the provided invoice/PDF.
+  let systemInstruction =
+    `Extract structured data from the provided invoice/PDF.
 If a field cannot be extracted, return null. 
 For line_items, ensure each entry has description, quantity, unit_price, and line_total.`;
 
   if (projectScope && projectScope.length > 0) {
-    const scopeStr = projectScope.map(s => `ID: ${s.id}, Category: ${s.category}, Description: ${s.description || 'N/A'}`).join("\n");
-    systemInstruction += `\n\nYou are also given the project's planned scope items below:
+    const scopeStr = projectScope.map((s) =>
+      `ID: ${s.id}, Category: ${s.category}, Description: ${
+        s.description || "N/A"
+      }`
+    ).join("\n");
+    systemInstruction +=
+      `\n\nYou are also given the project's planned scope items below:
 ${scopeStr}
 
 For EACH line_item you extract, find the most relevant planned scope item from the list above. 
@@ -88,7 +94,9 @@ Be accurate: only map if the line item directly contributes to that scope catego
         data: pdfBase64,
       },
     },
-    { text: "Please process this invoice and return ONLY a valid JSON object." },
+    {
+      text: "Please process this invoice and return ONLY a valid JSON object.",
+    },
   ];
 
   try {
@@ -103,7 +111,7 @@ Be accurate: only map if the line item directly contributes to that scope catego
 
     // Use data if already parsed by callGemini, otherwise parse text
     const parsed = (result.data || JSON.parse(result.text)) as OcrInvoiceResult;
-    
+
     if (!parsed || typeof parsed !== "object") return null;
 
     return {

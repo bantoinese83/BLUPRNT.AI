@@ -1,5 +1,9 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
-import { normalizeScopeSourceForDb, sanitizeEstimate, cityFromZip } from "./estimate.ts";
+import { assertEquals } from "std/assert";
+import {
+  cityFromZip,
+  normalizeScopeSourceForDb,
+  sanitizeEstimate,
+} from "./estimate.ts";
 
 Deno.test("normalizeScopeSourceForDb - DB only allows text | photo", () => {
   assertEquals(normalizeScopeSourceForDb("photo"), "photo");
@@ -129,4 +133,3 @@ Deno.test("sanitizeEstimate - sanitizes materials list", () => {
   assertEquals(result.scope_items[0].materials?.[0].quantity, 2);
   assertEquals(result.scope_items[0].materials?.[1].name, "Material");
 });
-

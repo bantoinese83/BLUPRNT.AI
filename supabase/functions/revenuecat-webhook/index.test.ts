@@ -3,7 +3,7 @@
  *
  * Run with: deno test --allow-env supabase/functions/revenuecat-webhook/index.test.ts
  */
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 
 // ---------------------------------------------------------------------------
 // Status mapping (mirrors the handler's event-type → status logic)
@@ -62,15 +62,21 @@ Deno.test("Stripe co-existence guard — only entitlement flag should change", (
   const hasStripe = true;
   // When Stripe row exists, we must NOT overwrite status or current_period_end.
   const updatePayload = hasStripe
-    ? { revenuecat_entitlement_active: true, updated_at: "2026-01-01T00:00:00.000Z" }
+    ? {
+      revenuecat_entitlement_active: true,
+      updated_at: "2026-01-01T00:00:00.000Z",
+    }
     : {
-        status: "active",
-        current_period_end: null,
-        revenuecat_entitlement_active: true,
-        updated_at: "2026-01-01T00:00:00.000Z",
-      };
+      status: "active",
+      current_period_end: null,
+      revenuecat_entitlement_active: true,
+      updated_at: "2026-01-01T00:00:00.000Z",
+    };
   assertEquals(Object.keys(updatePayload).includes("status"), false);
-  assertEquals(Object.keys(updatePayload).includes("revenuecat_entitlement_active"), true);
+  assertEquals(
+    Object.keys(updatePayload).includes("revenuecat_entitlement_active"),
+    true,
+  );
 });
 
 // ---------------------------------------------------------------------------

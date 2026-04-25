@@ -1,5 +1,5 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "https://esm.sh/stripe@14?target=denonext";
+import "@supabase/functions-js/edge-runtime.d.ts";
+import Stripe from "stripe";
 import { getServiceClient } from "../_shared/auth.ts";
 import { logEdge } from "../_shared/log.ts";
 
@@ -47,14 +47,13 @@ export const handler = async (req: Request) => {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId;
-        const customerEmail =
-          session.customer_email ?? session.customer_details?.email;
+        const customerEmail = session.customer_email ??
+          session.customer_details?.email;
 
         if (session.mode === "subscription" && session.subscription) {
-          const subId =
-            typeof session.subscription === "string"
-              ? session.subscription
-              : session.subscription.id;
+          const subId = typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription.id;
           const subscription = await stripe.subscriptions.retrieve(subId);
           const periodEnd = subscription.current_period_end
             ? new Date(subscription.current_period_end * 1000).toISOString()
@@ -96,10 +95,9 @@ export const handler = async (req: Request) => {
                 {
                   user_id: targetUserId,
                   stripe_subscription_id: subId,
-                  stripe_customer_id:
-                    typeof session.customer === "string"
-                      ? session.customer
-                      : (session.customer?.id ?? null),
+                  stripe_customer_id: typeof session.customer === "string"
+                    ? session.customer
+                    : (session.customer?.id ?? null),
                   plan: "architect",
                   status: "active",
                   current_period_end: periodEnd,
@@ -145,14 +143,13 @@ export const handler = async (req: Request) => {
         const periodEnd = subscription.current_period_end
           ? new Date(subscription.current_period_end * 1000).toISOString()
           : null;
-        const status =
-          subscription.status === "active"
-            ? "active"
-            : subscription.status === "canceled"
-              ? "canceled"
-              : subscription.status === "past_due"
-                ? "past_due"
-                : "trialing";
+        const status = subscription.status === "active"
+          ? "active"
+          : subscription.status === "canceled"
+          ? "canceled"
+          : subscription.status === "past_due"
+          ? "past_due"
+          : "trialing";
 
         const { data: row } = await admin
           .from("user_subscriptions")

@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
@@ -22,22 +22,25 @@ Deno.test({
   sanitizeOps: false,
   fn: async () => {
     setupTestEnv();
-    
+
     const mockUser = { id: USER_1, email: "test@example.com" };
-    const mockInvoice = { 
-      id: INVOICE_1, 
-      project_id: PROJECT_1, 
+    const mockInvoice = {
+      id: INVOICE_1,
+      project_id: PROJECT_1,
       vendor_name: "Plumbing Pros",
       total: 1500.00,
-      payment_status: "pending"
+      payment_status: "pending",
     };
-    
+
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: mockUser },
       "/rest/v1/invoices": mockInvoice,
-      "/rest/v1/projects": { id: PROJECT_1, properties: { owner_user_id: USER_1 } },
+      "/rest/v1/projects": {
+        id: PROJECT_1,
+        properties: { owner_user_id: USER_1 },
+      },
       "/rest/v1/invoice_line_items": [],
-      "/rest/v1/scope_items": []
+      "/rest/v1/scope_items": [],
     });
 
     try {
@@ -55,7 +58,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -66,7 +69,8 @@ Deno.test({
     setupTestEnv();
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
-      "/rest/v1/invoices": () => new Response(JSON.stringify({ error: "Not Found" }), { status: 404 })
+      "/rest/v1/invoices": () =>
+        new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }),
     });
     try {
       const req = new Request("http://localhost/get-invoice", {
@@ -82,7 +86,7 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
 
 Deno.test({
@@ -94,7 +98,7 @@ Deno.test({
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: { id: USER_1 } },
       "/rest/v1/invoices": { project_id: PROJECT_1 },
-      "/rest/v1/projects": [] 
+      "/rest/v1/projects": [],
     });
     try {
       const req = new Request("http://localhost/get-invoice", {
@@ -110,5 +114,5 @@ Deno.test({
     } finally {
       restoreFetch();
     }
-  }
+  },
 });
