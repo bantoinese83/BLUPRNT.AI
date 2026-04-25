@@ -61,7 +61,13 @@ export function useScopeManagement({
     const baseMeta = (item.metadata as Record<string, unknown>) || {};
     const nextMeta = {
       ...baseMeta,
-      materials: editMaterials,
+      materials: editMaterials.map((m) => ({
+        ...m,
+        quantity:
+          typeof m.quantity === "string"
+            ? parseFloat(m.quantity) || 0
+            : (m.quantity ?? 0),
+      })),
     };
 
     const { error: err } = await supabase
@@ -73,7 +79,7 @@ export function useScopeManagement({
         unit_cost_max: ucMax,
         total_cost_min: newTotalMin,
         total_cost_max: newTotalMax,
-        metadata: nextMeta as unknown as ScopeRow["metadata"],
+        metadata: nextMeta,
       })
       .eq("id", item.id);
 

@@ -72,9 +72,9 @@ function BillOfMaterialsList({
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none border border-slate-100">
                   {m.quantity} {m.unit || "units"}
                 </span>
-                {m.estimated_cost && m.quantity && m.quantity > 1 && (
+                {m.estimated_cost && m.quantity && Number(m.quantity) > 1 && (
                   <span className="text-[10px] font-medium text-slate-400 italic">
-                    Total: {money(m.estimated_cost * m.quantity)}
+                    Total: {money(m.estimated_cost * Number(m.quantity))}
                   </span>
                 )}
               </div>

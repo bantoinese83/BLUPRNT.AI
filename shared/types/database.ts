@@ -2,6 +2,8 @@ import type { Database } from "@shared/types/supabase.gen";
 
 type PublicSchema = Database["public"];
 
+import type { ScopeMetadata, ProjectMetadata } from "./metadata";
+
 /** Subset of `projects` row fields commonly selected in the dashboard (joined selects may omit columns). */
 export type ProjectRow = {
   id: string;
@@ -12,33 +14,18 @@ export type ProjectRow = {
   confidence_score: number | null;
   stage: string | null;
   created_at: string;
-  metadata: unknown;
+  metadata: ProjectMetadata | null;
   before_photo_storage_path: string | null;
   after_photo_storage_path: string | null;
   grounding_sources: Array<{ title: string; url?: string }> | null;
 };
 
-export type ScopeRow = Pick<
+export type ScopeRow = Omit<
   PublicSchema["Tables"]["scope_items"]["Row"],
-  | "id"
-  | "category"
-  | "description"
-  | "finish_tier"
-  | "quantity"
-  | "unit"
-  | "unit_cost_min"
-  | "unit_cost_max"
-  | "total_cost_min"
-  | "total_cost_max"
-  | "confidence_score"
-  | "confidence_reason"
-  | "source"
-  | "justification"
-  | "priority"
-  | "phase"
-  | "maintenance_tips"
-  | "metadata"
->;
+  "metadata"
+> & {
+  metadata: ScopeMetadata | null;
+};
 
 export type InvoiceRow = {
   id: string;

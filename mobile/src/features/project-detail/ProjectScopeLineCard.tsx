@@ -34,144 +34,162 @@ type Props = {
   ) => Promise<void>;
 };
 
-export function ProjectScopeLineCard({
-  item,
-  reconciliation,
-  catIndex,
-  index,
-  expandedId,
-  onToggleExpand,
-  onPersistScopeMaterials,
-}: Props) {
-  const isOpen = expandedId === item.id;
-  const materialRows = item.metadata?.materials;
-  const hasMaterialBreakdown = Array.isArray(materialRows);
+export const ProjectScopeLineCard = React.memo(
+  ({
+    item,
+    reconciliation,
+    catIndex,
+    index,
+    expandedId,
+    onToggleExpand,
+    onPersistScopeMaterials,
+  }: Props) => {
+    const isOpen = expandedId === item.id;
+    const materialRows = item.metadata?.materials;
+    const hasMaterialBreakdown = Array.isArray(materialRows);
 
-  return (
-    <MotiView
-      from={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        type: "timing",
-        duration: 400,
-        delay: 300 + catIndex * 150 + index * 50,
-      }}
-    >
-      <GlassCard
-        intensity={10}
-        style={[styles.scopeCard, isOpen && styles.expandedScopeCard]}
+    return (
+      <MotiView
+        from={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          type: "timing",
+          duration: 400,
+          delay: 300 + catIndex * 150 + index * 50,
+        }}
       >
-        <View style={styles.scopeHeader}>
-          <View style={{ flex: 1 }}>
-            <Text
-              style={styles.scopeDescription}
-              numberOfLines={3}
-              ellipsizeMode="tail"
-            >
-              {item.description}
-            </Text>
-            <View style={{ marginTop: 4 }}>
-              <ConfidenceDisplay score={item.confidence_score} size={8} />
+        <GlassCard
+          intensity={10}
+          style={[styles.scopeCard, isOpen && styles.expandedScopeCard]}
+        >
+          <View style={styles.scopeHeader}>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={styles.scopeDescription}
+                numberOfLines={3}
+                ellipsizeMode="tail"
+              >
+                {item.description}
+              </Text>
+              <View style={{ marginTop: 4 }}>
+                <ConfidenceDisplay score={item.confidence_score} size={8} />
+              </View>
+            </View>
+            <View style={styles.tierBadge}>
+              <Text style={styles.tierText}>{item.finish_tier}</Text>
             </View>
           </View>
-          <View style={styles.tierBadge}>
-            <Text style={styles.tierText}>{item.finish_tier}</Text>
-          </View>
-        </View>
-        <View style={styles.scopeFooter}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.scopeMeta}>
-              {item.quantity} {item.unit}
-            </Text>
-            {reconciliation && reconciliation.total_billed > 0 && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 4,
-                  marginTop: 2,
-                }}
-              >
-                {reconciliation.status === "reconciled" ? (
-                  <CheckCircle2 size={10} color={Theme.colors.status.success} />
-                ) : reconciliation.status === "over" ? (
-                  <AlertTriangle size={10} color={Theme.colors.status.error} />
-                ) : (
-                  <Info size={10} color={Theme.colors.status.warning} />
-                )}
-                <Text
+          <View style={styles.scopeFooter}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.scopeMeta}>
+                {item.quantity} {item.unit}
+              </Text>
+              {reconciliation && reconciliation.total_billed > 0 && (
+                <View
                   style={{
-                    fontSize: 9,
-                    fontFamily: Theme.typography.family.black,
-                    color:
-                      reconciliation.status === "reconciled"
-                        ? Theme.colors.status.success
-                        : reconciliation.status === "over"
-                          ? Theme.colors.status.error
-                          : Theme.colors.status.warning,
-                    textTransform: "uppercase",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                    marginTop: 2,
                   }}
                 >
-                  Billed {money(reconciliation.total_billed)}
-                </Text>
-              </View>
-            )}
+                  {reconciliation.status === "reconciled" ? (
+                    <CheckCircle2
+                      size={10}
+                      color={Theme.colors.status.success}
+                    />
+                  ) : reconciliation.status === "over" ? (
+                    <AlertTriangle
+                      size={10}
+                      color={Theme.colors.status.error}
+                    />
+                  ) : (
+                    <Info size={10} color={Theme.colors.status.warning} />
+                  )}
+                  <Text
+                    style={{
+                      fontSize: 9,
+                      fontFamily: Theme.typography.family.black,
+                      color:
+                        reconciliation.status === "reconciled"
+                          ? Theme.colors.status.success
+                          : reconciliation.status === "over"
+                            ? Theme.colors.status.error
+                            : Theme.colors.status.warning,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Billed {money(reconciliation.total_billed)}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.scopePrice}>
+              {money(item.total_cost_min, item.total_cost_max)}
+            </Text>
           </View>
-          <Text style={styles.scopePrice}>
-            {money(item.total_cost_min, item.total_cost_max)}
-          </Text>
-        </View>
 
-        {hasMaterialBreakdown && (
-          <>
-            <TouchableOpacity
-              style={[
-                styles.viewDetailsBtn,
-                isOpen && styles.activeViewDetailsBtn,
-              ]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onToggleExpand(item.id);
-              }}
-            >
-              <Text
+          {hasMaterialBreakdown && (
+            <>
+              <TouchableOpacity
                 style={[
-                  styles.viewDetailsText,
-                  isOpen && styles.activeViewDetailsText,
+                  styles.viewDetailsBtn,
+                  isOpen && styles.activeViewDetailsBtn,
                 ]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onToggleExpand(item.id);
+                }}
               >
-                {isOpen ? "Hide Breakdown" : "View Breakdown"}
-              </Text>
-              {isOpen ? (
-                <ChevronUp size={14} color="white" />
-              ) : (
-                <ChevronDown size={14} color={Theme.colors.text.secondary} />
-              )}
-            </TouchableOpacity>
-
-            <AnimatePresence>
-              {isOpen && (
-                <MotiView
-                  from={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ type: "timing", duration: 300 }}
-                  style={{ overflow: "hidden" }}
+                <Text
+                  style={[
+                    styles.viewDetailsText,
+                    isOpen && styles.activeViewDetailsText,
+                  ]}
                 >
-                  <ProjectBillOfMaterialsList
-                    materials={materialRows}
-                    onPersist={
-                      onPersistScopeMaterials
-                        ? (next) => onPersistScopeMaterials(item.id, next)
-                        : undefined
-                    }
-                  />
-                </MotiView>
-              )}
-            </AnimatePresence>
-          </>
-        )}
-      </GlassCard>
-    </MotiView>
-  );
-}
+                  {isOpen ? "Hide Breakdown" : "View Breakdown"}
+                </Text>
+                {isOpen ? (
+                  <ChevronUp size={14} color="white" />
+                ) : (
+                  <ChevronDown size={14} color={Theme.colors.text.secondary} />
+                )}
+              </TouchableOpacity>
+
+              <AnimatePresence>
+                {isOpen && (
+                  <MotiView
+                    from={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ type: "timing", duration: 300 }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <ProjectBillOfMaterialsList
+                      materials={materialRows}
+                      onPersist={
+                        onPersistScopeMaterials
+                          ? (next) => onPersistScopeMaterials(item.id, next)
+                          : undefined
+                      }
+                    />
+                  </MotiView>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+        </GlassCard>
+      </MotiView>
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.item.id === next.item.id &&
+      prev.expandedId === next.expandedId &&
+      prev.reconciliation === next.reconciliation &&
+      prev.item.quantity === next.item.quantity &&
+      prev.item.finish_tier === next.item.finish_tier &&
+      prev.item.metadata?.materials === next.item.metadata?.materials
+    );
+  },
+);
