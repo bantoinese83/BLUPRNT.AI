@@ -4,7 +4,7 @@
     "@bluprnt/shared",
     "react-native-screens",
     "react-native-worklets",
-    "expo-router"
+    "react-native-web"
   ],
   "ignore": [
     "src/test/**",
@@ -12,6 +12,6 @@
     "metro.config.cjs",
     "src/constants/Theme.ts"
   ],
-  "ignoreBinaries": ["expo", "eslint", "vitest", "knip"],
+  "ignoreBinaries": ["expo", "eslint", "vitest", "knip", "tsc"],
   "entry": ["app/**/*.{ts,tsx}", "src/lib/push.ts"]
 }
