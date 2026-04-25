@@ -86,7 +86,7 @@ export function ProjectTypeScreen() {
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-2 gap-3 sm:gap-4"
+          className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
         >
           {options.map((opt, idx) => {
             const Icon = PROJECT_TYPE_ICON[opt];

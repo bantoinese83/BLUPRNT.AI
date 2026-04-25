@@ -188,6 +188,11 @@ export function useDocumentManagement({
           document_type?: string;
           error?: string;
           error_code?: string;
+          budget_health?: {
+            isOverBudget: boolean;
+            isNearingBudget: boolean;
+            percentOfMax: number;
+          };
         }>("upload-document", { body: fd });
 
         const failure = extractUploadFailureFromInvokeResult(data, fnErr);
@@ -211,6 +216,28 @@ export function useDocumentManagement({
 
         successTotal++;
         onUploaded(projectId);
+
+        // Proactive Budget Alerts
+        if (data?.budget_health) {
+          const { isOverBudget, isNearingBudget, percentOfMax } =
+            data.budget_health;
+          if (isOverBudget) {
+            toast.error(
+              `Budget Alert: This project is at ${Math.round(percentOfMax)}% of your estimated max.`,
+              {
+                duration: 5000,
+              },
+            );
+          } else if (isNearingBudget) {
+            toast.warning(
+              `Budget Note: You have used ${Math.round(percentOfMax)}% of your estimated budget.`,
+              {
+                duration: 4000,
+              },
+            );
+          }
+        }
+
         const newId = data?.invoice_id;
         const resolvedType = (data?.document_type ??
           documentType) as ValidDocType;

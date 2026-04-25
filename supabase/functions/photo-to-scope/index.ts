@@ -217,28 +217,30 @@ Deno.serve(async (req: Request) => {
       if (photoFiles.length > 0) {
         // Upload the first photo to projects bucket as the initial "Before" state
         const first = photoFiles[0];
-        const ext = first.name.includes(".")
-          ? first.name.slice(first.name.lastIndexOf("."))
-          : ".jpg";
-        const path = `${project_id}/${userId}/before_photo${ext}`;
-        const { error: uploadErr } = await admin.storage
-          .from("project-documents")
-          .upload(path, await first.arrayBuffer(), {
-            contentType: first.type || "image/jpeg",
-            upsert: true,
-          });
+        if (first) {
+          const ext = first.name.includes(".")
+            ? first.name.slice(first.name.lastIndexOf("."))
+            : ".jpg";
+          const path = `${project_id}/${userId}/before_photo${ext}`;
+          const { error: uploadErr } = await admin.storage
+            .from("project-documents")
+            .upload(path, await first.arrayBuffer(), {
+              contentType: first.type || "image/jpeg",
+              upsert: true,
+            });
 
-        if (!uploadErr) {
-          firstPhotoPath = path;
-          // Create a record in documents table too
-          await admin.from("documents").insert({
-            project_id,
-            type: "photo",
-            storage_path: path,
-            original_filename: first.name,
-            uploaded_by_user_id: userId,
-            ocr_status: "success",
-          });
+          if (!uploadErr) {
+            firstPhotoPath = path;
+            // Create a record in documents table too
+            await admin.from("documents").insert({
+              project_id,
+              type: "photo",
+              storage_path: path,
+              original_filename: first.name,
+              uploaded_by_user_id: userId,
+              ocr_status: "success",
+            });
+          }
         }
       }
 

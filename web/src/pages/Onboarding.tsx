@@ -157,7 +157,14 @@ export default function Onboarding() {
           <Breadcrumbs className="px-2" />
         </div>
 
-        <div className="relative w-full max-w-md">
+        <div
+          className={cn(
+            "relative w-full transition-all duration-500",
+            location.pathname === "/onboarding/estimate"
+              ? "max-w-md lg:max-w-4xl"
+              : "max-w-md lg:max-w-2xl",
+          )}
+        >
           {!isWelcome && <StepProgress currentPath={location.pathname} />}
 
           <AnimatePresence mode="wait">

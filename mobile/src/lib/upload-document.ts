@@ -13,6 +13,11 @@ export type UploadResult = {
   documentType?: DocumentType;
   error?: string;
   errorCode?: string;
+  budgetHealth?: {
+    isOverBudget: boolean;
+    isNearingBudget: boolean;
+    percentOfMax: number;
+  };
 };
 
 const ACCEPTED_MIMES = [
@@ -89,10 +94,27 @@ async function executeUploadWorkflow(
     }
 
     const resolved = data?.document_type as DocumentType | undefined;
+
+    // Proactive Budget Alerts
+    if (data?.budget_health) {
+      const { isOverBudget, isNearingBudget, percentOfMax } =
+        data.budget_health;
+      if (isOverBudget) {
+        showAppToast(
+          `Budget Alert: Project at ${Math.round(percentOfMax)}% of max estimate.`,
+        );
+      } else if (isNearingBudget) {
+        showAppToast(
+          `Budget Note: ${Math.round(percentOfMax)}% of budget used.`,
+        );
+      }
+    }
+
     return {
       success: true,
       invoice_id: data?.invoice_id,
       documentType: resolved,
+      budgetHealth: data?.budget_health,
     };
   } catch (err) {
     return { success: false, error: friendlyDocumentUploadError(err) };
@@ -136,6 +158,11 @@ async function invokeUploadWithTimeout(formData: FormData) {
       document_type?: string;
       error?: string;
       error_code?: string;
+      budget_health?: {
+        isOverBudget: boolean;
+        isNearingBudget: boolean;
+        percentOfMax: number;
+      };
     }>("upload-document", { body: formData }),
     timeout,
   ]);

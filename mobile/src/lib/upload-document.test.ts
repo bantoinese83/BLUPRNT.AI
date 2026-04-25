@@ -4,9 +4,14 @@ import {
   normalizeInvoiceUploadMime,
 } from "@/lib/upload-document";
 import { invokeFunction } from "@/lib/supabase";
+import { showAppToast } from "@/lib/app-toast";
 
-vi.mock("./supabase", () => ({
+vi.mock("@/lib/supabase", () => ({
   invokeFunction: vi.fn(),
+}));
+
+vi.mock("@/lib/app-toast", () => ({
+  showAppToast: vi.fn(),
 }));
 
 describe("normalizeInvoiceUploadMime", () => {
@@ -102,5 +107,31 @@ describe("uploadDocumentWithType", () => {
     expect(result.success).toBe(false);
     expect(result.error).toBeTruthy();
     vi.useRealTimers();
+  });
+
+  it("shows budget alert toast when budget_health is present", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: {
+        invoice_id: "inv-1",
+        document_type: "quote",
+        budget_health: {
+          isOverBudget: true,
+          isNearingBudget: false,
+          percentOfMax: 110,
+        },
+      },
+      error: null,
+    });
+
+    const result = await uploadDocumentWithType(
+      "file:///a.jpg",
+      "image/jpeg",
+      "p1",
+    );
+
+    expect(result.success).toBe(true);
+    expect(showAppToast).toHaveBeenCalledWith(
+      expect.stringContaining("Budget Alert: Project at 110%"),
+    );
   });
 });

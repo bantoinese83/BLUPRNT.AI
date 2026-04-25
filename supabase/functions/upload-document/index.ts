@@ -22,6 +22,7 @@ import {
   coerceLedgerDocumentType,
   inferDocumentTypeFromFilename,
 } from "../../../shared/lib/infer-document-type.ts";
+import { getProjectBudgetHealth } from "../_shared/financials.ts";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
 function resolvedMimeType(f: File): string {
@@ -57,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
     const userId = await getUserIdFromRequest(req);
     if (!userId) return jsonResponse({ error: "Unauthorized" }, 401, req);
 
-    const rate = await checkRateLimit(req, "upload");
+    const rate = await checkRateLimit(req, "default");
     if (!rate.ok) {
       return jsonResponse(
         { error: "Too many uploads. Please wait a moment." },
@@ -90,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 1. Reserve slot if architect
     const reserved = await reserveArchitectInvoiceUploadSlot(admin, userId);
-    if (!reserved.allowed) {
+    if (!reserved.ok) {
       return jsonResponse(
         {
           error: "Monthly upload limit reached.",
@@ -129,7 +130,18 @@ const handler = async (req: Request): Promise<Response> => {
       if (isOcrSupported) {
         const arrayBuffer = await file.arrayBuffer();
         const base64 = bufferToBase64(arrayBuffer);
-        const ocrResult = await extractInvoiceFromPdf(base64, mime);
+
+        // Fetch scope items to enable intelligent mapping
+        const { data: scopeItems } = await admin
+          .from("scope_items")
+          .select("id, category, description")
+          .eq("project_id", projectId);
+
+        const ocrResult = await extractInvoiceFromPdf(
+          base64,
+          mime,
+          scopeItems || [],
+        );
 
         if (ocrResult) {
           vendorName = ocrResult.vendor_name;
@@ -137,7 +149,7 @@ const handler = async (req: Request): Promise<Response> => {
           taxTotal = ocrResult.tax_total;
           issueDate = ocrResult.issue_date;
           lineItems = ocrResult.line_items;
-          ocrConfidence = 0.9; // Placeholder
+          ocrConfidence = 0.9;
         }
       }
 
@@ -163,16 +175,37 @@ const handler = async (req: Request): Promise<Response> => {
           tax_total: taxTotal,
           issue_date: issueDate || new Date().toISOString(),
           ocr_confidence: ocrConfidence,
-          invoice_line_items: lineItems,
         })
         .select()
         .single();
 
       if (dbErr) throw dbErr;
 
+      // 5. Insert Line Items with Intelligent Mapping
+      if (lineItems.length > 0) {
+        const lineRows = lineItems.map((item) => ({
+          invoice_id: invoice.id,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          line_total: item.line_total,
+          scope_item_id: item.mapped_scope_item_id || null,
+        }));
+
+        const { error: linesErr } = await admin
+          .from("invoice_line_items")
+          .insert(lineRows);
+
+        if (linesErr) {
+          console.warn("[upload-document] Failed to insert line items:", linesErr);
+        }
+      }
+
       // 5. Automatic Reconciliation (if line items mapped to scope items)
       // This part depends on the specific project structure, omitted for brevity here
       // but the data is now in the `invoice_line_items` JSONB column.
+
+      const budgetHealth = await getProjectBudgetHealth(admin, projectId);
 
       return jsonResponse(
         {
@@ -180,13 +213,14 @@ const handler = async (req: Request): Promise<Response> => {
           invoice_id: invoice.id,
           document_type: inferredDocType,
           storage_path: storagePath,
+          budget_health: budgetHealth,
         },
         200,
         req,
       );
     } catch (e) {
       // Release slot if failure happened after reservation
-      if (reserved.wasReserved) {
+      if (reserved.ok) {
         await releaseArchitectInvoiceUploadSlot(admin, userId).catch((err) =>
           console.error(err),
         );

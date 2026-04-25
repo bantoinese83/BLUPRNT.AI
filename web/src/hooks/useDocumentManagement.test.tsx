@@ -128,4 +128,36 @@ describe("useDocumentManagement", () => {
     expect(mockInvoke).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalled();
   });
+
+  it("shows budget alert toast when isOverBudget is true", async () => {
+    const mockInvoke = vi.mocked(supabaseLib.invokeFunction);
+    mockInvoke.mockResolvedValue({
+      data: {
+        invoice_id: "inv-123",
+        document_type: "invoice",
+        budget_health: {
+          isOverBudget: true,
+          isNearingBudget: false,
+          percentOfMax: 110,
+        },
+      },
+      error: null,
+    } as any);
+
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const file = new File(["test"], "receipt.jpg", { type: "image/jpeg" });
+    const files = { length: 1, 0: file, item: () => file } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("Budget Alert: This project is at 110%"),
+      expect.any(Object),
+    );
+  });
 });

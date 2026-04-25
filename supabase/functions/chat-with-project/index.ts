@@ -90,6 +90,26 @@ export const handler = async (req: Request) => {
     }
     `;
 
+    const responseSchema = {
+      type: "object",
+      properties: {
+        reply: { type: "string" },
+        actions: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              type: { type: "string", enum: ["add_scope", "update_scope", "suggest_photo"] },
+              data: { type: "object", additionalProperties: true },
+              reason: { type: "string" },
+            },
+            required: ["type", "data", "reason"],
+          },
+        },
+      },
+      required: ["reply", "actions"],
+    };
+
     const systemInstruction = `
       You are a professional Renovation Consultant for BLUPRNT.AI. 
       Your goal is to provide specific, data-driven advice to a homeowner based on their project details.
@@ -103,19 +123,27 @@ export const handler = async (req: Request) => {
       3. If they are missing scope in a specific category, suggest common additions.
       4. Always refer to their specific data when possible.
       5. Do not hallucinate data that isn't provided.
+      
+      Actionable Intelligence:
+      You can suggest specific actions to the user. Use the "actions" field for:
+      - "add_scope": When the user mentions work that isn't in their current scope.
+      - "update_scope": When the user wants to change quantities or finish tiers.
+      - "suggest_photo": When the user asks for a visual appraisal or has reached a milestone.
     `;
 
     const result = await callGemini({
       parts: [{ text: query }],
       systemInstruction,
-      responseMimeType: "text/plain",
+      responseSchema: responseSchema as any,
       temperature: 0.7,
     });
 
+    const parsedResponse = result?.data || JSON.parse(result?.text || '{"reply": "I couldn’t process that.", "actions": []}');
+
     return jsonResponse(
       {
-        reply: result?.text ??
-          "I couldn’t answer that just now. Check your connection and try again in a moment.",
+        reply: parsedResponse.reply,
+        actions: parsedResponse.actions || [],
       },
       200,
       req,

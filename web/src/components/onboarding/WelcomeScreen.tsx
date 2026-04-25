@@ -76,7 +76,7 @@ export function WelcomeScreen() {
   return (
     <PageTransition>
       <div className="flex flex-col items-center text-center space-y-8 py-4 sm:py-10">
-        <div className="space-y-4 max-w-sm">
+        <div className="space-y-4 max-w-sm sm:max-w-xl">
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
