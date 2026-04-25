@@ -20,6 +20,8 @@ export default tseslint.config(
       "**/test-results/**",
       "supabase/functions",
       "mobile/.expo",
+      "mobile/ios",
+      "mobile/android",
       ".expo",
     ],
   },
