@@ -16,6 +16,8 @@ import {
   Boxes,
   Tag,
   Check,
+  Search,
+  ExternalLink,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -140,13 +142,26 @@ export function EstimateScreen() {
           <div className="absolute -inset-4 bg-teal-500/10 blur-2xl rounded-[3rem] -z-10 animate-pulse" />
           <Card className="border-teal-100 shadow-[0_20px_50px_rgba(13,148,136,0.12)] overflow-hidden bg-white/80 backdrop-blur-xl ring-1 ring-white/50">
             <div className="bg-linear-to-b from-teal-50/50 to-transparent p-8 flex flex-col items-center text-center space-y-4">
-              <Badge
-                variant="secondary"
-                className="bg-teal-600 text-white hover:bg-teal-700 h-7 px-3 gap-1.5 shadow-md shadow-teal-200 border-none transition-transform hover:scale-105"
-              >
-                <BadgeCheck className="w-4 h-4" aria-hidden />
-                Confidence: {conf} / 5
-              </Badge>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Badge
+                  variant="secondary"
+                  className="bg-teal-600 text-white hover:bg-teal-700 h-7 px-3 gap-1.5 shadow-md shadow-teal-200 border-none transition-transform hover:scale-105"
+                >
+                  <BadgeCheck className="w-4 h-4" aria-hidden />
+                  Confidence: {conf} / 5
+                </Badge>
+
+                {summary?.grounding_sources &&
+                  summary.grounding_sources.length > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="bg-white/80 text-teal-700 border-teal-200 h-7 px-3 gap-1.5 backdrop-blur-sm shadow-sm"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      Grounded by Google
+                    </Badge>
+                  )}
+              </div>
 
               <div className="space-y-1">
                 <p className="text-xs text-teal-600 font-black uppercase tracking-[0.2em]">
@@ -169,6 +184,7 @@ export function EstimateScreen() {
                   : "This includes labor, materials, and local permits for a standard project."}
               </p>
             </div>
+
             <CardContent className="p-8 pt-0 space-y-6">
               <div className="h-px bg-slate-100 w-full" />
 
@@ -400,9 +416,9 @@ export function EstimateScreen() {
               </div>
             </CardContent>
 
-            {summary?.value_engineering_tips &&
-              summary.value_engineering_tips.length > 0 && (
-                <div className="px-8 pb-8 space-y-4">
+            <div className="px-8 pb-8 space-y-8">
+              {summary?.value_engineering_tips &&
+                summary.value_engineering_tips.length > 0 && (
                   <div className="rounded-2xl bg-teal-50/50 border border-teal-100/50 p-5 space-y-3">
                     <h5 className="text-xs font-black text-teal-700 uppercase tracking-widest flex items-center gap-2">
                       <Wrench className="w-3.5 h-3.5" />
@@ -420,8 +436,41 @@ export function EstimateScreen() {
                       ))}
                     </ul>
                   </div>
-                </div>
-              )}
+                )}
+
+              {summary?.grounding_sources &&
+                summary.grounding_sources.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="h-px bg-slate-100 w-full" />
+                    <div className="space-y-4">
+                      <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <Search className="w-3 h-3" />
+                        Verified Market Sources
+                      </h5>
+                      <div className="flex flex-wrap gap-2">
+                        {summary.grounding_sources.map(
+                          (src: { title: string; url?: string }, i: number) => (
+                            <a
+                              key={i}
+                              href={src.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all group"
+                            >
+                              <span className="text-xs font-bold text-slate-600 group-hover:text-teal-700">
+                                {src.title}
+                              </span>
+                              {src.url && (
+                                <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-teal-500" />
+                              )}
+                            </a>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+            </div>
           </Card>
         </motion.div>
 

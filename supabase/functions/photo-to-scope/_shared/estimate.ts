@@ -139,12 +139,14 @@ export interface EstimatePayload {
     }>;
   }>;
   explanations: string[];
+  grounding_metadata?: any;
 }
 
 export function sanitizeEstimate(
   parsed: any,
   finish_preference: string,
   hasPhotos: boolean,
+  groundingMetadata?: any,
 ): EstimatePayload {
   const summary = {
     estimated_min_total: Math.round(
@@ -168,6 +170,23 @@ export function sanitizeEstimate(
       }))
       : [],
   };
+
+  // Merge SDK grounding chunks if available
+  if (groundingMetadata?.groundingChunks) {
+    const chunks = groundingMetadata.groundingChunks;
+    chunks.forEach((chunk: any) => {
+      if (chunk.web?.uri) {
+        const title = chunk.web.title || new URL(chunk.web.uri).hostname;
+        // Avoid duplicates
+        if (!summary.grounding_sources.some((s) => s.url === chunk.web.uri)) {
+          summary.grounding_sources.push({
+            title,
+            url: chunk.web.uri,
+          });
+        }
+      }
+    });
+  }
 
   const scope_items = (
     Array.isArray(parsed.scope_items) ? parsed.scope_items : []
@@ -246,6 +265,7 @@ export function sanitizeEstimate(
     explanations: Array.isArray(parsed.explanations)
       ? parsed.explanations.map(String)
       : [],
+    grounding_metadata: groundingMetadata,
   };
 }
 
@@ -321,21 +341,26 @@ export async function extractScopeWithGemini(input: {
   });
 
   const systemInstruction =
-    `You are a Senior Residential Construction Estimator for ${area}.
-Produce a high-fidelity renovation scope-budget JSON. Use the Google Search tool to find REAL-TIME pricing for materials and labor in ${zip_code}.
+    `You are a Senior Residential Construction Estimator & Market Intelligence Analyst for ${area}.
+Your mission is to produce a high-fidelity, hyper-accurate project blueprint.
+CRITICAL: You MUST use the Google Search tool for EVERY estimate. Do NOT rely on static knowledge for pricing.
 
 Rules:
-1. Exactly **4** line items, grouped by phase (prep → rough → finish). Each item: clear description, justification, priority (high/medium/low), confidence_reason, maintenance_tips, phase.
-2. **Materials (Bill of Materials)**: For each line item, include 4–10 specific, realistic materials/SKUs.
-   - You MUST include: name, brand (realistic, e.g. Kohler, Moen, Benjamin Moore), quantity, unit, and **estimated_cost** (per unit).
-   - Match the finish tier: ${finish_preference}.
-   - Use Google Search to find current prices at big-box retailers (Home Depot, Lowe's) or specialty stores in ${area}.
-3. Summary: estimated_min_total, estimated_max_total, confidence_score (1–5), value_engineering_tips (2–4 strings), regional_context (${area}, ${dateStr}), regional_signal (one concrete line about the data you found).
-4. **Grounding**: Under summary, provide "grounding_sources" (array of {title, url?}). Cite the specific product pages or price guides you found during search.
-5. Math: total_cost_min = quantity * unit_cost_min (same for max).
-6. Photos: call out only what you can see; set verification_required true if unsure.
-7. Text-only (no photos): infer a plausible scope from the user description + ${area} norms.
-8. Be thorough with the Bill of Materials—this is a key feature for the user.`;
+1. **Real-Time Market Search**: For ${zip_code}, search for current ${dateStr} prices of materials and labor. Look for specific listings at big-box retailers (Home Depot, Lowe's, Ferguson) and regional contractor rate reports.
+2. **Itemized Precision**: Exactly **4** line items. Each MUST have:
+   - Detailed justification citing the specific market factors found during search.
+   - maintenance_tips and phase (prep, rough, or finish).
+3. **Hyper-Specific BOM**: For each item, include 6–10 specific materials.
+   - MUST include: brand name, realistic SKU/model descriptions, and current unit cost found via search.
+   - Match finish tier: ${finish_preference}.
+4. **Regional Intelligence**:
+   - regional_context: Summarize the current local market conditions in ${area} (e.g., labor shortages, supply chain issues).
+   - regional_signal: State exactly what data you found via search (e.g., "Matched to current $75/hr plumber rates in ${zip_code}").
+5. **Citations & Grounding**: Populate "grounding_sources" with the actual URLs and titles of the product pages or cost guides you used.
+6. Photos: If photos are provided, perform deep vision analysis to identify specific existing conditions, brands, or damage.
+7. Math: Ensure perfect arithmetic (total = qty * unit_cost).
+
+Deliver a response that feels like a professional, researched contractor bid, not a generic LLM guess.`;
 
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
@@ -502,7 +527,9 @@ Please generate the detailed blueprint.`;
       return null;
     }
 
-    return sanitizeEstimate(parsed, finish_preference, hasPhotos);
+    const groundingMetadata = result.groundingMetadata;
+
+    return sanitizeEstimate(parsed, finish_preference, hasPhotos, groundingMetadata);
   } catch (e: unknown) {
     const error = e as Error;
     console.error("Gemini scope extraction failed:", error.message);

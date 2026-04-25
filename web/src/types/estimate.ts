@@ -5,6 +5,7 @@ export type EstimateSummary = {
   value_engineering_tips?: string[];
   regional_context?: string;
   regional_signal?: string; // e.g., "Matched to 2026 Material Costs in Austin"
+  grounding_sources?: Array<{ title: string; url?: string }>;
 };
 
 export type ScopeItemPreview = {

@@ -12,6 +12,7 @@ export type GeminiPart =
 export interface GeminiResponse {
   text: string;
   data?: Record<string, unknown>;
+  groundingMetadata?: Record<string, unknown>;
 }
 
 /**
@@ -143,7 +144,9 @@ export async function callGemini(params: {
         data = tryParseJson(text) ?? undefined;
       }
 
-      return { text, data };
+      const groundingMetadata = (response as any).candidates?.[0]?.groundingMetadata;
+
+      return { text, data, groundingMetadata };
     } catch (e: unknown) {
       const error = e as Error;
       console.error(

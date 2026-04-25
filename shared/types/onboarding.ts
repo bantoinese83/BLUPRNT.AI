@@ -27,6 +27,7 @@ export interface OnboardingScopeItem {
     brand?: string;
     quantity?: number | string;
     unit?: string;
+    estimated_cost?: number;
   }>;
   metadata?: {
     materials?: Array<{
@@ -40,6 +41,7 @@ export interface OnboardingScopeItem {
     phase?: string;
     maintenance_tips?: string;
     confidence_reason?: string;
+    estimated_cost?: number;
   };
 }
 
@@ -48,6 +50,10 @@ export interface OnboardingPhotoToScopeResult {
     estimated_min_total: number;
     estimated_max_total: number;
     confidence_score: number;
+    grounding_sources?: Array<{ title: string; url?: string }>;
+    regional_context?: string;
+    regional_signal?: string;
+    value_engineering_tips?: string[];
   };
   scope_items: OnboardingScopeItem[];
   /** True when the Edge function used `getFallbackEstimate` (Gemini returned no payload). */
