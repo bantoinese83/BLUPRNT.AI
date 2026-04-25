@@ -35,10 +35,6 @@ export const identifyUser = (userId: string, email?: string, name?: string) => {
   });
 };
 
-export const resetPostHog = () => {
-  posthog.reset();
-};
-
 export const setAnalyticsEnabled = (enabled: boolean) => {
   localStorage.setItem("bluprnt_analytics_opt_in", enabled ? "true" : "false");
   if (enabled) {

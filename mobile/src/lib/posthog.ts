@@ -25,7 +25,3 @@ export const identifyUser = (userId: string, email?: string, name?: string) => {
     name: name ?? null,
   });
 };
-
-export const resetPostHog = () => {
-  posthog.reset();
-};

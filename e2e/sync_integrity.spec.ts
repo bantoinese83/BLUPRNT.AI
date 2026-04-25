@@ -37,7 +37,7 @@ test.describe("Realtime Sync Integrity", () => {
     await projectDisplay.waitFor({ state: "visible", timeout: 60_000 });
 
     // 3. Get Project ID
-    let activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
+    const activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
     if (!activeProjectId) throw new Error("Could not find project ID in localStorage");
 
     // 4. Authenticate the external client to simulate a mobile app session

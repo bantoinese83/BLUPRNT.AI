@@ -3,7 +3,7 @@
   "ignoreWorkspaces": ["mobile", "shared"],
   "ignore": ["supabase/**", "scripts/**"],
   "ignoreDependencies": ["husky", "vitest"],
-  "ignoreBinaries": ["supabase", "expo"],
+  "ignoreBinaries": ["supabase"],
   "metro": false,
   "expo": false
 }

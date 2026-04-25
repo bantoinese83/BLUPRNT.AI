@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import { dismissOptionalCookies } from "./cookie-consent";
 
 export async function signUpForE2E(page: Page) {

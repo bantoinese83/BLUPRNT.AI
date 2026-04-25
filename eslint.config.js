@@ -31,10 +31,20 @@ export default tseslint.config(
       "mobile/**/*.ts",
       "mobile/**/*.tsx",
       "shared/**/*.ts",
+      "e2e/**/*.ts",
+      "scripts/**/*.mjs",
+      "scripts/**/*.ts",
+      "*.config.js",
+      "*.config.ts",
+      "*.config.cjs",
+      "*.config.mjs",
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
     plugins: {
       "react-hooks": reactHooks,
