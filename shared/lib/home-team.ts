@@ -1,4 +1,4 @@
-import type { InvoiceRow } from "../types/database";
+import type { InvoiceRow } from "../types/database.ts";
 
 export type Contractor = {
   name: string;

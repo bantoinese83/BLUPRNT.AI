@@ -1,4 +1,4 @@
-import type { ScopeRow } from "../types/database";
+import type { ScopeRow } from "../types/database.ts";
 
 export type ReconciliationItem = {
   scope_item_id: string;

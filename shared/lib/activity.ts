@@ -1,4 +1,4 @@
-import type { InvoiceRow, ProjectRow } from "../types/database";
+import type { InvoiceRow, ProjectRow } from "../types/database.ts";
 
 export type ActivityEvent = {
   id: string;

@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "npm:@google/genai@1.46.0";
 
 /**
  * Shared Gemini AI utilities for Supabase Edge Functions.

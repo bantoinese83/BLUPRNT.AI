@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { deriveHomeTeam } from "./home-team";
-import type { InvoiceRow } from "../types/database";
+import { deriveHomeTeam } from "./home-team.ts";
+import type { InvoiceRow } from "../types/database.ts";
 
 describe("deriveHomeTeam", () => {
   it("derives unique contractors with merged totals and contact info", () => {

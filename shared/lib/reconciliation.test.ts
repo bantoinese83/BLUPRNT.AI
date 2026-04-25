@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildReconciliation } from "./reconciliation";
-import type { ScopeRow } from "../types/database";
+import { buildReconciliation } from "./reconciliation.ts";
+import type { ScopeRow } from "../types/database.ts";
 
 describe("buildReconciliation", () => {
   const mockScopes: Partial<ScopeRow>[] = [

@@ -5,8 +5,8 @@ import {
   stageToDb,
   type ProjectTypeOption,
   type StageOption,
-} from "./onboarding-helpers";
-import type { OnboardingPhotoToScopeResult } from "../types/onboarding";
+} from "./onboarding-helpers.ts";
+import type { OnboardingPhotoToScopeResult } from "../types/onboarding.ts";
 
 /**
  * Shared core logic to persist an onboarding project to Supabase.

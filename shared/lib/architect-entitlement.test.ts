@@ -4,7 +4,7 @@ import {
   isArchitectPlanEffective,
   isStripeArchitectSubscriptionEntitled,
   isStripeArchitectUploadPeriodOpen,
-} from "./architect-entitlement";
+} from "./architect-entitlement.ts";
 
 const future = "2099-01-01T00:00:00.000Z";
 const past = "2020-01-01T00:00:00.000Z";

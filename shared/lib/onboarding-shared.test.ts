@@ -6,7 +6,7 @@ import {
   phaseIndexForOnboardingPath,
   ONBOARDING_PHASE_LABELS,
   loadingScreenMessages,
-} from "../constants/onboarding";
+} from "../constants/onboarding.ts";
 
 describe("onboarding shared", () => {
   it("hasValidOnboardingZip accepts five digits", () => {

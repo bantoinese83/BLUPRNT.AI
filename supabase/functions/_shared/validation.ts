@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "https://esm.sh/zod@3.23.8";
 import { UPLOAD_FORM_DOCUMENT_TYPES } from "../../../shared/lib/infer-document-type.ts";
 
 const uuidSchema = z.string().uuid();

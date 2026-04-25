@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { money, formatShortUsDate, getWarrantyStatus } from "./formatters";
+import { money, formatShortUsDate, getWarrantyStatus } from "./formatters.ts";
 
 describe("formatters", () => {
   describe("money", () => {

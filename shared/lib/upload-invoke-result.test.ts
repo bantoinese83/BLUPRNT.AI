@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractUploadFailureFromInvokeResult } from "./upload-invoke-result";
+import { extractUploadFailureFromInvokeResult } from "./upload-invoke-result.ts";
 
 describe("extractUploadFailureFromInvokeResult", () => {
   it("reads error and error_code from data body", () => {

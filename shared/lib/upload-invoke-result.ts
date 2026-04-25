@@ -1,4 +1,4 @@
-import { friendlyDocumentUploadError } from "./user-friendly-errors";
+import { friendlyDocumentUploadError } from "./user-friendly-errors.ts";
 
 export type UploadFailureBody = {
   error?: string;

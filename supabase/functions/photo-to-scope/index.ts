@@ -1,4 +1,4 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
+import "jsr:@supabase/functions-js@2.100.0/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { photoToScopeSchema } from "../_shared/validation.ts";
@@ -259,6 +259,30 @@ Deno.serve(async (req: Request) => {
           updated_at: new Date().toISOString(),
         })
         .eq("id", project_id);
+
+      // 6. Notify user via email
+      try {
+        const [{ data: userRes }, { data: projRes }] = await Promise.all([
+          admin.auth.admin.getUserById(userId),
+          admin.from("projects").select("name").eq("id", project_id).single(),
+        ]);
+
+        if (userRes?.user?.email) {
+          await admin.functions.invoke("send-email", {
+            body: {
+              to: userRes.user.email,
+              template: "project_ready",
+              params: {
+                userName: userRes.user.user_metadata?.full_name || userRes.user.email.split("@")[0],
+                projectName: projRes?.name || "Your project",
+                projectUrl: `https://bluprnt.ai/dashboard?project=${project_id}`,
+              },
+            },
+          });
+        }
+      } catch (emailErr) {
+        console.warn("[photo-to-scope] failed to send completion email", emailErr);
+      }
 
       return jsonResponse(
         {

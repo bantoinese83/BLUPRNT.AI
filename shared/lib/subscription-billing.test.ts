@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   hasDuplicateWebAndStoreSubscriptions,
   architectBillingChannel,
-} from "./subscription-billing";
+} from "./subscription-billing.ts";
 
-import type { UserSubscriptionRow } from "../types/database";
+import type { UserSubscriptionRow } from "../types/database.ts";
 
 describe("subscription-billing shared logic", () => {
   describe("hasDuplicateWebAndStoreSubscriptions", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { partialDashboardLoadMessage } from "./dashboard-partial-load";
+import { partialDashboardLoadMessage } from "./dashboard-partial-load.ts";
 
 describe("partialDashboardLoadMessage", () => {
   it("returns null when nothing failed", () => {

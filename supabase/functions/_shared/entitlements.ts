@@ -5,7 +5,7 @@
  * Project Pass: unlimited invoices for that project while pass is valid.
  */
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { isArchitectQuotaInvoiceType } from "../../../shared/lib/infer-document-type.ts";
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "../../../shared/lib/invoice-quota.ts";
 import {

@@ -4,7 +4,7 @@ import {
   maintenanceDocumentTotal,
   planVsActualNarrative,
   filterInvoicesByLedgerDocumentFilter,
-} from "./plan-vs-actual";
+} from "./plan-vs-actual.ts";
 
 describe("plan-vs-actual shared logic", () => {
   describe("capitalImprovementTotal", () => {

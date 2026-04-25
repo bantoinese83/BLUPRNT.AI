@@ -1,5 +1,5 @@
-import { type LedgerDocumentType } from "./infer-document-type";
-import { ledgerDocumentTypeLabel } from "./ledger-document-labels";
+import { type LedgerDocumentType } from "./infer-document-type.ts";
+import { ledgerDocumentTypeLabel } from "./ledger-document-labels.ts";
 
 /** Consistent order for review modals and mobile pickers (capital / common first). */
 export const LEDGER_DOCUMENT_PICKER_ORDER: LedgerDocumentType[] = [

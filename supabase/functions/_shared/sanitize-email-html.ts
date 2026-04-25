@@ -1,4 +1,4 @@
-import sanitizeHtml from "sanitize-html";
+import sanitizeHtml from "npm:sanitize-html@2.13.1";
 
 /**
  * Strips scripts, event handlers, and other XSS vectors from user-supplied HTML

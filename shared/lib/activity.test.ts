@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { generateActivityEvents, formatRelativeTime } from "./activity";
-import type { InvoiceRow, ProjectRow } from "../types/database";
+import { generateActivityEvents, formatRelativeTime } from "./activity.ts";
+import type { InvoiceRow, ProjectRow } from "../types/database.ts";
 
 describe("activity shared logic", () => {
   describe("generateActivityEvents", () => {

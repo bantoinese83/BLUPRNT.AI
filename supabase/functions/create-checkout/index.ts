@@ -1,5 +1,5 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "stripe";
+import "jsr:@supabase/functions-js@2.100.0/edge-runtime.d.ts";
+import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import {
   assertProjectOwner,

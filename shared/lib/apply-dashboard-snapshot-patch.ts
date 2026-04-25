@@ -1,5 +1,5 @@
-import type { DashboardSnapshot } from "../types/dashboard-snapshot";
-import { emptyDashboardSnapshot } from "./dashboard-snapshot-core";
+import type { DashboardSnapshot } from "../types/dashboard-snapshot.ts";
+import { emptyDashboardSnapshot } from "./dashboard-snapshot-core.ts";
 
 /**
  * Used by web + mobile `useDashboardData` for optimistic cache updates.

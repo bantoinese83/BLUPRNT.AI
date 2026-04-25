@@ -4,7 +4,7 @@ import type {
   InvoiceRow,
   UserSubscriptionRow,
   GalleryItemRow,
-} from "../types/database";
+} from "../types/database.ts";
 
 /** Shape stored in sessionStorage (web) / AsyncStorage (mobile) after a successful dashboard load. */
 export type CachedDashboardPayload = {

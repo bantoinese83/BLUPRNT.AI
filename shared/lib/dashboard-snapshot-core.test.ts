@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   emptyDashboardSnapshot,
   buildDashboardDataForProject,
-} from "./dashboard-snapshot-core";
+} from "./dashboard-snapshot-core.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 describe("dashboard-snapshot-core", () => {

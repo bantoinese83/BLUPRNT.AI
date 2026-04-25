@@ -7,7 +7,7 @@ import {
   isInvoiceStyleOcrType,
   isPlanVsActualDocumentType,
   LEDGER_DOCUMENT_TYPES,
-} from "./infer-document-type";
+} from "./infer-document-type.ts";
 
 describe("coerceLedgerDocumentType", () => {
   it("returns known types case-insensitively", () => {

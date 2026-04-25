@@ -10,15 +10,15 @@ import type {
   UserSubscriptionRow,
   ProjectPassRow,
   GalleryItemRow,
-} from "../types/database";
-import type { DashboardSnapshot } from "../types/dashboard-snapshot";
-import { buildSpendByCategory } from "./spend-by-category";
-import { partialDashboardLoadMessage } from "./dashboard-partial-load";
-import { isArchitectPlanEffective } from "./architect-entitlement";
+} from "../types/database.ts";
+import type { DashboardSnapshot } from "../types/dashboard-snapshot.ts";
+import { buildSpendByCategory } from "./spend-by-category.ts";
+import { partialDashboardLoadMessage } from "./dashboard-partial-load.ts";
+import { isArchitectPlanEffective } from "./architect-entitlement.ts";
 import {
   buildReconciliation,
   type ReconciliationResult,
-} from "./reconciliation";
+} from "./reconciliation.ts";
 
 export function emptyDashboardSnapshot(): DashboardSnapshot {
   return {

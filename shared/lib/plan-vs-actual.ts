@@ -3,8 +3,8 @@
  * Shared across Web and Mobile.
  */
 
-import { isPlanVsActualDocumentType } from "./infer-document-type";
-import { money } from "./formatters";
+import { isPlanVsActualDocumentType } from "./infer-document-type.ts";
+import { money } from "./formatters.ts";
 
 export type InvoiceLike = {
   total: number | null;

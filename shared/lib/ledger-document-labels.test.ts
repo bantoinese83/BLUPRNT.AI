@@ -5,7 +5,7 @@ import {
   ledgerDocumentTypeLabel,
   ledgerDocumentVisualGroup,
   reviewDocumentModalTitle,
-} from "./ledger-document-labels";
+} from "./ledger-document-labels.ts";
 
 describe("ledgerDocumentTypeLabel", () => {
   it("returns mapped labels for known types", () => {

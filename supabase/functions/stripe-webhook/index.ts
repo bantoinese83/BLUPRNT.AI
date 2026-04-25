@@ -1,5 +1,5 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "stripe";
+import "jsr:@supabase/functions-js@2.100.0/edge-runtime.d.ts";
+import Stripe from "https://esm.sh/stripe@14?target=denonext";
 import { getServiceClient } from "../_shared/auth.ts";
 import { logEdge } from "../_shared/log.ts";
 
@@ -112,6 +112,25 @@ export const handler = async (req: Request) => {
                 detail: upsertErr.message,
               });
               return new Response("Database error", { status: 500 });
+            }
+
+            // Notify user
+            try {
+              const { data: userRes } = await admin.auth.admin.getUserById(targetUserId);
+              if (userRes?.user?.email) {
+                await admin.functions.invoke("send-email", {
+                  body: {
+                    to: userRes.user.email,
+                    template: "subscription_active",
+                    params: {
+                      userName: userRes.user.user_metadata?.full_name || userRes.user.email.split("@")[0],
+                      planName: "Architect",
+                    },
+                  },
+                });
+              }
+            } catch (emailErr) {
+              console.warn("[stripe-webhook] failed to send confirmation email", emailErr);
             }
           }
         } else if (session.mode === "payment" && session.metadata?.project_id) {

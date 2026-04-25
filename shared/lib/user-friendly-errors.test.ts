@@ -3,7 +3,7 @@ import {
   friendlyAuthError,
   friendlyDocumentUploadError,
   friendlyPostgrestMutationError,
-} from "./user-friendly-errors";
+} from "./user-friendly-errors.ts";
 
 describe("user-friendly-errors shared logic", () => {
   describe("friendlyAuthError", () => {

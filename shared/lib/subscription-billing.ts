@@ -1,5 +1,5 @@
-import type { UserSubscriptionRow } from "../types/database";
-import { isArchitectPlanEffective } from "./architect-entitlement";
+import type { UserSubscriptionRow } from "../types/database.ts";
+import { isArchitectPlanEffective } from "./architect-entitlement.ts";
 
 /** User may be paying for Architect on both Stripe (web) and the app store. */
 export function hasDuplicateWebAndStoreSubscriptions(

@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F172A"
+      "backgroundColor": "#1D5C63"
     },
     "ios": {
       "supportsTablet": false,
@@ -20,80 +20,6 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
-    },
-    "android": {
-      "package": "ai.bluprnt.mobile",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "bluprnt.ai",
-              "pathPrefix": "/onboarding"
-            },
-            {
-              "scheme": "https",
-              "host": "bluprnt.ai",
-              "pathPrefix": "/reset-password"
-            },
-            {
-              "scheme": "https",
-              "host": "bluprnt.ai",
-              "pathPrefix": "/dashboard"
-            },
-            {
-              "scheme": "https",
-              "host": "bluprnt.ai",
-              "pathPrefix": "/project"
-            },
-            {
-              "scheme": "https",
-              "host": "bluprnt.ai",
-              "pathPrefix": "/share"
-            },
-            {
-              "scheme": "https",
-              "host": "www.bluprnt.ai",
-              "pathPrefix": "/onboarding"
-            },
-            {
-              "scheme": "https",
-              "host": "www.bluprnt.ai",
-              "pathPrefix": "/reset-password"
-            },
-            {
-              "scheme": "https",
-              "host": "www.bluprnt.ai",
-              "pathPrefix": "/dashboard"
-            },
-            {
-              "scheme": "https",
-              "host": "www.bluprnt.ai",
-              "pathPrefix": "/project"
-            },
-            {
-              "scheme": "https",
-              "host": "www.bluprnt.ai",
-              "pathPrefix": "/share"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ],
-      "adaptiveIcon": {
-        "backgroundColor": "#f9fafb",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
-      ]
     },
     "web": {
       "bundler": "metro",
@@ -104,9 +30,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon.png",
+          "image": "./assets/images/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#1D5C63"
         }
       ],
       "expo-router",
