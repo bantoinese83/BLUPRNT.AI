@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { openCookieSettings } from "@/lib/cookie-consent";
 import {
   WEB_APP_PATH_PRIVACY,
+  WEB_APP_PATH_SUPPORT,
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,12 @@ export function AppSlimFooter({
           >
             Questions
           </Link>
+          <Link
+            to={WEB_APP_PATH_SUPPORT}
+            className="transition-colors hover:text-slate-900"
+          >
+            Support
+          </Link>
           <a
             href="mailto:connect@monarch-labs.com"
             className="transition-colors hover:text-slate-900"
@@ -69,9 +76,32 @@ export function AppSlimFooter({
             Cookie settings
           </button>
         </div>
-        <p className="text-center text-[12px] font-bold text-slate-600 sm:text-right">
-          © {new Date().getFullYear()} BLUPRNT
-        </p>
+
+        <div className="flex flex-col items-center gap-2 sm:items-end">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md border border-slate-100 bg-white p-0.5 shadow-xs">
+              <img
+                src="/bluprnt_logo.webp"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <p className="text-[12px] font-bold text-slate-900">
+              © {new Date().getFullYear()} BLUPRNT
+            </p>
+          </div>
+          <p className="text-[10px] text-slate-500">
+            Built by{" "}
+            <a
+              href="https://www.monarch-labs.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-slate-900 hover:text-teal-600 transition-colors"
+            >
+              Monarch Labs
+            </a>
+          </p>
+        </div>
       </nav>
     </footer>
   );
