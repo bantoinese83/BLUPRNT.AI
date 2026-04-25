@@ -161,7 +161,7 @@ export default function Onboarding() {
           className={cn(
             "relative w-full transition-all duration-500",
             location.pathname === "/onboarding/estimate"
-              ? "max-w-md lg:max-w-3xl"
+              ? "max-w-md lg:max-w-6xl"
               : "max-w-md lg:max-w-2xl",
           )}
         >

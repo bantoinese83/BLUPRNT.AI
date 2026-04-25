@@ -217,31 +217,52 @@ export function EstimateScreen() {
                           Cost Breakdown
                         </h4>
                       </div>
-                      <div className="divide-y divide-slate-200/60">
-                        {estimate.scope_items.map((item, i) => (
-                          <div
-                            key={i}
-                            className="py-4 first:pt-0 last:pb-0 flex justify-between gap-4"
-                          >
-                            <div className="space-y-1">
-                              <p className="text-sm font-bold text-slate-900">
-                                {item.category}
-                              </p>
-                              <p className="text-xs text-slate-500 leading-relaxed max-w-md">
-                                {item.description}
-                              </p>
-                              <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                                {item.quantity} {item.unit}
-                              </p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="text-sm font-black text-slate-900 tracking-tight">
-                                {formatMoney(item.total_cost_min || 0)} –{" "}
-                                {formatMoney(item.total_cost_max || 0)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="overflow-x-auto -mx-4 sm:mx-0">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-200">
+                              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 sm:pl-0">
+                                Category
+                              </th>
+                              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
+                                Scope & Details
+                              </th>
+                              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pr-4 sm:pr-0 text-right">
+                                Projected Range
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {estimate.scope_items.map((item, i) => (
+                              <tr
+                                key={i}
+                                className="group hover:bg-slate-50/50 transition-colors"
+                              >
+                                <td className="py-4 pl-4 sm:pl-0">
+                                  <p className="text-sm font-bold text-slate-900">
+                                    {item.category}
+                                  </p>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-slate-500 leading-relaxed max-w-md">
+                                      {item.description}
+                                    </p>
+                                    <p className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">
+                                      {item.quantity} {item.unit}
+                                    </p>
+                                  </div>
+                                </td>
+                                <td className="py-4 pr-4 sm:pr-0 text-right">
+                                  <p className="text-sm font-black text-slate-900 tracking-tight">
+                                    {formatMoney(item.total_cost_min || 0)} –{" "}
+                                    {formatMoney(item.total_cost_max || 0)}
+                                  </p>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
 
@@ -269,60 +290,85 @@ export function EstimateScreen() {
                             Items
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {estimate.scope_items
-                            .flatMap((s) => s.metadata?.materials || [])
-                            .map((m, i) => (
-                              <div
-                                key={i}
-                                className="group relative flex flex-col p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-teal-100 transition-all duration-300"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-teal-50 transition-colors">
-                                    <Boxes className="w-5 h-5 text-slate-400 group-hover:text-teal-500 transition-colors" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <p className="text-sm font-bold text-slate-900 leading-tight">
-                                        {m.name}
-                                      </p>
-                                      {m.estimated_cost && (
-                                        <p className="text-sm font-black text-teal-600 shrink-0">
-                                          {formatMoney(m.estimated_cost)}
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
-                                      {m.brand && (
-                                        <div className="flex items-center gap-1">
+                        <div className="overflow-x-auto -mx-4 sm:mx-0">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-200">
+                                <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 sm:pl-0">
+                                  Material Item
+                                </th>
+                                <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
+                                  Brand
+                                </th>
+                                <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
+                                  Quantity
+                                </th>
+                                <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4 text-right">
+                                  Unit Price
+                                </th>
+                                <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pr-4 sm:pr-0 text-right">
+                                  Total
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {estimate.scope_items
+                                .flatMap((s) => s.metadata?.materials || [])
+                                .map((m, i) => (
+                                  <tr
+                                    key={i}
+                                    className="group hover:bg-slate-50/50 transition-colors"
+                                  >
+                                    <td className="py-4 pl-4 sm:pl-0">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-white transition-colors border border-slate-100">
+                                          <Boxes className="w-4 h-4 text-slate-400" />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-900 leading-tight">
+                                          {m.name}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      {m.brand ? (
+                                        <div className="flex items-center gap-1.5">
                                           <Tag className="w-3 h-3 text-teal-500" />
                                           <span className="text-[10px] font-black text-teal-600 uppercase tracking-tight">
                                             {m.brand}
                                           </span>
                                         </div>
-                                      )}
-                                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100">
-                                        <span className="text-[10px] font-bold text-slate-500">
-                                          QTY: {m.quantity} {m.unit || "units"}
+                                      ) : (
+                                        <span className="text-[10px] font-bold text-slate-300 uppercase">
+                                          Standard
                                         </span>
-                                      </div>
-                                      {m.estimated_cost &&
-                                        m.quantity &&
-                                        m.quantity > 1 && (
-                                          <span className="text-[10px] font-medium text-slate-400 italic">
-                                            Total:{" "}
-                                            {formatMoney(
+                                      )}
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100/50">
+                                        {m.quantity} {m.unit || "units"}
+                                      </span>
+                                    </td>
+                                    <td className="py-4 px-4 text-right">
+                                      <span className="text-sm font-medium text-slate-400">
+                                        {m.estimated_cost
+                                          ? formatMoney(m.estimated_cost)
+                                          : "—"}
+                                      </span>
+                                    </td>
+                                    <td className="py-4 pr-4 sm:pr-0 text-right">
+                                      <span className="text-sm font-black text-slate-900 tracking-tight">
+                                        {m.estimated_cost && m.quantity
+                                          ? formatMoney(
                                               m.estimated_cost *
                                                 Number(m.quantity),
-                                            )}
-                                          </span>
-                                        )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                                            )
+                                          : "—"}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     )}
@@ -335,7 +381,7 @@ export function EstimateScreen() {
                       <CheckCircle2 className="w-4 h-4 text-teal-500" />
                       Analysis Breakdown
                     </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-3">
                       {Array.from(new Set(bullets)).map((item, i) => (
                         <motion.div
                           initial={{ opacity: 0, x: -10 }}
