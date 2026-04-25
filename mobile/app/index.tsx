@@ -77,7 +77,7 @@ export default function LandingScreen() {
     setActiveSlide((prev) => Math.max(0, prev - 1));
   };
 
-  const slide = slides[activeSlide];
+  const slide = slides[activeSlide]!;
 
   if (loading) {
     return (

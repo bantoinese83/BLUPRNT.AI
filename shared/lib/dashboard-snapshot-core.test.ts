@@ -138,7 +138,7 @@ describe("dashboard-snapshot-core", () => {
         m.fetchDashboardProjectsList(mockSupabase, "u1"),
       );
       expect(res.rows).toHaveLength(1);
-      expect(res.rows[0].id).toBe("p1");
+      expect(res.rows[0]!.id).toBe("p1");
     });
 
     it("returns error when fetch fails", async () => {
@@ -165,12 +165,10 @@ describe("dashboard-snapshot-core", () => {
         from: vi.fn().mockReturnValue({
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi
-            .fn()
-            .mockResolvedValue({
-              data: { last_active_project_id: "p1" },
-              error: null,
-            }),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { last_active_project_id: "p1" },
+            error: null,
+          }),
         }),
       } as unknown as SupabaseClient;
 

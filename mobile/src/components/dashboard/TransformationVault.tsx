@@ -165,6 +165,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
     }
   };
 
+  const activeSet = sets[activeSetIndex]!;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -216,10 +218,10 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
         <PhotoSlot
           label="Baseline"
           icon={<History size={10} color="white" />}
-          item={sets[activeSetIndex].before}
+          item={activeSet.before}
           signedUrl={
-            sets[activeSetIndex].before
-              ? signedUrls[sets[activeSetIndex].before!.storage_path]
+            activeSet.before
+              ? (signedUrls[activeSet.before.storage_path] ?? null)
               : null
           }
           uploading={uploading === `before-${activeSetIndex}`}
@@ -236,10 +238,10 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
               fill={Theme.colors.brand.primary}
             />
           }
-          item={sets[activeSetIndex].after}
+          item={activeSet.after}
           signedUrl={
-            sets[activeSetIndex].after
-              ? signedUrls[sets[activeSetIndex].after!.storage_path]
+            activeSet.after
+              ? (signedUrls[activeSet.after.storage_path] ?? null)
               : null
           }
           uploading={uploading === `after-${activeSetIndex}`}

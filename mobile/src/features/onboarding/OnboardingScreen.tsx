@@ -303,7 +303,7 @@ export default function OnboardingScreen() {
                 style={onboardingStyles.phaseLabel}
                 numberOfLines={1}
               >
-                {ONBOARDING_PHASES[phaseIndexForStep(step)].label}
+                {ONBOARDING_PHASES[phaseIndexForStep(step)]!.label}
               </MotiText>
             </AnimatePresence>
           </View>

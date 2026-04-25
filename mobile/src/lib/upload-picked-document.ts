@@ -44,7 +44,7 @@ export async function uploadPickedDocumentToProject(
   let lastId: string | undefined;
 
   for (let i = 0; i < fileCount; i++) {
-    const file = options.files[i];
+    const file = options.files[i]!;
     const mime = file.mimeType || "image/jpeg";
     const kind = mime.includes("pdf") ? "pdf" : "image";
 

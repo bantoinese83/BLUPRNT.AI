@@ -40,9 +40,12 @@ Storage.prototype.clear = function (this: object) {
   Object.keys(s).forEach((k) => delete s[k]);
 };
 
-Storage.prototype.getItem = function (this: object, key: string) {
+Storage.prototype.getItem = function (
+  this: object,
+  key: string,
+): string | null {
   const s = _getStore(this);
-  return key in s ? s[key] : null;
+  return key in s ? s[key]! : null;
 };
 
 Storage.prototype.setItem = function (

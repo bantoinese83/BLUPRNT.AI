@@ -45,8 +45,8 @@ Deno.test("sanitizeEstimate - enforces itemized math", () => {
   const result = sanitizeEstimate(input, "mid", false);
 
   // Math should be corrected: 10 * 100 = 1000
-  assertEquals(result.scope_items[0].total_cost_min, 1000);
-  assertEquals(result.scope_items[0].total_cost_max, 2000);
+  assertEquals(result.scope_items[0]!.total_cost_min, 1000);
+  assertEquals(result.scope_items[0]!.total_cost_max, 2000);
 });
 
 Deno.test("sanitizeEstimate - handles extreme values gracefully", () => {
@@ -109,7 +109,7 @@ Deno.test("sanitizeEstimate - handles missing or corrupt summary", () => {
   assertEquals(result.summary.estimated_min_total, 50);
   assertEquals(result.summary.estimated_max_total, 100);
   assertEquals(result.summary.confidence_score, 3); // Default
-  assertEquals(result.scope_items[0].source, "photo");
+  assertEquals(result.scope_items[0]!.source, "photo");
 });
 
 Deno.test("sanitizeEstimate - sanitizes materials list", () => {
@@ -130,6 +130,6 @@ Deno.test("sanitizeEstimate - sanitizes materials list", () => {
 
   const result = sanitizeEstimate(input as any, "mid", false);
 
-  assertEquals(result.scope_items[0].materials?.[0].quantity, 2);
-  assertEquals(result.scope_items[0].materials?.[1].name, "Material");
+  assertEquals(result.scope_items[0]!.materials?.[0]!.quantity, 2);
+  assertEquals(result.scope_items[0]!.materials?.[1]!.name, "Material");
 });

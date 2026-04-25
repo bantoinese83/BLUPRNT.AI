@@ -32,22 +32,22 @@ describe("generateActivityEvents", () => {
     );
 
     expect(events.length).toBe(3); // 2 invoices + 1 project creation
-    expect(events[0].id).toBe("inv-2");
-    expect(events[1].id).toBe("inv-1");
-    expect(events[2].id).toBe("init-proj-1");
+    expect(events[0]!.id).toBe("inv-2");
+    expect(events[1]!.id).toBe("inv-1");
+    expect(events[2]!.id).toBe("init-proj-1");
   });
 
   it("handles empty invoices", () => {
     const events = generateActivityEvents(mockProject as ProjectRow, []);
     expect(events.length).toBe(1);
-    expect(events[0].type).toBe("project_created");
+    expect(events[0]!.type).toBe("project_created");
   });
 
   it("handles missing project name or totals", () => {
     const minimalProject = { id: "p-min", name: "Min" } as Partial<ProjectRow>;
     const events = generateActivityEvents(minimalProject as ProjectRow, []);
-    expect(events[0].description).toContain("Blueprint for 'Min' was created");
-    expect(events[0].description).not.toContain("baseline");
+    expect(events[0]!.description).toContain("Blueprint for 'Min' was created");
+    expect(events[0]!.description).not.toContain("baseline");
   });
 
   it("handles missing vendor name or invoice total", () => {
@@ -58,8 +58,8 @@ describe("generateActivityEvents", () => {
     const events = generateActivityEvents(mockProject as ProjectRow, [
       minimalInvoice as InvoiceRow,
     ]);
-    expect(events[0].description).toContain("Vendor invoice");
-    expect(events[0].description).toContain("unspecified amount");
+    expect(events[0]!.description).toContain("Vendor invoice");
+    expect(events[0]!.description).toContain("unspecified amount");
   });
 
   it("limits to 5 invoices", () => {

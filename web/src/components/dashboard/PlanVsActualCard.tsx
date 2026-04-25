@@ -60,7 +60,7 @@ export function PlanVsActualCard({
     estimatedMax,
     capital,
   );
-  const tone = toneStyles[kind] ?? toneStyles.no_estimate;
+  const tone = toneStyles[kind]! ?? toneStyles.no_estimate!;
 
   return (
     <motion.div

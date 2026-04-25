@@ -28,7 +28,7 @@ describe("generateActivityEvents", () => {
   it("includes invoice and project events sorted by time", () => {
     const events = generateActivityEvents(project, [invoice]);
     expect(events.length).toBeGreaterThanOrEqual(2);
-    expect(events[0].timestamp >= events[events.length - 1].timestamp).toBe(
+    expect(events[0]!.timestamp >= events[events.length - 1]!.timestamp).toBe(
       true,
     );
   });

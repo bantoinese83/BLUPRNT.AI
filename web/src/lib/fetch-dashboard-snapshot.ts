@@ -66,7 +66,7 @@ export async function fetchDashboardSnapshot(options?: {
 
   if (rows.length > 0) {
     if (!projectId || !rows.find((p) => p.id === projectId)) {
-      projectId = rows[0].id;
+      projectId = rows[0]!.id;
     }
 
     const built = await buildDashboardDataForProject(supabase, {

@@ -39,7 +39,7 @@ function getStrength(password: string): {
     5: { label: "Very strong", color: "bg-emerald-600" },
   };
 
-  const { label, color } = labels[score];
+  const { label, color } = labels[score]!;
   return { score, label, color, tips: tips.slice(0, 2) };
 }
 

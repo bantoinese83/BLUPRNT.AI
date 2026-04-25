@@ -54,7 +54,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
       <div className="flex w-full justify-between items-end px-1 gap-3">
         <div className="space-y-1 min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600/60 leading-none">
-            {ONBOARDING_WEB_PHASES[phaseIndex].label} — {phaseIndex + 1} of{" "}
+            {ONBOARDING_WEB_PHASES[phaseIndex]!.label} — {phaseIndex + 1} of{" "}
             {phasesTotal}
           </p>
           <h1 className="text-lg sm:text-xl font-black italic tracking-tighter text-slate-900 leading-none truncate">

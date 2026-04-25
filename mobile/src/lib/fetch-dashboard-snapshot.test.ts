@@ -225,6 +225,6 @@ describe("fetchMobileDashboardSnapshot", () => {
 
     const snap = await fetchMobileDashboardSnapshot();
     expect(snap.galleryItems).toHaveLength(1);
-    expect(snap.galleryItems[0].id).toBe("g1");
+    expect(snap.galleryItems[0]!.id).toBe("g1");
   });
 });

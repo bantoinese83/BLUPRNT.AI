@@ -56,7 +56,7 @@ export function AddAssetSheet({
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      setImageUri(result.assets[0]!.uri);
       Haptics.selectionAsync();
     }
   };
@@ -74,7 +74,7 @@ export function AddAssetSheet({
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      setImageUri(result.assets[0]!.uri);
       Haptics.selectionAsync();
     }
   };

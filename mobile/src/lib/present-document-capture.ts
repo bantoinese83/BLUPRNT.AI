@@ -34,12 +34,13 @@ async function openCamera(
     quality: 0.8,
   });
 
-  if (!result.canceled && result.assets[0]) {
+  if (!result.canceled && result.assets && result.assets[0]) {
+    const asset = result.assets[0]!;
     onPickedFiles([
       {
-        uri: result.assets[0].uri,
+        uri: asset.uri,
         mimeType: "image/jpeg",
-        fileName: result.assets[0].fileName ?? undefined,
+        fileName: asset.fileName ?? undefined,
       },
     ]);
   }
@@ -59,18 +60,16 @@ async function openPhotoLibrary(
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],
-    quality: 0.85,
+    quality: 0.8,
     allowsMultipleSelection: true,
   });
 
-  if (!result.canceled && result.assets.length) {
+  if (!result.canceled && result.assets) {
     onPickedFiles(
-      result.assets.map((asset) => ({
-        uri: asset.uri,
-        mimeType: asset.mimeType?.startsWith("image/")
-          ? asset.mimeType
-          : "image/jpeg",
-        fileName: asset.fileName ?? undefined,
+      result.assets.map((a) => ({
+        uri: a.uri,
+        mimeType: a.mimeType ?? "image/jpeg",
+        fileName: a.fileName ?? undefined,
       })),
     );
   }
@@ -84,7 +83,7 @@ async function openDocumentPicker(
     multiple: true,
   });
 
-  if (!result.canceled && result.assets.length) {
+  if (!result.canceled && result.assets && result.assets.length > 0) {
     onPickedFiles(
       result.assets.map((asset) => ({
         uri: asset.uri,

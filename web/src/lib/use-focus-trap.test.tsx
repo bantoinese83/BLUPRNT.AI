@@ -113,7 +113,7 @@ describe("useFocusTrap", () => {
 
     const trap = screen.getByTestId("trap");
     const buttons = screen.getAllByRole("button");
-    buttons[1].focus();
+    buttons[1]!.focus();
     fireEvent.keyDown(trap, { key: "Tab" });
     expect(document.activeElement).toBe(buttons[0]);
   });
@@ -128,7 +128,7 @@ describe("useFocusTrap", () => {
 
     const trap = screen.getByTestId("trap");
     const buttons = screen.getAllByRole("button");
-    buttons[0].focus();
+    buttons[0]!.focus();
     fireEvent.keyDown(trap, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(buttons[1]);
   });

@@ -72,8 +72,11 @@ export function buildReconciliation(
       };
     }
 
-    itemMap[scope.id].total_billed += amount;
-    itemMap[scope.id].invoice_count += 1;
+    const recon = itemMap[scope.id];
+    if (recon) {
+      recon.total_billed += amount;
+      recon.invoice_count += 1;
+    }
     result.total_reconciled += amount;
   }
 

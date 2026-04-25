@@ -123,7 +123,7 @@ export function VisionCapture({
               mediaTypes: ["images"],
               quality: 0.8,
             });
-            if (!result.canceled) setPhotos([...photos, result.assets[0].uri]);
+            if (!result.canceled) setPhotos([...photos, result.assets[0]!.uri]);
           }}
         >
           <View

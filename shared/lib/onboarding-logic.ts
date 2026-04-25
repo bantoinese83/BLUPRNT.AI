@@ -42,7 +42,7 @@ export async function sharedSaveOnboardingProject(params: {
     .eq("postal_code", resolvedZip)
     .limit(1);
 
-  if (matchedProps?.length) {
+  if (matchedProps && matchedProps[0]) {
     propertyId = matchedProps[0].id;
   } else {
     const { data: prop, error: pErr } = await supabase

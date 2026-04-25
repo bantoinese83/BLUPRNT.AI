@@ -134,7 +134,7 @@ export function AwarenessProvider({
     // 4. Next Best Action
     const nextAction =
       newInsights.length > 0
-        ? newInsights[0].actionLabel || "Review Insights"
+        ? newInsights[0]!.actionLabel || "Review Insights"
         : null;
 
     return {

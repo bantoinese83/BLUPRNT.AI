@@ -40,7 +40,7 @@ describe("deriveHomeTeam", () => {
 
     const electric = team.find((t) => t.name === "Electric Pro");
     expect(electric?.total_billed).toBe(2000);
-    expect(team[0].name).toBe("Electric Pro"); // sorted by billed descending
+    expect(team[0]!.name).toBe("Electric Pro"); // sorted by billed descending
   });
 
   it("returns empty array for empty input", () => {

@@ -116,7 +116,7 @@ export function AwarenessProvider({
 
     const nextAction =
       newInsights.length > 0
-        ? newInsights[0].actionLabel || "Review Insights"
+        ? newInsights[0]!.actionLabel || "Review Insights"
         : null;
 
     return {

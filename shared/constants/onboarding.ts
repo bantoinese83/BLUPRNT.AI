@@ -91,8 +91,9 @@ export const ONBOARDING_WEB_PHASES = [
 
 export function phaseIndexForOnboardingPath(pathname: string): number {
   for (let i = ONBOARDING_WEB_PHASES.length - 1; i >= 0; i--) {
-    for (const p of ONBOARDING_WEB_PHASES[i].paths) {
-      if (p === pathname) return i;
+    const phase = ONBOARDING_WEB_PHASES[i];
+    if (phase && phase.paths.some((p) => p === pathname)) {
+      return i;
     }
   }
   return 0;

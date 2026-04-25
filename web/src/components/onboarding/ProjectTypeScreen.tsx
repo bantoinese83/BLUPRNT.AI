@@ -47,7 +47,7 @@ export function ProjectTypeScreen() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = parseInt(e.key);
       if (key >= 1 && key <= options.length) {
-        setProjectType(options[key - 1]);
+        setProjectType(options[key - 1]!);
       }
       if (e.key === "Enter" && projectType) {
         navigate("/onboarding/location");

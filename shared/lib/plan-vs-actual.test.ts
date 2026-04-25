@@ -110,13 +110,13 @@ describe("plan-vs-actual shared logic", () => {
     it("returns only capital when filter is capital", () => {
       const res = filterInvoicesByLedgerDocumentFilter(invoices, "capital");
       expect(res).toHaveLength(1);
-      expect(res[0].id).toBe(1);
+      expect(res[0]!.id).toBe(1);
     });
 
     it("returns only maintenance when filter is maintenance", () => {
       const res = filterInvoicesByLedgerDocumentFilter(invoices, "maintenance");
       expect(res).toHaveLength(1);
-      expect(res[0].id).toBe(2);
+      expect(res[0]!.id).toBe(2);
     });
   });
 });

@@ -38,7 +38,7 @@ describe("reportClientError", () => {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
     expect(spy).toHaveBeenCalledTimes(1);
-    const raw = spy.mock.calls[0][0];
+    const raw = spy.mock.calls[0]![0];
     expect(typeof raw).toBe("string");
     const parsed = JSON.parse(raw as string) as {
       eventId: string;
@@ -67,7 +67,7 @@ describe("reportClientError", () => {
     // Note: mockCaptureException might not be called if initialized is false in the test environment
     // But the eventId fallback and console.error should work.
 
-    const raw = spy.mock.calls[0][0] as string;
+    const raw = spy.mock.calls[0]![0] as string;
     expect(JSON.parse(raw).source).toBe("checkout");
     spy.mockRestore();
   });

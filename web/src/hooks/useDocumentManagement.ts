@@ -149,7 +149,7 @@ export function useDocumentManagement({
     let lastServerDocType: LedgerDocumentType | null = null;
 
     for (let i = 0; i < fileArray.length; i++) {
-      const file = fileArray[i];
+      const file = fileArray[i]!;
 
       if (fileArray.length > 1) {
         setBatchStatus(`Uploading ${i + 1} of ${fileArray.length}...`);

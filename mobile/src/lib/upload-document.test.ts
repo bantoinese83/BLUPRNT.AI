@@ -58,7 +58,7 @@ describe("uploadDocumentWithType", () => {
     expect(result.invoice_id).toBe("inv-1");
     expect(result.documentType).toBe("quote");
     expect(invokeFunction).toHaveBeenCalled();
-    const call = vi.mocked(invokeFunction).mock.calls[0];
+    const call = vi.mocked(invokeFunction).mock.calls[0]!;
     const body = call[1]?.body as FormData;
     expect(body.get("document_type")).toBe("auto");
   });

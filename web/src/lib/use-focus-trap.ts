@@ -43,7 +43,7 @@ export function useFocusTrap(
 
     const list = collectFocusables(root);
     if (list.length > 0) {
-      list[0].focus();
+      list[0]!.focus();
     } else {
       if (!root.hasAttribute("tabindex")) {
         root.setAttribute("tabindex", "-1");
@@ -55,8 +55,8 @@ export function useFocusTrap(
       if (e.key !== "Tab") return;
       const focusables = collectFocusables(root);
       if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
       if (e.shiftKey) {
         if (document.activeElement === first) {
           e.preventDefault();

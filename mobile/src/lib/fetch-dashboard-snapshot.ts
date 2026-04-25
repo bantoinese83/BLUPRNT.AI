@@ -87,16 +87,17 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
   }
 
   if (rows.length > 0) {
+    const firstRow = rows[0]!;
     if (!projectId) {
-      projectId = rows[0].id;
+      projectId = firstRow.id;
       await AsyncStorage.setItem("bluprnt_project_id", projectId as string);
     }
 
     let project: ProjectRow | null =
       rows.find((p) => p.id === projectId) ?? null;
     if (!project) {
-      projectId = rows[0].id;
-      project = rows[0];
+      projectId = firstRow.id;
+      project = firstRow;
       await AsyncStorage.setItem("bluprnt_project_id", projectId as string);
     }
 

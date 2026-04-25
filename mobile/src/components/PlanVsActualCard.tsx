@@ -67,7 +67,7 @@ export function PlanVsActualCard({
     estimatedMax,
     capital,
   );
-  const tone = toneForKind[kind] ?? toneForKind.no_estimate;
+  const tone = (toneForKind[kind] ?? toneForKind.no_estimate)!;
 
   return (
     <GlassCard

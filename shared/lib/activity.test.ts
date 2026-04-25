@@ -35,9 +35,9 @@ describe("activity shared logic", () => {
 
     it("sorts events by recency (newest first)", () => {
       const events = generateActivityEvents(mockProject, mockInvoices);
-      expect(events[0].id).toBe("inv-i2"); // Apr 22
-      expect(events[1].id).toBe("inv-i1"); // Apr 21
-      expect(events[2].id).toBe("init-p1"); // Apr 20
+      expect(events[0]!.id).toBe("inv-i2"); // Apr 22
+      expect(events[1]!.id).toBe("inv-i1"); // Apr 21
+      expect(events[2]!.id).toBe("init-p1"); // Apr 20
     });
 
     it("limits invoice events to the 5 most recent", () => {

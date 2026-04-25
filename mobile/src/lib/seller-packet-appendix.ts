@@ -9,8 +9,8 @@ import type { InvoiceRow, ScopeRow } from "@shared/types/database";
 
 function uint8ToBase64(arr: Uint8Array): string {
   let binary = "";
-  for (let i = 0; i < arr.byteLength; i++) {
-    binary += String.fromCharCode(arr[i]);
+  for (const byte of arr) {
+    binary += String.fromCharCode(byte);
   }
   return btoa(binary);
 }

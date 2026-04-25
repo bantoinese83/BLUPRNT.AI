@@ -405,13 +405,13 @@ export function TransformationVault({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
         <PhotoSlot
-          key={sets[activeSetIndex].before?.id || `before-${activeSetIndex}`}
+          key={sets[activeSetIndex]!.before?.id || `before-${activeSetIndex}`}
           label="Baseline"
           icon={<History className="w-3 h-3 text-white" />}
-          item={sets[activeSetIndex].before}
+          item={sets[activeSetIndex]!.before}
           signedUrl={
-            sets[activeSetIndex].before
-              ? signedUrls[sets[activeSetIndex].before!.storage_path]
+            sets[activeSetIndex]!.before
+              ? (signedUrls[sets[activeSetIndex]!.before!.storage_path] ?? null)
               : null
           }
           uploading={uploading === `before-${activeSetIndex}`}
@@ -424,13 +424,13 @@ export function TransformationVault({
           error={false}
         />
         <PhotoSlot
-          key={sets[activeSetIndex].after?.id || `after-${activeSetIndex}`}
+          key={sets[activeSetIndex]!.after?.id || `after-${activeSetIndex}`}
           label="Current"
           icon={<Activity className="w-3 h-3 text-teal-400" />}
-          item={sets[activeSetIndex].after}
+          item={sets[activeSetIndex]!.after}
           signedUrl={
-            sets[activeSetIndex].after
-              ? signedUrls[sets[activeSetIndex].after!.storage_path]
+            sets[activeSetIndex]!.after
+              ? (signedUrls[sets[activeSetIndex]!.after!.storage_path] ?? null)
               : null
           }
           uploading={uploading === `after-${activeSetIndex}`}

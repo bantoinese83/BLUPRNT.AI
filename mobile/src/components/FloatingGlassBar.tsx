@@ -95,7 +95,7 @@ export function FloatingGlassBar({
         <View style={styles.content}>
           <View style={styles.side}>
             {leftRoutes.map((route) => {
-              const focused = state.routes[state.index]?.key === route.key;
+              const focused = state.routes[state.index]!.key === route.key;
               const asset = TAB_ASSETS[route.name as TabIconRoute];
               return (
                 <TabButton
@@ -103,7 +103,7 @@ export function FloatingGlassBar({
                   focused={focused}
                   asset={asset}
                   label={
-                    (descriptors[route.key].options.title as string) ||
+                    (descriptors[route.key]!.options.title as string) ||
                     route.name
                   }
                   onPress={() => pressTab(route.key, route.name, focused)}
@@ -124,7 +124,7 @@ export function FloatingGlassBar({
 
           <View style={styles.side}>
             {rightRoutes.map((route) => {
-              const focused = state.routes[state.index]?.key === route.key;
+              const focused = state.routes[state.index]!.key === route.key;
               const asset = TAB_ASSETS[route.name as TabIconRoute];
               return (
                 <TabButton
@@ -132,7 +132,7 @@ export function FloatingGlassBar({
                   focused={focused}
                   asset={asset}
                   label={
-                    (descriptors[route.key].options.title as string) ||
+                    (descriptors[route.key]!.options.title as string) ||
                     route.name
                   }
                   onPress={() => pressTab(route.key, route.name, focused)}

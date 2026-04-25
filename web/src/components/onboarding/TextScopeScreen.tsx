@@ -70,7 +70,7 @@ export function TextScopeScreen() {
         <div className="space-y-3">
           <p className="text-sm font-medium text-slate-700">Quick add</p>
           <div className="flex flex-wrap gap-2">
-            {chips.map((label) => (
+            {chips!.map((label) => (
               <button
                 key={label}
                 type="button"

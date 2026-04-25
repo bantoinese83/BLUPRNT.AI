@@ -31,7 +31,7 @@ describe("onboarding draft storage", () => {
       estimate: null,
     });
 
-    const [, payload] = vi.mocked(AsyncStorage.setItem).mock.calls[0];
+    const [, payload] = vi.mocked(AsyncStorage.setItem).mock.calls[0]!;
     const parsed = JSON.parse(payload as string) as {
       v: number;
       location: string;

@@ -24,7 +24,7 @@ export async function ensureUserHasWorkspace(
     const { data: projects, error: projErr } = await supabase
       .from("projects")
       .select("id")
-      .eq("property_id", existing[0].id)
+      .eq("property_id", existing[0]!.id)
       .order("created_at", { ascending: false })
       .limit(1);
 
@@ -46,7 +46,7 @@ export async function ensureUserHasWorkspace(
     const { data: proj, error: jErr } = await supabase
       .from("projects")
       .insert({
-        property_id: existing[0].id,
+        property_id: existing[0]!.id,
         name: "My home project",
         type: "other",
         stage: "planning",

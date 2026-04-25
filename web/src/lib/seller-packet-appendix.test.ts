@@ -44,7 +44,7 @@ describe("buildSellerPacketAppendixItems", () => {
       inv({ id: "1", document_id: "doc-1" }),
     ]);
     expect(items).toHaveLength(1);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
   });
 
   it("adds pdf_note when response body has error field", async () => {
@@ -55,7 +55,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
     expect(
       (items[0] as { noteLines: string[] }).noteLines.some((l) =>
         l.includes("couldn’t load this file"),
@@ -78,7 +78,7 @@ describe("buildSellerPacketAppendixItems", () => {
       inv({ id: "1", document_id: "doc-1" }),
     ]);
     expect(items).toHaveLength(1);
-    expect(items[0].kind).toBe("image");
+    expect(items[0]!.kind).toBe("image");
     expect((items[0] as { imageFormat: string }).imageFormat).toBe("JPEG");
   });
 
@@ -96,7 +96,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
   });
 
   it("adds pdf_note when signed_url is missing", async () => {
@@ -107,7 +107,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
     expect(
       (items[0] as { noteLines: string[] }).noteLines.some((l) =>
         l.includes("View original"),
@@ -125,7 +125,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
   });
 
   it("adds pdf_note when response is not ok", async () => {
@@ -142,7 +142,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
   });
 
   it("rejects oversized blobs with a friendly note", async () => {
@@ -162,7 +162,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
     expect((items[0] as { noteLines: string[] }).noteLines[0]).toMatch(
       /too large/i,
     );
@@ -189,7 +189,7 @@ describe("buildSellerPacketAppendixItems", () => {
       const items = await buildSellerPacketAppendixItems([
         inv({ id: "1", document_id: "doc-1" }),
       ]);
-      expect(items[0].kind).toBe("image");
+      expect(items[0]!.kind).toBe("image");
       expect((items[0] as { imageFormat: string }).imageFormat).toBe(fmt);
     }
   });
@@ -207,7 +207,7 @@ describe("buildSellerPacketAppendixItems", () => {
     const items = await buildSellerPacketAppendixItems([
       inv({ id: "1", document_id: "doc-1" }),
     ]);
-    expect(items[0].kind).toBe("pdf_note");
+    expect(items[0]!.kind).toBe("pdf_note");
   });
 
   it("uses neutral title when vendor name is blank", async () => {

@@ -62,8 +62,8 @@ describe("buildLandingJsonLd", () => {
     expect(faqPage?.mainEntity).toHaveLength(LANDING_FAQ.length);
 
     LANDING_FAQ.forEach((faq, index) => {
-      expect(faqPage?.mainEntity![index].name).toBe(faq.question);
-      expect(faqPage?.mainEntity![index].acceptedAnswer.text).toBe(faq.answer);
+      expect(faqPage?.mainEntity![index]!.name).toBe(faq.question);
+      expect(faqPage?.mainEntity![index]!.acceptedAnswer.text).toBe(faq.answer);
     });
 
     const webSite = jsonLd["@graph"].find(

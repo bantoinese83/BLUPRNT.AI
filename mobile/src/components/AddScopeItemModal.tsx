@@ -46,7 +46,7 @@ interface Props {
 export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [phase, setPhase] = useState(PHASE_ORDER[0]);
+  const [phase, setPhase] = useState(PHASE_ORDER[0]!);
   const [cost, setCost] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [unit, setUnit] = useState("ea");

@@ -17,8 +17,8 @@ describe("buildReconciliation", () => {
     const lines = [{ invoice_id: "i1", line_total: 50, scope_item_id: "s1" }];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
-    expect(result.items["s1"].status).toBe("under");
-    expect(result.items["s1"].total_billed).toBe(50);
+    expect(result.items["s1"]!.status).toBe("under");
+    expect(result.items["s1"]!.total_billed).toBe(50);
     expect(result.total_reconciled).toBe(50);
   });
 
@@ -28,15 +28,15 @@ describe("buildReconciliation", () => {
     ];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
-    expect(result.items["s1"].status).toBe("reconciled");
+    expect(result.items["s1"]!.status).toBe("reconciled");
   });
 
   it("calculates 'over' status when billed exceeds high estimate + margin", () => {
     const lines = [{ invoice_id: "i1", line_total: 600, scope_item_id: "s2" }];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
-    expect(result.items["s2"].status).toBe("over");
-    expect(result.items["s2"].difference).toBe(100);
+    expect(result.items["s2"]!.status).toBe("over");
+    expect(result.items["s2"]!.difference).toBe(100);
   });
 
   it("tracks unreconciled billed amounts", () => {

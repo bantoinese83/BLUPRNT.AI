@@ -48,14 +48,14 @@ describe("cookie-consent utilities", () => {
     const spy = vi.spyOn(window, "dispatchEvent");
     openCookieSettings();
     expect(spy).toHaveBeenCalledWith(expect.any(Event));
-    expect(spy.mock.calls[0][0].type).toBe(OPEN_COOKIE_SETTINGS_EVENT);
+    expect(spy.mock.calls[0]![0]!.type).toBe(OPEN_COOKIE_SETTINGS_EVENT);
   });
 
   it("dispatches consent changed event", () => {
     const spy = vi.spyOn(window, "dispatchEvent");
     dispatchCookieConsentChanged();
     expect(spy).toHaveBeenCalledWith(expect.any(Event));
-    expect(spy.mock.calls[0][0].type).toBe(COOKIE_CONSENT_CHANGED_EVENT);
+    expect(spy.mock.calls[0]![0]!.type).toBe(COOKIE_CONSENT_CHANGED_EVENT);
   });
 
   it("handles corrupted JSON in localStorage", () => {
