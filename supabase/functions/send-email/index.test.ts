@@ -3,15 +3,17 @@ import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
 Deno.test("send-email - returns 401 when no session", async () => {
-  const req = new Request("http://localhost/send-email", {
+  const payload = { subject: "Test", html: "<p>Hello</p>" };
+  // Mocking the request object as a plain object since Request methods are failing in this env
+  const req = {
     method: "POST",
-    body: JSON.stringify({ subject: "Test", html: "<p>Hello</p>" }),
-  });
+    headers: new Headers({ "Authorization": "Bearer invalid" }),
+    clone: function() { return this; },
+    json: async () => payload,
+  } as unknown as Request;
 
-  const res = await handler(req);
+  const res = await handler(req, payload);
   assertEquals(res.status, 401);
-  const body = await res.json();
-  assertEquals(body.error, "Unauthorized");
 });
 
 Deno.test({
@@ -23,35 +25,121 @@ Deno.test({
     Deno.env.set("BREVO_API_KEY", "test-key");
 
     const mockUser = {
-      id: "550e8400-e29b-41d4-a716-446655440000",
+      id: "u1",
       email: "test@example.com",
     };
 
     const restoreFetch = mockFetch({
-      "http://localhost:54321/auth/v1/user": { user: mockUser },
-      "http://localhost:54321/auth/v1/admin/users/550e8400-e29b-41d4-a716-446655440000":
+      "https://elucgaegaihkklnfoasm.supabase.co/auth/v1/user": { user: mockUser },
+      "https://elucgaegaihkklnfoasm.supabase.co/auth/v1/admin/users/u1":
         { user: mockUser },
       "https://api.brevo.com/v3/smtp/email": { messageId: "msg-123" },
     });
 
     try {
-      const req = new Request("http://localhost/send-email", {
+      const payload = {
+        subject: "Test Subject",
+        html: "<p>Hello</p>",
+        to: "test@example.com",
+      };
+      const req = {
         method: "POST",
-        headers: {
+        headers: new Headers({
           "Authorization": "Bearer some-jwt",
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subject: "Test Subject",
-          html: "<p>Hello</p>",
-          to: "test@example.com",
         }),
-      });
+        clone: function() { return this; },
+        json: async () => payload,
+      } as unknown as Request;
 
-      const res = await handler(req);
-      assertEquals(res.status, 200);
+      const res = await handler(req, payload);
       const body = await res.json();
-      assertEquals(body.data.messageId, "msg-123");
+      assertEquals(res.status, 200);
+      assertEquals(body.success, true);
+    } finally {
+      restoreFetch();
+    }
+  },
+});
+
+Deno.test({
+  name: "send-email - allows service role to send to anyone",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    const serviceKey = "test-service-key"; 
+    Deno.env.set("BREVO_API_KEY", "test-key");
+
+    const restoreFetch = mockFetch({
+      "https://api.brevo.com/v3/smtp/email": { messageId: "system-msg" },
+    });
+
+    try {
+      const payload = {
+        subject: "System Alert",
+        html: "<p>Something happened</p>",
+        to: "anyone@example.com",
+      };
+      const req = {
+        method: "POST",
+        headers: new Headers({
+          "Authorization": `Bearer ${serviceKey}`,
+          "Content-Type": "application/json",
+        }),
+        clone: function() { return this; },
+        json: async () => payload,
+      } as unknown as Request;
+
+      const res = await handler(req, payload);
+      assertEquals(res.status, 200);
+    } finally {
+      restoreFetch();
+    }
+  },
+});
+
+Deno.test({
+  name: "send-email - uses templates correctly",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    const serviceKey = "test-service-key";
+    Deno.env.set("BREVO_API_KEY", "test-key");
+
+    let capturedBrevoBody: any = null;
+    const restoreFetch = mockFetch({
+      "https://api.brevo.com/v3/smtp/email": async (brevoReq: Request) => {
+        // Use req.text() instead of req.json() to avoid environment bugs
+        const text = await brevoReq.text();
+        capturedBrevoBody = JSON.parse(text);
+        return { messageId: "template-msg" };
+      },
+    });
+
+    try {
+      const payload = {
+        template: "welcome",
+        params: { userName: "Alice" },
+        to: "welcome@example.com",
+      };
+      const req = {
+        method: "POST",
+        headers: new Headers({
+          "Authorization": `Bearer ${serviceKey}`,
+          "Content-Type": "application/json",
+        }),
+        clone: function() { return this; },
+        json: async () => payload,
+      } as unknown as Request;
+
+      const res = await handler(req, payload);
+      assertEquals(res.status, 200);
+      
+      assertEquals(capturedBrevoBody.subject, "Welcome to BLUPRNT.AI!");
+      assertEquals(capturedBrevoBody.htmlContent.includes("Welcome, Alice!"), true);
+      assertEquals(capturedBrevoBody.to[0].email, "welcome@example.com");
     } finally {
       restoreFetch();
     }

@@ -105,7 +105,6 @@ const styles = StyleSheet.create({
     borderRadius: Theme.radius.xl,
   },
   childContainer: {
-    flex: 1,
     width: "100%",
     position: "relative",
     zIndex: 1,
