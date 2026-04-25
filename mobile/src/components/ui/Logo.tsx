@@ -1,20 +1,21 @@
-import React from "react";
-import { View, type ViewStyle, Image } from "react-native";
-import logoSource from "../../../assets/images/icon.png";
+import { Image } from "expo-image";
+import logoSource from "../../../assets/images/android-icon-foreground.png";
 
 interface Props {
   size?: number;
-  style?: ViewStyle;
+  style?: any;
 }
 
 export function Logo({ size = 60, style }: Props) {
   return (
-    <View style={[{ width: size, height: size }, style]}>
-      <Image
-        source={logoSource}
-        style={{ width: "100%", height: "100%" }}
-        resizeMode="contain"
-      />
-    </View>
+    <Image
+      source={logoSource}
+      style={[
+        { width: size, height: size, backgroundColor: "transparent" },
+        style,
+      ]}
+      contentFit="contain"
+      transition={200}
+    />
   );
 }

@@ -58,19 +58,29 @@ function MaterialDetailList({
               <Boxes className="w-4 h-4 text-slate-400 group-hover:text-teal-500" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-teal-950 leading-tight">
-                {m.name}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[13px] font-bold text-teal-950 leading-tight truncate">
+                  {m.name}
+                </p>
+                {m.estimated_cost && (
+                  <span className="text-[11px] font-black text-teal-600 shrink-0">
+                    {money(m.estimated_cost)}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                 {m.brand && (
                   <span className="flex items-center gap-1 text-[10px] font-bold text-teal-600 uppercase tracking-wider">
                     <Tag className="w-3 h-3" />
                     {m.brand}
                   </span>
                 )}
-                {m.quantity && (
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none">
-                    {m.quantity} {m.unit || "units"}
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none border border-slate-100">
+                  {m.quantity} {m.unit || "units"}
+                </span>
+                {m.estimated_cost && m.quantity && m.quantity > 1 && (
+                  <span className="text-[10px] font-medium text-slate-400 italic">
+                    Total: {money(m.estimated_cost * m.quantity)}
                   </span>
                 )}
               </div>
@@ -134,9 +144,9 @@ function EditableMaterialList({
           {materials.map((m, idx) => (
             <div
               key={idx}
-              className="flex flex-col sm:flex-row items-start gap-2 p-3 bg-white rounded-xl border border-slate-200 shadow-sm group"
+              className="flex flex-col gap-2 p-3 bg-white rounded-xl border border-slate-200 shadow-sm group"
             >
-              <div className="flex-1 w-full space-y-2">
+              <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
                   placeholder="Material name"
@@ -144,51 +154,73 @@ function EditableMaterialList({
                   onChange={(e) =>
                     updateMaterial(idx, { name: e.target.value })
                   }
-                  className="w-full text-xs font-bold text-slate-900 border-none p-0 focus:ring-0 placeholder:text-slate-300"
+                  className="flex-1 text-xs font-bold text-slate-900 border-none p-0 focus:ring-0 placeholder:text-slate-300"
                 />
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 flex-1">
-                    <Tag className="w-3 h-3 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Brand"
-                      value={m.brand || ""}
-                      onChange={(e) =>
-                        updateMaterial(idx, { brand: e.target.value })
-                      }
-                      className="w-full text-[10px] font-medium bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-400"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={m.quantity || 0}
-                      onChange={(e) =>
-                        updateMaterial(idx, {
-                          quantity: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      className="w-12 text-[10px] font-bold text-center bg-slate-50 border-none rounded-lg p-1 focus:ring-0"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Unit"
-                      value={m.unit || ""}
-                      onChange={(e) =>
-                        updateMaterial(idx, { unit: e.target.value })
-                      }
-                      className="w-12 text-[10px] font-medium text-center bg-slate-50 border-none rounded-lg p-1 focus:ring-0 placeholder:text-slate-400"
-                    />
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => removeMaterial(idx)}
+                  className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="flex items-center gap-1 bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100">
+                  <Tag className="w-3 h-3 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Brand"
+                    value={m.brand || ""}
+                    onChange={(e) =>
+                      updateMaterial(idx, { brand: e.target.value })
+                    }
+                    className="w-full text-[10px] font-medium bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-400"
+                  />
+                </div>
+                <div className="flex items-center gap-1 bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    placeholder="Unit Cost"
+                    value={m.estimated_cost || ""}
+                    onChange={(e) =>
+                      updateMaterial(idx, {
+                        estimated_cost: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full text-[10px] font-bold bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-400"
+                  />
+                </div>
+                <div className="flex items-center gap-1 bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400">
+                    QTY
+                  </span>
+                  <input
+                    type="number"
+                    value={m.quantity || 0}
+                    onChange={(e) =>
+                      updateMaterial(idx, {
+                        quantity: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full text-[10px] font-bold bg-transparent border-none p-0 focus:ring-0"
+                  />
+                </div>
+                <div className="flex items-center gap-1 bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100">
+                  <input
+                    type="text"
+                    placeholder="Unit"
+                    value={m.unit || ""}
+                    onChange={(e) =>
+                      updateMaterial(idx, { unit: e.target.value })
+                    }
+                    className="w-full text-[10px] font-medium bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-400"
+                  />
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => removeMaterial(idx)}
-                className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors sm:self-center"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
             </div>
           ))}
         </div>

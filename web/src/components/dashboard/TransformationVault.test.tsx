@@ -52,8 +52,7 @@ describe("TransformationVault", () => {
       expect(screen.getByText("Transformation Gallery")).toBeInTheDocument();
     });
 
-    expect(screen.getAllByText("Baseline").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Current").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Photo").length).toBeGreaterThan(0);
   });
 
   it("renders photos when paths are provided", async () => {
@@ -86,16 +85,12 @@ describe("TransformationVault", () => {
     await waitFor(
       () => {
         const images = screen.getAllByRole("img");
-        // Filter for images with specific src or alt
-        const beforeImg = images.find(
-          (img) => img.getAttribute("alt") === "Baseline",
-        );
-        const currentImg = images.find(
-          (img) => img.getAttribute("alt") === "Current",
+        // Filter for images with specific alt text
+        const transformationImages = images.filter(
+          (img) => img.getAttribute("alt") === "Transformation photo",
         );
 
-        expect(beforeImg).toBeInTheDocument();
-        expect(currentImg).toBeInTheDocument();
+        expect(transformationImages.length).toBeGreaterThan(0);
       },
       { timeout: 2000 },
     );

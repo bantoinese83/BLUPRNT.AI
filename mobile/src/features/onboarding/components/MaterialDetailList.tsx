@@ -12,6 +12,7 @@ export function MaterialDetailList({
     brand?: string;
     quantity?: number | string;
     unit?: string;
+    estimated_cost?: number;
   }[];
 }) {
   if (!materials || materials.length === 0) return null;
@@ -19,29 +20,52 @@ export function MaterialDetailList({
   return (
     <View style={styles.materialContainer}>
       <View style={styles.materialHeader}>
-        <Package size={12} color={Theme.colors.brand.primary} />
-        <Text style={styles.materialHeaderText}>Bill of Materials</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Package size={14} color={Theme.colors.brand.primary} />
+          <Text style={styles.materialHeaderText}>Bill of Materials</Text>
+        </View>
+        <View style={styles.itemCountBadge}>
+          <Text style={styles.itemCountText}>{materials.length} items</Text>
+        </View>
       </View>
       <View style={styles.materialGrid}>
         {materials.map((m, idx: number) => (
-          <View key={idx} style={styles.materialCard}>
-            <View style={styles.materialIconBg}>
-              <Boxes size={14} color={Theme.colors.text.muted} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.materialName}>{m.name}</Text>
-              <View style={styles.materialMetaRow}>
-                {m.brand && (
-                  <View style={styles.brandTag}>
-                    <Tag size={10} color={Theme.colors.brand.primary} />
-                    <Text style={styles.brandText}>{m.brand}</Text>
-                  </View>
-                )}
-                {m.quantity && (
-                  <Text style={styles.materialQuantity}>
-                    {m.quantity} {m.unit || "units"}
+          <View key={idx} style={styles.materialCardPremium}>
+            <View style={styles.materialMainRow}>
+              <View style={styles.materialIconBgPremium}>
+                <Boxes size={16} color={Theme.colors.brand.primary} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Text style={styles.materialNamePremium} numberOfLines={2}>
+                    {m.name}
                   </Text>
-                )}
+                  {m.estimated_cost && (
+                    <Text style={styles.materialPrice}>
+                      ${m.estimated_cost}
+                    </Text>
+                  )}
+                </View>
+
+                <View style={styles.materialMetaRowPremium}>
+                  {m.brand && (
+                    <View style={styles.brandTagPremium}>
+                      <Tag size={10} color={Theme.colors.brand.primary} />
+                      <Text style={styles.brandTextPremium}>{m.brand}</Text>
+                    </View>
+                  )}
+                  <View style={styles.qtyBadge}>
+                    <Text style={styles.qtyText}>
+                      {m.quantity} {m.unit || "pc"}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
           </View>

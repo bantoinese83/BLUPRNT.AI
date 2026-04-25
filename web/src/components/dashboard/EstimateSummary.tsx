@@ -52,24 +52,34 @@ function MaterialDetailList({
               <Boxes className="w-4 h-4 text-slate-400 group-hover:text-teal-500" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-teal-950 leading-tight">
-                {m.name}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[13px] font-bold text-teal-950 leading-tight truncate">
+                  {m.name}
+                </p>
+                {m.estimated_cost && (
+                  <span className="text-[11px] font-black text-teal-600 shrink-0">
+                    {money(m.estimated_cost)}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                 {m.brand && (
                   <span className="flex items-center gap-1 text-[10px] font-bold text-teal-600 uppercase tracking-wider">
                     <Tag className="w-3 h-3" />
                     {m.brand}
                   </span>
                 )}
-                {m.quantity && (
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none">
-                    {m.quantity} {m.unit || "units"}
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none border border-slate-100">
+                  {m.quantity} {m.unit || "units"}
+                </span>
+                {m.estimated_cost && m.quantity && m.quantity > 1 && (
+                  <span className="text-[10px] font-medium text-slate-400 italic">
+                    Total: {money(m.estimated_cost * m.quantity)}
                   </span>
                 )}
               </div>
               {m.model && (
-                <p className="text-[10px] text-slate-400 font-medium mt-1 truncate">
+                <p className="text-[10px] text-slate-400 font-medium mt-2 truncate italic">
                   Model: {m.model}
                 </p>
               )}

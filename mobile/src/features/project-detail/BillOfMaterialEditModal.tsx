@@ -39,6 +39,7 @@ export function BillOfMaterialEditModal({
   const [brand, setBrand] = useState("");
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
+  const [estimatedCost, setEstimatedCost] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -47,6 +48,9 @@ export function BillOfMaterialEditModal({
     setBrand(item.brand ?? "");
     setQuantity(item.quantity != null ? String(item.quantity) : "");
     setUnit(item.unit ?? "");
+    setEstimatedCost(
+      item.estimated_cost != null ? String(item.estimated_cost) : "",
+    );
   }, [visible, item]);
 
   const handleSave = async () => {
@@ -66,6 +70,17 @@ export function BillOfMaterialEditModal({
       qtyNum = n;
     }
 
+    const costRaw = estimatedCost.trim().replace(/[$,]/g, "");
+    let costNum: number | undefined;
+    if (costRaw.length > 0) {
+      const n = Number.parseFloat(costRaw);
+      if (!Number.isFinite(n) || n < 0) {
+        showAppToast("Enter a valid unit cost, or leave it blank.");
+        return;
+      }
+      costNum = n;
+    }
+
     setSaving(true);
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
@@ -75,6 +90,7 @@ export function BillOfMaterialEditModal({
         brand: brand.trim() || undefined,
         quantity: qtyNum,
         unit: unit.trim() || undefined,
+        estimated_cost: costNum,
       };
       await onSave(next);
       onClose();
@@ -128,16 +144,33 @@ export function BillOfMaterialEditModal({
             accessibilityLabel="Material name"
           />
 
-          <Text style={styles.label}>Brand (optional)</Text>
-          <TextInput
-            value={brand}
-            onChangeText={setBrand}
-            style={styles.input}
-            placeholder="Brand or grade"
-            placeholderTextColor={Theme.colors.text.muted}
-            editable={!saving}
-            accessibilityLabel="Brand"
-          />
+          <View style={styles.row2}>
+            <View style={styles.row2Col}>
+              <Text style={styles.label}>Brand (optional)</Text>
+              <TextInput
+                value={brand}
+                onChangeText={setBrand}
+                style={styles.input}
+                placeholder="Brand or grade"
+                placeholderTextColor={Theme.colors.text.muted}
+                editable={!saving}
+                accessibilityLabel="Brand"
+              />
+            </View>
+            <View style={styles.row2Col}>
+              <Text style={styles.label}>Unit Cost ($)</Text>
+              <TextInput
+                value={estimatedCost}
+                onChangeText={setEstimatedCost}
+                style={styles.input}
+                placeholder="0.00"
+                keyboardType="decimal-pad"
+                placeholderTextColor={Theme.colors.text.muted}
+                editable={!saving}
+                accessibilityLabel="Unit cost"
+              />
+            </View>
+          </View>
 
           <View style={styles.row2}>
             <View style={styles.row2Col}>
@@ -174,7 +207,10 @@ export function BillOfMaterialEditModal({
               </View>
             ) : (
               <>
-                <Button title="Save" onPress={() => void handleSave()} />
+                <Button
+                  title="Save Changes"
+                  onPress={() => void handleSave()}
+                />
                 <Button title="Cancel" variant="outline" onPress={onClose} />
               </>
             )}

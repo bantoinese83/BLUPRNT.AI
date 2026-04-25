@@ -250,41 +250,75 @@ export function EstimateScreen() {
                       (s) => s.metadata?.materials?.length,
                     ) && (
                       <div className="rounded-2xl bg-teal-50/30 border border-teal-100/50 p-4 sm:p-6 space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Package className="w-4 h-4 text-teal-600" />
-                          <h4 className="text-[11px] font-black text-teal-700 uppercase tracking-[0.15em]">
-                            Bill of Materials
-                          </h4>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4 text-teal-600" />
+                            <h4 className="text-[11px] font-black text-teal-700 uppercase tracking-[0.15em]">
+                              Detailed Bill of Materials
+                            </h4>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="bg-white/50 text-[10px] border-teal-200 text-teal-700"
+                          >
+                            {
+                              estimate.scope_items.flatMap(
+                                (s) => s.metadata?.materials || [],
+                              ).length
+                            }{" "}
+                            Items
+                          </Badge>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {estimate.scope_items
                             .flatMap((s) => s.metadata?.materials || [])
                             .map((m, i) => (
                               <div
                                 key={i}
-                                className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm"
+                                className="group relative flex flex-col p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-teal-100 transition-all duration-300"
                               >
-                                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
-                                  <Boxes className="w-4 h-4 text-slate-400" />
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-xs font-bold text-slate-900 truncate">
-                                    {m.name}
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-0.5">
-                                    {m.brand && (
-                                      <div className="flex items-center gap-1">
-                                        <Tag className="w-2.5 h-2.5 text-teal-500" />
-                                        <span className="text-[9px] font-black text-teal-600 uppercase">
-                                          {m.brand}
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-teal-50 transition-colors">
+                                    <Boxes className="w-5 h-5 text-slate-400 group-hover:text-teal-500 transition-colors" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <p className="text-sm font-bold text-slate-900 leading-tight">
+                                        {m.name}
+                                      </p>
+                                      {m.estimated_cost && (
+                                        <p className="text-sm font-black text-teal-600 shrink-0">
+                                          {formatMoney(m.estimated_cost)}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+                                      {m.brand && (
+                                        <div className="flex items-center gap-1">
+                                          <Tag className="w-3 h-3 text-teal-500" />
+                                          <span className="text-[10px] font-black text-teal-600 uppercase tracking-tight">
+                                            {m.brand}
+                                          </span>
+                                        </div>
+                                      )}
+                                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100">
+                                        <span className="text-[10px] font-bold text-slate-500">
+                                          QTY: {m.quantity} {m.unit || "units"}
                                         </span>
                                       </div>
-                                    )}
-                                    {m.quantity && (
-                                      <span className="text-[9px] font-medium text-slate-400">
-                                        {m.quantity} {m.unit || "units"}
-                                      </span>
-                                    )}
+                                      {m.estimated_cost &&
+                                        m.quantity &&
+                                        m.quantity > 1 && (
+                                          <span className="text-[10px] font-medium text-slate-400 italic">
+                                            Total:{" "}
+                                            {formatMoney(
+                                              m.estimated_cost *
+                                                Number(m.quantity),
+                                            )}
+                                          </span>
+                                        )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>

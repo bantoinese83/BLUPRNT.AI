@@ -6,23 +6,17 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   TextInput,
+  Dimensions,
 } from "react-native";
 import { Image } from "expo-image";
-import {
-  Camera,
-  X,
-  MessageSquare,
-  Check,
-  Image as ImageIcon,
-} from "lucide-react-native";
+import { Camera, X, MessageSquare, Check } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { Logo } from "@/components/ui/Logo";
 
 type GalleryItem = import("@shared/types/database").GalleryItemRow;
 
 export type PhotoSlotProps = {
-  label: string;
-  icon: React.ReactNode;
   item: GalleryItem | null;
   signedUrl: string | null;
   uploading: boolean;
@@ -32,8 +26,6 @@ export type PhotoSlotProps = {
 };
 
 export function PhotoSlot({
-  label,
-  icon,
   item,
   signedUrl,
   uploading,
@@ -62,19 +54,32 @@ export function PhotoSlot({
 
   return (
     <View style={styles.slotContainer}>
-      <GlassCard intensity={8} style={styles.slotCard}>
+      <GlassCard intensity={12} style={styles.slotCard}>
         <View style={styles.flex1}>
           {showPlaceholder ? (
-            <View style={styles.placeholder}>
-              <View style={styles.placeholderIcon}>
-                {uploading ? (
-                  <ActivityIndicator color={Theme.colors.brand.primary} />
-                ) : (
-                  <ImageIcon size={24} color={Theme.colors.text.disabled} />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={onUpload}
+              disabled={uploading}
+              style={styles.placeholder}
+            >
+              <View style={styles.placeholderContent}>
+                <View style={styles.logoWrapper}>
+                  {uploading ? (
+                    <ActivityIndicator color={Theme.colors.brand.primary} />
+                  ) : (
+                    <Logo size={48} />
+                  )}
+                </View>
+
+                {!uploading && (
+                  <View style={styles.centeredActionBtn}>
+                    <Camera size={16} color="white" />
+                    <Text style={styles.centeredActionText}>Capture Photo</Text>
+                  </View>
                 )}
               </View>
-              <Text style={styles.placeholderLabel}>{label}</Text>
-            </View>
+            </TouchableOpacity>
           ) : (
             <View style={StyleSheet.absoluteFill}>
               <Image
@@ -102,6 +107,30 @@ export function PhotoSlot({
                 </TouchableOpacity>
               </View>
 
+              {/* Change Photo Button (Bottom Overlay - Only when image exists) */}
+              {!editingCaption && (
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  style={styles.actionOverlay}
+                  onPress={onUpload}
+                  disabled={uploading}
+                >
+                  <View style={styles.actionBtn}>
+                    {uploading ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={Theme.colors.brand.primary}
+                      />
+                    ) : (
+                      <>
+                        <Camera size={14} color={Theme.colors.text.secondary} />
+                        <Text style={styles.actionText}>Change Photo</Text>
+                      </>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
+
               {/* Caption Overlay (Bottom) */}
               {!editingCaption && item.caption && (
                 <View style={styles.captionContainer}>
@@ -111,42 +140,6 @@ export function PhotoSlot({
                 </View>
               )}
             </View>
-          )}
-
-          {/* Label Badge */}
-          <View style={styles.badgeContainer}>
-            <View style={styles.badge}>
-              {icon}
-              <Text style={styles.badgeText}>{label}</Text>
-            </View>
-          </View>
-
-          {/* Action Overlay */}
-          {!editingCaption && (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.actionOverlay}
-              onPress={() => {
-                onUpload();
-              }}
-              disabled={uploading}
-            >
-              <View style={styles.actionBtn}>
-                {uploading ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={Theme.colors.brand.primary}
-                  />
-                ) : (
-                  <>
-                    <Camera size={16} color={Theme.colors.text.primary} />
-                    <Text style={styles.actionText}>
-                      {showPlaceholder ? `Capture` : `Change`}
-                    </Text>
-                  </>
-                )}
-              </View>
-            </TouchableOpacity>
           )}
 
           {/* Inline Caption Editor */}
@@ -176,13 +169,17 @@ export function PhotoSlot({
   );
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_SIZE = SCREEN_WIDTH - 32;
+
 const styles = StyleSheet.create({
   flex1: {
     flex: 1,
+    justifyContent: "center",
   },
   slotContainer: {
-    width: "100%",
-    aspectRatio: 1,
+    width: CARD_SIZE,
+    height: CARD_SIZE,
   },
   slotCard: {
     flex: 1,
@@ -195,23 +192,46 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Theme.colors.inputBg,
-    gap: 8,
+    backgroundColor: "#F8FAFC",
   },
-  placeholderIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(255,255,255,0.05)",
+  placeholderContent: {
     alignItems: "center",
     justifyContent: "center",
+    gap: 16,
+    padding: 20,
   },
-  placeholderLabel: {
+  logoWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: Theme.colors.brand.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  centeredActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: Theme.colors.brand.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginTop: 8,
+    shadowColor: Theme.colors.brand.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  centeredActionText: {
+    color: "white",
     fontSize: 12,
     fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.disabled,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   topControls: {
     position: "absolute",
@@ -253,33 +273,6 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.medium,
     lineHeight: 14,
   },
-  badgeContainer: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    zIndex: 20,
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "white",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  badgeText: {
-    fontSize: 9,
-    fontFamily: Theme.typography.family.black,
-    color: Theme.colors.text.primary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
   actionOverlay: {
     position: "absolute",
     bottom: 12,
@@ -291,22 +284,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 8,
     backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: Theme.colors.divider,
-    paddingVertical: 10,
-    borderRadius: 14,
-    shadowColor: "#000",
+    borderWidth: 1.5,
+    borderColor: Theme.colors.brand.primary,
+    paddingVertical: 12,
+    borderRadius: 16,
+    shadowColor: Theme.colors.brand.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
   },
   actionText: {
-    fontSize: 10,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
+    fontSize: 11,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.brand.primary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   editorOverlay: {
     ...StyleSheet.absoluteFillObject,

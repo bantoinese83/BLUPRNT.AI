@@ -2,9 +2,6 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Camera,
   Loader2,
-  Image as ImageIcon,
-  Activity,
-  History,
   MessageSquare,
   Check,
   ChevronRight,
@@ -27,8 +24,6 @@ type TransformationVaultProps = {
 };
 
 type PhotoSlotProps = {
-  label: string;
-  icon: React.ReactNode;
   item: GalleryItem | null;
   signedUrl: string | null;
   uploading: boolean;
@@ -39,8 +34,6 @@ type PhotoSlotProps = {
 };
 
 function PhotoSlot({
-  label,
-  icon,
   item,
   signedUrl,
   uploading,
@@ -68,26 +61,27 @@ function PhotoSlot({
     <div className="relative group aspect-square sm:aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/10 shadow-lg transition-all duration-300 hover:shadow-xl hover:ring-2 hover:ring-teal-500/20">
       {/* Background/Image */}
       {showPlaceholder ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100/50 backdrop-blur-sm p-6 text-center">
-          <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-3 text-slate-300">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/50 backdrop-blur-sm p-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 ring-1 ring-slate-100">
             {uploading ? (
-              <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
             ) : (
-              <ImageIcon className="w-6 h-6" />
+              <img
+                src="/bluprnt_logo.webp"
+                alt="Logo"
+                className="w-10 h-10 object-contain opacity-80"
+              />
             )}
           </div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-            {label}
-          </p>
-          <p className="text-[10px] text-slate-400 mt-1 max-w-[140px]">
-            No image selected yet
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
+            Photo
           </p>
         </div>
       ) : (
         <>
           <img
             src={signedUrl!}
-            alt={label}
+            alt="Transformation photo"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           {/* Controls Overlay (Top) */}
@@ -154,16 +148,6 @@ function PhotoSlot({
         </>
       )}
 
-      {/* Label Badge */}
-      <div className="absolute top-3 left-3 z-10">
-        <div className="px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 flex items-center gap-1.5">
-          {icon}
-          <span className="text-[9px] font-black text-white uppercase tracking-wider">
-            {label}
-          </span>
-        </div>
-      </div>
-
       {/* Upload/Change Action Overlay */}
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[2px]">
         {!editingCaption && (
@@ -177,7 +161,7 @@ function PhotoSlot({
             ) : (
               <Camera className="w-4 h-4" />
             )}
-            {showPlaceholder ? `Capture ${label}` : `Change ${label}`}
+            {showPlaceholder ? "Capture Photo" : "Change Photo"}
           </button>
         )}
       </div>
@@ -406,8 +390,6 @@ export function TransformationVault({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
         <PhotoSlot
           key={sets[activeSetIndex]!.before?.id || `before-${activeSetIndex}`}
-          label="Baseline"
-          icon={<History className="w-3 h-3 text-white" />}
           item={sets[activeSetIndex]!.before}
           signedUrl={
             sets[activeSetIndex]!.before
@@ -425,8 +407,6 @@ export function TransformationVault({
         />
         <PhotoSlot
           key={sets[activeSetIndex]!.after?.id || `after-${activeSetIndex}`}
-          label="Current"
-          icon={<Activity className="w-3 h-3 text-teal-400" />}
           item={sets[activeSetIndex]!.after}
           signedUrl={
             sets[activeSetIndex]!.after

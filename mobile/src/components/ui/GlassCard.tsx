@@ -66,7 +66,14 @@ export function GlassCard({
       {/* Reflective Edge Highlight */}
       <View style={[StyleSheet.absoluteFill, styles.borderHighlight]} />
 
-      <View style={styles.childContainer}>{children}</View>
+      <View
+        style={[
+          styles.childContainer,
+          style && (style as any).flex ? { flex: 1 } : null,
+        ]}
+      >
+        {children}
+      </View>
     </View>
   );
 

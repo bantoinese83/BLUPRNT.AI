@@ -99,39 +99,65 @@ export function ProjectMaterialDetailList({ materials, onPersist }: Props) {
       ) : (
         <View style={styles.materialGrid}>
           {materials.map((m: BillOfMaterialRow, idx: number) => (
-            <View key={`${m.name}-${idx}`} style={styles.materialCard}>
-              <View style={styles.materialIconBg}>
-                <Boxes size={14} color={Theme.colors.text.muted} />
-              </View>
-              <TouchableOpacity
-                style={styles.materialBody}
-                activeOpacity={0.75}
-                disabled={!onPersist || persisting}
-                onPress={() => {
-                  if (!onPersist || persisting) return;
-                  void Haptics.selectionAsync();
-                  setEditItem({ index: idx, row: m });
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={`Edit ${m.name}`}
-              >
-                <Text style={styles.materialName}>{m.name}</Text>
-                <View style={styles.materialMetaRow}>
-                  {m.brand ? (
-                    <View style={styles.brandTag}>
-                      <Tag size={10} color={Theme.colors.brand.primary} />
-                      <Text style={styles.brandText}>{m.brand}</Text>
-                    </View>
-                  ) : null}
-                  {m.quantity != null ? (
-                    <Text style={styles.materialQuantity}>
-                      {m.quantity} {m.unit || "units"}
-                    </Text>
-                  ) : null}
+            <View key={`${m.name}-${idx}`} style={styles.materialCardPremium}>
+              <View style={styles.materialMainRow}>
+                <View style={styles.materialIconBgPremium}>
+                  <Boxes size={16} color={Theme.colors.brand.primary} />
                 </View>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, marginLeft: 12 }}
+                  activeOpacity={0.75}
+                  disabled={!onPersist || persisting}
+                  onPress={() => {
+                    if (!onPersist || persisting) return;
+                    void Haptics.selectionAsync();
+                    setEditItem({ index: idx, row: m });
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Text style={styles.materialNamePremium} numberOfLines={2}>
+                      {m.name}
+                    </Text>
+                    {m.estimated_cost && (
+                      <Text style={styles.materialPrice}>
+                        ${m.estimated_cost}
+                      </Text>
+                    )}
+                  </View>
+
+                  <View style={styles.materialMetaRowPremium}>
+                    {m.brand && (
+                      <View style={styles.brandTagPremium}>
+                        <Tag size={10} color={Theme.colors.brand.primary} />
+                        <Text style={styles.brandTextPremium}>{m.brand}</Text>
+                      </View>
+                    )}
+                    <View style={styles.qtyBadge}>
+                      <Text style={styles.qtyText}>
+                        {m.quantity} {m.unit || "pc"}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
               {onPersist ? (
-                <View style={styles.materialRowActions}>
+                <View
+                  style={[
+                    styles.materialRowActions,
+                    {
+                      marginTop: 12,
+                      paddingTop: 10,
+                      borderTopWidth: 0.5,
+                      borderTopColor: "rgba(15, 23, 42, 0.05)",
+                    },
+                  ]}
+                >
                   <TouchableOpacity
                     style={styles.materialIconBtn}
                     disabled={persisting}
@@ -139,19 +165,36 @@ export function ProjectMaterialDetailList({ materials, onPersist }: Props) {
                       void Haptics.selectionAsync();
                       setEditItem({ index: idx, row: m });
                     }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Edit ${m.name}`}
                   >
-                    <Pencil size={16} color={Theme.colors.brand.primary} />
+                    <Pencil size={14} color={Theme.colors.brand.primary} />
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontFamily: Theme.typography.family.bold,
+                        color: Theme.colors.brand.primary,
+                        marginLeft: 4,
+                      }}
+                    >
+                      Edit
+                    </Text>
                   </TouchableOpacity>
+                  <View style={{ flex: 1 }} />
                   <TouchableOpacity
                     style={styles.materialIconBtn}
                     disabled={persisting}
                     onPress={() => confirmRemove(idx, m.name)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Remove ${m.name}`}
                   >
-                    <Trash2 size={16} color={Theme.colors.status.error} />
+                    <Trash2 size={14} color={Theme.colors.status.error} />
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontFamily: Theme.typography.family.bold,
+                        color: Theme.colors.status.error,
+                        marginLeft: 4,
+                      }}
+                    >
+                      Remove
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ) : null}

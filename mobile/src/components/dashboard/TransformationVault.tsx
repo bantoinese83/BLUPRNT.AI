@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
-  History,
-  Play,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react-native";
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import { MotiView } from "moti";
+import * as ImagePicker from "expo-image-picker";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { useAwareness } from "@/contexts/AwarenessContext";
@@ -25,6 +28,15 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [activeSetIndex, setActiveSetIndex] = useState(0);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    hintTimerRef.current = setTimeout(() => setShowSwipeHint(false), 2800);
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    };
+  }, []);
 
   // Group items into sets
   const sets = useMemo(() => {
@@ -172,9 +184,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>TRANSFORMATION GALLERY</Text>
-          <Text style={styles.headerSubtitle}>
-            Angle {activeSetIndex + 1} of {sets.length}
-          </Text>
         </View>
         <View style={styles.navControls}>
           <TouchableOpacity
@@ -214,42 +223,67 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
         </View>
       </View>
 
-      <View style={styles.grid}>
-        <PhotoSlot
-          label="Baseline"
-          icon={<History size={10} color="white" />}
-          item={activeSet.before}
-          signedUrl={
-            activeSet.before
-              ? (signedUrls[activeSet.before.storage_path] ?? null)
-              : null
-          }
-          uploading={uploading === `before-${activeSetIndex}`}
-          onUpload={() => handlePickPhoto("before", activeSetIndex)}
-          onClear={handleClear}
-          onUpdateCaption={handleUpdateCaption}
-        />
-        <PhotoSlot
-          label="Current"
-          icon={
-            <Play
-              size={10}
-              color={Theme.colors.brand.primary}
-              fill={Theme.colors.brand.primary}
-            />
-          }
-          item={activeSet.after}
-          signedUrl={
-            activeSet.after
-              ? (signedUrls[activeSet.after.storage_path] ?? null)
-              : null
-          }
-          uploading={uploading === `after-${activeSetIndex}`}
-          onUpload={() => handlePickPhoto("after", activeSetIndex)}
-          onClear={handleClear}
-          onUpdateCaption={handleUpdateCaption}
-        />
+      <View style={styles.tabsContainer}>
+        <View style={[styles.tab, styles.activeTab]}>
+          <Text style={styles.tabText}>
+            Angle {activeSetIndex + 1} of {sets.length}
+          </Text>
+        </View>
       </View>
+
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.swipeContainer}
+      >
+        <View style={styles.swipeCard}>
+          <PhotoSlot
+            item={activeSet.before}
+            signedUrl={
+              activeSet.before
+                ? (signedUrls[activeSet.before.storage_path] ?? null)
+                : null
+            }
+            uploading={uploading === `before-${activeSetIndex}`}
+            onUpload={() => handlePickPhoto("before", activeSetIndex)}
+            onClear={handleClear}
+            onUpdateCaption={handleUpdateCaption}
+          />
+        </View>
+
+        <View style={styles.swipeCard}>
+          <PhotoSlot
+            item={activeSet.after}
+            signedUrl={
+              activeSet.after
+                ? (signedUrls[activeSet.after.storage_path] ?? null)
+                : null
+            }
+            uploading={uploading === `after-${activeSetIndex}`}
+            onUpload={() => handlePickPhoto("after", activeSetIndex)}
+            onClear={handleClear}
+            onUpdateCaption={handleUpdateCaption}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Swipe Affordance Hint - appears once on first mount */}
+      {showSwipeHint && (
+        <MotiView
+          from={{ opacity: 0, translateY: 4 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          exit={{ opacity: 0, translateY: -4 }}
+          transition={{ type: "timing", duration: 400 }}
+          style={styles.swipeHint}
+        >
+          <Text style={styles.swipeHintText}>BEFORE</Text>
+          <View style={styles.swipeHintLine} />
+          <Text style={styles.swipeHintIcon}>↔</Text>
+          <View style={styles.swipeHintLine} />
+          <Text style={styles.swipeHintText}>AFTER</Text>
+        </MotiView>
+      )}
 
       <View style={styles.dotsContainer}>
         {sets.map((_, i) => (
@@ -273,6 +307,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   );
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
     marginTop: 16,
@@ -283,7 +319,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 12,
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
   },
   headerTitle: {
     fontSize: 10,
@@ -314,6 +350,61 @@ const styles = StyleSheet.create({
   navBtnDisabled: {
     backgroundColor: Theme.colors.inputBg,
     borderColor: Theme.colors.divider,
+  },
+  tabsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  tab: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: Theme.colors.inputBg,
+    marginRight: 8,
+  },
+  activeTab: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: Theme.colors.divider,
+  },
+  tabText: {
+    fontSize: 9,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+    textTransform: "uppercase",
+  },
+  swipeContainer: {
+    paddingHorizontal: 0,
+  },
+  swipeCard: {
+    width: SCREEN_WIDTH,
+    paddingHorizontal: 16,
+  },
+  swipeHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 12,
+    marginBottom: -4,
+  },
+  swipeHintText: {
+    fontSize: 9,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.disabled,
+    letterSpacing: 1.5,
+  },
+  swipeHintLine: {
+    flex: 1,
+    height: 1,
+    maxWidth: 40,
+    backgroundColor: Theme.colors.divider,
+  },
+  swipeHintIcon: {
+    fontSize: 14,
+    color: Theme.colors.text.disabled,
   },
   grid: {
     flexDirection: "row",

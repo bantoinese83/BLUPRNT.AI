@@ -59,6 +59,7 @@ export async function callGemini(params: {
   temperature?: number;
   maxOutputTokens?: number;
   timeoutMs?: number;
+  tools?: any[];
 }): Promise<GeminiResponse | null> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey?.trim()) {
@@ -74,6 +75,7 @@ export async function callGemini(params: {
     temperature = 0.1,
     maxOutputTokens = 4096,
     timeoutMs = 90_000,
+    tools,
   } = params;
 
   const modelName =
@@ -110,16 +112,22 @@ export async function callGemini(params: {
         )
       );
 
+      const config: any = {
+        systemInstruction,
+        temperature,
+        maxOutputTokens,
+        responseMimeType,
+        responseSchema: responseSchema as any,
+      };
+
+      if (tools) {
+        config.tools = tools;
+      }
+
       const callPromise = client.models.generateContent({
         model: modelName,
         contents,
-        config: {
-          systemInstruction,
-          temperature,
-          maxOutputTokens,
-          responseMimeType,
-          responseSchema: responseSchema as any,
-        },
+        config,
       });
 
       const response = await Promise.race([callPromise, timeoutPromise]);

@@ -322,17 +322,20 @@ export async function extractScopeWithGemini(input: {
 
   const systemInstruction =
     `You are a Senior Residential Construction Estimator for ${area}.
-Produce a concise, accurate renovation scope-budget JSON. Speed matters: be thorough but avoid unnecessary verbosity.
+Produce a high-fidelity renovation scope-budget JSON. Use the Google Search tool to find REAL-TIME pricing for materials and labor in ${zip_code}.
 
 Rules:
 1. Exactly **4** line items, grouped by phase (prep → rough → finish). Each item: clear description, justification, priority (high/medium/low), confidence_reason, maintenance_tips, phase.
-2. **Materials**: 3–8 key SKUs per line item (name, brand optional, quantity, unit). Match finish tier (${finish_preference}). No empty materials arrays.
-3. Summary: estimated_min_total, estimated_max_total, confidence_score (1–5), value_engineering_tips (2–4 strings), regional_context (${area}, ${dateStr}), regional_signal (one concrete line).
-4. **Grounding**: Under summary, provide "grounding_sources" (array of {title, url?}). Cite 2-3 specific real-world data points you used to anchor these prices (e.g. HomeAdvisor labor rates for ${zip_code}, current tile prices at Floor & Decor, or RSMeans construction data).
+2. **Materials (Bill of Materials)**: For each line item, include 4–10 specific, realistic materials/SKUs.
+   - You MUST include: name, brand (realistic, e.g. Kohler, Moen, Benjamin Moore), quantity, unit, and **estimated_cost** (per unit).
+   - Match the finish tier: ${finish_preference}.
+   - Use Google Search to find current prices at big-box retailers (Home Depot, Lowe's) or specialty stores in ${area}.
+3. Summary: estimated_min_total, estimated_max_total, confidence_score (1–5), value_engineering_tips (2–4 strings), regional_context (${area}, ${dateStr}), regional_signal (one concrete line about the data you found).
+4. **Grounding**: Under summary, provide "grounding_sources" (array of {title, url?}). Cite the specific product pages or price guides you found during search.
 5. Math: total_cost_min = quantity * unit_cost_min (same for max).
 6. Photos: call out only what you can see; set verification_required true if unsure.
 7. Text-only (no photos): infer a plausible scope from the user description + ${area} norms.
-8. Prefer shorter sentences so the model finishes within a tight latency budget.`;
+8. Be thorough with the Bill of Materials—this is a key feature for the user.`;
 
   const hasPhotos = photoParts.length > 0;
   const prompt = `Project: ${room_type} Renovation
@@ -460,6 +463,7 @@ Please generate the detailed blueprint.`;
       parts,
       systemInstruction,
       responseSchema,
+      tools: [{ googleSearch: {} }],
       temperature: 0.1,
       maxOutputTokens: 4096,
       timeoutMs: 95_000,
