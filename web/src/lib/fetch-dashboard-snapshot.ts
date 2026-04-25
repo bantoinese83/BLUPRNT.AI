@@ -25,13 +25,17 @@ export async function fetchDashboardSnapshot(options?: {
     return { ...emptyDashboardSnapshot(), configured: false };
   }
 
-  const path =
-    options?.currentPath ??
-    `${typeof window !== "undefined" ? window.location.pathname : "/dashboard"}${typeof window !== "undefined" ? window.location.search : ""}`;
+  const [sessionRes, path] = await Promise.all([
+    supabase.auth.getSession(),
+    Promise.resolve(
+      options?.currentPath ??
+        `${typeof window !== "undefined" ? window.location.pathname : "/dashboard"}${typeof window !== "undefined" ? window.location.search : ""}`,
+    ),
+  ]);
 
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = sessionRes;
 
   if (!session) {
     return {
@@ -41,16 +45,18 @@ export async function fetchDashboardSnapshot(options?: {
   }
 
   const userId = session.user.id;
-  let projectId = options?.projectId ?? null;
 
-  if (!projectId) {
-    projectId = await fetchLastActiveProjectIdFromPreferences(supabase, userId);
-  }
+  // We can fetch the preferences and the project list in parallel.
+  // If options.projectId is provided, we don't need to fetch preferences.
+  const [prefProjectId, projListRes] = await Promise.all([
+    options?.projectId
+      ? Promise.resolve(options.projectId)
+      : fetchLastActiveProjectIdFromPreferences(supabase, userId),
+    fetchDashboardProjectsList(supabase, userId),
+  ]);
 
-  const { rows, error: projError } = await fetchDashboardProjectsList(
-    supabase,
-    userId,
-  );
+  let projectId = options?.projectId ?? prefProjectId;
+  const { rows, error: projError } = projListRes;
   if (projError) {
     return {
       ...emptyDashboardSnapshot(),
