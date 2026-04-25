@@ -27,7 +27,7 @@ import type { ReconciliationResult } from "@shared/lib/reconciliation";
 import { money, getStars as stars } from "@/lib/formatters";
 import { InsightTeaser } from "./InsightTeaser";
 
-function MaterialDetailList({
+function BillOfMaterialsList({
   materials,
 }: {
   materials: NonNullable<ScopeRow["metadata"]>["materials"];
@@ -39,7 +39,7 @@ function MaterialDetailList({
       <div className="flex items-center gap-2 mb-2">
         <Package className="w-4 h-4 text-teal-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-          Detailed Bill of Materials
+          Bill of Materials
         </span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -347,7 +347,7 @@ export function EstimateSummary({
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="overflow-hidden"
                       >
-                        <MaterialDetailList materials={materials} />
+                        <BillOfMaterialsList materials={materials} />
                       </motion.div>
                     )}
                   </AnimatePresence>

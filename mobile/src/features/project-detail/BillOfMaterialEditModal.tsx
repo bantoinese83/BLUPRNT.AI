@@ -16,11 +16,10 @@ import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { showAppToast } from "@/lib/app-toast";
-import type { ScopeRow } from "@shared/types/database";
 
-export type BillOfMaterialRow = NonNullable<
-  NonNullable<ScopeRow["metadata"]>["materials"]
->[number];
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
+
+export type BillOfMaterialRow = BillOfMaterialItem;
 
 type Props = {
   visible: boolean;

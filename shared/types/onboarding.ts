@@ -3,6 +3,15 @@
  * Centralizing these ensures data consistency during project initialization.
  */
 
+export interface BillOfMaterialItem {
+  name: string;
+  brand?: string;
+  model?: string;
+  quantity?: number | string;
+  unit?: string;
+  estimated_cost?: number;
+}
+
 export interface OnboardingScopeItem {
   category: string;
   description: string;
@@ -22,20 +31,9 @@ export interface OnboardingScopeItem {
   confidence_reason?: string | null;
   verification_required?: boolean | null;
   /** Present on raw photo-to-scope payloads; merged into `metadata.materials` in API responses. */
-  materials?: Array<{
-    name: string;
-    brand?: string;
-    quantity?: number | string;
-    unit?: string;
-    estimated_cost?: number;
-  }>;
+  materials?: BillOfMaterialItem[];
   metadata?: {
-    materials?: Array<{
-      name: string;
-      brand?: string;
-      quantity?: number | string;
-      unit?: string;
-    }>;
+    materials?: BillOfMaterialItem[];
     justification?: string;
     priority?: string;
     phase?: string;

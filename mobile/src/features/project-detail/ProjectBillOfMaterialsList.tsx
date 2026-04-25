@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Package, Tag, Boxes, Pencil, Trash2 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
-import type { ScopeRow } from "@shared/types/database";
+
 import { Theme } from "@/constants/Theme";
 import { projectDetailStyles as styles } from "./project-detail.styles";
 import {
@@ -16,16 +16,16 @@ import {
   type BillOfMaterialRow,
 } from "./BillOfMaterialEditModal";
 
-type MaterialsList = NonNullable<
-  NonNullable<ScopeRow["metadata"]>["materials"]
->;
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
+
+type MaterialsList = BillOfMaterialItem[];
 
 type Props = {
   materials: MaterialsList;
   onPersist?: (next: MaterialsList) => Promise<void>;
 };
 
-export function ProjectMaterialDetailList({ materials, onPersist }: Props) {
+export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
   const [editItem, setEditItem] = useState<{
     index: number;
     row: BillOfMaterialRow;

@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import type { ScopeRow } from "@shared/types/database";
+import type { BillOfMaterialItem } from "@shared/types/onboarding";
 
 interface UseScopeManagementProps {
   projectId: string;
@@ -16,9 +17,8 @@ export function useScopeManagement({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState<string>("");
   const [editTier, setEditTier] = useState<string>("");
-  const [editMaterials, setEditMaterials] = useState<
-    NonNullable<ScopeRow["metadata"]>["materials"]
-  >([]);
+  const [editMaterials, setEditMaterials] = useState<BillOfMaterialItem[]>([]);
+
   const [saving, setSaving] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export function useScopeManagement({
         unit_cost_max: ucMax,
         total_cost_min: newTotalMin,
         total_cost_max: newTotalMax,
-        metadata: nextMeta,
+        metadata: nextMeta as unknown as ScopeRow["metadata"],
       })
       .eq("id", item.id);
 

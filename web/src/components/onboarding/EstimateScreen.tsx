@@ -296,7 +296,7 @@ export function EstimateScreen() {
                           <div className="flex items-center gap-2">
                             <Package className="w-4 h-4 text-teal-600" />
                             <h4 className="text-[11px] font-black text-teal-700 uppercase tracking-[0.15em]">
-                              Detailed Bill of Materials
+                              Bill of Materials
                             </h4>
                           </div>
                           <Badge

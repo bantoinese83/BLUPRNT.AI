@@ -388,3 +388,35 @@ Deno.test(
     assertEquals(city, "Beverly Hills, CA area");
   },
 );
+
+Deno.test(
+  "sanitizeEstimate - detects and fixes pricing hallucinations (Double Multiplication)",
+  () => {
+    const rawData = {
+      summary: {
+        estimated_min_total: 50000,
+        estimated_max_total: 80000,
+      },
+      scope_items: [
+        {
+          category: "Tile & Flooring",
+          quantity: 150,
+          unit: "sq ft",
+          unit_cost_min: 4000, // Hallucination: should have been total
+          unit_cost_max: 7000,
+          materials: [
+            { name: "Subway Tile", quantity: 150, unit: "sq ft", estimated_cost: 10 }, // $1500 total
+          ],
+        },
+      ],
+    };
+
+    const result = sanitizeEstimate(rawData, "mid", false);
+    const item = result.scope_items[0];
+    assertExists(item);
+
+    assertEquals(item.unit_cost_min, 27); // 4000 / 150 rounded
+    assertEquals(item.total_cost_min, 4050); // 150 * 27
+    assertExists(item.total_cost_min < 10000, "Should be fixed to a reasonable range");
+  },
+);

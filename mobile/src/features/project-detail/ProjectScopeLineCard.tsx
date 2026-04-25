@@ -13,11 +13,13 @@ import { AnimatePresence } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { projectDetailStyles as styles } from "./project-detail.styles";
-import { ProjectMaterialDetailList } from "./ProjectMaterialDetailList";
+import { ProjectBillOfMaterialsList } from "./ProjectBillOfMaterialsList";
+
 import { ConfidenceDisplay } from "@/components/ui/ConfidenceDisplay";
 import type { ScopeRow } from "@shared/types/database";
 import type { ReconciliationItem } from "@shared/lib/reconciliation";
 import { money } from "@shared/lib/formatters";
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
 
 type Props = {
   item: ScopeRow;
@@ -28,7 +30,7 @@ type Props = {
   onToggleExpand: (itemId: string) => void;
   onPersistScopeMaterials?: (
     scopeItemId: string,
-    next: NonNullable<ScopeRow["metadata"]>["materials"],
+    next: BillOfMaterialItem[],
   ) => Promise<void>;
 };
 
@@ -156,7 +158,7 @@ export function ProjectScopeLineCard({
                   transition={{ type: "timing", duration: 300 }}
                   style={{ overflow: "hidden" }}
                 >
-                  <ProjectMaterialDetailList
+                  <ProjectBillOfMaterialsList
                     materials={materialRows}
                     onPersist={
                       onPersistScopeMaterials

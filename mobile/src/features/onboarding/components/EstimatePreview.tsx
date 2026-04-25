@@ -8,7 +8,8 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { ProjectIcon } from "@/lib/project-icons";
 import { Theme } from "@/constants/Theme";
 import { ScopeEstimateBreakdown } from "@/features/onboarding/components/ScopeEstimateBreakdown";
-import { MaterialDetailList } from "@/features/onboarding/components/MaterialDetailList";
+import { BillOfMaterialsList } from "@/features/onboarding/components/BillOfMaterialsList";
+
 import {
   estimateFallbackUserMessage,
   hasValidOnboardingZip,
@@ -136,7 +137,7 @@ export function EstimatePreview({
                     style={styles.breakdownExpand}
                   >
                     <ScopeEstimateBreakdown items={estimate.scope} />
-                    <MaterialDetailList
+                    <BillOfMaterialsList
                       materials={estimate.scope.flatMap(
                         (s) => s.metadata?.materials || [],
                       )}

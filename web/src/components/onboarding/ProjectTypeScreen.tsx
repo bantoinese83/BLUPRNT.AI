@@ -109,7 +109,7 @@ export function ProjectTypeScreen() {
                   }`}
                   onClick={() => setProjectType(opt)}
                 >
-                  <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-[6rem] sm:min-h-[7.5rem] text-center relative z-10">
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-24 sm:min-h-30 text-center relative z-10">
                     <div className="absolute top-2 right-2 hidden sm:block">
                       <span
                         className={`text-[9px] font-black px-1.5 py-0.5 rounded border transition-colors ${
@@ -142,7 +142,7 @@ export function ProjectTypeScreen() {
                   {selected && (
                     <motion.div
                       layoutId="active-bg"
-                      className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent pointer-events-none"
+                      className="absolute inset-0 bg-linear-to-br from-teal-500/5 to-transparent pointer-events-none"
                     />
                   )}
                 </Card>

@@ -11,6 +11,8 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { dashboardQueryKey } from "@/lib/query-client";
 import type { InvoiceRow, ProjectRow, ScopeRow } from "@shared/types/database";
 import { groupScopeByCategory, projectHasEstimateTotals } from "./helpers";
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
+
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 import {
@@ -330,10 +332,7 @@ export function useProjectDetailData() {
   ]);
 
   const updateScopeItemMaterials = useCallback(
-    async (
-      scopeItemId: string,
-      materials: NonNullable<ScopeRow["metadata"]>["materials"],
-    ) => {
+    async (scopeItemId: string, materials: BillOfMaterialItem[]) => {
       const row = scope.find((s) => s.id === scopeItemId);
       if (!row || !id) return;
 
@@ -341,14 +340,14 @@ export function useProjectDetailData() {
         row.metadata && typeof row.metadata === "object"
           ? { ...row.metadata }
           : {};
-      const nextMetadata: ScopeRow["metadata"] = {
+      const nextMetadata = {
         ...base,
         materials: materials ?? [],
       };
 
       const { error } = await supabase
         .from("scope_items")
-        .update({ metadata: nextMetadata })
+        .update({ metadata: nextMetadata as unknown as ScopeRow["metadata"] })
         .eq("id", scopeItemId);
 
       if (error) {
@@ -361,7 +360,12 @@ export function useProjectDetailData() {
 
       setScope((prev) =>
         prev.map((s) =>
-          s.id === scopeItemId ? { ...s, metadata: nextMetadata } : s,
+          s.id === scopeItemId
+            ? {
+                ...s,
+                metadata: nextMetadata as unknown as ScopeRow["metadata"],
+              }
+            : s,
         ),
       );
       void queryClient.invalidateQueries({ queryKey: dashboardQueryKey });

@@ -4,16 +4,12 @@ import { Package, Boxes, Tag } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { onboardingStyles as styles } from "@/features/onboarding/onboarding-screen.styles";
 
-export function MaterialDetailList({
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
+
+export function BillOfMaterialsList({
   materials,
 }: {
-  materials: {
-    name: string;
-    brand?: string;
-    quantity?: number | string;
-    unit?: string;
-    estimated_cost?: number;
-  }[];
+  materials: BillOfMaterialItem[];
 }) {
   if (!materials || materials.length === 0) return null;
 

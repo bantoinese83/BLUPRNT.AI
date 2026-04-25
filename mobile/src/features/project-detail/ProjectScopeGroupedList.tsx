@@ -6,6 +6,8 @@ import { ProjectScopeLineCard } from "./ProjectScopeLineCard";
 import type { ScopeRow } from "@shared/types/database";
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
+
 type Props = {
   groupedScope: Record<string, ScopeRow[]>;
   reconciliation: ReconciliationResult | null;
@@ -13,7 +15,7 @@ type Props = {
   setExpandedId: (id: string | null) => void;
   onPersistScopeMaterials?: (
     scopeItemId: string,
-    next: NonNullable<ScopeRow["metadata"]>["materials"],
+    next: BillOfMaterialItem[],
   ) => Promise<void>;
 };
 

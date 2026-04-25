@@ -62,7 +62,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
-          <Check className="w-2.5 h-2.5 text-teal-500 stroke-[4]" />
+          <Check className="w-2.5 h-2.5 text-teal-500 stroke-4" />
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
             {timeLabel}
           </span>
@@ -118,7 +118,7 @@ function StepProgress({ currentPath }: { currentPath: string }) {
                   )}
                 >
                   {isCompleted && (
-                    <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
+                    <Check className="w-2.5 h-2.5 text-white stroke-4" />
                   )}
                   {isActive && (
                     <ActiveIcon className="w-2.5 h-2.5 text-white animate-in fade-in zoom-in duration-500" />
@@ -140,7 +140,7 @@ export default function Onboarding() {
     location.pathname === "/onboarding" || location.pathname === "/onboarding/";
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white">
+    <div className="flex min-h-screen flex-col bg-linear-to-b from-slate-50 to-white">
       <Helmet>
         <title>Get Started — BLUPRNT.AI</title>
         <meta

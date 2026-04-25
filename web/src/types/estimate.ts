@@ -8,6 +8,8 @@ export type EstimateSummary = {
   grounding_sources?: Array<{ title: string; url?: string }>;
 };
 
+import { type BillOfMaterialItem } from "@shared/types/onboarding";
+
 export type ScopeItemPreview = {
   id: string;
   category: string;
@@ -20,7 +22,7 @@ export type ScopeItemPreview = {
   total_cost_min: number | null;
   total_cost_max: number | null;
   confidence_score: number | null;
-  confidence_reason?: string; // e.g., "Estimated as mid-range hardwood"
+  confidence_reason?: string;
   source: string;
   justification?: string;
   priority?: "high" | "medium" | "low";
@@ -32,14 +34,7 @@ export type ScopeItemPreview = {
     phase?: string;
     maintenance_tips?: string;
     confidence_reason?: string;
-    materials?: Array<{
-      name: string;
-      brand?: string;
-      model?: string;
-      quantity?: number;
-      unit?: string;
-      estimated_cost?: number;
-    }>;
+    materials?: BillOfMaterialItem[];
   };
 };
 
