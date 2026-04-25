@@ -172,12 +172,13 @@ export function EmptyState({
           </div>
         )}
 
-        <a
+        <motion.a
           href="mailto:connect@monarch-labs.com"
+          whileHover={{ y: -1 }}
           className="text-xs font-semibold text-slate-400 hover:text-teal-600 transition-colors flex items-center gap-1.5"
         >
           Need help? Contact support
-        </a>
+        </motion.a>
       </div>
 
       {/* Branded watermark */}

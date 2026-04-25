@@ -3,8 +3,8 @@
   "ignoreDependencies": [
     "@bluprnt/shared",
     "react-native-screens",
-    "react-native-web",
-    "react-native-worklets"
+    "react-native-worklets",
+    "expo-router"
   ],
   "ignore": [
     "src/test/**",
@@ -13,5 +13,5 @@
     "src/constants/Theme.ts"
   ],
   "ignoreBinaries": ["expo", "eslint", "vitest", "knip"],
-  "entry": ["src/lib/push.ts"]
+  "entry": ["app/**/*.{ts,tsx}", "src/lib/push.ts"]
 }

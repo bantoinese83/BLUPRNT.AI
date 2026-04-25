@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,10 @@ export function DashboardEmptyPanel({
   const isComfortable = density === "comfortable";
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
         "flex flex-col items-center text-center max-w-md mx-auto",
         isComfortable ? "py-20 px-6" : "p-10 sm:p-14",
@@ -71,6 +75,6 @@ export function DashboardEmptyPanel({
           {action}
         </div>
       ) : null}
-    </div>
+    </motion.div>
   );
 }

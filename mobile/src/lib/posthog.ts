@@ -18,10 +18,3 @@ export const captureEvent = (
 ) => {
   posthog.capture(event, properties);
 };
-
-export const identifyUser = (userId: string, email?: string, name?: string) => {
-  posthog.identify(userId, {
-    email: email ?? null,
-    name: name ?? null,
-  });
-};

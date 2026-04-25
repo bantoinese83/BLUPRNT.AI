@@ -27,6 +27,7 @@ export function AppSimpleHeader({
         <Link
           to="/"
           className="flex items-center gap-2.5 transition-opacity hover:opacity-90 sm:gap-3"
+          aria-label="BLUPRNT.AI - Home"
         >
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200 sm:h-12 sm:w-12 sm:rounded-2xl sm:p-1.5">
             <img

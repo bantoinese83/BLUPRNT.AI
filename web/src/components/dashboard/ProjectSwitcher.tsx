@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { getProjectIcon } from "@/lib/onboarding-icons";
 
@@ -102,97 +103,103 @@ export function ProjectSwitcher({
           />
         </Button>
 
-        {open && (
-          <div
-            className="animate-in fade-in slide-in-from-top-2 absolute left-0 top-full z-50 mt-2 w-full min-w-[260px] max-w-[min(100vw-2rem,320px)] rounded-[1.25rem] border border-slate-200 bg-white py-2 shadow-2xl duration-200"
-            role="listbox"
-          >
-            <div className="px-3 pb-2 mb-2 border-b border-slate-50">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">
-                Your Projects
-              </span>
-            </div>
-            <div className="max-h-[300px] overflow-y-auto px-1">
-              {projects.map((p) => {
-                const isActive = p.id === currentId;
-                return (
-                  <div
-                    key={p.id}
-                    className="relative flex items-center group px-1 mb-1"
-                  >
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
-                      className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-left text-sm rounded-xl transition-all ${
-                        isActive
-                          ? "bg-teal-500/10 text-teal-900 font-bold ring-1 ring-teal-500/20"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                      }`}
-                      onClick={() => {
-                        onSelect(p.id);
-                        setOpen(false);
-                      }}
-                      data-testid={`project-option-${p.name}`}
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute left-0 top-full z-50 mt-2 w-full min-w-[260px] max-w-[min(100vw-2rem,320px)] rounded-[1.25rem] border border-slate-200 bg-white py-2 shadow-2xl"
+              role="listbox"
+            >
+              <div className="px-3 pb-2 mb-2 border-b border-slate-50">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">
+                  Your Projects
+                </span>
+              </div>
+              <div className="max-h-[300px] overflow-y-auto px-1">
+                {projects.map((p) => {
+                  const isActive = p.id === currentId;
+                  return (
+                    <div
+                      key={p.id}
+                      className="relative flex items-center group px-1 mb-1"
                     >
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/40 shadow-sm" : "bg-teal-500/10 ring-1 ring-teal-500/20 group-hover:bg-teal-500/20"}`}
-                      >
-                        {getProjectIcon(p.name)({
-                          className: `w-4 h-4 object-contain transition-all ${isActive ? "opacity-100" : "opacity-90"}`,
-                        })}
-                      </div>
-
-                      <div className="flex flex-col min-w-0 pr-6">
-                        <span className="truncate">{p.name}</span>
-                        <span
-                          className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-teal-600/80" : "text-slate-400"}`}
-                        >
-                          {p.created_at
-                            ? new Date(p.created_at).toLocaleDateString(
-                                undefined,
-                                {
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )
-                            : ""}
-                          {p.estimated_min_total
-                            ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
-                            : " • Planning"}
-                        </span>
-                      </div>
-                    </button>
-                    {onDelete && (
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(p.id);
+                        role="option"
+                        aria-selected={isActive}
+                        className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-left text-sm rounded-xl transition-all ${
+                          isActive
+                            ? "bg-teal-500/10 text-teal-900 font-bold ring-1 ring-teal-500/20"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        }`}
+                        onClick={() => {
+                          onSelect(p.id);
+                          setOpen(false);
                         }}
-                        data-testid={`project-delete-${p.name}`}
-                        className="absolute right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                        aria-label={`Delete project ${p.name}`}
+                        data-testid={`project-option-${p.name}`}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${isActive ? "bg-white/40 shadow-sm" : "bg-teal-500/10 ring-1 ring-teal-500/20 group-hover:bg-teal-500/20"}`}
+                        >
+                          {getProjectIcon(p.name)({
+                            className: `w-4 h-4 object-contain transition-all ${isActive ? "opacity-100" : "opacity-90"}`,
+                          })}
+                        </div>
+
+                        <div className="flex flex-col min-w-0 pr-6">
+                          <span className="truncate">{p.name}</span>
+                          <span
+                            className={`text-[11px] truncate uppercase tracking-tight ${isActive ? "text-teal-600/80" : "text-slate-400"}`}
+                          >
+                            {p.created_at
+                              ? new Date(p.created_at).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )
+                              : ""}
+                            {p.estimated_min_total
+                              ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
+                              : " • Planning"}
+                          </span>
+                        </div>
                       </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="border-t border-slate-100 px-2 pt-2">
-              <Link
-                to="/onboarding"
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold text-teal-700 transition-colors hover:bg-teal-50"
-                onClick={() => setOpen(false)}
-              >
-                <Plus className="h-4 w-4 shrink-0" aria-hidden />
-                Start a BLUPRNT
-              </Link>
-            </div>
-          </div>
-        )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(p.id);
+                          }}
+                          data-testid={`project-delete-${p.name}`}
+                          className="absolute right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          aria-label={`Delete project ${p.name}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="border-t border-slate-100 px-2 pt-2">
+                <Link
+                  to="/onboarding"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold text-teal-700 transition-colors hover:bg-teal-50"
+                  onClick={() => setOpen(false)}
+                >
+                  <Plus className="h-4 w-4 shrink-0" aria-hidden />
+                  Start a BLUPRNT
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       {newProjectButton}
     </div>
