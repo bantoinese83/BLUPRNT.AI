@@ -7,7 +7,14 @@ import { Loader } from "@/components/ui/Loader";
 import { loadingScreenMessages } from "@shared/constants/onboarding";
 
 export function LoadingScreen() {
-  const { onboardingContext, fetchOnboardingContext } = useOnboarding();
+  const {
+    runPhotoToScope,
+    projectType,
+    estimateError,
+    locationInput,
+    onboardingContext,
+    fetchOnboardingContext,
+  } = useOnboarding();
   const navigate = useNavigate();
   const [messageIdx, setMessageIdx] = useState(0);
 
@@ -41,7 +48,7 @@ export function LoadingScreen() {
     return () => {
       cancelled = true;
     };
-  }, [runPhotoToScope, fetchOnboardingContext]);
+  }, [runPhotoToScope, fetchOnboardingContext, navigate]);
 
   return (
     <PageTransition>
