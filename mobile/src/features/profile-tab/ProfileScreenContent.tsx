@@ -74,7 +74,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
   return (
     <ScreenWrapper withLogo withScroll edges={["top", "left", "right"]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Account Settings</Text>
+        <Text style={styles.title}>Settings</Text>
       </View>
 
       <ScrollView
@@ -87,7 +87,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
           transition={{ type: "timing", duration: 500 }}
         >
           <GlassCard style={styles.sectionCard}>
-            <Text style={styles.sectionHeader}>Identity</Text>
+            <Text style={styles.sectionHeader}>Profile</Text>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Full Name</Text>
               <View style={styles.inputWrapper}>

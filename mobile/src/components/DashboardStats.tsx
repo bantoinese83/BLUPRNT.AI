@@ -13,6 +13,40 @@ import { money } from "@shared/lib/formatters";
 import { calculateBudgetStats } from "@shared/lib/plan-vs-actual";
 import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 
+function Counter({
+  value,
+  duration = 800,
+  formatter = (v: number) => Math.floor(v).toString(),
+}: {
+  value: number;
+  duration?: number;
+  formatter?: (v: number) => string;
+}) {
+  const [displayValue, setDisplayValue] = React.useState(0);
+
+  React.useEffect(() => {
+    let startTime: number | null = null;
+    const endValue = value;
+    const startValue = 0;
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const current = progress * (endValue - startValue) + startValue;
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    const handle = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(handle);
+  }, [value, duration]);
+
+  return <Text>{formatter(displayValue)}</Text>;
+}
+
 type DashboardStatsProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
@@ -23,7 +57,7 @@ type DashboardStatsProps = {
 
 interface StatItemProps {
   label: string;
-  value: string;
+  value: React.ReactNode;
   subValue: string;
   icon: LucideIcon;
   delay?: number;
@@ -99,7 +133,12 @@ export function DashboardStats({
 
       <StatItem
         label={DASHBOARD_STATS_LABELS.documents}
-        value={documentRowCount.toString()}
+        value={
+          <Counter
+            value={documentRowCount}
+            formatter={(v) => Math.floor(v).toString()}
+          />
+        }
         subValue={DASHBOARD_STATS_LABELS.documentsSub}
         icon={FileText}
         delay={100}
@@ -107,7 +146,18 @@ export function DashboardStats({
 
       <StatItem
         label={DASHBOARD_STATS_LABELS.invested}
-        value={money(spendingTotal)}
+        value={
+          <Counter
+            value={spendingTotal}
+            formatter={(v) =>
+              new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 0,
+              }).format(v)
+            }
+          />
+        }
         subValue={DASHBOARD_STATS_LABELS.investedSub}
         icon={TrendingUp}
         delay={200}
