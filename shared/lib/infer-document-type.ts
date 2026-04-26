@@ -106,12 +106,14 @@ export function inferDocumentTypeFromFilename(
     return "lien_waiver";
   }
   if (
-    /\b(appraisal|appraised|fmv|as is value|valuation report)\b/.test(compact)
+    /\b(appraisal|appraised|fmv|as is value|valuation report|valuation)\b/.test(
+      compact,
+    )
   ) {
     return "appraisal";
   }
   if (
-    /\b(hers|rated home|blower door|energy star|rescheck|home energy|bees score|energy cert)\b/.test(
+    /\b(hers|rated home|blower door|energy star|rescheck|home energy|bees score|energy cert|energy)\b/.test(
       compact,
     )
   ) {
@@ -125,11 +127,9 @@ export function inferDocumentTypeFromFilename(
     return "insurance";
   }
   if (
-    /\b(home inspection|property inspection|buyer inspection|pre purchase|4 point|4point|full inspection|inspection report)\b/.test(
+    /\b(home inspection|property inspection|buyer inspection|pre purchase|4 point|4point|full inspection|inspection report|inspection)\b/.test(
       compact,
-    ) ||
-    (/\binspection\b/.test(compact) &&
-      /\b(home|property|full|pre)\b/.test(compact))
+    )
   ) {
     return "inspection";
   }
@@ -156,10 +156,9 @@ export function inferDocumentTypeFromFilename(
     return "permit";
   }
   if (
-    /\b(maintenance log|maintenance-log|service log|upkeep log|homeowner log|house log|care log|property log|task log)\b/.test(
+    /\b(maintenance log|maintenance-log|service log|upkeep log|homeowner log|house log|care log|property log|task log|maintenance)\b/.test(
       compact,
-    ) ||
-    (/\bmaintenance\b/.test(compact) && /\blog\b/.test(compact))
+    )
   ) {
     return "maintenance";
   }

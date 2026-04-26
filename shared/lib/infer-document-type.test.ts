@@ -87,6 +87,11 @@ describe("inferDocumentTypeFromFilename", () => {
       "receipt",
     );
     expect(inferDocumentTypeFromFilename("invoice_po_123")).toBe("invoice");
+    expect(inferDocumentTypeFromFilename("inspection.pdf")).toBe("inspection");
+    expect(inferDocumentTypeFromFilename("energy.png")).toBe("energy");
+    expect(inferDocumentTypeFromFilename("maintenance.pdf")).toBe(
+      "maintenance",
+    );
   });
 
   it("returns null when no pattern matches", () => {
