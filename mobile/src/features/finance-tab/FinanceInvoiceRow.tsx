@@ -32,7 +32,10 @@ export function FinanceInvoiceRow({
   onDelete,
 }: FinanceInvoiceRowProps) {
   const swipeableRef = useRef<Swipeable>(null);
-  const warranty = getWarrantyStatus(inv.warranty_expiry_date);
+  const warranty =
+    inv.document_type === "quote"
+      ? null
+      : getWarrantyStatus(inv.warranty_expiry_date);
   const isWarrantyUnlocked = hasProjectPass;
 
   const renderRightActions = (
@@ -104,7 +107,11 @@ export function FinanceInvoiceRow({
                     numberOfLines={2}
                     ellipsizeMode="tail"
                   >
-                    {inv.vendor_name || "Uncategorized"}
+                    {inv.vendor_name && inv.vendor_name !== "Processing..."
+                      ? inv.vendor_name
+                      : ledgerDocumentTypeLabel(
+                          inv.document_type ?? "invoice",
+                        ).split(" / ")[0]}
                   </Text>
                   <View
                     style={{

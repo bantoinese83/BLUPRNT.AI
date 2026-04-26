@@ -40,7 +40,10 @@ export function DocumentCard({
   const showPaymentBadge = isPlanVsActualDocumentType(
     document.document_type ?? "invoice",
   );
-  const warranty = getWarrantyStatus(document.warranty_expiry_date);
+  const warranty =
+    document.document_type === "quote"
+      ? null
+      : getWarrantyStatus(document.warranty_expiry_date);
   const isWarrantyUnlocked = hasProjectPass;
 
   return (
@@ -64,7 +67,12 @@ export function DocumentCard({
             <div className="space-y-1 min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
-                  {document.vendor_name ?? "Document"}
+                  {document.vendor_name &&
+                  document.vendor_name !== "Processing..."
+                    ? document.vendor_name
+                    : ledgerDocumentTypeLabel(
+                        document.document_type ?? "invoice",
+                      ).split(" / ")[0]}
                 </h4>
                 <AnimatePresence>
                   {document.is_verified === false && (

@@ -360,7 +360,8 @@ export function DocumentReviewModal({
                 <h4 className="font-medium text-slate-900 flex items-center gap-2">
                   {document.vendor_name &&
                   document.vendor_name !== "Vendor" &&
-                  document.vendor_name !== "Document"
+                  document.vendor_name !== "Document" &&
+                  document.vendor_name !== "Processing..."
                     ? document.vendor_name
                     : defaultVendorNameForDocumentType(ledgerDocType)}
                   {(!document.vendor_name ||
@@ -377,7 +378,11 @@ export function DocumentReviewModal({
                 </h4>
                 {showCapitalLineLink && (
                   <Badge variant="secondary" className="capitalize">
-                    {document.payment_status}
+                    {document.payment_status === "unknown"
+                      ? ledgerDocType === "quote"
+                        ? "Pending Review"
+                        : "Processing"
+                      : document.payment_status}
                   </Badge>
                 )}
               </div>

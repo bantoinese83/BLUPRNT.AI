@@ -90,14 +90,23 @@ export function InvoiceReviewSheet({
     STATUS_COLORS[detail?.payment_status ?? invoice.payment_status ?? ""] ||
     "#64748b";
 
+  const rawVendor = detail?.vendor_name ?? invoice.vendor_name;
   const vendorDisplay =
-    detail?.vendor_name ?? invoice.vendor_name ?? "Uncategorized Vendor";
+    rawVendor &&
+    rawVendor !== "Vendor" &&
+    rawVendor !== "Document" &&
+    rawVendor !== "Processing..."
+      ? rawVendor
+      : ledgerDocumentTypeLabel(docType).split(" / ")[0]; // "Quote" or "Invoice"
   const totalDisplay = detail?.total ?? invoice.total ?? 0;
+  const rawStatus =
+    detail?.payment_status ?? invoice.payment_status ?? "pending";
   const paymentLabel =
-    (detail?.payment_status ?? invoice.payment_status ?? "pending")
-      .charAt(0)
-      .toUpperCase() +
-    (detail?.payment_status ?? invoice.payment_status ?? "pending").slice(1);
+    rawStatus === "unknown"
+      ? docType === "quote"
+        ? "Pending Review"
+        : "Processing"
+      : rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
 
   const docIdForOpen = detail?.document_id ?? invoice.document_id;
   const isUnverified = detail?.is_verified === false;
