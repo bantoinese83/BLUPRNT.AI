@@ -32,7 +32,7 @@ export function BillOfMaterialsTable({ materials }: BillOfMaterialsTableProps) {
                 Material Item
               </th>
               <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
-                Brand
+                Brand / Model
               </th>
               <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
                 Quantity
@@ -62,18 +62,26 @@ export function BillOfMaterialsTable({ materials }: BillOfMaterialsTableProps) {
                   </div>
                 </td>
                 <td className="py-4 px-4">
-                  {m.brand ? (
-                    <div className="flex items-center gap-1.5">
-                      <Tag className="w-3 h-3 text-teal-500" />
-                      <span className="text-[10px] font-black text-teal-600 uppercase tracking-tight">
-                        {m.brand}
+                  <div className="flex flex-col gap-1">
+                    {m.brand && (
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-teal-500" />
+                        <span className="text-[10px] font-black text-teal-600 uppercase tracking-tight">
+                          {m.brand}
+                        </span>
+                      </div>
+                    )}
+                    {m.model && (
+                      <span className="text-[10px] font-bold text-slate-400 italic">
+                        {m.model}
                       </span>
-                    </div>
-                  ) : (
-                    <span className="text-[10px] font-bold text-slate-300 uppercase">
-                      Standard
-                    </span>
-                  )}
+                    )}
+                    {!m.brand && !m.model && (
+                      <span className="text-[10px] font-bold text-slate-300 uppercase">
+                        Standard
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-4">
                   <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100/50">
@@ -82,13 +90,19 @@ export function BillOfMaterialsTable({ materials }: BillOfMaterialsTableProps) {
                 </td>
                 <td className="py-4 px-4 text-right">
                   <span className="text-sm font-medium text-slate-400">
-                    {m.estimated_cost ? formatCurrency(m.estimated_cost) : "—"}
+                    {m.estimated_cost
+                      ? formatCurrency(m.estimated_cost, {
+                          maximumFractionDigits: 2,
+                        })
+                      : "—"}
                   </span>
                 </td>
                 <td className="py-4 pr-4 sm:pr-0 text-right">
                   <span className="text-sm font-black text-slate-900 tracking-tight">
                     {m.estimated_cost && m.quantity
-                      ? formatCurrency(m.estimated_cost * Number(m.quantity))
+                      ? formatCurrency(m.estimated_cost * Number(m.quantity), {
+                          maximumFractionDigits: 2,
+                        })
                       : "—"}
                   </span>
                 </td>

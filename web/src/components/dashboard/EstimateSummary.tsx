@@ -35,58 +35,92 @@ function BillOfMaterialsList({
   if (!materials || materials.length === 0) return null;
 
   return (
-    <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+    <div className="mt-4 p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 overflow-hidden">
       <div className="flex items-center gap-2 mb-2">
         <Package className="w-4 h-4 text-teal-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           Bill of Materials
         </span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {materials.map((m, idx) => (
-          <div
-            key={idx}
-            className="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md hover:border-teal-100 group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-teal-50 transition-colors">
-              <Boxes className="w-4 h-4 text-slate-400 group-hover:text-teal-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-[13px] font-bold text-teal-950 leading-tight truncate">
-                  {m.name}
-                </p>
-                {m.estimated_cost && (
-                  <span className="text-[11px] font-black text-teal-600 shrink-0">
-                    {money(m.estimated_cost)}
+
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-slate-200/60">
+              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 sm:pl-0">
+                Material Item
+              </th>
+              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
+                Brand / Model
+              </th>
+              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-4">
+                Quantity
+              </th>
+              <th className="pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest pr-4 sm:pr-0 text-right">
+                Cost
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {materials.map((m, i) => (
+              <tr key={i} className="group hover:bg-white/50 transition-colors">
+                <td className="py-3.5 pl-4 sm:pl-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-100 shadow-xs">
+                      <Boxes className="w-3.5 h-3.5 text-slate-400" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-900 leading-tight">
+                      {m.name}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3.5 px-4">
+                  <div className="flex flex-col gap-1">
+                    {m.brand && (
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-teal-500" />
+                        <span className="text-[10px] font-black text-teal-600 uppercase tracking-tight">
+                          {m.brand}
+                        </span>
+                      </div>
+                    )}
+                    {m.model && (
+                      <span className="text-[10px] font-bold text-slate-400 italic">
+                        {m.model}
+                      </span>
+                    )}
+                    {!m.brand && !m.model && (
+                      <span className="text-[10px] font-bold text-slate-300 uppercase">
+                        Standard
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="py-3.5 px-4">
+                  <span className="text-[11px] font-black text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100 shadow-xs">
+                    {m.quantity} {m.unit || "units"}
                   </span>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                {m.brand && (
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-teal-600 uppercase tracking-wider">
-                    <Tag className="w-3 h-3" />
-                    {m.brand}
-                  </span>
-                )}
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none border border-slate-100">
-                  {m.quantity} {m.unit || "units"}
-                </span>
-                {m.estimated_cost && m.quantity && Number(m.quantity) > 1 && (
-                  <span className="text-[10px] font-medium text-slate-400 italic">
-                    Total: {money(m.estimated_cost * Number(m.quantity))}
-                  </span>
-                )}
-              </div>
-              {m.model && (
-                <p className="text-[10px] text-slate-400 font-medium mt-2 truncate italic">
-                  Model: {m.model}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
+                </td>
+                <td className="py-3.5 pr-4 sm:pr-0 text-right">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[13px] font-black text-slate-900 tabular-nums">
+                      {m.estimated_cost ? money(m.estimated_cost) : "—"}
+                    </span>
+                    {m.estimated_cost &&
+                      m.quantity &&
+                      Number(m.quantity) > 1 && (
+                        <span className="text-[10px] font-medium text-slate-400 tabular-nums italic">
+                          Total: {money(m.estimated_cost * Number(m.quantity))}
+                        </span>
+                      )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
       <div className="pt-2 flex items-center justify-center">
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
           <Activity className="w-2.5 h-2.5 text-emerald-500" />
