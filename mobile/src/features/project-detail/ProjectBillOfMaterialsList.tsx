@@ -6,7 +6,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Package, Tag, Boxes, Pencil, Trash2 } from "lucide-react-native";
+import { Package, Pencil, Trash2 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 
 import { Theme } from "@/constants/Theme";

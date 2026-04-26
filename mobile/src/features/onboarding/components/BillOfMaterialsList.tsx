@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { Package, Boxes, Tag } from "lucide-react-native";
+import { Package } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { onboardingStyles as styles } from "@/features/onboarding/onboarding-screen.styles";
 
