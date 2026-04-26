@@ -135,6 +135,10 @@ export function validatePassword(
   return null;
 }
 
+export function isValidPassword(password: string | null | undefined): boolean {
+  return typeof password === "string" && password.length >= PASSWORD_MIN_LENGTH;
+}
+
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmail(email: string | null | undefined): boolean {

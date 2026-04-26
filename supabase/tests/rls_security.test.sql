@@ -1,5 +1,5 @@
 begin;
-select plan(12);
+select plan(13);
 
 -- 1. Setup Test Users
 insert into auth.users (id, email)
@@ -105,7 +105,20 @@ select is_empty(
   'User B should see no invoices from User A projects'
 );
 
--- 9. TEST MARKETING LEADS (Restricted to service_role)
+-- 9. TEST DOCUMENTS ISOLATION
+set local role postgres;
+insert into public.documents (project_id, type, storage_path, uploaded_by_user_id)
+values ('22222222-2222-2222-2222-222222222222', 'invoice', '22222222-2222-2222-2222-222222222222/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/doc1.pdf', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+
+set local role authenticated;
+set local "request.jwt.claims" = '{"sub":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"}';
+
+select is_empty(
+  'select * from public.documents',
+  'User B should see no documents from User A projects'
+);
+
+-- 10. TEST MARKETING LEADS (Restricted to service_role)
 set local role anon;
 prepare restricted_insert as insert into public.marketing_leads (email, source) values ('lead@test.com', 'web');
 select throws_ok(

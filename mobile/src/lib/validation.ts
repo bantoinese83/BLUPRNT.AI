@@ -3,16 +3,10 @@
  * Server-side validation remains the source of truth.
  */
 
-/** Simple, tolerant RFC-5322-ish email check (no catastrophic backtracking). */
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import {
+  isValidEmail,
+  isValidPassword,
+  PASSWORD_MIN_LENGTH as MIN_PASSWORD_LENGTH,
+} from "@shared/lib/validation";
 
-export function isValidEmail(value: string): boolean {
-  return EMAIL_REGEX.test(value.trim());
-}
-
-/** Minimum password length we enforce on the client before hitting Supabase. */
-export const MIN_PASSWORD_LENGTH = 8;
-
-export function isValidPassword(value: string): boolean {
-  return typeof value === "string" && value.length >= MIN_PASSWORD_LENGTH;
-}
+export { isValidEmail, isValidPassword, MIN_PASSWORD_LENGTH };

@@ -145,3 +145,49 @@ Deno.test({
     }
   },
 });
+
+Deno.test({
+  name: "send-email - escapes template parameters for XSS protection",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    const serviceKey = "test-service-key";
+    Deno.env.set("BREVO_API_KEY", "test-key");
+
+    let capturedBrevoBody: any = null;
+    const restoreFetch = mockFetch({
+      "https://api.brevo.com/v3/smtp/email": async (brevoReq: Request) => {
+        const text = await brevoReq.text();
+        capturedBrevoBody = JSON.parse(text);
+        return { messageId: "xss-msg" };
+      },
+    });
+
+    try {
+      const payload = {
+        template: "welcome",
+        params: { userName: "<script>alert('XSS')</script>" },
+        to: "xss@example.com",
+      };
+      const req = {
+        method: "POST",
+        headers: new Headers({
+          "Authorization": `Bearer ${serviceKey}`,
+          "Content-Type": "application/json",
+        }),
+        clone: function() { return this; },
+        json: async () => payload,
+      } as unknown as Request;
+
+      const res = await handler(req, payload);
+      assertEquals(res.status, 200);
+      
+      // Verify the script tag is escaped
+      assertEquals(capturedBrevoBody.htmlContent.includes("&lt;script&gt;alert(&#039;XSS&#039;)&lt;/script&gt;"), true);
+      assertEquals(capturedBrevoBody.htmlContent.includes("<script>"), false);
+    } finally {
+      restoreFetch();
+    }
+  },
+});
