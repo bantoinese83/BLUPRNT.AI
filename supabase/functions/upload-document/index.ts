@@ -86,21 +86,44 @@ const handler = async (req: Request): Promise<Response> => {
 
     const mime = resolvedMimeType(file);
     const originalFilename = file.name || "upload";
-    const extension = originalFilename.split(".").pop() || "bin";
-    const storagePath = `${userId}/${projectId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
 
-    // 1. Reserve slot if architect
-    const reserved = await reserveArchitectInvoiceUploadSlot(admin, userId);
-    if (!reserved.ok) {
+    // 1. Check Entitlements
+    const entitlement = await checkInvoiceUploadAllowed(
+      admin,
+      userId,
+      projectId,
+      documentType,
+    );
+    if (!entitlement.allowed) {
       return jsonResponse(
         {
-          error: "Monthly upload limit reached.",
-          code: "ARCHITECT_LIMIT_REACHED",
+          error: entitlement.reason || "Upload limit reached.",
+          code: entitlement.code || "UPLOAD_LIMIT_REACHED",
         },
         403,
         req,
       );
     }
+
+    // 2. Reserve slot if using Architect quota
+    let reservedSlot = false;
+    if (entitlement.reason === "architect_plan") {
+      const reserved = await reserveArchitectInvoiceUploadSlot(admin, userId);
+      if (!reserved.ok) {
+        return jsonResponse(
+          {
+            error: "Monthly upload limit reached.",
+            code: "ARCHITECT_LIMIT_REACHED",
+          },
+          403,
+          req,
+        );
+      }
+      reservedSlot = true;
+    }
+
+    const extension = originalFilename.split(".").pop() || "bin";
+    const storagePath = `${userId}/${projectId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
 
     try {
       // 2. Upload to Storage
@@ -153,28 +176,39 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      // If OCR failed or was skipped, use fallback logic
+      // 4. Create Document Record
       const inferredDocType =
         documentType === "auto"
           ? inferDocumentTypeFromFilename(originalFilename)
           : coerceLedgerDocumentType(documentType);
 
-      const finalTotal = total ?? (amountHintStr ? parseFloat(amountHintStr) : 0);
+      const { data: doc, error: docErr } = await admin
+        .from("documents")
+        .insert({
+          project_id: projectId,
+          type: inferredDocType,
+          storage_path: storagePath,
+          original_filename: originalFilename,
+          uploaded_by_user_id: userId,
+          ocr_status: isOcrSupported ? "success" : "skipped",
+        })
+        .select()
+        .single();
 
-      // 4. Database Insert
+      if (docErr) throw docErr;
+
+      // 5. Create Invoice Record
+      const finalTotal = total ?? (amountHintStr ? parseFloat(amountHintStr) : 0);
       const { data: invoice, error: dbErr } = await admin
         .from("invoices")
         .insert({
           project_id: projectId,
-          uploaded_by_user_id: userId,
-          storage_path: storagePath,
-          original_filename: originalFilename,
+          document_id: doc.id,
           document_type: inferredDocType,
           vendor_name: vendorName || "Unknown Vendor",
           total: finalTotal,
           tax_total: taxTotal,
-          issue_date: issueDate || new Date().toISOString(),
-          ocr_confidence: ocrConfidence,
+          issue_date: issueDate || new Date().toISOString().split("T")[0],
         })
         .select()
         .single();
@@ -220,7 +254,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     } catch (e) {
       // Release slot if failure happened after reservation
-      if (reserved.ok) {
+      if (reservedSlot) {
         await releaseArchitectInvoiceUploadSlot(admin, userId).catch((err) =>
           console.error(err),
         );
@@ -228,16 +262,21 @@ const handler = async (req: Request): Promise<Response> => {
       throw e; // Rethrow to global catch
     }
   } catch (e) {
-    const error = e instanceof Error ? e : new Error(String(e));
-    console.error("[upload-document] Critical Failure:", error.message);
-    if (error.message === "forbidden") {
+    let message = "An unexpected error occurred during upload";
+    if (e instanceof Error) {
+      message = e.message;
+    } else if (typeof e === "object" && e !== null) {
+      message = (e as any).message || (e as any).error || JSON.stringify(e);
+    } else {
+      message = String(e);
+    }
+
+    console.error("[upload-document] Critical Failure:", message);
+
+    if (message === "forbidden") {
       return jsonResponse({ error: "Access denied" }, 403, req);
     }
-    return jsonResponse(
-      { error: error.message || "An unexpected error occurred during upload" },
-      500,
-      req,
-    );
+    return jsonResponse({ error: message }, 500, req);
   }
 };
 
