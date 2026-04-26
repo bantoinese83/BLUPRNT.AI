@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { Wallet, FileText, TrendingUp } from "lucide-react";
-import { motion } from "motion/react";
+import { useSpring, useTransform, motion } from "motion/react";
 import { money } from "@/lib/formatters";
 import { calculateBudgetStats } from "@/lib/plan-vs-actual";
 import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
@@ -24,6 +25,34 @@ function StatSkeleton() {
       <div className="h-3 w-24 bg-slate-50 rounded" />
     </div>
   );
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const spring = useSpring(0, { stiffness: 50, damping: 15 });
+  const display = useTransform(spring, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    spring.set(value);
+  }, [spring, value]);
+
+  return <motion.span>{display}</motion.span>;
+}
+
+function AnimatedMoney({ value }: { value: number }) {
+  const spring = useSpring(0, { stiffness: 40, damping: 12 });
+  const display = useTransform(spring, (latest) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(latest),
+  );
+
+  useEffect(() => {
+    spring.set(value);
+  }, [spring, value]);
+
+  return <motion.span className="tabular-nums">{display}</motion.span>;
 }
 
 export function DashboardStats({
@@ -58,9 +87,12 @@ export function DashboardStats({
         className="glass-card flex flex-col items-start p-5 sm:p-6"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center shadow-inner">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: -5 }}
+            className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center shadow-inner"
+          >
             <Wallet className="w-5 h-5" strokeWidth={2.5} />
-          </div>
+          </motion.div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
             {DASHBOARD_STATS_LABELS.estimate}
           </span>
@@ -81,16 +113,19 @@ export function DashboardStats({
         className="glass-card flex flex-col items-start p-5 sm:p-6"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center shadow-inner">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center shadow-inner"
+          >
             <FileText className="w-5 h-5" strokeWidth={2.5} />
-          </div>
+          </motion.div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
             {DASHBOARD_STATS_LABELS.documents}
           </span>
         </div>
 
         <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5">
-          {documentRowCount}{" "}
+          <AnimatedNumber value={documentRowCount} />{" "}
           <span className="text-sm font-bold text-slate-400">
             {documentRowCount === 1 ? "file" : "files"}
           </span>
@@ -107,9 +142,12 @@ export function DashboardStats({
         className="glass-card flex flex-col items-start p-5 sm:p-6 sm:col-span-2 lg:col-span-1"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center shadow-inner">
+          <motion.div
+            whileHover={{ scale: 1.1, y: -2 }}
+            className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center shadow-inner"
+          >
             <TrendingUp className="w-5 h-5" strokeWidth={2.5} />
-          </div>
+          </motion.div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
             {DASHBOARD_STATS_LABELS.invested}
           </span>
@@ -117,7 +155,7 @@ export function DashboardStats({
 
         <div className="flex items-baseline gap-2 mb-1.5">
           <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none">
-            {money(spendingTotal)}
+            <AnimatedMoney value={spendingTotal} />
           </p>
           {budgetPct > 0 && (
             <motion.span
