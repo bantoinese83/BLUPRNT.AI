@@ -82,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const admin = getServiceClient();
-    await assertProjectOwner(admin, userId, projectId);
+    await assertProjectOwner(admin, projectId, userId);
 
     const mime = resolvedMimeType(file);
     const originalFilename = file.name || "upload";
@@ -230,6 +230,9 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (e) {
     const error = e instanceof Error ? e : new Error(String(e));
     console.error("[upload-document] Critical Failure:", error.message);
+    if (error.message === "forbidden") {
+      return jsonResponse({ error: "Access denied" }, 403, req);
+    }
     return jsonResponse(
       { error: error.message || "An unexpected error occurred during upload" },
       500,
