@@ -30,7 +30,7 @@ export function LocationSelector({
       exit={{ opacity: 0, translateX: -50 }}
       key="step1"
     >
-      <Text style={styles.stepTitle}>Where is this home?</Text>
+      <Text style={styles.stepTitle}>Add your project location</Text>
       <Text style={styles.stepSubtitle}>
         We use your area to ground costs in real numbers, not guesses.
       </Text>

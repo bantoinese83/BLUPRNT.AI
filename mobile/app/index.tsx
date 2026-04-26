@@ -31,34 +31,34 @@ export default function LandingScreen() {
   const slides = React.useMemo(
     () => [
       {
-        title: "Snap the room. Get the number.",
-        highlight: "See a budget range before contractors bid",
+        title: "Snap it. Get the number.",
+        highlight: "Local cost ranges before you bid",
         subtitle:
-          "Add one room photo and your location. We show a planning range from local cost data so you can compare quotes instead of guessing.",
+          "A single photo builds a local cost range before contractors ever show up.",
         icon: <Hammer size={32} color={Theme.colors.brand.primary} />,
         badge: "SMART ESTIMATE",
       },
       {
-        title: "Your home file",
-        highlight: "Planned vs. paid, side by side",
+        title: "Your home costs, organized.",
+        highlight: "Planned vs. paid, tracked",
         subtitle:
-          "Drop in invoices and quotes; we pull the totals so you can see if the job is still on track.",
+          "Drop in quotes and invoice while we track planned vs. paid so you stay on budget.",
         icon: <ShieldCheck size={32} color={Theme.colors.status.success} />,
         badge: "STAY ON BUDGET",
       },
       {
         title: "Paperwork, packaged.",
-        highlight: "One PDF when they ask",
+        highlight: "Shareable project PDFs",
         subtitle:
-          "Bundle what you spent and what you changed into a clean download—handy for lenders or agents, not a promise they’ll say yes.",
+          "Turn your project costs into a clean, shareable PDF that are always ready for lenders or agents.",
         icon: <FileText size={32} color={Theme.colors.brand.primary} />,
         badge: "SHARE READY",
       },
       {
-        title: "Time to move on?",
-        highlight: "Show what you improved",
+        title: "Never lose track again.",
+        highlight: "History & Warranties",
         subtitle:
-          "Export a simple packet that tells the story of your remodel—buyers still do their own homework.",
+          "We store your warranties, contractors, and service history. Get alerts before warranties expire.",
         icon: <TrendingUp size={32} color={Theme.colors.status.warning} />,
         badge: "LIST SMARTER",
       },

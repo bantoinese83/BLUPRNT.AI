@@ -91,7 +91,7 @@ export function SignupScreen() {
 
           <div className="space-y-2">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-              Save this project and track quotes
+              Save this project
             </h2>
             <p className="text-slate-500">
               We&apos;ll keep your estimate, photos, and changes in one place —

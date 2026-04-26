@@ -38,7 +38,7 @@ describe("getDashboardGreeting", () => {
         capitalDocumentedTotal: 0,
         estimatedMinTotal: null,
       }),
-    ).toBe("Good morning");
+    ).toBe("Good morning,");
   });
 });
 
@@ -69,7 +69,7 @@ describe("buildDashboardHeaderLines", () => {
       firstName: null,
       projectDisplayName: "Kitchen",
     });
-    expect(line1).toBe("Good afternoon");
+    expect(line1).toBe("Good afternoon,");
     expect(line2).toBe("Here's your Kitchen.");
   });
 

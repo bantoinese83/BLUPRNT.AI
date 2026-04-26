@@ -45,7 +45,7 @@ export function buildDashboardHeaderLines(params: {
 
   const period = getPeriodGreeting();
   const trimmedFirst = firstName?.trim();
-  const line1 = trimmedFirst ? `${period}, ${trimmedFirst}` : period;
+  const line1 = trimmedFirst ? `${period}, ${trimmedFirst}` : `${period},`;
 
   return { line1, line2 };
 }
@@ -68,5 +68,5 @@ export function getDashboardGreeting(params: {
     return `${invoicesLength} Documents tracked`;
   }
 
-  return getPeriodGreeting();
+  return `${getPeriodGreeting()},`;
 }

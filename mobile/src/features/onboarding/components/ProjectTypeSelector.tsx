@@ -34,7 +34,7 @@ export function ProjectTypeSelector({
       exit={{ opacity: 0, translateX: -50 }}
       key="step0"
     >
-      <Text style={styles.stepTitle}>What are you working on?</Text>
+      <Text style={styles.stepTitle}>What are you planning today?</Text>
       <Text style={styles.stepSubtitle}>You can add more projects later.</Text>
       <View style={styles.iconGrid}>
         {OPTIONS.map((opt) => (

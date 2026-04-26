@@ -200,7 +200,7 @@ export function PhotoScreen() {
             disabled={!photos.length && !scopeDescription.trim()}
           >
             {photos.length > 0
-              ? `Analyze ${photos.length} Vision Assets`
+              ? "Start build my bluprnt"
               : "Analyze Project Details"}
             <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>

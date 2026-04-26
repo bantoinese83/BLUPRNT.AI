@@ -44,10 +44,11 @@ export function VisionCapture({
       key="step3"
       style={styles.visionContainer}
     >
-      <Text style={styles.stepTitle}>Vision-Match your room</Text>
+      <Text style={styles.stepTitle}>
+        Add any photos and details you have. We’ll handle the estimate.
+      </Text>
       <Text style={styles.stepSubtitle}>
-        Add at least one photo or a short description so we can tailor your
-        estimate.
+        The more you add the tighter the numbers.
       </Text>
 
       <View style={styles.visionActions}>

@@ -100,7 +100,7 @@ export function FinalStep({
       </View>
 
       <Text style={styles.stepTitle}>
-        {session ? "Everything is set!" : "Save Your Progress"}
+        {session ? "Everything is set!" : "Save this project"}
       </Text>
       <Text style={styles.stepSubtitle}>
         {session
