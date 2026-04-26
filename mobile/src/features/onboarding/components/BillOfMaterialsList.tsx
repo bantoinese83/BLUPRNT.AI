@@ -25,44 +25,57 @@ export function BillOfMaterialsList({
         </View>
       </View>
       <View style={styles.materialGrid}>
-        {materials.map((m, idx: number) => (
-          <View key={idx} style={styles.materialCardPremium}>
-            <View style={styles.materialMainRow}>
-              <View style={styles.materialIconBgPremium}>
-                <Boxes size={16} color={Theme.colors.brand.primary} />
-              </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <Text style={styles.materialNamePremium} numberOfLines={2}>
-                    {m.name}
-                  </Text>
-                  {m.estimated_cost && (
-                    <Text style={styles.materialPrice}>
-                      ${m.estimated_cost}
-                    </Text>
-                  )}
-                </View>
+        {/* Table Header */}
+        <View style={styles.materialTableHeader}>
+          <View style={styles.materialColMain}>
+            <Text style={styles.materialTableLabel}>Material</Text>
+          </View>
+          <View style={styles.materialColQty}>
+            <Text style={styles.materialTableLabel}>Qty</Text>
+          </View>
+          <View style={styles.materialColPrice}>
+            <Text style={styles.materialTableLabel}>Est</Text>
+          </View>
+        </View>
 
-                <View style={styles.materialMetaRowPremium}>
-                  {m.brand && (
-                    <View style={styles.brandTagPremium}>
-                      <Tag size={10} color={Theme.colors.brand.primary} />
-                      <Text style={styles.brandTextPremium}>{m.brand}</Text>
-                    </View>
-                  )}
-                  <View style={styles.qtyBadge}>
-                    <Text style={styles.qtyText}>
-                      {m.quantity} {m.unit || "pc"}
-                    </Text>
-                  </View>
-                </View>
-              </View>
+        {materials.map((m, idx: number) => (
+          <View
+            key={idx}
+            style={[
+              styles.materialTableRow,
+              idx === materials.length - 1 && { borderBottomWidth: 0 },
+            ]}
+          >
+            <View style={styles.materialColMain}>
+              <Text style={styles.materialNameTable} numberOfLines={1}>
+                {m.name}
+              </Text>
+              {m.brand && (
+                <Text style={styles.materialBrandTable}>{m.brand}</Text>
+              )}
+            </View>
+
+            <View style={styles.materialColQty}>
+              <Text style={styles.materialQtyTable}>
+                {m.quantity} {m.unit || "pc"}
+              </Text>
+            </View>
+
+            <View style={styles.materialColPrice}>
+              {m.estimated_cost ? (
+                <Text style={styles.materialPriceTable}>
+                  ${m.estimated_cost}
+                </Text>
+              ) : (
+                <Text
+                  style={[
+                    styles.materialPriceTable,
+                    { color: Theme.colors.text.muted },
+                  ]}
+                >
+                  —
+                </Text>
+              )}
             </View>
           </View>
         ))}

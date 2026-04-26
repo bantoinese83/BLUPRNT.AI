@@ -98,68 +98,63 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
         </Text>
       ) : (
         <View style={styles.materialGrid}>
-          {materials.map((m: BillOfMaterialRow, idx: number) => (
-            <View key={`${m.name}-${idx}`} style={styles.materialCardPremium}>
-              <View style={styles.materialMainRow}>
-                <View style={styles.materialIconBgPremium}>
-                  <Boxes size={16} color={Theme.colors.brand.primary} />
-                </View>
-                <TouchableOpacity
-                  style={{ flex: 1, marginLeft: 12 }}
-                  activeOpacity={0.75}
-                  disabled={!onPersist || persisting}
-                  onPress={() => {
-                    if (!onPersist || persisting) return;
-                    void Haptics.selectionAsync();
-                    setEditItem({ index: idx, row: m });
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Text style={styles.materialNamePremium} numberOfLines={2}>
-                      {m.name}
-                    </Text>
-                    {m.estimated_cost && (
-                      <Text style={styles.materialPrice}>
-                        ${m.estimated_cost}
-                      </Text>
-                    )}
-                  </View>
+          {/* Table Header */}
+          <View style={styles.materialTableHeader}>
+            <View style={styles.materialColMain}>
+              <Text style={styles.materialTableLabel}>Material</Text>
+            </View>
+            <View style={styles.materialColQty}>
+              <Text style={styles.materialTableLabel}>Qty</Text>
+            </View>
+            <View style={styles.materialColPrice}>
+              <Text style={styles.materialTableLabel}>Est</Text>
+            </View>
+            {onPersist && <View style={{ width: 44 }} />}
+          </View>
 
-                  <View style={styles.materialMetaRowPremium}>
-                    {m.brand && (
-                      <View style={styles.brandTagPremium}>
-                        <Tag size={10} color={Theme.colors.brand.primary} />
-                        <Text style={styles.brandTextPremium}>{m.brand}</Text>
-                      </View>
-                    )}
-                    <View style={styles.qtyBadge}>
-                      <Text style={styles.qtyText}>
-                        {m.quantity} {m.unit || "pc"}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+          {materials.map((m: BillOfMaterialRow, idx: number) => (
+            <View
+              key={`${m.name}-${idx}`}
+              style={[
+                styles.materialTableRow,
+                idx === materials.length - 1 && { borderBottomWidth: 0 },
+              ]}
+            >
+              <View style={styles.materialColMain}>
+                <Text style={styles.materialNameTable} numberOfLines={1}>
+                  {m.name}
+                </Text>
+                {m.brand && (
+                  <Text style={styles.materialBrandTable}>{m.brand}</Text>
+                )}
               </View>
+
+              <View style={styles.materialColQty}>
+                <Text style={styles.materialQtyTable}>
+                  {m.quantity} {m.unit || "pc"}
+                </Text>
+              </View>
+
+              <View style={styles.materialColPrice}>
+                {m.estimated_cost ? (
+                  <Text style={styles.materialPriceTable}>
+                    ${m.estimated_cost}
+                  </Text>
+                ) : (
+                  <Text
+                    style={[
+                      styles.materialPriceTable,
+                      { color: Theme.colors.text.muted },
+                    ]}
+                  >
+                    —
+                  </Text>
+                )}
+              </View>
+
               {onPersist ? (
-                <View
-                  style={[
-                    styles.materialRowActions,
-                    {
-                      marginTop: 12,
-                      paddingTop: 10,
-                      borderTopWidth: 0.5,
-                      borderTopColor: "rgba(15, 23, 42, 0.05)",
-                    },
-                  ]}
-                >
+                <View style={styles.materialColActions}>
                   <TouchableOpacity
-                    style={styles.materialIconBtn}
                     disabled={persisting}
                     onPress={() => {
                       void Haptics.selectionAsync();
@@ -167,34 +162,12 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
                     }}
                   >
                     <Pencil size={14} color={Theme.colors.brand.primary} />
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        fontFamily: Theme.typography.family.bold,
-                        color: Theme.colors.brand.primary,
-                        marginLeft: 4,
-                      }}
-                    >
-                      Edit
-                    </Text>
                   </TouchableOpacity>
-                  <View style={{ flex: 1 }} />
                   <TouchableOpacity
-                    style={styles.materialIconBtn}
                     disabled={persisting}
                     onPress={() => confirmRemove(idx, m.name)}
                   >
                     <Trash2 size={14} color={Theme.colors.status.error} />
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        fontFamily: Theme.typography.family.bold,
-                        color: Theme.colors.status.error,
-                        marginLeft: 4,
-                      }}
-                    >
-                      Remove
-                    </Text>
                   </TouchableOpacity>
                 </View>
               ) : null}
