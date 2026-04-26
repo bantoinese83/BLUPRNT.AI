@@ -34,7 +34,7 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-Deno.serve(async (req: Request) => {
+export async function handler(req: Request): Promise<Response> {
   try {
     const opt = handleOptions(req);
     if (opt) return opt;
@@ -328,4 +328,8 @@ Deno.serve(async (req: Request) => {
     console.error("[photo-to-scope] top-level:", error.stack || error);
     return jsonResponse({ error: "Something went wrong." }, 500, req);
   }
-});
+}
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}

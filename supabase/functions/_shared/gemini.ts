@@ -74,9 +74,9 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
       const client = new GoogleGenAI({ apiKey });
       const response = await client.models.embedContent({
         model: modelName,
-        content: {
+        contents: [{
           parts: [{ text }],
-        },
+        }],
       });
 
       const embedding = response.embeddings?.[0]?.values;
