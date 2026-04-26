@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text, type ViewStyle } from "react-native";
 import { type LucideIcon } from "lucide-react-native";
 import { MotiView } from "moti";
+import * as Haptics from "expo-haptics";
 import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -55,7 +56,10 @@ export function EmptyState({
           <Button
             title={actionTitle}
             titleCase={actionTitleCase}
-            onPress={onAction}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              onAction();
+            }}
             style={styles.button}
           />
         )}
@@ -63,7 +67,10 @@ export function EmptyState({
         {secondaryTitle && onSecondary && (
           <Button
             title={secondaryTitle}
-            onPress={onSecondary}
+            onPress={() => {
+              Haptics.selectionAsync();
+              onSecondary();
+            }}
             variant="outline"
             style={styles.secondaryButton}
           />

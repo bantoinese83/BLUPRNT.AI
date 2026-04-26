@@ -40,7 +40,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
 }
 
 const PROJECTS_LIST_SELECT =
-  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, owner_user_id, before_photo_storage_path, after_photo_storage_path, grounding_sources";
+  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at";
 
 const SCOPE_SELECT =
   "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";
@@ -58,12 +58,11 @@ const GALLERY_SELECT =
  */
 export async function fetchDashboardProjectsList(
   supabase: SupabaseClient,
-  userId: string,
+  _userId: string,
 ): Promise<{ rows: ProjectRow[]; error: PostgrestError | null }> {
   const projRes = await supabase
     .from("projects")
     .select(PROJECTS_LIST_SELECT)
-    .eq("owner_user_id", userId)
     .order("created_at", { ascending: false });
   if (projRes.error) {
     return { rows: [], error: projRes.error };
@@ -91,14 +90,14 @@ export async function fetchLastActiveProjectIdFromPreferences(
 
 export type BuiltDashboardForProject = {
   project: ProjectRow;
-  scopeItems: import("../types/database").ScopeRow[];
-  invoices: import("../types/database").InvoiceRow[];
-  galleryItems: import("../types/database").GalleryItemRow[];
+  scopeItems: import("../types/database.ts").ScopeRow[];
+  invoices: import("../types/database.ts").InvoiceRow[];
+  galleryItems: import("../types/database.ts").GalleryItemRow[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
   loadError: string | null;
   isArchitect: boolean;
-  subscription: import("../types/database").UserSubscriptionRow | null;
+  subscription: import("../types/database.ts").UserSubscriptionRow | null;
   hasProjectPass: boolean;
   lastProjectId: string;
 };

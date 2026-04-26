@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { MotiView } from "moti";
+import * as Haptics from "expo-haptics";
 import { Plus, MessageCircle } from "lucide-react-native";
 import { ConfidenceDisplay } from "@/components/ui/ConfidenceDisplay";
 import { Theme } from "@/constants/Theme";
@@ -39,7 +40,10 @@ export function DashboardHeader({
       <View style={styles.headerTitleBlock}>
         <TouchableOpacity
           testID="rename-project-trigger"
-          onPress={onRenamePress}
+          onPress={() => {
+            Haptics.selectionAsync();
+            onRenamePress();
+          }}
           accessibilityRole="button"
           accessibilityLabel="Rename project"
         >
@@ -64,7 +68,10 @@ export function DashboardHeader({
       </View>
       <View style={styles.headerRight}>
         <TouchableOpacity
-          onPress={onInsightsPress}
+          onPress={() => {
+            Haptics.selectionAsync();
+            onInsightsPress();
+          }}
           style={styles.headerBtn}
           accessibilityRole="button"
           accessibilityLabel="Smart insights"
@@ -78,7 +85,10 @@ export function DashboardHeader({
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={onAddDocumentPress}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onAddDocumentPress();
+          }}
           disabled={isUploading || isExporting}
           style={[styles.headerBtn, styles.captureBtn]}
           accessibilityRole="button"

@@ -23,10 +23,10 @@ export function HeroSection({
       className="relative overflow-hidden px-4 pt-24 pb-14 sm:px-6 sm:pt-28 sm:pb-16 mesh-bg"
       aria-labelledby="hero-heading"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-100/50 via-transparent to-transparent opacity-60" />
+      <div className="absolute inset-0 bg-linear-to-b from-slate-100/50 via-transparent to-transparent opacity-60" />
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-10">
-        <div className="space-y-5">
+        <div className="flex flex-col items-center text-center space-y-5 lg:items-start lg:text-left">
           <div className="space-y-3">
             <span className="text-[11px] font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-[0.18em] inline-block">
               {LANDING_HERO_COPY.badge}
@@ -73,9 +73,9 @@ export function HeroSection({
             </span>
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-1">
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-1 lg:justify-start">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap lg:items-start">
+              <div className="flex flex-wrap justify-center gap-3">
                 <Button
                   size="lg"
                   className="h-12 px-6 text-base font-black rounded-xl liquid-metal-button hover:scale-[1.02] active:scale-[0.98] transition-all text-white border-0 sm:px-7"
@@ -97,7 +97,7 @@ export function HeroSection({
               <button
                 type="button"
                 onClick={onCreateAccount}
-                className="text-left text-sm font-bold text-teal-700 underline-offset-4 hover:underline sm:self-center sm:pl-1"
+                className="text-center text-sm font-bold text-teal-700 underline-offset-4 hover:underline lg:text-left"
               >
                 {LANDING_HERO_COPY.createAccountLink}
               </button>
@@ -139,7 +139,7 @@ export function HeroSection({
             aria-hidden
           />
 
-          <div className="animate-float relative z-[1] w-full">
+          <div className="animate-float relative z-1 w-full">
             <Iphone
               src="/images/hero-iphone-screenshot.png"
               screenSrcSetWebp="/images/hero-iphone-screenshot-480.webp"

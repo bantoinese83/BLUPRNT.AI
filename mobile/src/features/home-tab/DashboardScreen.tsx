@@ -220,7 +220,6 @@ export default function DashboardScreen() {
         isExporting={isExporting}
         onRenamePress={() => setRenameVisible(true)}
         onInsightsPress={() => {
-          Haptics.selectionAsync();
           setIsInsightsOpen(true);
         }}
         onAddDocumentPress={openDashboardDocumentCapture}

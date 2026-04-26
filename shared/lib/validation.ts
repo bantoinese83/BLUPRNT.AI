@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UPLOAD_FORM_DOCUMENT_TYPES } from "./infer-document-type.ts";
+import { UPLOAD_FORM_DOCUMENT_TYPES } from "./infer-document-type";
 
 export const uuidSchema = z.string().uuid();
 

@@ -1,14 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  X,
-  Loader2,
-  Link2,
-  AlertTriangle,
-  Calendar,
-  Sparkles,
-} from "lucide-react";
+import { Loader2, Link2, Sparkles } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -25,12 +17,16 @@ import {
   reviewDocumentModalTitle,
   defaultVendorNameForDocumentType,
 } from "@shared/lib/ledger-document-labels";
-import { ledgerDocumentSelectOptions } from "@shared/lib/ledger-document-pickers";
 import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { ModalFocusSurface } from "@/components/ui/modal-dialog";
 import { getUserFriendlyErrorMessage } from "@shared/lib/user-friendly-errors";
 import { cn } from "@/lib/utils";
+
+// Sub-components
+import { ReviewModalHeader } from "./document-review/ReviewModalHeader";
+import { MetadataSection } from "./document-review/MetadataSection";
+import { LineItemCard } from "./document-review/LineItemCard";
 
 type LineItem = {
   id: string;
@@ -298,35 +294,14 @@ export function DocumentReviewModal({
         active={!originalPreviewOpen}
       >
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
-            <h3
-              id="document-review-title"
-              className="text-lg font-semibold text-slate-900 flex items-center gap-2"
-            >
-              <HeaderIcon
-                className={`w-5 h-5 shrink-0 ${headerIconClass}`}
-                aria-hidden
-              />
-              {modalTitle}
-              {isUnverified && (
-                <Badge
-                  variant="outline"
-                  className="bg-amber-50 text-amber-700 border-amber-200 ml-2"
-                >
-                  <Sparkles className="w-2.5 h-2.5 mr-1" />
-                  AI Draft
-                </Badge>
-              )}
-            </h3>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="p-2 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <ReviewModalHeader
+            title={modalTitle}
+            isUnverified={isUnverified}
+            headerIconClass={headerIconClass}
+            HeaderIcon={HeaderIcon}
+            onClose={onClose}
+          />
+
           <div className="p-4 space-y-4">
             {isUnverified ? (
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
@@ -371,52 +346,12 @@ export function DocumentReviewModal({
                   </Button>
                 ) : null}
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
-                  <label
-                    htmlFor="document-review-doc-type"
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
-                  >
-                    Document type
-                  </label>
-                  <select
-                    id="document-review-doc-type"
-                    value={ledgerDocType}
-                    onChange={(e) =>
-                      setLedgerDocType(e.target.value as LedgerDocumentType)
-                    }
-                    className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
-                  >
-                    {ledgerDocumentSelectOptions().map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[11px] text-slate-500 leading-snug">
-                    Fix a misclassification here — no need to re-upload. This
-                    updates your ledger and seller packet grouping.
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
-                  <label
-                    htmlFor="document-review-warranty-expiry"
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wide flex items-center gap-1.5"
-                  >
-                    <Calendar className="w-3 h-3" />
-                    Warranty Expiration
-                  </label>
-                  <input
-                    id="document-review-warranty-expiry"
-                    type="date"
-                    value={warrantyExpiryDate}
-                    onChange={(e) => setWarrantyExpiryDate(e.target.value)}
-                    className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
-                  />
-                  <p className="text-[11px] text-slate-500 leading-snug">
-                    Optional. We'll notify you 30 days before this date.
-                  </p>
-                </div>
+                <MetadataSection
+                  ledgerDocType={ledgerDocType}
+                  onDocTypeChange={setLedgerDocType}
+                  warrantyExpiryDate={warrantyExpiryDate}
+                  onWarrantyDateChange={setWarrantyExpiryDate}
+                />
               </div>
             </div>
 
@@ -473,56 +408,17 @@ export function DocumentReviewModal({
                   Link document lines to your budget breakdown to track actual
                   vs. estimate.
                 </p>
-                {document.line_items.map((line) => {
-                  const isUnmapped = !(mappings[line.id] ?? line.scope_item_id);
-                  const showOverrunHint = isUnmapped && scopeItems.length > 0;
-                  return (
-                    <Card
-                      key={line.id}
-                      className={`p-3 ${showOverrunHint ? "border-amber-200 bg-amber-50/50" : ""}`}
-                    >
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-slate-900">
-                            {line.description}
-                          </p>
-                          <p className="text-sm text-slate-500">
-                            {new Intl.NumberFormat("en-US", {
-                              style: "currency",
-                              currency: "USD",
-                            }).format(line.line_total)}
-                          </p>
-                          {showOverrunHint && (
-                            <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-700 font-medium">
-                              <AlertTriangle
-                                className="w-3.5 h-3.5 shrink-0"
-                                aria-hidden
-                              />
-                              Not in your original budget
-                            </p>
-                          )}
-                        </div>
-                        <select
-                          value={mappings[line.id] ?? line.scope_item_id ?? ""}
-                          onChange={(e) =>
-                            setMappings((m) => ({
-                              ...m,
-                              [line.id]: e.target.value,
-                            }))
-                          }
-                          className="text-sm rounded-lg border border-slate-300 px-2 py-1 shrink-0"
-                        >
-                          <option value="">— Not linked</option>
-                          {scopeItems.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.category}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </Card>
-                  );
-                })}
+                {document.line_items.map((line) => (
+                  <LineItemCard
+                    key={line.id}
+                    line={line}
+                    mapping={mappings[line.id]}
+                    scopeItems={scopeItems}
+                    onMappingChange={(lineId, scopeItemId) =>
+                      setMappings((m) => ({ ...m, [lineId]: scopeItemId }))
+                    }
+                  />
+                ))}
               </div>
             ) : null}
 

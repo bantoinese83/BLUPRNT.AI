@@ -1,36 +1,18 @@
 import { Helmet } from "react-helmet-async";
 
-import {
-  ArrowLeft,
-  User,
-  Shield,
-  LogOut,
-  Download,
-  Trash2,
-  Loader2,
-  CreditCard,
-  HelpCircle,
-  TrendingUp,
-} from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, LogOut, HelpCircle } from "lucide-react";
 import { AIAssistantWidget } from "@/components/AIAssistantWidget";
 
 import { UpgradeModal } from "@/components/dashboard/UpgradeModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
-import { PRICING } from "@shared/constants/pricing";
-import {
-  ArchitectPlanIcon,
-  ProjectPassIcon,
-} from "@/components/icons/PlanMarks";
-import {
-  architectBillingChannel,
-  hasDuplicateWebAndStoreSubscriptions,
-} from "@shared/lib/subscription-billing";
+import { AccountProfileSection } from "@/components/settings/AccountProfileSection";
+import { SecuritySection } from "@/components/settings/SecuritySection";
+import { BillingSection } from "@/components/settings/BillingSection";
+import { PrivacySection } from "@/components/settings/PrivacySection";
 
 import type { SettingsContentProps } from "./settings-content.types";
 
@@ -99,384 +81,44 @@ export function SettingsContent(props: SettingsContentProps) {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
-        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-              <User className="w-5 h-5 text-teal-500" />
-              Account Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <form
-              className="space-y-6"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void onSaveProfile();
-              }}
-            >
-              <div className="space-y-2">
-                <label
-                  className="text-xs font-bold text-slate-500 uppercase tracking-widest"
-                  htmlFor="email"
-                >
-                  Email Address
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email ?? ""}
-                  disabled
-                  className="bg-slate-50/50 border-slate-200 rounded-xl"
-                  autoComplete="email"
-                />
-                <p className="text-[10px] text-slate-400 font-medium">
-                  Email is managed by your sign-in provider.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <label
-                  className="text-xs font-bold text-slate-500 uppercase tracking-widest"
-                  htmlFor="displayName"
-                >
-                  Display Name
-                </label>
-                <Input
-                  id="displayName"
-                  type="text"
-                  placeholder="Your name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="rounded-xl border-slate-200 focus:ring-teal-500/20"
-                  autoComplete="name"
-                />
-              </div>
-              {profileMessage && (
-                <p
-                  className={`text-sm ${profileMessage === "Saved." ? "text-teal-600 font-bold" : "text-amber-600 font-medium"}`}
-                >
-                  {profileMessage}
-                </p>
-              )}
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full sm:w-auto rounded-xl liquid-metal-button shadow-teal-200/50"
-                disabled={profileSaving}
-                type="submit"
-              >
-                {profileSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                Save Changes
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <AccountProfileSection
+          user={user}
+          displayName={displayName}
+          setDisplayName={setDisplayName}
+          profileSaving={profileSaving}
+          profileMessage={profileMessage}
+          onSaveProfile={onSaveProfile}
+        />
 
-        {user?.email && (
-          <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
-            <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-                <Shield className="w-5 h-5 text-teal-500" />
-                Security & Password
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <form
-                className="space-y-6"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void onChangePassword();
-                }}
-              >
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-slate-900">
-                    Update Password
-                  </h4>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                    Ensure your account is using a long, random password to stay
-                    secure.
-                  </p>
-                </div>
+        <SecuritySection
+          user={user}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          passwordSaving={passwordSaving}
+          passwordMessage={passwordMessage}
+          onChangePassword={onChangePassword}
+        />
 
-                <input
-                  type="text"
-                  name="username"
-                  autoComplete="email"
-                  value={user.email}
-                  readOnly
-                  className="hidden"
-                />
+        <BillingSection
+          isArchitect={isArchitect}
+          subscriptionRow={subscriptionRow}
+          setShowUpgrade={setShowUpgrade}
+        />
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label
-                      className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]"
-                      htmlFor="new-password"
-                    >
-                      New Password
-                    </label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      placeholder="Min. 8 characters"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="h-11 rounded-xl border-slate-200"
-                      autoComplete="new-password"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]"
-                      htmlFor="confirm-password"
-                    >
-                      Confirm Password
-                    </label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      placeholder="Repeat password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="h-11 rounded-xl border-slate-200"
-                      autoComplete="new-password"
-                    />
-                  </div>
-                </div>
-
-                {passwordMessage && (
-                  <p
-                    className={`text-sm ${passwordMessage.includes("Success") ? "text-teal-600 font-bold" : "text-amber-600 font-medium"}`}
-                  >
-                    {passwordMessage}
-                  </p>
-                )}
-
-                <Button
-                  variant="outline"
-                  size="lg"
-                  disabled={passwordSaving || !newPassword}
-                  type="submit"
-                  className="w-full sm:w-auto rounded-xl border-slate-200 hover:bg-slate-50"
-                >
-                  {passwordSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : null}
-                  Update Password
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-              <CreditCard className="w-5 h-5 text-teal-500" />
-              Plan & Billing
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-6">
-            {isArchitect &&
-              subscriptionRow &&
-              hasDuplicateWebAndStoreSubscriptions(subscriptionRow) && (
-                <div
-                  className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
-                  role="status"
-                >
-                  <p className="font-bold text-amber-950 mb-1">
-                    Possible duplicate subscription
-                  </p>
-                  <p className="font-medium leading-relaxed text-amber-950/95">
-                    We see both a web (Stripe) subscription and an app store
-                    subscription. Cancel one to avoid paying twice — use the
-                    Stripe customer portal for web, or Subscriptions in the App
-                    Store for the iOS app.
-                  </p>
-                </div>
-              )}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-slate-50/80 border border-slate-200 rounded-3xl gap-4">
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${isArchitect ? "bg-slate-900 text-white shadow-slate-700/50" : "bg-white text-slate-400 shadow-slate-200/50 border border-slate-100"}`}
-                >
-                  {isArchitect ? (
-                    <ArchitectPlanIcon className="w-8 h-8" />
-                  ) : (
-                    <ProjectPassIcon className="w-8 h-8" />
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-base font-black text-slate-900 leading-none">
-                    {isArchitect ? "Architect Plan" : "Free Explorer"}
-                  </p>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
-                    {isArchitect
-                      ? "Active Monthly Subscription"
-                      : "Standard Features Only"}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant={isArchitect ? "outline" : "primary"}
-                size="lg"
-                className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-teal-200/50" : "border-slate-200"}`}
-                onClick={() => setShowUpgrade(true)}
-                type="button"
-              >
-                {isArchitect ? "Manage Plan" : "Upgrade Now"}
-              </Button>
-            </div>
-
-            <div className="px-2">
-              {!isArchitect ? (
-                <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                  Architect is{" "}
-                  <span className="text-slate-900 font-bold">
-                    ${PRICING.architectUsdPerMonth}/mo
-                  </span>{" "}
-                  with{" "}
-                  <span className="text-slate-900 font-bold">
-                    professional AI generation
-                  </span>
-                  , 10 smart document scans per month, and priority project
-                  strategy. Project Pass is ${PRICING.projectPassUsdOneTime}{" "}
-                  one-time per project.
-                </p>
-              ) : (
-                <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                  {subscriptionRow &&
-                  architectBillingChannel(subscriptionRow) === "stripe"
-                    ? "You have full access to professional renovation tools. Billing and invoices are handled securely through Stripe."
-                    : subscriptionRow &&
-                        architectBillingChannel(subscriptionRow) === "store"
-                      ? "You have full access to professional tools. This subscription is billed through the App Store (iOS) — manage or cancel there."
-                      : "You have full access to professional renovation tools. Manage billing wherever you subscribed (Stripe on the web, or the App Store on iOS)."}
-                </p>
-              )}
-              <p className="text-xs text-slate-500 leading-relaxed font-medium border-t border-slate-100 pt-4 mt-2">
-                Plans on the website are billed through Stripe. If you subscribe
-                in the iOS app, manage or cancel in the App Store — use the same
-                place you subscribed.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-              <Shield className="w-5 h-5 text-teal-500" />
-              Data & Privacy
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-8">
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h4 className="font-bold text-slate-900">
-                  Export Project Data
-                </h4>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  Download a single file with your properties, projects, scope,
-                  and documents—useful for backups or moving your data.
-                </p>
-              </div>
-              {exportMessage && (
-                <p
-                  className={`text-sm ${exportMessage === "Download started." ? "text-teal-600 font-bold" : "text-amber-600 font-medium"}`}
-                >
-                  {exportMessage}
-                </p>
-              )}
-              <Button
-                variant="outline"
-                size="lg"
-                className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50"
-                onClick={() => void onExportData()}
-                disabled={exportLoading}
-                type="button"
-              >
-                {exportLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )}
-                Generate Export
-              </Button>
-            </div>
-
-            <div className="border-t border-slate-100 pt-8 space-y-4">
-              <div className="space-y-1">
-                <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-teal-500" />
-                  Product Analytics
-                </h4>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  Share anonymous usage data to help us improve BLUPRNT. We
-                  never track personal project details or identity.
-                </p>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
-                <span className="text-sm font-bold text-slate-700">
-                  Allow usage insights
-                </span>
-                <Switch
-                  checked={analyticsEnabled}
-                  onCheckedChange={onAnalyticsToggle}
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-slate-100 pt-8 space-y-4">
-              <div className="space-y-1">
-                <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                  Danger Zone
-                </h4>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  Permanently delete your account and all associated data. This
-                  action is immediate and IRREVERSIBLE.
-                </p>
-              </div>
-              <div className="flex items-center gap-3 p-4 bg-amber-50/50 border border-amber-100 rounded-2xl">
-                <input
-                  id="delete-confirm"
-                  type="checkbox"
-                  checked={deleteConfirm}
-                  onChange={(e) => setDeleteConfirm(e.target.checked)}
-                  className="w-4 h-4 rounded-lg border-slate-300 text-teal-600 focus:ring-teal-500"
-                />
-                <label
-                  htmlFor="delete-confirm"
-                  className="text-sm text-slate-700 font-bold select-none cursor-pointer"
-                >
-                  I understand this is permanent
-                </label>
-              </div>
-              {deleteMessage && (
-                <p className="text-sm text-amber-700 font-bold px-1">
-                  {deleteMessage}
-                </p>
-              )}
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-auto gap-2 text-amber-600 border-amber-200 hover:bg-amber-100 hover:border-amber-300 rounded-xl"
-                onClick={() => void onDeleteAccount()}
-                disabled={!deleteConfirm || deleteLoading}
-                type="button"
-              >
-                {deleteLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-                Delete My Account
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <PrivacySection
+          exportMessage={exportMessage}
+          exportLoading={exportLoading}
+          onExportData={onExportData}
+          analyticsEnabled={analyticsEnabled}
+          onAnalyticsToggle={onAnalyticsToggle}
+          deleteConfirm={deleteConfirm}
+          setDeleteConfirm={setDeleteConfirm}
+          deleteMessage={deleteMessage}
+          deleteLoading={deleteLoading}
+          onDeleteAccount={onDeleteAccount}
+        />
 
         <Card className="glass border-white/40 shadow-xl shadow-slate-200/50 overflow-hidden">
           <CardHeader className="border-b border-slate-100 bg-slate-50/50">

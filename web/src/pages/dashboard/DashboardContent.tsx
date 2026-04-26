@@ -10,29 +10,16 @@ import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 
-import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
-import { DocumentsSection } from "@/components/dashboard/DocumentsSection";
-import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
-import { PropertyLedger } from "@/components/dashboard/PropertyLedger";
 import { downloadSellerPacket } from "@/lib/seller-packet-download";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
-import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { generateActivityEvents } from "@/lib/activity";
-import {
-  UpgradeModal,
-  type UpgradeOpenReason,
-} from "@/components/dashboard/UpgradeModal";
-import { LeadCaptureModal } from "@/components/LeadCaptureModal";
+import type { UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
-import {
-  DASHBOARD_SECTION_GUIDED_PATH,
-  DASHBOARD_SECTION_PLAN_SPENDING,
-} from "@shared/copy/dashboard";
-import { ShareModal } from "@/components/dashboard/ShareModal";
+import { DASHBOARD_SECTION_GUIDED_PATH } from "@shared/copy/dashboard";
 import type { InvoiceRow, ProjectRow } from "@shared/types/database";
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
@@ -42,12 +29,10 @@ import { useLogout } from "@/hooks/use-logout";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
 import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
-import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { DashboardPlan } from "./DashboardPlan";
 import { DashboardScope } from "./DashboardScope";
 import { DashboardExecute } from "./DashboardExecute";
 import { DashboardRecord } from "./DashboardRecord";
-import { DeleteProjectModal } from "@/components/dashboard/DeleteProjectModal";
 import { DashboardDataStatus } from "@/components/dashboard/DashboardDataStatus";
 import { containerVariants, itemVariants } from "@/lib/animations";
 
@@ -57,10 +42,9 @@ import {
   useDashboardUpgradeQueryEffect,
 } from "./useDashboardLocationEffects";
 import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
-import { TransformationVault } from "@/components/dashboard/TransformationVault";
-import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
-import { HomeSpecsVault } from "@/components/dashboard/HomeSpecsVault";
-import { AIAssistantWidget } from "@/components/AIAssistantWidget";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { DashboardActionModals } from "@/components/dashboard/DashboardActionModals";
+import { useDashboardSections } from "./useDashboardSections";
 
 export function DashboardContent({
   projects,
@@ -70,7 +54,7 @@ export function DashboardContent({
   spendByCategory: _spendByCategory,
   reconciliation,
   isArchitect,
-  subscription,
+  subscription: _subscription,
   hasProjectPass,
   homeTeam: memoHomeTeam,
   investmentTotal: memoInvestmentTotal,
@@ -89,8 +73,7 @@ export function DashboardContent({
   const location = useLocation();
   const { logout } = useLogout();
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [_useDiscount, setUseDiscount] = useState(false);
-  const [_upgradeReason, setUpgradeReason] =
+  const [upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -109,6 +92,28 @@ export function DashboardContent({
   );
   useDashboardCheckoutSuccessConfetti(location.search, load);
   useDashboardMilestoneConfetti(project, invoices);
+
+  const {
+    health,
+    transformationVault,
+    homeSpecsVault,
+    homeTeam,
+    ledger,
+    documentsComp,
+  } = useDashboardSections({
+    project,
+    projects,
+    scopeItems,
+    invoices,
+    memoHomeTeam,
+    memoInvestmentTotal,
+    memoResaleImpact,
+    isArchitect,
+    hasProjectPass,
+    load,
+    setShowUpgrade,
+    setUpgradeReason,
+  });
 
   const handleSignOut = useCallback(async () => {
     await logout();
@@ -187,120 +192,6 @@ export function DashboardContent({
   const activityEvents = useMemo(
     () => generateActivityEvents(project, invoices),
     [project, invoices],
-  );
-
-  const stats = useMemo(
-    () => (
-      <DashboardStats
-        estimatedMin={project.estimated_min_total}
-        estimatedMax={project.estimated_max_total}
-        spendingTotal={memoInvestmentTotal}
-        documentRowCount={invoices.length}
-      />
-    ),
-    [
-      project.estimated_min_total,
-      project.estimated_max_total,
-      memoInvestmentTotal,
-      invoices.length,
-    ],
-  );
-
-  const health = useMemo(
-    () => (
-      <ProjectHealth
-        estimatedMin={project.estimated_min_total}
-        estimatedMax={project.estimated_max_total}
-        spendingTotal={memoInvestmentTotal}
-      />
-    ),
-    [
-      project.estimated_min_total,
-      project.estimated_max_total,
-      memoInvestmentTotal,
-    ],
-  );
-
-  const transformationVault = useMemo(
-    () => <TransformationVault projectId={project.id} />,
-    [project.id],
-  );
-
-  const homeSpecsVault = useMemo(
-    () => <HomeSpecsVault projectId={project.id} />,
-    [project.id],
-  );
-
-  const homeTeam = useMemo(
-    () => (
-      <HomeTeamSection
-        team={memoHomeTeam}
-        isArchitect={isArchitect}
-        hasProjectPass={hasProjectPass}
-        onUpgradeClick={() => setShowUpgrade(true)}
-      />
-    ),
-    [memoHomeTeam, isArchitect, hasProjectPass],
-  );
-
-  const ledger = useMemo(
-    () => (
-      <div className="space-y-6">
-        <ResaleValueImpact
-          investment={memoInvestmentTotal}
-          resaleImpact={memoResaleImpact}
-          projectName={project.name}
-        />
-        <PropertyLedger
-          projectId={project.id}
-          propertyId={project.property_id}
-          project={{
-            name: project.name,
-            estimated_min_total: project.estimated_min_total,
-            estimated_max_total: project.estimated_max_total,
-          }}
-          scopeItems={scopeItems}
-          invoices={invoices}
-          canExportSellerPacket={isArchitect || hasProjectPass}
-          onExportNotAllowed={() => {
-            setUpgradeReason("export");
-            setShowUpgrade(true);
-          }}
-        />
-      </div>
-    ),
-    [
-      memoInvestmentTotal,
-      memoResaleImpact,
-      project.name,
-      project.id,
-      project.property_id,
-      project.estimated_min_total,
-      project.estimated_max_total,
-      scopeItems,
-      invoices,
-      isArchitect,
-      hasProjectPass,
-    ],
-  );
-
-  const documentsComp = useMemo(
-    () => (
-      <DocumentsSection
-        projectId={project.id}
-        documents={invoices}
-        onUploaded={load}
-        onUpgradeClick={(reason) => {
-          setUpgradeReason(
-            reason === "invoice_limit" ? "invoice_limit" : "general",
-          );
-          setShowUpgrade(true);
-        }}
-        subscription={subscription}
-        hasProjectPass={hasProjectPass}
-      />
-    ),
-    [project.id, invoices, load, subscription, hasProjectPass],
   );
 
   const handleProjectRename = async (id: string, newName: string) => {
@@ -394,14 +285,12 @@ export function DashboardContent({
           <DashboardWelcomeBanner />
         </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <div className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
-              {DASHBOARD_SECTION_PLAN_SPENDING}
-            </h3>
-            {stats}
-          </div>
-        </motion.div>
+        <DashboardOverview
+          estimatedMin={project.estimated_min_total ?? 0}
+          estimatedMax={project.estimated_max_total ?? 0}
+          spendingTotal={memoInvestmentTotal}
+          documentRowCount={invoices.length}
+        />
 
         {project && (
           <motion.div variants={itemVariants}>
@@ -517,41 +406,26 @@ export function DashboardContent({
 
       <AppSlimFooter className="border-slate-200/60 bg-white/40 backdrop-blur-sm" />
 
-      <ComponentErrorBoundary name="Billing">
-        <UpgradeModal
-          isOpen={showUpgrade}
-          onClose={() => {
-            setShowUpgrade(false);
-            setUseDiscount(false);
-            setUpgradeReason("general");
-          }}
-        />
-      </ComponentErrorBoundary>
-
-      <LeadCaptureModal />
-
-      <ShareModal
-        isOpen={shareOpen}
-        onClose={() => setShareOpen(false)}
-        projectId={project.id}
+      <DashboardActionModals
+        project={project}
+        showUpgrade={showUpgrade}
+        setShowUpgrade={setShowUpgrade}
+        upgradeReason={upgradeReason}
+        setUpgradeReason={setUpgradeReason}
+        shareOpen={shareOpen}
+        setShareOpen={setShareOpen}
+        showDeleteModal={showDeleteModal}
+        setShowDeleteModal={setShowDeleteModal}
+        deleteProjectName={deleteProject?.name ?? ""}
+        handleConfirmDelete={handleConfirmDelete}
+        isAssistantOpen={isAssistantOpen}
+        setIsAssistantOpen={setIsAssistantOpen}
+        isArchitect={isArchitect}
       />
 
       <SmartSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-      />
-
-      <DeleteProjectModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete}
-        projectName={deleteProject?.name ?? ""}
-      />
-
-      <AIAssistantWidget
-        projectId={project.id}
-        isOpen={isAssistantOpen}
-        onOpenChange={setIsAssistantOpen}
       />
     </div>
   );

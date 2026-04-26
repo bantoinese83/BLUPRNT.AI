@@ -295,7 +295,7 @@ export function LandingHeader() {
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
                     </Button>
                   </Link>
-                  <p className="mt-4 text-center text-xs text-slate-400">
+                  <p className="mt-4 text-center text-sm font-medium text-slate-500">
                     Join 2,000+ homeowners today.
                   </p>
                 </div>
