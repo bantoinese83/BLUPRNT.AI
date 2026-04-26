@@ -39,6 +39,8 @@ export type InvoiceRow = {
   project_id: string;
   vendor_contact_info: unknown;
   warranty_expiry_date: string | null;
+  is_verified: boolean;
+  owner_user_id: string | null;
 };
 
 export type InvoiceLineItemRow =
@@ -59,11 +61,11 @@ export type OnboardingSyncRow = {
 export type GalleryItemRow = {
   id: string;
   project_id: string;
-  photo_type: "before" | "after" | "progress";
+  photo_type: "before" | "after" | "progress" | string;
   storage_path: string;
   caption: string | null;
   uploaded_by_user_id: string;
-  created_at: string;
+  created_at: string | null;
 };
 
 export type PhysicalAssetRow = {
@@ -78,6 +80,9 @@ export type PhysicalAssetRow = {
   location_in_home: string | null;
   notes: string | null;
   storage_path: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 };
+
+export type DocumentProcessingQueueRow =
+  PublicSchema["Tables"]["document_processing_queue"]["Row"];

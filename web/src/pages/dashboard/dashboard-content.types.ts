@@ -6,6 +6,8 @@ import type {
 } from "@shared/types/database";
 
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
+import type { Contractor } from "@shared/lib/home-team";
+import type { ResaleImpactResult } from "@shared/lib/resale-value";
 
 export interface DashboardContentProps {
   projects: ProjectRow[];
@@ -17,6 +19,9 @@ export interface DashboardContentProps {
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
+  homeTeam: Contractor[];
+  investmentTotal: number;
+  resaleImpact: ResaleImpactResult;
   load: () => Promise<void>;
   loadError: string | null;
   refreshing: boolean;

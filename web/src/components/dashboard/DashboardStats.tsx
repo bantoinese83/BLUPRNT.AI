@@ -1,5 +1,8 @@
 import { Wallet, FileText, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
+import { money } from "@/lib/formatters";
+import { calculateBudgetStats } from "@/lib/plan-vs-actual";
+import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 
 type DashboardStatsProps = {
   estimatedMin: number | null;
@@ -9,14 +12,6 @@ type DashboardStatsProps = {
   documentRowCount: number;
   isLoading?: boolean;
 };
-
-function formatCurrency(n: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
 
 function StatSkeleton() {
   return (
@@ -48,14 +43,11 @@ export function DashboardStats({
     );
   }
 
-  const estimatedMid =
-    (estimatedMin ?? 0) + (estimatedMax ?? 0)
-      ? ((estimatedMin ?? 0) + (estimatedMax ?? 0)) / 2
-      : 0;
-  const budgetPct =
-    estimatedMid > 0
-      ? Math.min(100, Math.round((spendingTotal / estimatedMid) * 100))
-      : 0;
+  const { budgetPct } = calculateBudgetStats(
+    estimatedMin,
+    estimatedMax,
+    spendingTotal,
+  );
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -70,16 +62,16 @@ export function DashboardStats({
             <Wallet className="w-5 h-5" strokeWidth={2.5} />
           </div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
-            Estimate
+            {DASHBOARD_STATS_LABELS.estimate}
           </span>
         </div>
 
         <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5">
-          {estimatedMin != null && estimatedMax != null
-            ? `${formatCurrency(estimatedMin)} – ${formatCurrency(estimatedMax)}`
-            : "—"}
+          {money(estimatedMin, estimatedMax)}
         </p>
-        <p className="text-xs text-slate-400 font-bold">Total project range</p>
+        <p className="text-xs text-slate-400 font-bold">
+          {DASHBOARD_STATS_LABELS.estimateSub}
+        </p>
       </motion.div>
 
       <motion.div
@@ -93,7 +85,7 @@ export function DashboardStats({
             <FileText className="w-5 h-5" strokeWidth={2.5} />
           </div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
-            Documents
+            {DASHBOARD_STATS_LABELS.documents}
           </span>
         </div>
 
@@ -104,7 +96,7 @@ export function DashboardStats({
           </span>
         </p>
         <p className="text-xs text-slate-400 font-bold">
-          All project records combined
+          {DASHBOARD_STATS_LABELS.documentsSub}
         </p>
       </motion.div>
 
@@ -119,15 +111,15 @@ export function DashboardStats({
             <TrendingUp className="w-5 h-5" strokeWidth={2.5} />
           </div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">
-            Invested
+            {DASHBOARD_STATS_LABELS.invested}
           </span>
         </div>
 
         <div className="flex items-baseline gap-2 mb-1.5">
           <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none">
-            {formatCurrency(spendingTotal)}
+            {money(spendingTotal)}
           </p>
-          {estimatedMid > 0 && spendingTotal > 0 && (
+          {budgetPct > 0 && (
             <motion.span
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
@@ -138,7 +130,7 @@ export function DashboardStats({
           )}
         </div>
         <p className="text-xs text-slate-400 font-bold">
-          Spending &amp; quotes vs your estimate
+          {DASHBOARD_STATS_LABELS.investedSub}
         </p>
       </motion.div>
     </div>

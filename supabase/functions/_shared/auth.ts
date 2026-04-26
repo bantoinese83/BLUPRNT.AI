@@ -29,9 +29,9 @@ export async function assertProjectOwner(
 ): Promise<void> {
   const { data, error } = await admin
     .from("projects")
-    .select("id, properties!inner(owner_user_id)")
+    .select("id")
     .eq("id", projectId)
-    .eq("properties.owner_user_id", userId)
+    .eq("owner_user_id", userId)
     .maybeSingle();
 
   if (error || !data) {

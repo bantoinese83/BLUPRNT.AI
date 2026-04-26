@@ -12,12 +12,15 @@ export type ReconciliationResult = {
   items: Record<string, ReconciliationItem>;
   total_reconciled: number;
   unreconciled_billed: number;
+  /** Spend that is linked to scope but belongs to an unverified (AI Draft) invoice. */
+  unverified_reconciled_spend: number;
 };
 
 export type InvoiceLineItemMinimal = {
   line_total: number | null;
   scope_item_id: string | null;
   invoice_id: string;
+  is_verified?: boolean;
 };
 
 /**
@@ -31,6 +34,7 @@ export function buildReconciliation(
     items: {},
     total_reconciled: 0,
     unreconciled_billed: 0,
+    unverified_reconciled_spend: 0,
   };
 
   if (!scopeItems.length || !lineItems.length) {
@@ -51,6 +55,8 @@ export function buildReconciliation(
 
   for (const line of lineItems) {
     const amount = line.line_total || 0;
+    const isUnverified = line.is_verified === false;
+
     if (!line.scope_item_id) {
       result.unreconciled_billed += amount;
       continue;
@@ -78,6 +84,10 @@ export function buildReconciliation(
       recon.invoice_count += 1;
     }
     result.total_reconciled += amount;
+
+    if (isUnverified) {
+      result.unverified_reconciled_spend += amount;
+    }
   }
 
   // Calculate statuses

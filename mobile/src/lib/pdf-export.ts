@@ -7,7 +7,7 @@ import {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
   planVsActualPdfLines,
-} from "@/lib/plan-vs-actual";
+} from "@shared/lib/plan-vs-actual";
 import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
 import type { InvoiceRow } from "@shared/types/database";
 

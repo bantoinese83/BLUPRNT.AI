@@ -24,12 +24,7 @@ describe("supabase", () => {
   });
 
   describe("invokeFunction", () => {
-    it("calls supabase.functions.invoke with session token", async () => {
-      const mockSession = { access_token: "mock-token" };
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
-        data: { session: mockSession },
-        error: null,
-      } as any);
+    it("calls supabase.functions.invoke with API version header", async () => {
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { success: true },
         error: null,
@@ -39,37 +34,18 @@ describe("supabase", () => {
         body: { foo: "bar" },
       });
 
-      expect(supabase.auth.getSession).toHaveBeenCalled();
       expect(supabase.functions.invoke).toHaveBeenCalledWith("test-func", {
         body: { foo: "bar" },
-        headers: { Authorization: "Bearer mock-token" },
+        headers: { "x-bluprnt-api-version": "2026-04-26" },
       });
       expect(result.data).toEqual({ success: true });
     });
 
-    it("calls supabase.functions.invoke without session token if no session exists", async () => {
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
-        data: { session: null },
-        error: null,
-      } as any);
+    it("merges custom headers with version header", async () => {
       vi.mocked(supabase.functions.invoke).mockResolvedValue({
         data: { success: true },
         error: null,
       });
-
-      await invokeFunction("test-func");
-
-      expect(supabase.functions.invoke).toHaveBeenCalledWith("test-func", {
-        headers: {},
-      });
-    });
-
-    it("merges custom headers with authorization header", async () => {
-      const mockSession = { access_token: "mock-token" };
-      vi.mocked(supabase.auth.getSession).mockResolvedValue({
-        data: { session: mockSession },
-        error: null,
-      } as any);
 
       await invokeFunction("test-func", {
         headers: { "X-Custom": "value" },
@@ -78,7 +54,7 @@ describe("supabase", () => {
       expect(supabase.functions.invoke).toHaveBeenCalledWith("test-func", {
         headers: {
           "X-Custom": "value",
-          Authorization: "Bearer mock-token",
+          "x-bluprnt-api-version": "2026-04-26",
         },
       });
     });

@@ -110,6 +110,13 @@ async function executeUploadWorkflow(
       }
     }
 
+    const isOcr = resolved !== "manual";
+    if (isOcr) {
+      showAppToast("Upload complete. AI is processing the details...", {
+        type: "success",
+      });
+    }
+
     return {
       success: true,
       invoice_id: data?.invoice_id,

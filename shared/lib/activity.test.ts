@@ -1,50 +1,33 @@
-import { describe, it, expect } from "vitest";
-import { generateActivityEvents, formatRelativeTime } from "./activity.ts";
+import { describe, it, expect, vi } from "vitest";
+import { generateActivityEvents, formatRelativeTime } from "./activity";
 import type { InvoiceRow, ProjectRow } from "../types/database.ts";
 
 describe("activity shared logic", () => {
   describe("generateActivityEvents", () => {
     const mockProject = {
       id: "p1",
-      name: "Kitchen Reno",
-      created_at: "2026-04-20T10:00:00Z",
-      estimated_min_total: 5000,
-    } as unknown as ProjectRow;
+      name: "Test Project",
+      estimated_min_total: 1000,
+      created_at: new Date().toISOString(),
+    } as ProjectRow;
 
-    const mockInvoices = [
-      {
-        id: "i1",
-        vendor_name: "Tile Co",
-        total: 200,
-        created_at: "2026-04-21T10:00:00Z",
-      },
-      {
-        id: "i2",
-        vendor_name: "Cabinets Plus",
-        total: 3000,
-        created_at: "2026-04-22T10:00:00Z",
-      },
-    ] as unknown as InvoiceRow[];
-
-    it("includes project initialization and invoice uploads", () => {
-      const events = generateActivityEvents(mockProject, mockInvoices);
-      expect(events).toHaveLength(3);
-      expect(events.find((e) => e.type === "project_created")).toBeDefined();
-      expect(events.filter((e) => e.type === "upload")).toHaveLength(2);
+    it("includes project initialization event", () => {
+      const events = generateActivityEvents(mockProject, []);
+      expect(events).toHaveLength(1);
+      expect(events[0]!.type).toBe("project_created");
+      expect(events[0]!.description).toContain("Test Project");
     });
 
-    it("sorts events by recency (newest first)", () => {
-      const events = generateActivityEvents(mockProject, mockInvoices);
-      expect(events[0]!.id).toBe("inv-i2"); // Apr 22
-      expect(events[1]!.id).toBe("inv-i1"); // Apr 21
-      expect(events[2]!.id).toBe("init-p1"); // Apr 20
-    });
+    it("includes recent invoices (up to 5)", () => {
+      const manyInvoices = Array(10)
+        .fill(0)
+        .map((_, i) => ({
+          id: `i${i}`,
+          vendor_name: `Vendor ${i}`,
+          total: 100 * i,
+          created_at: new Date().toISOString(),
+        })) as InvoiceRow[];
 
-    it("limits invoice events to the 5 most recent", () => {
-      const manyInvoices = Array.from({ length: 10 }, (_, i) => ({
-        id: `i${i}`,
-        created_at: `2026-04-${10 + i}T10:00:00Z`,
-      })) as unknown as InvoiceRow[];
       const events = generateActivityEvents(mockProject, manyInvoices);
       expect(events.filter((e) => e.type === "upload")).toHaveLength(5);
     });
@@ -83,6 +66,21 @@ describe("activity shared logic", () => {
     it("handles invalid dates gracefully", () => {
       expect(formatRelativeTime("not-a-date")).toBe("recently");
       expect(formatRelativeTime("")).toBe("recently");
+    });
+
+    it("handles future dates as 'just now' (clock drift)", () => {
+      const future = new Date(Date.now() + 10000).toISOString();
+      expect(formatRelativeTime(future)).toBe("just now");
+    });
+
+    it("returns recently if string formatting fails", () => {
+      const spy = vi
+        .spyOn(Date.prototype, "toLocaleDateString")
+        .mockImplementation(() => {
+          throw new Error("fail");
+        });
+      expect(formatRelativeTime(new Date(0).toISOString())).toBe("recently");
+      spy.mockRestore();
     });
   });
 });

@@ -1,12 +1,8 @@
 import "jsr:@supabase/functions-js@2.100.0/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
-import {
-  assertProjectOwner,
-  getServiceClient,
-  getUserIdFromRequest,
-} from "../_shared/auth.ts";
-import { callGemini } from "../_shared/gemini.ts";
+import { assertProjectOwner, getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
+import { callGemini, generateEmbedding } from "../_shared/gemini.ts";
 import { chatWithProjectSchema } from "../_shared/validation.ts";
 
 export const handler = async (req: Request) => {
@@ -135,6 +131,40 @@ export const handler = async (req: Request) => {
       parts: [{ text: query }],
       systemInstruction,
       responseSchema: responseSchema as any,
+      temperature: 0.7,
+    });
+
+    const parsedResponse = result?.data || JSON.parse(result?.text || '{"reply": "I couldn’t process that.", "actions": []}');
+
+    return jsonResponse(
+      {
+        reply: parsedResponse.reply,
+        actions: parsedResponse.actions || [],
+      },
+      200,
+      req,
+    );
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error(error);
+    if (error.message === "not_found") {
+      return jsonResponse({ error: "Project not found" }, 404, req);
+    }
+    if (error.message === "forbidden") {
+      return jsonResponse({ error: "Access denied" }, 403, req);
+    }
+    return jsonResponse(
+      { error: error.message || "Internal server error" },
+      500,
+      req,
+    );
+  }
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}
+ponseSchema as any,
       temperature: 0.7,
     });
 

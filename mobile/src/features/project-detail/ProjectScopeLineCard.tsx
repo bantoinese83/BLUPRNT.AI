@@ -20,6 +20,7 @@ import type { ScopeRow } from "@shared/types/database";
 import type { ReconciliationItem } from "@shared/lib/reconciliation";
 import { money } from "@shared/lib/formatters";
 import { type BillOfMaterialItem } from "@shared/types/onboarding";
+import { RECONCILIATION_STATUS_LABELS } from "@shared/copy/dashboard";
 
 type Props = {
   item: ScopeRow;
@@ -119,7 +120,10 @@ export const ProjectScopeLineCard = React.memo(
                       textTransform: "uppercase",
                     }}
                   >
-                    Billed {money(reconciliation.total_billed)}
+                    {reconciliation.status === "reconciled"
+                      ? RECONCILIATION_STATUS_LABELS.reconciled
+                      : reconciliation.status}{" "}
+                    {money(reconciliation.total_billed)}
                   </Text>
                 </View>
               )}

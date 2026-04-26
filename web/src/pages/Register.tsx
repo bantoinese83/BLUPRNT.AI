@@ -333,7 +333,7 @@ export default function Register() {
               <span className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-slate-50 px-3 font-bold uppercase tracking-widest text-slate-400">
+              <span className="bg-slate-50 px-3 font-bold uppercase tracking-widest text-slate-500">
                 Or use email
               </span>
             </div>

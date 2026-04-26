@@ -1,21 +1,19 @@
 import { Users, Phone, Mail, ExternalLink, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { deriveHomeTeam } from "@shared/lib/home-team";
-import type { InvoiceRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
+import type { Contractor } from "@shared/lib/home-team";
 
 export function HomeTeamSection({
-  invoices,
+  team,
   isArchitect,
   hasProjectPass,
   onUpgradeClick,
 }: {
-  invoices: InvoiceRow[];
+  team: Contractor[];
   isArchitect?: boolean;
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
 }) {
-  const team = deriveHomeTeam(invoices);
   const isUnlocked = isArchitect || hasProjectPass;
 
   if (team.length === 0) {

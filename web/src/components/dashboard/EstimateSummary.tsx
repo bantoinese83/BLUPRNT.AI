@@ -23,6 +23,11 @@ import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
 
 import type { ProjectRow, ScopeRow } from "@shared/types/database";
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
+import {
+  RECONCILIATION_STATUS_LABELS,
+  CONFIDENCE_LABELS,
+  DASHBOARD_STATS_LABELS,
+} from "@shared/copy/dashboard";
 
 import { money, getStars as stars } from "@/lib/formatters";
 import { InsightTeaser } from "./InsightTeaser";
@@ -164,7 +169,7 @@ export function EstimateSummary({
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-teal-200/70 text-[11px] font-extrabold uppercase tracking-[0.2em] flex items-center gap-2">
               <Wallet className="w-3.5 h-3.5 shrink-0" aria-hidden />
-              Projected Investment
+              {DASHBOARD_STATS_LABELS.projectedInvestment}
             </p>
             {regionalSignal && (
               <Badge className="bg-teal-500/20 text-teal-300 border-none text-[9px] font-black uppercase tracking-widest py-0.5 px-2">
@@ -217,7 +222,10 @@ export function EstimateSummary({
           <div className="flex flex-col md:items-end">
             <div className="flex gap-0.5 mb-1.5">{stars(conf)}</div>
             <p className="text-[11px] font-bold text-teal-200/60 uppercase tracking-widest text-shadow-sm">
-              Regional Match
+              Regional{" "}
+              {RECONCILIATION_STATUS_LABELS.reconciled === "Matched"
+                ? "Match"
+                : "Score"}
             </p>
           </div>
         </div>
@@ -297,7 +305,7 @@ export function EstimateSummary({
                             )}
                           >
                             {recon.status === "reconciled"
-                              ? "Matched"
+                              ? RECONCILIATION_STATUS_LABELS.reconciled
                               : recon.status}
                           </Badge>
                         )}
@@ -310,7 +318,7 @@ export function EstimateSummary({
                           {stars(item.confidence_score)}
                         </div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          Market Precision
+                          {CONFIDENCE_LABELS.marketPrecision}
                         </span>
                       </div>
                     </div>

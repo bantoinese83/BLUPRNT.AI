@@ -5,79 +5,45 @@ import { Shield, TrendingUp } from "lucide-react-native";
 import { MotiView } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
+import { calculateHealthScore } from "@shared/lib/project-health";
 
 type Props = {
   estimatedMin?: number | null;
   estimatedMax?: number | null;
-  invoiceTotal?: number;
+  spendingTotal?: number;
 };
-
-function calculateHealthScore(invoiceTotal: number, min: number, max: number) {
-  if (min === 0) {
-    return {
-      score: 0,
-      status: "Analyzing",
-      color: Theme.colors.text.secondary,
-      secondary: Theme.colors.text.muted,
-      message: "Processing your initial project data...",
-    };
-  }
-
-  const progressPct = (invoiceTotal / min) * 100;
-  const budgetUtilization = (invoiceTotal / max) * 100;
-
-  if (budgetUtilization > 100) {
-    const overPct = budgetUtilization - 100;
-    return {
-      score: Math.max(0, Math.round(70 - overPct)),
-      status: "Over Budget",
-      color: Theme.colors.status.error,
-      secondary: "#ea580c",
-      message: "Careful! Spending is above the top of your estimate range.",
-    };
-  }
-
-  if (budgetUtilization > 85) {
-    return {
-      score: 75,
-      status: "At Limit",
-      color: Theme.colors.status.warning,
-      secondary: Theme.colors.status.warning,
-      message: "You're approaching the upper limit of your budget.",
-    };
-  }
-
-  if (progressPct < 20) {
-    return {
-      score: 95,
-      status: "Excellent",
-      color: Theme.colors.status.success,
-      secondary: "#14b8a6",
-      message: "Starting strong! Your initial spending is well-aligned.",
-    };
-  }
-
-  return {
-    score: 88,
-    status: "Healthy",
-    color: Theme.colors.brand.primary,
-    secondary: Theme.colors.brand.deep,
-    message: "Your project spending is pacing well against estimates.",
-  };
-}
 
 export function ProjectHealth({
   estimatedMin = 0,
   estimatedMax = 0,
-  invoiceTotal = 0,
+  spendingTotal = 0,
 }: Props) {
   const min = estimatedMin || 0;
   const max = estimatedMax || 0;
-  const { score, status, color, secondary, message } = calculateHealthScore(
-    invoiceTotal,
+  const { score, status, message } = calculateHealthScore(
+    spendingTotal,
     min,
     max,
   );
+
+  const colorMap: Record<string, { color: string; secondary: string }> = {
+    Analyzing: {
+      color: Theme.colors.text.secondary,
+      secondary: Theme.colors.text.muted,
+    },
+    "Over Budget": { color: Theme.colors.status.error, secondary: "#ea580c" },
+    "At Limit": {
+      color: Theme.colors.status.warning,
+      secondary: Theme.colors.status.warning,
+    },
+    Excellent: { color: Theme.colors.status.success, secondary: "#14b8a6" },
+    Healthy: {
+      color: Theme.colors.brand.primary,
+      secondary: Theme.colors.brand.deep,
+    },
+  };
+  const activeColors = colorMap[status] ?? colorMap["Healthy"]!;
+  const { color, secondary } = activeColors;
 
   const size = 100;
   const strokeWidth = 10;
@@ -109,7 +75,7 @@ export function ProjectHealth({
             <View style={[styles.statusBadge, { backgroundColor: color }]}>
               <Text style={styles.statusText}>{status}</Text>
             </View>
-            {invoiceTotal > 0 && (
+            {spendingTotal > 0 && (
               <View style={styles.liveIndicator}>
                 <TrendingUp size={10} color={Theme.colors.status.success} />
                 <Text style={styles.liveText}>Live</Text>

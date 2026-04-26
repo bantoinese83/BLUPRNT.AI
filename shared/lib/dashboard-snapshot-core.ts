@@ -40,7 +40,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
 }
 
 const PROJECTS_LIST_SELECT =
-  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, properties!inner(owner_user_id), before_photo_storage_path, after_photo_storage_path, grounding_sources";
+  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, owner_user_id, before_photo_storage_path, after_photo_storage_path, grounding_sources";
 
 const SCOPE_SELECT =
   "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";
@@ -54,7 +54,7 @@ const GALLERY_SELECT =
   "id, project_id, photo_type, storage_path, caption, uploaded_by_user_id, created_at";
 
 /**
- * All projects the user owns (via property → owner).
+ * All projects the user owns.
  */
 export async function fetchDashboardProjectsList(
   supabase: SupabaseClient,
@@ -63,7 +63,7 @@ export async function fetchDashboardProjectsList(
   const projRes = await supabase
     .from("projects")
     .select(PROJECTS_LIST_SELECT)
-    .eq("properties.owner_user_id", userId)
+    .eq("owner_user_id", userId)
     .order("created_at", { ascending: false });
   if (projRes.error) {
     return { rows: [], error: projRes.error };

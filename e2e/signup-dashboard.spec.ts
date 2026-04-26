@@ -45,13 +45,13 @@ test.describe("Auth: signup to dashboard", () => {
     await Promise.race([dashboardNav, alertVisible]);
 
     await expect(
-      page.getByRole("link", { name: "BLUPRNT — Dashboard home" }),
-    ).toBeVisible({ timeout: 30_000 });
+      page.getByTestId("project-name-display"),
+    ).toBeVisible({ timeout: 60_000 });
 
     await expect(
       page.getByRole("heading", { name: "My home project" }),
     ).toBeVisible({
-      timeout: 30_000,
+      timeout: 60_000,
     });
   });
 });

@@ -3,17 +3,18 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Info } from "lucide-react";
 import { motion } from "motion/react";
 import { BLUPRNT_COLORS } from "@shared/constants/design-tokens";
+import type { ResaleImpactResult } from "@shared/lib/resale-value";
 
 export function ResaleValueImpact({
   investment,
+  resaleImpact,
   projectName,
 }: {
   investment: number;
+  resaleImpact: ResaleImpactResult;
   projectName: string;
 }) {
-  const valueAddScale = 1.25; // Professional estimate: 1.25x ROI on quality renovations
-  const estimatedValueAdd = investment * valueAddScale;
-  const ledgerPremium = investment > 0 ? investment * 0.05 : 0; // 5% bonus for professional documentation
+  const { totalImpact, ledgerPremium } = resaleImpact;
 
   return (
     <Card className="overflow-hidden border-slate-100 shadow-xl shadow-slate-50/50 group">
@@ -36,7 +37,7 @@ export function ResaleValueImpact({
       <CardContent className="space-y-6">
         <div className="flex items-baseline gap-2">
           <motion.h3
-            key={estimatedValueAdd}
+            key={totalImpact}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-4xl font-black text-slate-900"
@@ -45,7 +46,7 @@ export function ResaleValueImpact({
               style: "currency",
               currency: "USD",
               maximumFractionDigits: 0,
-            }).format(estimatedValueAdd + ledgerPremium)}
+            }).format(totalImpact)}
           </motion.h3>
           <span className="text-sm font-bold text-slate-400">
             Est. Added Value

@@ -134,4 +134,55 @@ describe("uploadDocumentWithType", () => {
       expect.stringContaining("Budget Alert: Project at 110%"),
     );
   });
+
+  it("shows budget nearing warning when budget_health is nearing", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: {
+        invoice_id: "inv-1",
+        document_type: "invoice",
+        budget_health: {
+          isOverBudget: false,
+          isNearingBudget: true,
+          percentOfMax: 85,
+        },
+      },
+      error: null,
+    });
+
+    await uploadDocumentWithType("file:///a.jpg", "image/jpeg", "p1");
+
+    expect(showAppToast).toHaveBeenCalledWith(
+      expect.stringContaining("Budget Note: 85% of budget used"),
+    );
+  });
+
+  it("shows AI processing toast for non-manual documents", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { invoice_id: "inv-1", document_type: "invoice" },
+      error: null,
+    });
+
+    await uploadDocumentWithType("file:///a.jpg", "image/jpeg", "p1");
+
+    expect(showAppToast).toHaveBeenCalledWith(
+      expect.stringContaining("AI is processing the details"),
+      { type: "success" },
+    );
+  });
+
+  it("does not show AI processing toast for manual documents", async () => {
+    vi.mocked(invokeFunction).mockResolvedValue({
+      data: { invoice_id: "inv-1", document_type: "manual" },
+      error: null,
+    });
+
+    await uploadDocumentWithType("file:///a.jpg", "image/jpeg", "p1");
+
+    // It might still show budget toast, but not the OCR toast
+    const calls = vi.mocked(showAppToast).mock.calls;
+    const hasOcrToast = calls.some((c) =>
+      String(c[0]).includes("AI is processing"),
+    );
+    expect(hasOcrToast).toBe(false);
+  });
 });

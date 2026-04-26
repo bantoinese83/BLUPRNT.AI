@@ -100,6 +100,7 @@ export function InvoiceReviewSheet({
     (detail?.payment_status ?? invoice.payment_status ?? "pending").slice(1);
 
   const docIdForOpen = detail?.document_id ?? invoice.document_id;
+  const isUnverified = detail?.is_verified === false;
 
   const handleDelete = () => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -176,14 +177,22 @@ export function InvoiceReviewSheet({
               style={styles.content}
             >
               <View style={styles.header}>
-                <View style={styles.docIconContainer}>
-                  {createElement(
-                    rowIconForLedgerDocumentType(ledgerDocType) ??
-                      DEFAULT_DOC_ICON,
-                    {
-                      size: 28,
-                      color: Theme.colors.brand.primary,
-                    },
+                <View style={styles.headerTitleRow}>
+                  <View style={styles.docIconContainer}>
+                    {createElement(
+                      rowIconForLedgerDocumentType(ledgerDocType) ??
+                        DEFAULT_DOC_ICON,
+                      {
+                        size: 28,
+                        color: Theme.colors.brand.primary,
+                      },
+                    )}
+                  </View>
+                  {isUnverified && (
+                    <View style={styles.aiBadgeHeader}>
+                      <ShieldCheck size={10} color="#d97706" />
+                      <Text style={styles.aiTextHeader}>AI Draft</Text>
+                    </View>
                   )}
                 </View>
                 <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
@@ -211,6 +220,20 @@ export function InvoiceReviewSheet({
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
+                  {isUnverified && (
+                    <View style={styles.verifyCallout}>
+                      <ShieldCheck size={20} color="#d97706" />
+                      <View style={styles.verifyCalloutTextWrap}>
+                        <Text style={styles.verifyCalloutTitle}>
+                          Review and Verify
+                        </Text>
+                        <Text style={styles.verifyCalloutDescription}>
+                          This data was extracted by AI. Confirm the vendor,
+                          amounts, and links below.
+                        </Text>
+                      </View>
+                    </View>
+                  )}
                   <Text
                     style={styles.vendor}
                     numberOfLines={2}
@@ -344,13 +367,15 @@ export function InvoiceReviewSheet({
                   </Text>
 
                   {projectId &&
-                    (typeDirty ||
+                    (isUnverified ||
+                      typeDirty ||
                       (showCapitalLineLink &&
                         lineItems.length > 0 &&
                         scopeItems.length > 0)) && (
                       <TouchableOpacity
                         style={[
                           styles.saveBtn,
+                          isUnverified ? styles.verifyBtn : undefined,
                           saving ? styles.saveBtnDisabled : undefined,
                         ]}
                         disabled={saving}
@@ -362,16 +387,27 @@ export function InvoiceReviewSheet({
                             tone="onPrimary"
                           />
                         ) : (
-                          <Text style={styles.saveBtnText}>
-                            {typeDirty &&
-                            !(
-                              showCapitalLineLink &&
-                              lineItems.length > 0 &&
-                              scopeItems.length > 0
-                            )
-                              ? "Save type"
-                              : "Save changes"}
-                          </Text>
+                          <>
+                            {isUnverified && (
+                              <ShieldCheck
+                                size={18}
+                                color="white"
+                                style={{ marginRight: 8 }}
+                              />
+                            )}
+                            <Text style={styles.saveBtnText}>
+                              {isUnverified
+                                ? "Verify & Save"
+                                : typeDirty &&
+                                    !(
+                                      showCapitalLineLink &&
+                                      lineItems.length > 0 &&
+                                      scopeItems.length > 0
+                                    )
+                                  ? "Save type"
+                                  : "Save changes"}
+                            </Text>
+                          </>
                         )}
                       </TouchableOpacity>
                     )}

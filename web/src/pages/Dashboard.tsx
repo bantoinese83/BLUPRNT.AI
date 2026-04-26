@@ -11,6 +11,7 @@ import {
 } from "@/pages/dashboard/DashboardEarlyViews";
 
 export default function Dashboard() {
+  const dashData = useDashboardData();
   const {
     loading,
     refreshing,
@@ -25,13 +26,16 @@ export default function Dashboard() {
     isArchitect,
     subscription,
     hasProjectPass,
+    homeTeam,
+    investmentTotal,
+    resaleImpact,
     load,
     handleProjectSelect,
     setProjects,
     setProject,
     setScopeItems,
     setInvoices,
-  } = useDashboardData();
+  } = dashData;
 
   if (!isSupabaseConfigured()) {
     return <DashboardSupabaseNotConfiguredView />;
@@ -77,6 +81,9 @@ export default function Dashboard() {
           isArchitect={isArchitect}
           subscription={subscription}
           hasProjectPass={hasProjectPass}
+          homeTeam={homeTeam}
+          investmentTotal={investmentTotal}
+          resaleImpact={resaleImpact}
           load={load}
           loadError={loadError}
           refreshing={refreshing}

@@ -43,6 +43,34 @@ describe("deriveHomeTeam", () => {
     expect(team[0]!.name).toBe("Electric Pro"); // sorted by billed descending
   });
 
+  it("updates last_activity if a newer invoice is found", () => {
+    const invoices = [
+      {
+        vendor_name: "Pro",
+        total: 100,
+        issue_date: "2026-01-01",
+      },
+      {
+        vendor_name: "Pro",
+        total: 200,
+        issue_date: "2026-02-01",
+      },
+    ];
+    // By default map iterates in insertion order.
+    // First 'Pro' creates the entry with 2026-01-01.
+    // Second 'Pro' sees existing, total becomes 300, and 2026-02-01 > 2026-01-01.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const team = deriveHomeTeam(invoices as any[]);
+    expect(team[0]!.last_activity).toBe("2026-02-01");
+    expect(team[0]!.total_billed).toBe(300);
+  });
+
+  it("handles null project_id gracefully", () => {
+    const invoices = [{ vendor_name: "A", total: 10, project_id: null }];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const team = deriveHomeTeam(invoices as any[]);
+    expect(team[0]!.project_ids).toEqual([]);
+  });
   it("returns empty array for empty input", () => {
     expect(deriveHomeTeam([])).toEqual([]);
   });

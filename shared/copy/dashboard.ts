@@ -13,3 +13,25 @@ export const DASHBOARD_EMPTY_STATE = {
   primaryCta: "Start your project",
   secondaryCta: "Walk through the intro first",
 } as const;
+
+export const DASHBOARD_STATS_LABELS = {
+  estimate: "Estimate",
+  estimateSub: "Total project range",
+  documents: "Documents",
+  documentsSub: "Files in your ledger",
+  invested: "Invested",
+  investedSub: "Logged capital spend",
+  projectedInvestment: "Projected Investment",
+  invoicesAndQuotes: "Invoices & quotes",
+} as const;
+
+export const RECONCILIATION_STATUS_LABELS = {
+  reconciled: "Matched",
+  over: "Over",
+  under: "Under",
+} as const;
+
+export const CONFIDENCE_LABELS = {
+  marketPrecision: "Market Precision",
+  confidence: "Confidence",
+} as const;

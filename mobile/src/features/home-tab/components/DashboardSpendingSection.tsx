@@ -33,7 +33,7 @@ export function DashboardSpendingSection({
       <DashboardStats
         estimatedMin={estimatedMin ?? null}
         estimatedMax={estimatedMax ?? null}
-        invoiceTotal={invoiceTotal}
+        spendingTotal={invoiceTotal}
         documentRowCount={invoices.length}
       />
 

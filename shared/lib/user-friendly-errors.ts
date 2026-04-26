@@ -129,6 +129,14 @@ export function friendlyDocumentUploadError(
       "Your session expired. Sign in again, then try uploading.",
     ],
     [
+      ["version mismatch", "api version"],
+      "An update is required. Please update your app to the latest version to continue.",
+    ],
+    [
+      ["gemini", "ai error", "ocr failed", "extraction"],
+      "AI extraction is taking longer than usual. The file is uploaded; check your vault in a few minutes.",
+    ],
+    [
       ["network", "failed to fetch", "network request failed"],
       "Check your internet connection and try again.",
     ],

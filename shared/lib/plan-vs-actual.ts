@@ -126,8 +126,12 @@ function estimateRangeLabel(
 ): string {
   if (estimatedMin == null && estimatedMax == null) return "—";
   if (estimatedMin != null && estimatedMax != null) {
-    if (estimatedMin === estimatedMax) return money(estimatedMin);
-    return `${money(estimatedMin)} – ${money(estimatedMax)}`;
+    const [low, high] =
+      estimatedMin <= estimatedMax
+        ? [estimatedMin, estimatedMax]
+        : [estimatedMax, estimatedMin];
+    if (low === high) return money(low);
+    return `${money(low)} – ${money(high)}`;
   }
   return money(estimatedMin ?? estimatedMax ?? 0);
 }
@@ -151,4 +155,32 @@ export function planVsActualPdfLines(
     narrative.body,
     "Note: Documented amounts reflect files you uploaded; they may not include every cash expense.",
   ];
+}
+
+/**
+ * Calculates a midpoint estimate and the percentage of that midpoint
+ * that has already been invested/spent.
+ */
+export function calculateBudgetStats(
+  estimatedMin: number | null,
+  estimatedMax: number | null,
+  totalInvested: number,
+) {
+  // If both exist, use average. If one exists, use that one. If neither, 0.
+  let estimatedMid = 0;
+  if (estimatedMin != null && estimatedMax != null) {
+    estimatedMid = (estimatedMin + estimatedMax) / 2;
+  } else if (estimatedMin != null || estimatedMax != null) {
+    estimatedMid = estimatedMin ?? estimatedMax ?? 0;
+  }
+
+  const budgetPct =
+    estimatedMid > 0
+      ? Math.min(
+          100,
+          Math.max(0, Math.round((totalInvested / estimatedMid) * 100)),
+        )
+      : 0;
+
+  return { estimatedMid, budgetPct };
 }

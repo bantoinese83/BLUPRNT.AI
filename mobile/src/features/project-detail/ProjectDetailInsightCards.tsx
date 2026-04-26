@@ -20,7 +20,7 @@ export function ProjectDetailInsightCards({ project, invoiceTotal }: Props) {
         <ProjectHealth
           estimatedMin={project.estimated_min_total}
           estimatedMax={project.estimated_max_total}
-          invoiceTotal={invoiceTotal}
+          spendingTotal={invoiceTotal}
         />
       </MotiView>
 

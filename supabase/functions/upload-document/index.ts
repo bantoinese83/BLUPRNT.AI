@@ -7,6 +7,7 @@ import {
   getServiceClient,
   getUserIdFromRequest,
 } from "../_shared/auth.ts";
+import { getApiVersion, API_VERSIONS } from "../_shared/versioning.ts";
 import {
   ARCHITECT_UPLOADS_PER_MONTH as _ARCHITECT_UPLOADS_PER_MONTH,
   checkInvoiceUploadAllowed,
@@ -57,6 +58,9 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const userId = await getUserIdFromRequest(req);
     if (!userId) return jsonResponse({ error: "Unauthorized" }, 401, req);
+
+    const apiVersion = getApiVersion(req);
+    console.log(`[upload-document] Request API Version: ${apiVersion}`);
 
     const rate = await checkRateLimit(req, "default");
     if (!rate.ok) {
@@ -136,45 +140,12 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (storageErr) throw storageErr;
 
-      // 3. OCR Analysis (if applicable)
-      let vendorName: string | null = null;
-      let total: number | null = null;
-      let taxTotal: number | null = null;
-      let issueDate: string | null = null;
-      let lineItems: any[] = [];
-      let ocrConfidence: number | null = null;
-
+      // 3. Queue for Asynchronous OCR Analysis
       const isOcrSupported =
         mime === "application/pdf" ||
         mime.startsWith("image/jpeg") ||
         mime.startsWith("image/png") ||
         mime.startsWith("image/webp");
-
-      if (isOcrSupported) {
-        const arrayBuffer = await file.arrayBuffer();
-        const base64 = bufferToBase64(arrayBuffer);
-
-        // Fetch scope items to enable intelligent mapping
-        const { data: scopeItems } = await admin
-          .from("scope_items")
-          .select("id, category, description")
-          .eq("project_id", projectId);
-
-        const ocrResult = await extractInvoiceFromPdf(
-          base64,
-          mime,
-          scopeItems || [],
-        );
-
-        if (ocrResult) {
-          vendorName = ocrResult.vendor_name;
-          total = ocrResult.total;
-          taxTotal = ocrResult.tax_total;
-          issueDate = ocrResult.issue_date;
-          lineItems = ocrResult.line_items;
-          ocrConfidence = 0.9;
-        }
-      }
 
       // 4. Create Document Record
       const inferredDocType =
@@ -190,66 +161,61 @@ const handler = async (req: Request): Promise<Response> => {
           storage_path: storagePath,
           original_filename: originalFilename,
           uploaded_by_user_id: userId,
-          ocr_status: isOcrSupported ? "success" : "skipped",
+          ocr_status: isOcrSupported ? "pending" : "skipped",
+          owner_user_id: userId, // Explicit set for performance
         })
         .select()
         .single();
 
       if (docErr) throw docErr;
 
-      // 5. Create Invoice Record
-      const finalTotal = total ?? (amountHintStr ? parseFloat(amountHintStr) : 0);
+      // 5. Create Draft Invoice Record (will be updated by background OCR)
+      const finalTotal = amountHintStr ? parseFloat(amountHintStr) : 0;
       const { data: invoice, error: dbErr } = await admin
         .from("invoices")
         .insert({
           project_id: projectId,
           document_id: doc.id,
           document_type: inferredDocType,
-          vendor_name: vendorName || "Unknown Vendor",
+          vendor_name: "Processing...",
           total: finalTotal,
-          tax_total: taxTotal,
-          issue_date: issueDate || new Date().toISOString().split("T")[0],
+          issue_date: new Date().toISOString().split("T")[0],
+          is_verified: false,
+          owner_user_id: userId,
         })
         .select()
         .single();
 
       if (dbErr) throw dbErr;
 
-      // 5. Insert Line Items with Intelligent Mapping
-      if (lineItems.length > 0) {
-        const lineRows = lineItems.map((item) => ({
-          invoice_id: invoice.id,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          line_total: item.line_total,
-          scope_item_id: item.mapped_scope_item_id || null,
-        }));
+      // 6. Insert into processing queue if OCR supported
+      if (isOcrSupported) {
+        const { error: queueErr } = await admin
+          .from("document_processing_queue")
+          .insert({
+            document_id: doc.id,
+            project_id: projectId,
+            owner_user_id: userId,
+            file_path: storagePath,
+            mime_type: mime,
+            status: "pending",
+          });
 
-        const { error: linesErr } = await admin
-          .from("invoice_line_items")
-          .insert(lineRows);
-
-        if (linesErr) {
-          console.warn("[upload-document] Failed to insert line items:", linesErr);
+        if (queueErr) {
+          console.warn("[upload-document] Failed to queue OCR:", queueErr);
         }
       }
-
-      // 5. Automatic Reconciliation (if line items mapped to scope items)
-      // This part depends on the specific project structure, omitted for brevity here
-      // but the data is now in the `invoice_line_items` JSONB column.
-
-      const budgetHealth = await getProjectBudgetHealth(admin, projectId);
 
       return jsonResponse(
         {
           success: true,
           invoice_id: invoice.id,
+          document_id: doc.id,
           document_type: inferredDocType,
           storage_path: storagePath,
-          budget_health: budgetHealth,
+          ocr_status: isOcrSupported ? "processing" : "skipped",
         },
-        200,
+        202, // Accepted
         req,
       );
     } catch (e) {

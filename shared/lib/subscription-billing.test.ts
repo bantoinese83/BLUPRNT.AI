@@ -73,6 +73,16 @@ describe("subscription-billing shared logic", () => {
       expect(architectBillingChannel(sub)).toBe("unknown");
     });
 
+    it("returns unknown if on architect plan but no fields match", () => {
+      const sub = {
+        plan_id: "architect",
+        status: "active",
+        stripe_subscription_id: null,
+        revenuecat_entitlement_active: false,
+      } as unknown as UserSubscriptionRow;
+      expect(architectBillingChannel(sub)).toBe("unknown");
+    });
+
     it("returns unknown for null sub", () => {
       expect(architectBillingChannel(null)).toBe("unknown");
     });

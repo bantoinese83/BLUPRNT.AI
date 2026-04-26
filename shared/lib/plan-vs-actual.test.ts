@@ -5,6 +5,7 @@ import {
   planVsActualNarrative,
   filterInvoicesByLedgerDocumentFilter,
   planVsActualPdfLines,
+  calculateBudgetStats,
 } from "./plan-vs-actual.ts";
 
 describe("plan-vs-actual shared logic", () => {
@@ -94,6 +95,22 @@ describe("plan-vs-actual shared logic", () => {
       const res = planVsActualNarrative(2000, 1000, 1500);
       expect(res.kind).toBe("within");
     });
+
+    it("handles single bound in narrative (min only)", () => {
+      const res = planVsActualNarrative(1000, null, 1500);
+      expect(res.kind).toBe("above_max");
+    });
+
+    it("handles single bound in narrative (max only)", () => {
+      const res = planVsActualNarrative(null, 1000, 500);
+      expect(res.kind).toBe("below_min");
+    });
+
+    it("handles swapped bounds gracefully", () => {
+      const stats = calculateBudgetStats(2000, 1000, 1500);
+      expect(stats.estimatedMid).toBe(1500);
+      expect(stats.budgetPct).toBe(100);
+    });
   });
 
   describe("filterInvoicesByLedgerDocumentFilter", () => {
@@ -118,6 +135,17 @@ describe("plan-vs-actual shared logic", () => {
       const res = filterInvoicesByLedgerDocumentFilter(invoices, "maintenance");
       expect(res).toHaveLength(1);
       expect(res[0]!.id).toBe(2);
+    });
+
+    it("handles missing document type as capital (default invoice)", () => {
+      const mixed = [
+        { id: 1, total: 100 }, // missing type -> capital
+        { id: 2, total: 200, document_type: "permit" }, // maintenance
+      ];
+      const cap = filterInvoicesByLedgerDocumentFilter(mixed, "capital");
+      const main = filterInvoicesByLedgerDocumentFilter(mixed, "maintenance");
+      expect(cap).toHaveLength(1);
+      expect(main).toHaveLength(1);
     });
   });
 
@@ -144,6 +172,43 @@ describe("plan-vs-actual shared logic", () => {
     it("handles single bound in PDF lines", () => {
       const lines = planVsActualPdfLines(1000, null, 1000);
       expect(lines[0]).toContain("$1,000");
+    });
+
+    it("handles max-only bound in PDF lines", () => {
+      const lines = planVsActualPdfLines(null, 2000, 1000);
+      expect(lines[0]).toContain("$2,000");
+    });
+  });
+
+  describe("calculateBudgetStats", () => {
+    it("calculates midpoint and percentage correctly", () => {
+      const stats = calculateBudgetStats(1000, 2000, 500);
+      expect(stats.estimatedMid).toBe(1500);
+      expect(stats.budgetPct).toBe(33); // 500/1500 = 0.333
+    });
+
+    it("handles null bounds by using 0 as midpoint", () => {
+      const stats = calculateBudgetStats(null, null, 500);
+      expect(stats.estimatedMid).toBe(0);
+      expect(stats.budgetPct).toBe(0);
+    });
+
+    it("handles zero midpoint to avoid NaN", () => {
+      const stats = calculateBudgetStats(0, 0, 500);
+      expect(stats.estimatedMid).toBe(0);
+      expect(stats.budgetPct).toBe(0);
+    });
+
+    it("handles single bound correctly", () => {
+      const stats = calculateBudgetStats(1000, null, 250);
+      expect(stats.estimatedMid).toBe(1000);
+      expect(stats.budgetPct).toBe(25);
+    });
+
+    it("caps percentage at 100", () => {
+      const stats = calculateBudgetStats(500, 1000, 2000);
+      expect(stats.estimatedMid).toBe(750);
+      expect(stats.budgetPct).toBe(100);
     });
   });
 });

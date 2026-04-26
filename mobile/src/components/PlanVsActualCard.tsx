@@ -6,11 +6,12 @@ import * as Haptics from "expo-haptics";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money } from "@shared/lib/formatters";
+import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 import {
   capitalImprovementTotal,
   planVsActualNarrative,
   type InvoiceLike,
-} from "@/lib/plan-vs-actual";
+} from "@shared/lib/plan-vs-actual";
 
 type Props = {
   estimatedMin: number | null;
@@ -92,13 +93,17 @@ export function PlanVsActualCard({
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Your estimate</Text>
+          <Text style={styles.statLabel}>
+            {DASHBOARD_STATS_LABELS.estimate}
+          </Text>
           <Text style={styles.statValue}>
             {money(estimatedMin, estimatedMax)}
           </Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Invoices & quotes</Text>
+          <Text style={styles.statLabel}>
+            {DASHBOARD_STATS_LABELS.invoicesAndQuotes}
+          </Text>
           <Text style={styles.statValue}>{money(capital)}</Text>
         </View>
       </View>

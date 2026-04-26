@@ -3,9 +3,27 @@ import {
   emptyDashboardSnapshot,
   buildDashboardDataForProject,
 } from "./dashboard-snapshot-core.ts";
+import { buildSpendByCategory } from "./spend-by-category.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 describe("dashboard-snapshot-core", () => {
+  describe("buildSpendByCategory", () => {
+    it("uses scope item category if line category is missing", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const scope = [{ id: "s1", category: "Kitchen" }] as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const lines = [{ scope_item_id: "s1", line_total: 100 }] as any[];
+      const spend = buildSpendByCategory(lines, scope);
+      expect(spend.Kitchen).toBe(100);
+    });
+
+    it("falls back to Uncategorized if everything is missing", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const spend = buildSpendByCategory([{ line_total: 50 }] as any, []);
+      expect(spend.Uncategorized).toBe(50);
+    });
+  });
+
   describe("emptyDashboardSnapshot", () => {
     it("returns a correctly initialized empty snapshot", () => {
       const snapshot = emptyDashboardSnapshot();

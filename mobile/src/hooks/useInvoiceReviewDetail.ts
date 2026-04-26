@@ -26,6 +26,7 @@ export type InvoiceDetail = {
   payment_status: string;
   document_id?: string | null;
   document_type?: string | null;
+  is_verified?: boolean;
 };
 
 export function useInvoiceReviewDetail(
@@ -143,6 +144,7 @@ export function useInvoiceReviewDetail(
 
     try {
       const docKindChanged = ledgerDocType !== serverLedgerDocType;
+      const needsVerification = detail?.is_verified === false;
 
       const lineUpdatePromises = Object.entries(mappings).map(
         ([lineId, scopeItemId]) =>
@@ -153,13 +155,16 @@ export function useInvoiceReviewDetail(
       );
 
       const typeUpdatePromises =
-        docKindChanged && invoice.id
+        (docKindChanged || needsVerification) && invoice.id
           ? [
               supabase
                 .from("invoices")
-                .update({ document_type: ledgerDocType })
+                .update({
+                  document_type: ledgerDocType,
+                  is_verified: true, // Always verify on manual save
+                })
                 .eq("id", invoice.id),
-              ...(detail?.document_id
+              ...(docKindChanged && detail?.document_id
                 ? [
                     supabase
                       .from("documents")
@@ -177,18 +182,21 @@ export function useInvoiceReviewDetail(
       const firstError = results.find((r) => r.error)?.error;
       if (firstError) throw firstError;
 
-      if (docKindChanged) {
+      if (docKindChanged || needsVerification) {
         setServerLedgerDocType(ledgerDocType);
+        if (detail) setDetail({ ...detail, is_verified: true });
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const didLines = lineUpdatePromises.length > 0;
       showAppToast(
-        docKindChanged && didLines
-          ? "Changes saved."
-          : docKindChanged
-            ? "Document type updated."
-            : "Line links saved.",
+        needsVerification
+          ? "Document verified."
+          : docKindChanged && didLines
+            ? "Changes saved."
+            : docKindChanged
+              ? "Document type updated."
+              : "Line links saved.",
         { type: "success" },
       );
       return true;

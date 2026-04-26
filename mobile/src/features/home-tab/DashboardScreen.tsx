@@ -35,7 +35,7 @@ import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
-import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
+import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 
 // Sub-components
 import { DashboardHeader } from "./components/DashboardHeader";
@@ -291,7 +291,7 @@ export default function DashboardScreen() {
           <ProjectHealth
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
-            invoiceTotal={capitalDocumentedTotal}
+            spendingTotal={capitalDocumentedTotal}
           />
         </MotiView>
 

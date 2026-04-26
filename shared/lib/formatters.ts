@@ -22,8 +22,9 @@ export function money(
   const valB = b != null && Number.isFinite(b) ? (b as number) : null;
 
   if (valA !== null && valB !== null) {
-    if (valA === valB) return fmt(valA);
-    return `${fmt(valA)} – ${fmt(valB)}`;
+    const [low, high] = valA <= valB ? [valA, valB] : [valB, valA];
+    if (low === high) return fmt(low);
+    return `${fmt(low)} – ${fmt(high)}`;
   }
   if (valA !== null) return fmt(valA);
   return "—";

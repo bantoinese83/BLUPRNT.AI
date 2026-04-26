@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Star } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
+import { CONFIDENCE_LABELS } from "@shared/copy/dashboard";
 
 type Props = {
   score: number | null;
@@ -29,7 +30,11 @@ export function ConfidenceDisplay({
           />
         ))}
       </View>
-      {showText && <Text style={styles.text}>{percentage}% Confidence</Text>}
+      {showText && (
+        <Text style={styles.text}>
+          {percentage}% {CONFIDENCE_LABELS.confidence}
+        </Text>
+      )}
     </View>
   );
 }

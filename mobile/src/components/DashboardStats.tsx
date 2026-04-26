@@ -10,11 +10,13 @@ import { MotiView } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money } from "@shared/lib/formatters";
+import { calculateBudgetStats } from "@shared/lib/plan-vs-actual";
+import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 
 type DashboardStatsProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
-  invoiceTotal: number;
+  spendingTotal: number;
   /** All document rows in the project (all types) — not the Free-tier bill cap. */
   documentRowCount: number;
 };
@@ -72,17 +74,14 @@ function StatItem({
 export function DashboardStats({
   estimatedMin,
   estimatedMax,
-  invoiceTotal,
+  spendingTotal,
   documentRowCount,
 }: DashboardStatsProps) {
-  const estimatedMid =
-    (estimatedMin ?? 0) + (estimatedMax ?? 0)
-      ? ((estimatedMin ?? 0) + (estimatedMax ?? 0)) / 2
-      : 0;
-  const budgetPct =
-    estimatedMid > 0
-      ? Math.min(100, Math.round((invoiceTotal / estimatedMid) * 100))
-      : 0;
+  const { budgetPct } = calculateBudgetStats(
+    estimatedMin,
+    estimatedMax,
+    spendingTotal,
+  );
 
   return (
     <ScrollView
@@ -92,37 +91,27 @@ export function DashboardStats({
       contentContainerStyle={styles.scrollContent}
     >
       <StatItem
-        label="Estimate"
-        value={
-          estimatedMin != null && estimatedMax != null
-            ? money(estimatedMin, estimatedMax)
-            : "—"
-        }
-        subValue="Total project range"
+        label={DASHBOARD_STATS_LABELS.estimate}
+        value={money(estimatedMin, estimatedMax)}
+        subValue={DASHBOARD_STATS_LABELS.estimateSub}
         icon={Wallet}
       />
 
       <StatItem
-        label="Documents"
+        label={DASHBOARD_STATS_LABELS.documents}
         value={documentRowCount.toString()}
-        subValue={
-          documentRowCount === 1
-            ? "file in your ledger"
-            : "files in your ledger"
-        }
+        subValue={DASHBOARD_STATS_LABELS.documentsSub}
         icon={FileText}
         delay={100}
       />
 
       <StatItem
-        label="Invested"
-        value={money(invoiceTotal)}
-        subValue="Logged capital spend"
+        label={DASHBOARD_STATS_LABELS.invested}
+        value={money(spendingTotal)}
+        subValue={DASHBOARD_STATS_LABELS.investedSub}
         icon={TrendingUp}
         delay={200}
-        badge={
-          estimatedMid > 0 && invoiceTotal > 0 ? `${budgetPct}%` : undefined
-        }
+        badge={budgetPct > 0 ? `${budgetPct}%` : undefined}
       />
     </ScrollView>
   );

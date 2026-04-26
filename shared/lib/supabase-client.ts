@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/supabase.gen.ts";
+import { type EdgeFunctionName, API_VERSIONS } from "./backend-routing.ts";
 
 export type SupabaseClientConfig = {
   url: string;
@@ -37,11 +38,13 @@ export function createSupabaseClient(config: SupabaseClientConfig) {
 
 /**
  * Shared retry logic for Edge Functions.
- * Ensures a fresh JWT is sent and handles transient 5xx errors.
+ * Ensures an API version header is sent and handles transient 5xx errors.
+ * Note: The Supabase client automatically injects the Authorization header
+ * from the active session.
  */
 export async function invokeSharedFunction<T = unknown>(
   supabase: SupabaseClient<Database>,
-  name: string,
+  name: EdgeFunctionName | (string & {}), // Suggest known names but allow strings
   options?: {
     body?:
       | string
@@ -59,15 +62,10 @@ export async function invokeSharedFunction<T = unknown>(
   },
   retries = 2,
 ) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
+  // Automatically inject our custom API versioning header
   const headers = {
+    "x-bluprnt-api-version": API_VERSIONS.V2,
     ...options?.headers,
-    ...(session?.access_token
-      ? { Authorization: `Bearer ${session.access_token}` }
-      : {}),
   };
 
   let lastResult: {

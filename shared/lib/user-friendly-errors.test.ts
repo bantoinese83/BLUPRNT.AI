@@ -209,5 +209,17 @@ describe("user-friendly-errors shared logic", () => {
         "That didn’t go through",
       );
     });
+
+    it("friendlyDocumentUploadError: handles version mismatch", () => {
+      expect(
+        friendlyDocumentUploadError({ message: "api version mismatch" }),
+      ).toContain("update your app");
+    });
+
+    it("friendlyDocumentUploadError: handles gemini ocr delay", () => {
+      expect(
+        friendlyDocumentUploadError({ message: "gemini ocr failed" }),
+      ).toContain("taking longer than usual");
+    });
   });
 });

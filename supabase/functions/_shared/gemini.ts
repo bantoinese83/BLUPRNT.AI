@@ -51,6 +51,57 @@ function isRetryableGeminiError(e: unknown): boolean {
 
 const DEFAULT_MAX_ATTEMPTS = 3;
 const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
+const DEFAULT_EMBEDDING_MODEL = "text-embedding-004";
+
+export async function generateEmbedding(text: string): Promise<number[] | null> {
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey?.trim()) {
+    console.error("[generateEmbedding] GEMINI_API_KEY not found in environment");
+    return null;
+  }
+
+  const modelName =
+    (Deno.env.get("EMBEDDING_MODEL") ?? DEFAULT_EMBEDDING_MODEL).trim() ||
+    DEFAULT_EMBEDDING_MODEL;
+
+  for (let attempt = 1; attempt <= DEFAULT_MAX_ATTEMPTS; attempt++) {
+    if (attempt > 1) {
+      const delayMs = Math.min(4000, 400 * Math.pow(2, attempt - 2));
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+
+    try {
+      const client = new GoogleGenAI({ apiKey });
+      const response = await client.models.embedContent({
+        model: modelName,
+        content: {
+          parts: [{ text }],
+        },
+      });
+
+      const embedding = response.embeddings?.[0]?.values;
+      if (!embedding || embedding.length === 0) {
+        console.warn("[generateEmbedding] No usable embedding in response");
+        return null;
+      }
+
+      return embedding;
+    } catch (e: unknown) {
+      const error = e as Error;
+      console.error(
+        `[generateEmbedding] Attempt ${attempt} failed:`,
+        error.name,
+        error.message,
+      );
+
+      if (!isRetryableGeminiError(e) || attempt === DEFAULT_MAX_ATTEMPTS) {
+        return null;
+      }
+    }
+  }
+
+  return null;
+}
 
 export async function callGemini(params: {
   parts: GeminiPart[];

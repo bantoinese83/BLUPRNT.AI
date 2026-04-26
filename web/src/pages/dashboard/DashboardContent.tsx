@@ -34,7 +34,6 @@ import {
 } from "@shared/copy/dashboard";
 import { ShareModal } from "@/components/dashboard/ShareModal";
 import type { InvoiceRow, ProjectRow } from "@shared/types/database";
-import { capitalImprovementTotal } from "@/lib/plan-vs-actual";
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -73,6 +72,9 @@ export function DashboardContent({
   isArchitect,
   subscription,
   hasProjectPass,
+  homeTeam: memoHomeTeam,
+  investmentTotal: memoInvestmentTotal,
+  resaleImpact: memoResaleImpact,
   load,
   loadError,
   refreshing,
@@ -107,11 +109,6 @@ export function DashboardContent({
   );
   useDashboardCheckoutSuccessConfetti(location.search, load);
   useDashboardMilestoneConfetti(project, invoices);
-
-  const capitalDocumentedTotal = useMemo(
-    () => capitalImprovementTotal(invoices),
-    [invoices],
-  );
 
   const handleSignOut = useCallback(async () => {
     await logout();
@@ -197,14 +194,14 @@ export function DashboardContent({
       <DashboardStats
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
-        spendingTotal={capitalDocumentedTotal}
+        spendingTotal={memoInvestmentTotal}
         documentRowCount={invoices.length}
       />
     ),
     [
       project.estimated_min_total,
       project.estimated_max_total,
-      capitalDocumentedTotal,
+      memoInvestmentTotal,
       invoices.length,
     ],
   );
@@ -214,13 +211,13 @@ export function DashboardContent({
       <ProjectHealth
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
-        spendingTotal={capitalDocumentedTotal}
+        spendingTotal={memoInvestmentTotal}
       />
     ),
     [
       project.estimated_min_total,
       project.estimated_max_total,
-      capitalDocumentedTotal,
+      memoInvestmentTotal,
     ],
   );
 
@@ -237,20 +234,21 @@ export function DashboardContent({
   const homeTeam = useMemo(
     () => (
       <HomeTeamSection
-        invoices={invoices}
+        team={memoHomeTeam}
         isArchitect={isArchitect}
         hasProjectPass={hasProjectPass}
         onUpgradeClick={() => setShowUpgrade(true)}
       />
     ),
-    [invoices, isArchitect, hasProjectPass],
+    [memoHomeTeam, isArchitect, hasProjectPass],
   );
 
   const ledger = useMemo(
     () => (
       <div className="space-y-6">
         <ResaleValueImpact
-          investment={capitalDocumentedTotal}
+          investment={memoInvestmentTotal}
+          resaleImpact={memoResaleImpact}
           projectName={project.name}
         />
         <PropertyLedger
@@ -272,7 +270,8 @@ export function DashboardContent({
       </div>
     ),
     [
-      capitalDocumentedTotal,
+      memoInvestmentTotal,
+      memoResaleImpact,
       project.name,
       project.id,
       project.property_id,

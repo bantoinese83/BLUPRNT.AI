@@ -272,13 +272,22 @@ export function useDocumentManagement({
     if (successTotal > 0) {
       dismissGuide();
       const labelForType = (t: string) => ledgerDocumentTypeLabel(t);
+      const isOcr = successTotal === 1 && lastServerDocType !== "manual";
       const msg =
         successTotal === 1 && lastServerDocType
-          ? `${labelForType(lastServerDocType)} uploaded (detected automatically)`
+          ? `${labelForType(lastServerDocType)} uploaded. AI is processing the details...`
           : successTotal === 1
-            ? "Document uploaded successfully"
-            : `Successfully uploaded ${successTotal} documents.`;
-      toast.success(msg);
+            ? "Document uploaded. AI is processing..."
+            : `Successfully uploaded ${successTotal} documents. AI is processing in the background.`;
+
+      if (isOcr) {
+        toast.info(msg, {
+          description: "Details will appear in your vault in a few moments.",
+          duration: 6000,
+        });
+      } else {
+        toast.success(msg);
+      }
     }
 
     setUploading(false);

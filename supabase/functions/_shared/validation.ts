@@ -1,117 +1,31 @@
 import { z } from "https://esm.sh/zod@3.23.8";
-import { UPLOAD_FORM_DOCUMENT_TYPES } from "../../../shared/lib/infer-document-type.ts";
+import { 
+  photoToScopeSchema as _p, 
+  uploadInvoiceSchema as _u, 
+  marketingLeadSchema as _m, 
+  chatWithProjectSchema as _c,
+  getInvoiceSchema as _g,
+  uploadFileMimeLooksAllowed as _mime,
+  uuidSchema as _uuid,
+  documentTypeSchema as _dt
+} from "../../../shared/lib/validation.ts";
 
-const uuidSchema = z.string().uuid();
+// Proxy re-exports to maintain compatibility with existing Edge Function imports
+// but enforcing the shared logic from @bluprnt/shared.
 
-export const photoToScopeSchema = z.object({
-  zip_code: z
-    .string()
-    .max(20)
-    .transform((s) => {
-      const digits = s.replace(/\D/g, "").slice(0, 5);
-      return digits.length >= 5 ? digits : "00000";
-    }),
-  room_type: z.string().transform((s) => {
-    const v = s.toLowerCase();
-    if (v === "kitchen") return "kitchen" as const;
-    if (v === "bathroom" || v === "bath") return "bathroom" as const;
-    return "other" as const;
-  }),
-  finish_preference: z.string().transform((s) => {
-    const v = s.toLowerCase();
-    return (v === "economy" || v === "premium" ? v : "mid") as
-      | "economy"
-      | "mid"
-      | "premium";
-  }),
-  project_id: z
-    .string()
-    .optional()
-    .nullable()
-    .transform((v) => {
-      const s = (v ?? "").trim();
-      if (!s) return null;
-      const parsed = uuidSchema.safeParse(s);
-      return parsed.success ? parsed.data : null;
-    }),
-  location_unset: z
-    .string()
-    .optional()
-    .transform((v) => v === "1" || v === "true"),
-  scope_description: z.string().max(2000).optional().nullable(),
-});
-
-const documentTypeSchema = z.preprocess(
-  (v) => {
-    const s = String(v ?? "").trim().toLowerCase();
-    if ((UPLOAD_FORM_DOCUMENT_TYPES as readonly string[]).includes(s)) {
-      return s;
-    }
-    return "auto";
-  },
-  z.enum(
-    UPLOAD_FORM_DOCUMENT_TYPES as unknown as [
-      (typeof UPLOAD_FORM_DOCUMENT_TYPES)[number],
-      ...(typeof UPLOAD_FORM_DOCUMENT_TYPES)[number][],
-    ],
-  ),
-);
-
-/** iOS camera/library often produces HEIC; mobile multipart may omit `File.type`. */
-const UPLOAD_MIME_ALLOWLIST = new Set([
-  "application/pdf",
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-]);
-
-function uploadFileMimeLooksAllowed(f: File): boolean {
-  const t = (f.type || "").trim().toLowerCase();
-  if (t && UPLOAD_MIME_ALLOWLIST.has(t)) return true;
-  // React Native / some clients send an empty type — infer from filename.
-  if (!t || t === "application/octet-stream") {
-    const n = (f.name || "").toLowerCase();
-    return /\.(pdf|jpe?g|png|webp|heic|heif)$/i.test(n);
-  }
-  return false;
-}
-
-export const uploadInvoiceSchema = z.object({
-  project_id: uuidSchema,
+export const photoToScopeSchema = _p;
+export const uploadInvoiceSchema = _u.extend({
+  // Backend needs the raw File object validation which is environment specific
   file: z
     .custom<File>((v) => v instanceof File && v.size > 0, "Valid file required")
     .refine((f) => f.size <= 10 * 1024 * 1024, "File must be under 10MB")
     .refine(
-      uploadFileMimeLooksAllowed,
+      (f) => _mime(f.type, f.name),
       "Unsupported file type. Upload a PDF, JPEG, PNG, WEBP, or HEIC.",
     ),
-  document_type: documentTypeSchema,
-  vendor_hint: z.string().max(200).optional().nullable(),
-  amount_hint: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((v) => {
-      if (v === "" || v == null) return null;
-      const n = typeof v === "string" ? parseFloat(v) : v;
-      return Number.isFinite(n) ? n : null;
-    }),
 });
-
-export const getInvoiceSchema = z.object({
-  invoice_id: uuidSchema,
-});
-
-/** Public lead capture (inserted via Edge Function with service role). */
-export const marketingLeadSchema = z.object({
-  email: z.string().trim().toLowerCase().email().max(320),
-  source: z.string().trim().min(1).max(64),
-});
-
-/** AI chat: bounded prompt + project scope. */
-export const chatWithProjectSchema = z.object({
-  projectId: uuidSchema,
-  query: z.string().trim().min(1).max(8000),
-});
+export const marketingLeadSchema = _m;
+export const chatWithProjectSchema = _c;
+export const getInvoiceSchema = _g;
+export const uuidSchema = _uuid;
+export const documentTypeSchema = _dt;

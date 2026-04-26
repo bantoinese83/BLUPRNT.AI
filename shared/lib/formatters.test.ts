@@ -19,6 +19,10 @@ describe("formatters", () => {
       expect(money(null)).toBe("—");
       expect(money(NaN)).toBe("—");
     });
+
+    it("swaps values for out-of-order ranges", () => {
+      expect(money(2000, 1000)).toBe("$1,000 – $2,000");
+    });
   });
 
   describe("formatShortUsDate", () => {
@@ -33,6 +37,16 @@ describe("formatters", () => {
 
     it("returns placeholder for empty input", () => {
       expect(formatShortUsDate("")).toBe("—");
+    });
+
+    it("returns raw string if formatting throws", () => {
+      const spy = vi
+        .spyOn(Date.prototype, "toLocaleDateString")
+        .mockImplementation(() => {
+          throw new Error("fail");
+        });
+      expect(formatShortUsDate("2026-01-01")).toBe("2026-01-01");
+      spy.mockRestore();
     });
   });
 

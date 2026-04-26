@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Eye, Clock, Lock } from "lucide-react";
+import { Eye, Clock, Lock, Sparkles } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import type { InvoiceRow } from "@shared/types/database";
 import { money, getWarrantyStatus } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
@@ -62,9 +62,24 @@ export function DocumentCard({
               className="mt-0.5"
             />
             <div className="space-y-1 min-w-0 flex-1">
-              <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
-                {document.vendor_name ?? "Document"}
-              </h4>
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
+                  {document.vendor_name ?? "Document"}
+                </h4>
+                <AnimatePresence>
+                  {document.is_verified === false && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5, y: -5 }}
+                      className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 shrink-0 shadow-sm shadow-amber-100/50"
+                    >
+                      <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                      AI Draft
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <p className="text-xs text-slate-500">
                 {new Date(document.created_at).toLocaleDateString(undefined, {
                   month: "short",

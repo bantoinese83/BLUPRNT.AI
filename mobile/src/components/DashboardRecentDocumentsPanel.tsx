@@ -278,6 +278,23 @@ const styles = StyleSheet.create({
   titleChevron: {
     marginTop: 1,
   },
+  aiBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#fffbeb", // Amber-50
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+    borderWidth: 0.5,
+    borderColor: "#fde68a", // Amber-200
+  },
+  aiText: {
+    fontSize: 8,
+    fontFamily: Theme.typography.family.black,
+    color: "#d97706", // Amber-600
+    textTransform: "uppercase",
+  },
   timeLabel: {
     fontSize: 10,
     fontFamily: Theme.typography.family.semibold,

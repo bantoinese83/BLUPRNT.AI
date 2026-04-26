@@ -5,6 +5,8 @@ import type { DashboardSnapshot } from "../types/dashboard-snapshot";
 import { persistLastActiveProjectId } from "../lib/persist-last-active-project-id";
 import { useDashboardSnapshotCache } from "./use-dashboard-snapshot-cache";
 import { deriveDashboardQueryStatus } from "./derive-dashboard-query-status";
+import { deriveHomeTeam } from "../lib/home-team";
+import { calculateResaleImpact } from "../lib/resale-value";
 
 /**
  * Injected platform behavior for `useDashboardDataShared` (one implementation, web + mobile).
@@ -140,6 +142,25 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
     adapter.isSupabaseConfigured(),
   );
 
+  const homeTeam = useMemo(
+    () => deriveHomeTeam(snapshot?.invoices ?? []),
+    [snapshot?.invoices],
+  );
+
+  const investmentTotal = useMemo(
+    () =>
+      (snapshot?.invoices ?? []).reduce(
+        (acc, inv) => acc + (inv.total ?? 0),
+        0,
+      ),
+    [snapshot?.invoices],
+  );
+
+  const resaleImpact = useMemo(
+    () => calculateResaleImpact(investmentTotal),
+    [investmentTotal],
+  );
+
   return useMemo(
     () => ({
       activeProjectId,
@@ -158,6 +179,9 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
       subscription: snapshot?.subscription ?? null,
       hasProjectPass: snapshot?.hasProjectPass ?? false,
       galleryItems: snapshot?.galleryItems ?? [],
+      homeTeam,
+      investmentTotal,
+      resaleImpact,
       load,
       handleProjectSelect,
       setProjects,
@@ -173,6 +197,9 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
       refreshing,
       snapshot,
       clearLoadError,
+      homeTeam,
+      investmentTotal,
+      resaleImpact,
       load,
       handleProjectSelect,
       setProjects,

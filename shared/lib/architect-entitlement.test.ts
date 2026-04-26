@@ -177,5 +177,15 @@ describe("architect-entitlement", () => {
         ),
       ).toBe(false);
     });
+
+    it("returns false if revenuecat_entitlement_active is false and no stripe sub", () => {
+      const sub = {
+        invoice_uploads_count: 0,
+        revenuecat_entitlement_active: false,
+        status: "canceled" as const,
+        current_period_end: past,
+      };
+      expect(isArchitectGlobalUploadQuotaAvailable(sub, now)).toBe(false);
+    });
   });
 });

@@ -125,7 +125,7 @@ export function CookieConsent() {
                   </div>
                   <div className="space-y-4 flex-1">
                     <div className="space-y-1">
-                      <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                      <h3 className="text-lg font-bold text-slate-950 tracking-tight">
                         Privacy Preferences
                       </h3>
                       <p className="text-sm text-slate-600 leading-relaxed">

@@ -11,6 +11,7 @@ import Svg, {
 } from "react-native-svg";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
+import { calculateResaleImpact } from "@shared/lib/resale-value";
 
 interface Props {
   investment: number;
@@ -18,10 +19,7 @@ interface Props {
 }
 
 export function ResaleValueImpact({ investment, projectName }: Props) {
-  const valueAddScale = 1.25; // Professional estimate: 1.25x ROI on quality renovations
-  const estimatedValueAdd = investment * valueAddScale;
-  const ledgerPremium = investment > 0 ? investment * 0.05 : 0; // 5% bonus for professional documentation
-  const totalImpact = estimatedValueAdd + ledgerPremium;
+  const { ledgerPremium, totalImpact } = calculateResaleImpact(investment);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-US", {

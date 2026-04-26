@@ -4,6 +4,7 @@ export {
   filterInvoicesByLedgerDocumentFilter,
   planVsActualNarrative,
   planVsActualPdfLines,
+  calculateBudgetStats,
 } from "@shared/lib/plan-vs-actual";
 export type {
   InvoiceLike,
