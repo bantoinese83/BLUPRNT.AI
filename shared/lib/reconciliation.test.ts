@@ -49,4 +49,11 @@ describe("buildReconciliation", () => {
     expect(result.unreconciled_billed).toBe(300);
     expect(result.total_reconciled).toBe(0);
   });
+
+  it("handles case with lines but no scope items", () => {
+    const lines = [{ line_total: 100, scope_item_id: "any", invoice_id: "1" }];
+    const result = buildReconciliation([], lines);
+    expect(result.unreconciled_billed).toBe(100);
+    expect(result.total_reconciled).toBe(0);
+  });
 });

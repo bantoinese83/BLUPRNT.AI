@@ -4,6 +4,7 @@ import {
   maintenanceDocumentTotal,
   planVsActualNarrative,
   filterInvoicesByLedgerDocumentFilter,
+  planVsActualPdfLines,
 } from "./plan-vs-actual.ts";
 
 describe("plan-vs-actual shared logic", () => {
@@ -117,6 +118,32 @@ describe("plan-vs-actual shared logic", () => {
       const res = filterInvoicesByLedgerDocumentFilter(invoices, "maintenance");
       expect(res).toHaveLength(1);
       expect(res[0]!.id).toBe(2);
+    });
+  });
+
+  describe("planVsActualPdfLines", () => {
+    it("generates correct lines for a range", () => {
+      const lines = planVsActualPdfLines(1000, 2000, 1500);
+      expect(lines).toHaveLength(5);
+      expect(lines[0]).toContain("$1,000 – $2,000");
+      expect(lines[1]).toContain("$1,500");
+      expect(lines[2]).toContain("Within your estimate range");
+    });
+
+    it("generates correct lines for a single point", () => {
+      const lines = planVsActualPdfLines(1000, 1000, 1000);
+      expect(lines[0]).toContain("$1,000");
+      expect(lines[0]).not.toContain("–");
+    });
+
+    it("handles null bounds in PDF lines", () => {
+      const lines = planVsActualPdfLines(null, null, 0);
+      expect(lines[0]).toContain("—");
+    });
+
+    it("handles single bound in PDF lines", () => {
+      const lines = planVsActualPdfLines(1000, null, 1000);
+      expect(lines[0]).toContain("$1,000");
     });
   });
 });

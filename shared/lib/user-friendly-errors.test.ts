@@ -3,6 +3,8 @@ import {
   friendlyAuthError,
   friendlyDocumentUploadError,
   friendlyPostgrestMutationError,
+  friendlyProjectShareError,
+  getUserFriendlyErrorMessage,
 } from "./user-friendly-errors.ts";
 
 describe("user-friendly-errors shared logic", () => {
@@ -120,6 +122,91 @@ describe("user-friendly-errors shared logic", () => {
     it("handles null or non-object errors", () => {
       expect(friendlyPostgrestMutationError(null)).toContain(
         "Something went wrong",
+      );
+      expect(friendlyPostgrestMutationError("string error")).toContain(
+        "Something went wrong",
+      );
+    });
+
+    it("handles generic errors", () => {
+      expect(friendlyPostgrestMutationError({ message: "unknown" })).toContain(
+        "Try again in a moment",
+      );
+    });
+  });
+
+  describe("friendlyProjectShareError", () => {
+    it("handles network errors", () => {
+      expect(friendlyProjectShareError("Failed to fetch")).toContain(
+        "Check your internet connection",
+      );
+    });
+
+    it("handles permission/RLS errors", () => {
+      expect(friendlyProjectShareError("row-level security")).toContain(
+        "Sign in again if needed",
+      );
+      expect(friendlyProjectShareError(undefined, "42501")).toContain(
+        "Sign in again if needed",
+      );
+    });
+
+    it("handles generic share errors", () => {
+      expect(friendlyProjectShareError("unknown")).toContain(
+        "Try again in a moment",
+      );
+    });
+  });
+
+  describe("getUserFriendlyErrorMessage", () => {
+    it("returns strings directly", () => {
+      expect(getUserFriendlyErrorMessage("Direct message")).toBe(
+        "Direct message",
+      );
+    });
+
+    it("extracts message from error objects", () => {
+      expect(getUserFriendlyErrorMessage({ message: "Object message" })).toBe(
+        "Object message",
+      );
+    });
+
+    it("handles fallback cases", () => {
+      expect(getUserFriendlyErrorMessage(null)).toBe(
+        "An unexpected error occurred.",
+      );
+      expect(getUserFriendlyErrorMessage({})).toBe(
+        "An unexpected error occurred.",
+      );
+    });
+  });
+
+  describe("Edge cases in other functions", () => {
+    it("friendlyAuthError: handles empty or blank message", () => {
+      expect(friendlyAuthError("")).toBe(
+        "Something went wrong. Please try again.",
+      );
+      expect(friendlyAuthError("   ")).toBe(
+        "Something went wrong. Please try again.",
+      );
+    });
+
+    it("friendlyAuthError: handles signup disabled", () => {
+      expect(friendlyAuthError("signup_disabled")).toContain(
+        "New sign-ups aren’t available",
+      );
+    });
+
+    it("friendlyAuthError: handles invalid otp", () => {
+      expect(friendlyAuthError("invalid otp")).toContain("Request a new one");
+    });
+
+    it("friendlyDocumentUploadError: handles complex error objects", () => {
+      expect(friendlyDocumentUploadError({ message: "too large" })).toContain(
+        "too large",
+      );
+      expect(friendlyDocumentUploadError({ message: undefined })).toContain(
+        "That didn’t go through",
       );
     });
   });

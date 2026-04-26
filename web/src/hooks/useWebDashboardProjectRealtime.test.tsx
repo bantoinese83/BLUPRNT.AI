@@ -1,19 +1,23 @@
+/** @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useWebDashboardProjectRealtime } from "./useWebDashboardProjectRealtime";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as supabaseLib from "@/lib/supabase";
 
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    channel: vi.fn().mockReturnValue({
-      on: vi.fn().mockReturnThis(),
-      subscribe: vi.fn(),
-    }),
-    removeChannel: vi.fn(),
-  },
-  isSupabaseConfigured: vi.fn().mockReturnValue(true),
-}));
+vi.mock("@/lib/supabase", () => {
+  const mockChannel = {
+    on: vi.fn().mockReturnThis(),
+    subscribe: vi.fn().mockReturnThis(),
+  };
+  return {
+    supabase: {
+      channel: vi.fn().mockReturnValue(mockChannel),
+      removeChannel: vi.fn(),
+    },
+    isSupabaseConfigured: vi.fn().mockReturnValue(true),
+  };
+});
 
 describe("useWebDashboardProjectRealtime", () => {
   const queryClient = new QueryClient();
@@ -53,5 +57,34 @@ describe("useWebDashboardProjectRealtime", () => {
     unmount();
 
     expect(mockRemove).toHaveBeenCalled();
+  });
+
+  it("invalidates queries when a realtime event occurs", () => {
+    const callbacks: (() => void)[] = [];
+    const mockOn = vi
+      .fn()
+      .mockImplementation((_event: string, _filter: string, cb: () => void) => {
+        callbacks.push(cb);
+        return { on: mockOn, subscribe: vi.fn() };
+      });
+
+    vi.mocked(supabaseLib.supabase.channel).mockReturnValue({
+      on: mockOn,
+      subscribe: vi.fn(),
+    } as any);
+
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    renderHook(() => useWebDashboardProjectRealtime("project-123"), {
+      wrapper,
+    });
+
+    // We expect 3 subscriptions: projects, invoices, scope_items
+    expect(callbacks.length).toBe(3);
+
+    // Trigger each callback
+    callbacks.forEach((cb) => cb());
+
+    expect(invalidateSpy).toHaveBeenCalledTimes(3);
   });
 });

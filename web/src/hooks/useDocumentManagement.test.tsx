@@ -14,6 +14,7 @@ vi.mock("sonner", () => ({
   toast: {
     error: vi.fn(),
     success: vi.fn(),
+    warning: vi.fn(),
   },
 }));
 
@@ -158,6 +159,118 @@ describe("useDocumentManagement", () => {
     expect(toast.error).toHaveBeenCalledWith(
       expect.stringContaining("Budget Alert: This project is at 110%"),
       expect.any(Object),
+    );
+  });
+
+  it("shows budget nearing warning when isNearingBudget is true", async () => {
+    const mockInvoke = vi.mocked(supabaseLib.invokeFunction);
+    mockInvoke.mockResolvedValue({
+      data: {
+        invoice_id: "inv-123",
+        document_type: "invoice",
+        budget_health: {
+          isOverBudget: false,
+          isNearingBudget: true,
+          percentOfMax: 85,
+        },
+      },
+      error: null,
+    } as any);
+
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const file = new File(["test"], "receipt.jpg", { type: "image/jpeg" });
+    const files = { length: 1, 0: file, item: () => file } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(toast.warning).toHaveBeenCalledWith(
+      expect.stringContaining("Budget Note: You have used 85%"),
+      expect.any(Object),
+    );
+  });
+
+  it("handles file too large error", async () => {
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const largeFile = new File(["a".repeat(11 * 1024 * 1024)], "big.pdf", {
+      type: "application/pdf",
+    });
+    const files = { length: 1, 0: largeFile, item: () => largeFile } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("too large"),
+    );
+  });
+
+  it("handles unsupported format error", async () => {
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const badFile = new File(["test"], "doc.txt", { type: "text/plain" });
+    const files = { length: 1, 0: badFile, item: () => badFile } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("unsupported format"),
+    );
+  });
+
+  it("handles server error code for upgrade prompt", async () => {
+    const mockInvoke = vi.mocked(supabaseLib.invokeFunction);
+    mockInvoke.mockResolvedValue({
+      data: {
+        error: "Free tier limit reached",
+        error_code: "INVOICE_LIMIT_FREE_PROJECT",
+      },
+      error: null,
+    } as any);
+
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const file = new File(["test"], "receipt.jpg", { type: "image/jpeg" });
+    const files = { length: 1, 0: file, item: () => file } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(mockOnUpgradeClick).toHaveBeenCalledWith("invoice_limit");
+  });
+
+  it("handles unexpected exceptions during upload", async () => {
+    const mockInvoke = vi.mocked(supabaseLib.invokeFunction);
+    mockInvoke.mockRejectedValue(new Error("Network fail"));
+
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const file = new File(["test"], "receipt.jpg", { type: "image/jpeg" });
+    const files = { length: 1, 0: file, item: () => file } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("Unexpected issue"),
     );
   });
 });

@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+/** @vitest-environment jsdom */
+import "@testing-library/jest-dom/vitest";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { AwarenessProvider } from "./AwarenessProvider";
 import { useAwareness } from "./AwarenessContext";
 import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
@@ -47,6 +49,14 @@ describe("useAwareness", () => {
 });
 
 describe("AwarenessProvider", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
   it("provides optimal health when no project", () => {
     render(
       <AwarenessProvider

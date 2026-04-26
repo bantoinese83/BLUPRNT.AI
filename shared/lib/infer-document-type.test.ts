@@ -49,6 +49,44 @@ describe("inferDocumentTypeFromFilename", () => {
     expect(inferDocumentTypeFromFilename("building_permit_scan.pdf")).toBe(
       "permit",
     );
+    expect(inferDocumentTypeFromFilename("hoa_approval.pdf")).toBe("hoa");
+    expect(inferDocumentTypeFromFilename("certificate_of_insurance.pdf")).toBe(
+      "insurance",
+    );
+    expect(inferDocumentTypeFromFilename("appraisal_report.pdf")).toBe(
+      "appraisal",
+    );
+    expect(inferDocumentTypeFromFilename("maintenance-log.pdf")).toBe(
+      "maintenance",
+    );
+    expect(inferDocumentTypeFromFilename("warranty_card.pdf")).toBe("warranty");
+    expect(inferDocumentTypeFromFilename("user-manual.pdf")).toBe("manual");
+    expect(inferDocumentTypeFromFilename("hers_rating.pdf")).toBe("energy");
+    expect(inferDocumentTypeFromFilename("lead_paint_disclosure.pdf")).toBe(
+      "disclosure",
+    );
+    expect(inferDocumentTypeFromFilename("lien_waiver_release.pdf")).toBe(
+      "lien_waiver",
+    );
+    expect(inferDocumentTypeFromFilename("renovation_contract.pdf")).toBe(
+      "contract",
+    );
+  });
+
+  it("handles complex patterns and edge cases", () => {
+    expect(inferDocumentTypeFromFilename("home inspection report")).toBe(
+      "inspection",
+    );
+    expect(inferDocumentTypeFromFilename("permit for plan check")).toBe(
+      "permit",
+    );
+    expect(inferDocumentTypeFromFilename("maintenance log book")).toBe(
+      "maintenance",
+    );
+    expect(inferDocumentTypeFromFilename("receipt for payment")).toBe(
+      "receipt",
+    );
+    expect(inferDocumentTypeFromFilename("invoice_po_123")).toBe("invoice");
   });
 
   it("returns null when no pattern matches", () => {

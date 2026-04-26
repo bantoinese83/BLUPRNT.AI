@@ -1,3 +1,4 @@
+/** @vitest-environment jsdom */
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import confetti from "canvas-confetti";
 import { runViewportCelebration } from "./dashboard-celebration-confetti";

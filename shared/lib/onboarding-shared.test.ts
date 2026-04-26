@@ -6,6 +6,8 @@ import {
   phaseIndexForOnboardingPath,
   ONBOARDING_PHASE_LABELS,
   loadingScreenMessages,
+  estimateFallbackUserMessage,
+  FALLBACK_REASON_CLIENT_TYPE_BENCHMARK,
 } from "../constants/onboarding.ts";
 
 describe("onboarding shared", () => {
@@ -46,5 +48,26 @@ describe("onboarding shared", () => {
 
   it("keeps three phase labels in sync", () => {
     expect(ONBOARDING_PHASE_LABELS).toHaveLength(3);
+  });
+
+  describe("estimateFallbackUserMessage", () => {
+    it("returns null when not using fallback", () => {
+      expect(estimateFallbackUserMessage(false, null)).toBe(null);
+    });
+
+    it("returns benchmark message for client type reason", () => {
+      expect(
+        estimateFallbackUserMessage(
+          true,
+          FALLBACK_REASON_CLIENT_TYPE_BENCHMARK,
+        ),
+      ).toContain("broad benchmark");
+    });
+
+    it("returns generic fallback message for other reasons", () => {
+      expect(estimateFallbackUserMessage(true, "some_other_reason")).toContain(
+        "regional placeholder",
+      );
+    });
   });
 });

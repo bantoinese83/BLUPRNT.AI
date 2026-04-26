@@ -1,3 +1,4 @@
+/** @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getPublicSiteUrl, buildLandingJsonLd, LANDING_FAQ } from "./site-url";
 

@@ -1,3 +1,4 @@
+/** @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import posthog from "posthog-js";
 import { captureEvent, setAnalyticsEnabled, identifyUser } from "./posthog";

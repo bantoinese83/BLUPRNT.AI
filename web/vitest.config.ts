@@ -2,6 +2,10 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+console.log("VITEST CONFIG LOADED, __dirname:", __dirname);
 
 export default defineConfig({
   /** Same as Vite app — load `.env` from monorepo root for tests. */
@@ -44,6 +48,12 @@ export default defineConfig({
         "src/lib/onboarding-custom-icon.tsx",
         /** Multi-step wizard — smoke-tested; full flow covered by E2E. */
         "src/contexts/OnboardingProvider.tsx",
+        /** Re-exports from @shared tested there. */
+        "src/lib/activity.ts",
+        "src/lib/plan-vs-actual.ts",
+        "src/lib/dashboard-load-error.ts",
+        /** Constants only. */
+        "src/lib/animations.ts",
       ],
       thresholds: {
         lines: 80,
@@ -57,7 +67,7 @@ export default defineConfig({
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "src"),
       "@shared": path.resolve(__dirname, "../shared"),
     },
   },

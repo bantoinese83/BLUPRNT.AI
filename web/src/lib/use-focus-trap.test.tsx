@@ -1,3 +1,5 @@
+/** @vitest-environment jsdom */
+import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, renderHook } from "@testing-library/react";
 import { useRef, type ReactNode, type RefObject } from "react";

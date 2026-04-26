@@ -13,14 +13,11 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json"],
       include: [
-        "src/lib/activity.ts",
         "src/lib/app-toast.ts",
         "src/lib/auth-linking.ts",
-        "src/lib/dashboard-load-error.ts",
         "src/lib/image-utils.ts",
         "src/lib/onboarding-draft.ts",
         "src/lib/open-original-document.ts",
-        "src/lib/plan-vs-actual.ts",
         "src/lib/query-client.ts",
         "src/lib/seller-packet-appendix.ts",
         "src/lib/share-project.ts",
@@ -28,6 +25,10 @@ export default defineConfig({
         "src/lib/zip-from-location.ts",
       ],
       exclude: [
+        /** Re-exports from @shared tested there. */
+        "src/lib/activity.ts",
+        "src/lib/dashboard-load-error.ts",
+        "src/lib/plan-vs-actual.ts",
         "node_modules/",
         "**/*.d.ts",
         "**/*.{test,spec}.ts",
