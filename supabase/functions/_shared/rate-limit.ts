@@ -6,8 +6,8 @@
  * - `marketing` — stricter for public lead capture (default 10/hour)
  * - `ai` — chat / LLM endpoints (default 20/min)
  */
-import { Redis } from "npm:@upstash/redis@1.34.3";
-import { Ratelimit } from "npm:@upstash/ratelimit@2.0.5";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 export type RateLimitKind = "default" | "marketing" | "ai";
 

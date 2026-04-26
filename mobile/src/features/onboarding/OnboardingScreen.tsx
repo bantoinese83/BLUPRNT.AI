@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
@@ -314,6 +315,7 @@ export default function OnboardingScreen() {
           contentContainerStyle={onboardingStyles.stepScrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
         >
           <AnimatePresence exitBeforeEnter>
             <MotiView

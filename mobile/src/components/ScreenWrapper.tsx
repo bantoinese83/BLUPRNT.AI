@@ -26,6 +26,8 @@ interface Props {
   withLogo?: boolean;
   withTabBar?: boolean;
   withKeyboard?: boolean;
+  keyboardVerticalOffset?: number;
+  contentContainerStyle?: ViewStyle;
   /** When `withScroll` is true, attaches to the inner `ScrollView` (e.g. programmatic scroll). */
   scrollViewRef?: React.RefObject<ScrollView | null>;
 }
@@ -40,6 +42,8 @@ export function ScreenWrapper({
   withLogo = false,
   withTabBar = true,
   withKeyboard = false,
+  keyboardVerticalOffset = 0,
+  contentContainerStyle,
   scrollViewRef,
 }: Props) {
   const content = withScroll ? (
@@ -47,9 +51,11 @@ export function ScreenWrapper({
       ref={scrollViewRef}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
       contentContainerStyle={[
         styles.scrollContent,
         withTabBar && { paddingBottom: TAB_BAR_SCROLL_PADDING },
+        contentContainerStyle,
       ]}
       refreshControl={
         onRefresh ? (
@@ -72,6 +78,7 @@ export function ScreenWrapper({
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
+      keyboardVerticalOffset={keyboardVerticalOffset}
     >
       {content}
     </KeyboardAvoidingView>

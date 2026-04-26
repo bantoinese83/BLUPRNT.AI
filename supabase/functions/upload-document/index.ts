@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js@2.100.0/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { uploadInvoiceSchema as _uploadInvoiceSchema } from "../_shared/validation.ts";
@@ -18,7 +18,7 @@ import {
   extractInvoiceFromPdf,
   type ProjectScopeItem,
 } from "../_shared/ocr.ts";
-import { type SupabaseClient as _SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { type SupabaseClient as _SupabaseClient } from "@supabase/supabase-js";
 import {
   coerceLedgerDocumentType,
   inferDocumentTypeFromFilename,

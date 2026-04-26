@@ -3,13 +3,11 @@ import {
   StyleSheet,
   View,
   Text,
-  KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
   TouchableOpacity,
-  ScrollView,
   Pressable,
 } from "react-native";
 import { BlurView } from "expo-blur";
@@ -162,190 +160,180 @@ export default function RegisterScreen() {
   return (
     <ScreenWrapper
       withScroll
+      withKeyboard
       withTabBar={false}
       edges={["top", "bottom", "left", "right"]}
+      contentContainerStyle={styles.scrollContent}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            bounces={false}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.selectionAsync();
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/");
+              }
+            }}
+            style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
           >
-            <View style={styles.container}>
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  if (router.canGoBack()) {
-                    router.back();
-                  } else {
-                    router.replace("/");
-                  }
-                }}
-                style={styles.backButton}
-                accessibilityRole="button"
-                accessibilityLabel="Back"
-              >
-                <BlurView
-                  intensity={20}
-                  tint="light"
-                  style={StyleSheet.absoluteFill}
-                />
-                <ChevronLeft size={24} color={Theme.colors.text.primary} />
-              </TouchableOpacity>
+            <BlurView
+              intensity={20}
+              tint="light"
+              style={StyleSheet.absoluteFill}
+            />
+            <ChevronLeft size={24} color={Theme.colors.text.primary} />
+          </TouchableOpacity>
 
-              <MotiView
-                from={{ opacity: 0, scale: 0.9, translateY: 20 }}
-                animate={{ opacity: 1, scale: 1, translateY: 0 }}
-                transition={{ type: "timing", duration: 800 }}
-                style={styles.header}
-              >
-                <Text style={styles.title}>Create account</Text>
-                <Text style={styles.subtitle}>Join BLUPRNT today</Text>
-              </MotiView>
+          <MotiView
+            from={{ opacity: 0, scale: 0.9, translateY: 20 }}
+            animate={{ opacity: 1, scale: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 800 }}
+            style={styles.header}
+          >
+            <Text style={styles.title}>Create account</Text>
+            <Text style={styles.subtitle}>Join BLUPRNT today</Text>
+          </MotiView>
 
-              <GlassCard intensity={10} style={styles.formCard}>
-                <View style={styles.form}>
-                  <View style={styles.policyRow}>
-                    <Pressable
-                      onPress={() => {
-                        Haptics.selectionAsync();
-                        setAcceptedPolicies((v) => !v);
-                      }}
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: acceptedPolicies }}
-                      hitSlop={8}
-                    >
-                      <View
-                        style={[
-                          styles.policyCheck,
-                          acceptedPolicies && styles.policyCheckOn,
-                        ]}
-                      >
-                        {acceptedPolicies ? (
-                          <Check size={14} color="#fff" strokeWidth={3} />
-                        ) : null}
-                      </View>
-                    </Pressable>
-                    <Text style={styles.policyText}>
-                      I agree to the{" "}
-                      <Text
-                        style={styles.policyLink}
-                        onPress={() => {
-                          Haptics.selectionAsync();
-                          router.push(WEB_APP_PATH_TERMS);
-                        }}
-                      >
-                        Terms
-                      </Text>{" "}
-                      and{" "}
-                      <Text
-                        style={styles.policyLink}
-                        onPress={() => {
-                          Haptics.selectionAsync();
-                          router.push(WEB_APP_PATH_PRIVACY);
-                        }}
-                      >
-                        Privacy Policy
-                      </Text>
-                      .
-                    </Text>
-                  </View>
-
-                  <TextField
-                    label="Full Name"
-                    value={name}
-                    onChangeText={(text) => {
-                      setName(text);
-                      if (errorMsg) setErrorMsg(null);
-                    }}
-                    placeholder="Enter your name"
-                    autoCapitalize="words"
-                  />
-
-                  <TextField
-                    label="Email address"
-                    value={email}
-                    onChangeText={(text) => {
-                      setEmail(text);
-                      if (errorMsg) setErrorMsg(null);
-                    }}
-                    placeholder="Enter your email"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-
-                  <TextField
-                    label="Password"
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      if (errorMsg) setErrorMsg(null);
-                    }}
-                    placeholder="Create a password"
-                    secureTextEntry
-                  />
-
-                  {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-
-                  <Button
-                    title="Sign Up"
-                    onPress={handleRegister}
-                    loading={loading}
-                    style={{ marginTop: 8 }}
-                  />
-
-                  <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>or</Text>
-                    <View style={styles.dividerLine} />
-                  </View>
-
-                  <Button
-                    title="Continue with Google"
-                    onPress={handleGoogleLogin}
-                    loading={googleLoading}
-                    variant="outline"
-                    icon={<GoogleIcon />}
-                    style={{ marginTop: 0 }}
-                  />
-
-                  <AppleSignIn
-                    policyAccepted={acceptedPolicies}
-                    busy={googleLoading}
-                    onStart={() => setGoogleLoading(true)}
-                    onSuccess={() => setGoogleLoading(false)}
-                    onError={(err) => {
-                      setGoogleLoading(false);
-                      Alert.alert(
-                        "Apple sign-in",
-                        friendlyAuthError(err.message || ""),
-                      );
-                    }}
-                  />
-                </View>
-              </GlassCard>
-
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account? </Text>
-                <TouchableOpacity
+          <GlassCard intensity={10} style={styles.formCard}>
+            <View style={styles.form}>
+              <View style={styles.policyRow}>
+                <Pressable
                   onPress={() => {
                     Haptics.selectionAsync();
-                    router.push("/(auth)/login");
+                    setAcceptedPolicies((v) => !v);
                   }}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: acceptedPolicies }}
+                  hitSlop={8}
                 >
-                  <Text style={styles.linkText}>Sign In</Text>
-                </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.policyCheck,
+                      acceptedPolicies && styles.policyCheckOn,
+                    ]}
+                  >
+                    {acceptedPolicies ? (
+                      <Check size={14} color="#fff" strokeWidth={3} />
+                    ) : null}
+                  </View>
+                </Pressable>
+                <Text style={styles.policyText}>
+                  I agree to the{" "}
+                  <Text
+                    style={styles.policyLink}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      router.push(WEB_APP_PATH_TERMS);
+                    }}
+                  >
+                    Terms
+                  </Text>{" "}
+                  and{" "}
+                  <Text
+                    style={styles.policyLink}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      router.push(WEB_APP_PATH_PRIVACY);
+                    }}
+                  >
+                    Privacy Policy
+                  </Text>
+                  .
+                </Text>
               </View>
+
+              <TextField
+                label="Full Name"
+                value={name}
+                onChangeText={(text) => {
+                  setName(text);
+                  if (errorMsg) setErrorMsg(null);
+                }}
+                placeholder="Enter your name"
+                autoCapitalize="words"
+              />
+
+              <TextField
+                label="Email address"
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errorMsg) setErrorMsg(null);
+                }}
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <TextField
+                label="Password"
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errorMsg) setErrorMsg(null);
+                }}
+                placeholder="Create a password"
+                secureTextEntry
+              />
+
+              {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+
+              <Button
+                title="Sign Up"
+                onPress={handleRegister}
+                loading={loading}
+                style={{ marginTop: 8 }}
+              />
+
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <Button
+                title="Continue with Google"
+                onPress={handleGoogleLogin}
+                loading={googleLoading}
+                variant="outline"
+                icon={<GoogleIcon />}
+                style={{ marginTop: 0 }}
+              />
+
+              <AppleSignIn
+                policyAccepted={acceptedPolicies}
+                busy={googleLoading}
+                onStart={() => setGoogleLoading(true)}
+                onSuccess={() => setGoogleLoading(false)}
+                onError={(err) => {
+                  setGoogleLoading(false);
+                  Alert.alert(
+                    "Apple sign-in",
+                    friendlyAuthError(err.message || ""),
+                  );
+                }}
+              />
             </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+          </GlassCard>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.selectionAsync();
+                router.push("/(auth)/login");
+              }}
+            >
+              <Text style={styles.linkText}>Sign In</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     </ScreenWrapper>
   );
 }

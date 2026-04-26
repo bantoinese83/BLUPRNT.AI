@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js@2.100.0/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { assertProjectOwner, getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
