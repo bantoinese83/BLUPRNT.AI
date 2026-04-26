@@ -54,8 +54,29 @@ export const handler = async (req: Request) => {
     }
 
     const project = projectRes.data;
-    const scope = (scopeRes.data || []).slice(0, 100);
-    const invoices = (invoiceRes.data || []).slice(0, 100);
+    const scope = (scopeRes.data || []).slice(0, 50); // Keep scope manageable
+    const invoices = (invoiceRes.data || []).slice(0, 20); // Top recent invoices
+
+    // 1. Semantic Retrieval for additional context
+    let semanticDocsContext = "";
+    try {
+      const queryEmbedding = await generateEmbedding(query);
+      if (queryEmbedding) {
+        const { data: matchedDocs } = await admin.rpc("match_document_embeddings", {
+          query_embedding: queryEmbedding,
+          match_threshold: 0.5,
+          match_count: 5,
+          p_project_id: projectId,
+        });
+
+        if (matchedDocs && matchedDocs.length > 0) {
+          semanticDocsContext = "\nRelevant Documents found via Semantic Search:\n" +
+            (matchedDocs as any[]).map((d) => `- ${d.content}`).join("\n");
+        }
+      }
+    } catch (semErr) {
+      console.warn("[chat-with-project] Semantic search failed:", semErr);
+    }
 
     const contextStr = `
       Project: ${project.name}
@@ -76,7 +97,7 @@ export const handler = async (req: Request) => {
       ).join("\n")
     }
       
-      Current Invoices:
+      Recent Invoices:
       ${
       (invoices as Array<
         { vendor_name: string; total: number; payment_status: string }
@@ -84,6 +105,7 @@ export const handler = async (req: Request) => {
         `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`
       ).join("\n")
     }
+    ${semanticDocsContext}
     `;
 
     const responseSchema = {
@@ -131,40 +153,6 @@ export const handler = async (req: Request) => {
       parts: [{ text: query }],
       systemInstruction,
       responseSchema: responseSchema as any,
-      temperature: 0.7,
-    });
-
-    const parsedResponse = result?.data || JSON.parse(result?.text || '{"reply": "I couldn’t process that.", "actions": []}');
-
-    return jsonResponse(
-      {
-        reply: parsedResponse.reply,
-        actions: parsedResponse.actions || [],
-      },
-      200,
-      req,
-    );
-  } catch (e: unknown) {
-    const error = e as Error;
-    console.error(error);
-    if (error.message === "not_found") {
-      return jsonResponse({ error: "Project not found" }, 404, req);
-    }
-    if (error.message === "forbidden") {
-      return jsonResponse({ error: "Access denied" }, 403, req);
-    }
-    return jsonResponse(
-      { error: error.message || "Internal server error" },
-      500,
-      req,
-    );
-  }
-};
-
-if (import.meta.main) {
-  Deno.serve(handler);
-}
-ponseSchema as any,
       temperature: 0.7,
     });
 

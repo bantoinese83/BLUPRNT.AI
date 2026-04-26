@@ -63,7 +63,7 @@ function resolveAccessControlAllowOrigin(req: Request): string | null {
 
 const BASE_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-bluprnt-api-version",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
   "Access-Control-Max-Age": "86400",
 };

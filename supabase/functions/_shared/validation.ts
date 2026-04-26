@@ -1,4 +1,4 @@
-import { z } from "https://esm.sh/zod@3.23.8";
+import { z } from "zod";
 import { 
   photoToScopeSchema as _p, 
   uploadInvoiceSchema as _u, 
