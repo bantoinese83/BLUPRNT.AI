@@ -11,13 +11,13 @@ appId: ai.bluprnt.mobile
 - tapOn: { id: "onboarding-continue" }
 - tapOn: "ZIP code"
 - inputText: "90210"
-- tapOn: "Where is this home?"
+- tapOn: "Add your project location"
 - tapOn: { id: "onboarding-continue" }
 - tapOn: { text: "Just planning.*" }
 - tapOn: { id: "onboarding-continue" }
 - tapOn: "Or describe the project here…"
 - inputText: "Profile Test"
-- tapOn: "Vision-Match your room"
+- tapOn: "Add any photos and details"
 - tapOn: { id: "onboarding-continue" }
 
 # Wait for analysis complete
@@ -64,5 +64,5 @@ appId: ai.bluprnt.mobile
 - tapOn:
     id: "signed-out-continue"
 - extendedWaitUntil:
-    visible: "Snap the room. Get the number."
+    visible: "Snap it. Get the number."
     timeout: 10000

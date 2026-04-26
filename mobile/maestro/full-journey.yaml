@@ -3,7 +3,7 @@ appId: ai.bluprnt.mobile
 - runFlow:
     file: common/launch-app.active.yaml
 - extendedWaitUntil:
-    visible: "Snap the room. Get the number."
+    visible: "Snap it. Get the number."
     timeout: 30000
 - tapOn: "Next"
 - tapOn: "Next"
@@ -11,16 +11,16 @@ appId: ai.bluprnt.mobile
 - tapOn: "Get Started"
 
 # Step 0: Project Type
-- assertVisible: "What are you working on?"
+- assertVisible: "What are you planning today?"
 - tapOn: "Kitchen"
 - tapOn:
     id: "onboarding-continue"
 
 # Step 1: Location
-- assertVisible: "Where is this home?"
+- assertVisible: "Add your project location"
 - tapOn: "ZIP code"
 - inputText: "90210"
-- tapOn: "Where is this home?" # Dismiss keyboard
+- tapOn: "Add your project location" # Dismiss keyboard
 - tapOn:
     id: "onboarding-continue"
 - extendedWaitUntil:
@@ -33,29 +33,28 @@ appId: ai.bluprnt.mobile
 - tapOn:
     id: "onboarding-continue"
 - extendedWaitUntil:
-    visible: "Vision-Match your room"
+    visible: "Add any photos and details"
     timeout: 10000
 
 # Step 3: Vision/Context
 - tapOn: "Or describe the project here…"
 - inputText: "Full remodel with quartz countertops and custom cabinets"
-- tapOn: "Vision-Match your room" # Dismiss keyboard
-- tapOn:
-    id: "onboarding-continue"
+- tapOn: "Add any photos and details" # Dismiss keyboard
+- tapOn: "Start build my bluprnt"
 - extendedWaitUntil:
-    visible: "Building your kitchen estimate..."
+    visible: "Building your BLUPRNT"
     timeout: 30000
 - extendedWaitUntil:
     visible: "Everything we see" 
     timeout: 60000
 
 # Step 5: Preview
-- assertVisible: "Estimate Summary"
-- assertVisible: "Materials Breakdown"
+- assertVisible: "Investment Range"
+- assertVisible: "View Breakdown"
 - tapOn:
     id: "onboarding-continue"
 
 # Step 6: Final
-- assertVisible: "Get ready to save"
+- assertVisible: "Save this project"
 - tapOn: "Already have an account? Sign In"
 - assertVisible: "Enter your email"

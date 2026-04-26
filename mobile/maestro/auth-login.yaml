@@ -5,7 +5,7 @@ appId: ai.bluprnt.mobile
 - runFlow:
     file: common/onboarding-skip.yaml
     when:
-      visible: "Snap the room. Get the number."
+      visible: "Snap it. Get the number."
 - tapOn: "Already have an account? Sign In"
 - inputText: ${USER_EMAIL}
 - tapOn: "Password"

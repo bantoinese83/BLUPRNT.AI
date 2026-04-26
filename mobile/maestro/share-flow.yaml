@@ -9,7 +9,7 @@ appId: ai.bluprnt.mobile
 - tapOn: "Next"
 - tapOn: "Next"
 - tapOn: "Get Started"
-- assertVisible: "What are you working on?"
+- assertVisible: "What are you planning today?"
 # Assuming user is already logged in or we bypass login for smoke
 - tapOn:
     id: "tab-home"

@@ -8,13 +8,13 @@ appId: ai.bluprnt.mobile
 - tapOn: { id: "onboarding-continue" }
 - tapOn: "ZIP code"
 - inputText: "90210"
-- tapOn: "Where is this home?"
+- tapOn: "Add your project location"
 - tapOn: { id: "onboarding-continue" }
 - tapOn: { text: "Just planning.*" }
 - tapOn: { id: "onboarding-continue" }
 - tapOn: "Or describe the project here…"
 - inputText: "Maestro Test Project"
-- tapOn: "Vision-Match your room"
+- tapOn: "Add any photos and details"
 - tapOn: { id: "onboarding-continue" }
 - extendedWaitUntil:
     visible: "Everything we see"

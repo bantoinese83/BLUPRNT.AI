@@ -15,7 +15,7 @@ appId: ai.bluprnt.mobile
 - extendedWaitUntil:
     visible: "Next"
     timeout: 90000
-- assertVisible: "Snap the room. Get the number."
+- assertVisible: "Snap it. Get the number."
 - tapOn: "Next"
 - waitForAnimationToEnd:
     timeout: 4000
@@ -28,7 +28,7 @@ appId: ai.bluprnt.mobile
 - tapOn: "Get Started"
 - waitForAnimationToEnd:
     timeout: 4000
-- assertVisible: "What are you working on?"
+- assertVisible: "What are you planning today?"
 - scrollUntilVisible:
     element:
       id: "onboarding-privacy-note"
