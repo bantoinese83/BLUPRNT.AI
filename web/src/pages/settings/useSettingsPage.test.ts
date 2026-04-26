@@ -81,7 +81,7 @@ describe("useSettingsPage", () => {
     const { result } = renderHook(() => useSettingsPage());
 
     expect(result.current.displayName).toBe("Test User");
-    expect(result.current.user?.id).toBe("user-1");
+    expect((result.current.user as any)?.id).toBe("user-1");
   });
 
   it("handles profile name update", async () => {
