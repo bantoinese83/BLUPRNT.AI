@@ -146,9 +146,13 @@ export function DocumentCard({
                     variant="secondary"
                     className="bg-slate-100 text-slate-700 capitalize text-[10px] font-black tracking-widest"
                   >
-                    {document.payment_status === "unpaid"
-                      ? "Unpaid"
-                      : document.payment_status}
+                    {document.payment_status === "unknown"
+                      ? document.document_type === "quote"
+                        ? "Pending Review"
+                        : "Processing"
+                      : document.payment_status === "unpaid"
+                        ? "Unpaid"
+                        : document.payment_status}
                   </Badge>
                 )}
               </div>

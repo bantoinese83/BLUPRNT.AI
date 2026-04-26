@@ -71,6 +71,7 @@ export function DocumentThumbnail({
   }
 
   const isImg = isImageFilename(filename);
+  const isPdf = filename?.toLowerCase().endsWith(".pdf");
 
   return (
     <div
@@ -88,11 +89,28 @@ export function DocumentThumbnail({
           onError={() => setError(true)}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-400">
-          {filename?.toLowerCase().endsWith(".pdf") ? (
-            <FileText className={size === "sm" ? "w-4 h-4" : "w-6 h-6"} />
+        <div
+          className={cn(
+            "w-full h-full flex flex-col items-center justify-center text-slate-400 gap-0.5",
+            isPdf ? "bg-rose-50/50" : "bg-slate-50",
+          )}
+        >
+          {isPdf ? (
+            <>
+              <FileText
+                className={cn(
+                  "text-rose-600/80",
+                  size === "sm" ? "w-5 h-5" : "w-7 h-7",
+                )}
+              />
+              {size !== "sm" && (
+                <span className="text-[10px] font-black text-rose-700/60 uppercase tracking-tighter">
+                  PDF
+                </span>
+              )}
+            </>
           ) : (
-            <ImageIcon className={size === "sm" ? "w-4 h-4" : "w-6 h-6"} />
+            <ImageIcon className={size === "sm" ? "w-5 h-5" : "w-7 h-7"} />
           )}
         </div>
       )}
