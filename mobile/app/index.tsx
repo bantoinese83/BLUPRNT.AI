@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  Platform,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
@@ -228,7 +227,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: Theme.spacing.margin,
-    paddingTop: Platform.OS === "ios" ? 20 : 40,
   },
   scroll: {
     flex: 1,

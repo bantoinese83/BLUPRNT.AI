@@ -127,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const extension = originalFilename.split(".").pop() || "bin";
-    const storagePath = `${userId}/${projectId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
+    const storagePath = `${projectId}/${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
 
     try {
       // 2. Upload to Storage

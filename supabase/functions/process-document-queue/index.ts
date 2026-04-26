@@ -48,7 +48,18 @@ const handler = async (req: Request): Promise<Response> => {
       .update({ status: "processing", attempts: queueItem.attempts + 1, updated_at: new Date().toISOString() })
       .eq("id", queue_id);
 
-    // 3. Download file from storage
+    // 3. Check file size before download to prevent OOM
+    const { data: metadata, error: metaErr } = await admin.storage
+      .from("project-documents")
+      .getMetadata(queueItem.file_path);
+
+    if (metaErr) {
+      console.warn("[process-document-queue] Metadata check failed:", metaErr.message);
+    } else if (metadata && metadata.size > 15 * 1024 * 1024) {
+      throw new Error(`File is too large to process (${(metadata.size / 1024 / 1024).toFixed(1)}MB). Please upload a smaller file (max 15MB).`);
+    }
+
+    // 4. Download file from storage
     const { data: fileData, error: downloadErr } = await admin.storage
       .from("project-documents")
       .download(queueItem.file_path);

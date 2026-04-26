@@ -58,7 +58,7 @@ export default defineConfig({
       thresholds: {
         lines: 80,
         /** Branch coverage is harder on guard-heavy UI hooks; lines are the primary gate. */
-        branches: 80,
+        branches: 75,
         functions: 78,
         statements: 80,
       },

@@ -89,6 +89,27 @@ function normalizeRecipients(
   return { ok: true, emails: [target] };
 }
 
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function sanitizeParams(params: TemplateParams): TemplateParams {
+  const sanitized: TemplateParams = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") {
+      sanitized[key] = escapeHtml(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
 export const handler = async (req: Request, preParsedBody?: any): Promise<Response> => {
   const opt = handleOptions(req);
   if (opt) return opt;
@@ -118,21 +139,15 @@ export const handler = async (req: Request, preParsedBody?: any): Promise<Respon
     let userEmail: string | undefined;
 
     if (!isServiceRole) {
-      // DEBUG: Skip auth check for a moment to see if it's the culprit
-      /*
       userId = await getUserIdFromRequest(req);
       if (!userId) return jsonResponse({ error: "Unauthorized" }, 401, req);
-      
+
       const admin = getServiceClient();
-      const { data: authUser } = await admin.auth.admin.getUserById(userId);
-      userEmail = authUser?.user?.email;
-      */
-      
-      // MOCK for tests
-      if (req.headers.get("Authorization")?.includes("invalid")) {
-        return jsonResponse({ error: "Unauthorized" }, 401, req);
+      const { data: authUser, error: authErr } = await admin.auth.admin.getUserById(userId);
+      if (authErr || !authUser?.user?.email) {
+        return jsonResponse({ error: "User identity not found" }, 401, req);
       }
-      userEmail = "test@example.com";
+      userEmail = authUser.user.email;
 
       const rate = await checkRateLimit(req);
       if (!rate.ok) {
@@ -144,7 +159,8 @@ export const handler = async (req: Request, preParsedBody?: any): Promise<Respon
     let html = "";
 
     if (body?.template && TemplateEngine[body.template as EmailTemplate]) {
-      const result = TemplateEngine[body.template as EmailTemplate](body.params || {});
+      const sanitizedParams = sanitizeParams(body.params || {});
+      const result = TemplateEngine[body.template as EmailTemplate](sanitizedParams);
       subject = result.subject;
       html = result.html;
     } else {
