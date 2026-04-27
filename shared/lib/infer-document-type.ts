@@ -120,7 +120,7 @@ export function inferDocumentTypeFromFilename(
     return "energy";
   }
   if (
-    /\b(insurance|coi|certificate of insurance|policy dec|claim|loss report|acord|general liability|workers comp)\b/.test(
+    /\b(insurance|coi|certificate of insurance|policy dec|policy|declaration|claim|loss report|acord|general liability|workers comp)\b/.test(
       compact,
     )
   ) {

@@ -82,6 +82,27 @@ describe("inferDocumentTypeFromFilename", () => {
     expect(inferDocumentTypeFromFilename("renovation_contract.pdf")).toBe(
       "contract",
     );
+    expect(inferDocumentTypeFromFilename("HOA Approval Letter.pdf")).toBe(
+      "hoa",
+    );
+    expect(inferDocumentTypeFromFilename("ACME Association ARC.pdf")).toBe(
+      "hoa",
+    );
+    expect(inferDocumentTypeFromFilename("COI-Kitchen-Specialists.pdf")).toBe(
+      "insurance",
+    );
+    expect(inferDocumentTypeFromFilename("policy declaration page.pdf")).toBe(
+      "insurance",
+    );
+    expect(inferDocumentTypeFromFilename("Energy Star Certificate.pdf")).toBe(
+      "energy",
+    );
+    expect(inferDocumentTypeFromFilename("HERS-Rating-Report.pdf")).toBe(
+      "energy",
+    );
+    expect(
+      inferDocumentTypeFromFilename("unconditional-waiver-and-release.pdf"),
+    ).toBe("lien_waiver");
   });
 
   it("handles complex patterns and edge cases", () => {
