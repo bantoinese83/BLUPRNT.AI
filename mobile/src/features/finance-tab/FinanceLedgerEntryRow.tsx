@@ -1,4 +1,4 @@
-import React, { createElement, useRef } from "react";
+import React, { useRef } from "react";
 import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";

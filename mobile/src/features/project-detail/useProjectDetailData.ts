@@ -191,8 +191,10 @@ export function useProjectDetailData() {
   }, [project]);
 
   // Hook 1: Polling
-  const { stopPolling } = useProjectPolling({
+  useProjectPolling({
     id,
+    loading,
+    project,
     scopeCount: scope.length,
     setScope,
     setScopeLoadWarning,
@@ -206,9 +208,6 @@ export function useProjectDetailData() {
     id,
     scope,
     setScope,
-    load: () => {
-      /* could refresh everything if needed */
-    },
   });
 
   // Hook 3: Export
@@ -278,9 +277,8 @@ export function useProjectDetailData() {
 
     return () => {
       cancelled = true;
-      stopPolling();
     };
-  }, [id, ingestFetchResults, stopPolling]);
+  }, [id, ingestFetchResults]);
 
   return {
     id,

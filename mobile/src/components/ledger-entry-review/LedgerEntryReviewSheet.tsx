@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
+  StyleSheet,
 } from "react-native";
 import {
   X,

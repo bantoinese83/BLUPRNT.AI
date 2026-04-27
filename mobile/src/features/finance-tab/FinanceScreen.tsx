@@ -368,16 +368,16 @@ export default function FinanceScreen() {
               {ledgerEntries.length === 0 ? (
                 <EmptyState
                   icon={Receipt}
-                  title="Nothing in your vault yet"
-                  description="Add invoices, quotes, or receipts—they all show up here as your project record."
-                  actionTitle="Add to vault"
+                  title="No documents yet"
+                  description="Add invoices, quotes, or other records—they all show up here as your permanent project record."
+                  actionTitle="Add to ledger"
                   onAction={openLedgerDocumentCapture}
                 />
               ) : (
                 <EmptyState
                   icon={Receipt}
                   title="No documents match this filter"
-                  description="Switch to “All” to see every invoice, or add a document in this category."
+                  description="Switch to “All” to see every record, or add a document in this category."
                   actionTitle="Show all"
                   onAction={() => setFilter("all")}
                 />
