@@ -94,7 +94,7 @@ export const handler = async (req: Request) => {
       .from("project-documents")
       .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SEC, {
         transform: width || height
-          ? { width, height, resize: resize || "contain", format: "webp" }
+          ? { width, height, resize: resize || "contain" }
           : undefined,
       });
 

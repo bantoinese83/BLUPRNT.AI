@@ -51,9 +51,13 @@ function bufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-const handler = async (req: Request): Promise<Response> => {
+export const handler = async (req: Request): Promise<Response> => {
   const corsHeaders = handleOptions(req);
   if (corsHeaders) return corsHeaders;
+
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405, req);
+  }
 
   try {
     const userId = await getUserIdFromRequest(req);
