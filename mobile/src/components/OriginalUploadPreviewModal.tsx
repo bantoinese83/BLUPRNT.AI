@@ -9,6 +9,7 @@ import {
   BackHandler,
   Linking,
   useWindowDimensions,
+  Platform,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { Image } from "expo-image";
@@ -181,9 +182,17 @@ export function OriginalUploadPreviewModal({
 
             {!isImageFilename(filename) && !webBroken ? (
               <WebView
-                source={{ uri: signedUrl }}
+                source={{
+                  uri:
+                    Platform.OS === "android" &&
+                    filename?.toLowerCase().endsWith(".pdf")
+                      ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(signedUrl)}`
+                      : signedUrl,
+                }}
                 style={styles.web}
                 startInLoadingState
+                originWhitelist={["*"]}
+                scalesPageToFit
                 renderLoading={() => (
                   <View style={styles.webLoading}>
                     <ActivityIndicator

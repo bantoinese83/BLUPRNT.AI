@@ -14,12 +14,14 @@ interface DocumentThumbnailProps {
   ledgerEntryId: string;
   size?: number;
   style?: import("react-native").StyleProp<import("react-native").ViewStyle>;
+  fileType?: string | null;
 }
 
 export function DocumentThumbnail({
   ledgerEntryId,
   size = 44,
   style,
+  fileType,
 }: DocumentThumbnailProps) {
   const { data, isLoading, isError } = useDocumentSignedUrl(
     supabase,
@@ -33,8 +35,13 @@ export function DocumentThumbnail({
 
   const url = data?.signedUrl;
   const filename = data?.filename;
-  const isImg = isImageFilename(filename);
-  const isPdf = isPdfFilename(filename);
+
+  // Use provided fileType or infer from filename
+  const isPdf =
+    fileType === "pdf" ||
+    isPdfFilename(filename || (fileType?.endsWith(".pdf") ? "f.pdf" : ""));
+  const isImg =
+    !isPdf && (isImageFilename(filename) || (!filename && fileType !== "pdf"));
 
   return (
     <View
@@ -44,9 +51,7 @@ export function DocumentThumbnail({
         style,
       ]}
     >
-      {isLoading ? (
-        <ActivityIndicator size="small" color={Theme.colors.brand.primary} />
-      ) : isImg && url && !isError ? (
+      {isImg && url && !isError ? (
         <Image
           source={{ uri: url }}
           style={StyleSheet.absoluteFill}
@@ -68,6 +73,20 @@ export function DocumentThumbnail({
           ) : (
             <ImageIcon size={size * 0.45} color={Theme.colors.text.muted} />
           )}
+        </View>
+      )}
+      {isLoading && (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: "rgba(255,255,255,0.4)",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          ]}
+        >
+          <ActivityIndicator size="small" color={Theme.colors.brand.primary} />
         </View>
       )}
     </View>

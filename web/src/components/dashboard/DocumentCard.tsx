@@ -61,6 +61,7 @@ export function DocumentCard({
           <CardContent className="p-4 flex items-start space-x-4">
             <DocumentThumbnail
               ledgerEntryId={document.id}
+              fileType={document.document_type}
               size="sm"
               className="mt-0.5"
             />

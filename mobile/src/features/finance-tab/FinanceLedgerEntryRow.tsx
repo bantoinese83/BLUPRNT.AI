@@ -5,12 +5,12 @@ import * as Haptics from "expo-haptics";
 import { Trash2, Clock, Lock } from "lucide-react-native";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { DocumentThumbnail } from "@/components/DocumentThumbnail";
 import { Theme } from "@/constants/Theme";
 import { money, getWarrantyStatus } from "@shared/lib/formatters";
 import type { LedgerEntryRow } from "@shared/types/database";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
-import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
 
 type FinanceLedgerEntryRowProps = {
   inv: LedgerEntryRow;
@@ -92,15 +92,12 @@ export function FinanceLedgerEntryRow({
           <GlassCard intensity={8} style={styles.invoiceCard}>
             <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
               <View style={styles.invoiceMain}>
-                <View style={styles.invoiceIcon}>
-                  {createElement(
-                    rowIconForLedgerDocumentType(inv.document_type),
-                    {
-                      size: 18,
-                      color: Theme.colors.text.muted,
-                    },
-                  )}
-                </View>
+                <DocumentThumbnail
+                  ledgerEntryId={inv.id}
+                  size={44}
+                  fileType={inv.document_type}
+                  style={{ marginRight: 12 }}
+                />
                 <View style={styles.invoiceText}>
                   <Text
                     style={styles.vendorName}
