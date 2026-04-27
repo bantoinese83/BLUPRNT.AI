@@ -11,9 +11,9 @@ import {
 } from "@/components/icons/PlanMarks";
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 
-const ARCHITECT_INVOICE_LIMIT = 10;
+const ARCHITECT_LEDGER_LIMIT = 10;
 
-export type UpgradeOpenReason = "general" | "invoice_limit" | "export";
+export type UpgradeOpenReason = "general" | "ledger_limit" | "export";
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -136,7 +136,7 @@ export function UpgradeModal({
             {checkoutError}
           </p>
         )}
-        {openReason === "invoice_limit" && (
+        {openReason === "ledger_limit" && (
           <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
             Only <strong>vendor invoices</strong> and{" "}
             <strong>store receipts</strong> count toward this cap. Quotes,
@@ -152,10 +152,10 @@ export function UpgradeModal({
           </p>
         )}
 
-        {openReason === "invoice_limit" && isArchitect && (
+        {openReason === "ledger_limit" && isArchitect && (
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             You&apos;ve used your{" "}
-            <strong>{ARCHITECT_INVOICE_LIMIT} bill or receipt uploads</strong>{" "}
+            <strong>{ARCHITECT_LEDGER_LIMIT} bill or receipt uploads</strong>{" "}
             for this billing period. Your limit will reset when your
             subscription renews.{" "}
             <span className="text-slate-600">
@@ -163,7 +163,7 @@ export function UpgradeModal({
             </span>
           </p>
         )}
-        {openReason === "invoice_limit" && !isArchitect && !hasProjectPass && (
+        {openReason === "ledger_limit" && !isArchitect && !hasProjectPass && (
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             You&apos;ve used all{" "}
             <strong>{FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt</strong>{" "}
@@ -243,7 +243,7 @@ export function UpgradeModal({
               <ul className="space-y-3">
                 {[
                   "Expert AI Insights & Project Strategy",
-                  `Up to ${ARCHITECT_INVOICE_LIMIT} invoice uploads per billing period, total across all projects`,
+                  `Up to ${ARCHITECT_LEDGER_LIMIT} ledger record uploads per billing period, total across all projects`,
                   "Track up to 2 active projects",
                   "Cloud-backed Seller Packet PDF",
                 ].map((item, i) => (
@@ -299,7 +299,7 @@ export function UpgradeModal({
               <ul className="space-y-3">
                 {[
                   "6 months of Architect features",
-                  "Unlimited invoice uploads for this project while your pass is active",
+                  "Unlimited ledger record uploads for this project while your pass is active",
                   "No subscription – one-time payment",
                   "Perfect for one big remodel",
                 ].map((item, i) => (

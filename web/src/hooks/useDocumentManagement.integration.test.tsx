@@ -125,6 +125,6 @@ describe("useDocumentManagement Integration", () => {
       await result.current.handleUploadFile(files);
     });
 
-    expect(mockOnUpgradeClick).toHaveBeenCalledWith("invoice_limit");
+    expect(mockOnUpgradeClick).toHaveBeenCalledWith("ledger_limit");
   });
 });

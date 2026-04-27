@@ -33,7 +33,7 @@ export function AwarenessProvider({
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<
-    "export" | "invoice_limit" | "general"
+    "export" | "ledger_limit" | "general"
   >("general");
 
   const awarenessData = useMemo(() => {

@@ -30,7 +30,7 @@ import { useUpgradeActions } from "./upgrade/useUpgradeActions";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  reason?: "general" | "invoice_limit" | "export";
+  reason?: "general" | "ledger_limit" | "export";
   /** When true, monthly (Architect) is already active — align with web paywall. */
   isArchitect?: boolean;
   hasProjectPass?: boolean;

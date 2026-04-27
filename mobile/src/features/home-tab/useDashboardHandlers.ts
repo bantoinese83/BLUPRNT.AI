@@ -79,7 +79,7 @@ export function useDashboardHandlers({
     if (scopeItems.length === 0 && ledgerEntries.length === 0) {
       Alert.alert(
         "Nothing to export yet",
-        "Add a scope item or upload an invoice, then try Export Packet again.",
+        "Add a scope item or upload a document, then try Export Packet again.",
       );
       return;
     }
@@ -128,7 +128,7 @@ export function useDashboardHandlers({
           files,
           successToastMessage: "Document added — your dashboard is updated.",
           onLedgerEntryLimitUpgrade: () => {
-            setUpgradeReason("invoice_limit");
+            setUpgradeReason("ledger_limit");
             setShowUpgrade(true);
           },
           refreshProjectData: load,
@@ -169,7 +169,7 @@ export function useDashboardHandlers({
         hasProjectPass,
       )
     ) {
-      setUpgradeReason("invoice_limit");
+      setUpgradeReason("ledger_limit");
       setShowUpgrade(true);
       return;
     }

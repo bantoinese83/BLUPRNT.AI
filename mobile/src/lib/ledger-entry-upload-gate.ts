@@ -10,8 +10,8 @@ export function countLedgerEntryDocuments(entries: LedgerEntryRow[]): number {
 }
 
 /**
- * Free tier allows a small number of invoice documents per project before upgrade.
- * Returns true when the user must upgrade before adding another invoice-class doc.
+ * Free tier allows a small number of ledger records (bills/receipts) per project before upgrade.
+ * Returns true when the user must upgrade before adding another ledger-class doc.
  */
 export function isFreeTierLedgerEntryLimitReached(
   entries: LedgerEntryRow[],

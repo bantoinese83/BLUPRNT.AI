@@ -149,7 +149,7 @@ export function useDashboardSections({
         onUploaded={load}
         onUpgradeClick={(reason) => {
           setUpgradeReason(
-            reason === "invoice_limit" ? "invoice_limit" : "general",
+            reason === "ledger_limit" ? "ledger_limit" : "general",
           );
           setShowUpgrade(true);
         }}

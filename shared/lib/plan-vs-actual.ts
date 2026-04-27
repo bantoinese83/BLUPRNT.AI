@@ -150,7 +150,7 @@ export function planVsActualPdfLines(
 
   return [
     `Estimated range (lifecycle): ${estimateRangeLabel(estimatedMin, estimatedMax)}`,
-    `Documented capital (invoices, quotes & receipts): ${money(capitalTotal)}`,
+    `Documented capital (ledger records): ${money(capitalTotal)}`,
     `Summary: ${narrative.headline}`,
     narrative.body,
     "Note: Documented amounts reflect files you uploaded; they may not include every cash expense.",

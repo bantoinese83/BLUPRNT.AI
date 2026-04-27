@@ -6,11 +6,11 @@ describe("extractUploadFailureFromInvokeResult", () => {
     const r = extractUploadFailureFromInvokeResult(
       {
         error: "Upload limit reached. Upgrade for more.",
-        error_code: "INVOICE_LIMIT_FREE_PROJECT",
+        error_code: "LEDGER_LIMIT_FREE_PROJECT",
       },
       null,
     );
-    expect(r?.errorCode).toBe("INVOICE_LIMIT_FREE_PROJECT");
+    expect(r?.errorCode).toBe("LEDGER_LIMIT_FREE_PROJECT");
     expect(r?.message).toContain("limit");
   });
 

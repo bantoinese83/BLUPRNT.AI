@@ -23,7 +23,7 @@ interface UseDocumentManagementProps {
   projectId: string;
   documents: LedgerEntryRow[];
   onUploaded: (id?: string) => void;
-  onUpgradeClick: (reason?: "invoice_limit") => void;
+  onUpgradeClick: (reason?: "ledger_limit") => void;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
 }
@@ -142,7 +142,7 @@ export function useDocumentManagement({
     const fileArray = Array.from(files);
 
     if (blockDocumentOnlyUpload) {
-      onUpgradeClick("invoice_limit");
+      onUpgradeClick("ledger_limit");
       return;
     }
 
@@ -210,7 +210,7 @@ export function useDocumentManagement({
               failure.message,
             )
           ) {
-            onUpgradeClick("invoice_limit");
+            onUpgradeClick("ledger_limit");
             break; // Stop batch on limit
           }
           toast.error(`Failed to upload ${file.name}: ${failure.message}`);
@@ -300,7 +300,7 @@ export function useDocumentManagement({
 
   const openFileUpload = () => {
     if (blockDocumentOnlyUpload) {
-      onUpgradeClick("invoice_limit");
+      onUpgradeClick("ledger_limit");
       return;
     }
     inputRef.current?.click();

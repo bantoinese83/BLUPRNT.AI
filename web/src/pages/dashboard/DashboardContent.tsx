@@ -323,7 +323,7 @@ export function DashboardContent({
           <UpgradeBanner
             invoiceCount={countBillOrReceiptUploadsInProject(ledgerEntries)}
             onUpgradeClick={() => {
-              setUpgradeReason("invoice_limit");
+              setUpgradeReason("ledger_limit");
               setShowUpgrade(true);
             }}
             isArchitect={isArchitect}

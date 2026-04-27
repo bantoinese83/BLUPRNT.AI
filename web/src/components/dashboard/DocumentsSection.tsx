@@ -26,7 +26,7 @@ type DocumentsSectionProps = {
   projectId: string;
   documents: LedgerEntryRow[];
   onUploaded: (id?: string) => void;
-  onUpgradeClick: (reason?: "invoice_limit") => void;
+  onUpgradeClick: (reason?: "ledger_limit") => void;
   subscription?: UserSubscriptionRow | null;
   hasProjectPass?: boolean;
 };

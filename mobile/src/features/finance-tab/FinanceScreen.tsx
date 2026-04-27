@@ -159,7 +159,7 @@ export default function FinanceScreen() {
           files,
           successToastMessage: "Document added — your vault is updated.",
           onLedgerEntryLimitUpgrade: () => {
-            setUpgradeReason("invoice_limit");
+            setUpgradeReason("ledger_limit");
             setShowUpgrade(true);
           },
           refreshProjectData: load,
@@ -193,7 +193,7 @@ export default function FinanceScreen() {
         hasProjectPass,
       )
     ) {
-      setUpgradeReason("invoice_limit");
+      setUpgradeReason("ledger_limit");
       setShowUpgrade(true);
       return;
     }

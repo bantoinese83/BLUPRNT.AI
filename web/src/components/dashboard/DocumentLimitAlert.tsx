@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 interface DocumentLimitAlertProps {
   isArchitectAtGlobalLimit: boolean;
   freeLimit: number;
-  onUpgradeClick: (reason?: "invoice_limit") => void;
+  onUpgradeClick: (reason?: "ledger_limit") => void;
 }
 
 export function DocumentLimitAlert({
@@ -37,7 +37,7 @@ export function DocumentLimitAlert({
         size="sm"
         variant="primary"
         className="rounded-xl mt-1"
-        onClick={() => onUpgradeClick("invoice_limit")}
+        onClick={() => onUpgradeClick("ledger_limit")}
       >
         {isArchitectAtGlobalLimit ? "View subscription" : "See upgrade options"}
       </Button>

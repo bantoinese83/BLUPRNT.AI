@@ -20,7 +20,7 @@ export type EntitlementResult = {
   allowed: boolean;
   reason?: string;
   /** Stable code for clients (see shared/constants/upload-error-codes.ts). */
-  code?: "INVOICE_LIMIT_FREE_PROJECT" | "INVOICE_LIMIT_ARCHITECT_MONTH";
+  code?: "LEDGER_LIMIT_FREE_PROJECT" | "LEDGER_LIMIT_ARCHITECT_MONTH";
 };
 
 export async function checkLedgerUploadAllowed(
@@ -95,7 +95,7 @@ export async function checkLedgerUploadAllowed(
       allowed: false,
       reason:
         `Architect plan limit reached (${ARCHITECT_UPLOADS_PER_MONTH} global uploads). Renewals occur when your monthly subscription cycles.`,
-      code: "INVOICE_LIMIT_ARCHITECT_MONTH",
+      code: "LEDGER_LIMIT_ARCHITECT_MONTH",
     };
   }
 
@@ -103,7 +103,7 @@ export async function checkLedgerUploadAllowed(
     allowed: false,
     reason:
       `Free tier limit reached (${FREE_RECORD_LIMIT} bill or receipt uploads for this project). Upgrade for more uploads and premium features.`,
-    code: "INVOICE_LIMIT_FREE_PROJECT",
+    code: "LEDGER_LIMIT_FREE_PROJECT",
   };
 }
 

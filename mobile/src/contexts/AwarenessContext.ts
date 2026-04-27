@@ -20,8 +20,8 @@ export interface AwarenessState {
   setIsInsightsOpen: (isOpen: boolean) => void;
   showUpgrade: boolean;
   setShowUpgrade: (show: boolean) => void;
-  upgradeReason: "export" | "invoice_limit" | "general";
-  setUpgradeReason: (reason: "export" | "invoice_limit" | "general") => void;
+  upgradeReason: "export" | "ledger_limit" | "general";
+  setUpgradeReason: (reason: "export" | "ledger_limit" | "general") => void;
   activeProjectId: string | null;
   /** Mirrors dashboard snapshot — paywall should respect subscription state. */
   isArchitect: boolean;
