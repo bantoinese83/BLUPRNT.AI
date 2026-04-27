@@ -1,5 +1,9 @@
 import React, { useState, useMemo } from "react";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  LedgerEntryRow,
+} from "@shared/types/database";
 import {
   AwarenessContext,
   type SmartInsight,
@@ -11,7 +15,7 @@ export function AwarenessProvider({
   children,
   project,
   scopeItems,
-  invoices,
+  ledgerEntries,
   spendByCategory,
   isArchitect,
   hasProjectPass,
@@ -20,7 +24,7 @@ export function AwarenessProvider({
   children: React.ReactNode;
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   spendByCategory: Record<string, number>;
   isArchitect: boolean;
   hasProjectPass: boolean;
@@ -44,7 +48,7 @@ export function AwarenessProvider({
     const newInsights: SmartInsight[] = [];
     let health: "optimal" | "warning" | "critical" = "optimal";
 
-    // 1. Budget deviation — `spendByCategory` comes from invoice line items (see dashboard snapshot).
+    // 1. Budget deviation — `spendByCategory` comes from ledger entry line items (see dashboard snapshot).
     const categoryTotals = spendByCategory;
 
     scopeItems.forEach((item) => {
@@ -67,7 +71,9 @@ export function AwarenessProvider({
       (a, b) => a + b,
       0,
     );
-    const capitalDocumentedTotal = capitalImprovementTotal(invoices);
+    const capitalDocumentedTotal = capitalImprovementTotal(
+      ledgerEntries as any,
+    );
     const scopeMaxSum = scopeItems.reduce(
       (s, it) => s + (it.total_cost_max ?? 0),
       0,
@@ -82,7 +88,7 @@ export function AwarenessProvider({
         id: "budget-aggregate-over",
         type: "anomaly",
         title: "Spend above total scope",
-        description: `Documented capital (invoices and quotes) is about ${money(capitalDocumentedTotal)}, above the roughly ${money(scopeMaxSum)} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
+        description: `Documented capital (ledger records) is about ${money(capitalDocumentedTotal)}, above the roughly ${money(scopeMaxSum)} ceiling in your line-item scope. Add line items to documents for category-level tracking.`,
       });
       health = health === "optimal" ? "warning" : health;
     }
@@ -105,15 +111,15 @@ export function AwarenessProvider({
       (stage === "in_progress" ||
         stage === "collecting_quotes" ||
         stage === "construction") &&
-      invoices.length === 0
+      ledgerEntries.length === 0
     ) {
       newInsights.push({
         id: "no-invoices",
         type: "tip",
         title: "Track your spending",
         description:
-          "You’re past the planning stage but haven’t uploaded invoices yet. Add documents to stay on budget and sharpen these insights.",
-        actionLabel: "Upload Invoice",
+          "You’re past the planning stage but haven’t uploaded ledger records yet. Add documents to stay on budget and sharpen these insights.",
+        actionLabel: "Upload Document",
         actionKind: "execute",
       });
     }
@@ -142,7 +148,7 @@ export function AwarenessProvider({
       projectHealth: health,
       nextBestAction: nextAction,
     };
-  }, [project, scopeItems, invoices, spendByCategory]);
+  }, [project, scopeItems, ledgerEntries, spendByCategory]);
 
   const value = useMemo(
     () => ({

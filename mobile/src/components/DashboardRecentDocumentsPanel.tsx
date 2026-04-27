@@ -13,41 +13,41 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money, getWarrantyStatus } from "@shared/lib/formatters";
 import { formatRelativeTime } from "@/lib/activity";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 /** Matches Activity feed upload row (opaque tile + spine in gap). */
 
 type Props = {
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   estimatedMin: number | null;
   estimatedMax: number | null;
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
-  onOpenInvoice: (invoice: InvoiceRow) => void;
+  onOpenLedgerEntry: (entry: LedgerEntryRow) => void;
   onOpenLedger: () => void;
   onAddDocument: () => void;
 };
 
 export function DashboardRecentDocumentsPanel({
-  invoices,
+  ledgerEntries,
   hasProjectPass,
   onUpgradeClick,
-  onOpenInvoice,
+  onOpenLedgerEntry,
   onOpenLedger,
   onAddDocument,
 }: Props) {
   const recent = useMemo(
     () =>
-      [...invoices]
+      [...ledgerEntries]
         .sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         )
         .slice(0, 3),
-    [invoices],
+    [ledgerEntries],
   );
 
-  if (invoices.length > 0) {
+  if (ledgerEntries.length > 0) {
     return (
       <GlassCard intensity={10} style={styles.card}>
         <View style={styles.sectionHeaderRow}>
@@ -69,7 +69,7 @@ export function DashboardRecentDocumentsPanel({
                 testID={`dashboard-recent-doc-row-${index}`}
                 onPress={() => {
                   void Haptics.selectionAsync();
-                  onOpenInvoice(inv);
+                  onOpenLedgerEntry(inv);
                 }}
                 style={({ pressed }) => [
                   styles.docRow,
@@ -78,7 +78,7 @@ export function DashboardRecentDocumentsPanel({
                 accessibilityRole="button"
                 accessibilityLabel={`Review ${inv.vendor_name?.trim() || "document"}, ${money(inv.total)}`}
               >
-                <DocumentThumbnail invoiceId={inv.id} size={44} />
+                <DocumentThumbnail ledgerEntryId={inv.id} size={44} />
 
                 <View style={styles.docContent}>
                   <View style={styles.titleRow}>

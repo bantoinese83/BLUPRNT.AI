@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { generateActivityEvents, formatRelativeTime } from "./activity";
-import type { InvoiceRow, ProjectRow } from "../types/database.ts";
+import { generateActivityEvents, formatRelativeTime } from "./activity.ts";
+import type { LedgerEntryRow, ProjectRow } from "../types/database.ts";
 
 describe("activity shared logic", () => {
   describe("generateActivityEvents", () => {
@@ -18,17 +18,17 @@ describe("activity shared logic", () => {
       expect(events[0]!.description).toContain("Test Project");
     });
 
-    it("includes recent invoices (up to 5)", () => {
-      const manyInvoices = Array(10)
+    it("includes recent ledger entries (up to 5)", () => {
+      const manyEntries = Array(10)
         .fill(0)
         .map((_, i) => ({
           id: `i${i}`,
           vendor_name: `Vendor ${i}`,
           total: 100 * i,
           created_at: new Date().toISOString(),
-        })) as InvoiceRow[];
+        })) as LedgerEntryRow[];
 
-      const events = generateActivityEvents(mockProject, manyInvoices);
+      const events = generateActivityEvents(mockProject, manyEntries);
       expect(events.filter((e) => e.type === "upload")).toHaveLength(5);
     });
   });

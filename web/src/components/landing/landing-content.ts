@@ -58,10 +58,10 @@ export const PLAN_COMPARISON_ROWS: readonly PricingRow[] = [
     hint: "Ideas tuned to your area—not a contractor quote",
   },
   {
-    feature: "Invoice & receipt reads",
+    feature: "Ledger document processing",
     architect: "10 invoiced docs / mo (account total)",
     pass: "Unlimited for this project (during pass)",
-    hint: "Invoices only count toward limits—not quotes or warranties. Architect: one monthly quota shared across all projects.",
+    hint: "Financial documents (invoices & receipts) only count toward limits—not quotes or warranties. Architect: one monthly quota shared across all projects.",
   },
   {
     feature: "Jobs at once",

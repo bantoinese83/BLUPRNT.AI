@@ -9,7 +9,7 @@ export type ArchitectEntitlementFields = {
 };
 
 export type ArchitectUploadQuotaFields = ArchitectEntitlementFields & {
-  invoice_uploads_count?: number | null;
+  ledger_uploads_count?: number | null;
 };
 
 export function isStripeArchitectSubscriptionEntitled(
@@ -50,7 +50,7 @@ export function isArchitectGlobalUploadQuotaAvailable(
   maxUploads: number = 10,
 ): boolean {
   if (!sub) return false;
-  if ((sub.invoice_uploads_count ?? 0) >= maxUploads) return false;
+  if ((sub.ledger_uploads_count ?? 0) >= maxUploads) return false;
   if (isStripeArchitectSubscriptionEntitled(sub, now)) return true;
   if (sub.revenuecat_entitlement_active === true) return true;
   return false;

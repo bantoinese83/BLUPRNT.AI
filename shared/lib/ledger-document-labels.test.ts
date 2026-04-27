@@ -1,67 +1,101 @@
 import { describe, it, expect } from "vitest";
 import {
-  defaultLineDescriptionForUpload,
-  defaultVendorNameForDocumentType,
   ledgerDocumentTypeLabel,
-  ledgerDocumentVisualGroup,
   reviewDocumentModalTitle,
+  ledgerDocumentVisualGroup,
+  defaultVendorNameForDocumentType,
+  defaultLineDescriptionForUpload,
+  ledgerDocumentTheme,
 } from "./ledger-document-labels.ts";
 
-describe("ledgerDocumentTypeLabel", () => {
-  it("returns mapped labels for known types", () => {
-    expect(ledgerDocumentTypeLabel("invoice")).toBe("Invoice / bill");
-    expect(ledgerDocumentTypeLabel("lien_waiver")).toBe(
-      "Lien waiver / release",
-    );
+describe("ledger-document-labels", () => {
+  describe("ledgerDocumentTypeLabel", () => {
+    it("returns correct labels", () => {
+      expect(ledgerDocumentTypeLabel("invoice")).toBe("Invoice / bill");
+      expect(ledgerDocumentTypeLabel("quote")).toBe("Quote / estimate");
+      expect(ledgerDocumentTypeLabel("receipt")).toBe("Receipt");
+      expect(ledgerDocumentTypeLabel("warranty")).toBe("Warranty");
+    });
+
+    it("defaults to invoice on nullish", () => {
+      expect(ledgerDocumentTypeLabel(null)).toBe("Invoice / bill");
+      expect(ledgerDocumentTypeLabel(undefined)).toBe("Invoice / bill");
+    });
+
+    it("handles unknown types gracefully", () => {
+      expect(ledgerDocumentTypeLabel("custom_record")).toBe("custom record");
+    });
   });
 
-  it("defaults nullish to invoice label", () => {
-    expect(ledgerDocumentTypeLabel(null)).toBe("Invoice / bill");
+  describe("reviewDocumentModalTitle", () => {
+    it("returns correct titles", () => {
+      expect(reviewDocumentModalTitle("invoice")).toBe(
+        "Review bill or invoice",
+      );
+      expect(reviewDocumentModalTitle("permit")).toBe(
+        "Review permit or approval",
+      );
+      expect(reviewDocumentModalTitle("other")).toBe("Review document");
+    });
   });
 
-  it("title-cases unknown keys for map miss", () => {
-    expect(ledgerDocumentTypeLabel("custom_type")).toBe("custom type");
+  describe("ledgerDocumentVisualGroup", () => {
+    it("categorizes correctly", () => {
+      expect(ledgerDocumentVisualGroup("invoice")).toBe("spend");
+      expect(ledgerDocumentVisualGroup("quote")).toBe("spend");
+      expect(ledgerDocumentVisualGroup("receipt")).toBe("spend");
+      expect(ledgerDocumentVisualGroup("warranty")).toBe("warranty_care");
+      expect(ledgerDocumentVisualGroup("maintenance")).toBe("warranty_care");
+      expect(ledgerDocumentVisualGroup("permit")).toBe("archive");
+      expect(ledgerDocumentVisualGroup("other")).toBe("archive");
+    });
   });
-});
 
-describe("reviewDocumentModalTitle", () => {
-  it("uses coerce for unknown input", () => {
-    expect(reviewDocumentModalTitle("invoice")).toContain("invoice");
-    expect(reviewDocumentModalTitle("garbage")).toBe("Review document");
+  describe("defaultVendorNameForDocumentType", () => {
+    it("returns correct default names", () => {
+      expect(defaultVendorNameForDocumentType("invoice")).toBe("Vendor");
+      expect(defaultVendorNameForDocumentType("permit")).toBe("Permit");
+      expect(defaultVendorNameForDocumentType("other")).toBe("Document");
+    });
   });
-});
 
-describe("ledgerDocumentVisualGroup", () => {
-  it("groups spend, care, and archive", () => {
-    expect(ledgerDocumentVisualGroup("invoice")).toBe("spend");
-    expect(ledgerDocumentVisualGroup("warranty")).toBe("warranty_care");
-    expect(ledgerDocumentVisualGroup("permit")).toBe("archive");
+  describe("defaultLineDescriptionForUpload", () => {
+    it("formats maintenance logs", () => {
+      expect(defaultLineDescriptionForUpload("maintenance", "ACME")).toBe(
+        "Log — ACME",
+      );
+      expect(defaultLineDescriptionForUpload("maintenance", null)).toBe(
+        "Maintenance log entry",
+      );
+    });
+
+    it("formats spend docs", () => {
+      expect(defaultLineDescriptionForUpload("invoice", "ACME")).toBe(
+        "Services or purchase — ACME",
+      );
+      expect(defaultLineDescriptionForUpload("receipt", null)).toBe(
+        "Receipt line",
+      );
+    });
   });
-});
 
-describe("defaultVendorNameForDocumentType", () => {
-  it("covers every ledger type", () => {
-    expect(defaultVendorNameForDocumentType("invoice")).toBe("Vendor");
-    expect(defaultVendorNameForDocumentType("other")).toBe("Document");
-  });
-});
+  describe("ledgerDocumentTheme", () => {
+    it("returns spend theme for invoices", () => {
+      const theme = ledgerDocumentTheme("invoice");
+      expect(theme.icon).toBe("text-rose-600");
+      expect(theme.label).toBe("Vendor Name");
+    });
 
-describe("defaultLineDescriptionForUpload", () => {
-  it("formats maintenance and spend lines", () => {
-    expect(defaultLineDescriptionForUpload("maintenance", "Roof")).toBe(
-      "Log — Roof",
-    );
-    expect(defaultLineDescriptionForUpload("maintenance", null)).toBe(
-      "Maintenance log entry",
-    );
-    expect(defaultLineDescriptionForUpload("invoice", "ACME")).toBe(
-      "Services or purchase — ACME",
-    );
-    expect(defaultLineDescriptionForUpload("receipt", "")).toBe("Receipt line");
-    expect(defaultLineDescriptionForUpload("quote", "")).toBe("Invoice line");
-    expect(defaultLineDescriptionForUpload("permit", "City")).toBe(
-      "Record — City",
-    );
-    expect(defaultLineDescriptionForUpload("permit", "")).toBe("Recorded line");
+    it("returns warranty theme for warranties", () => {
+      const theme = ledgerDocumentTheme("warranty");
+      expect(theme.icon).toBe("text-teal-600");
+      expect(theme.label).toBe("Brand / Provider");
+    });
+
+    it("returns default theme for others", () => {
+      const theme = ledgerDocumentTheme("permit");
+      expect(theme.icon).toBe("text-slate-600");
+      expect(theme.label).toBe("Issuer / Category");
+    });
   });
 });

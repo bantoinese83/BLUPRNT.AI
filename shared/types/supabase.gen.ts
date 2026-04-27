@@ -204,71 +204,9 @@ export type Database = {
           },
         ];
       };
-      invoice_line_items: {
+      ledger_entries: {
         Row: {
-          category: string | null;
-          created_at: string;
-          description: string;
-          id: string;
-          invoice_id: string;
-          line_total: number | null;
-          quantity: number | null;
-          scope_item_id: string | null;
-          tax_amount: number;
-          tax_rate: number;
-          unit_of_measure: string;
-          unit_price: number | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          category?: string | null;
-          created_at?: string;
-          description?: string;
-          id?: string;
-          invoice_id: string;
-          line_total?: number | null;
-          quantity?: number | null;
-          scope_item_id?: string | null;
-          tax_amount?: number;
-          tax_rate?: number;
-          unit_of_measure?: string;
-          unit_price?: number | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          category?: string | null;
-          created_at?: string;
-          description?: string;
-          id?: string;
-          invoice_id?: string;
-          line_total?: number | null;
-          quantity?: number | null;
-          scope_item_id?: string | null;
-          tax_amount?: number;
-          tax_rate?: number;
-          unit_of_measure?: string;
-          unit_price?: number | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "invoice_line_items_invoice_id_fkey";
-            columns: ["invoice_id"];
-            isOneToOne: false;
-            referencedRelation: "invoices";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "invoice_line_items_scope_item_id_fkey";
-            columns: ["scope_item_id"];
-            isOneToOne: false;
-            referencedRelation: "scope_items";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      invoices: {
-        Row: {
+          ai_summary: string | null;
           created_at: string;
           currency: string;
           document_id: string | null;
@@ -291,6 +229,7 @@ export type Database = {
           warranty_notified_at: string | null;
         };
         Insert: {
+          ai_summary?: string | null;
           created_at?: string;
           currency?: string;
           document_id?: string | null;
@@ -313,6 +252,7 @@ export type Database = {
           warranty_notified_at?: string | null;
         };
         Update: {
+          ai_summary?: string | null;
           created_at?: string;
           currency?: string;
           document_id?: string | null;
@@ -347,6 +287,69 @@ export type Database = {
             columns: ["project_id"];
             isOneToOne: false;
             referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ledger_line_items: {
+        Row: {
+          category: string | null;
+          created_at: string;
+          description: string;
+          id: string;
+          ledger_entry_id: string;
+          line_total: number | null;
+          quantity: number | null;
+          scope_item_id: string | null;
+          tax_amount: number;
+          tax_rate: number;
+          unit_of_measure: string;
+          unit_price: number | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          category?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          ledger_entry_id: string;
+          line_total?: number | null;
+          quantity?: number | null;
+          scope_item_id?: string | null;
+          tax_amount?: number;
+          tax_rate?: number;
+          unit_of_measure?: string;
+          unit_price?: number | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          category?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          ledger_entry_id?: string;
+          line_total?: number | null;
+          quantity?: number | null;
+          scope_item_id?: string | null;
+          tax_amount?: number;
+          tax_rate?: number;
+          unit_of_measure?: string;
+          unit_price?: number | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_invoice_id_fkey";
+            columns: ["ledger_entry_id"];
+            isOneToOne: false;
+            referencedRelation: "ledger_entries";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoice_line_items_scope_item_id_fkey";
+            columns: ["scope_item_id"];
+            isOneToOne: false;
+            referencedRelation: "scope_items";
             referencedColumns: ["id"];
           },
         ];
@@ -838,8 +841,8 @@ export type Database = {
           created_at: string | null;
           current_period_end: string | null;
           id: string;
-          invoice_uploads_count: number;
-          invoice_uploads_reset_at: string | null;
+          ledger_uploads_count: number;
+          ledger_uploads_reset_at: string | null;
           plan: string;
           revenuecat_entitlement_active: boolean;
           status: string;
@@ -852,8 +855,8 @@ export type Database = {
           created_at?: string | null;
           current_period_end?: string | null;
           id?: string;
-          invoice_uploads_count?: number;
-          invoice_uploads_reset_at?: string | null;
+          ledger_uploads_count?: number;
+          ledger_uploads_reset_at?: string | null;
           plan?: string;
           revenuecat_entitlement_active?: boolean;
           status?: string;
@@ -866,8 +869,8 @@ export type Database = {
           created_at?: string | null;
           current_period_end?: string | null;
           id?: string;
-          invoice_uploads_count?: number;
-          invoice_uploads_reset_at?: string | null;
+          ledger_uploads_count?: number;
+          ledger_uploads_reset_at?: string | null;
           plan?: string;
           revenuecat_entitlement_active?: boolean;
           status?: string;
@@ -884,6 +887,7 @@ export type Database = {
     };
     Functions: {
       get_onboarding_sync_payload: { Args: { p_token: string }; Returns: Json };
+      get_system_config: { Args: { config_key: string }; Returns: string };
       get_user_id_by_email: { Args: { user_email: string }; Returns: string };
       match_document_embeddings: {
         Args: {
@@ -900,14 +904,14 @@ export type Database = {
         }[];
       };
       recalc_project_totals: { Args: { p_id: string }; Returns: undefined };
-      release_architect_invoice_upload_slot: {
+      release_architect_ledger_upload_slot: {
         Args: { p_user_id: string };
         Returns: undefined;
       };
-      reserve_architect_invoice_upload_slot: {
-        Args: { p_max_uploads?: number; p_user_id: string };
+      reserve_architect_ledger_upload_slot: {
+        Args: { p_max_uploads: number; p_user_id: string };
         Returns: {
-          invoice_uploads_count: number;
+          ledger_uploads_count: number;
           ok: boolean;
         }[];
       };

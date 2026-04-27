@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { generateSellerPacketBlob } from "@/lib/pdf-export";
 import { buildSellerPacketAppendixItems } from "@/lib/seller-packet-appendix";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 export type SellerPacketScopeInput = {
   category: string;
@@ -21,7 +21,7 @@ export type DownloadSellerPacketParams = {
   propertyId: string;
   project: SellerPacketProjectInput;
   scopeItems: SellerPacketScopeInput[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   /** When true, fetches originals and may embed images (larger PDF). */
   includeAppendix?: boolean;
 };
@@ -35,16 +35,16 @@ export async function downloadSellerPacket({
   propertyId,
   project,
   scopeItems,
-  invoices,
+  ledgerEntries,
   includeAppendix = false,
 }: DownloadSellerPacketParams): Promise<{ savedToProject: boolean }> {
   const appendixItems = includeAppendix
-    ? await buildSellerPacketAppendixItems(invoices)
+    ? await buildSellerPacketAppendixItems(ledgerEntries)
     : [];
   const blob = await generateSellerPacketBlob(
     project,
     scopeItems,
-    invoices,
+    ledgerEntries,
     appendixItems.length > 0 ? { appendixItems } : undefined,
   );
 

@@ -1,4 +1,4 @@
-import { isArchitectQuotaInvoiceType } from "./infer-document-type.ts";
+import { isArchitectQuotaLedgerEntryType } from "./infer-document-type.ts";
 
 /**
  * Free tier: max combined vendor invoice + store receipt uploads per project.
@@ -11,6 +11,6 @@ export function countBillOrReceiptUploadsInProject(
   rows: { document_type?: string | null }[],
 ): number {
   return rows.filter((r) =>
-    isArchitectQuotaInvoiceType(r.document_type ?? "invoice"),
+    isArchitectQuotaLedgerEntryType(r.document_type ?? "invoice"),
   ).length;
 }

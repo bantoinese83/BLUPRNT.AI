@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type {
   ProjectRow,
   ScopeRow,
-  InvoiceRow,
+  LedgerEntryRow,
   GalleryItemRow,
 } from "../types/database";
 import type { DashboardSnapshot } from "../types/dashboard-snapshot";
@@ -66,10 +66,10 @@ export function useDashboardSnapshotCache(
     [getQueryKey, queryClient],
   );
 
-  const setInvoices = useCallback(
-    (invoices: InvoiceRow[]) => {
+  const setLedgerEntries = useCallback(
+    (ledgerEntries: LedgerEntryRow[]) => {
       queryClient.setQueryData<DashboardSnapshot>(getQueryKey(), (prev) =>
-        applyDashboardSnapshotPatch(prev, { invoices }),
+        applyDashboardSnapshotPatch(prev, { ledgerEntries }),
       );
     },
     [getQueryKey, queryClient],
@@ -89,7 +89,7 @@ export function useDashboardSnapshotCache(
     setProjects,
     setProject,
     setScopeItems,
-    setInvoices,
+    setLedgerEntries,
     setGalleryItems,
   };
 }

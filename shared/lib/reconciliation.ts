@@ -5,30 +5,30 @@ export type ReconciliationItem = {
   total_billed: number;
   status: "under" | "reconciled" | "over";
   difference: number;
-  invoice_count: number;
+  ledger_entry_count: number;
 };
 
 export type ReconciliationResult = {
   items: Record<string, ReconciliationItem>;
   total_reconciled: number;
   unreconciled_billed: number;
-  /** Spend that is linked to scope but belongs to an unverified (AI Draft) invoice. */
+  /** Spend that is linked to scope but belongs to an unverified (AI Draft) ledger entry. */
   unverified_reconciled_spend: number;
 };
 
-export type InvoiceLineItemMinimal = {
+export type LedgerLineItemMinimal = {
   line_total: number | null;
   scope_item_id: string | null;
-  invoice_id: string;
+  ledger_entry_id: string;
   is_verified?: boolean;
 };
 
 /**
- * Calculates reconciliation status for each scope item based on linked invoice lines.
+ * Calculates reconciliation status for each scope item based on linked ledger lines.
  */
 export function buildReconciliation(
   scopeItems: ScopeRow[],
-  lineItems: InvoiceLineItemMinimal[],
+  lineItems: LedgerLineItemMinimal[],
 ): ReconciliationResult {
   const result: ReconciliationResult = {
     items: {},
@@ -74,14 +74,14 @@ export function buildReconciliation(
         total_billed: 0,
         status: "under",
         difference: 0,
-        invoice_count: 0,
+        ledger_entry_count: 0,
       };
     }
 
     const recon = itemMap[scope.id];
     if (recon) {
       recon.total_billed += amount;
-      recon.invoice_count += 1;
+      recon.ledger_entry_count += 1;
     }
     result.total_reconciled += amount;
 

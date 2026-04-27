@@ -5,11 +5,11 @@ import {
   openURLMock,
 } from "@/test/react-native-mock";
 import {
-  fetchInvoiceOriginalSignedUrl,
-  openOriginalDocumentForInvoice,
+  fetchLedgerEntryOriginalSignedUrl,
+  openOriginalDocumentForLedgerEntry,
 } from "@/lib/open-original-document";
 import { invokeFunction } from "@/lib/supabase";
-import { invoiceOriginalMessages } from "@shared/lib/invoice-original-messages";
+import { ledgerOriginalMessages } from "@shared/lib/ledger-original-messages";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),
@@ -19,17 +19,17 @@ vi.mock("@/lib/sentry", () => ({
   reportClientError: vi.fn(),
 }));
 
-describe("fetchInvoiceOriginalSignedUrl", () => {
+describe("fetchLedgerEntryOriginalSignedUrl", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("returns ok when signed_url present", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://x.com/a.pdf", filename: "a.pdf" },
+      data: { signedUrl: "https://x.com/a.pdf", filename: "a.pdf" },
       error: null,
     });
-    const r = await fetchInvoiceOriginalSignedUrl("i1");
+    const r = await fetchLedgerEntryOriginalSignedUrl("i1");
     expect(r).toEqual({
       ok: true,
       signedUrl: "https://x.com/a.pdf",
@@ -42,15 +42,15 @@ describe("fetchInvoiceOriginalSignedUrl", () => {
       data: null,
       error: new Error("x"),
     });
-    const r = await fetchInvoiceOriginalSignedUrl("i1");
+    const r = await fetchLedgerEntryOriginalSignedUrl("i1");
     expect(r).toEqual({
       ok: false,
-      message: invoiceOriginalMessages.network,
+      message: ledgerOriginalMessages.network,
     });
   });
 });
 
-describe("openOriginalDocumentForInvoice", () => {
+describe("openOriginalDocumentForLedgerEntry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -60,20 +60,20 @@ describe("openOriginalDocumentForInvoice", () => {
       data: null,
       error: new Error("x"),
     });
-    const ok = await openOriginalDocumentForInvoice("i1");
+    const ok = await openOriginalDocumentForLedgerEntry("i1");
     expect(ok).toBe(false);
     expect(alertMock).toHaveBeenCalled();
   });
 
   it("opens url when allowed", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://x.com/a.pdf" },
+      data: { signedUrl: "https://x.com/a.pdf" },
       error: null,
     });
     canOpenURLMock.mockResolvedValue(true);
     openURLMock.mockResolvedValue(undefined);
 
-    const ok = await openOriginalDocumentForInvoice("i1");
+    const ok = await openOriginalDocumentForLedgerEntry("i1");
     expect(ok).toBe(true);
     expect(openURLMock).toHaveBeenCalledWith("https://x.com/a.pdf");
   });
@@ -83,38 +83,38 @@ describe("openOriginalDocumentForInvoice", () => {
       data: { error: "No original" },
       error: null,
     });
-    const ok = await openOriginalDocumentForInvoice("i1");
+    const ok = await openOriginalDocumentForLedgerEntry("i1");
     expect(ok).toBe(false);
     expect(alertMock).toHaveBeenCalled();
   });
 
   it("returns false when signed_url missing", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: undefined },
+      data: { signedUrl: undefined },
       error: null,
     });
-    const ok = await openOriginalDocumentForInvoice("i1");
+    const ok = await openOriginalDocumentForLedgerEntry("i1");
     expect(ok).toBe(false);
   });
 
   it("returns false when link cannot be opened", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://x.com/a.pdf" },
+      data: { signedUrl: "https://x.com/a.pdf" },
       error: null,
     });
     canOpenURLMock.mockResolvedValue(false);
-    const ok = await openOriginalDocumentForInvoice("i1");
+    const ok = await openOriginalDocumentForLedgerEntry("i1");
     expect(ok).toBe(false);
   });
 
   it("returns false when openURL throws", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://x.com/a.pdf" },
+      data: { signedUrl: "https://x.com/a.pdf" },
       error: null,
     });
     canOpenURLMock.mockResolvedValue(true);
     openURLMock.mockRejectedValue(new Error("cannot open"));
-    const ok = await openOriginalDocumentForInvoice("i1");
+    const ok = await openOriginalDocumentForLedgerEntry("i1");
     expect(ok).toBe(false);
     expect(alertMock).toHaveBeenCalled();
   });

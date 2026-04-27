@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { deriveHomeTeam } from "./home-team.ts";
-import type { InvoiceRow } from "../types/database.ts";
+import type { LedgerEntryRow } from "../types/database.ts";
 
 describe("deriveHomeTeam", () => {
   it("derives unique contractors with merged totals and contact info", () => {
-    const mockInvoices: Partial<InvoiceRow>[] = [
+    const mockLedgerEntries: Partial<LedgerEntryRow>[] = [
       {
         vendor_name: "John Plumbing",
         total: 1000,
@@ -27,7 +27,7 @@ describe("deriveHomeTeam", () => {
       },
     ];
 
-    const team = deriveHomeTeam(mockInvoices as InvoiceRow[]);
+    const team = deriveHomeTeam(mockLedgerEntries as LedgerEntryRow[]);
 
     expect(team).toHaveLength(2);
 

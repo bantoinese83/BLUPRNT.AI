@@ -1,5 +1,5 @@
 /** User-facing strings for original-upload / signed URL flows (web + mobile). */
-export const invoiceOriginalMessages = {
+export const ledgerOriginalMessages = {
   network:
     "We couldn’t open the original file. Check your connection and try again.",
   noLinkedFile: "There’s no saved file for this record.",
@@ -10,8 +10,8 @@ export const invoiceOriginalMessages = {
   openLinkFailed: "Something went wrong opening the link. Try again.",
 } as const;
 
-export function messageForInvoiceOriginalApiError(errorBody: string): string {
+export function messageForLedgerOriginalApiError(errorBody: string): string {
   return errorBody.includes("No original")
-    ? invoiceOriginalMessages.noLinkedFile
-    : invoiceOriginalMessages.generic;
+    ? ledgerOriginalMessages.noLinkedFile
+    : ledgerOriginalMessages.generic;
 }

@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import { showAppToast } from "@/lib/app-toast";
-import type { InvoiceRow } from "@/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 import {
   coerceLedgerDocumentType,
   type LedgerDocumentType,
@@ -20,7 +20,7 @@ export type LineItem = {
   scope_item_id?: string | null;
 };
 
-export type InvoiceDetail = {
+export type LedgerEntryDetail = {
   vendor_name: string | null;
   total: number | null;
   payment_status: string;
@@ -29,14 +29,14 @@ export type InvoiceDetail = {
   is_verified?: boolean;
 };
 
-export function useInvoiceReviewDetail(
-  invoice: InvoiceRow | null,
+export function useLedgerEntryReviewDetail(
+  ledgerEntry: LedgerEntryRow | null,
   projectId: string | null,
   isOpen: boolean,
 ) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<InvoiceDetail | null>(null);
+  const [detail, setDetail] = useState<LedgerEntryDetail | null>(null);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [scopeItems, setScopeItems] = useState<
     { id: string; category: string; description: string }[]
@@ -59,7 +59,7 @@ export function useInvoiceReviewDetail(
   }, []);
 
   useEffect(() => {
-    if (!isOpen || !invoice?.id || !projectId) {
+    if (!isOpen || !ledgerEntry?.id || !projectId) {
       if (!isOpen) reset();
       return;
     }
@@ -70,13 +70,13 @@ export function useInvoiceReviewDetail(
       setError(null);
       try {
         const { data: invData, error: invErr } = await invokeFunction<{
-          invoice: InvoiceDetail & {
+          ledger_entry: LedgerEntryDetail & {
             id: string;
             document_type?: string | null;
           };
           line_items: LineItem[];
-        }>("get-invoice", {
-          body: { invoice_id: invoice.id },
+        }>("get-ledger-entry", {
+          body: { ledger_entry_id: ledgerEntry.id },
         });
 
         if (cancelled) return;
@@ -86,10 +86,10 @@ export function useInvoiceReviewDetail(
           return;
         }
 
-        setDetail(invData.invoice);
+        setDetail(invData.ledger_entry);
         const lines = invData.line_items ?? [];
         setLineItems(lines);
-        const t = coerceLedgerDocumentType(invData.invoice.document_type);
+        const t = coerceLedgerDocumentType(invData.ledger_entry.document_type);
         setLedgerDocType(t);
         setServerLedgerDocType(t);
 
@@ -100,7 +100,7 @@ export function useInvoiceReviewDetail(
 
         if (cancelled) return;
         if (scopeErr) {
-          reportClientError("invoice_review_scope_list", scopeErr);
+          reportClientError("ledger_review_scope_list", scopeErr);
           showAppToast(
             "Budget list didn’t load — line links may be incomplete.",
             { type: "warning" },
@@ -123,7 +123,7 @@ export function useInvoiceReviewDetail(
       } catch (err) {
         if (!cancelled) {
           setError("Something went wrong loading details.");
-          reportClientError("useInvoiceReviewDetail_load", err);
+          reportClientError("useLedgerEntryReviewDetail_load", err);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -133,12 +133,12 @@ export function useInvoiceReviewDetail(
     return () => {
       cancelled = true;
     };
-  }, [isOpen, invoice?.id, projectId, reset]);
+  }, [isOpen, ledgerEntry?.id, projectId, reset]);
 
   const typeDirty = ledgerDocType !== serverLedgerDocType;
 
   const saveMappings = async () => {
-    if (!projectId || !invoice?.id) return false;
+    if (!projectId || !ledgerEntry?.id) return false;
     setSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
@@ -149,21 +149,21 @@ export function useInvoiceReviewDetail(
       const lineUpdatePromises = Object.entries(mappings).map(
         ([lineId, scopeItemId]) =>
           supabase
-            .from("invoice_line_items")
+            .from("ledger_line_items")
             .update({ scope_item_id: scopeItemId || null })
             .eq("id", lineId),
       );
 
       const typeUpdatePromises =
-        (docKindChanged || needsVerification) && invoice.id
+        (docKindChanged || needsVerification) && ledgerEntry.id
           ? [
               supabase
-                .from("invoices")
+                .from("ledger_entries")
                 .update({
                   document_type: ledgerDocType,
                   is_verified: true, // Always verify on manual save
                 })
-                .eq("id", invoice.id),
+                .eq("id", ledgerEntry.id),
               ...(docKindChanged && detail?.document_id
                 ? [
                     supabase
@@ -201,7 +201,7 @@ export function useInvoiceReviewDetail(
       );
       return true;
     } catch (err) {
-      reportClientError("useInvoiceReviewDetail_save", err);
+      reportClientError("useLedgerEntryReviewDetail_save", err);
       Alert.alert("Couldn’t save", "We couldn’t save your changes. Try again.");
       return false;
     } finally {

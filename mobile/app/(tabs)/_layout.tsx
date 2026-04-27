@@ -81,7 +81,7 @@ export default function TabLayout() {
   const {
     project,
     scopeItems,
-    invoices,
+    ledgerEntries,
     spendByCategory,
     isArchitect,
     hasProjectPass,
@@ -92,7 +92,7 @@ export default function TabLayout() {
     <AwarenessProvider
       project={project}
       scopeItems={scopeItems}
-      invoices={invoices}
+      ledgerEntries={ledgerEntries}
       spendByCategory={spendByCategory}
       isArchitect={isArchitect}
       hasProjectPass={hasProjectPass}

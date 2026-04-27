@@ -39,11 +39,16 @@ export function DocumentGuide({
           <ol className="text-sm text-slate-900/90 space-y-2 list-decimal list-inside pl-1">
             <li>
               <strong>Upload</strong> a PDF or photo—we detect whether it&apos;s
-              an invoice (including store receipts), quote, warranty, or permit.
+              an invoice, receipt, quote, warranty, permit, or other record.
             </li>
             <li>
-              <strong>Review</strong> the next screen to line items up with your
-              estimate when it&apos;s a bill or quote.
+              <strong>Review</strong> the data our AI extracts. You can link
+              spending to your budget or update categories.
+            </li>
+            <li>
+              <strong>Verify</strong> to turn that document into a permanent
+              record in your <strong>Smart Ledger</strong>—a verified digital
+              vault for your home.
             </li>
           </ol>
 

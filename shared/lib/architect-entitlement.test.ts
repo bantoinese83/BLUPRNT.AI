@@ -140,7 +140,7 @@ describe("architect-entitlement", () => {
             status: "active",
             current_period_end: null,
             revenuecat_entitlement_active: false,
-            invoice_uploads_count: 2,
+            ledger_uploads_count: 2,
           },
           now,
           10,
@@ -155,7 +155,7 @@ describe("architect-entitlement", () => {
             status: "canceled",
             current_period_end: past,
             revenuecat_entitlement_active: true,
-            invoice_uploads_count: 3,
+            ledger_uploads_count: 3,
           },
           now,
           10,
@@ -170,7 +170,7 @@ describe("architect-entitlement", () => {
             status: "canceled",
             current_period_end: past,
             revenuecat_entitlement_active: true,
-            invoice_uploads_count: 10,
+            ledger_uploads_count: 10,
           },
           now,
           10,
@@ -180,7 +180,7 @@ describe("architect-entitlement", () => {
 
     it("returns false if revenuecat_entitlement_active is false and no stripe sub", () => {
       const sub = {
-        invoice_uploads_count: 0,
+        ledger_uploads_count: 0,
         revenuecat_entitlement_active: false,
         status: "canceled" as const,
         current_period_end: past,

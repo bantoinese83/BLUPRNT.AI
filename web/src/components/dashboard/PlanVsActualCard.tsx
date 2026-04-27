@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 type PlanVsActualCardProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
-  invoices: InvoiceLike[];
+  ledgerEntries: InvoiceLike[];
 };
 
 const toneStyles: Record<
@@ -51,10 +51,10 @@ const toneStyles: Record<
 export function PlanVsActualCard({
   estimatedMin,
   estimatedMax,
-  invoices,
+  ledgerEntries,
 }: PlanVsActualCardProps) {
   const navigate = useNavigate();
-  const capital = capitalImprovementTotal(invoices);
+  const capital = capitalImprovementTotal(ledgerEntries);
   const { headline, body, kind } = planVsActualNarrative(
     estimatedMin,
     estimatedMax,

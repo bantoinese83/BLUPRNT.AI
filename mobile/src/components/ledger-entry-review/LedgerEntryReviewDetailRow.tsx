@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 
-import { invoiceReviewSheetStyles as styles } from "./invoiceReviewSheet.styles";
+import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
 
 type Props = {
   icon: React.ReactNode;
@@ -10,7 +10,7 @@ type Props = {
   valueColor?: string;
 };
 
-export function InvoiceReviewDetailRow({
+export function LedgerEntryReviewDetailRow({
   icon,
   label,
   value,

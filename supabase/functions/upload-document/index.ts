@@ -1,7 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
-import { uploadInvoiceSchema as _uploadInvoiceSchema } from "../_shared/validation.ts";
+import { uploadLedgerEntrySchema as _uploadLedgerEntrySchema } from "../_shared/validation.ts";
 import {
   assertProjectOwner,
   getServiceClient,
@@ -10,9 +10,9 @@ import {
 import { getApiVersion, API_VERSIONS } from "../_shared/versioning.ts";
 import {
   ARCHITECT_UPLOADS_PER_MONTH as _ARCHITECT_UPLOADS_PER_MONTH,
-  checkInvoiceUploadAllowed,
-  releaseArchitectInvoiceUploadSlot,
-  reserveArchitectInvoiceUploadSlot,
+  checkLedgerUploadAllowed,
+  releaseArchitectLedgerUploadSlot,
+  reserveArchitectLedgerUploadSlot,
 } from "../_shared/entitlements.ts";
 import {
   extractInvoiceFromPdf,
@@ -92,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
     const originalFilename = file.name || "upload";
 
     // 1. Check Entitlements
-    const entitlement = await checkInvoiceUploadAllowed(
+    const entitlement = await checkLedgerUploadAllowed(
       admin,
       userId,
       projectId,
@@ -112,7 +112,7 @@ const handler = async (req: Request): Promise<Response> => {
     // 2. Reserve slot if using Architect quota
     let reservedSlot = false;
     if (entitlement.reason === "architect_plan") {
-      const reserved = await reserveArchitectInvoiceUploadSlot(admin, userId);
+      const reserved = await reserveArchitectLedgerUploadSlot(admin, userId);
       if (!reserved.ok) {
         return jsonResponse(
           {
@@ -169,10 +169,10 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (docErr) throw docErr;
 
-      // 5. Create Draft Invoice Record (will be updated by background OCR)
+      // 5. Create Draft Ledger Entry Record (will be updated by background OCR)
       const finalTotal = amountHintStr ? parseFloat(amountHintStr) : 0;
-      const { data: invoice, error: dbErr } = await admin
-        .from("invoices")
+      const { data: ledgerEntry, error: dbErr } = await admin
+        .from("ledger_entries")
         .insert({
           project_id: projectId,
           document_id: doc.id,
@@ -209,7 +209,7 @@ const handler = async (req: Request): Promise<Response> => {
       return jsonResponse(
         {
           success: true,
-          invoice_id: invoice.id,
+          ledger_entry_id: ledgerEntry.id,
           document_id: doc.id,
           document_type: inferredDocType,
           storage_path: storagePath,
@@ -221,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
     } catch (e) {
       // Release slot if failure happened after reservation
       if (reservedSlot) {
-        await releaseArchitectInvoiceUploadSlot(admin, userId).catch((err) =>
+        await releaseArchitectLedgerUploadSlot(admin, userId).catch((err) =>
           console.error(err),
         );
       }

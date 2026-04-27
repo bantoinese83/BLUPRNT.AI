@@ -1,33 +1,33 @@
-import { Linking, Alert } from "react-native";
+import { Alert, Linking } from "react-native";
 import { invokeFunction } from "@/lib/supabase";
-import { reportClientError } from "@/lib/sentry";
 import {
-  invoiceOriginalMessages,
-  messageForInvoiceOriginalApiError,
-} from "@shared/lib/invoice-original-messages";
+  ledgerOriginalMessages,
+  messageForLedgerOriginalApiError,
+} from "@shared/lib/ledger-original-messages";
 
 type SignedUrlResponse = {
-  signed_url?: string;
+  signedUrl?: string;
   filename?: string;
   error?: string;
 };
 
-export type InvoiceOriginalFetchResult =
+export type LedgerEntryOriginalFetchResult =
   | { ok: true; signedUrl: string; filename?: string }
   | { ok: false; message: string };
 
-export async function fetchInvoiceOriginalSignedUrl(
-  invoiceId: string,
-): Promise<InvoiceOriginalFetchResult> {
+export async function fetchLedgerEntryOriginalSignedUrl(
+  ledgerEntryId: string,
+  options?: { width?: number; height?: number; resize?: string },
+): Promise<LedgerEntryOriginalFetchResult> {
   const { data, error } = await invokeFunction<SignedUrlResponse>(
     "get-document-signed-url",
-    { body: { invoice_id: invoiceId } },
+    { body: { ledger_entry_id: ledgerEntryId, ...options } },
   );
 
   if (error) {
     return {
       ok: false,
-      message: invoiceOriginalMessages.network,
+      message: ledgerOriginalMessages.network,
     };
   }
 
@@ -35,43 +35,42 @@ export async function fetchInvoiceOriginalSignedUrl(
   if (body?.error) {
     return {
       ok: false,
-      message: messageForInvoiceOriginalApiError(body.error),
+      message: messageForLedgerOriginalApiError(body.error),
     };
   }
 
-  const url = body?.signed_url;
+  const url = body?.signedUrl;
   if (!url) {
-    return { ok: false, message: invoiceOriginalMessages.generic };
+    return { ok: false, message: ledgerOriginalMessages.generic };
   }
 
   return { ok: true, signedUrl: url, filename: body.filename };
 }
 
-/** Opens the signed URL in the system browser (e.g. share flows). Prefer `OriginalUploadPreviewModal` in UI. */
-export async function openOriginalDocumentForInvoice(
-  invoiceId: string,
+export async function openOriginalDocumentForLedgerEntry(
+  ledgerEntryId: string,
 ): Promise<boolean> {
-  const result = await fetchInvoiceOriginalSignedUrl(invoiceId);
-  if (!result.ok) {
-    Alert.alert("Couldn’t open file", result.message);
-    return false;
-  }
-
-  const can = await Linking.canOpenURL(result.signedUrl);
-  if (!can) {
-    Alert.alert(
-      "Couldn’t open file",
-      invoiceOriginalMessages.deviceCannotOpenLink,
-    );
-    return false;
-  }
-
   try {
-    await Linking.openURL(result.signedUrl);
-  } catch (err: unknown) {
-    reportClientError("open_invoice_document_url", err);
-    Alert.alert("Couldn’t open file", invoiceOriginalMessages.openLinkFailed);
+    const result = await fetchLedgerEntryOriginalSignedUrl(ledgerEntryId);
+    if (!result.ok) {
+      Alert.alert("Couldn’t open file", result.message);
+      return false;
+    }
+
+    const supported = await Linking.canOpenURL(result.signedUrl);
+    if (supported) {
+      await Linking.openURL(result.signedUrl);
+      return true;
+    } else {
+      Alert.alert(
+        "Couldn’t open file",
+        ledgerOriginalMessages.deviceCannotOpenLink,
+      );
+      return false;
+    }
+  } catch (err) {
+    console.error("[openOriginalDocumentForLedgerEntry] Error:", err);
+    Alert.alert("Couldn’t open file", ledgerOriginalMessages.openLinkFailed);
     return false;
   }
-  return true;
 }

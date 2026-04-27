@@ -9,7 +9,7 @@ export type DocumentType = UploadFormDocumentType;
 
 export type UploadResult = {
   success: boolean;
-  invoice_id?: string;
+  ledger_entry_id?: string;
   documentType?: DocumentType;
   error?: string;
   errorCode?: string;
@@ -30,7 +30,7 @@ const ACCEPTED_MIMES = [
 ];
 
 /** Ensures camera / library picks send a MIME the edge function accepts (incl. HEIC on iOS). */
-export function normalizeInvoiceUploadMime(
+export function normalizeDocumentUploadMime(
   fileUri: string,
   mimeHint?: string,
 ): string {
@@ -46,7 +46,7 @@ export function normalizeInvoiceUploadMime(
 }
 
 /**
- * Uploads via `upload-invoice` with `document_type=auto` so the server classifies
+ * Uploads via `upload-document` with `document_type=auto` so the server classifies
  * from filename + document contents.
  */
 export async function uploadDocumentWithType(
@@ -119,7 +119,7 @@ async function executeUploadWorkflow(
 
     return {
       success: true,
-      invoice_id: data?.invoice_id,
+      ledger_entry_id: data?.ledger_entry_id,
       documentType: resolved,
       budgetHealth: data?.budget_health,
     };
@@ -136,7 +136,7 @@ function prepareUploadFormData(
   projectId: string,
   originalFileName?: string,
 ): FormData {
-  const mime = normalizeInvoiceUploadMime(uri, mimeType);
+  const mime = normalizeDocumentUploadMime(uri, mimeType);
   const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
   const safeName =
     (originalFileName && originalFileName.trim()) || `doc_${Date.now()}.${ext}`;
@@ -161,7 +161,7 @@ async function invokeUploadWithTimeout(formData: FormData) {
 
   return await Promise.race([
     invokeFunction<{
-      invoice_id?: string;
+      ledger_entry_id?: string;
       document_type?: string;
       error?: string;
       error_code?: string;

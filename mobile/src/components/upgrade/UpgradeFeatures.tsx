@@ -14,7 +14,7 @@ export function UpgradeFeatures() {
     {
       icon: <ShieldCheck size={20} color={Theme.colors.status.success} />,
       title: "Living home file",
-      desc: "Photo your invoices and quotes; we read the amounts (limits vary by plan).",
+      desc: "Photo your ledger records and quotes; we read the amounts (limits vary by plan).",
     },
     {
       icon: <FileDown size={20} color={Theme.colors.status.info} />,

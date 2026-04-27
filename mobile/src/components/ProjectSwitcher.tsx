@@ -13,7 +13,7 @@ import * as Haptics from "expo-haptics";
 import { supabase } from "@/lib/supabase";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
-import type { ProjectRow } from "@/types/database";
+import type { ProjectRow } from "@shared/types/database";
 import { ProjectIcon } from "@/lib/project-icons";
 
 type ProjectSwitcherProps = {
@@ -122,7 +122,7 @@ const ProjectCard = memo(
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           Alert.alert(
             "Delete Project",
-            `Are you sure you want to delete "${p.name}"? This will remove all associated invoices and scope items.`,
+            `Are you sure you want to delete "${p.name}"? This will remove all associated ledger entries and scope items.`,
             [
               { text: "Cancel", style: "cancel" },
               {

@@ -98,9 +98,9 @@ test.describe("Realtime Sync Integrity", () => {
       throw new Error(`External document insert failed: ${docErr.message}`);
 
 
-    // 5. Insert invoice "externally"
+    // 5. Insert ledger entry "externally"
     const vendorName = `External Vendor ${suffix}`;
-    const { error: invErr } = await supabase.from("invoices").insert({
+    const { error: invErr } = await supabase.from("ledger_entries").insert({
       project_id: activeProjectId,
       document_id: docId,
       vendor_name: vendorName,
@@ -110,7 +110,7 @@ test.describe("Realtime Sync Integrity", () => {
     });
 
     if (invErr)
-      throw new Error(`External invoice insert failed: ${invErr.message}`);
+      throw new Error(`External ledger entry insert failed: ${invErr.message}`);
 
     // Fallback: Reload if Realtime is being slow in the test environment
     await page.waitForTimeout(5000);

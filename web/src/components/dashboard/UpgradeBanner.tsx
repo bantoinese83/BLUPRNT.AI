@@ -1,6 +1,6 @@
 import { AlertCircle, Hammer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 
 interface UpgradeBannerProps {
   invoiceCount: number;

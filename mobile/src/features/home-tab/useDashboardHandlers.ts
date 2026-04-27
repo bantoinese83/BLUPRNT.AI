@@ -7,37 +7,41 @@ import { generateSellerPacketPDF } from "@/lib/pdf-export";
 import { scopeRowsForSellerPacket } from "@/features/finance-tab/ledger-helpers";
 import { reportClientError } from "@/lib/sentry";
 import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
-import { isFreeTierInvoiceLimitReached } from "@/lib/invoice-upload-gate";
+import { isFreeTierLedgerEntryLimitReached } from "@/lib/ledger-entry-upload-gate";
 import {
   DOCUMENT_CAPTURE_HOME_COPY,
   presentDocumentCapturePrompt,
 } from "@/lib/present-document-capture";
-import type { ProjectRow, InvoiceRow, ScopeRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  LedgerEntryRow,
+  ScopeRow,
+} from "@shared/types/database";
 import type { AwarenessState } from "@/contexts/AwarenessContext";
 
 interface UseDashboardHandlersProps {
   project: ProjectRow | null;
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   scopeItems: ScopeRow[];
   isArchitect: boolean;
   hasProjectPass: boolean;
   load: () => void;
   setUpgradeReason: AwarenessState["setUpgradeReason"];
   setShowUpgrade: (show: boolean) => void;
-  setReviewInvoice: (inv: InvoiceRow | null) => void;
+  setReviewLedgerEntry: (inv: LedgerEntryRow | null) => void;
   setReviewOpen: (open: boolean) => void;
 }
 
 export function useDashboardHandlers({
   project,
-  invoices,
+  ledgerEntries,
   scopeItems,
   isArchitect,
   hasProjectPass,
   load,
   setUpgradeReason,
   setShowUpgrade,
-  setReviewInvoice,
+  setReviewLedgerEntry,
   setReviewOpen,
 }: UseDashboardHandlersProps) {
   const [isUploading, setIsUploading] = useState(false);
@@ -72,7 +76,7 @@ export function useDashboardHandlers({
       setShowUpgrade(true);
       return;
     }
-    if (scopeItems.length === 0 && invoices.length === 0) {
+    if (scopeItems.length === 0 && ledgerEntries.length === 0) {
       Alert.alert(
         "Nothing to export yet",
         "Add a scope item or upload an invoice, then try Export Packet again.",
@@ -91,7 +95,7 @@ export function useDashboardHandlers({
           estimated_max_total: project.estimated_max_total,
         },
         scopeRowsForSellerPacket(scopeItems),
-        invoices,
+        ledgerEntries,
         { includeAppendix: false },
       );
     } catch (err: unknown) {
@@ -108,7 +112,7 @@ export function useDashboardHandlers({
     isArchitect,
     hasProjectPass,
     scopeItems,
-    invoices,
+    ledgerEntries,
     setUpgradeReason,
     setShowUpgrade,
   ]);
@@ -123,20 +127,20 @@ export function useDashboardHandlers({
           projectId: project.id,
           files,
           successToastMessage: "Document added — your dashboard is updated.",
-          onInvoiceLimitUpgrade: () => {
+          onLedgerEntryLimitUpgrade: () => {
             setUpgradeReason("invoice_limit");
             setShowUpgrade(true);
           },
           refreshProjectData: load,
         });
-        if (result.ok && result.lastInvoiceId && files.length === 1) {
+        if (result.ok && result.lastLedgerEntryId && files.length === 1) {
           const { data: row } = await supabase
-            .from("invoices")
+            .from("ledger_entries")
             .select("*")
-            .eq("id", result.lastInvoiceId)
+            .eq("id", result.lastLedgerEntryId)
             .maybeSingle();
           if (row) {
-            setReviewInvoice(row as unknown as InvoiceRow);
+            setReviewLedgerEntry(row as unknown as LedgerEntryRow);
             setReviewOpen(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           }
@@ -150,7 +154,7 @@ export function useDashboardHandlers({
       load,
       setUpgradeReason,
       setShowUpgrade,
-      setReviewInvoice,
+      setReviewLedgerEntry,
       setReviewOpen,
     ],
   );
@@ -158,7 +162,13 @@ export function useDashboardHandlers({
   const openDashboardDocumentCapture = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-    if (isFreeTierInvoiceLimitReached(invoices, isArchitect, hasProjectPass)) {
+    if (
+      isFreeTierLedgerEntryLimitReached(
+        ledgerEntries,
+        isArchitect,
+        hasProjectPass,
+      )
+    ) {
       setUpgradeReason("invoice_limit");
       setShowUpgrade(true);
       return;
@@ -168,7 +178,7 @@ export function useDashboardHandlers({
       void runDashboardDocumentUpload(files);
     });
   }, [
-    invoices,
+    ledgerEntries,
     isArchitect,
     hasProjectPass,
     runDashboardDocumentUpload,

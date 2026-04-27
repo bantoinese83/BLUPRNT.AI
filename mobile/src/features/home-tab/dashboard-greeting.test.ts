@@ -13,7 +13,7 @@ describe("getDashboardGreeting", () => {
   it("returns Budget reached when spend meets estimate", () => {
     expect(
       getDashboardGreeting({
-        invoicesLength: 2,
+        ledgerEntriesLength: 2,
         capitalDocumentedTotal: 100,
         estimatedMinTotal: 100,
       }),
@@ -23,7 +23,7 @@ describe("getDashboardGreeting", () => {
   it("returns document count when under budget", () => {
     expect(
       getDashboardGreeting({
-        invoicesLength: 3,
+        ledgerEntriesLength: 3,
         capitalDocumentedTotal: 50,
         estimatedMinTotal: 100,
       }),
@@ -34,7 +34,7 @@ describe("getDashboardGreeting", () => {
     vi.spyOn(Date.prototype, "getHours").mockReturnValue(9);
     expect(
       getDashboardGreeting({
-        invoicesLength: 0,
+        ledgerEntriesLength: 0,
         capitalDocumentedTotal: 0,
         estimatedMinTotal: null,
       }),
@@ -50,7 +50,7 @@ describe("buildDashboardHeaderLines", () => {
   it("pairs time greeting with first name and project line when no invoices", () => {
     vi.spyOn(Date.prototype, "getHours").mockReturnValue(9);
     const { line1, line2 } = buildDashboardHeaderLines({
-      invoicesLength: 0,
+      ledgerEntriesLength: 0,
       capitalDocumentedTotal: 0,
       estimatedMinTotal: null,
       firstName: "Lauren",
@@ -63,7 +63,7 @@ describe("buildDashboardHeaderLines", () => {
   it("omits name when firstName is blank", () => {
     vi.spyOn(Date.prototype, "getHours").mockReturnValue(14);
     const { line1, line2 } = buildDashboardHeaderLines({
-      invoicesLength: 0,
+      ledgerEntriesLength: 0,
       capitalDocumentedTotal: 0,
       estimatedMinTotal: null,
       firstName: null,
@@ -75,7 +75,7 @@ describe("buildDashboardHeaderLines", () => {
 
   it("uses document status on line1 when invoices exist", () => {
     const { line1, line2 } = buildDashboardHeaderLines({
-      invoicesLength: 2,
+      ledgerEntriesLength: 2,
       capitalDocumentedTotal: 50,
       estimatedMinTotal: 100,
       firstName: "Lauren",
@@ -88,7 +88,7 @@ describe("buildDashboardHeaderLines", () => {
   it("falls back to overview when project name missing", () => {
     vi.spyOn(Date.prototype, "getHours").mockReturnValue(20);
     const { line1, line2 } = buildDashboardHeaderLines({
-      invoicesLength: 0,
+      ledgerEntriesLength: 0,
       capitalDocumentedTotal: 0,
       estimatedMinTotal: null,
       firstName: "Alex",

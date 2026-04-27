@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { openOriginalDocumentForInvoice } from "./open-original-document";
+import { openOriginalDocumentForLedgerEntry } from "./open-original-document";
 import { invokeFunction } from "./supabase";
 import { toast } from "sonner";
 
@@ -13,7 +13,7 @@ vi.mock("sonner", () => ({
   },
 }));
 
-describe("openOriginalDocumentForInvoice", () => {
+describe("openOriginalDocumentForLedgerEntry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -23,7 +23,7 @@ describe("openOriginalDocumentForInvoice", () => {
       data: null,
       error: new Error("network"),
     });
-    const ok = await openOriginalDocumentForInvoice("inv-1");
+    const ok = await openOriginalDocumentForLedgerEntry("inv-1");
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalled();
   });
@@ -33,7 +33,7 @@ describe("openOriginalDocumentForInvoice", () => {
       data: { error: "No original file" },
       error: null,
     });
-    const ok = await openOriginalDocumentForInvoice("inv-2");
+    const ok = await openOriginalDocumentForLedgerEntry("inv-2");
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalled();
   });
@@ -43,10 +43,10 @@ describe("openOriginalDocumentForInvoice", () => {
       .spyOn(window, "open")
       .mockImplementation(() => ({}) as Window);
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://example.com/doc.pdf" },
+      data: { signedUrl: "https://example.com/doc.pdf" },
       error: null,
     });
-    const ok = await openOriginalDocumentForInvoice("inv-3");
+    const ok = await openOriginalDocumentForLedgerEntry("inv-3");
     expect(ok).toBe(true);
     expect(openSpy).toHaveBeenCalledWith(
       "https://example.com/doc.pdf",
@@ -61,7 +61,7 @@ describe("openOriginalDocumentForInvoice", () => {
       data: { signed_url: "https://example.com/doc.pdf" },
       error: null,
     });
-    const ok = await openOriginalDocumentForInvoice("inv-popup");
+    const ok = await openOriginalDocumentForLedgerEntry("inv-popup");
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalled();
   });
@@ -71,7 +71,7 @@ describe("openOriginalDocumentForInvoice", () => {
       data: {},
       error: null,
     });
-    const ok = await openOriginalDocumentForInvoice("inv-4");
+    const ok = await openOriginalDocumentForLedgerEntry("inv-4");
     expect(ok).toBe(false);
   });
 });

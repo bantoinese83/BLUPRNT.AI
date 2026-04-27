@@ -6,15 +6,15 @@ import * as Haptics from "expo-haptics";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
-import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
-import type { InvoiceRow } from "@shared/types/database";
+import { LedgerEntryReviewSheet } from "@/components/LedgerEntryReviewSheet";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { ConfigurationRequired } from "@/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 import { FinanceTabSkeleton } from "@/components/TabLoadingSkeletons";
 import { OriginalUploadPreviewModal } from "@/components/OriginalUploadPreviewModal";
-import { isFreeTierInvoiceLimitReached } from "@/lib/invoice-upload-gate";
+import { isFreeTierLedgerEntryLimitReached } from "@/lib/ledger-entry-upload-gate";
 import {
   DOCUMENT_CAPTURE_LEDGER_COPY,
   presentDocumentCapturePrompt,
@@ -23,17 +23,17 @@ import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
 import { FINANCE_TAB_BAR_OFFSET } from "@/features/finance-tab/constants";
 import {
   computeLedgerStats,
-  sortInvoicesByDateDesc,
-  groupInvoicesByMonth,
-  groupedInvoicesToSections,
+  sortLedgerEntriesByDateDesc,
+  groupLedgerEntriesByMonth,
+  groupedLedgerEntriesToSections,
   scopeRowsForSellerPacket,
-  type InvoiceLedgerFilter,
+  type LedgerDocumentFilter,
 } from "@/features/finance-tab/ledger-helpers";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 import { reportClientError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import { FinanceLedgerHeader } from "@/features/finance-tab/FinanceLedgerHeader";
-import { FinanceInvoiceRow } from "@/features/finance-tab/FinanceInvoiceRow";
+import { FinanceLedgerEntryRow } from "@/features/finance-tab/FinanceLedgerEntryRow";
 import { HomeSpecsTab } from "@/features/finance-tab/HomeSpecsTab";
 import { AddAssetSheet } from "@/features/finance-tab/AddAssetSheet";
 import { Theme } from "@/constants/Theme";
@@ -49,7 +49,7 @@ export default function FinanceScreen() {
     projects,
     project,
     scopeItems,
-    invoices,
+    ledgerEntries,
     handleProjectSelect,
     isArchitect,
     hasProjectPass,
@@ -58,25 +58,26 @@ export default function FinanceScreen() {
 
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
 
-  const [filter, setFilter] = useState<InvoiceLedgerFilter>("all");
+  const [filter, setFilter] = useState<LedgerDocumentFilter>("all");
   const [exporting, setExporting] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRow | null>(
-    null,
-  );
+  const [selectedLedgerEntry, setSelectedLedgerEntry] =
+    useState<LedgerEntryRow | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [includeAppendix, setIncludeAppendix] = useState(false);
-  const [originalPreviewInvoiceId, setOriginalPreviewInvoiceId] = useState<
-    string | null
-  >(null);
+  const [originalPreviewLedgerEntryId, setOriginalPreviewLedgerEntryId] =
+    useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<"ledger" | "specs">("ledger");
   const [isAddAssetOpen, setIsAddAssetOpen] = useState(false);
 
-  const stats = useMemo(() => computeLedgerStats(invoices), [invoices]);
+  const stats = useMemo(
+    () => computeLedgerStats(ledgerEntries as any),
+    [ledgerEntries],
+  );
 
-  const sortedInvoices = useMemo(
-    () => sortInvoicesByDateDesc(invoices),
-    [invoices],
+  const sortedLedgerEntries = useMemo(
+    () => sortLedgerEntriesByDateDesc(ledgerEntries as any),
+    [ledgerEntries],
   );
 
   const scopeForSellerPacket = useMemo(
@@ -84,14 +85,14 @@ export default function FinanceScreen() {
     [scopeItems],
   );
 
-  const groupedInvoices = useMemo(
-    () => groupInvoicesByMonth(sortedInvoices, filter),
-    [sortedInvoices, filter],
+  const groupedLedgerEntries = useMemo(
+    () => groupLedgerEntriesByMonth(sortedLedgerEntries, filter),
+    [sortedLedgerEntries, filter],
   );
 
   const sections = useMemo(
-    () => groupedInvoicesToSections(groupedInvoices),
-    [groupedInvoices],
+    () => groupedLedgerEntriesToSections(groupedLedgerEntries),
+    [groupedLedgerEntries],
   );
 
   const handleExport = useCallback(async () => {
@@ -103,10 +104,10 @@ export default function FinanceScreen() {
       return;
     }
 
-    if (scopeForSellerPacket.length === 0 && invoices.length === 0) {
+    if (scopeForSellerPacket.length === 0 && ledgerEntries.length === 0) {
       Alert.alert(
         "Nothing to export yet",
-        "Add a scope item or upload an invoice, then try Export Home Archive again.",
+        "Add a scope item or upload a document, then try Export Home Archive again.",
       );
       return;
     }
@@ -124,7 +125,7 @@ export default function FinanceScreen() {
           estimated_max_total: project.estimated_max_total,
         },
         scopeForSellerPacket,
-        invoices,
+        ledgerEntries as any,
         { includeAppendix },
       );
     } catch (err: unknown) {
@@ -141,7 +142,7 @@ export default function FinanceScreen() {
     isArchitect,
     hasProjectPass,
     scopeForSellerPacket,
-    invoices,
+    ledgerEntries,
     includeAppendix,
     setUpgradeReason,
     setShowUpgrade,
@@ -157,20 +158,20 @@ export default function FinanceScreen() {
           projectId: project.id,
           files,
           successToastMessage: "Document added — your vault is updated.",
-          onInvoiceLimitUpgrade: () => {
+          onLedgerEntryLimitUpgrade: () => {
             setUpgradeReason("invoice_limit");
             setShowUpgrade(true);
           },
           refreshProjectData: load,
         });
-        if (result.ok && result.lastInvoiceId && files.length === 1) {
+        if (result.ok && result.lastLedgerEntryId && files.length === 1) {
           const { data: row } = await supabase
-            .from("invoices")
+            .from("ledger_entries")
             .select("*")
-            .eq("id", result.lastInvoiceId)
+            .eq("id", result.lastLedgerEntryId)
             .maybeSingle();
           if (row) {
-            setSelectedInvoice(row as unknown as InvoiceRow);
+            setSelectedLedgerEntry(row as unknown as LedgerEntryRow);
             setIsReviewOpen(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           }
@@ -185,7 +186,13 @@ export default function FinanceScreen() {
   const openLedgerDocumentCapture = useCallback(() => {
     Haptics.selectionAsync();
 
-    if (isFreeTierInvoiceLimitReached(invoices, isArchitect, hasProjectPass)) {
+    if (
+      isFreeTierLedgerEntryLimitReached(
+        ledgerEntries as any,
+        isArchitect,
+        hasProjectPass,
+      )
+    ) {
       setUpgradeReason("invoice_limit");
       setShowUpgrade(true);
       return;
@@ -195,7 +202,7 @@ export default function FinanceScreen() {
       void runLedgerDocumentUpload(files);
     });
   }, [
-    invoices,
+    ledgerEntries,
     isArchitect,
     hasProjectPass,
     runLedgerDocumentUpload,
@@ -238,7 +245,7 @@ export default function FinanceScreen() {
               onIncludeAppendixChange={setIncludeAppendix}
               exporting={exporting}
               onExport={handleExport}
-              invoices={invoices}
+              ledgerEntries={ledgerEntries as any}
               filter={filter}
               onFilterChange={setFilter}
             />
@@ -260,7 +267,7 @@ export default function FinanceScreen() {
       setIncludeAppendix,
       exporting,
       handleExport,
-      invoices,
+      ledgerEntries,
       filter,
       setFilter,
     ],
@@ -310,7 +317,7 @@ export default function FinanceScreen() {
     );
   }
 
-  const handleInvoiceDelete = (id: string) => {
+  const handleLedgerEntryDelete = (id: string) => {
     Alert.alert(
       "Remove document?",
       "This will permanently delete this record and its associated data.",
@@ -321,7 +328,7 @@ export default function FinanceScreen() {
           style: "destructive",
           onPress: async () => {
             const { error } = await supabase
-              .from("invoices")
+              .from("ledger_entries")
               .delete()
               .eq("id", id);
             if (error) {
@@ -358,7 +365,7 @@ export default function FinanceScreen() {
           stickySectionHeadersEnabled
           ListEmptyComponent={
             <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
-              {invoices.length === 0 ? (
+              {ledgerEntries.length === 0 ? (
                 <EmptyState
                   icon={Receipt}
                   title="Nothing in your vault yet"
@@ -396,8 +403,8 @@ export default function FinanceScreen() {
             </View>
           )}
           renderItem={({ item: inv, index }) => (
-            <FinanceInvoiceRow
-              inv={inv}
+            <FinanceLedgerEntryRow
+              inv={inv as LedgerEntryRow}
               index={index}
               hasProjectPass={hasProjectPass}
               onUpgradeClick={() => {
@@ -405,12 +412,12 @@ export default function FinanceScreen() {
                 setShowUpgrade(true);
               }}
               onPress={() => {
-                setSelectedInvoice(inv as unknown as InvoiceRow);
+                setSelectedLedgerEntry(inv as LedgerEntryRow);
                 setIsReviewOpen(true);
                 Haptics.selectionAsync();
               }}
-              onViewOriginal={() => setOriginalPreviewInvoiceId(inv.id)}
-              onDelete={handleInvoiceDelete}
+              onViewOriginal={() => setOriginalPreviewLedgerEntryId(inv.id)}
+              onDelete={handleLedgerEntryDelete}
             />
           )}
         />
@@ -444,13 +451,13 @@ export default function FinanceScreen() {
         </View>
       )}
 
-      <InvoiceReviewSheet
-        invoice={selectedInvoice}
+      <LedgerEntryReviewSheet
+        ledgerEntry={selectedLedgerEntry}
         projectId={project?.id ?? null}
         isOpen={isReviewOpen}
         onClose={() => {
           setIsReviewOpen(false);
-          setSelectedInvoice(null);
+          setSelectedLedgerEntry(null);
         }}
         onDeleted={() => {
           load();
@@ -460,11 +467,11 @@ export default function FinanceScreen() {
         }}
       />
 
-      {originalPreviewInvoiceId ? (
+      {originalPreviewLedgerEntryId ? (
         <OriginalUploadPreviewModal
-          key={originalPreviewInvoiceId}
-          invoiceId={originalPreviewInvoiceId}
-          onClose={() => setOriginalPreviewInvoiceId(null)}
+          key={originalPreviewLedgerEntryId}
+          ledgerEntryId={originalPreviewLedgerEntryId}
+          onClose={() => setOriginalPreviewLedgerEntryId(null)}
         />
       ) : null}
 

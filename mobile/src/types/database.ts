@@ -1,7 +1,7 @@
 export type {
   ProjectRow,
   ScopeRow,
-  InvoiceRow,
+  LedgerEntryRow,
   UserSubscriptionRow,
   ProjectPassRow,
 } from "@shared/types/database";

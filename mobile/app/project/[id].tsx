@@ -54,7 +54,7 @@ function ProjectDetailScreenInner() {
     <AwarenessProvider
       project={vm.project}
       scopeItems={vm.scope}
-      invoices={vm.detailInvoices}
+      ledgerEntries={vm.detailInvoices}
       spendByCategory={vm.spendByCategory}
       isArchitect={vm.isArchitect}
       hasProjectPass={vm.hasProjectPass}

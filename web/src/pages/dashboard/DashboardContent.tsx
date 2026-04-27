@@ -20,7 +20,8 @@ import type { UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
 import { DASHBOARD_SECTION_GUIDED_PATH } from "@shared/copy/dashboard";
-import type { InvoiceRow, ProjectRow } from "@shared/types/database";
+import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
+import { countBillOrReceiptUploadsInProject } from "@shared/lib/ledger-entry-quota";
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -50,7 +51,7 @@ export function DashboardContent({
   projects,
   project,
   scopeItems,
-  invoices,
+  ledgerEntries,
   spendByCategory: _spendByCategory,
   reconciliation,
   isArchitect,
@@ -67,7 +68,7 @@ export function DashboardContent({
   setProjects,
   setProject,
   setScopeItems,
-  setInvoices,
+  setLedgerEntries,
 }: DashboardContentProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -91,7 +92,7 @@ export function DashboardContent({
     setShowUpgrade,
   );
   useDashboardCheckoutSuccessConfetti(location.search, load);
-  useDashboardMilestoneConfetti(project, invoices);
+  useDashboardMilestoneConfetti(project, ledgerEntries);
 
   const {
     health,
@@ -104,7 +105,7 @@ export function DashboardContent({
     project,
     projects,
     scopeItems,
-    invoices,
+    ledgerEntries,
     memoHomeTeam,
     memoInvestmentTotal,
     memoResaleImpact,
@@ -136,9 +137,9 @@ export function DashboardContent({
         estimated_max_total: project.estimated_max_total,
       },
       scopeItems,
-      invoices,
+      invoices: ledgerEntries as LedgerEntryRow[],
     });
-  }, [project, scopeItems, invoices, isArchitect, hasProjectPass]);
+  }, [project, scopeItems, ledgerEntries, isArchitect, hasProjectPass]);
 
   const handleProjectDelete = useCallback((p: ProjectRow) => {
     setDeleteProject(p);
@@ -156,7 +157,7 @@ export function DashboardContent({
     if (id === project?.id) {
       setProject(null);
       setScopeItems([]);
-      setInvoices([]);
+      setLedgerEntries([]);
     }
 
     const deleteAction = async () => {
@@ -190,8 +191,8 @@ export function DashboardContent({
   }
 
   const activityEvents = useMemo(
-    () => generateActivityEvents(project, invoices),
-    [project, invoices],
+    () => generateActivityEvents(project, ledgerEntries as any),
+    [project, ledgerEntries],
   );
 
   const handleProjectRename = async (id: string, newName: string) => {
@@ -289,7 +290,7 @@ export function DashboardContent({
           estimatedMin={project.estimated_min_total ?? 0}
           estimatedMax={project.estimated_max_total ?? 0}
           spendingTotal={memoInvestmentTotal}
-          documentRowCount={invoices.length}
+          documentRowCount={ledgerEntries.length}
         />
 
         {project && (
@@ -320,11 +321,7 @@ export function DashboardContent({
 
         <motion.div variants={itemVariants}>
           <UpgradeBanner
-            invoiceCount={
-              invoices.filter(
-                (i: InvoiceRow) => (i.document_type ?? "invoice") === "invoice",
-              ).length
-            }
+            invoiceCount={countBillOrReceiptUploadsInProject(ledgerEntries)}
             onUpgradeClick={() => {
               setUpgradeReason("invoice_limit");
               setShowUpgrade(true);
@@ -353,7 +350,7 @@ export function DashboardContent({
                   <DashboardPlan
                     project={project}
                     scopeItems={scopeItems}
-                    invoices={invoices}
+                    ledgerEntries={ledgerEntries}
                     activityEvents={activityEvents}
                     reconciliation={reconciliation}
                     isArchitect={isArchitect}
@@ -389,7 +386,7 @@ export function DashboardContent({
                 element={
                   <DashboardExecute
                     project={project}
-                    invoices={invoices}
+                    ledgerEntries={ledgerEntries}
                     health={health}
                     documentsComp={documentsComp}
                   />

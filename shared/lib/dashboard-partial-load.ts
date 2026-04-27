@@ -4,7 +4,7 @@
 export function partialDashboardLoadMessage(
   parts: {
     scopeFailed: boolean;
-    invoicesFailed: boolean;
+    ledgerEntriesFailed: boolean;
     subscriptionFailed: boolean;
     projectPassFailed: boolean;
     galleryFailed: boolean;
@@ -13,7 +13,7 @@ export function partialDashboardLoadMessage(
 ): string | null {
   const labels: string[] = [];
   if (parts.scopeFailed) labels.push("scope and estimates");
-  if (parts.invoicesFailed) labels.push("documents");
+  if (parts.ledgerEntriesFailed) labels.push("documents");
   if (parts.subscriptionFailed) labels.push("plan status");
   if (parts.projectPassFailed) labels.push("project pass");
   if (parts.galleryFailed) labels.push("transformation photos");

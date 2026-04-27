@@ -2,23 +2,26 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/supabase";
-import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
+import type {
+  LedgerEntryRow,
+  UserSubscriptionRow,
+} from "@shared/types/database";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { shouldPromptUpgradeAfterUploadFailure } from "@shared/constants/upload-error-codes";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { addUserFlowBreadcrumb, reportClientError } from "@/lib/sentry";
 import {
-  isArchitectQuotaInvoiceType,
+  isArchitectQuotaLedgerEntryType,
   LEDGER_DOCUMENT_TYPES,
   type LedgerDocumentType,
   type UploadFormDocumentType,
 } from "@shared/lib/infer-document-type";
-import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
 
 interface UseDocumentManagementProps {
   projectId: string;
-  documents: InvoiceRow[];
+  documents: LedgerEntryRow[];
   onUploaded: (id?: string) => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
   subscription: UserSubscriptionRow | null;
@@ -98,16 +101,16 @@ export function useDocumentManagement({
     reviewQueueRef.current = [];
   }, [projectId]);
 
-  const documentCount = documents.filter((i) =>
-    isArchitectQuotaInvoiceType(i.document_type ?? "invoice"),
+  const recordCount = documents.filter((i) =>
+    isArchitectQuotaLedgerEntryType(i.document_type ?? "invoice"),
   ).length;
 
-  const architectUploads = subscription?.invoice_uploads_count ?? 0;
+  const architectUploads = subscription?.ledger_uploads_count ?? 0;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
   const isAtDocumentUploadLimit =
     !hasProjectPass &&
-    ((!isArchitectActive && documentCount >= FREE_LIMIT) ||
+    ((!isArchitectActive && recordCount >= FREE_LIMIT) ||
       (isArchitectActive && architectUploads >= 10));
 
   /** Blocks when the user picked invoice/receipt and is at the cap. */
@@ -183,7 +186,7 @@ export function useDocumentManagement({
         fd.set("document_type", documentType);
 
         const { data, error: fnErr } = await invokeFunction<{
-          invoice_id?: string;
+          ledger_entry_id?: string;
           ocr_status?: string;
           document_type?: string;
           error?: string;
@@ -238,7 +241,7 @@ export function useDocumentManagement({
           }
         }
 
-        const newId = data?.invoice_id;
+        const newId = data?.ledger_entry_id;
         const resolvedType = (data?.document_type ??
           documentType) as ValidDocType;
         if (
@@ -308,17 +311,17 @@ export function useDocumentManagement({
     uploading,
     batchStatus,
     error,
-    reviewInvoiceId: reviewDocumentId,
-    setReviewInvoiceId: setReviewDocumentId,
+    reviewDocumentId,
+    setReviewDocumentId,
     closeReviewModal,
     documentType,
     setDocumentType,
     guideDismissed,
     guideExpanded,
     setGuideExpanded,
-    invoiceCount: documentCount,
+    recordCount,
     atLimit: isAtDocumentUploadLimit,
-    blockInvoiceOnlyUpload: blockDocumentOnlyUpload,
+    blockRecordOnlyUpload: blockDocumentOnlyUpload,
     isArchitectAtGlobalLimit,
     dismissGuide,
     handleUploadFile,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UPLOAD_FORM_DOCUMENT_TYPES } from "./infer-document-type";
+import { UPLOAD_FORM_DOCUMENT_TYPES } from "./infer-document-type.ts";
 
 export const uuidSchema = z.string().uuid();
 
@@ -84,7 +84,7 @@ export function uploadFileMimeLooksAllowed(
   return false;
 }
 
-export const uploadInvoiceSchema = z.object({
+export const uploadLedgerEntrySchema = z.object({
   project_id: uuidSchema,
   // File validation is handled differently in backend vs frontend (multipart/form-data vs browser File)
   // so we keep the structural fields here.
@@ -100,8 +100,8 @@ export const uploadInvoiceSchema = z.object({
     }),
 });
 
-export const getInvoiceSchema = z.object({
-  invoice_id: uuidSchema,
+export const getLedgerEntrySchema = z.object({
+  ledger_entry_id: uuidSchema,
 });
 
 /** Public lead capture (inserted via Edge Function with service role). */

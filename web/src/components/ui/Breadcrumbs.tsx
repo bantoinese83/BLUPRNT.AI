@@ -7,7 +7,7 @@ const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
   plan: "Project Plan",
   scope: "Scope",
-  invoices: "Invoices",
+  invoices: "Ledger",
   settings: "Settings",
   onboarding: "Onboarding",
   estimate: "Estimate",

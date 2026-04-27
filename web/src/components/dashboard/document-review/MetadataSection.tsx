@@ -7,6 +7,9 @@ interface MetadataSectionProps {
   onDocTypeChange: (type: LedgerDocumentType) => void;
   warrantyExpiryDate: string;
   onWarrantyDateChange: (date: string) => void;
+  vendorName: string;
+  onVendorNameChange: (name: string) => void;
+  vendorLabel?: string;
 }
 
 export function MetadataSection({
@@ -14,9 +17,32 @@ export function MetadataSection({
   onDocTypeChange,
   warrantyExpiryDate,
   onWarrantyDateChange,
+  vendorName,
+  onVendorNameChange,
+  vendorLabel = "Vendor Name",
 }: MetadataSectionProps) {
   return (
     <div className="flex-1 w-full space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
+        <label
+          htmlFor="document-review-vendor-name"
+          className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+        >
+          {vendorLabel}
+        </label>
+        <input
+          id="document-review-vendor-name"
+          type="text"
+          value={vendorName}
+          onChange={(e) => onVendorNameChange(e.target.value)}
+          placeholder="e.g. Home Depot, ACME Roofing"
+          className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
+        />
+        <p className="text-[11px] text-slate-500 leading-snug">
+          The company name identified from the document. Correct if necessary.
+        </p>
+      </div>
+
       <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
         <label
           htmlFor="document-review-doc-type"
@@ -44,7 +70,7 @@ export function MetadataSection({
         </p>
       </div>
 
-      {ledgerDocType !== "quote" && (
+      {ledgerDocType === "warranty" && (
         <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
           <label
             htmlFor="document-review-warranty-expiry"

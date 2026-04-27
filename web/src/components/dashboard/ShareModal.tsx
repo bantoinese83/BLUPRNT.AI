@@ -134,8 +134,8 @@ export function ShareModal({ isOpen, onClose, projectId }: ShareModalProps) {
               </h4>
             </div>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Viewers only see your project scope and budget baseline. Invoices,
-              receipts, and personal notes are kept private.
+              Viewers only see your project scope and budget baseline.
+              Documents, receipts, and personal notes are kept private.
             </p>
           </div>
 

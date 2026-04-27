@@ -1,52 +1,57 @@
-import type { InvoiceRow, ScopeRow } from "@shared/types/database";
+import type { LedgerEntryRow, ScopeRow } from "@shared/types/database";
 import {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
-  filterInvoicesByLedgerDocumentFilter,
+  filterLedgerEntriesByDocumentFilter,
   type LedgerDocumentFilter,
 } from "@shared/lib/plan-vs-actual";
 
-export type InvoiceLedgerFilter = LedgerDocumentFilter;
+// Alias for backward compatibility if needed, but preferred LedgerDocumentFilter
+export type { LedgerDocumentFilter };
 
-export function computeLedgerStats(invoices: InvoiceRow[]): {
+export function computeLedgerStats(entries: LedgerEntryRow[]): {
   capital: number;
   maintenance: number;
   total: number;
 } {
-  const capital = capitalImprovementTotal(invoices);
-  const maintenance = maintenanceDocumentTotal(invoices);
+  const capital = capitalImprovementTotal(entries as any);
+  const maintenance = maintenanceDocumentTotal(entries as any);
   return { capital, maintenance, total: capital + maintenance };
 }
 
-export function sortInvoicesByDateDesc(invoices: InvoiceRow[]): InvoiceRow[] {
-  return [...invoices].sort(
+export function sortLedgerEntriesByDateDesc(
+  entries: LedgerEntryRow[],
+): LedgerEntryRow[] {
+  return [...entries].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 }
 
-export function groupInvoicesByMonth(
-  sortedInvoices: InvoiceRow[],
-  filter: InvoiceLedgerFilter,
-): Record<string, InvoiceRow[]> {
-  const active = filterInvoicesByLedgerDocumentFilter(sortedInvoices, filter);
+export function groupLedgerEntriesByMonth(
+  sortedEntries: LedgerEntryRow[],
+  filter: LedgerDocumentFilter,
+): Record<string, LedgerEntryRow[]> {
+  const active = filterLedgerEntriesByDocumentFilter(
+    sortedEntries as any,
+    filter,
+  );
 
-  const groups: Record<string, InvoiceRow[]> = {};
-  active.forEach((inv) => {
+  const groups: Record<string, LedgerEntryRow[]> = {};
+  active.forEach((inv: any) => {
     const date = new Date(inv.created_at);
-    const key = date.toLocaleString("default", {
-      month: "long",
-      year: "numeric",
-    });
+    const month = date.toLocaleString("en-US", { month: "long" });
+    const year = date.getFullYear();
+    const key = `${month} ${year}`;
     if (!groups[key]) groups[key] = [];
     groups[key].push(inv);
   });
   return groups;
 }
 
-export function groupedInvoicesToSections(
-  grouped: Record<string, InvoiceRow[]>,
-): { title: string; data: InvoiceRow[] }[] {
+export function groupedLedgerEntriesToSections(
+  grouped: Record<string, LedgerEntryRow[]>,
+): { title: string; data: LedgerEntryRow[] }[] {
   return Object.entries(grouped).map(([month, items]) => ({
     title: month,
     data: items,

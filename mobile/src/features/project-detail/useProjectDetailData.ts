@@ -5,7 +5,11 @@ import { presentProjectShareSheet } from "@/lib/share-project";
 import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import type { InvoiceRow, ProjectRow, ScopeRow } from "@shared/types/database";
+import type {
+  LedgerEntryRow,
+  ProjectRow,
+  ScopeRow,
+} from "@shared/types/database";
 import { groupScopeByCategory } from "./helpers";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 import {
@@ -33,7 +37,9 @@ export function useProjectDetailData() {
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [scope, setScope] = useState<ScopeRow[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [detailInvoices, setDetailInvoices] = useState<InvoiceRow[]>([]);
+  const [detailLedgerEntries, setDetailLedgerEntries] = useState<
+    LedgerEntryRow[]
+  >([]);
   const [includeAppendix, setIncludeAppendix] = useState(false);
 
   const {
@@ -49,25 +55,25 @@ export function useProjectDetailData() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [scopePollDone, setScopePollDone] = useState(false);
   const [scopeLoadWarning, setScopeLoadWarning] = useState<string | null>(null);
-  const [invoiceLoadWarning, setInvoiceLoadWarning] = useState<string | null>(
-    null,
-  );
+  const [ledgerEntryLoadWarning, setLedgerEntryLoadWarning] = useState<
+    string | null
+  >(null);
 
   const detailDataWarning = useMemo(
     () =>
-      [scopeLoadWarning, invoiceLoadWarning].filter(Boolean).join("\n\n") ||
+      [scopeLoadWarning, ledgerEntryLoadWarning].filter(Boolean).join("\n\n") ||
       null,
-    [scopeLoadWarning, invoiceLoadWarning],
+    [scopeLoadWarning, ledgerEntryLoadWarning],
   );
 
   const clearDetailDataWarnings = useCallback(() => {
     setScopeLoadWarning(null);
-    setInvoiceLoadWarning(null);
+    setLedgerEntryLoadWarning(null);
   }, []);
 
-  const invoiceTotal = useMemo(
-    () => capitalImprovementTotal(detailInvoices),
-    [detailInvoices],
+  const ledgerEntryTotal = useMemo(
+    () => capitalImprovementTotal(detailLedgerEntries),
+    [detailLedgerEntries],
   );
 
   const [reconciliation, setReconciliation] =
@@ -79,19 +85,22 @@ export function useProjectDetailData() {
   const groupedScope = useMemo(() => groupScopeByCategory(scope), [scope]);
 
   const refreshReconciliation = useCallback(
-    async (currentScope: ScopeRow[], currentInvoices: InvoiceRow[]) => {
-      if (currentInvoices.length === 0) return;
+    async (
+      currentScope: ScopeRow[],
+      currentLedgerEntries: LedgerEntryRow[],
+    ) => {
+      if (currentLedgerEntries.length === 0) return;
 
       const { data: lines } = await supabase
-        .from("invoice_line_items")
-        .select("invoice_id, line_total, scope_item_id, category")
+        .from("ledger_line_items")
+        .select("ledger_entry_id, line_total, scope_item_id, category")
         .in(
-          "invoice_id",
-          currentInvoices.map((i) => i.id),
+          "ledger_entry_id",
+          currentLedgerEntries.map((i) => i.id),
         );
 
       if (lines) {
-        setReconciliation(buildReconciliation(currentScope, lines));
+        setReconciliation(buildReconciliation(currentScope, lines as any));
         setSpendByCategory(
           buildSpendByCategory(
             lines.map((l) => ({
@@ -118,7 +127,7 @@ export function useProjectDetailData() {
         error: { message: string; code?: string } | null;
       },
       invRes: {
-        data: InvoiceRow[] | null;
+        data: LedgerEntryRow[] | null;
         error: { message: string; code?: string } | null;
       },
     ) => {
@@ -156,20 +165,21 @@ export function useProjectDetailData() {
         setScopeLoadWarning(null);
       }
 
-      const newInvoices = (invRes.data ?? []) as unknown as InvoiceRow[];
-      setDetailInvoices(newInvoices);
+      const newLedgerEntries = (invRes.data ??
+        []) as unknown as LedgerEntryRow[];
+      setDetailLedgerEntries(newLedgerEntries);
       if (invRes.error) {
-        setInvoiceLoadWarning(
+        setLedgerEntryLoadWarning(
           friendlyDashboardLoadError({
             message: invRes.error.message,
             code: invRes.error.code,
           }),
         );
       } else {
-        setInvoiceLoadWarning(null);
+        setLedgerEntryLoadWarning(null);
       }
 
-      await refreshReconciliation(newScopes, newInvoices);
+      await refreshReconciliation(newScopes, newLedgerEntries);
     },
     [refreshReconciliation],
   );
@@ -180,57 +190,15 @@ export function useProjectDetailData() {
     await presentProjectShareSheet({ id: project.id, name: project.name });
   }, [project]);
 
-  // Initial Fetch
-  useEffect(() => {
-    async function fetchProject() {
-      if (!id) {
-        setLoading(false);
-        setProjectLoadError(null);
-        setScopeLoadWarning(null);
-        setInvoiceLoadWarning(null);
-        return;
-      }
-
-      setLoading(true);
-      setScopePollDone(false);
-
-      const [projRes, scopeRes, invRes] = await Promise.all([
-        supabase.from("projects").select("*").eq("id", id).single(),
-        supabase
-          .from("scope_items")
-          .select("*")
-          .eq("project_id", id)
-          .order("created_at", { ascending: true }),
-        supabase
-          .from("invoices")
-          .select("*")
-          .eq("project_id", id)
-          .order("created_at", { ascending: false }),
-      ]);
-
-      await ingestFetchResults(
-        projRes as unknown as Parameters<typeof ingestFetchResults>[0],
-        scopeRes as unknown as Parameters<typeof ingestFetchResults>[1],
-        invRes as unknown as Parameters<typeof ingestFetchResults>[2],
-      );
-
-      setLoading(false);
-    }
-
-    void fetchProject();
-  }, [id, ingestFetchResults]);
-
   // Hook 1: Polling
-  useProjectPolling({
+  const { stopPolling } = useProjectPolling({
     id,
-    loading,
-    project,
     scopeCount: scope.length,
     setScope,
     setScopeLoadWarning,
     setScopePollDone,
     onScopeArrived: (newScopes) =>
-      refreshReconciliation(newScopes, detailInvoices),
+      refreshReconciliation(newScopes, detailLedgerEntries),
   });
 
   // Hook 2: Mutations
@@ -238,6 +206,9 @@ export function useProjectDetailData() {
     id,
     scope,
     setScope,
+    load: () => {
+      /* could refresh everything if needed */
+    },
   });
 
   // Hook 3: Export
@@ -245,7 +216,7 @@ export function useProjectDetailData() {
     id,
     project,
     scope,
-    detailInvoices,
+    detailLedgerEntries: detailLedgerEntries,
     isArchitect,
     hasProjectPass,
     includeAppendix,
@@ -265,20 +236,51 @@ export function useProjectDetailData() {
         .eq("project_id", id)
         .order("created_at", { ascending: true }),
       supabase
-        .from("invoices")
+        .from("ledger_entries")
         .select("*")
         .eq("project_id", id)
         .order("created_at", { ascending: false }),
     ]);
 
-    await ingestFetchResults(
-      projRes as unknown as Parameters<typeof ingestFetchResults>[0],
-      scopeRes as unknown as Parameters<typeof ingestFetchResults>[1],
-      invRes as unknown as Parameters<typeof ingestFetchResults>[2],
-    );
-
+    await ingestFetchResults(projRes as any, scopeRes as any, invRes as any);
     setRefreshing(false);
   }, [id, ingestFetchResults]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchProject = async () => {
+      if (!id) return;
+      setLoading(true);
+      setScopePollDone(false);
+
+      const [projRes, scopeRes, invRes] = await Promise.all([
+        supabase.from("projects").select("*").eq("id", id).single(),
+        supabase
+          .from("scope_items")
+          .select("*")
+          .eq("project_id", id)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("ledger_entries")
+          .select("*")
+          .eq("project_id", id)
+          .order("created_at", { ascending: false }),
+      ]);
+
+      if (cancelled) return;
+
+      await ingestFetchResults(projRes as any, scopeRes as any, invRes as any);
+      setLoading(false);
+    };
+
+    void fetchProject();
+
+    return () => {
+      cancelled = true;
+      stopPolling();
+    };
+  }, [id, ingestFetchResults, stopPolling]);
 
   return {
     id,
@@ -292,7 +294,7 @@ export function useProjectDetailData() {
     scope,
     expandedId,
     setExpandedId,
-    detailInvoices,
+    detailLedgerEntries,
     reconciliation,
     includeAppendix,
     setIncludeAppendix,
@@ -308,7 +310,7 @@ export function useProjectDetailData() {
     scopePollDone,
     detailDataWarning,
     clearDetailDataWarnings,
-    invoiceTotal,
+    ledgerTotal: ledgerEntryTotal,
     groupedScope,
     handleShare,
     handleRefresh,

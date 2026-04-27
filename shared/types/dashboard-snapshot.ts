@@ -1,7 +1,7 @@
 import type {
   ProjectRow,
   ScopeRow,
-  InvoiceRow,
+  LedgerEntryRow,
   UserSubscriptionRow,
 } from "./database";
 
@@ -16,7 +16,7 @@ export type DashboardSnapshot = {
   projects: ProjectRow[];
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
   isArchitect: boolean;

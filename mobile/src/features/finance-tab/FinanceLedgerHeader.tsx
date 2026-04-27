@@ -18,8 +18,8 @@ import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { DashboardLoadErrorBanner } from "@/components/DashboardLoadErrorBanner";
-import type { InvoiceRow, ProjectRow } from "@shared/types/database";
-import type { InvoiceLedgerFilter } from "@/features/finance-tab/ledger-helpers";
+import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
+import type { LedgerDocumentFilter } from "@/features/finance-tab/ledger-helpers";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 
 type FinanceLedgerHeaderProps = {
@@ -36,9 +36,9 @@ type FinanceLedgerHeaderProps = {
   onIncludeAppendixChange: (value: boolean) => void;
   exporting: boolean;
   onExport: () => void;
-  invoices: InvoiceRow[];
-  filter: InvoiceLedgerFilter;
-  onFilterChange: (next: InvoiceLedgerFilter) => void;
+  ledgerEntries: LedgerEntryRow[];
+  filter: LedgerDocumentFilter;
+  onFilterChange: (next: LedgerDocumentFilter) => void;
 };
 
 export function FinanceLedgerHeader({
@@ -55,11 +55,11 @@ export function FinanceLedgerHeader({
   onIncludeAppendixChange,
   exporting,
   onExport,
-  invoices,
+  ledgerEntries,
   filter,
   onFilterChange,
 }: FinanceLedgerHeaderProps) {
-  const canIncludeUploads = invoices.some((i) => Boolean(i.document_id));
+  const canIncludeUploads = ledgerEntries.some((i) => Boolean(i.document_id));
 
   return (
     <>
@@ -159,7 +159,7 @@ export function FinanceLedgerHeader({
                 <Text style={styles.appendixHint}>
                   {canIncludeUploads
                     ? "Adds receipt photos at the end of your seller packet. Larger download. If an invoice is a PDF, we add a short note instead of the full file."
-                    : "Turn this on after you attach a photo or file to at least one invoice — nothing is linked yet, so the switch stays off."}
+                    : "Turn this on after you attach a photo or file to at least one document — nothing is linked yet, so the switch stays off."}
                 </Text>
               </View>
               <Switch
@@ -169,8 +169,8 @@ export function FinanceLedgerHeader({
                 accessibilityLabel="Include uploads in seller packet PDF"
                 accessibilityHint={
                   canIncludeUploads
-                    ? "Adds an extra section with images from linked invoice files"
-                    : "Requires at least one invoice with an attached file"
+                    ? "Adds an extra section with images from linked files"
+                    : "Requires at least one document with an attached file"
                 }
                 trackColor={{
                   false: "rgba(148,163,184,0.35)",
@@ -204,7 +204,7 @@ export function FinanceLedgerHeader({
           ]}
           value={filter}
           onChange={(val: string) => {
-            onFilterChange(val as InvoiceLedgerFilter);
+            onFilterChange(val as LedgerDocumentFilter);
           }}
           containerStyle={{ marginTop: 32, marginBottom: 16 }}
         />

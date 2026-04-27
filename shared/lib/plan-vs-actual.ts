@@ -6,13 +6,13 @@
 import { isPlanVsActualDocumentType } from "./infer-document-type.ts";
 import { money } from "./formatters.ts";
 
-export type InvoiceLike = {
+export type LedgerEntryLike = {
   total: number | null;
   document_type?: string | null;
 };
 
-export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
-  return (invoices ?? []).reduce((s, i) => {
+export function capitalImprovementTotal(entries: LedgerEntryLike[]): number {
+  return (entries ?? []).reduce((s, i) => {
     const t = (i?.document_type ?? "invoice").toLowerCase();
     if (isPlanVsActualDocumentType(t)) {
       const val = i?.total != null && Number.isFinite(i.total) ? i.total : 0;
@@ -26,8 +26,8 @@ export function capitalImprovementTotal(invoices: InvoiceLike[]): number {
  * Sums all non–plan-vs-actual documents (warranties, permits, records, other).
  * Shown in the "Records" side of the ledger, not the capital improvement track.
  */
-export function maintenanceDocumentTotal(invoices: InvoiceLike[]): number {
-  return (invoices ?? []).reduce((s, i) => {
+export function maintenanceDocumentTotal(entries: LedgerEntryLike[]): number {
+  return (entries ?? []).reduce((s, i) => {
     const t = (i?.document_type ?? "").toLowerCase();
     const isCapital = t ? isPlanVsActualDocumentType(t) : false;
     if (t && !isCapital) {
@@ -40,18 +40,18 @@ export function maintenanceDocumentTotal(invoices: InvoiceLike[]): number {
 
 export type LedgerDocumentFilter = "all" | "capital" | "maintenance";
 
-export function filterInvoicesByLedgerDocumentFilter<T extends InvoiceLike>(
-  invoices: T[],
+export function filterLedgerEntriesByDocumentFilter<T extends LedgerEntryLike>(
+  entries: T[],
   filter: LedgerDocumentFilter,
 ): T[] {
-  if (filter === "all") return invoices;
+  if (filter === "all") return entries;
   if (filter === "capital") {
-    return invoices.filter((i) => {
+    return entries.filter((i) => {
       const t = (i.document_type ?? "invoice").toLowerCase();
       return isPlanVsActualDocumentType(t);
     });
   }
-  return invoices.filter((i) => {
+  return entries.filter((i) => {
     const t = (i.document_type ?? "invoice").toLowerCase();
     return !isPlanVsActualDocumentType(t);
   });

@@ -1,8 +1,8 @@
-import type { Database } from "@shared/types/supabase.gen";
+import type { Database } from "./supabase.gen.ts";
 
 type PublicSchema = Database["public"];
 
-import type { ScopeMetadata, ProjectMetadata } from "./metadata";
+import type { ScopeMetadata, ProjectMetadata } from "./metadata.ts";
 
 /** Subset of `projects` row fields commonly selected in the dashboard (joined selects may omit columns). */
 export type ProjectRow = {
@@ -27,24 +27,10 @@ export type ScopeRow = Omit<
   metadata: ScopeMetadata | null;
 };
 
-export type InvoiceRow = {
-  id: string;
-  vendor_name: string | null;
-  total: number | null;
-  created_at: string;
-  payment_status: string;
-  document_type: string | null;
-  document_id: string | null;
-  issue_date: string | null;
-  project_id: string;
-  vendor_contact_info: unknown;
-  warranty_expiry_date: string | null;
-  is_verified: boolean;
-  owner_user_id: string | null;
-};
+export type LedgerEntryRow = PublicSchema["Tables"]["ledger_entries"]["Row"];
 
-export type InvoiceLineItemRow =
-  PublicSchema["Tables"]["invoice_line_items"]["Row"];
+export type LedgerLineItemRow =
+  PublicSchema["Tables"]["ledger_line_items"]["Row"];
 
 export type UserSubscriptionRow =
   PublicSchema["Tables"]["user_subscriptions"]["Row"];

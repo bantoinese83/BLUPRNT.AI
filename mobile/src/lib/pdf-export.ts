@@ -7,9 +7,9 @@ import {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
   planVsActualPdfLines,
+  type LedgerEntryLike,
 } from "@shared/lib/plan-vs-actual";
 import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
-import type { InvoiceRow } from "@shared/types/database";
 
 type ScopeItem = {
   category: string;
@@ -18,7 +18,7 @@ type ScopeItem = {
   total_cost_max: number | null;
 };
 
-type InvoiceItem = {
+type LedgerEntryItem = {
   id: string;
   vendor_name: string | null;
   total: number | null;
@@ -43,15 +43,16 @@ export type SellerPacketPdfOptions = {
 export async function generateSellerPacketPDF(
   project: ProjectInfo,
   scopeItems: ScopeItem[],
-  invoices: InvoiceItem[],
+  ledgerEntries: LedgerEntryItem[],
   options?: SellerPacketPdfOptions,
 ) {
-  const capitalTotal = capitalImprovementTotal(invoices);
-  const maintenanceTotal = maintenanceDocumentTotal(invoices);
+  const ledgerLike = ledgerEntries as LedgerEntryLike[];
+  const capitalTotal = capitalImprovementTotal(ledgerLike);
+  const maintenanceTotal = maintenanceDocumentTotal(ledgerLike);
 
   const appendixHtml =
-    options?.includeAppendix && invoices.some((i) => i.document_id)
-      ? await buildSellerPacketAppendixHtml(invoices as InvoiceRow[])
+    options?.includeAppendix && ledgerEntries.some((i) => i.document_id)
+      ? await buildSellerPacketAppendixHtml(ledgerLike as any)
       : "";
 
   const html = `
@@ -159,15 +160,15 @@ export async function generateSellerPacketPDF(
             </thead>
             <tbody>
               ${
-                invoices.length === 0
+                ledgerEntries.length === 0
                   ? '<tr><td colspan="4" style="text-align:center; padding: 20px;">No records found.</td></tr>'
-                  : invoices
+                  : ledgerEntries
                       .map(
                         (inv) => `
                 <tr>
                   <td>${formatShortUsDate(inv.created_at)}</td>
                   <td>${inv.vendor_name || "Uncategorized"}</td>
-                  <td>${(inv.document_type || "Invoice").charAt(0).toUpperCase() + (inv.document_type || "Invoice").slice(1)}</td>
+                  <td>${(inv.document_type || "Document").charAt(0).toUpperCase() + (inv.document_type || "Document").slice(1)}</td>
                   <td>${money(inv.total)}</td>
                 </tr>
               `,

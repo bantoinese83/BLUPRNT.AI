@@ -12,7 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
-import type { InvoiceRow, UserSubscriptionRow } from "@shared/types/database";
+import type {
+  LedgerEntryRow,
+  UserSubscriptionRow,
+} from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import {
   filterInvoicesByLedgerDocumentFilter,
@@ -21,7 +24,7 @@ import {
 
 type DocumentsSectionProps = {
   projectId: string;
-  documents: InvoiceRow[];
+  documents: LedgerEntryRow[];
   onUploaded: (id?: string) => void;
   onUpgradeClick: (reason?: "invoice_limit") => void;
   subscription?: UserSubscriptionRow | null;
@@ -66,15 +69,15 @@ export function DocumentsSection({
     uploading,
     batchStatus,
     error,
-    reviewInvoiceId: reviewDocumentId,
-    setReviewInvoiceId: setReviewDocumentId,
+    reviewDocumentId,
+    setReviewDocumentId,
     closeReviewModal,
     guideDismissed,
     guideExpanded,
     setGuideExpanded,
-    invoiceCount: documentCount,
+    recordCount,
     atLimit,
-    blockInvoiceOnlyUpload,
+    blockRecordOnlyUpload,
     isArchitectAtGlobalLimit,
     dismissGuide,
     handleUploadFile,
@@ -96,7 +99,7 @@ export function DocumentsSection({
     wasUploading.current = uploading;
   }, [uploading, documents.length]);
 
-  const dropDisabled = uploading || blockInvoiceOnlyUpload;
+  const dropDisabled = uploading || blockRecordOnlyUpload;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
   const onDragOver = useCallback(
@@ -174,7 +177,7 @@ export function DocumentsSection({
             setExpanded={setGuideExpanded}
             onUploadClick={openFileUpload}
             onDismiss={dismissGuide}
-            disabled={uploading || blockInvoiceOnlyUpload}
+            disabled={uploading || blockRecordOnlyUpload}
           />
         )}
 
@@ -195,7 +198,7 @@ export function DocumentsSection({
                 [
                   { id: "all" as const, label: "All" },
                   { id: "capital" as const, label: "Spending" },
-                  { id: "maintenance" as const, label: "Logs & Certs" },
+                  { id: "maintenance" as const, label: "Records & Logs" },
                 ] as const
               ).map(({ id, label }) => (
                 <button
@@ -274,11 +277,11 @@ export function DocumentsSection({
 
         {!isArchitectActive &&
           !hasProjectPass &&
-          documentCount > 0 &&
-          documentCount < FREE_LIMIT && (
+          recordCount > 0 &&
+          recordCount < FREE_LIMIT && (
             <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
               <span className="font-medium text-slate-700">
-                {documentCount} of {FREE_LIMIT} free spending document uploads
+                {recordCount} of {FREE_LIMIT} free spending document uploads
                 used on this project (quotes &amp; other records don&apos;t
                 count).
               </span>{" "}
@@ -344,7 +347,7 @@ export function DocumentsSection({
                     variant="outline"
                     size="sm"
                     onClick={openFileUpload}
-                    disabled={uploading || blockInvoiceOnlyUpload}
+                    disabled={uploading || blockRecordOnlyUpload}
                     type="button"
                     className="gap-2 rounded-xl"
                   >
@@ -373,7 +376,7 @@ export function DocumentsSection({
               type="button"
               className="border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center text-slate-500 hover:bg-slate-50/80 hover:border-slate-300 transition-all min-h-[140px]"
               onClick={openFileUpload}
-              disabled={uploading || blockInvoiceOnlyUpload}
+              disabled={uploading || blockRecordOnlyUpload}
             >
               <Upload className="w-6 h-6 mb-2 text-slate-400" />
               <span className="text-sm font-medium">Add more</span>
@@ -389,6 +392,7 @@ export function DocumentsSection({
           projectId={projectId}
           onClose={closeReviewModal}
           onSaved={onUploaded}
+          onDeleted={() => onUploaded(projectId)}
         />
       )}
     </div>

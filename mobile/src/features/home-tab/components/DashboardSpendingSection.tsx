@@ -4,14 +4,14 @@ import { DashboardStats } from "@/components/DashboardStats";
 import { PlanVsActualCard } from "@/components/PlanVsActualCard";
 import { DASHBOARD_SECTION_PLAN_SPENDING } from "@shared/copy/dashboard";
 import { homeTabStyles as styles } from "../home-tab.styles";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 interface DashboardSpendingSectionProps {
   estimatedMin: number | null | undefined;
   estimatedMax: number | null | undefined;
   invoiceTotal: number;
 
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   projectId: string;
 }
 
@@ -19,7 +19,7 @@ export function DashboardSpendingSection({
   estimatedMin,
   estimatedMax,
   invoiceTotal,
-  invoices,
+  ledgerEntries,
   projectId,
 }: DashboardSpendingSectionProps) {
   return (
@@ -34,14 +34,14 @@ export function DashboardSpendingSection({
         estimatedMin={estimatedMin ?? null}
         estimatedMax={estimatedMax ?? null}
         spendingTotal={invoiceTotal}
-        documentRowCount={invoices.length}
+        documentRowCount={ledgerEntries.length}
       />
 
       <View style={{ marginTop: 20 }}>
         <PlanVsActualCard
           estimatedMin={estimatedMin ?? null}
           estimatedMax={estimatedMax ?? null}
-          invoices={invoices}
+          ledgerEntries={ledgerEntries as any}
           projectId={projectId}
         />
       </View>

@@ -204,7 +204,7 @@ export function isInvoiceStyleOcrType(docType: LedgerDocumentType): boolean {
   return docType === "invoice" || docType === "receipt";
 }
 
-export function isArchitectQuotaInvoiceType(docType: string): boolean {
+export function isArchitectQuotaLedgerEntryType(docType: string): boolean {
   const t = normalizedLedgerTypeKey(docType);
   return t === "invoice" || t === "receipt";
 }
@@ -217,3 +217,15 @@ export const UPLOAD_FORM_DOCUMENT_TYPES = [
 
 export type UploadFormDocumentType =
   (typeof UPLOAD_FORM_DOCUMENT_TYPES)[number];
+
+/** Check if a filename corresponds to a supported image format (including HEIC). */
+export function isImageFilename(name?: string | null): boolean {
+  if (!name) return false;
+  return /\.(jpe?g|png|gif|webp|bmp|svg|heic|heif)$/i.test(name);
+}
+
+/** Check if a filename corresponds to a PDF. */
+export function isPdfFilename(name?: string | null): boolean {
+  if (!name) return false;
+  return /\.pdf$/i.test(name);
+}

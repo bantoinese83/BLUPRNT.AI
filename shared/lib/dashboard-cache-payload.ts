@@ -1,7 +1,7 @@
 import type {
   ProjectRow,
   ScopeRow,
-  InvoiceRow,
+  LedgerEntryRow,
   UserSubscriptionRow,
   GalleryItemRow,
 } from "../types/database.ts";
@@ -11,7 +11,7 @@ export type CachedDashboardPayload = {
   projects: ProjectRow[];
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   spendByCategory: Record<string, number>;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
@@ -30,7 +30,11 @@ export function parseCachedDashboardPayload(
       projects: Array.isArray(o.projects) ? o.projects : [],
       project: o.project ?? null,
       scopeItems: Array.isArray(o.scopeItems) ? o.scopeItems : [],
-      invoices: Array.isArray(o.invoices) ? o.invoices : [],
+      ledgerEntries: Array.isArray(o.ledgerEntries)
+        ? o.ledgerEntries
+        : Array.isArray((o as any).invoices)
+          ? (o as any).invoices
+          : [],
       galleryItems: Array.isArray(o.galleryItems) ? o.galleryItems : [],
       reconciliation: o.reconciliation ?? null,
       spendByCategory:

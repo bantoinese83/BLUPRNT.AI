@@ -1,4 +1,4 @@
-import type { InvoiceRow } from "../types/database.ts";
+import type { LedgerEntryRow } from "../types/database.ts";
 
 export type Contractor = {
   name: string;
@@ -13,12 +13,12 @@ export type Contractor = {
 };
 
 /**
- * Derives a unique list of contractors ("The Home Team") from a user's invoice history.
+ * Derives a unique list of contractors ("The Home Team") from a user's ledger history.
  */
-export function deriveHomeTeam(invoices: InvoiceRow[]): Contractor[] {
+export function deriveHomeTeam(ledgerEntries: LedgerEntryRow[]): Contractor[] {
   const teamMap = new Map<string, Contractor>();
 
-  for (const inv of invoices) {
+  for (const inv of ledgerEntries) {
     if (!inv.vendor_name) continue;
 
     const name = inv.vendor_name.trim();
@@ -37,7 +37,7 @@ export function deriveHomeTeam(invoices: InvoiceRow[]): Contractor[] {
       if (inv.project_id && !existing.project_ids.includes(inv.project_id)) {
         existing.project_ids.push(inv.project_id);
       }
-      // Merge contact info if we found more in this invoice
+      // Merge contact info if we found more in this record
       if (inv.vendor_contact_info) {
         existing.contact_info = {
           ...existing.contact_info,

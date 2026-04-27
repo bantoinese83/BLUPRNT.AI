@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   uploadDocumentWithType,
-  normalizeInvoiceUploadMime,
+  normalizeDocumentUploadMime,
 } from "@/lib/upload-document";
 import { invokeFunction } from "@/lib/supabase";
 import { showAppToast } from "@/lib/app-toast";
@@ -14,31 +14,22 @@ vi.mock("@/lib/app-toast", () => ({
   showAppToast: vi.fn(),
 }));
 
-describe("normalizeInvoiceUploadMime", () => {
-  it("maps iOS .heic paths when MIME is missing", () => {
+describe("normalizeDocumentUploadMime", () => {
+  it("defaults to image/jpeg for unknown hints/exts", () => {
     expect(
-      normalizeInvoiceUploadMime("file:///var/IMG.CR2.heic", undefined),
+      normalizeDocumentUploadMime("file:///var/IMG.CR2.heic", undefined),
     ).toBe("image/heic");
   });
 
-  it("maps .png paths when MIME is missing", () => {
-    expect(normalizeInvoiceUploadMime("a.png")).toBe("image/png");
-  });
-
-  it("maps .webp paths when MIME is missing", () => {
-    expect(normalizeInvoiceUploadMime("a.webp")).toBe("image/webp");
-  });
-
-  it("maps .pdf paths when MIME is missing", () => {
-    expect(normalizeInvoiceUploadMime("a.pdf")).toBe("application/pdf");
-  });
-
-  it("defaults to image/jpeg for unknown", () => {
-    expect(normalizeInvoiceUploadMime("a.unknown")).toBe("image/jpeg");
+  it("handles known extensions", () => {
+    expect(normalizeDocumentUploadMime("a.png")).toBe("image/png");
+    expect(normalizeDocumentUploadMime("a.webp")).toBe("image/webp");
+    expect(normalizeDocumentUploadMime("a.pdf")).toBe("application/pdf");
+    expect(normalizeDocumentUploadMime("a.unknown")).toBe("image/jpeg");
   });
 
   it("keeps declared JPEG", () => {
-    expect(normalizeInvoiceUploadMime("file:///a", "image/jpeg")).toBe(
+    expect(normalizeDocumentUploadMime("file:///a", "image/jpeg")).toBe(
       "image/jpeg",
     );
   });
@@ -48,7 +39,7 @@ describe("uploadDocumentWithType", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { invoice_id: "inv-1", document_type: "quote" },
+      data: { ledger_entry_id: "inv-1", document_type: "quote" },
       error: null,
     });
   });
@@ -60,7 +51,7 @@ describe("uploadDocumentWithType", () => {
       "p1",
     );
     expect(result.success).toBe(true);
-    expect(result.invoice_id).toBe("inv-1");
+    expect(result.ledger_entry_id).toBe("inv-1");
     expect(result.documentType).toBe("quote");
     expect(invokeFunction).toHaveBeenCalled();
     const call = vi.mocked(invokeFunction).mock.calls[0]!;
@@ -112,7 +103,7 @@ describe("uploadDocumentWithType", () => {
   it("shows budget alert toast when budget_health is present", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
       data: {
-        invoice_id: "inv-1",
+        ledger_entry_id: "inv-1",
         document_type: "quote",
         budget_health: {
           isOverBudget: true,
@@ -138,7 +129,7 @@ describe("uploadDocumentWithType", () => {
   it("shows budget nearing warning when budget_health is nearing", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
       data: {
-        invoice_id: "inv-1",
+        ledger_entry_id: "inv-1",
         document_type: "invoice",
         budget_health: {
           isOverBudget: false,
@@ -158,7 +149,7 @@ describe("uploadDocumentWithType", () => {
 
   it("shows AI processing toast for non-manual documents", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { invoice_id: "inv-1", document_type: "invoice" },
+      data: { ledger_entry_id: "inv-1", document_type: "invoice" },
       error: null,
     });
 
@@ -172,7 +163,7 @@ describe("uploadDocumentWithType", () => {
 
   it("does not show AI processing toast for manual documents", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { invoice_id: "inv-1", document_type: "manual" },
+      data: { ledger_entry_id: "inv-1", document_type: "manual" },
       error: null,
     });
 

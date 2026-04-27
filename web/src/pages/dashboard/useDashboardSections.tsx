@@ -8,7 +8,11 @@ import { HomeSpecsVault } from "@/components/dashboard/HomeSpecsVault";
 import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import type { UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
-import type { ProjectRow, InvoiceRow, ScopeRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  LedgerEntryRow,
+  ScopeRow,
+} from "@shared/types/database";
 import type { ResaleImpactResult } from "@shared/lib/resale-value";
 import type { Contractor } from "@shared/lib/home-team";
 
@@ -16,7 +20,7 @@ type UseDashboardSectionsProps = {
   project: ProjectRow;
   projects: ProjectRow[];
   scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   memoHomeTeam: Contractor[];
   memoInvestmentTotal: number;
   memoResaleImpact: ResaleImpactResult;
@@ -30,7 +34,7 @@ type UseDashboardSectionsProps = {
 export function useDashboardSections({
   project,
   scopeItems,
-  invoices,
+  ledgerEntries,
   memoHomeTeam,
   memoInvestmentTotal,
   memoResaleImpact,
@@ -46,14 +50,14 @@ export function useDashboardSections({
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
         spendingTotal={memoInvestmentTotal}
-        documentRowCount={invoices.length}
+        documentRowCount={ledgerEntries.length}
       />
     ),
     [
       project.estimated_min_total,
       project.estimated_max_total,
       memoInvestmentTotal,
-      invoices.length,
+      ledgerEntries.length,
     ],
   );
 
@@ -111,7 +115,7 @@ export function useDashboardSections({
             estimated_max_total: project.estimated_max_total,
           }}
           scopeItems={scopeItems}
-          invoices={invoices}
+          ledgerEntries={ledgerEntries}
           canExportSellerPacket={isArchitect || hasProjectPass}
           onExportNotAllowed={() => {
             setUpgradeReason("export");
@@ -129,7 +133,7 @@ export function useDashboardSections({
       project.estimated_min_total,
       project.estimated_max_total,
       scopeItems,
-      invoices,
+      ledgerEntries,
       isArchitect,
       hasProjectPass,
       setUpgradeReason,
@@ -141,7 +145,7 @@ export function useDashboardSections({
     () => (
       <DocumentsSection
         projectId={project.id}
-        documents={invoices}
+        documents={ledgerEntries as any}
         onUploaded={load}
         onUpgradeClick={(reason) => {
           setUpgradeReason(
@@ -155,7 +159,7 @@ export function useDashboardSections({
     ),
     [
       project.id,
-      invoices,
+      ledgerEntries,
       load,
       hasProjectPass,
       setUpgradeReason,

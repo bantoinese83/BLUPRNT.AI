@@ -6,6 +6,7 @@ interface ReviewModalHeaderProps {
   isUnverified: boolean;
   headerIconClass: string;
   HeaderIcon: LucideIcon;
+  bgClass: string;
   onClose: () => void;
 }
 
@@ -14,10 +15,13 @@ export function ReviewModalHeader({
   isUnverified,
   headerIconClass,
   HeaderIcon,
+  bgClass,
   onClose,
 }: ReviewModalHeaderProps) {
   return (
-    <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between z-10">
+    <div
+      className={`sticky top-0 border-b border-slate-200 p-4 flex items-center justify-between z-10 ${bgClass}`}
+    >
       <h3
         id="document-review-title"
         className="text-lg font-semibold text-slate-900 flex items-center gap-2"

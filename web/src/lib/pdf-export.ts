@@ -28,7 +28,7 @@ type ScopeItem = {
   total_cost_max: number | null;
 };
 
-type InvoiceItem = {
+type LedgerEntryItem = {
   vendor_name: string | null;
   total: number | null;
   created_at: string;
@@ -182,15 +182,15 @@ function drawSellerPacketAppendix(
 export async function generateSellerPacketBlob(
   project: ProjectInfo,
   scopeItems: ScopeItem[],
-  invoices: InvoiceItem[],
+  ledgerEntries: LedgerEntryItem[],
   options?: SellerPacketExportOptions,
 ): Promise<Blob> {
   const { jsPDF: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
 
-  const capitalTotal = capitalImprovementTotal(invoices);
-  const maintenance = maintenanceDocumentTotal(invoices);
+  const capitalTotal = capitalImprovementTotal(ledgerEntries);
+  const maintenance = maintenanceDocumentTotal(ledgerEntries);
 
   const addPageIfNeeded = (needed: number) => {
     if (y + needed > doc.internal.pageSize.height - MARGIN) {
@@ -255,16 +255,16 @@ export async function generateSellerPacketBlob(
   doc.setFontSize(FONT_SIZE);
   doc.setFont("helvetica", "normal");
 
-  if (invoices.length === 0) {
-    doc.text("No invoices or documents recorded yet.", MARGIN, y);
+  if (ledgerEntries.length === 0) {
+    doc.text("No records or documents added yet.", MARGIN, y);
     y += LINE_HEIGHT * 2;
   } else {
-    invoices.forEach((inv) => {
+    ledgerEntries.forEach((entry) => {
       addPageIfNeeded(LINE_HEIGHT * 2);
-      const type = (inv.document_type ?? "invoice").toString();
+      const type = (entry.document_type ?? "invoice").toString();
       const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
       doc.text(
-        `${formatShortUsDate(inv.created_at)} — ${inv.vendor_name ?? "Vendor"} (${typeLabel}): ${money(inv.total)}`,
+        `${formatShortUsDate(entry.created_at)} — ${entry.vendor_name ?? "Vendor"} (${typeLabel}): ${money(entry.total)}`,
         MARGIN + 2,
         y,
         { maxWidth: 170 },
@@ -284,7 +284,7 @@ export async function generateSellerPacketBlob(
   doc.setFontSize(FONT_SIZE);
   doc.setFont("helvetica", "normal");
   doc.text(
-    `Capital improvements (invoices, quotes): ${money(capitalTotal)}`,
+    `Capital improvements (ledger records): ${money(capitalTotal)}`,
     MARGIN + 2,
     y,
   );

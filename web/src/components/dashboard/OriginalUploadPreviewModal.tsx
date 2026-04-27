@@ -3,22 +3,20 @@ import { X, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModalDialog } from "@/components/ui/modal-dialog";
 import {
-  fetchInvoiceOriginalSignedUrl,
-  type InvoiceOriginalFetchResult,
+  fetchLedgerEntryOriginalSignedUrl,
+  type LedgerEntryOriginalFetchResult,
 } from "@/lib/open-original-document";
 
-function isImageFilename(name?: string): boolean {
-  return /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(name ?? "");
-}
+import { isImageFilename } from "@shared/lib/infer-document-type.ts";
 
 type Phase = "loading" | "ready" | "error";
 
-/** Renders only while open; pass a stable `key` (e.g. invoice id) so each open remounts with a fresh loading state. */
+/** Renders only while open; pass a stable `key` (e.g. ledger entry id) so each open remounts with a fresh loading state. */
 export function OriginalUploadPreviewModal({
-  invoiceId,
+  ledgerEntryId,
   onClose,
 }: {
-  invoiceId: string;
+  ledgerEntryId: string;
   onClose: () => void;
 }) {
   const [phase, setPhase] = useState<Phase>("loading");
@@ -31,8 +29,8 @@ export function OriginalUploadPreviewModal({
     let cancelled = false;
 
     (async () => {
-      const result: InvoiceOriginalFetchResult =
-        await fetchInvoiceOriginalSignedUrl(invoiceId);
+      const result: LedgerEntryOriginalFetchResult =
+        await fetchLedgerEntryOriginalSignedUrl(ledgerEntryId);
       if (cancelled) return;
       if (!result.ok) {
         setErrorMessage(result.message);
@@ -47,7 +45,7 @@ export function OriginalUploadPreviewModal({
     return () => {
       cancelled = true;
     };
-  }, [invoiceId]);
+  }, [ledgerEntryId]);
 
   const title = filename?.trim() || "Original upload";
 

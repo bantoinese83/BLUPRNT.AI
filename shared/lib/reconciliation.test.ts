@@ -14,7 +14,9 @@ describe("buildReconciliation", () => {
   ];
 
   it("calculates 'under' status when billed is below low estimate", () => {
-    const lines = [{ invoice_id: "i1", line_total: 50, scope_item_id: "s1" }];
+    const lines = [
+      { ledger_entry_id: "i1", line_total: 50, scope_item_id: "s1" },
+    ];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
     expect(result.items["s1"]!.status).toBe("under");
@@ -24,7 +26,7 @@ describe("buildReconciliation", () => {
 
   it("calculates 'reconciled' status when billed is within margin", () => {
     const lines = [
-      { invoice_id: "i1", line_total: 155, scope_item_id: "s1" }, // Mid is 150, 5% margin is 7.5
+      { ledger_entry_id: "i1", line_total: 155, scope_item_id: "s1" }, // Mid is 150, 5% margin is 7.5
     ];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
@@ -32,7 +34,9 @@ describe("buildReconciliation", () => {
   });
 
   it("calculates 'over' status when billed exceeds high estimate + margin", () => {
-    const lines = [{ invoice_id: "i1", line_total: 600, scope_item_id: "s2" }];
+    const lines = [
+      { ledger_entry_id: "i1", line_total: 600, scope_item_id: "s2" },
+    ];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
     expect(result.items["s2"]!.status).toBe("over");
@@ -41,8 +45,8 @@ describe("buildReconciliation", () => {
 
   it("tracks unreconciled billed amounts", () => {
     const lines = [
-      { invoice_id: "i1", line_total: 100, scope_item_id: null },
-      { invoice_id: "i2", line_total: 200, scope_item_id: "non-existent" },
+      { ledger_entry_id: "i1", line_total: 100, scope_item_id: null },
+      { ledger_entry_id: "i2", line_total: 200, scope_item_id: "non-existent" },
     ];
     const result = buildReconciliation(mockScopes as ScopeRow[], lines);
 
@@ -51,7 +55,9 @@ describe("buildReconciliation", () => {
   });
 
   it("handles case with lines but no scope items", () => {
-    const lines = [{ line_total: 100, scope_item_id: "any", invoice_id: "1" }];
+    const lines = [
+      { line_total: 100, scope_item_id: "any", ledger_entry_id: "1" },
+    ];
     const result = buildReconciliation([], lines);
     expect(result.unreconciled_billed).toBe(100);
     expect(result.total_reconciled).toBe(0);

@@ -67,6 +67,7 @@ export function useDashboardData() {
       configurationMissing,
       addItem,
       recalcProjectTotals,
+      ledgerEntries: publicCore.ledgerEntries,
       galleryItems: publicCore.galleryItems,
     }),
     [publicCore, configurationMissing, addItem, recalcProjectTotals],

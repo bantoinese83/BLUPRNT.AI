@@ -58,7 +58,7 @@ describe("pdf-export", () => {
     },
   ];
 
-  const mockInvoices = [
+  const mockLedgerEntries = [
     {
       vendor_name: "Best Cabinets",
       total: 22000,
@@ -71,7 +71,7 @@ describe("pdf-export", () => {
     const blob = await generateSellerPacketBlob(
       mockProject,
       mockScopeItems,
-      mockInvoices,
+      mockLedgerEntries,
     );
 
     expect(blob).toBeInstanceOf(Blob);
@@ -108,7 +108,7 @@ describe("pdf-export", () => {
     await generateSellerPacketBlob(mockProject, [], []);
 
     expect(mockText).toHaveBeenCalledWith(
-      "No invoices or documents recorded yet.",
+      "No records or documents added yet.",
       expect.any(Number),
       expect.any(Number),
     );
@@ -134,9 +134,14 @@ describe("pdf-export", () => {
       },
     ];
 
-    await generateSellerPacketBlob(mockProject, mockScopeItems, mockInvoices, {
-      appendixItems,
-    });
+    await generateSellerPacketBlob(
+      mockProject,
+      mockScopeItems,
+      mockLedgerEntries,
+      {
+        appendixItems,
+      },
+    );
 
     // Verify appendix section title
     expect(mockText).toHaveBeenCalledWith(

@@ -3,9 +3,9 @@ import { AlertTriangle } from "lucide-react-native";
 
 import { Theme } from "@/constants/Theme";
 import { money } from "@shared/lib/formatters";
-import type { LineItem } from "@/hooks/useInvoiceReviewDetail";
+import type { LineItem } from "@/hooks/useLedgerEntryReviewDetail";
 
-import { invoiceReviewSheetStyles as styles } from "./invoiceReviewSheet.styles";
+import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
 
 export type ScopeItemOption = {
   id: string;
@@ -22,7 +22,7 @@ type Props = {
   linkingEnabled?: boolean;
 };
 
-export function InvoiceReviewLineItemRow({
+export function LedgerEntryReviewLineItemRow({
   line,
   mappedId,
   scopeItems,

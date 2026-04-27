@@ -1,6 +1,6 @@
 import type { ScopeRow } from "../types/database.ts";
 
-export type InvoiceLineSpendRow = {
+export type LedgerLineSpendRow = {
   category: string | null;
   line_total: number | null;
   scope_item_id: string | null;
@@ -11,7 +11,7 @@ export type InvoiceLineSpendRow = {
  * resolving `scope_item_id` to the scope row’s category.
  */
 export function buildSpendByCategory(
-  lines: InvoiceLineSpendRow[] | null | undefined,
+  lines: LedgerLineSpendRow[] | null | undefined,
   scopeItems: ScopeRow[],
 ): Record<string, number> {
   const categoryByScopeId = new Map(

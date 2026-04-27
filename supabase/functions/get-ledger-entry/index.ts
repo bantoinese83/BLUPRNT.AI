@@ -1,7 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
-import { getInvoiceSchema } from "../_shared/validation.ts";
+import { getLedgerEntrySchema } from "../_shared/validation.ts";
 import {
   assertProjectOwner,
   getServiceClient,
@@ -30,52 +30,52 @@ export const handler = async (req: Request) => {
     return jsonResponse({ error: "Please sign in." }, 401, req);
   }
 
-  let invoice_id: string | null = null;
+  let ledger_entry_id: string | null = null;
   if (req.method === "POST") {
     try {
       const body = await req.json();
-      invoice_id = typeof body?.invoice_id === "string"
-        ? body.invoice_id
+      ledger_entry_id = typeof body?.ledger_entry_id === "string"
+        ? body.ledger_entry_id
         : null;
     } catch {
       /* ignore */
     }
   } else if (req.method === "GET") {
     const u = new URL(req.url);
-    invoice_id = u.searchParams.get("invoice_id");
+    ledger_entry_id = u.searchParams.get("ledger_entry_id");
   }
 
-  if (!invoice_id) {
-    return jsonResponse({ error: "invoice_id required" }, 400, req);
+  if (!ledger_entry_id) {
+    return jsonResponse({ error: "ledger_entry_id required" }, 400, req);
   }
-  const parsed = getInvoiceSchema.safeParse({ invoice_id });
+  const parsed = getLedgerEntrySchema.safeParse({ ledger_entry_id });
   if (!parsed.success) {
-    return jsonResponse({ error: "Invalid invoice_id" }, 400, req);
+    return jsonResponse({ error: "Invalid ledger_entry_id" }, 400, req);
   }
 
   try {
     const admin = getServiceClient();
     const { data: inv, error: invErr } = await admin
-      .from("invoices")
+      .from("ledger_entries")
       .select("*")
-      .eq("id", parsed.data.invoice_id)
+      .eq("id", parsed.data.ledger_entry_id)
       .single();
 
     if (invErr || !inv) {
-      return jsonResponse({ error: "Invoice not found" }, 404, req);
+      return jsonResponse({ error: "Record not found" }, 404, req);
     }
 
     await assertProjectOwner(admin, inv.project_id, userId);
 
     const { data: lines, error: linesErr } = await admin
-      .from("invoice_line_items")
+      .from("ledger_line_items")
       .select("*")
-      .eq("invoice_id", parsed.data.invoice_id);
+      .eq("ledger_entry_id", parsed.data.ledger_entry_id);
 
     if (linesErr) {
-      console.error("Invoice line items fetch failed:", linesErr);
+      console.error("Ledger line items fetch failed:", linesErr);
       return jsonResponse(
-        { error: "Could not load invoice details" },
+        { error: "Could not load record details" },
         500,
         req,
       );
@@ -119,7 +119,7 @@ export const handler = async (req: Request) => {
 
     return jsonResponse(
       {
-        invoice: {
+        ledger_entry: {
           id: inv.id,
           project_id: inv.project_id,
           vendor_name: inv.vendor_name,
@@ -135,6 +135,9 @@ export const handler = async (req: Request) => {
           updated_at: inv.updated_at,
           document_type: inv.document_type,
           document_id: inv.document_id,
+          ai_summary: inv.ai_summary,
+          is_verified: inv.is_verified,
+          warranty_expiry_date: inv.warranty_expiry_date,
         },
         line_items: (lines ?? []).map((l) => ({
           id: l.id,
@@ -162,7 +165,7 @@ export const handler = async (req: Request) => {
       return jsonResponse({ error: "Access denied" }, 403, req);
     }
     console.error(e);
-    return jsonResponse({ error: "Could not load invoice" }, 500, req);
+    return jsonResponse({ error: "Could not load record" }, 500, req);
   }
 };
 

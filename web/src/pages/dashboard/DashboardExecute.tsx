@@ -1,18 +1,18 @@
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
 import { PlanVsActualCard } from "@/components/dashboard/PlanVsActualCard";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
-import type { ProjectRow, InvoiceRow } from "@shared/types/database";
+import type { ProjectRow, LedgerEntryRow } from "@shared/types/database";
 
 interface DashboardExecuteProps {
   project: ProjectRow;
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   health: React.ReactNode;
   documentsComp: React.ReactNode;
 }
 
 export function DashboardExecute({
   project,
-  invoices,
+  ledgerEntries,
   health,
   documentsComp,
 }: DashboardExecuteProps) {
@@ -21,7 +21,7 @@ export function DashboardExecute({
       <PlanVsActualCard
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
-        invoices={invoices}
+        ledgerEntries={ledgerEntries as any}
       />
       <ComponentErrorBoundary name="Documents Ledger">
         {documentsComp}

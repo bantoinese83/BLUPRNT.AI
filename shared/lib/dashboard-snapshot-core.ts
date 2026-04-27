@@ -6,7 +6,7 @@ import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import type {
   ProjectRow,
   ScopeRow,
-  InvoiceRow,
+  LedgerEntryRow,
   UserSubscriptionRow,
   ProjectPassRow,
   GalleryItemRow,
@@ -28,7 +28,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
     projects: [],
     project: null,
     scopeItems: [],
-    invoices: [],
+    ledgerEntries: [],
     spendByCategory: {},
     reconciliation: null,
     isArchitect: false,
@@ -45,10 +45,10 @@ const PROJECTS_LIST_SELECT =
 const SCOPE_SELECT =
   "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";
 
-const INVOICE_SELECT =
-  "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date";
+const LEDGER_SELECT =
+  "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date, ai_summary";
 
-const INVOICE_WITH_LINES_SELECT = `${INVOICE_SELECT}, invoice_line_items(invoice_id, category, line_total, scope_item_id)`;
+const LEDGER_WITH_LINES_SELECT = `${LEDGER_SELECT}, ledger_line_items(ledger_entry_id, category, line_total, scope_item_id)`;
 
 const GALLERY_SELECT =
   "id, project_id, photo_type, storage_path, caption, uploaded_by_user_id, created_at";
@@ -91,7 +91,7 @@ export async function fetchLastActiveProjectIdFromPreferences(
 export type BuiltDashboardForProject = {
   project: ProjectRow;
   scopeItems: import("../types/database.ts").ScopeRow[];
-  invoices: import("../types/database.ts").InvoiceRow[];
+  ledgerEntries: import("../types/database.ts").LedgerEntryRow[];
   galleryItems: import("../types/database.ts").GalleryItemRow[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
@@ -103,7 +103,7 @@ export type BuiltDashboardForProject = {
 };
 
 /**
- * Loads scope, invoices, subscription, pass, and spend-by-category for a project.
+ * Loads scope, ledger entries, subscription, pass, and spend-by-category for a project.
  * Callers must only pass a `projectId` that exists in `allProjects` (when non-empty).
  */
 export async function buildDashboardDataForProject(
@@ -124,8 +124,8 @@ export async function buildDashboardDataForProject(
       .eq("project_id", projectId)
       .order("created_at", { ascending: true }),
     supabase
-      .from("invoices")
-      .select(INVOICE_WITH_LINES_SELECT)
+      .from("ledger_entries")
+      .select(LEDGER_WITH_LINES_SELECT)
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
     supabase
@@ -148,7 +148,7 @@ export async function buildDashboardDataForProject(
   const loadError = partialDashboardLoadMessage(
     {
       scopeFailed: !!scopesRes.error,
-      invoicesFailed: !!invRes.error,
+      ledgerEntriesFailed: !!invRes.error,
       subscriptionFailed: !!subRes.error,
       projectPassFailed: !!subRes2.error,
       galleryFailed: !!galleryRes.error,
@@ -157,19 +157,17 @@ export async function buildDashboardDataForProject(
   );
 
   const newScopes = (scopesRes.data ?? []) as ScopeRow[];
-  const newInvoicesRaw = (invRes.data ?? []) as (InvoiceRow & {
-    invoice_line_items?: import("../types/database").InvoiceLineItemRow[];
+  const newLedgerRaw = (invRes.data ?? []) as (LedgerEntryRow & {
+    ledger_line_items?: import("../types/database.ts").LedgerLineItemRow[];
   })[];
-  const newInvoices = newInvoicesRaw as InvoiceRow[];
+  const newLedger = newLedgerRaw as LedgerEntryRow[];
   const newGalleryItems = (galleryRes.data ?? []) as GalleryItemRow[];
   const sub = subRes.data as UserSubscriptionRow | null;
   const pass = subRes2.data as ProjectPassRow | null;
   const isArchitect = isArchitectPlanEffective(sub);
   const hasProjectPass = !!pass;
 
-  const allLineItems = newInvoicesRaw.flatMap(
-    (inv) => inv.invoice_line_items || [],
-  );
+  const allLineItems = newLedgerRaw.flatMap((l) => l.ledger_line_items || []);
   const spendByCategory = buildSpendByCategory(allLineItems, newScopes);
   const reconciliation = buildReconciliation(newScopes, allLineItems);
 
@@ -180,7 +178,7 @@ export async function buildDashboardDataForProject(
   return {
     project,
     scopeItems: newScopes,
-    invoices: newInvoices,
+    ledgerEntries: newLedger,
     galleryItems: newGalleryItems,
     spendByCategory,
     reconciliation,

@@ -26,8 +26,8 @@ export function HomeTeamSection({
           Building your Team
         </h4>
         <p className="text-[11px] text-slate-500 font-medium max-w-[200px] mx-auto">
-          As you upload invoices, we’ll automatically build a directory of your
-          property’s contractors.
+          As you upload ledger records, we’ll automatically build a directory of
+          your property’s contractors.
         </p>
       </div>
     );

@@ -24,7 +24,7 @@ export async function getProjectBudgetHealth(
       .eq("id", projectId)
       .single(),
     supabase
-      .from("invoices")
+      .from("ledger_entries")
       .select("total")
       .eq("project_id", projectId)
   ]);

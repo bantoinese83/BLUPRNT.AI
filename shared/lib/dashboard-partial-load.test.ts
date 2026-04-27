@@ -6,7 +6,7 @@ describe("partialDashboardLoadMessage", () => {
     expect(
       partialDashboardLoadMessage({
         scopeFailed: false,
-        invoicesFailed: false,
+        ledgerEntriesFailed: false,
         subscriptionFailed: false,
         projectPassFailed: false,
         galleryFailed: false,
@@ -18,7 +18,7 @@ describe("partialDashboardLoadMessage", () => {
     const msg = partialDashboardLoadMessage(
       {
         scopeFailed: true,
-        invoicesFailed: true,
+        ledgerEntriesFailed: true,
         subscriptionFailed: false,
         projectPassFailed: false,
         galleryFailed: false,

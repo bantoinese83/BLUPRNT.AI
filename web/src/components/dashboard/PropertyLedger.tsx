@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { downloadSellerPacket } from "@/lib/seller-packet-download";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { money } from "@/lib/formatters";
 import {
   capitalImprovementTotal,
@@ -19,8 +19,8 @@ type ScopeItem = {
   total_cost_max: number | null;
 };
 
-type InvoiceItem = Pick<
-  InvoiceRow,
+type LedgerEntryItem = Pick<
+  LedgerEntryRow,
   | "id"
   | "vendor_name"
   | "total"
@@ -40,7 +40,7 @@ type PropertyLedgerProps = {
   propertyId?: string;
   project?: ProjectInfo;
   scopeItems?: ScopeItem[];
-  invoices?: InvoiceItem[];
+  ledgerEntries?: LedgerEntryItem[];
   /** Full seller packet export requires Architect or Project Pass (same as mobile). */
   canExportSellerPacket?: boolean;
   onExportNotAllowed?: () => void;
@@ -51,7 +51,7 @@ export function PropertyLedger({
   propertyId,
   project,
   scopeItems = [],
-  invoices = [],
+  ledgerEntries = [],
   canExportSellerPacket = false,
   onExportNotAllowed,
 }: PropertyLedgerProps) {
@@ -59,8 +59,8 @@ export function PropertyLedger({
   const [message, setMessage] = useState<string | null>(null);
   const [includeOriginalAppendix, setIncludeOriginalAppendix] = useState(false);
 
-  const capitalTotal = capitalImprovementTotal(invoices);
-  const maintenanceTotal = maintenanceDocumentTotal(invoices);
+  const capitalTotal = capitalImprovementTotal(ledgerEntries);
+  const maintenanceTotal = maintenanceDocumentTotal(ledgerEntries);
 
   async function handleExportPDF() {
     if (!project || !projectId || !propertyId) {
@@ -87,7 +87,7 @@ export function PropertyLedger({
         propertyId,
         project,
         scopeItems: scopeForPdf,
-        invoices: invoices as InvoiceRow[],
+        invoices: ledgerEntries as LedgerEntryRow[],
         includeAppendix: includeOriginalAppendix,
       });
       setMessage(
@@ -150,14 +150,14 @@ export function PropertyLedger({
               type="checkbox"
               checked={includeOriginalAppendix}
               onChange={(e) => setIncludeOriginalAppendix(e.target.checked)}
-              disabled={exporting || invoices.every((i) => !i.document_id)}
+              disabled={exporting || ledgerEntries.every((i) => !i.document_id)}
               className="mt-1 size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
             />
             <span className="text-sm text-slate-600 leading-snug">
               <span className="font-semibold text-slate-900 block mb-0.5">
                 Include uploads in PDF
               </span>
-              {invoices.every((i) => !i.document_id) ? (
+              {ledgerEntries.every((i) => !i.document_id) ? (
                 <>
                   Available after you attach a photo or file to at least one
                   document. Nothing is linked yet, so this stays off.

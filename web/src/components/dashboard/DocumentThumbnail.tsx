@@ -1,62 +1,39 @@
-import { useState, useEffect } from "react";
-import { Loader2, FileText, Image as ImageIcon } from "lucide-react";
-import { fetchInvoiceOriginalSignedUrl } from "@/lib/open-original-document";
+import { useState } from "react";
+import { FileTextIcon, ImageIcon, Loader2 } from "lucide-react";
+import { useDocumentSignedUrl } from "@shared/hooks/use-document-signed-url";
+import { supabase } from "@/lib/supabase";
+import {
+  isImageFilename,
+  isPdfFilename,
+} from "@shared/lib/infer-document-type.ts";
 import { cn } from "@/lib/utils";
 
 interface DocumentThumbnailProps {
-  invoiceId: string;
+  ledgerEntryId: string;
   className?: string;
   size?: "sm" | "md" | "lg";
 }
 
-function isImageFilename(name?: string): boolean {
-  return /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(name ?? "");
-}
-
 export function DocumentThumbnail({
-  invoiceId,
+  ledgerEntryId,
   className,
   size = "md",
 }: DocumentThumbnailProps) {
-  const [loading, setLoading] = useState(true);
-  const [url, setUrl] = useState<string | null>(null);
-  const [filename, setFilename] = useState<string | undefined>();
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadThumbnail = async () => {
-      setLoading(true);
-      setError(false);
-      try {
-        const result = await fetchInvoiceOriginalSignedUrl(invoiceId, {
-          width: size === "sm" ? 80 : size === "md" ? 160 : 320,
-          height: size === "sm" ? 80 : size === "md" ? 160 : 320,
-          resize: "contain",
-        });
-        if (cancelled) return;
-        if (result.ok) {
-          setUrl(result.signedUrl);
-          setFilename(result.filename);
-        } else {
-          setError(true);
-        }
-      } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    loadThumbnail();
-    return () => {
-      cancelled = true;
-    };
-  }, [invoiceId, size]);
+  const [imgError, setImgError] = useState(false);
+  const { data, isLoading, isError } = useDocumentSignedUrl(
+    supabase,
+    ledgerEntryId,
+    {
+      width: size === "sm" ? 80 : size === "md" ? 160 : 320,
+      height: size === "sm" ? 80 : size === "md" ? 160 : 320,
+      resize: "contain",
+    },
+  );
 
   const dimensions =
     size === "sm" ? "w-10 h-10" : size === "md" ? "w-16 h-16" : "w-24 h-24";
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div
         className={cn(
@@ -69,9 +46,9 @@ export function DocumentThumbnail({
       </div>
     );
   }
-
+  const { filename, signedUrl: url } = data || {};
   const isImg = isImageFilename(filename);
-  const isPdf = filename?.toLowerCase().endsWith(".pdf");
+  const isPdf = isPdfFilename(filename);
 
   return (
     <div
@@ -81,12 +58,12 @@ export function DocumentThumbnail({
         className,
       )}
     >
-      {isImg && url && !error ? (
+      {isImg && url && !isError && !imgError ? (
         <img
           src={url}
           alt="Thumbnail"
           className="w-full h-full object-cover"
-          onError={() => setError(true)}
+          onError={() => setImgError(true)}
         />
       ) : (
         <div
@@ -97,7 +74,7 @@ export function DocumentThumbnail({
         >
           {isPdf ? (
             <>
-              <FileText
+              <FileTextIcon
                 className={cn(
                   "text-rose-600/80",
                   size === "sm" ? "w-5 h-5" : "w-7 h-7",

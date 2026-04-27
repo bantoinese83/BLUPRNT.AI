@@ -1,7 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
-import { getInvoiceSchema } from "../_shared/validation.ts";
+import { getLedgerEntrySchema } from "../_shared/validation.ts";
 import {
   assertProjectOwner,
   getServiceClient,
@@ -32,14 +32,16 @@ export const handler = async (req: Request) => {
     return jsonResponse({ error: "Please sign in." }, 401, req);
   }
 
-  let invoice_id: string | null = null;
+  let ledger_entry_id: string | null = null;
   let width: number | undefined;
   let height: number | undefined;
   let resize: "cover" | "contain" | "fill" | undefined;
 
   try {
     const body = await req.json();
-    invoice_id = typeof body?.invoice_id === "string" ? body.invoice_id : null;
+    ledger_entry_id = typeof body?.ledger_entry_id === "string" 
+      ? body.ledger_entry_id 
+      : null;
     width = typeof body?.width === "number" ? body.width : undefined;
     height = typeof body?.height === "number" ? body.height : undefined;
     resize = ["cover", "contain", "fill"].includes(body?.resize)
@@ -47,21 +49,21 @@ export const handler = async (req: Request) => {
       : undefined;
   } catch { /* ignore */ }
 
-  if (!invoice_id) {
-    return jsonResponse({ error: "invoice_id required" }, 400, req);
+  if (!ledger_entry_id) {
+    return jsonResponse({ error: "ledger_entry_id required" }, 400, req);
   }
 
-  const parsed = getInvoiceSchema.safeParse({ invoice_id });
+  const parsed = getLedgerEntrySchema.safeParse({ ledger_entry_id });
   if (!parsed.success) {
-    return jsonResponse({ error: "Invalid invoice_id" }, 400, req);
+    return jsonResponse({ error: "Invalid ledger_entry_id" }, 400, req);
   }
 
   try {
     const admin = getServiceClient();
     const { data: inv, error: invErr } = await admin
-      .from("invoices")
+      .from("ledger_entries")
       .select("project_id, document_id")
-      .eq("id", parsed.data.invoice_id)
+      .eq("id", parsed.data.ledger_entry_id)
       .single();
 
     if (invErr || !inv) {
@@ -92,7 +94,7 @@ export const handler = async (req: Request) => {
       .from("project-documents")
       .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SEC, {
         transform: width || height
-          ? { width, height, resize: resize || "contain" }
+          ? { width, height, resize: resize || "contain", format: "webp" }
           : undefined,
       });
 
@@ -107,7 +109,7 @@ export const handler = async (req: Request) => {
 
     return jsonResponse(
       {
-        signed_url: signed.signedUrl,
+        signedUrl: signed.signedUrl,
         filename: doc.original_filename ?? "document",
         expires_in: SIGNED_URL_TTL_SEC,
       },

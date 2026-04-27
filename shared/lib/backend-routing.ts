@@ -5,7 +5,7 @@
 
 export const EDGE_FUNCTIONS = {
   UPLOAD_DOCUMENT: "upload-document",
-  GET_INVOICE: "get-invoice",
+  GET_LEDGER_ENTRY: "get-ledger-entry",
   PROCESS_QUEUE: "process-document-queue",
   CLEANUP_STORAGE: "cleanup-storage",
   CHECK_SUBSCRIPTIONS: "check-subscription-status",

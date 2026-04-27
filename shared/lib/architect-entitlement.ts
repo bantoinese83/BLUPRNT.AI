@@ -66,18 +66,18 @@ export function isArchitectPlanEffective(
 }
 
 export type ArchitectUploadQuotaFields = ArchitectEntitlementFields &
-  Pick<UserSubscriptionRow, "invoice_uploads_count">;
+  Pick<UserSubscriptionRow, "ledger_uploads_count">;
 
 const DEFAULT_ARCHITECT_UPLOAD_CAP = 10;
 
-/** Global Architect invoice upload quota (per product rules) still has capacity. */
+/** Global Architect ledger upload quota (per product rules) still has capacity. */
 export function isArchitectGlobalUploadQuotaAvailable(
   sub: ArchitectUploadQuotaFields | null | undefined,
   now: Date = new Date(),
   maxUploads: number = DEFAULT_ARCHITECT_UPLOAD_CAP,
 ): boolean {
   if (!sub) return false;
-  if ((sub.invoice_uploads_count ?? 0) >= maxUploads) return false;
+  if ((sub.ledger_uploads_count ?? 0) >= maxUploads) return false;
   if (isStripeArchitectSubscriptionEntitled(sub, now)) return true;
   if (sub.revenuecat_entitlement_active === true) return true;
   return false;

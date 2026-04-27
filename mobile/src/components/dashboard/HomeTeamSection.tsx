@@ -10,21 +10,21 @@ import { Users, Phone, Mail, Lock } from "lucide-react-native";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { deriveHomeTeam } from "@shared/lib/home-team";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { money } from "@shared/lib/formatters";
 
 export function HomeTeamSection({
-  invoices,
+  ledgerEntries,
   isArchitect,
   hasProjectPass,
   onUpgradeClick,
 }: {
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   isArchitect?: boolean;
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
 }) {
-  const team = deriveHomeTeam(invoices);
+  const team = deriveHomeTeam(ledgerEntries as any);
   const isUnlocked = isArchitect || hasProjectPass;
 
   if (team.length === 0) {

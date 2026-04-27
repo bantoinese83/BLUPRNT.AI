@@ -16,7 +16,7 @@ const PLAN_DELIVERABLES = [
 const EXECUTE_DELIVERABLES = [
   { label: "Bids & quotes", tag: "Side by side" },
   { label: "Receipt snaps", tag: "We read totals" },
-  { label: "Paid invoices", tag: "Plan vs. spent" },
+  { label: "Paid documents", tag: "Plan vs. spent" },
 ] as const;
 
 const TRANSFER_DELIVERABLES = [
@@ -128,7 +128,7 @@ export function LandingHowItWorks() {
               <img
                 loading="lazy"
                 src="/images/invoice_system_mockup.webp"
-                alt="Invoice Tracking System"
+                alt="Ledger Tracking System"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent" />
@@ -160,8 +160,8 @@ export function LandingHowItWorks() {
             </h3>
 
             <p className="text-slate-800 text-lg leading-relaxed font-medium mb-6">
-              Stack bids, receipts, and paid invoices next to that budget—most
-              of the typing is on us.
+              Stack bids, receipts, and documents next to that budget—most of
+              the typing is on us.
             </p>
 
             <DeliverableList rows={EXECUTE_DELIVERABLES} />

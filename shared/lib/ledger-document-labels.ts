@@ -110,3 +110,38 @@ export function defaultLineDescriptionForUpload(
   if (v) return `Record — ${v}`;
   return "Recorded line";
 }
+/** Theme colors and visual hints for the review modal based on type. */
+export function ledgerDocumentTheme(t: string | null | undefined): {
+  bg: string;
+  icon: string;
+  border: string;
+  glow: string;
+  label: string;
+} {
+  const vg = ledgerDocumentVisualGroup(t);
+  if (vg === "spend") {
+    return {
+      bg: "bg-rose-50/50",
+      icon: "text-rose-600",
+      border: "border-rose-100",
+      glow: "shadow-rose-100/50",
+      label: "Vendor Name",
+    };
+  }
+  if (vg === "warranty_care") {
+    return {
+      bg: "bg-teal-50/50",
+      icon: "text-teal-600",
+      border: "border-teal-100",
+      glow: "shadow-teal-100/50",
+      label: "Brand / Provider",
+    };
+  }
+  return {
+    bg: "bg-slate-50/50",
+    icon: "text-slate-600",
+    border: "border-slate-100",
+    glow: "shadow-slate-100/50",
+    label: "Issuer / Category",
+  };
+}

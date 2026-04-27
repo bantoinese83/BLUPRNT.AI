@@ -1,33 +1,33 @@
 import { toast } from "sonner";
 import { invokeFunction } from "@/lib/supabase";
 import {
-  invoiceOriginalMessages,
-  messageForInvoiceOriginalApiError,
-} from "@shared/lib/invoice-original-messages";
+  ledgerOriginalMessages,
+  messageForLedgerOriginalApiError,
+} from "@shared/lib/ledger-original-messages";
 
 type SignedUrlResponse = {
-  signed_url?: string;
+  signedUrl?: string;
   filename?: string;
   error?: string;
 };
 
-export type InvoiceOriginalFetchResult =
+export type LedgerEntryOriginalFetchResult =
   | { ok: true; signedUrl: string; filename?: string }
   | { ok: false; message: string };
 
-export async function fetchInvoiceOriginalSignedUrl(
-  invoiceId: string,
+export async function fetchLedgerEntryOriginalSignedUrl(
+  ledgerEntryId: string,
   options?: { width?: number; height?: number; resize?: string },
-): Promise<InvoiceOriginalFetchResult> {
+): Promise<LedgerEntryOriginalFetchResult> {
   const { data, error } = await invokeFunction<SignedUrlResponse>(
     "get-document-signed-url",
-    { body: { invoice_id: invoiceId, ...options } },
+    { body: { ledger_entry_id: ledgerEntryId, ...options } },
   );
 
   if (error) {
     return {
       ok: false,
-      message: invoiceOriginalMessages.network,
+      message: ledgerOriginalMessages.network,
     };
   }
 
@@ -35,22 +35,22 @@ export async function fetchInvoiceOriginalSignedUrl(
   if (body?.error) {
     return {
       ok: false,
-      message: messageForInvoiceOriginalApiError(body.error),
+      message: messageForLedgerOriginalApiError(body.error),
     };
   }
 
-  const url = body?.signed_url;
+  const url = body?.signedUrl;
   if (!url) {
-    return { ok: false, message: invoiceOriginalMessages.generic };
+    return { ok: false, message: ledgerOriginalMessages.generic };
   }
 
   return { ok: true, signedUrl: url, filename: body.filename };
 }
 
-export async function openOriginalDocumentForInvoice(
-  invoiceId: string,
+export async function openOriginalDocumentForLedgerEntry(
+  ledgerEntryId: string,
 ): Promise<boolean> {
-  const result = await fetchInvoiceOriginalSignedUrl(invoiceId);
+  const result = await fetchLedgerEntryOriginalSignedUrl(ledgerEntryId);
   if (!result.ok) {
     toast.error(result.message);
     return false;
@@ -58,7 +58,7 @@ export async function openOriginalDocumentForInvoice(
 
   const win = window.open(result.signedUrl, "_blank", "noopener,noreferrer");
   if (!win) {
-    toast.error(invoiceOriginalMessages.popupBlocked);
+    toast.error(ledgerOriginalMessages.popupBlocked);
     return false;
   }
   return true;

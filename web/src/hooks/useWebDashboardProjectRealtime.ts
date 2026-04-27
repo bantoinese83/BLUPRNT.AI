@@ -38,11 +38,11 @@ export function useWebDashboardProjectRealtime(activeProjectId: string | null) {
         {
           event: "*",
           schema: "public",
-          table: "invoices",
+          table: "ledger_entries",
           filter: `project_id=eq.${activeProjectId}`,
         },
         () => {
-          console.log("[Realtime] Invoices updated, refreshing...");
+          console.log("[Realtime] Ledger updated, refreshing...");
           invalidate();
         },
       )

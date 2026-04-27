@@ -83,7 +83,7 @@ export async function fetchDashboardSnapshot(options?: {
       projects: rows,
       project: built.project,
       scopeItems: built.scopeItems,
-      invoices: built.invoices,
+      ledgerEntries: built.ledgerEntries,
       galleryItems: built.galleryItems,
       spendByCategory: built.spendByCategory,
       reconciliation: built.reconciliation,

@@ -1,5 +1,5 @@
 import { invokeFunction } from "@/lib/supabase";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 export type SellerPacketAppendixItem =
   | {
@@ -44,7 +44,7 @@ function formatDate(iso: string): string {
   }
 }
 
-function appendixTitle(inv: InvoiceRow): string {
+function appendixTitle(inv: LedgerEntryRow): string {
   const vendor = inv.vendor_name?.trim() || "Document";
   return `${formatDate(inv.created_at)} — ${vendor}`;
 }
@@ -73,16 +73,16 @@ function isProbablyPdf(mime: string, filename: string): boolean {
  * Builds optional appendix pages: embeds image uploads; PDFs get a short note (no rasterization).
  */
 export async function buildSellerPacketAppendixItems(
-  invoices: InvoiceRow[],
+  ledgerEntries: LedgerEntryRow[],
 ): Promise<SellerPacketAppendixItem[]> {
-  const withDocs = invoices.filter((i) => i.document_id);
+  const withDocs = ledgerEntries.filter((i) => i.document_id);
   const items = await Promise.all(
     withDocs.map(async (inv): Promise<SellerPacketAppendixItem> => {
       const title = appendixTitle(inv);
       try {
         const { data, error } = await invokeFunction<SignedUrlResponse>(
           "get-document-signed-url",
-          { body: { invoice_id: inv.id } },
+          { body: { ledger_entry_id: inv.id } },
         );
 
         if (error || (data as SignedUrlResponse | null)?.error || !data) {

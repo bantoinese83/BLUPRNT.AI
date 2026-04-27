@@ -14,6 +14,9 @@ export type OcrInvoiceResult = {
   subtotal: number | null;
   tax_total: number | null;
   total: number | null;
+  document_type?: string | null;
+  warranty_expiry_date?: string | null;
+  summary?: string | null;
 };
 
 export type ProjectScopeItem = {
@@ -31,10 +34,41 @@ export async function extractInvoiceFromPdf(
   mimeType: string,
   projectScope?: ProjectScopeItem[],
 ): Promise<OcrInvoiceResult | null> {
+  const ledgerTypes = [
+    "invoice", "quote", "receipt", "permit", "hoa", "warranty", "maintenance", 
+    "manual", "insurance", "disclosure", "inspection", "appraisal", "energy", 
+    "contract", "lien_waiver", "other"
+  ];
+
   let systemInstruction =
-    `Extract structured data from the provided invoice/PDF.
-If a field cannot be extracted, return null. 
-For line_items, ensure each entry has description, quantity, unit_price, and line_total.`;
+    `Extract structured data from the provided document.
+Vendor name is the company that issued the document. LOOK CAREFULLY for logos, company headers, or footers to identify the company name. 
+
+Identify the 'document_type' as one of these specific keys:
+${ledgerTypes.map(t => `- ${t}`).join('\n')}
+
+Guidelines for classification:
+- 'invoice': A request for payment for goods or services already provided or to be provided.
+- 'receipt': Proof of payment for a completed transaction.
+- 'quote': A price estimate or proposal for potential work (not a bill).
+- 'insurance': Certificates of Insurance (COI), policy documents, or risk reports.
+- 'permit': Building permits, occupancy certificates, or city approvals.
+- 'hoa': Correspondence or approvals from a Homeowners Association.
+- 'contract': Signed agreements or work orders.
+- 'lien_waiver': Documents where a contractor waives their right to place a lien.
+- 'warranty': Product warranties or care instructions.
+- 'inspection'/'appraisal': Reports on property condition or value.
+- 'maintenance': Service logs, HVAC tune-ups, or recurring care records.
+- 'manual': User manuals for appliances or home systems.
+- 'other': Only if it fits none of the above.
+
+Extraction Rules:
+1. For 'total', look for the final amount often labeled as TOTAL, AMOUNT DUE, or GRAND TOTAL. 
+2. If it's a quote, 'total' is the estimated amount.
+3. For line_items, ensure each entry has description, quantity, unit_price, and line_total.
+4. If a field cannot be extracted with high confidence, return null for that field. 
+5. If the document mentions a warranty duration (e.g., '10 year warranty') or an expiration date, calculate the expiration date in 'YYYY-MM-DD' format.
+6. Provide a concise, one-sentence 'summary' describing the document's purpose (e.g. 'A receipt for roofing materials from Home Depot' or 'Building permit for second floor renovation').`;
 
   if (projectScope && projectScope.length > 0) {
     const scopeStr = projectScope.map((s) =>
@@ -52,7 +86,7 @@ If no reasonable match exists, return null for that field.
 Be accurate: only map if the line item directly contributes to that scope category or description.`;
   }
 
-  const responseSchema = {
+  const _responseSchema = {
     type: "object",
     properties: {
       vendor_name: { type: "string", nullable: true },
@@ -75,15 +109,16 @@ Be accurate: only map if the line item directly contributes to that scope catego
       subtotal: { type: "number", nullable: true },
       tax_total: { type: "number", nullable: true },
       total: { type: "number", nullable: true },
+      document_type: { 
+        type: "string", 
+        enum: ["invoice", "quote", "receipt", "permit", "hoa", "warranty", "maintenance", "manual", "insurance", "disclosure", "inspection", "appraisal", "energy", "contract", "lien_waiver", "other"],
+        description: "The primary type of document"
+      },
+      warranty_expiry_date: { type: "string", nullable: true, description: "YYYY-MM-DD" },
+      summary: { type: "string", nullable: true, description: "Concise one-sentence summary" },
     },
     required: [
-      "vendor_name",
-      "invoice_number",
-      "issue_date",
-      "line_items",
-      "subtotal",
-      "tax_total",
-      "total",
+      "document_type",
     ],
   };
 
@@ -103,16 +138,18 @@ Be accurate: only map if the line item directly contributes to that scope catego
     const result = await callGemini({
       parts,
       systemInstruction,
-      responseSchema: responseSchema as any,
+      responseSchema: _responseSchema,
+      responseMimeType: "application/json",
       temperature: 0.1,
     });
 
-    if (!result) return null;
+    if (!result?.data) {
+      console.warn("[ocr] Gemini returned no structured data");
+      return null;
+    }
 
-    // Use data if already parsed by callGemini, otherwise parse text
-    const parsed = (result.data || JSON.parse(result.text)) as OcrInvoiceResult;
-
-    if (!parsed || typeof parsed !== "object") return null;
+    const parsed = result.data;
+    console.log("[ocr] Extracted data:", JSON.stringify(parsed));
 
     return {
       vendor_name: parsed.vendor_name || null,
@@ -122,6 +159,9 @@ Be accurate: only map if the line item directly contributes to that scope catego
       subtotal: parsed.subtotal ?? null,
       tax_total: parsed.tax_total ?? null,
       total: parsed.total ?? null,
+      document_type: parsed.document_type || null,
+      warranty_expiry_date: parsed.warranty_expiry_date || null,
+      summary: parsed.summary || null,
     };
   } catch (e) {
     console.error("OCR extraction error:", e);

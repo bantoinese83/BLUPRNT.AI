@@ -9,7 +9,7 @@ import {
   ArchitectPlanIcon,
   ProjectPassIcon,
 } from "@/components/icons/PlanMarks";
-import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 
 const ARCHITECT_INVOICE_LIMIT = 10;
 

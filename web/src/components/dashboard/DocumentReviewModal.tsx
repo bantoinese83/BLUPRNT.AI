@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Link2, Sparkles } from "lucide-react";
+import { Loader2, Link2, Sparkles, Trash2 } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +13,8 @@ import {
 import {
   isCapitalLedgerDocumentType,
   ledgerDocumentTypeLabel,
-  ledgerDocumentVisualGroup,
   reviewDocumentModalTitle,
-  defaultVendorNameForDocumentType,
+  ledgerDocumentTheme,
 } from "@shared/lib/ledger-document-labels";
 import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
@@ -55,6 +54,7 @@ type DocumentData = {
   document_id?: string | null;
   document_type?: string | null;
   warranty_expiry_date?: string | null;
+  ai_summary?: string | null;
   is_verified?: boolean;
 };
 
@@ -63,11 +63,13 @@ export function DocumentReviewModal({
   projectId,
   onClose,
   onSaved,
+  onDeleted,
 }: {
   documentId: string;
   projectId: string;
   onClose: () => void;
   onSaved?: (id?: string) => void;
+  onDeleted?: (id: string) => void;
 }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,10 +79,12 @@ export function DocumentReviewModal({
   >([]);
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
   const [ledgerDocType, setLedgerDocType] =
     useState<LedgerDocumentType>("invoice");
   const [warrantyExpiryDate, setWarrantyExpiryDate] = useState<string>("");
+  const [vendorName, setVendorName] = useState<string>("");
 
   const handleSaveMappings = useCallback(async () => {
     if (!document || saving) return;
@@ -89,7 +93,7 @@ export function DocumentReviewModal({
       const lineUpdates = Object.entries(mappings).map(
         ([lineId, scopeItemId]) =>
           supabase
-            .from("invoice_line_items")
+            .from("ledger_line_items")
             .update({ scope_item_id: scopeItemId || null })
             .eq("id", lineId),
       );
@@ -102,14 +106,16 @@ export function DocumentReviewModal({
       const typeChanged = ledgerDocType !== prevType;
       const dateChanged =
         warrantyExpiryDate !== (document.warranty_expiry_date || "");
+      const vendorChanged = vendorName !== (document.vendor_name || "");
       const needsVerification = document.is_verified === false;
 
-      if (typeChanged || dateChanged || needsVerification) {
+      if (typeChanged || dateChanged || vendorChanged || needsVerification) {
         const { error: invErr } = await supabase
-          .from("invoices")
+          .from("ledger_entries")
           .update({
             document_type: ledgerDocType,
             warranty_expiry_date: warrantyExpiryDate || null,
+            vendor_name: vendorName || null,
             is_verified: true, // Always verify on manual save
           })
           .eq("id", document.id);
@@ -149,6 +155,7 @@ export function DocumentReviewModal({
     mappings,
     ledgerDocType,
     warrantyExpiryDate,
+    vendorName,
     projectId,
     onSaved,
     onClose,
@@ -166,76 +173,126 @@ export function DocumentReviewModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleSaveMappings]);
 
+  // Initial load
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
+    const load = async (isPoll = false) => {
+      if (!isPoll) setLoading(true);
       try {
         const { data: invData, error: invErr } = await invokeFunction<{
-          invoice: DocumentData;
+          ledger_entry: DocumentData;
           line_items: LineItem[];
           budget_mapping_suggestions?: ScopeSuggestion[];
-        }>("get-invoice", {
-          body: { invoice_id: documentId },
+        }>("get-ledger-entry", {
+          body: { ledger_entry_id: documentId },
         });
         if (cancelled) return;
         if (invErr || !invData) {
-          setError("Couldn't load document.");
-          setLoading(false);
+          if (!isPoll) setError("Couldn't load document.");
           return;
         }
         const inv = invData as unknown as {
-          invoice: DocumentData;
+          ledger_entry: DocumentData;
           line_items: LineItem[];
           budget_mapping_suggestions?: ScopeSuggestion[];
         };
         const merged = {
-          ...inv.invoice,
+          ...inv.ledger_entry,
           line_items: inv.line_items ?? [],
           budget_mapping_suggestions: inv.budget_mapping_suggestions,
         };
+
+        // Update state if data changed
         setDocument(merged);
         setLedgerDocType(coerceLedgerDocumentType(merged.document_type));
         setWarrantyExpiryDate(merged.warranty_expiry_date || "");
+        setVendorName(merged.vendor_name || "");
 
-        const { data: scope, error: scopeErr } = await supabase
-          .from("scope_items")
-          .select("id, category, description")
-          .eq("project_id", projectId);
-        if (cancelled) return;
-        if (scopeErr) {
-          reportClientError("document_review_scope_list", scopeErr);
-          toast.error(
-            "We couldn’t load your budget breakdown, so some line links may be missing. You can still review amounts—try again shortly or check your connection.",
-            { duration: 8000 },
-          );
-          setScopeItems([]);
-        } else {
-          setScopeItems(
-            (scope ?? []) as {
-              id: string;
-              category: string;
-              description: string;
-            }[],
-          );
+        // Only fetch scope items on initial load
+        if (!isPoll) {
+          const { data: scope, error: scopeErr } = await supabase
+            .from("scope_items")
+            .select("id, category, description")
+            .eq("project_id", projectId);
+          if (cancelled) return;
+          if (scopeErr) {
+            reportClientError("document_review_scope_list", scopeErr);
+            toast.error(
+              "We couldn’t load your budget breakdown, so some line links may be missing.",
+              { duration: 8000 },
+            );
+            setScopeItems([]);
+          } else {
+            setScopeItems(
+              (scope ?? []) as {
+                id: string;
+                category: string;
+                description: string;
+              }[],
+            );
+          }
+
+          const initial: Record<string, string> = {};
+          (inv.line_items ?? []).forEach((line: LineItem) => {
+            if (line.scope_item_id) initial[line.id] = line.scope_item_id;
+          });
+          setMappings(initial);
         }
-
-        const initial: Record<string, string> = {};
-        (inv.line_items ?? []).forEach((line: LineItem) => {
-          if (line.scope_item_id) initial[line.id] = line.scope_item_id;
-        });
-        setMappings(initial);
       } catch {
-        if (!cancelled) setError("Something went wrong.");
+        if (!cancelled && !isPoll) setError("Something went wrong.");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && !isPoll) setLoading(false);
       }
-    })();
+    };
+
+    void load();
+
+    // Start polling if status is unknown/processing
+    const pollInterval = setInterval(() => {
+      setDocument((prev) => {
+        if (
+          prev?.is_verified === false &&
+          (prev.payment_status === "unknown" ||
+            prev.vendor_name === "Processing...")
+        ) {
+          void load(true);
+        }
+        return prev;
+      });
+    }, 3000);
+
     return () => {
       cancelled = true;
+      clearInterval(pollInterval);
     };
   }, [documentId, projectId]);
+
+  const handleDelete = async () => {
+    if (!document) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete this ${ledgerDocType}? This cannot be undone.`,
+    );
+    if (!confirmDelete) return;
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("ledger_entries")
+        .delete()
+        .eq("id", document.id);
+
+      if (error) throw error;
+
+      toast.success("Document deleted");
+      onDeleted?.(document.id);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not delete document");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -274,15 +331,7 @@ export function DocumentReviewModal({
   }
 
   const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
-  const modalTitle = reviewDocumentModalTitle(ledgerDocType);
-  const vg = ledgerDocumentVisualGroup(ledgerDocType);
-  const headerIconClass =
-    vg === "spend"
-      ? "text-red-500"
-      : vg === "warranty_care"
-        ? "text-teal-600"
-        : "text-slate-700";
-  const HeaderIcon = reviewModalIconForDocumentType(ledgerDocType);
+  const theme = ledgerDocumentTheme(ledgerDocType);
   const isUnverified = document.is_verified === false;
 
   return (
@@ -295,10 +344,11 @@ export function DocumentReviewModal({
       >
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <ReviewModalHeader
-            title={modalTitle}
-            isUnverified={isUnverified}
-            headerIconClass={headerIconClass}
-            HeaderIcon={HeaderIcon}
+            title={reviewDocumentModalTitle(ledgerDocType)}
+            isUnverified={document.is_verified === false}
+            headerIconClass={theme.icon}
+            HeaderIcon={reviewModalIconForDocumentType(ledgerDocType)}
+            bgClass={theme.bg}
             onClose={onClose}
           />
 
@@ -327,7 +377,7 @@ export function DocumentReviewModal({
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               {document.id && (
                 <DocumentThumbnail
-                  invoiceId={document.id}
+                  ledgerEntryId={document.id}
                   size="lg"
                   className="w-full sm:w-32 sm:h-32 rounded-2xl shadow-drop-md border-slate-200"
                 />
@@ -351,6 +401,9 @@ export function DocumentReviewModal({
                   onDocTypeChange={setLedgerDocType}
                   warrantyExpiryDate={warrantyExpiryDate}
                   onWarrantyDateChange={setWarrantyExpiryDate}
+                  vendorName={vendorName}
+                  onVendorNameChange={setVendorName}
+                  vendorLabel={theme.label}
                 />
               </div>
             </div>
@@ -361,29 +414,61 @@ export function DocumentReviewModal({
                   {document.vendor_name &&
                   document.vendor_name !== "Vendor" &&
                   document.vendor_name !== "Document" &&
-                  document.vendor_name !== "Processing..."
-                    ? document.vendor_name
-                    : defaultVendorNameForDocumentType(ledgerDocType)}
+                  document.vendor_name !== "Processing..." ? (
+                    document.vendor_name
+                  ) : (
+                    <span className="flex items-center gap-2 text-slate-500 italic">
+                      <Sparkles className="w-4 h-4 text-teal-500 animate-pulse" />
+                      AI Extracting...
+                    </span>
+                  )}
                   {(!document.vendor_name ||
                     document.vendor_name === "Vendor" ||
-                    document.vendor_name === "Document") &&
+                    document.vendor_name === "Document" ||
+                    document.vendor_name === "Processing...") &&
                     showCapitalLineLink && (
                       <Badge
                         variant="outline"
-                        className="text-[10px] text-amber-700 border-amber-200 bg-amber-50"
+                        className="text-[10px] text-teal-700 border-teal-200 bg-teal-50 animate-pulse"
                       >
-                        Needs a quick check
+                        Analyzing Document
                       </Badge>
                     )}
                 </h4>
                 {showCapitalLineLink && (
-                  <Badge variant="secondary" className="capitalize">
-                    {document.payment_status === "unknown"
-                      ? ledgerDocType === "quote"
-                        ? "Pending Review"
-                        : "Processing"
-                      : document.payment_status}
-                  </Badge>
+                  <>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "capitalize",
+                        document.payment_status === "unknown" &&
+                          ledgerDocType !== "quote" &&
+                          "animate-pulse bg-teal-50 text-teal-700",
+                      )}
+                    >
+                      {document.payment_status === "unknown"
+                        ? ledgerDocType === "quote"
+                          ? "Pending Review"
+                          : "Processing..."
+                        : document.payment_status}
+                    </Badge>
+
+                    {/* AI Summary Section */}
+                    {(isUnverified || document.ai_summary) && (
+                      <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-teal-50/50 border border-teal-100/50">
+                        <Sparkles className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
+                        <p className="text-sm text-teal-900 leading-relaxed">
+                          {document.ai_summary ? (
+                            document.ai_summary
+                          ) : (
+                            <span className="italic text-teal-700 animate-pulse">
+                              Analyzing Document...
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               {showCapitalLineLink && (
@@ -395,8 +480,17 @@ export function DocumentReviewModal({
                     }).format(document.total ?? 0)}
                   </p>
                   {(!document.total || document.total === 0) && (
-                    <p className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">
-                      Verify Total
+                    <p
+                      className={cn(
+                        "text-[10px] font-bold uppercase tracking-wider",
+                        document.vendor_name === "Processing..."
+                          ? "text-teal-600/50 italic animate-pulse"
+                          : "text-amber-700",
+                      )}
+                    >
+                      {document.vendor_name === "Processing..."
+                        ? "Calculating..."
+                        : "Verify Total"}
                     </p>
                   )}
                 </div>
@@ -427,40 +521,55 @@ export function DocumentReviewModal({
               </div>
             ) : null}
 
-            <div className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={onClose} className="flex-1">
-                Cancel
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-2 pt-4">
               <Button
-                variant="primary"
-                onClick={handleSaveMappings}
-                disabled={saving}
-                className={cn(
-                  "flex-1 gap-2 relative overflow-hidden group",
-                  isUnverified &&
-                    "bg-amber-600 hover:bg-amber-700 border-amber-700 shadow-amber-200",
-                )}
+                variant="ghost"
+                onClick={handleDelete}
+                disabled={deleting || saving}
+                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-2 order-2 sm:order-1"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {isUnverified ? (
-                  <>
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Delete
+              </Button>
+              <div className="flex-1 flex gap-2 order-1 sm:order-2">
+                <Button variant="outline" onClick={onClose} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleSaveMappings}
+                  disabled={saving || deleting}
+                  className={cn(
+                    "flex-1 gap-2 relative overflow-hidden group",
+                    isUnverified &&
+                      "bg-amber-600 hover:bg-amber-700 border-amber-700 shadow-amber-200",
+                  )}
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  {isUnverified ? (
+                    <>
+                      <Sparkles className="w-4 h-4 animate-pulse" />
+                      <span className="flex items-center gap-1.5">
+                        Verify & Save
+                        <kbd className="hidden sm:inline-block text-[10px] font-black bg-amber-800/20 px-1 rounded ml-1">
+                          ⌘+Enter
+                        </kbd>
+                      </span>
+                    </>
+                  ) : (
                     <span className="flex items-center gap-1.5">
-                      Verify & Save
-                      <kbd className="hidden sm:inline-block text-[10px] font-black bg-amber-800/20 px-1 rounded ml-1">
+                      Save changes
+                      <kbd className="hidden sm:inline-block text-[10px] font-black bg-slate-800/10 px-1 rounded ml-1">
                         ⌘+Enter
                       </kbd>
                     </span>
-                  </>
-                ) : (
-                  <span className="flex items-center gap-1.5">
-                    Save changes
-                    <kbd className="hidden sm:inline-block text-[10px] font-black bg-slate-800/10 px-1 rounded ml-1">
-                      ⌘+Enter
-                    </kbd>
-                  </span>
-                )}
-              </Button>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -468,7 +577,7 @@ export function DocumentReviewModal({
       {originalPreviewOpen ? (
         <OriginalUploadPreviewModal
           key={documentId}
-          invoiceId={documentId}
+          ledgerEntryId={documentId}
           onClose={() => setOriginalPreviewOpen(false)}
         />
       ) : null}

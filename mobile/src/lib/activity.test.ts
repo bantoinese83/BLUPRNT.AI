@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { generateActivityEvents, formatRelativeTime } from "@/lib/activity";
-import type { InvoiceRow, ProjectRow } from "@shared/types/database";
+import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
 
 describe("generateActivityEvents", () => {
   const project = {
@@ -14,7 +14,7 @@ describe("generateActivityEvents", () => {
     created_at: "2024-06-01T12:00:00.000Z",
   } as unknown as ProjectRow;
 
-  const invoice = {
+  const ledgerEntry = {
     id: "i1",
     project_id: "p1",
     vendor_name: "ACME",
@@ -23,10 +23,10 @@ describe("generateActivityEvents", () => {
     payment_status: "paid",
     document_type: "invoice",
     document_id: null,
-  } as unknown as InvoiceRow;
+  } as unknown as LedgerEntryRow;
 
   it("includes invoice and project events sorted by time", () => {
-    const events = generateActivityEvents(project, [invoice]);
+    const events = generateActivityEvents(project, [ledgerEntry as any]);
     expect(events.length).toBeGreaterThanOrEqual(2);
     expect(events[0]!.timestamp >= events[events.length - 1]!.timestamp).toBe(
       true,

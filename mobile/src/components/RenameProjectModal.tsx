@@ -38,33 +38,35 @@ export function RenameProjectModal({
     >
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.centerWrap}>
           <Pressable style={styles.scrim} onPress={onClose} />
           <View style={styles.sheetOuter}>
             <View style={styles.sheet}>
-              <Text style={styles.title}>Rename project</Text>
-              <Text style={styles.subtitle}>
-                This name appears on your dashboard and exports.
-              </Text>
-              <TextInput
-                testID="rename-project-input"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-                placeholder="Project name"
-                placeholderTextColor={Theme.colors.text.muted}
-                autoFocus
-                autoCorrect={false}
-                editable={!saving}
-              />
+              <View style={styles.content}>
+                <Text style={styles.title}>Rename project</Text>
+                <Text style={styles.subtitle}>
+                  This name appears on your dashboard and exports.
+                </Text>
+                <TextInput
+                  testID="rename-project-input"
+                  value={name}
+                  onChangeText={setName}
+                  style={styles.input}
+                  placeholder="Project name"
+                  placeholderTextColor={Theme.colors.text.muted}
+                  autoFocus
+                  autoCorrect={false}
+                  editable={!saving}
+                />
+              </View>
               <View style={styles.row}>
                 <Button
                   title="Cancel"
                   variant="outline"
                   onPress={onClose}
-                  style={styles.half}
+                  style={styles.button}
                   titleCase="sentence"
                   disabled={saving}
                 />
@@ -85,7 +87,7 @@ export function RenameProjectModal({
                   }}
                   disabled={!name.trim() || saving}
                   loading={saving}
-                  style={styles.half}
+                  style={styles.button}
                   titleCase="sentence"
                 />
               </View>
@@ -117,9 +119,12 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background,
     borderRadius: Theme.radius.xl,
     padding: Theme.spacing.lg,
-    gap: Theme.spacing.md,
     borderWidth: 1,
     borderColor: Theme.colors.border,
+  },
+  content: {
+    gap: Theme.spacing.md,
+    marginBottom: Theme.spacing.lg,
   },
   title: {
     fontSize: 20,
@@ -141,13 +146,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.primary,
+    marginTop: 4,
   },
   row: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 4,
   },
-  half: {
+  button: {
     flex: 1,
+    height: 52, // Explicit height for predictability
   },
 });

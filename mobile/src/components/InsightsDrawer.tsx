@@ -141,7 +141,7 @@ export function InsightsDrawer() {
       }
       if (actionKind === "execute") {
         router.push("/(tabs)");
-        showAppToast("Tap + to upload an invoice or document.");
+        showAppToast("Tap + to upload a document.");
         return;
       }
       if (actionKind === "record") {
@@ -200,8 +200,8 @@ export function InsightsDrawer() {
               </View>
               <Text style={styles.emptyTitle}>All Looking Good</Text>
               <Text style={styles.emptySubtitle}>
-                Your project looks solid. Check back as you add more invoices
-                and scope updates.
+                Your project looks solid. Check back as you add more records and
+                scope updates.
               </Text>
             </View>
           ) : (
@@ -221,8 +221,8 @@ export function InsightsDrawer() {
           <GlassCard intensity={8} style={styles.footerCard}>
             <Text style={styles.footerText}>
               <Text style={styles.footerBold}>Pro Tip: </Text>
-              Keeping your invoices and scope updated ensures these insights
-              stay accurate and actionable.
+              Keeping your records and scope updated ensures these insights stay
+              accurate and actionable.
             </Text>
           </GlassCard>
         </View>

@@ -1,4 +1,4 @@
-import type { InvoiceRow, ProjectRow } from "../types/database.ts";
+import type { LedgerEntryRow, ProjectRow } from "../types/database.ts";
 
 export type ActivityEvent = {
   id: string;
@@ -10,28 +10,30 @@ export type ActivityEvent = {
 };
 
 /**
- * Generates dynamic activity events based on live project + invoice data.
+ * Generates dynamic activity events based on live project + ledger data.
  * Shared across Web and Mobile.
  */
 export function generateActivityEvents(
   project: ProjectRow,
-  invoices: InvoiceRow[],
+  ledgerEntries: LedgerEntryRow[],
 ): ActivityEvent[] {
   const events: ActivityEvent[] = [
-    ...generateInvoiceUploadEvents(invoices),
+    ...generateLedgerEntryUploadEvents(ledgerEntries),
     generateProjectInitializationEvent(project),
   ];
 
   return sortEventsByRecency(events);
 }
 
-/** Creates events for the 5 most recent invoice uploads. */
-function generateInvoiceUploadEvents(invoices: InvoiceRow[]): ActivityEvent[] {
-  return (invoices ?? []).slice(0, 5).map((inv) => ({
+/** Creates events for the 5 most recent ledger entry uploads. */
+function generateLedgerEntryUploadEvents(
+  ledgerEntries: LedgerEntryRow[],
+): ActivityEvent[] {
+  return (ledgerEntries ?? []).slice(0, 5).map((inv) => ({
     id: `inv-${inv.id}`,
     type: "upload" as const,
-    title: "Invoice Uploaded",
-    description: `${inv.vendor_name || "Vendor"} invoice for ${
+    title: "Document Uploaded",
+    description: `${inv.vendor_name || "Vendor"} document for ${
       inv.total != null && Number.isFinite(inv.total)
         ? `$${inv.total.toLocaleString()}`
         : "an unspecified amount"

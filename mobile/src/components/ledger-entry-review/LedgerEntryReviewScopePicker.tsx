@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 
-import { invoiceReviewSheetStyles as styles } from "./invoiceReviewSheet.styles";
+import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
 
 export type PickerOption = { id: string; label: string };
 
@@ -20,12 +20,12 @@ type Props = {
   onSelect: (lineId: string, scopeId: string) => void;
   /**
    * When true, renders as an in-tree overlay (no nested Modal). Use inside
-   * `InvoiceReviewSheet` so the picker appears above the sheet on all platforms.
+   * `LedgerEntryReviewSheet` so the picker appears above the sheet on all platforms.
    */
   embedded?: boolean;
 };
 
-export function InvoiceReviewScopePicker({
+export function LedgerEntryReviewScopePicker({
   visible,
   options,
   activeLineId,

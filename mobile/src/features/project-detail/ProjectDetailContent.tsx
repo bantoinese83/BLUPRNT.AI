@@ -32,7 +32,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
     project,
     expandedId,
     setExpandedId,
-    detailInvoices,
+    detailLedgerEntries,
     includeAppendix,
     setIncludeAppendix,
     addItem,
@@ -43,6 +43,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
     scopePollDone,
     detailDataWarning,
     clearDetailDataWarnings,
+    ledgerTotal,
     groupedScope,
     handleShare,
     handleRefresh,
@@ -118,7 +119,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
             <TransformationVault projectId={project.id} />
             <ProjectDetailInsightCards
               project={project}
-              invoiceTotal={vm.invoiceTotal}
+              ledgerTotal={ledgerTotal}
             />
             {isTrustHighPriority && (
               <GroundingSourcesSection project={project} />
@@ -151,7 +152,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
         )}
 
         <ProjectDetailFooterActions
-          detailInvoices={detailInvoices}
+          detailLedgerEntries={detailLedgerEntries}
           includeAppendix={includeAppendix}
           setIncludeAppendix={setIncludeAppendix}
           onShare={handleShare}

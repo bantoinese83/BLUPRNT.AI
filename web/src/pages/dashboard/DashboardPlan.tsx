@@ -10,13 +10,17 @@ import {
 import { DashboardSubPage } from "@/components/dashboard/DashboardSubPage";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  LedgerEntryRow,
+} from "@shared/types/database";
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
 interface DashboardPlanProps {
   project: ProjectRow;
   scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   activityEvents: ActivityEvent[];
   reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
@@ -33,7 +37,7 @@ interface DashboardPlanProps {
 export function DashboardPlan({
   project,
   scopeItems,
-  invoices,
+  ledgerEntries,
   activityEvents,
   reconciliation,
   isArchitect,
@@ -76,7 +80,7 @@ export function DashboardPlan({
       <PlanVsActualCard
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
-        invoices={invoices}
+        ledgerEntries={ledgerEntries as any}
       />
       <Button
         variant="outline"

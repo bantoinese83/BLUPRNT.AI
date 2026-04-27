@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   coerceLedgerDocumentType,
   inferDocumentTypeFromFilename,
-  isArchitectQuotaInvoiceType,
+  isArchitectQuotaLedgerEntryType,
   isCapitalLedgerDocumentType,
   isInvoiceStyleOcrType,
   isPlanVsActualDocumentType,
@@ -26,6 +26,11 @@ describe("coerceLedgerDocumentType", () => {
   it("maps unknown strings to other", () => {
     expect(coerceLedgerDocumentType("mystery.pdf")).toBe("other");
   });
+
+  it("handles whitespace and case in coerce", () => {
+    expect(coerceLedgerDocumentType("  receipt  ")).toBe("receipt");
+    expect(coerceLedgerDocumentType("InVoice")).toBe("invoice");
+  });
 });
 
 describe("isPlanVsActualDocumentType / isCapitalLedgerDocumentType", () => {
@@ -36,6 +41,12 @@ describe("isPlanVsActualDocumentType / isCapitalLedgerDocumentType", () => {
     expect(isPlanVsActualDocumentType("permit")).toBe(false);
     expect(isCapitalLedgerDocumentType("RECEIPT")).toBe(true);
     expect(isCapitalLedgerDocumentType("warranty")).toBe(false);
+  });
+
+  it("handles null/undefined in spend checks", () => {
+    expect(isPlanVsActualDocumentType(null)).toBe(true); // Defaults to invoice
+    expect(isPlanVsActualDocumentType(undefined)).toBe(true);
+    expect(isCapitalLedgerDocumentType("")).toBe(true);
   });
 });
 
@@ -108,11 +119,11 @@ describe("isInvoiceStyleOcrType", () => {
   });
 });
 
-describe("isArchitectQuotaInvoiceType", () => {
+describe("isArchitectQuotaLedgerEntryType", () => {
   it("counts invoice and receipt only", () => {
-    expect(isArchitectQuotaInvoiceType("invoice")).toBe(true);
-    expect(isArchitectQuotaInvoiceType("Receipt")).toBe(true);
-    expect(isArchitectQuotaInvoiceType("quote")).toBe(false);
+    expect(isArchitectQuotaLedgerEntryType("invoice")).toBe(true);
+    expect(isArchitectQuotaLedgerEntryType("Receipt")).toBe(true);
+    expect(isArchitectQuotaLedgerEntryType("quote")).toBe(false);
   });
 });
 

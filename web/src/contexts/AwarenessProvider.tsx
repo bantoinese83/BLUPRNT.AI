@@ -1,18 +1,22 @@
 import React, { useState, useMemo } from "react";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  LedgerEntryRow,
+} from "@shared/types/database";
 import { AwarenessContext, type SmartInsight } from "./AwarenessContext";
 
 export function AwarenessProvider({
   children,
   project,
   scopeItems,
-  invoices,
+  ledgerEntries,
   spendByCategory,
 }: {
   children: React.ReactNode;
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
-  invoices: InvoiceRow[];
+  ledgerEntries: LedgerEntryRow[];
   spendByCategory: Record<string, number>;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -51,7 +55,10 @@ export function AwarenessProvider({
       (a, b) => a + b,
       0,
     );
-    const invoiceGrandTotal = invoices.reduce((s, i) => s + (i.total ?? 0), 0);
+    const ledgerGrandTotal = ledgerEntries.reduce(
+      (s, i) => s + (i.total ?? 0),
+      0,
+    );
     const scopeMaxSum = scopeItems.reduce(
       (s, it) => s + (it.total_cost_max ?? 0),
       0,
@@ -59,14 +66,14 @@ export function AwarenessProvider({
     if (
       scopeItems.length > 0 &&
       scopeMaxSum > 0 &&
-      invoiceGrandTotal > scopeMaxSum &&
-      lineBackedTotal < invoiceGrandTotal * 0.85
+      ledgerGrandTotal > scopeMaxSum &&
+      lineBackedTotal < ledgerGrandTotal * 0.85
     ) {
       newInsights.push({
         id: "budget-aggregate-over",
         type: "anomaly",
         title: "Spend above total scope",
-        description: `Invoices total about $${invoiceGrandTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to invoices for category-level tracking.`,
+        description: `Your documents total about $${ledgerGrandTotal.toLocaleString()}, above the roughly $${scopeMaxSum.toLocaleString()} ceiling in your line-item scope. Add line items to documents for category-level tracking.`,
       });
       health = health === "optimal" ? "warning" : health;
     }
@@ -88,21 +95,21 @@ export function AwarenessProvider({
       (stage === "in_progress" ||
         stage === "collecting_quotes" ||
         stage === "construction") &&
-      invoices.length === 0
+      ledgerEntries.length === 0
     ) {
       newInsights.push({
-        id: "no-invoices",
+        id: "no-ledger-entries",
         type: "tip",
         title: "Track your spending",
         description:
-          "You’re past the planning stage but haven’t uploaded invoices yet. Add documents to stay on budget and sharpen these insights.",
-        actionLabel: "Upload Invoice",
+          "You’re past the planning stage but haven’t uploaded documents yet. Add them to stay on budget and sharpen these insights.",
+        actionLabel: "Upload Document",
         actionKind: "execute",
       });
     }
 
-    const invoiceTotal = invoices.reduce((s, i) => s + (i.total || 0), 0);
-    if (invoiceTotal > 5000 && scopeItems.length > 0) {
+    const ledgerTotal = ledgerEntries.reduce((s, i) => s + (i.total || 0), 0);
+    if (ledgerTotal > 5000 && scopeItems.length > 0) {
       newInsights.push({
         id: "resale-opportunity",
         type: "opportunity",
@@ -124,7 +131,7 @@ export function AwarenessProvider({
       projectHealth: health,
       nextBestAction: nextAction,
     };
-  }, [project, scopeItems, invoices, spendByCategory]);
+  }, [project, scopeItems, ledgerEntries, spendByCategory]);
 
   const value = useMemo(
     () => ({

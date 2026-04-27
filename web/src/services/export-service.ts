@@ -15,7 +15,7 @@ export async function exportUserData(userId: string, email: string) {
       ? await supabase
           .from("projects")
           .select(
-            "*, scope_items(*), invoices(*, invoice_line_items(*)), documents(id, project_id, type, original_filename, created_at)",
+            "*, scope_items(*), ledger_entries(*, ledger_line_items(*)), documents(id, project_id, type, original_filename, created_at)",
           )
           .in("property_id", propIds)
       : { data: [] };
@@ -23,20 +23,25 @@ export async function exportUserData(userId: string, email: string) {
   const projsNested = projsRes.data ?? [];
 
   const projs = projsNested.map((p) => {
-    const { scope_items: _s, invoices: _i, documents: _d, ...rest } = p as any;
+    const {
+      scope_items: _s,
+      ledger_entries: _i,
+      documents: _d,
+      ...rest
+    } = p as any;
     return rest;
   });
 
   const scopeItems = projsNested.flatMap((p: any) => p.scope_items ?? []);
-  const invoices = projsNested
-    .flatMap((p: any) => p.invoices ?? [])
+  const ledgerEntries = projsNested
+    .flatMap((p: any) => p.ledger_entries ?? [])
     .map((inv: any) => {
-      const { invoice_line_items: _li, ...rest } = inv;
+      const { ledger_line_items: _li, ...rest } = inv;
       return rest;
     });
   const lineItems = projsNested
-    .flatMap((p: any) => p.invoices ?? [])
-    .flatMap((inv: any) => inv.invoice_line_items ?? []);
+    .flatMap((p: any) => p.ledger_entries ?? [])
+    .flatMap((inv: any) => inv.ledger_line_items ?? []);
   const documents = projsNested.flatMap((p: any) => p.documents ?? []);
 
   const exportData = {
@@ -46,8 +51,8 @@ export async function exportUserData(userId: string, email: string) {
     properties: props ?? [],
     projects: projs,
     scope_items: scopeItems,
-    invoices,
-    invoice_line_items: lineItems,
+    ledger_entries: ledgerEntries,
+    ledger_line_items: lineItems,
     documents,
   };
 

@@ -36,7 +36,7 @@ describe("downloadSellerPacket", () => {
       estimated_max_total: 2000,
     },
     scopeItems: [],
-    invoices: [],
+    ledgerEntries: [],
   };
 
   beforeEach(() => {
@@ -101,7 +101,7 @@ describe("downloadSellerPacket", () => {
     expect(generateSellerPacketBlob).toHaveBeenCalledWith(
       params.project,
       params.scopeItems,
-      params.invoices,
+      params.ledgerEntries,
       expect.objectContaining({ appendixItems: expect.any(Array) }),
     );
   });

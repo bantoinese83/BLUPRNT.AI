@@ -111,6 +111,7 @@ export function AddScopeItemModal({ isOpen, onClose, onAdd }: Props) {
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.container}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         >
           <MotiView
             from={{ translateY: 300, opacity: 0 }}

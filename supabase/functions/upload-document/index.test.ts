@@ -27,7 +27,7 @@ Deno.test("upload-document - returns 405 for GET", async () => {
   assertEquals(res.status, 405);
 });
 
-function calculateInvoiceTotals(params: {
+function calculateLedgerEntryTotals(params: {
   amount_hint?: number;
   ocr_total?: number;
   ocr_subtotal?: number;
@@ -67,14 +67,14 @@ function calculateInvoiceTotals(params: {
   };
 }
 
-Deno.test("calculateInvoiceTotals - uses amount_hint when provided", () => {
-  const result = calculateInvoiceTotals({ amount_hint: 1000, type: "invoice" });
+Deno.test("calculateLedgerEntryTotals - uses amount_hint when provided", () => {
+  const result = calculateLedgerEntryTotals({ amount_hint: 1000, type: "invoice" });
   assertEquals(result.subtotal, 1000);
   assertEquals(result.total, 1080);
 });
 
-Deno.test("calculateInvoiceTotals - uses OCR values when detected", () => {
-  const result = calculateInvoiceTotals({
+Deno.test("calculateLedgerEntryTotals - uses OCR values when detected", () => {
+  const result = calculateLedgerEntryTotals({
     ocr_total: 500,
     ocr_subtotal: 450,
     ocr_tax: 50,
@@ -84,13 +84,13 @@ Deno.test("calculateInvoiceTotals - uses OCR values when detected", () => {
   assertEquals(result.total, 500);
 });
 
-Deno.test("calculateInvoiceTotals - handles non-invoice documents as $0", () => {
-  const result = calculateInvoiceTotals({ amount_hint: 1000, type: "quote" });
+Deno.test("calculateLedgerEntryTotals - handles non-invoice documents as $0", () => {
+  const result = calculateLedgerEntryTotals({ amount_hint: 1000, type: "quote" });
   assertEquals(result.total, 0);
 });
 
-Deno.test("calculateInvoiceTotals - defaults to $1850 for invoices with no data", () => {
-  const result = calculateInvoiceTotals({ type: "invoice" });
+Deno.test("calculateLedgerEntryTotals - defaults to $1850 for invoices with no data", () => {
+  const result = calculateLedgerEntryTotals({ type: "invoice" });
   assertEquals(result.subtotal, 1850);
   assertEquals(result.total, 1998); // 1850 + 148
 });

@@ -21,6 +21,10 @@ vi.mock("@/lib/sentry", () => ({
   reportClientError: vi.fn(),
 }));
 
+vi.mock("@/components/dashboard/DocumentThumbnail", () => ({
+  DocumentThumbnail: () => <div data-testid="doc-thumb" />,
+}));
+
 describe("DocumentReviewModal", () => {
   const documentId = "doc123";
   const projectId = "proj456";
@@ -34,13 +38,13 @@ describe("DocumentReviewModal", () => {
       id: documentId,
       vendor_name: "Test Vendor",
       total: 100,
-      document_type: "invoice",
+      document_type: "warranty",
       line_items: [],
       warranty_expiry_date: null,
     };
 
     (invokeFunction as any).mockResolvedValue({
-      data: { invoice: mockInvoice, line_items: [] },
+      data: { ledger_entry: mockInvoice, line_items: [] },
       error: null,
     });
 
@@ -61,7 +65,7 @@ describe("DocumentReviewModal", () => {
 
     // Wait for load
     await waitFor(() =>
-      expect(screen.getByText(/Review bill or invoice/i)).toBeInTheDocument(),
+      expect(screen.getByText(/Review warranty/i)).toBeInTheDocument(),
     );
 
     const dateInput = screen.getByLabelText(/Warranty Expiration/i);

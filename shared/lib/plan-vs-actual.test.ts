@@ -3,7 +3,7 @@ import {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
   planVsActualNarrative,
-  filterInvoicesByLedgerDocumentFilter,
+  filterLedgerEntriesByDocumentFilter,
   planVsActualPdfLines,
   calculateBudgetStats,
 } from "./plan-vs-actual.ts";
@@ -113,26 +113,26 @@ describe("plan-vs-actual shared logic", () => {
     });
   });
 
-  describe("filterInvoicesByLedgerDocumentFilter", () => {
+  describe("filterLedgerEntriesByDocumentFilter", () => {
     const invoices = [
       { id: 1, total: 100, document_type: "invoice" },
       { id: 2, total: 200, document_type: "permit" },
     ];
 
     it("returns all when filter is all", () => {
-      expect(
-        filterInvoicesByLedgerDocumentFilter(invoices, "all"),
-      ).toHaveLength(2);
+      expect(filterLedgerEntriesByDocumentFilter(invoices, "all")).toHaveLength(
+        2,
+      );
     });
 
     it("returns only capital when filter is capital", () => {
-      const res = filterInvoicesByLedgerDocumentFilter(invoices, "capital");
+      const res = filterLedgerEntriesByDocumentFilter(invoices, "capital");
       expect(res).toHaveLength(1);
       expect(res[0]!.id).toBe(1);
     });
 
     it("returns only maintenance when filter is maintenance", () => {
-      const res = filterInvoicesByLedgerDocumentFilter(invoices, "maintenance");
+      const res = filterLedgerEntriesByDocumentFilter(invoices, "maintenance");
       expect(res).toHaveLength(1);
       expect(res[0]!.id).toBe(2);
     });
@@ -142,8 +142,8 @@ describe("plan-vs-actual shared logic", () => {
         { id: 1, total: 100 }, // missing type -> capital
         { id: 2, total: 200, document_type: "permit" }, // maintenance
       ];
-      const cap = filterInvoicesByLedgerDocumentFilter(mixed, "capital");
-      const main = filterInvoicesByLedgerDocumentFilter(mixed, "maintenance");
+      const cap = filterLedgerEntriesByDocumentFilter(mixed, "capital");
+      const main = filterLedgerEntriesByDocumentFilter(mixed, "maintenance");
       expect(cap).toHaveLength(1);
       expect(main).toHaveLength(1);
     });

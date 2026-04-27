@@ -195,21 +195,21 @@ export const handler = async (req: Request) => {
       await removeStorageForProjects(admin, projectIds);
       await removePhotosForProjects(admin, projectIds);
 
-      const { data: invs } = await admin
-        .from("invoices")
+      const { data: ledgerEntries } = await admin
+        .from("ledger_entries")
         .select("id")
         .in("project_id", projectIds);
-      const invIds = (invs ?? []).map((i) => i.id);
+      const entryIds = (ledgerEntries ?? []).map((i) => i.id);
 
-      if (invIds.length > 0) {
+      if (entryIds.length > 0) {
         await admin
-          .from("invoice_line_items")
+          .from("ledger_line_items")
           .delete()
-          .in("invoice_id", invIds);
+          .in("ledger_entry_id", entryIds);
       }
 
       await Promise.all([
-        admin.from("invoices").delete().in("project_id", projectIds),
+        admin.from("ledger_entries").delete().in("project_id", projectIds),
         admin.from("documents").delete().in("project_id", projectIds),
         admin.from("scope_items").delete().in("project_id", projectIds),
         admin.from("project_view_tokens").delete().in("project_id", projectIds),

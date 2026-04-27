@@ -9,7 +9,7 @@ export const DASHBOARD_SECTION_GUIDED_PATH = "Your guided path";
 export const DASHBOARD_EMPTY_STATE = {
   title: "Your estimate and ledger in one story",
   description:
-    "Start a project for a local cost range, then add quotes and paid invoices so plan vs. actual stays clear—whether you’re mid-remodel or getting ready to list.",
+    "Start a project for a local cost range, then add quotes and documents so plan vs. actual stays clear—whether you’re mid-remodel or getting ready to list.",
   primaryCta: "Start your project",
   secondaryCta: "Walk through the intro first",
 } as const;
@@ -22,7 +22,7 @@ export const DASHBOARD_STATS_LABELS = {
   invested: "Invested",
   investedSub: "Logged capital spend",
   projectedInvestment: "Projected Investment",
-  invoicesAndQuotes: "Invoices & quotes",
+  invoicesAndQuotes: "Ledger records",
 } as const;
 
 export const RECONCILIATION_STATUS_LABELS = {

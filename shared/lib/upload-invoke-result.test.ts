@@ -16,7 +16,7 @@ describe("extractUploadFailureFromInvokeResult", () => {
 
   it("returns null when data is success shape without error", () => {
     const r = extractUploadFailureFromInvokeResult(
-      { invoice_id: "inv-1" },
+      { ledger_entry_id: "inv-1" },
       null,
     );
     expect(r).toBeNull();

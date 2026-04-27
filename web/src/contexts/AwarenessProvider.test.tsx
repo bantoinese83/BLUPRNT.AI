@@ -4,7 +4,11 @@ import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { AwarenessProvider } from "./AwarenessProvider";
 import { useAwareness } from "./AwarenessContext";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  LedgerEntryRow,
+} from "@shared/types/database";
 
 function Consumer() {
   const a = useAwareness();
@@ -62,7 +66,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={emptyProject}
         scopeItems={[]}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{}}
       >
         <Consumer />
@@ -85,7 +89,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={baseProject}
         scopeItems={scopeItems}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{ Kitchen: 5000 }}
       >
         <Consumer />
@@ -104,7 +108,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={baseProject}
         scopeItems={scopeItems}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{ Bath: 850 }}
       >
         <Consumer />
@@ -118,13 +122,13 @@ describe("AwarenessProvider", () => {
       { id: "a", category: "A", total_cost_max: 5000 },
       { id: "b", category: "B", total_cost_max: 5000 },
     ] as unknown as ScopeRow[];
-    const invoices = [{ total: 12_000 }] as unknown as InvoiceRow[];
+    const ledgerEntries = [{ total: 12_000 }] as unknown as LedgerEntryRow[];
 
     render(
       <AwarenessProvider
         project={{ ...baseProject, stage: "in_progress" } as ProjectRow}
         scopeItems={scopeItems}
-        invoices={invoices}
+        ledgerEntries={ledgerEntries}
         spendByCategory={{ A: 4000, B: 4000 }}
       >
         <Consumer />
@@ -139,7 +143,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={baseProject}
         scopeItems={[]}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{}}
       >
         <Consumer />
@@ -155,17 +159,17 @@ describe("AwarenessProvider", () => {
         scopeItems={[
           { id: "x", category: "K", total_cost_max: 100 } as ScopeRow,
         ]}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{}}
       >
         <Consumer />
       </AwarenessProvider>,
     );
-    expect(screen.getByTestId("next")).toHaveTextContent("Upload Invoice");
+    expect(screen.getByTestId("next")).toHaveTextContent("Upload Document");
   });
 
   it("surfaces seller packet opportunity when spend is high enough", () => {
-    const invoices = [{ total: 6000 }] as unknown as InvoiceRow[];
+    const ledgerEntries = [{ total: 6000 }] as unknown as LedgerEntryRow[];
     const scopeItems = [
       { id: "s1", category: "Kitchen", total_cost_max: 8000 },
     ] as unknown as ScopeRow[];
@@ -174,7 +178,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={{ ...baseProject, stage: "in_progress" } as ProjectRow}
         scopeItems={scopeItems}
-        invoices={invoices}
+        ledgerEntries={ledgerEntries}
         spendByCategory={{ Kitchen: 1000 }}
       >
         <Consumer />
@@ -192,7 +196,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={baseProject}
         scopeItems={scopeItems}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{ Roof: 5000 }}
       >
         <Consumer />
@@ -206,7 +210,7 @@ describe("AwarenessProvider", () => {
       <AwarenessProvider
         project={baseProject}
         scopeItems={[]}
-        invoices={[]}
+        ledgerEntries={[]}
         spendByCategory={{}}
       >
         <Consumer />

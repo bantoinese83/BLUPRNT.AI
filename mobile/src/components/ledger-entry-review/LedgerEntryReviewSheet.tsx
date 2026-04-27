@@ -1,4 +1,4 @@
-import React, { createElement, useState } from "react";
+import React, { createElement, useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -7,6 +7,11 @@ import {
   Pressable,
   Alert,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import {
   X,
@@ -22,10 +27,9 @@ import { MotiView } from "moti";
 
 import { supabase } from "@/lib/supabase";
 import { OriginalUploadPreviewModal } from "@/components/OriginalUploadPreviewModal";
-import { money } from "@shared/lib/formatters";
-import type { InvoiceRow } from "@/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
-import { useInvoiceReviewDetail } from "@/hooks/useInvoiceReviewDetail";
+import { useLedgerEntryReviewDetail } from "@/hooks/useLedgerEntryReviewDetail";
 
 import {
   isCapitalLedgerDocumentType,
@@ -34,17 +38,17 @@ import {
 import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
 import { DEFAULT_DOC_ICON, STATUS_COLORS } from "./constants";
 import { Theme } from "@/constants/Theme";
-import { invoiceReviewSheetStyles as styles } from "./invoiceReviewSheet.styles";
-import { InvoiceReviewDetailRow } from "./InvoiceReviewDetailRow";
+import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
+import { LedgerEntryReviewDetailRow } from "./LedgerEntryReviewDetailRow";
 import {
-  InvoiceReviewLineItemRow,
+  LedgerEntryReviewLineItemRow,
   type ScopeItemOption,
-} from "./InvoiceReviewLineItemRow";
-import { InvoiceReviewScopePicker } from "./InvoiceReviewScopePicker";
-import { InvoiceReviewDocTypePicker } from "./InvoiceReviewDocTypePicker";
+} from "./LedgerEntryReviewLineItemRow";
+import { LedgerEntryReviewScopePicker } from "./LedgerEntryReviewScopePicker";
+import { LedgerEntryReviewDocTypePicker } from "./LedgerEntryReviewDocTypePicker";
 
-export type InvoiceReviewSheetProps = {
-  invoice: InvoiceRow | null;
+export type LedgerEntryReviewSheetProps = {
+  ledgerEntry: LedgerEntryRow | null;
   projectId: string | null;
   isOpen: boolean;
   onClose: () => void;
@@ -52,14 +56,14 @@ export type InvoiceReviewSheetProps = {
   onSaved?: () => void;
 };
 
-export function InvoiceReviewSheet({
-  invoice,
+export function LedgerEntryReviewSheet({
+  ledgerEntry,
   projectId,
   isOpen,
   onClose,
   onDeleted,
   onSaved,
-}: InvoiceReviewSheetProps) {
+}: LedgerEntryReviewSheetProps) {
   const {
     loading: loadingDetail,
     error: loadError,
@@ -73,7 +77,7 @@ export function InvoiceReviewSheet({
     ledgerDocType,
     setLedgerDocType,
     typeDirty,
-  } = useInvoiceReviewDetail(invoice, projectId, isOpen);
+  } = useLedgerEntryReviewDetail(ledgerEntry, projectId, isOpen);
 
   const [deleting, setDeleting] = useState(false);
   const [scopePickerLineId, setScopePickerLineId] = useState<string | null>(
@@ -82,25 +86,27 @@ export function InvoiceReviewSheet({
   const [docTypePickerOpen, setDocTypePickerOpen] = useState(false);
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
 
-  if (!invoice) return null;
+  // Editable fields
+  const [vendorName, setVendorName] = useState("");
+  const [totalValue, setTotalValue] = useState("");
+
+  useEffect(() => {
+    if (isOpen && (detail || ledgerEntry)) {
+      setVendorName(detail?.vendor_name ?? ledgerEntry?.vendor_name ?? "");
+      setTotalValue(String(detail?.total ?? ledgerEntry?.total ?? 0));
+    }
+  }, [isOpen, detail, ledgerEntry]);
+
+  if (!ledgerEntry) return null;
 
   const docType = ledgerDocType;
   const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
   const statusColor =
-    STATUS_COLORS[detail?.payment_status ?? invoice.payment_status ?? ""] ||
+    STATUS_COLORS[detail?.payment_status ?? ledgerEntry.payment_status ?? ""] ||
     "#64748b";
 
-  const rawVendor = detail?.vendor_name ?? invoice.vendor_name;
-  const vendorDisplay =
-    rawVendor &&
-    rawVendor !== "Vendor" &&
-    rawVendor !== "Document" &&
-    rawVendor !== "Processing..."
-      ? rawVendor
-      : ledgerDocumentTypeLabel(docType).split(" / ")[0]; // "Quote" or "Invoice"
-  const totalDisplay = detail?.total ?? invoice.total ?? 0;
   const rawStatus =
-    detail?.payment_status ?? invoice.payment_status ?? "pending";
+    detail?.payment_status ?? ledgerEntry.payment_status ?? "pending";
   const paymentLabel =
     rawStatus === "unknown"
       ? docType === "quote"
@@ -108,14 +114,20 @@ export function InvoiceReviewSheet({
         : "Processing"
       : rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
 
-  const docIdForOpen = detail?.document_id ?? invoice.document_id;
+  const docIdForOpen = detail?.document_id ?? ledgerEntry.document_id;
   const isUnverified = detail?.is_verified === false;
+
+  const vendorChanged =
+    vendorName !== (detail?.vendor_name ?? ledgerEntry.vendor_name ?? "");
+  const totalChanged =
+    parseFloat(totalValue) !== (detail?.total ?? ledgerEntry.total ?? 0);
+  const isDirty = typeDirty || vendorChanged || totalChanged;
 
   const handleDelete = () => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
       "Delete Document",
-      `Are you sure you want to remove this ${docType} from ${vendorDisplay}? This cannot be undone.`,
+      `Are you sure you want to remove this ${docType} from ${vendorName || "Unknown Vendor"}? This cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -124,9 +136,9 @@ export function InvoiceReviewSheet({
           onPress: async () => {
             setDeleting(true);
             const { error } = await supabase
-              .from("invoices")
+              .from("ledger_entries")
               .delete()
-              .eq("id", invoice.id);
+              .eq("id", ledgerEntry.id);
             setDeleting(false);
             if (error) {
               Alert.alert(
@@ -137,7 +149,7 @@ export function InvoiceReviewSheet({
               void Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Success,
               );
-              onDeleted(invoice.id);
+              onDeleted(ledgerEntry.id);
               onClose();
             }
           },
@@ -147,6 +159,27 @@ export function InvoiceReviewSheet({
   };
 
   const handleSave = async () => {
+    // If vendor or total changed, update ledger_entries first
+    if (isDirty || isUnverified) {
+      const { error } = await supabase
+        .from("ledger_entries")
+        .update({
+          vendor_name: vendorName.trim() || null,
+          total: parseFloat(totalValue) || 0,
+          document_type: ledgerDocType,
+          is_verified: true,
+        })
+        .eq("id", ledgerEntry.id);
+
+      if (error) {
+        Alert.alert(
+          "Save failed",
+          "We couldn't update the record. Please try again.",
+        );
+        return;
+      }
+    }
+
     const ok = await saveMappings();
     if (ok) {
       onSaved?.();
@@ -170,12 +203,20 @@ export function InvoiceReviewSheet({
         transparent
         onRequestClose={onClose}
       >
-        <View style={styles.modalRoot}>
-          <Pressable
-            style={styles.backdrop}
-            onPress={onClose}
-            accessibilityLabel="Dismiss"
-          />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalRoot}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.backdrop}>
+              <Pressable
+                style={StyleSheet.absoluteFill}
+                onPress={onClose}
+                accessibilityLabel="Dismiss"
+              />
+            </View>
+          </TouchableWithoutFeedback>
+
           <View style={styles.sheet}>
             <View style={styles.handle} />
 
@@ -243,17 +284,32 @@ export function InvoiceReviewSheet({
                       </View>
                     </View>
                   )}
-                  <Text
-                    style={styles.vendor}
-                    numberOfLines={2}
-                    ellipsizeMode="tail"
-                  >
-                    {vendorDisplay}
-                  </Text>
-                  <Text style={styles.amount}>{money(totalDisplay)}</Text>
+
+                  <View style={styles.editableField}>
+                    <Text style={styles.editableLabel}>Vendor Name</Text>
+                    <TextInput
+                      style={styles.editableInput}
+                      value={vendorName}
+                      onChangeText={setVendorName}
+                      placeholder="e.g. Home Depot"
+                      placeholderTextColor={Theme.colors.text.muted}
+                    />
+                  </View>
+
+                  <View style={styles.editableField}>
+                    <Text style={styles.editableLabel}>Total Amount ($)</Text>
+                    <TextInput
+                      style={styles.editableInput}
+                      value={totalValue}
+                      onChangeText={setTotalValue}
+                      keyboardType="decimal-pad"
+                      placeholder="0.00"
+                      placeholderTextColor={Theme.colors.text.muted}
+                    />
+                  </View>
 
                   <View style={styles.detailGrid}>
-                    <InvoiceReviewDetailRow
+                    <LedgerEntryReviewDetailRow
                       icon={
                         <Calendar
                           size={16}
@@ -261,14 +317,13 @@ export function InvoiceReviewSheet({
                         />
                       }
                       label="Date"
-                      value={new Date(invoice.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        },
-                      )}
+                      value={new Date(
+                        ledgerEntry.created_at,
+                      ).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     />
                     <TouchableOpacity
                       style={styles.docTypeRow}
@@ -295,7 +350,7 @@ export function InvoiceReviewSheet({
                       </View>
                       <Text style={styles.docTypeChange}>Change</Text>
                     </TouchableOpacity>
-                    <InvoiceReviewDetailRow
+                    <LedgerEntryReviewDetailRow
                       icon={<ShieldCheck size={16} color={statusColor} />}
                       label="Payment Status"
                       value={paymentLabel}
@@ -344,7 +399,7 @@ export function InvoiceReviewSheet({
                         </View>
                       ) : null}
                       {lineItems.map((line) => (
-                        <InvoiceReviewLineItemRow
+                        <LedgerEntryReviewLineItemRow
                           key={line.id}
                           line={line}
                           mappedId={
@@ -377,7 +432,7 @@ export function InvoiceReviewSheet({
 
                   {projectId &&
                     (isUnverified ||
-                      typeDirty ||
+                      isDirty ||
                       (showCapitalLineLink &&
                         lineItems.length > 0 &&
                         scopeItems.length > 0)) && (
@@ -407,13 +462,13 @@ export function InvoiceReviewSheet({
                             <Text style={styles.saveBtnText}>
                               {isUnverified
                                 ? "Verify & Save"
-                                : typeDirty &&
+                                : isDirty &&
                                     !(
                                       showCapitalLineLink &&
                                       lineItems.length > 0 &&
                                       scopeItems.length > 0
                                     )
-                                  ? "Save type"
+                                  ? "Save record"
                                   : "Save changes"}
                             </Text>
                           </>
@@ -443,7 +498,7 @@ export function InvoiceReviewSheet({
             </MotiView>
           </View>
 
-          <InvoiceReviewScopePicker
+          <LedgerEntryReviewScopePicker
             embedded
             visible={scopePickerLineId !== null}
             options={pickerOptions}
@@ -457,7 +512,7 @@ export function InvoiceReviewSheet({
             }}
           />
 
-          <InvoiceReviewDocTypePicker
+          <LedgerEntryReviewDocTypePicker
             visible={docTypePickerOpen}
             value={ledgerDocType}
             onSelect={(next) => setLedgerDocType(next)}
@@ -467,14 +522,14 @@ export function InvoiceReviewSheet({
           {originalPreviewOpen ? (
             <View style={styles.originalPreviewHost}>
               <OriginalUploadPreviewModal
-                key={invoice.id}
+                key={ledgerEntry.id}
                 variant="embedded"
-                invoiceId={invoice.id}
+                ledgerEntryId={ledgerEntry.id}
                 onClose={() => setOriginalPreviewOpen(false)}
               />
             </View>
           ) : null}
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );

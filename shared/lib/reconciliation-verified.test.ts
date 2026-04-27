@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   buildReconciliation,
-  type InvoiceLineItemMinimal,
-} from "./reconciliation";
+  type LedgerLineItemMinimal,
+} from "./reconciliation.ts";
 import type { ScopeRow } from "../types/database.ts";
 
 describe("reconciliation - AI verification status", () => {
@@ -23,19 +23,18 @@ describe("reconciliation - AI verification status", () => {
       unit_cost_max: 2000,
       metadata: null,
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ] as any as ScopeRow[];
+  ] as unknown as ScopeRow[];
 
   it("correctly tracks unverified spend within reconciled totals", () => {
-    const lines: InvoiceLineItemMinimal[] = [
+    const lines: LedgerLineItemMinimal[] = [
       {
-        invoice_id: "inv-unverified",
+        ledger_entry_id: "inv-unverified",
         line_total: 1200,
         scope_item_id: "s1",
         is_verified: false,
       },
       {
-        invoice_id: "inv-verified",
+        ledger_entry_id: "inv-verified",
         line_total: 300,
         scope_item_id: "s1",
         is_verified: true,
@@ -54,9 +53,9 @@ describe("reconciliation - AI verification status", () => {
   });
 
   it("handles unverified unreconciled spend (not linked to scope)", () => {
-    const lines: InvoiceLineItemMinimal[] = [
+    const lines: LedgerLineItemMinimal[] = [
       {
-        invoice_id: "inv-orphan",
+        ledger_entry_id: "inv-orphan",
         line_total: 500,
         scope_item_id: null,
         is_verified: false,
@@ -72,9 +71,9 @@ describe("reconciliation - AI verification status", () => {
   });
 
   it("returns zero unverified spend when all are verified", () => {
-    const lines: InvoiceLineItemMinimal[] = [
+    const lines: LedgerLineItemMinimal[] = [
       {
-        invoice_id: "inv-1",
+        ledger_entry_id: "inv-1",
         line_total: 1000,
         scope_item_id: "s1",
         is_verified: true,
@@ -86,9 +85,9 @@ describe("reconciliation - AI verification status", () => {
   });
 
   it("defaults to verified if is_verified is missing", () => {
-    const lines: InvoiceLineItemMinimal[] = [
+    const lines: LedgerLineItemMinimal[] = [
       {
-        invoice_id: "inv-legacy",
+        ledger_entry_id: "inv-legacy",
         line_total: 1000,
         scope_item_id: "s1",
       },
@@ -99,7 +98,9 @@ describe("reconciliation - AI verification status", () => {
   });
 
   it("handles no scope items with existing lines", () => {
-    const lines = [{ invoice_id: "1", line_total: 500, scope_item_id: null }];
+    const lines: LedgerLineItemMinimal[] = [
+      { ledger_entry_id: "1", line_total: 500, scope_item_id: null },
+    ];
     const result = buildReconciliation([], lines);
     expect(result.unreconciled_billed).toBe(500);
     expect(result.total_reconciled).toBe(0);
@@ -112,8 +113,8 @@ describe("reconciliation - AI verification status", () => {
   });
 
   it("handles lines with invalid scope_item_id", () => {
-    const lines = [
-      { invoice_id: "1", line_total: 500, scope_item_id: "invalid" },
+    const lines: LedgerLineItemMinimal[] = [
+      { ledger_entry_id: "1", line_total: 500, scope_item_id: "invalid" },
     ];
     const result = buildReconciliation(mockScope, lines);
     expect(result.unreconciled_billed).toBe(500);
@@ -121,7 +122,9 @@ describe("reconciliation - AI verification status", () => {
   });
 
   it("marks status as 'under' when spend is significantly below estimate", () => {
-    const lines = [{ invoice_id: "1", line_total: 100, scope_item_id: "s1" }];
+    const lines: LedgerLineItemMinimal[] = [
+      { ledger_entry_id: "1", line_total: 100, scope_item_id: "s1" },
+    ];
     // midEstimate is 1500, margin is 75. 100 is < 1425.
     const result = buildReconciliation(mockScope, lines);
     expect(result.items["s1"]!.status).toBe("under");

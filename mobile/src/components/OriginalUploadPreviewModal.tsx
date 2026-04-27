@@ -14,7 +14,7 @@ import { WebView } from "react-native-webview";
 import { Image } from "expo-image";
 import { X, ExternalLink } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { fetchInvoiceOriginalSignedUrl } from "@/lib/open-original-document";
+import { fetchLedgerEntryOriginalSignedUrl } from "@/lib/open-original-document";
 import { Theme } from "@/constants/Theme";
 
 function isImageFilename(name?: string): boolean {
@@ -27,17 +27,17 @@ export type OriginalUploadPreviewVariant = "fullscreenModal" | "embedded";
 
 /**
  * Full-screen preview over the current screen. Mount only while open; use
- * `key={invoiceId}` on the parent so each open starts fresh.
+ * `key={ledgerEntryId}` on the parent so each open starts fresh.
  *
- * Use `embedded` inside another Modal (e.g. invoice review) so this layer
+ * Use `embedded` inside another Modal (e.g. ledger review) so this layer
  * stacks above the sheet; nested RN Modals are unreliable on some devices.
  */
 export function OriginalUploadPreviewModal({
-  invoiceId,
+  ledgerEntryId,
   onClose,
   variant = "fullscreenModal",
 }: {
-  invoiceId: string;
+  ledgerEntryId: string;
   onClose: () => void;
   variant?: OriginalUploadPreviewVariant;
 }) {
@@ -72,7 +72,7 @@ export function OriginalUploadPreviewModal({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const result = await fetchInvoiceOriginalSignedUrl(invoiceId);
+      const result = await fetchLedgerEntryOriginalSignedUrl(ledgerEntryId);
       if (cancelled) return;
       if (!result.ok) {
         setErrorMessage(result.message);
@@ -86,7 +86,7 @@ export function OriginalUploadPreviewModal({
     return () => {
       cancelled = true;
     };
-  }, [invoiceId]);
+  }, [ledgerEntryId]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {

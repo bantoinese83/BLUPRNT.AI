@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateActivityEvents } from "./activity";
-import type { ProjectRow, InvoiceRow } from "@shared/types/database";
+import type { ProjectRow, LedgerEntryRow } from "@shared/types/database";
 
 describe("generateActivityEvents", () => {
   const mockProject: Partial<ProjectRow> = {
@@ -10,7 +10,7 @@ describe("generateActivityEvents", () => {
     estimated_min_total: 1000,
   };
 
-  const mockInvoices: Partial<InvoiceRow>[] = [
+  const mockLedgerEntries: Partial<LedgerEntryRow>[] = [
     {
       id: "1",
       vendor_name: "Vendor A",
@@ -28,16 +28,16 @@ describe("generateActivityEvents", () => {
   it("generates events and sorts them by timestamp descending", () => {
     const events = generateActivityEvents(
       mockProject as ProjectRow,
-      mockInvoices as InvoiceRow[],
+      mockLedgerEntries as LedgerEntryRow[],
     );
 
-    expect(events.length).toBe(3); // 2 invoices + 1 project creation
+    expect(events.length).toBe(3); // 2 ledger entries + 1 project creation
     expect(events[0]!.id).toBe("inv-2");
     expect(events[1]!.id).toBe("inv-1");
     expect(events[2]!.id).toBe("init-proj-1");
   });
 
-  it("handles empty invoices", () => {
+  it("handles empty ledger entries", () => {
     const events = generateActivityEvents(mockProject as ProjectRow, []);
     expect(events.length).toBe(1);
     expect(events[0]!.type).toBe("project_created");
@@ -50,28 +50,28 @@ describe("generateActivityEvents", () => {
     expect(events[0]!.description).not.toContain("baseline");
   });
 
-  it("handles missing vendor name or invoice total", () => {
+  it("handles missing vendor name or ledger entry total", () => {
     const minimalInvoice = {
       id: "i-min",
       created_at: "2023-01-05T00:00:00Z",
-    } as Partial<InvoiceRow>;
+    } as Partial<LedgerEntryRow>;
     const events = generateActivityEvents(mockProject as ProjectRow, [
-      minimalInvoice as InvoiceRow,
+      minimalInvoice as LedgerEntryRow,
     ]);
-    expect(events[0]!.description).toContain("Vendor invoice");
+    expect(events[0]!.description).toContain("Vendor document");
     expect(events[0]!.description).toContain("unspecified amount");
   });
 
-  it("limits to 5 invoices", () => {
-    const manyInvoices = Array.from({ length: 10 }, (_, i) => ({
+  it("limits to 5 ledger entries", () => {
+    const manyEntries = Array.from({ length: 10 }, (_, i) => ({
       id: `inv-${i}`,
       created_at: `2023-01-1${i}T00:00:00Z`,
-    })) as Partial<InvoiceRow>[];
+    })) as Partial<LedgerEntryRow>[];
     const events = generateActivityEvents(
       mockProject as ProjectRow,
-      manyInvoices as InvoiceRow[],
+      manyEntries as LedgerEntryRow[],
     );
-    // 5 invoices + 1 project creation
+    // 5 ledger entries + 1 project creation
     expect(events.filter((e) => e.type === "upload").length).toBe(5);
   });
 });

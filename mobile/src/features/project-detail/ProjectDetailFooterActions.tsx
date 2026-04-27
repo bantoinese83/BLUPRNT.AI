@@ -4,10 +4,10 @@ import { MotiView } from "moti";
 import { Share2, Download } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { projectDetailStyles as styles } from "./project-detail.styles";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 type Props = {
-  detailInvoices: InvoiceRow[];
+  detailLedgerEntries: LedgerEntryRow[];
   includeAppendix: boolean;
   setIncludeAppendix: (v: boolean) => void;
   onShare: () => void;
@@ -15,13 +15,15 @@ type Props = {
 };
 
 export function ProjectDetailFooterActions({
-  detailInvoices,
+  detailLedgerEntries,
   includeAppendix,
   setIncludeAppendix,
   onShare,
   onExportSellerPacket,
 }: Props) {
-  const canIncludeUploads = detailInvoices.some((i) => Boolean(i.document_id));
+  const canIncludeUploads = detailLedgerEntries.some((i) =>
+    Boolean(i.document_id),
+  );
 
   return (
     <MotiView
@@ -35,8 +37,8 @@ export function ProjectDetailFooterActions({
           <Text style={styles.exportAppendixLabel}>Include uploads in PDF</Text>
           <Text style={styles.exportAppendixHint}>
             {canIncludeUploads
-              ? "Adds receipt photos at the end of your seller packet. Larger download. If an invoice is a PDF, we add a short note instead of the full file."
-              : "Turn this on after you attach a photo or file to at least one invoice — nothing is linked yet, so the switch stays off."}
+              ? "Adds receipt photos at the end of your seller packet. Larger download. If a document is a PDF, we add a short note instead of the full file."
+              : "Turn this on after you attach a photo or file to at least one document — nothing is linked yet, so the switch stays off."}
           </Text>
         </View>
         <Switch
@@ -46,8 +48,8 @@ export function ProjectDetailFooterActions({
           accessibilityLabel="Include uploads in seller packet PDF"
           accessibilityHint={
             canIncludeUploads
-              ? "Adds an extra section with images from linked invoice files"
-              : "Requires at least one invoice with an attached file"
+              ? "Adds an extra section with images from linked files"
+              : "Requires at least one document with an attached file"
           }
           trackColor={{
             false: "rgba(148,163,184,0.35)",

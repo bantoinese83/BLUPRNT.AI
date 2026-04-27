@@ -11,7 +11,7 @@ export function getPeriodGreeting(): string {
  * Second line: friendly project framing (“Here’s your …”).
  */
 export function buildDashboardHeaderLines(params: {
-  invoicesLength: number;
+  ledgerEntriesLength: number;
   /** Invoices & quotes only — same basis as plan vs actual (excludes maintenance log). */
   capitalDocumentedTotal: number;
   estimatedMinTotal: number | null | undefined;
@@ -19,7 +19,7 @@ export function buildDashboardHeaderLines(params: {
   projectDisplayName: string | null | undefined;
 }): { line1: string; line2: string } {
   const {
-    invoicesLength,
+    ledgerEntriesLength,
     capitalDocumentedTotal,
     estimatedMinTotal,
     firstName,
@@ -32,10 +32,10 @@ export function buildDashboardHeaderLines(params: {
       ? `Here's your ${trimmedProject}.`
       : "Here's your overview.";
 
-  if (invoicesLength > 0) {
+  if (ledgerEntriesLength > 0) {
     return {
       line1: getDashboardGreeting({
-        invoicesLength,
+        ledgerEntriesLength,
         capitalDocumentedTotal,
         estimatedMinTotal,
       }),
@@ -51,21 +51,22 @@ export function buildDashboardHeaderLines(params: {
 }
 
 export function getDashboardGreeting(params: {
-  invoicesLength: number;
+  ledgerEntriesLength: number;
   /** Invoices & quotes only — same basis as plan vs actual (excludes maintenance log). */
   capitalDocumentedTotal: number;
   estimatedMinTotal: number | null | undefined;
 }): string {
-  const { invoicesLength, capitalDocumentedTotal, estimatedMinTotal } = params;
+  const { ledgerEntriesLength, capitalDocumentedTotal, estimatedMinTotal } =
+    params;
 
-  if (invoicesLength > 0) {
+  if (ledgerEntriesLength > 0) {
     if (
       estimatedMinTotal != null &&
       capitalDocumentedTotal >= estimatedMinTotal
     ) {
       return "Budget reached";
     }
-    return `${invoicesLength} Documents tracked`;
+    return `${ledgerEntriesLength} Documents tracked`;
   }
 
   return `${getPeriodGreeting()},`;

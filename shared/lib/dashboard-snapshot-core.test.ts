@@ -71,14 +71,14 @@ describe("dashboard-snapshot-core", () => {
             let data: any[] = [];
             if (table === "scope_items")
               data = [{ id: "s1", category: "Test" }];
-            if (table === "invoices")
+            if (table === "ledger_entries")
               data = [
                 {
                   id: "i1",
                   vendor_name: "Vendor",
-                  invoice_line_items: [
+                  ledger_line_items: [
                     {
-                      invoice_id: "i1",
+                      ledger_entry_id: "i1",
                       category: "Test",
                       line_total: 100,
                       scope_item_id: "s1",
@@ -105,7 +105,7 @@ describe("dashboard-snapshot-core", () => {
 
       expect(result.project.id).toBe("p1");
       expect(result.scopeItems).toHaveLength(1);
-      expect(result.invoices).toHaveLength(1);
+      expect(result.ledgerEntries).toHaveLength(1);
       expect(result.galleryItems).toHaveLength(1);
       expect(result.isArchitect).toBe(true);
     });

@@ -1,6 +1,6 @@
 import { escapeHtml } from "./image-utils";
 import { supabase } from "./supabase";
-import type { InvoiceRow, ScopeRow } from "@shared/types/database";
+import type { LedgerEntryRow, ScopeRow } from "@shared/types/database";
 
 /**
  * PDF Template Part: Appendix
@@ -16,10 +16,10 @@ function uint8ToBase64(arr: Uint8Array): string {
 }
 
 export async function buildSellerPacketAppendixHtml(
-  invoices: (InvoiceRow & { storage_path?: string | null })[],
+  ledgerEntries: (LedgerEntryRow & { storage_path?: string | null })[],
   _scopeItems?: ScopeRow[],
 ) {
-  const images = invoices.filter(
+  const images = ledgerEntries.filter(
     (inv) =>
       inv.storage_path &&
       (inv.storage_path.toLowerCase().endsWith(".jpg") ||

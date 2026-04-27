@@ -55,8 +55,6 @@ describe("fetchDashboardSnapshot", () => {
     expect(snap.redirectToLogin).toContain("settings");
   });
 
-
-
   it("ignores malformed session cache JSON", async () => {
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session },
@@ -134,7 +132,7 @@ describe("fetchDashboardSnapshot", () => {
           order: vi.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
-      if (table === "invoices") {
+      if (table === "ledger_entries") {
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
@@ -235,7 +233,7 @@ describe("fetchDashboardSnapshot", () => {
     expect(snap.project).toBeNull();
   });
 
-  it("loads scope, invoices, subscription when a project exists", async () => {
+  it("loads scope, ledger entries, subscription when a project exists", async () => {
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session },
     } as never);
@@ -279,7 +277,7 @@ describe("fetchDashboardSnapshot", () => {
           order: vi.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
-      if (table === "invoices") {
+      if (table === "ledger_entries") {
         return {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
@@ -306,7 +304,7 @@ describe("fetchDashboardSnapshot", () => {
           maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
         };
       }
-      if (table === "invoice_line_items") {
+      if (table === "ledger_line_items") {
         return {
           select: vi.fn().mockReturnThis(),
           in: vi.fn().mockResolvedValue({ data: [], error: null }),
@@ -324,6 +322,6 @@ describe("fetchDashboardSnapshot", () => {
     const snap = await fetchDashboardSnapshot();
     expect(snap.project?.id).toBe("proj-1");
     expect(snap.isArchitect).toBe(true);
-    expect(snap.invoices).toHaveLength(1);
+    expect(snap.ledgerEntries).toHaveLength(1);
   });
 });

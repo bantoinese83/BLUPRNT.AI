@@ -1,20 +1,9 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { getServiceClient } from "../_shared/auth.ts";
+import { encodeBase64 } from "std/encoding/base64";
 import { extractInvoiceFromPdf } from "../_shared/ocr.ts";
-
-/** Converts a Buffer to a Base64 string for OCR processing. */
-function bufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    const byte = bytes[i];
-    if (byte !== undefined) {
-      binary += String.fromCharCode(byte);
-    }
-  }
-  return btoa(binary);
-}
+import { generateEmbedding } from "../_shared/gemini.ts";
 
 const handler = async (req: Request): Promise<Response> => {
   const opt = handleOptions(req);
@@ -25,21 +14,31 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   const admin = getServiceClient();
+  let queue_id: string | null = null;
 
   try {
-    const { queue_id } = await req.json();
-    if (!queue_id) return jsonResponse({ error: "queue_id required" }, 400, req);
+    const raw_queue_id = await req.json().then(j => j.queue_id).catch(() => null);
+    if (!raw_queue_id) return jsonResponse({ error: "queue_id required" }, 400, req);
+    
+    queue_id = String(raw_queue_id).trim();
+    
+    const url = Deno.env.get("SUPABASE_URL");
+    console.log(`[process-document-queue] Fetching ID: "${queue_id}" on ${url}`);
 
-    // 1. Fetch queue item
-    const { data: queueItem, error: fetchErr } = await admin
+    const { data: allItems } = await admin.from("document_processing_queue").select("id");
+    const allIds = allItems?.map(i => i.id).join(", ") || "none";
+
+    const { data: items, error: fetchErr } = await admin
       .from("document_processing_queue")
       .select("*")
-      .eq("id", queue_id)
-      .single();
+      .eq("id", queue_id);
+
+    const queueItem = items?.[0];
 
     if (fetchErr || !queueItem) {
-      console.error("[process-document-queue] Queue item not found:", fetchErr);
-      return jsonResponse({ error: "Queue item not found" }, 404, req);
+      const msg = `Queue item "${queue_id}" not found. DB Error: ${JSON.stringify(fetchErr)}. Found count: ${items?.length || 0}. Visible IDs: [${allIds}]`;
+      console.error("[process-document-queue] " + msg);
+      return jsonResponse({ error: msg }, 404, req);
     }
 
     // 2. Mark as processing
@@ -48,18 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
       .update({ status: "processing", attempts: queueItem.attempts + 1, updated_at: new Date().toISOString() })
       .eq("id", queue_id);
 
-    // 3. Check file size before download to prevent OOM
-    const { data: metadata, error: metaErr } = await admin.storage
-      .from("project-documents")
-      .getMetadata(queueItem.file_path);
-
-    if (metaErr) {
-      console.warn("[process-document-queue] Metadata check failed:", metaErr.message);
-    } else if (metadata && metadata.size > 15 * 1024 * 1024) {
-      throw new Error(`File is too large to process (${(metadata.size / 1024 / 1024).toFixed(1)}MB). Please upload a smaller file (max 15MB).`);
-    }
-
-    // 4. Download file from storage
+    // 3. Download file from storage
     const { data: fileData, error: downloadErr } = await admin.storage
       .from("project-documents")
       .download(queueItem.file_path);
@@ -68,8 +56,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`File download failed: ${downloadErr?.message || "No data"}`);
     }
 
+    if (fileData.size > 15 * 1024 * 1024) {
+      throw new Error(`File is too large to process (${(fileData.size / 1024 / 1024).toFixed(1)}MB).`);
+    }
+
+    console.log(`[process-document-queue] Downloaded file size: ${fileData.size} bytes`);
+    
+    if (fileData.size === 0) {
+      throw new Error("Downloaded file is empty (0 bytes)");
+    }
+
     const arrayBuffer = await fileData.arrayBuffer();
-    const base64 = bufferToBase64(arrayBuffer);
+    const base64 = encodeBase64(arrayBuffer);
+    
+    console.log(`[process-document-queue] Encoded base64 length: ${base64.length}`);
 
     // 4. Fetch scope items for mapping
     const { data: scopeItems } = await admin
@@ -88,14 +88,23 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("OCR extraction returned no result");
     }
 
-    // 6. Update Invoice Record
-    const { data: invoice, error: invErr } = await admin
-      .from("invoices")
+    // Infer payment status
+    let payment_status = "unknown";
+    if (ocrResult.document_type === "receipt") payment_status = "paid";
+    if (ocrResult.document_type === "invoice") payment_status = "pending";
+
+    // 6. Update Ledger Entry Record
+    const { data: ledgerEntry, error: invErr } = await admin
+      .from("ledger_entries")
       .update({
         vendor_name: ocrResult.vendor_name || "Unknown Vendor",
         total: ocrResult.total || 0,
         tax_total: ocrResult.tax_total,
         issue_date: ocrResult.issue_date || new Date().toISOString().split("T")[0],
+        document_type: ocrResult.document_type || undefined,
+        payment_status: payment_status,
+        warranty_expiry_date: ocrResult.warranty_expiry_date || null,
+        ai_summary: ocrResult.summary || null,
       })
       .eq("document_id", queueItem.document_id)
       .select()
@@ -103,10 +112,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (invErr) throw invErr;
 
+    // 6b. Update Document Type if AI confirmed it
+    if (ocrResult.document_type) {
+      await admin
+        .from("documents")
+        .update({ type: ocrResult.document_type })
+        .eq("id", queueItem.document_id);
+    }
+
     // 7. Insert Line Items
     if (ocrResult.line_items && ocrResult.line_items.length > 0) {
       const lineRows = ocrResult.line_items.map((item: any) => ({
-        invoice_id: invoice.id,
+        ledger_entry_id: ledgerEntry.id,
         description: item.description,
         quantity: item.quantity,
         unit_price: item.unit_price,
@@ -116,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
       }));
 
       const { error: linesErr } = await admin
-        .from("invoice_line_items")
+        .from("ledger_line_items")
         .insert(lineRows);
 
       if (linesErr) {
@@ -154,20 +171,26 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", queue_id);
 
     return jsonResponse({ success: true }, 200, req);
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    console.error("[process-document-queue] Critical Failure:", message);
+  } catch (e: unknown) {
+    const errorString = e instanceof Error ? e.message : typeof e === "string" ? e : JSON.stringify(e);
+    console.error("[process-document-queue] Fatal:", errorString);
 
-    // Update queue with error
-    const { queue_id } = await req.json().catch(() => ({}));
-    if (queue_id) {
-      await admin
-        .from("document_processing_queue")
-        .update({ status: "failed", error_message: message, updated_at: new Date().toISOString() })
-        .eq("id", queue_id);
+    try {
+      if (queue_id) {
+        await admin
+          .from("document_processing_queue")
+          .update({
+            status: "failed",
+            error_message: errorString,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", queue_id);
+      }
+    } catch (dbErr) {
+      console.error("[process-document-queue] Failed to update error status in DB:", dbErr);
     }
 
-    return jsonResponse({ error: message }, 500, req);
+    return jsonResponse({ error: "[VERSION-DEBUG-999] " + errorString }, 500, req);
   }
 };
 

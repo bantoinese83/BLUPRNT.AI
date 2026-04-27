@@ -9,7 +9,7 @@ import { showAppToast } from "@/lib/app-toast";
 export type UploadPickedDocumentResult = {
   ok: boolean;
   uploadedCount: number;
-  lastInvoiceId?: string;
+  lastLedgerEntryId?: string;
 };
 
 export type PickedFile = {
@@ -22,13 +22,13 @@ export type UploadPickedDocumentOptions = {
   files: PickedFile[];
   /** Shown after a successful upload (dashboard vs finance wording). */
   successToastMessage: string;
-  onInvoiceLimitUpgrade: () => void;
+  onLedgerEntryLimitUpgrade: () => void;
   /** Typically invalidates dashboard / refetches snapshot. */
   refreshProjectData: () => void;
 };
 
 /**
- * Runs the upload-invoice flow for one or more files chosen by the user.
+ * Runs the upload-ledger-entry flow for one or more files chosen by the user.
  * Handles limit errors, generic failures, and success haptics + toast.
  */
 export async function uploadPickedDocumentToProject(
@@ -72,7 +72,7 @@ export async function uploadPickedDocumentToProject(
             limit_prompt: limitPrompt,
           });
           if (limitPrompt) {
-            options.onInvoiceLimitUpgrade();
+            options.onLedgerEntryLimitUpgrade();
             break; // Stop batch on limit
           } else {
             Alert.alert(
@@ -86,7 +86,7 @@ export async function uploadPickedDocumentToProject(
       }
 
       successCount++;
-      lastId = result.invoice_id;
+      lastId = result.ledger_entry_id;
       addUserFlowBreadcrumb("document_upload_succeeded", { kind });
 
       // Minor tick feedback for each file in a small batch,
@@ -116,7 +116,7 @@ export async function uploadPickedDocumentToProject(
     return {
       ok: true,
       uploadedCount: successCount,
-      lastInvoiceId: lastId,
+      lastLedgerEntryId: lastId,
     };
   }
 

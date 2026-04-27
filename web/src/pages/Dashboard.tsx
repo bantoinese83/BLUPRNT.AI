@@ -20,7 +20,7 @@ export default function Dashboard() {
     projects,
     project,
     scopeItems,
-    invoices,
+    ledgerEntries,
     spendByCategory,
     reconciliation,
     isArchitect,
@@ -34,7 +34,7 @@ export default function Dashboard() {
     setProjects,
     setProject,
     setScopeItems,
-    setInvoices,
+    setLedgerEntries,
   } = dashData;
 
   if (!isSupabaseConfigured()) {
@@ -68,14 +68,14 @@ export default function Dashboard() {
       <AwarenessProvider
         project={project}
         scopeItems={scopeItems}
-        invoices={invoices}
+        ledgerEntries={ledgerEntries}
         spendByCategory={spendByCategory}
       >
         <DashboardContent
           projects={projects}
           project={project}
           scopeItems={scopeItems}
-          invoices={invoices}
+          ledgerEntries={ledgerEntries}
           spendByCategory={spendByCategory}
           reconciliation={reconciliation}
           isArchitect={isArchitect}
@@ -92,7 +92,7 @@ export default function Dashboard() {
           setProjects={setProjects}
           setProject={setProject}
           setScopeItems={setScopeItems}
-          setInvoices={setInvoices}
+          setLedgerEntries={setLedgerEntries}
         />
       </AwarenessProvider>
     </>

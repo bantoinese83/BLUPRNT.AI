@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { MotiView } from "moti";
 import { ArchitectPlanIcon, ProjectPassIcon } from "../icons/PlanMarks";
 import { Theme } from "@/constants/Theme";
-import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/invoice-quota";
+import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 
 const ARCHITECT_INVOICE_LIMIT = 10;
 
@@ -46,11 +46,11 @@ export function UpgradeHero({
                 ? `You’ve used all ${FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt uploads on this project. Upgrade to add more anytime.`
                 : reason === "export"
                   ? "Upgrade to Architect to build full PDF packets and your complete home file."
-                  : "Keep budgets, photos of bills, and one-tap exports in a single place—built for homeowners."}
+                  : "Keep budgets, photos of records, and one-tap exports in a single place—built for homeowners."}
       </Text>
       {reason === "invoice_limit" && (
         <Text style={styles.invoiceLimitHint}>
-          Only vendor invoices and store receipts count toward this cap—not
+          Only vendor records and store receipts count toward this cap—not
           quotes, estimates, or permits.
         </Text>
       )}

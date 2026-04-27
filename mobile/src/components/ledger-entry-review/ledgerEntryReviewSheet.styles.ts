@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { Theme } from "@/constants/Theme";
 import { sheetMaxH } from "./constants";
 
-export const invoiceReviewSheetStyles = StyleSheet.create({
+export const ledgerEntryReviewSheetStyles = StyleSheet.create({
   modalRoot: {
     flex: 1,
   },
@@ -149,6 +149,29 @@ export const invoiceReviewSheetStyles = StyleSheet.create({
     color: Theme.colors.brand.primary,
     letterSpacing: -1,
     marginBottom: 20,
+  },
+  editableField: {
+    marginBottom: 16,
+  },
+  editableLabel: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 6,
+    marginLeft: 4,
+  },
+  editableInput: {
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.primary,
   },
   detailGrid: {
     gap: 0,

@@ -26,8 +26,8 @@ import { ConfigurationRequired } from "@/components/ConfigurationRequired";
 import { DataLoadErrorFullScreen } from "@/components/DataLoadErrorFullScreen";
 import { DashboardLoadErrorBanner } from "@/components/DashboardLoadErrorBanner";
 import { RenameProjectModal } from "@/components/RenameProjectModal";
-import { InvoiceReviewSheet } from "@/components/InvoiceReviewSheet";
-import type { InvoiceRow } from "@shared/types/database";
+import { LedgerEntryReviewSheet } from "@/components/LedgerEntryReviewSheet";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { buildDashboardHeaderLines } from "@/features/home-tab/dashboard-greeting";
 import { presentProjectShareSheet } from "@/lib/share-project";
 import { TransformationVault } from "@/components/dashboard/TransformationVault";
@@ -55,7 +55,7 @@ export default function DashboardScreen() {
     configurationMissing,
     projects,
     project,
-    invoices,
+    ledgerEntries,
     scopeItems,
     load,
     handleProjectSelect,
@@ -75,12 +75,13 @@ export default function DashboardScreen() {
     null,
   );
   const [isCelebrating, setIsCelebrating] = useState(false);
-  const [reviewInvoice, setReviewInvoice] = useState<InvoiceRow | null>(null);
+  const [reviewLedgerEntry, setReviewLedgerEntry] =
+    useState<LedgerEntryRow | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
 
   const capitalDocumentedTotal = useMemo(
-    () => capitalImprovementTotal(invoices),
-    [invoices],
+    () => capitalImprovementTotal(ledgerEntries as any),
+    [ledgerEntries],
   );
 
   const dashboardFirstName = useMemo(() => {
@@ -92,14 +93,14 @@ export default function DashboardScreen() {
   const { line1: greetingLine, line2: dashboardSubline } = useMemo(
     () =>
       buildDashboardHeaderLines({
-        invoicesLength: invoices.length,
+        ledgerEntriesLength: ledgerEntries.length,
         capitalDocumentedTotal,
         estimatedMinTotal: project?.estimated_min_total,
         firstName: dashboardFirstName,
         projectDisplayName: project?.name ?? null,
       }),
     [
-      invoices.length,
+      ledgerEntries.length,
       capitalDocumentedTotal,
       project?.estimated_min_total,
       dashboardFirstName,
@@ -108,8 +109,9 @@ export default function DashboardScreen() {
   );
 
   const activityEvents = useMemo(
-    () => (project ? generateActivityEvents(project, invoices) : []),
-    [project, invoices],
+    () =>
+      project ? generateActivityEvents(project, ledgerEntries as any) : [],
+    [project, ledgerEntries],
   );
 
   const {
@@ -122,21 +124,21 @@ export default function DashboardScreen() {
     openDashboardDocumentCapture,
   } = useDashboardHandlers({
     project,
-    invoices,
+    ledgerEntries,
     scopeItems,
     isArchitect,
     hasProjectPass,
     load,
     setUpgradeReason,
     setShowUpgrade,
-    setReviewInvoice,
+    setReviewLedgerEntry,
     setReviewOpen,
   });
 
   useEffect(() => {
     if (!project) return;
     if (
-      invoices.length > 0 &&
+      ledgerEntries.length > 0 &&
       project.estimated_min_total != null &&
       celebratedProjectId !== project.id &&
       capitalDocumentedTotal >= project.estimated_min_total
@@ -145,7 +147,12 @@ export default function DashboardScreen() {
       setIsCelebrating(true);
       setCelebratedProjectId(project.id);
     }
-  }, [project, invoices.length, capitalDocumentedTotal, celebratedProjectId]);
+  }, [
+    project,
+    ledgerEntries.length,
+    capitalDocumentedTotal,
+    celebratedProjectId,
+  ]);
 
   const onGeneralUpgrade = useCallback(() => {
     setUpgradeReason("general");
@@ -269,7 +276,7 @@ export default function DashboardScreen() {
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
         invoiceTotal={capitalDocumentedTotal}
-        invoices={invoices}
+        ledgerEntries={ledgerEntries as any}
         projectId={project.id}
       />
 
@@ -311,7 +318,7 @@ export default function DashboardScreen() {
           transition={{ type: "timing", duration: 380, delay: 160 }}
         >
           <HomeTeamSection
-            invoices={invoices}
+            ledgerEntries={ledgerEntries as any}
             isArchitect={isArchitect}
             hasProjectPass={hasProjectPass}
             onUpgradeClick={onGeneralUpgrade}
@@ -340,14 +347,14 @@ export default function DashboardScreen() {
           transition={{ type: "timing", duration: 380, delay: 210 }}
         >
           <DashboardRecentDocumentsPanel
-            invoices={invoices}
+            ledgerEntries={ledgerEntries as any}
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
             hasProjectPass={hasProjectPass}
             onUpgradeClick={onGeneralUpgrade}
-            onOpenInvoice={(inv) => {
+            onOpenLedgerEntry={(inv) => {
               Haptics.selectionAsync();
-              setReviewInvoice(inv);
+              setReviewLedgerEntry(inv);
               setReviewOpen(true);
             }}
             onOpenLedger={() => {
@@ -382,13 +389,13 @@ export default function DashboardScreen() {
         />
       </ComponentErrorBoundary>
 
-      <InvoiceReviewSheet
-        invoice={reviewInvoice}
+      <LedgerEntryReviewSheet
+        ledgerEntry={reviewLedgerEntry}
         projectId={project?.id ?? null}
         isOpen={reviewOpen}
         onClose={() => {
           setReviewOpen(false);
-          setReviewInvoice(null);
+          setReviewLedgerEntry(null);
         }}
         onDeleted={load}
         onSaved={load}

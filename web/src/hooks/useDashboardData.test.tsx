@@ -180,7 +180,7 @@ describe("useDashboardData", () => {
     const mockProjectId = "proj-123";
     const mockProjects = [{ id: mockProjectId, name: "Project 1" }];
     const mockScopes = [{ id: "scope-1", category: "Test" }];
-    const mockInvoices = [{ id: "inv-1", vendor_name: "Vendor" }];
+    const mockLedgerEntries = [{ id: "inv-1", vendor_name: "Vendor" }];
     const mockSub = { status: "active" };
     const mockPass = { id: "pass-1" };
 
@@ -191,7 +191,8 @@ describe("useDashboardData", () => {
     vi.mocked(supabase.from).mockImplementation(((table: string) => {
       if (table === "projects") return mockSupabaseQuery(mockProjects);
       if (table === "scope_items") return mockSupabaseQuery(mockScopes);
-      if (table === "invoices") return mockSupabaseQuery(mockInvoices);
+      if (table === "ledger_entries")
+        return mockSupabaseQuery(mockLedgerEntries);
       if (table === "user_subscriptions") return mockSupabaseQuery(mockSub);
       if (table === "project_passes") return mockSupabaseQuery(mockPass);
       return mockSupabaseQuery([]);
@@ -203,7 +204,7 @@ describe("useDashboardData", () => {
       () => {
         expect(result.current.project?.id).toBe(mockProjectId);
         expect(result.current.scopeItems).toEqual(mockScopes);
-        expect(result.current.invoices).toEqual(mockInvoices);
+        expect(result.current.ledgerEntries).toEqual(mockLedgerEntries);
         expect(result.current.spendByCategory).toEqual({});
         expect(result.current.isArchitect).toBe(true);
         expect(result.current.hasProjectPass).toBe(true);

@@ -6,10 +6,10 @@ import type { ProjectRow } from "@shared/types/database";
 
 type Props = {
   project: ProjectRow;
-  invoiceTotal: number;
+  ledgerTotal: number;
 };
 
-export function ProjectDetailInsightCards({ project, invoiceTotal }: Props) {
+export function ProjectDetailInsightCards({ project, ledgerTotal }: Props) {
   return (
     <>
       <MotiView
@@ -20,7 +20,7 @@ export function ProjectDetailInsightCards({ project, invoiceTotal }: Props) {
         <ProjectHealth
           estimatedMin={project.estimated_min_total}
           estimatedMax={project.estimated_max_total}
-          spendingTotal={invoiceTotal}
+          spendingTotal={ledgerTotal}
         />
       </MotiView>
 
@@ -30,7 +30,7 @@ export function ProjectDetailInsightCards({ project, invoiceTotal }: Props) {
         transition={{ type: "timing", duration: 600, delay: 100 }}
       >
         <ResaleValueImpact
-          investment={invoiceTotal || project.estimated_min_total || 0}
+          investment={ledgerTotal || project.estimated_min_total || 0}
           projectName={project.name}
         />
       </MotiView>

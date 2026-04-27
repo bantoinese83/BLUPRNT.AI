@@ -3,13 +3,17 @@ import { useCallback } from "react";
 import { Alert } from "react-native";
 import * as Haptics from "expo-haptics";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
-import type { ProjectRow, ScopeRow, InvoiceRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  LedgerEntryRow,
+} from "@shared/types/database";
 
 interface UseProjectExportProps {
   id?: string;
   project: ProjectRow | null;
   scope: ScopeRow[];
-  detailInvoices: InvoiceRow[];
+  detailLedgerEntries: LedgerEntryRow[];
   isArchitect: boolean;
   hasProjectPass: boolean;
   includeAppendix: boolean;
@@ -20,7 +24,7 @@ export function useProjectExport({
   id,
   project,
   scope,
-  detailInvoices,
+  detailLedgerEntries,
   isArchitect,
   hasProjectPass,
   includeAppendix,
@@ -50,7 +54,7 @@ export function useProjectExport({
           estimated_max_total: project.estimated_max_total,
         },
         scopeForPdf,
-        detailInvoices,
+        detailLedgerEntries as any,
         { includeAppendix },
       );
     } catch {
@@ -65,7 +69,7 @@ export function useProjectExport({
     isArchitect,
     hasProjectPass,
     scope,
-    detailInvoices,
+    detailLedgerEntries,
     includeAppendix,
     setShowUpgrade,
   ]);

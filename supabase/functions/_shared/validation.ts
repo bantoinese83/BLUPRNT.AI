@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { 
   photoToScopeSchema as _p, 
-  uploadInvoiceSchema as _u, 
+  uploadLedgerEntrySchema as _u, 
   marketingLeadSchema as _m, 
   chatWithProjectSchema as _c,
-  getInvoiceSchema as _g,
+  getLedgerEntrySchema as _g,
   uploadFileMimeLooksAllowed as _mime,
   uuidSchema as _uuid,
   documentTypeSchema as _dt
@@ -14,7 +14,7 @@ import {
 // but enforcing the shared logic from @bluprnt/shared.
 
 export const photoToScopeSchema = _p;
-export const uploadInvoiceSchema = _u.extend({
+export const uploadLedgerEntrySchema = _u.extend({
   // Backend needs the raw File object validation which is environment specific
   file: z
     .custom<File>((v) => v instanceof File && v.size > 0, "Valid file required")
@@ -26,6 +26,6 @@ export const uploadInvoiceSchema = _u.extend({
 });
 export const marketingLeadSchema = _m;
 export const chatWithProjectSchema = _c;
-export const getInvoiceSchema = _g;
+export const getLedgerEntrySchema = _g;
 export const uuidSchema = _uuid;
 export const documentTypeSchema = _dt;

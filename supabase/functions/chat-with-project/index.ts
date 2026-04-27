@@ -43,10 +43,11 @@ export const handler = async (req: Request) => {
     const admin = getServiceClient();
     await assertProjectOwner(admin, projectId, userId);
 
-    const [projectRes, scopeRes, invoiceRes] = await Promise.all([
+    const [projectRes, _docsRes, ledgerRes, scopeRes] = await Promise.all([
       admin.from("projects").select("*").eq("id", projectId).single(),
+      admin.from("documents").select("*").eq("project_id", projectId),
+      admin.from("ledger_entries").select("*").eq("project_id", projectId),
       admin.from("scope_items").select("*").eq("project_id", projectId),
-      admin.from("invoices").select("*").eq("project_id", projectId),
     ]);
 
     if (projectRes.error || !projectRes.data) {
@@ -55,7 +56,7 @@ export const handler = async (req: Request) => {
 
     const project = projectRes.data;
     const scope = (scopeRes.data || []).slice(0, 50); // Keep scope manageable
-    const invoices = (invoiceRes.data || []).slice(0, 20); // Top recent invoices
+    const ledgerEntries = (ledgerRes.data || []).slice(0, 20); // Top recent records
 
     // 1. Semantic Retrieval for additional context
     let semanticDocsContext = "";
@@ -97,9 +98,9 @@ export const handler = async (req: Request) => {
       ).join("\n")
     }
       
-      Recent Invoices:
+      Recent Ledger Records:
       ${
-      (invoices as Array<
+      (ledgerEntries as Array<
         { vendor_name: string; total: number; payment_status: string }
       >).map((i) =>
         `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`

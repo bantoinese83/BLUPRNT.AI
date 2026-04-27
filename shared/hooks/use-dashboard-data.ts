@@ -68,7 +68,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
     setProjects,
     setProject,
     setScopeItems,
-    setInvoices,
+    setLedgerEntries,
     setGalleryItems,
   } = useDashboardSnapshotCache(getSnapshotKey, {
     onLocalProjectIdChange: (id) => {
@@ -143,17 +143,17 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
   );
 
   const homeTeam = useMemo(
-    () => deriveHomeTeam(snapshot?.invoices ?? []),
-    [snapshot?.invoices],
+    () => deriveHomeTeam(snapshot?.ledgerEntries ?? []),
+    [snapshot?.ledgerEntries],
   );
 
   const investmentTotal = useMemo(
     () =>
-      (snapshot?.invoices ?? []).reduce(
+      (snapshot?.ledgerEntries ?? []).reduce(
         (acc, inv) => acc + (inv.total ?? 0),
         0,
       ),
-    [snapshot?.invoices],
+    [snapshot?.ledgerEntries],
   );
 
   const resaleImpact = useMemo(
@@ -172,7 +172,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
       projects: snapshot?.projects ?? [],
       project: snapshot?.project ?? null,
       scopeItems: snapshot?.scopeItems ?? [],
-      invoices: snapshot?.invoices ?? [],
+      ledgerEntries: snapshot?.ledgerEntries ?? [],
       spendByCategory: snapshot?.spendByCategory ?? {},
       reconciliation: snapshot?.reconciliation ?? null,
       isArchitect: snapshot?.isArchitect ?? false,
@@ -187,7 +187,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
       setProjects,
       setProject,
       setScopeItems,
-      setInvoices,
+      setLedgerEntries,
       setGalleryItems,
     }),
     [
@@ -205,7 +205,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
       setProjects,
       setProject,
       setScopeItems,
-      setInvoices,
+      setLedgerEntries,
       setGalleryItems,
     ],
   );

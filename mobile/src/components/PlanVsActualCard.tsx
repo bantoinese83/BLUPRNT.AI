@@ -10,13 +10,13 @@ import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 import {
   capitalImprovementTotal,
   planVsActualNarrative,
-  type InvoiceLike,
+  type LedgerEntryLike,
 } from "@shared/lib/plan-vs-actual";
 
 type Props = {
   estimatedMin: number | null;
   estimatedMax: number | null;
-  invoices: InvoiceLike[];
+  ledgerEntries: LedgerEntryLike[];
   projectId: string;
 };
 
@@ -59,10 +59,10 @@ const toneForKind: Record<
 export function PlanVsActualCard({
   estimatedMin,
   estimatedMax,
-  invoices,
+  ledgerEntries,
   projectId,
 }: Props) {
-  const capital = capitalImprovementTotal(invoices);
+  const capital = capitalImprovementTotal(ledgerEntries);
   const { headline, body, kind } = planVsActualNarrative(
     estimatedMin,
     estimatedMax,

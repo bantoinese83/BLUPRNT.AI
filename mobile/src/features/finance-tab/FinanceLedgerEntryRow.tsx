@@ -7,13 +7,13 @@ import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { money, getWarrantyStatus } from "@shared/lib/formatters";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
 import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
 
-type FinanceInvoiceRowProps = {
-  inv: InvoiceRow;
+type FinanceLedgerEntryRowProps = {
+  inv: LedgerEntryRow;
   index: number;
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
@@ -22,7 +22,7 @@ type FinanceInvoiceRowProps = {
   onDelete?: (id: string) => void;
 };
 
-export function FinanceInvoiceRow({
+export function FinanceLedgerEntryRow({
   inv,
   index,
   hasProjectPass,
@@ -30,7 +30,7 @@ export function FinanceInvoiceRow({
   onPress,
   onViewOriginal,
   onDelete,
-}: FinanceInvoiceRowProps) {
+}: FinanceLedgerEntryRowProps) {
   const swipeableRef = useRef<Swipeable>(null);
   const warranty =
     inv.document_type === "quote"
@@ -107,11 +107,32 @@ export function FinanceInvoiceRow({
                     numberOfLines={2}
                     ellipsizeMode="tail"
                   >
-                    {inv.vendor_name && inv.vendor_name !== "Processing..."
-                      ? inv.vendor_name
-                      : ledgerDocumentTypeLabel(
-                          inv.document_type ?? "invoice",
-                        ).split(" / ")[0]}
+                    {inv.vendor_name && inv.vendor_name !== "Processing..." ? (
+                      inv.vendor_name
+                    ) : (
+                      <MotiView
+                        from={{ opacity: 0.5 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                          type: "timing",
+                          duration: 1000,
+                          loop: true,
+                        }}
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Text
+                          style={[
+                            styles.vendorName,
+                            {
+                              color: Theme.colors.text.muted,
+                              fontStyle: "italic",
+                            },
+                          ]}
+                        >
+                          AI Extracting...
+                        </Text>
+                      </MotiView>
+                    )}
                   </Text>
                   <View
                     style={{
@@ -189,7 +210,39 @@ export function FinanceInvoiceRow({
                       ))}
                   </View>
                 </View>
-                <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
+                {inv.total != null &&
+                inv.total > 0 &&
+                inv.vendor_name !== "Processing..." ? (
+                  <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
+                ) : (
+                  <MotiView
+                    from={{ opacity: 0.5, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "timing",
+                      duration: 800,
+                      loop: true,
+                    }}
+                    style={{
+                      backgroundColor: "rgba(16, 185, 129, 0.05)",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 10,
+                        fontFamily: Theme.typography.family.black,
+                        color: Theme.colors.status.success,
+                        textTransform: "uppercase",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Calculating...
+                    </Text>
+                  </MotiView>
+                )}
               </View>
             </TouchableOpacity>
             {inv.document_id ? (

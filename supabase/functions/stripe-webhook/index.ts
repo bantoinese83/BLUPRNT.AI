@@ -101,8 +101,8 @@ export const handler = async (req: Request) => {
                   plan: "architect",
                   status: "active",
                   current_period_end: periodEnd,
-                  invoice_uploads_count: 0,
-                  invoice_uploads_reset_at: periodEnd,
+                  ledger_uploads_count: 0,
+                  ledger_uploads_reset_at: periodEnd,
                   updated_at: new Date().toISOString(),
                 },
                 { onConflict: "user_id" },
@@ -189,8 +189,8 @@ export const handler = async (req: Request) => {
           .update({
             status,
             current_period_end: periodEnd,
-            invoice_uploads_reset_at: periodEnd,
-            ...(billingPeriodAdvanced ? { invoice_uploads_count: 0 } : {}),
+            ledger_uploads_reset_at: periodEnd,
+            ...(billingPeriodAdvanced ? { ledger_uploads_count: 0 } : {}),
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subscription.id);

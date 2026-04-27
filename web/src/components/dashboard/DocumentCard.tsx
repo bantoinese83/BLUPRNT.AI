@@ -5,7 +5,7 @@ import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploa
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "motion/react";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { money, getWarrantyStatus } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import {
@@ -15,7 +15,7 @@ import {
 import { isPlanVsActualDocumentType } from "@shared/lib/infer-document-type";
 
 interface DocumentCardProps {
-  document: InvoiceRow;
+  document: LedgerEntryRow;
   index: number;
   isArchitect?: boolean;
   hasProjectPass?: boolean;
@@ -60,7 +60,7 @@ export function DocumentCard({
           <div className="absolute top-0 left-0 w-1 h-full bg-teal-600 opacity-0 group-hover:opacity-100 transition-opacity" />
           <CardContent className="p-4 flex items-start space-x-4">
             <DocumentThumbnail
-              invoiceId={document.id}
+              ledgerEntryId={document.id}
               size="sm"
               className="mt-0.5"
             />
@@ -95,6 +95,11 @@ export function DocumentCard({
                   year: "numeric",
                 })}
               </p>
+              {document.ai_summary && (
+                <p className="text-xs text-slate-600 line-clamp-1 italic">
+                  {document.ai_summary}
+                </p>
+              )}
               {showPaymentBadge && document.total != null && (
                 <p className="text-sm font-bold text-slate-900 tabular-nums">
                   {money(document.total)}
@@ -149,7 +154,7 @@ export function DocumentCard({
                     {document.payment_status === "unknown"
                       ? document.document_type === "quote"
                         ? "Pending Review"
-                        : "Processing"
+                        : "Syncing to Ledger..."
                       : document.payment_status === "unpaid"
                         ? "Unpaid"
                         : document.payment_status}
@@ -176,7 +181,7 @@ export function DocumentCard({
       {originalPreviewId ? (
         <OriginalUploadPreviewModal
           key={originalPreviewId}
-          invoiceId={originalPreviewId}
+          ledgerEntryId={originalPreviewId}
           onClose={() => setOriginalPreviewId(null)}
         />
       ) : null}
