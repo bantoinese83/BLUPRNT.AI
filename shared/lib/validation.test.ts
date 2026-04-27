@@ -6,9 +6,64 @@ import {
   isValidZip,
   validatePassword,
   marketingLeadSchema,
+  documentTypeSchema,
+  uploadLedgerEntrySchema,
 } from "./validation.ts";
 
 describe("validation library", () => {
+  describe("documentTypeSchema", () => {
+    it("accepts valid document types", () => {
+      expect(documentTypeSchema.parse("invoice")).toBe("invoice");
+      expect(documentTypeSchema.parse(" RECEIPT ")).toBe("receipt");
+      expect(documentTypeSchema.parse("auto")).toBe("auto");
+    });
+
+    it("falls back to 'auto' for unknown or missing types", () => {
+      expect(documentTypeSchema.parse("unknown-type")).toBe("auto");
+      expect(documentTypeSchema.parse("")).toBe("auto");
+      expect(documentTypeSchema.parse(null)).toBe("auto");
+      expect(documentTypeSchema.parse(undefined)).toBe("auto");
+    });
+  });
+
+  describe("uploadLedgerEntrySchema", () => {
+    it("parses amount_hint correctly", () => {
+      const validUUID = "123e4567-e89b-12d3-a456-426614174000";
+
+      // String number
+      const parsedString = uploadLedgerEntrySchema.parse({
+        project_id: validUUID,
+        document_type: "invoice",
+        amount_hint: "123.45",
+      });
+      expect(parsedString.amount_hint).toBe(123.45);
+
+      // Actual number
+      const parsedNumber = uploadLedgerEntrySchema.parse({
+        project_id: validUUID,
+        document_type: "receipt",
+        amount_hint: 50,
+      });
+      expect(parsedNumber.amount_hint).toBe(50);
+
+      // Empty / Nullish
+      const parsedEmpty = uploadLedgerEntrySchema.parse({
+        project_id: validUUID,
+        document_type: "permit",
+        amount_hint: "",
+      });
+      expect(parsedEmpty.amount_hint).toBeNull();
+
+      // Invalid string (NaN) -> falls back to null because of Number.isFinite check
+      const parsedInvalid = uploadLedgerEntrySchema.parse({
+        project_id: validUUID,
+        document_type: "auto",
+        amount_hint: "not-a-number",
+      });
+      expect(parsedInvalid.amount_hint).toBeNull();
+    });
+  });
+
   describe("photoToScopeSchema", () => {
     it("transforms zip_code to 5 digits", () => {
       const result = photoToScopeSchema.safeParse({
