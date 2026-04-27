@@ -20,6 +20,7 @@ export type PhotoSlotProps = {
   item: GalleryItem | null;
   signedUrl: string | null;
   uploading: boolean;
+  working?: boolean;
   onUpload: () => void;
   onClear: (id: string) => void;
   onUpdateCaption: (id: string, caption: string) => void;
@@ -29,6 +30,7 @@ export function PhotoSlot({
   item,
   signedUrl,
   uploading,
+  working,
   onUpload,
   onClear,
   onUpdateCaption,
@@ -92,6 +94,7 @@ export function PhotoSlot({
               <View style={styles.topControls}>
                 <TouchableOpacity
                   onPress={() => setEditingCaption(!editingCaption)}
+                  disabled={working || uploading}
                   style={[
                     styles.controlBtn,
                     editingCaption && styles.controlBtnActive,
@@ -101,9 +104,14 @@ export function PhotoSlot({
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => onClear(item.id)}
+                  disabled={working || uploading}
                   style={[styles.controlBtn, styles.clearBtn]}
                 >
-                  <X size={14} color="white" />
+                  {working ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <X size={14} color="white" />
+                  )}
                 </TouchableOpacity>
               </View>
 
@@ -156,9 +164,17 @@ export function PhotoSlot({
                 />
                 <TouchableOpacity
                   onPress={handleSaveCaption}
+                  disabled={working}
                   style={styles.saveBtn}
                 >
-                  <Check size={18} color={Theme.colors.brand.primary} />
+                  {working ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={Theme.colors.brand.primary}
+                    />
+                  ) : (
+                    <Check size={18} color={Theme.colors.brand.primary} />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>

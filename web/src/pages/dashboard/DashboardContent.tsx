@@ -196,20 +196,23 @@ export function DashboardContent({
   );
 
   const handleProjectRename = async (id: string, newName: string) => {
-    try {
+    const renameAction = async () => {
       const { error } = await supabase
         .from("projects")
         .update({ name: newName })
         .eq("id", id);
       if (error) throw error;
-      toast.success("Project renamed successfully.");
       load();
-    } catch (err: unknown) {
-      reportClientError("dashboard_rename_project", err);
-      toast.error("Failed to rename project.", {
-        description: "Check your connection and try again.",
-      });
-    }
+    };
+
+    toast.promise(renameAction(), {
+      loading: "Renaming project...",
+      success: "Project renamed successfully.",
+      error: (err: unknown) => {
+        reportClientError("dashboard_rename_project", err);
+        return "Failed to rename project. Check your connection and try again.";
+      },
+    });
   };
 
   return (

@@ -69,6 +69,7 @@ export default function FinanceScreen() {
     useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<"ledger" | "specs">("ledger");
   const [isAddAssetOpen, setIsAddAssetOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const stats = useMemo(
     () => computeLedgerStats(ledgerEntries as any),
@@ -327,20 +328,25 @@ export default function FinanceScreen() {
           text: "Remove",
           style: "destructive",
           onPress: async () => {
-            const { error } = await supabase
-              .from("ledger_entries")
-              .delete()
-              .eq("id", id);
-            if (error) {
-              Alert.alert(
-                "Couldn't remove",
-                "Something went wrong. Try again.",
-              );
-            } else {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              load();
+            setDeletingId(id);
+            try {
+              const { error } = await supabase
+                .from("ledger_entries")
+                .delete()
+                .eq("id", id);
+              if (error) {
+                Alert.alert(
+                  "Couldn't remove",
+                  "Something went wrong. Try again.",
+                );
+              } else {
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
+                load();
+              }
+            } finally {
+              setDeletingId(null);
             }
           },
         },
@@ -407,6 +413,7 @@ export default function FinanceScreen() {
               inv={inv as LedgerEntryRow}
               index={index}
               hasProjectPass={hasProjectPass}
+              isDeleting={deletingId === (inv as LedgerEntryRow).id}
               onUpgradeClick={() => {
                 setUpgradeReason("general");
                 setShowUpgrade(true);
@@ -414,9 +421,10 @@ export default function FinanceScreen() {
               onPress={() => {
                 setSelectedLedgerEntry(inv as LedgerEntryRow);
                 setIsReviewOpen(true);
-                Haptics.selectionAsync();
               }}
-              onViewOriginal={() => setOriginalPreviewLedgerEntryId(inv.id)}
+              onViewOriginal={() =>
+                setOriginalPreviewLedgerEntryId((inv as LedgerEntryRow).id)
+              }
               onDelete={handleLedgerEntryDelete}
             />
           )}

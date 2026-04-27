@@ -26,6 +26,7 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const { galleryItems = [] } = useAwareness();
   const { load: refreshDashboard } = useDashboardData();
   const [uploading, setUploading] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [activeSetIndex, setActiveSetIndex] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
@@ -149,6 +150,7 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   };
 
   const handleClear = async (id: string) => {
+    setWorkingId(id);
     try {
       const { error } = await supabase
         .from("project_gallery")
@@ -159,10 +161,13 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Could not remove photo");
+    } finally {
+      setWorkingId(null);
     }
   };
 
   const handleUpdateCaption = async (id: string, caption: string) => {
+    setWorkingId(id);
     try {
       const { error } = await supabase
         .from("project_gallery")
@@ -174,6 +179,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
       console.error(err);
       Alert.alert("Error", "Could not update caption");
       throw err;
+    } finally {
+      setWorkingId(null);
     }
   };
 
@@ -246,6 +253,7 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
                 : null
             }
             uploading={uploading === `before-${activeSetIndex}`}
+            working={workingId === activeSet.before?.id}
             onUpload={() => handlePickPhoto("before", activeSetIndex)}
             onClear={handleClear}
             onUpdateCaption={handleUpdateCaption}
@@ -261,6 +269,7 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
                 : null
             }
             uploading={uploading === `after-${activeSetIndex}`}
+            working={workingId === activeSet.after?.id}
             onUpload={() => handlePickPhoto("after", activeSetIndex)}
             onClear={handleClear}
             onUpdateCaption={handleUpdateCaption}

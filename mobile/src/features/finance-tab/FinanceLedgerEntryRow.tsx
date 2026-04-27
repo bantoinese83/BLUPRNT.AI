@@ -1,5 +1,11 @@
 import React, { useRef } from "react";
-import { View, Text, TouchableOpacity, Animated } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  ActivityIndicator,
+} from "react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { Trash2, Clock, Lock } from "lucide-react-native";
@@ -16,6 +22,7 @@ type FinanceLedgerEntryRowProps = {
   inv: LedgerEntryRow;
   index: number;
   hasProjectPass?: boolean;
+  isDeleting?: boolean;
   onUpgradeClick?: () => void;
   onPress: () => void;
   onViewOriginal: () => void;
@@ -26,6 +33,7 @@ export function FinanceLedgerEntryRow({
   inv,
   index,
   hasProjectPass,
+  isDeleting,
   onUpgradeClick,
   onPress,
   onViewOriginal,
@@ -207,9 +215,22 @@ export function FinanceLedgerEntryRow({
                       ))}
                   </View>
                 </View>
-                {inv.total != null &&
-                inv.total > 0 &&
-                inv.vendor_name !== "Processing..." ? (
+                {isDeleting ? (
+                  <View
+                    style={{
+                      width: 50,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActivityIndicator
+                      size="small"
+                      color={Theme.colors.status.error}
+                    />
+                  </View>
+                ) : inv.total != null &&
+                  inv.total > 0 &&
+                  inv.vendor_name !== "Processing..." ? (
                   <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
                 ) : (
                   <MotiView

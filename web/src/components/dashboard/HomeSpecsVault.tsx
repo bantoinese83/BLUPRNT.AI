@@ -107,21 +107,23 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
   }, [assets, activeCategory]);
 
   const handleDelete = async (id: string) => {
-    try {
+    const deleteAction = async () => {
       const { error } = await supabase
         .from("physical_assets")
         .delete()
         .eq("id", id);
       if (error) throw error;
-      toast.success("Spec removed");
       captureEvent("asset_deleted", {
         category: assets.find((a) => a.id === id)?.category,
       });
       fetchAssets();
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not remove spec");
-    }
+    };
+
+    toast.promise(deleteAction(), {
+      loading: "Removing spec...",
+      success: "Spec removed",
+      error: "Could not remove spec",
+    });
   };
 
   if (loading) {

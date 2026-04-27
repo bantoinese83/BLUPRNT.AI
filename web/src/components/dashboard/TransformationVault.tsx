@@ -297,34 +297,37 @@ export function TransformationVault({
   };
 
   const handleClear = async (id: string) => {
-    try {
+    const clearAction = async () => {
       const { error } = await supabase
         .from("project_gallery")
         .delete()
         .eq("id", id);
       if (error) throw error;
-      toast.success("Photo removed");
       fetchGallery();
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not remove photo");
-    }
+    };
+
+    toast.promise(clearAction(), {
+      loading: "Removing photo...",
+      success: "Photo removed",
+      error: "Could not remove photo",
+    });
   };
 
   const handleUpdateCaption = async (id: string, caption: string) => {
-    try {
+    const updateAction = async () => {
       const { error } = await supabase
         .from("project_gallery")
         .update({ caption })
         .eq("id", id);
       if (error) throw error;
-      toast.success("Caption updated");
       fetchGallery();
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not update caption");
-      throw err;
-    }
+    };
+
+    toast.promise(updateAction(), {
+      loading: "Updating caption...",
+      success: "Caption updated",
+      error: "Could not update caption",
+    });
   };
 
   const [activeSetIndex, setActiveSetIndex] = useState(0);

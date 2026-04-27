@@ -290,9 +290,9 @@ export function AddAssetSheet({
 
         <View style={styles.footer}>
           <Button
-            title={loading ? "Saving..." : "Save to Vault"}
+            title="Save to Vault"
             onPress={handleSubmit}
-            disabled={loading}
+            loading={loading}
             style={styles.submitBtn}
           />
         </View>
