@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 
 type PlanVsActualCardProps = {
   estimatedMin: number | null;
@@ -87,7 +88,7 @@ export function PlanVsActualCard({
               </div>
               <div className="min-w-0 space-y-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  Plan vs Actual Spending
+                  Plan vs documented spend
                 </p>
                 <h3
                   className={cn(
@@ -107,7 +108,7 @@ export function PlanVsActualCard({
           <div className="mt-6 grid gap-3 border-t border-slate-100 pt-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
               <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
-                Your estimate
+                {DASHBOARD_STATS_LABELS.estimate}
               </p>
               <p className="mt-1 text-lg font-black tabular-nums text-slate-900">
                 {money(estimatedMin, estimatedMax)}
@@ -115,7 +116,7 @@ export function PlanVsActualCard({
             </div>
             <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
               <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
-                Project Docs logged
+                {DASHBOARD_STATS_LABELS.invoicesAndQuotes}
               </p>
               <p className="mt-1 text-lg font-black tabular-nums text-slate-900">
                 {money(capital)}

@@ -115,9 +115,9 @@ export function PlanVsActualCard({
           router.push("/(tabs)/finance");
         }}
         accessibilityRole="button"
-        accessibilityLabel="Open finance tab to export seller packet"
+        accessibilityLabel="Open finance tab to export home archive"
       >
-        <Text style={styles.ctaText}>Seller packet includes this story</Text>
+        <Text style={styles.ctaText}>Home Archive includes this story</Text>
         <ChevronRight size={18} color={Theme.colors.brand.primary} />
       </TouchableOpacity>
 

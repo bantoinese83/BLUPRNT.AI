@@ -1,8 +1,12 @@
 import React from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { FileText, Image as ImageIcon } from "lucide-react-native";
 import { useDocumentSignedUrl } from "@shared/hooks/use-document-signed-url";
+import {
+  isImageFilename,
+  isPdfFilename,
+} from "@shared/lib/infer-document-type";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/constants/Theme";
 
@@ -10,10 +14,6 @@ interface DocumentThumbnailProps {
   ledgerEntryId: string;
   size?: number;
   style?: import("react-native").StyleProp<import("react-native").ViewStyle>;
-}
-
-function isImageFilename(name?: string): boolean {
-  return /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(name ?? "");
 }
 
 export function DocumentThumbnail({
@@ -34,6 +34,7 @@ export function DocumentThumbnail({
   const url = data?.signedUrl;
   const filename = data?.filename;
   const isImg = isImageFilename(filename);
+  const isPdf = isPdfFilename(filename);
 
   return (
     <View
@@ -53,9 +54,17 @@ export function DocumentThumbnail({
           transition={200}
         />
       ) : (
-        <View style={styles.fallback}>
-          {filename?.toLowerCase().endsWith(".pdf") ? (
-            <FileText size={size * 0.45} color={Theme.colors.text.muted} />
+        <View
+          style={[
+            styles.fallback,
+            isPdf && { backgroundColor: "rgba(225, 29, 72, 0.05)" },
+          ]}
+        >
+          {isPdf ? (
+            <>
+              <FileText size={size * 0.45} color="rgba(225, 29, 72, 0.8)" />
+              {size >= 44 && <Text style={styles.pdfLabel}>PDF</Text>}
+            </>
           ) : (
             <ImageIcon size={size * 0.45} color={Theme.colors.text.muted} />
           )}
@@ -79,5 +88,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Theme.colors.inputBg,
+    width: "100%",
+    height: "100%",
+  },
+  pdfLabel: {
+    fontSize: 9,
+    fontFamily: Theme.typography.family.black,
+    color: "rgba(190, 18, 60, 0.6)",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 2,
   },
 });

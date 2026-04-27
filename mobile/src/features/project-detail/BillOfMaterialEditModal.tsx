@@ -113,7 +113,7 @@ export function BillOfMaterialEditModal({
     >
       <KeyboardAvoidingView
         style={styles.backdrop}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <Pressable style={styles.scrim} onPress={onClose} />
         <View style={styles.sheet}>
