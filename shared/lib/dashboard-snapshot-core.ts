@@ -167,7 +167,12 @@ export async function buildDashboardDataForProject(
   const isArchitect = isArchitectPlanEffective(sub);
   const hasProjectPass = !!pass;
 
-  const allLineItems = newLedgerRaw.flatMap((l) => l.ledger_line_items || []);
+  const allLineItems = newLedgerRaw.flatMap((l) =>
+    (l.ledger_line_items || []).map((li) => ({
+      ...li,
+      is_verified: l.is_verified,
+    })),
+  );
   const spendByCategory = buildSpendByCategory(allLineItems, newScopes);
   const reconciliation = buildReconciliation(newScopes, allLineItems);
 

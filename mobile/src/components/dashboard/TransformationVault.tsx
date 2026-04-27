@@ -32,6 +32,12 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Clear cache when switching projects to manage memory
+  useEffect(() => {
+    setSignedUrls({});
+    setActiveSetIndex(0);
+  }, [projectId]);
+
   useEffect(() => {
     hintTimerRef.current = setTimeout(() => setShowSwipeHint(false), 2800);
     return () => {
@@ -39,11 +45,15 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
     };
   }, []);
 
-  // Group items into sets
+  // Group items into sets (Optimized single-pass)
   const sets = useMemo(() => {
     const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
-    const befores = safeGallery.filter((i) => i.photo_type === "before");
-    const afters = safeGallery.filter((i) => i.photo_type === "after");
+    const befores = [];
+    const afters = [];
+    for (const item of safeGallery) {
+      if (item.photo_type === "before") befores.push(item);
+      else if (item.photo_type === "after") afters.push(item);
+    }
     const count = Math.max(befores.length, afters.length, 1);
 
     const result = [];

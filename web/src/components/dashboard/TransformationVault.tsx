@@ -187,6 +187,13 @@ export function TransformationVault({
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
   const [targetIndex, setTargetIndex] = useState<number>(0);
+  const [activeSetIndex, setActiveSetIndex] = useState(0);
+
+  // Clear cache when switching projects to manage memory
+  useEffect(() => {
+    setSignedUrls({});
+    setActiveSetIndex(0);
+  }, [projectId]);
 
   const fetchGallery = useCallback(async () => {
     try {
@@ -209,11 +216,14 @@ export function TransformationVault({
     fetchGallery();
   }, [fetchGallery]);
 
-  // Group items into sets
-  // A set is a logical grouping. For now, we'll just group them by their sequence.
+  // Group items into sets (Optimized single-pass)
   const sets = useMemo(() => {
-    const befores = items.filter((i) => i.photo_type === "before");
-    const afters = items.filter((i) => i.photo_type === "after");
+    const befores = [];
+    const afters = [];
+    for (const item of items) {
+      if (item.photo_type === "before") befores.push(item);
+      else if (item.photo_type === "after") afters.push(item);
+    }
     const count = Math.max(befores.length, afters.length, 1);
 
     const result = [];
@@ -329,8 +339,6 @@ export function TransformationVault({
       error: "Could not update caption",
     });
   };
-
-  const [activeSetIndex, setActiveSetIndex] = useState(0);
 
   if (loading) {
     return (

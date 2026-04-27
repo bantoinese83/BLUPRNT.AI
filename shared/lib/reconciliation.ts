@@ -20,7 +20,7 @@ export type LedgerLineItemMinimal = {
   line_total: number | null;
   scope_item_id: string | null;
   ledger_entry_id: string;
-  is_verified?: boolean;
+  is_verified?: boolean | null;
 };
 
 /**

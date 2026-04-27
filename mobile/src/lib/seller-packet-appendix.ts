@@ -7,10 +7,18 @@ import type { LedgerEntryRow, ScopeRow } from "@shared/types/database";
  * Renders full-page images of original receipt uploads.
  */
 
+/**
+ * Inefficient for large arrays because of string concatenation.
+ * Chunked conversion is much faster and memory-friendly.
+ */
 function uint8ToBase64(arr: Uint8Array): string {
+  const CHUNK_SIZE = 0x8000; // 32KB chunks
   let binary = "";
-  for (const byte of arr) {
-    binary += String.fromCharCode(byte);
+  for (let i = 0; i < arr.length; i += CHUNK_SIZE) {
+    binary += String.fromCharCode.apply(
+      null,
+      arr.subarray(i, i + CHUNK_SIZE) as unknown as number[],
+    );
   }
   return btoa(binary);
 }
@@ -19,7 +27,7 @@ export async function buildSellerPacketAppendixHtml(
   ledgerEntries: (LedgerEntryRow & { storage_path?: string | null })[],
   _scopeItems?: ScopeRow[],
 ) {
-  const images = ledgerEntries.filter(
+  const items = ledgerEntries.filter(
     (inv) =>
       inv.storage_path &&
       (inv.storage_path.toLowerCase().endsWith(".jpg") ||
@@ -28,50 +36,50 @@ export async function buildSellerPacketAppendixHtml(
         inv.storage_path.toLowerCase().endsWith(".pdf")),
   );
 
-  if (images.length === 0) return "";
+  if (items.length === 0) return "";
 
-  // Parallel fetch and process all images to speed up generation
-  const blocks = await Promise.all(
-    images.map(async (inv) => {
-      const title = `${inv.vendor_name || "Unknown Vendor"} — ${new Date(
-        inv.issue_date || "",
-      ).toLocaleDateString()}`;
+  // Process images sequentially to avoid memory spikes and network congestion
+  const blocks: string[] = [];
+  for (const inv of items) {
+    const title = `${inv.vendor_name || "Unknown Vendor"} — ${new Date(
+      inv.issue_date || "",
+    ).toLocaleDateString()}`;
 
-      try {
-        const { data, error } = await supabase.storage
-          .from("project-documents")
-          .download(inv.storage_path!);
+    try {
+      const { data, error } = await supabase.storage
+        .from("project-documents")
+        .download(inv.storage_path!);
 
-        if (error || !data) throw error || new Error("No data");
+      if (error || !data) throw error || new Error("No data");
 
-        const blob = data as Blob;
-        const mime = blob.type || "image/jpeg";
+      const blob = data as Blob;
+      const mime = blob.type || "image/jpeg";
 
-        if (mime === "application/pdf") {
-          return `
-            <div style="page-break-before: always; margin-top: 24px;">
-              <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-              <p class="plan-line">This file type can’t be embedded. Use View original in the app.</p>
-            </div>`;
-        }
-
-        const buf = await blob.arrayBuffer();
-        const dataUrl = `data:${mime};base64,${uint8ToBase64(new Uint8Array(buf))}`;
-
-        return `
+      if (mime === "application/pdf") {
+        blocks.push(`
           <div style="page-break-before: always; margin-top: 24px;">
             <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-            <img src="${dataUrl}" style="max-width: 100%; height: auto; margin-top: 12px;" alt="" />
-          </div>`;
-      } catch (_err) {
-        return `
-          <div style="page-break-before: always; margin-top: 24px;">
-            <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-            <p class="plan-line">We couldn’t download this file.</p>
-          </div>`;
+            <p class="plan-line">This file type can’t be embedded. Use View original in the app.</p>
+          </div>`);
+        continue;
       }
-    }),
-  );
+
+      const buf = await blob.arrayBuffer();
+      const dataUrl = `data:${mime};base64,${uint8ToBase64(new Uint8Array(buf))}`;
+
+      blocks.push(`
+        <div style="page-break-before: always; margin-top: 24px;">
+          <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
+          <img src="${dataUrl}" style="max-width: 100%; height: auto; margin-top: 12px;" alt="" />
+        </div>`);
+    } catch (_err) {
+      blocks.push(`
+        <div style="page-break-before: always; margin-top: 24px;">
+          <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
+          <p class="plan-line">We couldn’t download this file.</p>
+        </div>`);
+    }
+  }
 
   return `
     <div class="section">
