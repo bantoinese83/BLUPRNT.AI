@@ -10,6 +10,7 @@ import type {
   UserSubscriptionRow,
   ProjectPassRow,
   GalleryItemRow,
+  LedgerLineItemRow,
 } from "../types/database.ts";
 import type { DashboardSnapshot } from "../types/dashboard-snapshot.ts";
 import { buildSpendByCategory } from "./spend-by-category.ts";
@@ -182,7 +183,7 @@ export async function buildDashboardDataForProject(
           description: l.ai_summary || l.vendor_name || "Document Total",
           quantity: 1,
           unit_price: l.total,
-        } as any,
+        } as unknown as LedgerLineItemRow,
       ];
     }
     return lines.map((li) => ({

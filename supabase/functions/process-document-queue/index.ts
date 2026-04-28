@@ -99,7 +99,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Infer payment status
     let payment_status = "unknown";
     if (ocrResult.document_type === "receipt") payment_status = "paid";
-    if (ocrResult.document_type === "invoice") payment_status = "pending";
+    if (ocrResult.document_type === "invoice") payment_status = "unpaid";
 
     // 6. Update Ledger Entry Record
     const { data: ledgerEntry, error: invErr } = await admin
@@ -137,8 +137,8 @@ const handler = async (req: Request): Promise<Response> => {
       lineItemsToInsert = [{
         description: ocrResult.summary || `Total from ${ocrResult.vendor_name || "Document"}`,
         quantity: 1,
-        unit_price: ocrResult.total,
-        line_total: ocrResult.total,
+        unit_price: ocrResult.total ?? 0,
+        line_total: ocrResult.total ?? 0,
         mapped_scope_item_id: null
       }];
     }
