@@ -14,8 +14,8 @@ export interface GeminiResponse {
   groundingMetadata?: any;
 }
 
-const DEFAULT_MAX_ATTEMPTS = 3;
-const DEFAULT_GEMINI_MODEL = "gemini-1.5-flash";
+const DEFAULT_MAX_ATTEMPTS = 2;
+const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
 const DEFAULT_EMBEDDING_MODEL = "text-embedding-004";
 
 /**
@@ -40,7 +40,7 @@ export async function callGemini(params: {
     tools,
     temperature = 0.1,
     maxOutputTokens = 2048,
-    timeoutMs = 60000,
+    timeoutMs = 45000,
     model: modelOverride,
   } = params;
 

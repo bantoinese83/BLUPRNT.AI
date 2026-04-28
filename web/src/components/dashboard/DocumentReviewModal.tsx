@@ -542,7 +542,12 @@ export function DocumentReviewModal({
                 <Button
                   variant="primary"
                   onClick={handleSaveMappings}
-                  disabled={saving || deleting}
+                  disabled={
+                    saving ||
+                    deleting ||
+                    vendorName === "Processing..." ||
+                    vendorName === "Needs Review"
+                  }
                   className={cn(
                     "flex-1 gap-2 relative overflow-hidden group",
                     isUnverified &&

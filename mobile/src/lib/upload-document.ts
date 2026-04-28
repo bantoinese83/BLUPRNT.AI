@@ -75,6 +75,9 @@ async function executeUploadWorkflow(
   try {
     showAppToast("Starting upload... please keep the app open.");
 
+    console.log(
+      `[upload-document] Workflow started for URI: ${uri}, Mime: ${mimeType}, Project: ${projectId}`,
+    );
     const formData = prepareUploadFormData(
       uri,
       mimeType,
@@ -82,7 +85,9 @@ async function executeUploadWorkflow(
       projectId,
       originalFileName,
     );
+    console.log("[upload-document] FormData prepared, invoking function...");
     const { data, error } = await invokeUploadWithTimeout(formData);
+    console.log("[upload-document] Response received:", { data, error });
 
     const failure = extractUploadFailureFromInvokeResult(data, error);
     if (failure) {

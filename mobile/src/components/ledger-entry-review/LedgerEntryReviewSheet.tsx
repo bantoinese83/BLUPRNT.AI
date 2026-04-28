@@ -441,9 +441,17 @@ export function LedgerEntryReviewSheet({
                         style={[
                           styles.saveBtn,
                           isUnverified ? styles.verifyBtn : undefined,
-                          saving ? styles.saveBtnDisabled : undefined,
+                          saving ||
+                          vendorName === "Processing..." ||
+                          vendorName === "Needs Review"
+                            ? styles.saveBtnDisabled
+                            : undefined,
                         ]}
-                        disabled={saving}
+                        disabled={
+                          saving ||
+                          vendorName === "Processing..." ||
+                          vendorName === "Needs Review"
+                        }
                         onPress={() => void handleSave()}
                       >
                         {saving ? (

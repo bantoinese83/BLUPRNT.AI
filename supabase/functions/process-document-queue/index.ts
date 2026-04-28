@@ -15,6 +15,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const admin = getServiceClient();
   let queue_id: string | null = null;
+  let queueItem: any = null;
 
   try {
     const raw_queue_id = await req.json().then(j => j.queue_id).catch(() => null);
@@ -33,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
       .select("*")
       .eq("id", queue_id);
 
-    const queueItem = items?.[0];
+    queueItem = items?.[0];
 
     if (fetchErr || !queueItem) {
       const msg = `Queue item "${queue_id}" not found. DB Error: ${JSON.stringify(fetchErr)}. Found count: ${items?.length || 0}. Visible IDs: [${allIds}]`;
@@ -42,10 +43,17 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // 2. Mark as processing
+    console.log(`[process-document-queue] Marking item ${queue_id} as processing...`);
     await admin
       .from("document_processing_queue")
-      .update({ status: "processing", attempts: queueItem.attempts + 1, updated_at: new Date().toISOString() })
+      .update({ 
+        status: "processing", 
+        attempts: (queueItem.attempts || 0) + 1, 
+        updated_at: new Date().toISOString() 
+      })
       .eq("id", queue_id);
+
+    console.log(`[process-document-queue] Processing document: ${queueItem.document_id} (${queueItem.file_path})`);
 
     // 3. Download file from storage
     const { data: fileData, error: downloadErr } = await admin.storage
@@ -148,11 +156,13 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", queueItem.document_id);
 
     // 9. Generate and Store Semantic Embedding for Retrieval
+    console.log("[process-document-queue] Generating embedding...");
     try {
       const summaryText = `Invoice from ${ocrResult.vendor_name || "Unknown Vendor"} on ${ocrResult.issue_date || "Unknown Date"} for total ${ocrResult.total || 0}. Items: ${ocrResult.line_items?.map((l: any) => l.description).join(", ")}`;
       const embedding = await generateEmbedding(summaryText);
 
       if (embedding) {
+        console.log("[process-document-queue] Storing embedding...");
         await admin.from("document_embeddings").insert({
           document_id: queueItem.document_id,
           project_id: queueItem.project_id,
@@ -185,6 +195,16 @@ const handler = async (req: Request): Promise<Response> => {
             updated_at: new Date().toISOString(),
           })
           .eq("id", queue_id);
+
+        // Also update the ledger entry to clear the "Processing..." state
+        await admin
+          .from("ledger_entries")
+          .update({
+            vendor_name: "Extraction Failed",
+            is_verified: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("document_id", queueItem?.document_id);
       }
     } catch (dbErr) {
       console.error("[process-document-queue] Failed to update error status in DB:", dbErr);

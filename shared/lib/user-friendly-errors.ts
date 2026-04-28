@@ -109,6 +109,10 @@ export function friendlyDocumentUploadError(
       "That file type isn’t supported. Use a PDF or a photo (JPEG, PNG, WebP, or HEIC).",
     ],
     [
+      ["empty file", "0 bytes"],
+      "That file appears to be empty. Try choosing it again or snap a new photo.",
+    ],
+    [
       ["too many requests", "try again later", "rate limit"],
       "You’re sending files quickly. Wait a moment, then try again.",
     ],

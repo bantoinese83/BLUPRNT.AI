@@ -7,23 +7,18 @@ import {
   getServiceClient,
   getUserIdFromRequest,
 } from "../_shared/auth.ts";
-import { getApiVersion, API_VERSIONS } from "../_shared/versioning.ts";
+import { getApiVersion } from "../_shared/versioning.ts";
 import {
   ARCHITECT_UPLOADS_PER_MONTH as _ARCHITECT_UPLOADS_PER_MONTH,
   checkLedgerUploadAllowed,
   releaseArchitectLedgerUploadSlot,
   reserveArchitectLedgerUploadSlot,
 } from "../_shared/entitlements.ts";
-import {
-  extractInvoiceFromPdf,
-  type ProjectScopeItem,
-} from "../_shared/ocr.ts";
 import { type SupabaseClient as _SupabaseClient } from "@supabase/supabase-js";
 import {
   coerceLedgerDocumentType,
   inferDocumentTypeFromFilename,
 } from "../../../shared/lib/infer-document-type.ts";
-import { getProjectBudgetHealth } from "../_shared/financials.ts";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
 function resolvedMimeType(f: File): string {
@@ -38,18 +33,7 @@ function resolvedMimeType(f: File): string {
   return "image/jpeg";
 }
 
-/** Converts a Buffer to a Base64 string for OCR processing. */
-function bufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    const byte = bytes[i];
-    if (byte !== undefined) {
-      binary += String.fromCharCode(byte);
-    }
-  }
-  return btoa(binary);
-}
+
 
 export const handler = async (req: Request): Promise<Response> => {
   const corsHeaders = handleOptions(req);
@@ -81,9 +65,9 @@ export const handler = async (req: Request): Promise<Response> => {
     const amountHintStr = formData.get("amount_hint") as string | null;
     const file = formData.get("file") as File;
 
-    if (!projectId || !file) {
+    if (!projectId || !file || file.size === 0) {
       return jsonResponse(
-        { error: "Missing required fields (project_id, file)" },
+        { error: "Missing or empty file (0 bytes)." },
         400,
         req,
       );
@@ -149,12 +133,13 @@ export const handler = async (req: Request): Promise<Response> => {
         mime === "application/pdf" ||
         mime.startsWith("image/jpeg") ||
         mime.startsWith("image/png") ||
-        mime.startsWith("image/webp");
+        mime.startsWith("image/webp") ||
+        mime.startsWith("image/heic");
 
       // 4. Create Document Record
       const inferredDocType =
         documentType === "auto"
-          ? inferDocumentTypeFromFilename(originalFilename)
+          ? (inferDocumentTypeFromFilename(originalFilename) ?? "other")
           : coerceLedgerDocumentType(documentType);
 
       const { data: doc, error: docErr } = await admin
@@ -181,7 +166,7 @@ export const handler = async (req: Request): Promise<Response> => {
           project_id: projectId,
           document_id: doc.id,
           document_type: inferredDocType,
-          vendor_name: "Processing...",
+          vendor_name: isOcrSupported ? "Processing..." : "Needs Review",
           total: finalTotal,
           issue_date: new Date().toISOString().split("T")[0],
           is_verified: false,

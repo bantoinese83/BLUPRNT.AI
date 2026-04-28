@@ -15,6 +15,7 @@ export type UploadPickedDocumentResult = {
 export type PickedFile = {
   uri: string;
   mimeType?: string;
+  size?: number;
 };
 
 export type UploadPickedDocumentOptions = {
@@ -47,6 +48,14 @@ export async function uploadPickedDocumentToProject(
     const file = options.files[i]!;
     const mime = file.mimeType || "image/jpeg";
     const kind = mime.includes("pdf") ? "pdf" : "image";
+
+    if (file.size === 0) {
+      Alert.alert(
+        "Empty file",
+        `File ${i + 1} appears to be empty and cannot be uploaded.`,
+      );
+      continue;
+    }
 
     if (fileCount > 1) {
       showAppToast(`Uploading ${i + 1} of ${fileCount}...`);

@@ -158,6 +158,11 @@ export function useDocumentManagement({
         setBatchStatus(`Uploading ${i + 1} of ${fileArray.length}...`);
       }
 
+      if (file.size === 0) {
+        toast.error(`File "${file.name}" is empty.`);
+        continue;
+      }
+
       if (file.size > 10 * 1024 * 1024) {
         toast.error(`File "${file.name}" is too large (max 10MB).`);
         continue;

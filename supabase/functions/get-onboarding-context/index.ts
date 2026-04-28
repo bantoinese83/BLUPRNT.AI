@@ -1,23 +1,18 @@
+import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { callGemini } from "../_shared/gemini.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const opt = handleOptions(req);
+  if (opt) return opt;
 
   try {
     const { projectType, zipCode } = await req.json();
 
     if (!projectType || !zipCode) {
-      return new Response(
-        JSON.stringify({ error: "projectType and zipCode are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      return jsonResponse(
+        { error: "projectType and zipCode are required" },
+        400,
+        req
       );
     }
 
@@ -54,14 +49,9 @@ Deno.serve(async (req) => {
       throw new Error("Failed to generate context from Gemini");
     }
 
-    return new Response(JSON.stringify(response.data), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse(response.data, 200, req);
   } catch (error) {
     console.error("[get-onboarding-context] Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: error.message }, 500, req);
   }
 });

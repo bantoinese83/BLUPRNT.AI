@@ -65,9 +65,10 @@ export function useLedgerEntryReviewDetail(
     }
 
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
+
+    const load = async (isPoll = false) => {
+      if (!isPoll) setLoading(true);
+      if (!isPoll) setError(null);
       try {
         const { data: invData, error: invErr } = await invokeFunction<{
           ledger_entry: LedgerEntryDetail & {
@@ -81,8 +82,8 @@ export function useLedgerEntryReviewDetail(
 
         if (cancelled) return;
         if (invErr || !invData) {
-          setError("We couldn’t load this document’s details.");
-          setLoading(false);
+          if (!isPoll) setError("We couldn’t load this document’s details.");
+          if (!isPoll) setLoading(false);
           return;
         }
 
@@ -93,45 +94,64 @@ export function useLedgerEntryReviewDetail(
         setLedgerDocType(t);
         setServerLedgerDocType(t);
 
-        const { data: scope, error: scopeErr } = await supabase
-          .from("scope_items")
-          .select("id, category, description")
-          .eq("project_id", projectId);
+        if (!isPoll) {
+          const { data: scope, error: scopeErr } = await supabase
+            .from("scope_items")
+            .select("id, category, description")
+            .eq("project_id", projectId);
 
-        if (cancelled) return;
-        if (scopeErr) {
-          reportClientError("ledger_review_scope_list", scopeErr);
-          showAppToast(
-            "Budget list didn’t load — line links may be incomplete.",
-            { type: "warning" },
-          );
-        } else {
-          setScopeItems(
-            (scope ?? []) as {
-              id: string;
-              category: string;
-              description: string;
-            }[],
-          );
+          if (cancelled) return;
+          if (scopeErr) {
+            reportClientError("ledger_review_scope_list", scopeErr);
+            showAppToast(
+              "Budget list didn’t load — line links may be incomplete.",
+              { type: "warning" },
+            );
+          } else {
+            setScopeItems(
+              (scope ?? []) as {
+                id: string;
+                category: string;
+                description: string;
+              }[],
+            );
+          }
+
+          const initial: Record<string, string> = {};
+          lines.forEach((line) => {
+            if (line.scope_item_id) initial[line.id] = line.scope_item_id;
+          });
+          setMappings(initial);
         }
-
-        const initial: Record<string, string> = {};
-        lines.forEach((line) => {
-          if (line.scope_item_id) initial[line.id] = line.scope_item_id;
-        });
-        setMappings(initial);
       } catch (err) {
-        if (!cancelled) {
+        if (!cancelled && !isPoll) {
           setError("Something went wrong loading details.");
           reportClientError("useLedgerEntryReviewDetail_load", err);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && !isPoll) setLoading(false);
       }
-    })();
+    };
+
+    void load();
+
+    const pollInterval = setInterval(() => {
+      setDetail((prev) => {
+        if (
+          prev?.is_verified === false &&
+          (prev.payment_status === "unknown" ||
+            prev.vendor_name === "Processing..." ||
+            prev.vendor_name === "Needs Review")
+        ) {
+          void load(true);
+        }
+        return prev;
+      });
+    }, 3000);
 
     return () => {
       cancelled = true;
+      clearInterval(pollInterval);
     };
   }, [isOpen, ledgerEntry?.id, projectId, reset]);
 
