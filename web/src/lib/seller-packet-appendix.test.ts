@@ -1,13 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { buildSellerPacketAppendixItems } from "./seller-packet-appendix";
 import { invokeFunction } from "./supabase";
-import type { InvoiceRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 vi.mock("./supabase", () => ({
   invokeFunction: vi.fn(),
 }));
 
-function inv(partial: Partial<InvoiceRow> & { id: string }): InvoiceRow {
+function inv(
+  partial: Partial<LedgerEntryRow> & { id: string },
+): LedgerEntryRow {
   const { id, ...rest } = partial;
   return {
     id,
@@ -19,7 +21,7 @@ function inv(partial: Partial<InvoiceRow> & { id: string }): InvoiceRow {
     document_type: "invoice",
     document_id: null,
     ...rest,
-  } as InvoiceRow;
+  } as LedgerEntryRow;
 }
 
 describe("buildSellerPacketAppendixItems", () => {

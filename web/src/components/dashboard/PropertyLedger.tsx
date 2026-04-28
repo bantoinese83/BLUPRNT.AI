@@ -87,7 +87,7 @@ export function PropertyLedger({
         propertyId,
         project,
         scopeItems: scopeForPdf,
-        invoices: ledgerEntries as LedgerEntryRow[],
+        ledgerEntries: ledgerEntries as LedgerEntryRow[],
         includeAppendix: includeOriginalAppendix,
       });
       setMessage(

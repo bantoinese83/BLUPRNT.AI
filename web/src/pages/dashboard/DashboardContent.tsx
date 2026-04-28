@@ -137,7 +137,7 @@ export function DashboardContent({
         estimated_max_total: project.estimated_max_total,
       },
       scopeItems,
-      invoices: ledgerEntries as LedgerEntryRow[],
+      ledgerEntries: ledgerEntries as LedgerEntryRow[],
     });
   }, [project, scopeItems, ledgerEntries, isArchitect, hasProjectPass]);
 
