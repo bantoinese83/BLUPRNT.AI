@@ -167,12 +167,29 @@ export async function buildDashboardDataForProject(
   const isArchitect = isArchitectPlanEffective(sub);
   const hasProjectPass = !!pass;
 
-  const allLineItems = newLedgerRaw.flatMap((l) =>
-    (l.ledger_line_items || []).map((li) => ({
+  const allLineItems = newLedgerRaw.flatMap((l) => {
+    const lines = l.ledger_line_items || [];
+    if (lines.length === 0 && (l.total || 0) > 0) {
+      // Fallback: If no line items but we have a total, create a single representative line item
+      // so it counts towards spendByCategory and reconciliation.
+      return [
+        {
+          ledger_entry_id: l.id,
+          category: null,
+          line_total: l.total,
+          scope_item_id: null,
+          is_verified: l.is_verified,
+          description: l.ai_summary || l.vendor_name || "Document Total",
+          quantity: 1,
+          unit_price: l.total,
+        } as any,
+      ];
+    }
+    return lines.map((li) => ({
       ...li,
       is_verified: l.is_verified,
-    })),
-  );
+    }));
+  });
   const spendByCategory = buildSpendByCategory(allLineItems, newScopes);
   const reconciliation = buildReconciliation(newScopes, allLineItems);
 

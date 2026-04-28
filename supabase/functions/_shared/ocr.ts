@@ -68,7 +68,8 @@ Extraction Rules:
 3. For line_items, ensure each entry has description, quantity, unit_price, and line_total.
 4. If a field cannot be extracted with high confidence, return null for that field. 
 5. If the document mentions a warranty duration (e.g., '10 year warranty') or an expiration date, calculate the expiration date in 'YYYY-MM-DD' format.
-6. Provide a concise, one-sentence 'summary' describing the document's purpose (e.g. 'A receipt for roofing materials from Home Depot' or 'Building permit for second floor renovation').`;
+6. Provide a concise, one-sentence 'summary' describing the document's purpose (e.g. 'A receipt for roofing materials from Home Depot' or 'Building permit for second floor renovation').
+7. If you cannot extract granular line items from the document but a total exists, you MUST still create at least ONE entry in 'line_items' that represents the whole document, using the 'summary' as its description and the document 'total' as its 'line_total'.`;
 
   if (projectScope && projectScope.length > 0) {
     const scopeStr = projectScope.map((s) =>
@@ -80,7 +81,7 @@ Extraction Rules:
       `\n\nYou are also given the project's planned scope items below:
 ${scopeStr}
 
-For EACH line_item you extract, find the most relevant planned scope item from the list above. 
+For EACH line_item you extract (including the fallback one representing the total), find the most relevant planned scope item from the list above. 
 Return the "ID" of the matching scope item in the "mapped_scope_item_id" field. 
 If no reasonable match exists, return null for that field. 
 Be accurate: only map if the line item directly contributes to that scope category or description.`;

@@ -129,8 +129,22 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // 7. Insert Line Items
-    if (ocrResult.line_items && ocrResult.line_items.length > 0) {
-      const lineRows = ocrResult.line_items.map((item: any) => ({
+    let lineItemsToInsert = ocrResult.line_items || [];
+
+    // Fallback: If no line items but we have a total, create a single representative line item
+    if (lineItemsToInsert.length === 0 && (ocrResult.total || 0) > 0) {
+      console.log("[process-document-queue] No line items found, creating fallback line item from total.");
+      lineItemsToInsert = [{
+        description: ocrResult.summary || `Total from ${ocrResult.vendor_name || "Document"}`,
+        quantity: 1,
+        unit_price: ocrResult.total,
+        line_total: ocrResult.total,
+        mapped_scope_item_id: null
+      }];
+    }
+
+    if (lineItemsToInsert.length > 0) {
+      const lineRows = lineItemsToInsert.map((item: any) => ({
         ledger_entry_id: ledgerEntry.id,
         description: item.description,
         quantity: item.quantity,
