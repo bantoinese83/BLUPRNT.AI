@@ -11,7 +11,7 @@
 
 ## Deploy order
 
-1. Deploy Edge functions (`photo-to-scope`, `upload-invoice`, `get-invoice`, `create-checkout`, `stripe-webhook`).
+1. Deploy Edge functions (`photo-to-scope`, `upload-invoice`, `get-ledger-entry`, `create-checkout`, `stripe-webhook`).
 2. Deploy frontend.
 3. Run `bash scripts/post-deploy-verify.sh`.
 

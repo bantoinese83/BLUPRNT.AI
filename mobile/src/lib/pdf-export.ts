@@ -9,7 +9,9 @@ import {
   planVsActualPdfLines,
   type LedgerEntryLike,
 } from "@shared/lib/plan-vs-actual";
+import type { LedgerEntryRow } from "@shared/types/database";
 import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
+import { escapeHtml } from "./image-utils";
 
 type ScopeItem = {
   category: string;
@@ -52,7 +54,11 @@ export async function generateSellerPacketPDF(
 
   const appendixHtml =
     options?.includeAppendix && ledgerEntries.some((i) => i.document_id)
-      ? await buildSellerPacketAppendixHtml(ledgerLike as any)
+      ? await buildSellerPacketAppendixHtml(
+          ledgerEntries as unknown as (LedgerEntryRow & {
+            storage_path?: string | null;
+          })[],
+        )
       : "";
 
   const html = `
@@ -82,7 +88,7 @@ export async function generateSellerPacketPDF(
         <div class="header">
           <p class="subtitle">BLUPRNT.AI — PROPERTY LEDGER</p>
           <h1 class="title">Property Improvement Ledger</h1>
-          <p class="subtitle">Project: ${project.name} | Generated: ${formatShortUsDate(new Date().toISOString())}</p>
+          <p class="subtitle">Project: ${escapeHtml(project.name)} | Generated: ${formatShortUsDate(new Date().toISOString())}</p>
         </div>
 
         <div class="section">
@@ -135,8 +141,8 @@ export async function generateSellerPacketPDF(
                       .map(
                         (s) => `
                 <tr>
-                  <td>${s.category}</td>
-                  <td>${s.description}</td>
+                  <td>${escapeHtml(s.category)}</td>
+                  <td>${escapeHtml(s.description)}</td>
                   <td>${money(s.total_cost_min)} – ${money(s.total_cost_max)}</td>
                 </tr>
               `,
@@ -167,8 +173,8 @@ export async function generateSellerPacketPDF(
                         (inv) => `
                 <tr>
                   <td>${formatShortUsDate(inv.created_at)}</td>
-                  <td>${inv.vendor_name || "Uncategorized"}</td>
-                  <td>${(inv.document_type || "Document").charAt(0).toUpperCase() + (inv.document_type || "Document").slice(1)}</td>
+                  <td>${escapeHtml(inv.vendor_name || "Uncategorized")}</td>
+                  <td>${escapeHtml((inv.document_type || "Document").charAt(0).toUpperCase() + (inv.document_type || "Document").slice(1))}</td>
                   <td>${money(inv.total)}</td>
                 </tr>
               `,

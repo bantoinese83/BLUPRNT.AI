@@ -18,7 +18,7 @@ FILES=(
   supabase/functions/chat-with-project/index.ts
   supabase/functions/create-checkout/index.ts
   supabase/functions/delete-account/index.ts
-  supabase/functions/get-invoice/index.ts
+  supabase/functions/get-ledger-entry/index.ts
   supabase/functions/get-document-signed-url/index.ts
   supabase/functions/get-project-view/index.ts
   supabase/functions/photo-to-scope/index.ts
@@ -26,6 +26,8 @@ FILES=(
   supabase/functions/stripe-webhook/index.ts
   supabase/functions/upload-document/index.ts
   supabase/functions/submit-marketing-lead/index.ts
+  supabase/functions/process-document-queue/index.ts
+  supabase/functions/revenuecat-webhook/index.ts
 )
 
 for f in "${FILES[@]}"; do

@@ -62,4 +62,26 @@ describe("buildReconciliation", () => {
     expect(result.unreconciled_billed).toBe(100);
     expect(result.total_reconciled).toBe(0);
   });
+
+  it("tracks unverified (AI Draft) spend separately", () => {
+    const lines = [
+      {
+        ledger_entry_id: "i1",
+        line_total: 100,
+        scope_item_id: "s1",
+        is_verified: false,
+      },
+      {
+        ledger_entry_id: "i2",
+        line_total: 200,
+        scope_item_id: "s1",
+        is_verified: true,
+      },
+    ];
+    const result = buildReconciliation(mockScopes as ScopeRow[], lines);
+
+    expect(result.items["s1"]!.total_billed).toBe(300);
+    expect(result.unverified_reconciled_spend).toBe(100);
+    expect(result.total_reconciled).toBe(300);
+  });
 });

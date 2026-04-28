@@ -36,55 +36,57 @@ describe("useWebDashboardProjectRealtime", () => {
       wrapper,
     });
 
-    expect(mockChannel).toHaveBeenCalledWith("project_sync:project-123");
+    // Expect random suffix in channel name
+    expect(mockChannel).toHaveBeenCalledWith(
+      expect.stringMatching(/^project_sync:project-123:[a-z0-9]+$/),
+    );
   });
 
   it("does not subscribe if activeProjectId is null", () => {
-    const mockChannel = vi.mocked(supabaseLib.supabase.channel);
-
     renderHook(() => useWebDashboardProjectRealtime(null), { wrapper });
-
-    expect(mockChannel).not.toHaveBeenCalled();
+    expect(supabaseLib.supabase.channel).not.toHaveBeenCalled();
   });
 
   it("removes channel on unmount", () => {
-    const mockRemove = vi.mocked(supabaseLib.supabase.removeChannel);
-
     const { unmount } = renderHook(
       () => useWebDashboardProjectRealtime("project-123"),
       { wrapper },
     );
     unmount();
-
-    expect(mockRemove).toHaveBeenCalled();
+    expect(supabaseLib.supabase.removeChannel).toHaveBeenCalled();
   });
 
-  it("invalidates queries when a realtime event occurs", () => {
-    const callbacks: (() => void)[] = [];
-    const mockOn = vi
-      .fn()
-      .mockImplementation((_event: string, _filter: string, cb: () => void) => {
-        callbacks.push(cb);
-        return { on: mockOn, subscribe: vi.fn() };
-      });
-
+  it("invalidates queries when a realtime event occurs (debounced)", async () => {
+    vi.useFakeTimers();
+    const refetchSpy = vi.spyOn(queryClient, "refetchQueries");
+    const callbacks: ((payload: unknown) => void)[] = [];
     vi.mocked(supabaseLib.supabase.channel).mockReturnValue({
-      on: mockOn,
+      on: vi.fn().mockImplementation((_event, _filter, callback) => {
+        callbacks.push(callback);
+        return supabaseLib.supabase.channel("");
+      }),
       subscribe: vi.fn(),
-    } as any);
-
-    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    } as unknown as ReturnType<typeof supabaseLib.supabase.channel>);
 
     renderHook(() => useWebDashboardProjectRealtime("project-123"), {
       wrapper,
     });
 
-    // We expect 3 subscriptions: projects, invoices, scope_items
-    expect(callbacks.length).toBe(3);
+    // We expect 4 subscriptions: projects, ledger_entries, scope_items, documents
+    expect(callbacks.length).toBe(4);
 
-    // Trigger each callback
-    callbacks.forEach((cb) => cb());
+    // Trigger each callback with a mock payload
+    callbacks.forEach((cb) => cb({ eventType: "UPDATE" }));
 
-    expect(invalidateSpy).toHaveBeenCalledTimes(3);
+    // Before timer advances, no refetch should have happened
+    expect(refetchSpy).not.toHaveBeenCalled();
+
+    // Advance timers by 100ms
+    vi.advanceTimersByTime(100);
+
+    // After timer advances, we expect exactly 1 refetch call due to debouncing
+    expect(refetchSpy).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
   });
 });

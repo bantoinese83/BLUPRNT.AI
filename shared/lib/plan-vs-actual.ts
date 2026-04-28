@@ -182,5 +182,12 @@ export function calculateBudgetStats(
         )
       : 0;
 
-  return { estimatedMid, budgetPct };
+  const statusLabel =
+    estimatedMax && totalInvested > estimatedMax
+      ? "Over"
+      : estimatedMin && totalInvested < estimatedMin
+        ? "Under"
+        : "Matched";
+
+  return { estimatedMid, budgetPct, statusLabel };
 }

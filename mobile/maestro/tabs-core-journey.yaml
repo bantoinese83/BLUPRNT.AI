@@ -2,8 +2,10 @@
 appId: ai.bluprnt.mobile
 ---
 - runFlow:
-    file: common/launch-app.active.yaml
+    file: common/launch-robust.yaml
 - runFlow:
+    when:
+      notVisible: "Dashboard"
     file: common/signup-unique-account-dashboard.yaml
 
 # Bottom tabs (accessibility labels from NotchedTabBar)

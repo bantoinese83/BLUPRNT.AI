@@ -5,6 +5,11 @@ import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { addUserFlowBreadcrumb } from "@/lib/sentry";
 import { uploadDocumentWithType } from "@/lib/upload-document";
 import { showAppToast } from "@/lib/app-toast";
+import {
+  MAX_DOCUMENT_UPLOAD_SIZE_BYTES,
+  MAX_DOCUMENT_UPLOAD_SIZE_LABEL,
+} from "@shared/lib/upload-limits";
+import { uploadFileMimeLooksAllowed } from "@shared/lib/validation";
 
 export type UploadPickedDocumentResult = {
   ok: boolean;
@@ -53,6 +58,22 @@ export async function uploadPickedDocumentToProject(
       Alert.alert(
         "Empty file",
         `File ${i + 1} appears to be empty and cannot be uploaded.`,
+      );
+      continue;
+    }
+
+    if (file.size && file.size > MAX_DOCUMENT_UPLOAD_SIZE_BYTES) {
+      Alert.alert(
+        "File too large",
+        `File ${i + 1} is larger than the ${MAX_DOCUMENT_UPLOAD_SIZE_LABEL} limit.`,
+      );
+      continue;
+    }
+
+    if (!uploadFileMimeLooksAllowed(mime, file.uri)) {
+      Alert.alert(
+        "Unsupported file",
+        `File ${i + 1} has an unsupported format.`,
       );
       continue;
     }

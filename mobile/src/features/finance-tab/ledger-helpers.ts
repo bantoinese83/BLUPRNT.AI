@@ -14,8 +14,8 @@ export function computeLedgerStats(entries: LedgerEntryRow[]): {
   maintenance: number;
   total: number;
 } {
-  const capital = capitalImprovementTotal(entries as any);
-  const maintenance = maintenanceDocumentTotal(entries as any);
+  const capital = capitalImprovementTotal(entries);
+  const maintenance = maintenanceDocumentTotal(entries);
   return { capital, maintenance, total: capital + maintenance };
 }
 
@@ -32,13 +32,10 @@ export function groupLedgerEntriesByMonth(
   sortedEntries: LedgerEntryRow[],
   filter: LedgerDocumentFilter,
 ): Record<string, LedgerEntryRow[]> {
-  const active = filterLedgerEntriesByDocumentFilter(
-    sortedEntries as any,
-    filter,
-  );
+  const active = filterLedgerEntriesByDocumentFilter(sortedEntries, filter);
 
   const groups: Record<string, LedgerEntryRow[]> = {};
-  active.forEach((inv: any) => {
+  active.forEach((inv) => {
     const date = new Date(inv.created_at);
     const month = date.toLocaleString("en-US", { month: "long" });
     const year = date.getFullYear();

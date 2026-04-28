@@ -18,6 +18,8 @@ import {
 } from "@shared/lib/infer-document-type";
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
+import { MAX_DOCUMENT_UPLOAD_SIZE_BYTES } from "@shared/lib/upload-limits";
+import { uploadFileMimeLooksAllowed } from "@shared/lib/validation";
 
 interface UseDocumentManagementProps {
   projectId: string;
@@ -163,18 +165,14 @@ export function useDocumentManagement({
         continue;
       }
 
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`File "${file.name}" is too large (max 10MB).`);
+      if (file.size > MAX_DOCUMENT_UPLOAD_SIZE_BYTES) {
+        toast.error(
+          `File "${file.name}" is too large (max ${MAX_DOCUMENT_UPLOAD_SIZE_BYTES / 1024 / 1024}MB).`,
+        );
         continue;
       }
 
-      const validTypes = [
-        "application/pdf",
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-      ];
-      if (!validTypes.includes(file.type)) {
+      if (!uploadFileMimeLooksAllowed(file.type, file.name)) {
         toast.error(`File "${file.name}" has an unsupported format.`);
         continue;
       }

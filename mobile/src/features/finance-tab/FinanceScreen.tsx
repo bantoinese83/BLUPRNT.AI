@@ -72,12 +72,12 @@ export default function FinanceScreen() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const stats = useMemo(
-    () => computeLedgerStats(ledgerEntries as any),
+    () => computeLedgerStats(ledgerEntries),
     [ledgerEntries],
   );
 
   const sortedLedgerEntries = useMemo(
-    () => sortLedgerEntriesByDateDesc(ledgerEntries as any),
+    () => sortLedgerEntriesByDateDesc(ledgerEntries),
     [ledgerEntries],
   );
 
@@ -126,7 +126,7 @@ export default function FinanceScreen() {
           estimated_max_total: project.estimated_max_total,
         },
         scopeForSellerPacket,
-        ledgerEntries as any,
+        ledgerEntries,
         { includeAppendix },
       );
     } catch (err: unknown) {
@@ -189,7 +189,7 @@ export default function FinanceScreen() {
 
     if (
       isFreeTierLedgerEntryLimitReached(
-        ledgerEntries as any,
+        ledgerEntries,
         isArchitect,
         hasProjectPass,
       )
@@ -246,7 +246,7 @@ export default function FinanceScreen() {
               onIncludeAppendixChange={setIncludeAppendix}
               exporting={exporting}
               onExport={handleExport}
-              ledgerEntries={ledgerEntries as any}
+              ledgerEntries={ledgerEntries}
               filter={filter}
               onFilterChange={setFilter}
             />

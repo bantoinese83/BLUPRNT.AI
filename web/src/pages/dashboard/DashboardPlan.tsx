@@ -80,7 +80,7 @@ export function DashboardPlan({
       <PlanVsActualCard
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
-        ledgerEntries={ledgerEntries as any}
+        ledgerEntries={ledgerEntries as LedgerEntryRow[]}
       />
       <Button
         variant="outline"

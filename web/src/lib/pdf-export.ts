@@ -6,7 +6,7 @@
 import type { jsPDF } from "jspdf";
 
 type JsPdfInstance = InstanceType<typeof jsPDF>;
-import { formatShortUsDate } from "@/lib/formatters";
+import { formatShortUsDate, money } from "@/lib/formatters";
 import {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
@@ -46,21 +46,6 @@ const HEADING_SIZE = 14;
 const TITLE_SIZE = 18;
 const MARGIN = 20;
 const LINE_HEIGHT = 6;
-
-function money(n: number | null): string {
-  if (n == null) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function moneyRange(min: number | null, max: number | null): string {
-  if (min != null && max != null) return `${money(min)} – ${money(max)}`;
-  if (min != null) return money(min);
-  return "—";
-}
 
 /** Plan vs documented spend — narrative for agents, buyers, and you. */
 function drawPlanVsActualSection(
@@ -223,7 +208,7 @@ export async function generateSellerPacketBlob(
   doc.setFontSize(FONT_SIZE);
   doc.setFont("helvetica", "normal");
   doc.text(
-    `Total estimate: ${moneyRange(project.estimated_min_total, project.estimated_max_total)}`,
+    `Total estimate: ${money(project.estimated_min_total, project.estimated_max_total)}`,
     MARGIN,
     y,
   );
@@ -233,7 +218,7 @@ export async function generateSellerPacketBlob(
     scopeItems.forEach((s) => {
       addPageIfNeeded(LINE_HEIGHT * 2);
       doc.text(
-        `• ${s.category}: ${s.description} — ${moneyRange(s.total_cost_min, s.total_cost_max)}`,
+        `• ${s.category}: ${s.description} — ${money(s.total_cost_min, s.total_cost_max)}`,
         MARGIN + 2,
         y,
         { maxWidth: 170 },

@@ -2,7 +2,7 @@
 appId: ai.bluprnt.mobile
 ---
 - runFlow:
-    file: common/onboarding-skip.yaml
+    file: onboarding-skip.yaml
 - tapOn: "Get Started"
 - tapOn: "Kitchen"
 - tapOn: { id: "onboarding-continue" }

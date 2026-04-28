@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Wallet, FileText, TrendingUp } from "lucide-react";
 import { useSpring, useTransform, motion } from "motion/react";
 import { money } from "@/lib/formatters";
+import { cn } from "@/lib/utils";
 import { calculateBudgetStats } from "@/lib/plan-vs-actual";
 import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 
@@ -72,7 +73,7 @@ export function DashboardStats({
     );
   }
 
-  const { budgetPct } = calculateBudgetStats(
+  const { budgetPct, statusLabel } = calculateBudgetStats(
     estimatedMin,
     estimatedMax,
     spendingTotal,
@@ -157,13 +158,35 @@ export function DashboardStats({
           <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none">
             <AnimatedMoney value={spendingTotal} />
           </p>
-          {budgetPct > 0 && (
+          {estimatedMin !== null && (
             <motion.span
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              className="text-[10px] font-black text-white bg-teal-600 px-1.5 py-0.5 rounded-md"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={
+                statusLabel === "Over"
+                  ? {
+                      opacity: 1,
+                      scale: [1, 1.05, 1],
+                    }
+                  : { opacity: 1, scale: 1 }
+              }
+              transition={
+                statusLabel === "Over"
+                  ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 0.3 }
+              }
+              className={cn(
+                "text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm border whitespace-nowrap",
+                statusLabel === "Over"
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : statusLabel === "Under"
+                    ? "bg-teal-50 text-teal-700 border-teal-200"
+                    : "bg-emerald-50 text-emerald-700 border-emerald-200",
+              )}
             >
-              {budgetPct}%
+              {statusLabel === "Over" && "⚠️ "}
+              {statusLabel === "Under" && "↓ "}
+              {statusLabel === "Matched" && "✓ "}
+              {statusLabel} • {budgetPct}%
             </motion.span>
           )}
         </div>

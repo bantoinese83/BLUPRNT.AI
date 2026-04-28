@@ -8,6 +8,8 @@ import {
   useMobileDashboardDataInjected,
 } from "./build-mobile-dashboard-adapter";
 
+import { useMobileDashboardProjectRealtime } from "./useMobileDashboardProjectRealtime";
+
 export function useDashboardData() {
   const client = useQueryClient();
   const mobileInjected = useMobileDashboardDataInjected();
@@ -16,6 +18,8 @@ export function useDashboardData() {
     [mobileInjected],
   );
   const shared = useDashboardDataShared(adapter);
+
+  useMobileDashboardProjectRealtime(shared.project?.id ?? null);
 
   const configurationMissing = !isSupabaseConfigured();
 

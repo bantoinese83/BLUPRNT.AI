@@ -80,7 +80,7 @@ export default function DashboardScreen() {
   const [reviewOpen, setReviewOpen] = useState(false);
 
   const capitalDocumentedTotal = useMemo(
-    () => capitalImprovementTotal(ledgerEntries as any),
+    () => capitalImprovementTotal(ledgerEntries as LedgerEntryRow[]),
     [ledgerEntries],
   );
 
@@ -110,7 +110,9 @@ export default function DashboardScreen() {
 
   const activityEvents = useMemo(
     () =>
-      project ? generateActivityEvents(project, ledgerEntries as any) : [],
+      project
+        ? generateActivityEvents(project, ledgerEntries as LedgerEntryRow[])
+        : [],
     [project, ledgerEntries],
   );
 
@@ -276,7 +278,7 @@ export default function DashboardScreen() {
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
         invoiceTotal={capitalDocumentedTotal}
-        ledgerEntries={ledgerEntries as any}
+        ledgerEntries={ledgerEntries as LedgerEntryRow[]}
         projectId={project.id}
       />
 
@@ -318,7 +320,7 @@ export default function DashboardScreen() {
           transition={{ type: "timing", duration: 380, delay: 160 }}
         >
           <HomeTeamSection
-            ledgerEntries={ledgerEntries as any}
+            ledgerEntries={ledgerEntries as LedgerEntryRow[]}
             isArchitect={isArchitect}
             hasProjectPass={hasProjectPass}
             onUpgradeClick={onGeneralUpgrade}
@@ -347,7 +349,7 @@ export default function DashboardScreen() {
           transition={{ type: "timing", duration: 380, delay: 210 }}
         >
           <DashboardRecentDocumentsPanel
-            ledgerEntries={ledgerEntries as any}
+            ledgerEntries={ledgerEntries as LedgerEntryRow[]}
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
             hasProjectPass={hasProjectPass}

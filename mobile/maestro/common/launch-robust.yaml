@@ -1,0 +1,15 @@
+# Robust launch that handles Metro server picker if it appears.
+appId: ai.bluprnt.mobile
+---
+- launchApp:
+    clearState: false
+- tapOn:
+    text: "http://localhost:8081"
+    optional: true
+- tapOn:
+    text: "Continue"
+    optional: true
+- extendedWaitUntil:
+    visible: "Next"
+    optional: true
+    timeout: 30000

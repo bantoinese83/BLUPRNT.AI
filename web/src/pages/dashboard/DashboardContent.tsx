@@ -191,7 +191,7 @@ export function DashboardContent({
   }
 
   const activityEvents = useMemo(
-    () => generateActivityEvents(project, ledgerEntries as any),
+    () => generateActivityEvents(project, ledgerEntries as LedgerEntryRow[]),
     [project, ledgerEntries],
   );
 

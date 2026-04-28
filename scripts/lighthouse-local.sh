@@ -14,7 +14,7 @@ REPORT_JSON="${OUT}.report.json"
 
 cd "$ROOT"
 npm run clean -w web --silent 2>/dev/null || rm -rf "${ROOT}/web/dist"
-npm run build:web --silent
+npm run build -w web --silent
 
 PREVIEW_PID=""
 cleanup() {

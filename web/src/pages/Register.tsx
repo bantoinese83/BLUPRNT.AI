@@ -162,6 +162,7 @@ export default function Register() {
         .from("projects")
         .insert({
           property_id: prop.id,
+          owner_user_id: userId,
           name: "My home project",
           type: "other",
           stage: "planning",
@@ -245,7 +246,7 @@ export default function Register() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white">
+    <div className="flex min-h-screen flex-col bg-linear-to-b from-slate-50 to-white">
       <Helmet>
         <title>Create account — BLUPRNT.AI</title>
         <meta

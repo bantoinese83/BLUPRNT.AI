@@ -41,7 +41,7 @@ export function DashboardSpendingSection({
         <PlanVsActualCard
           estimatedMin={estimatedMin ?? null}
           estimatedMax={estimatedMax ?? null}
-          ledgerEntries={ledgerEntries as any}
+          ledgerEntries={ledgerEntries as LedgerEntryRow[]}
           projectId={projectId}
         />
       </View>

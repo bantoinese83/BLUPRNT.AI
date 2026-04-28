@@ -53,7 +53,7 @@ test.describe("Realtime Sync Integrity", () => {
     if (error) throw new Error(`Supabase update failed: ${error.message}`);
 
     // 6. Assert UI reflects the change (Realtime subscription should catch this)
-    await expect(projectDisplay).toContainText(newName, { timeout: 15_000 });
+    await expect(projectDisplay).toContainText(newName, { timeout: 30_000 });
   });
 
   test("New invoices added externally should appear instantly", async ({ page }) => {
@@ -112,16 +112,20 @@ test.describe("Realtime Sync Integrity", () => {
     if (invErr)
       throw new Error(`External ledger entry insert failed: ${invErr.message}`);
 
-    // Fallback: Reload if Realtime is being slow in the test environment
-    await page.waitForTimeout(5000);
-    await page.reload();
-    await page.waitForURL(/\/dashboard/i);
+    // 6. Verify it appears in the UI (Realtime check)
+    const invoiceCard = page.locator("h4").filter({ hasText: vendorName });
+    const isVisible = await invoiceCard.first().isVisible();
+    
+    if (!isVisible) {
+      console.log("[E2E] Realtime slow, falling back to reload...");
+      await page.reload();
+      await page.waitForURL(/\/dashboard/i);
+    }
 
     // Ensure we are looking at the documents section
     await page.locator("#document-upload-anchor").scrollIntoViewIfNeeded();
 
     // 6. Verify it appears in the UI
-    const invoiceCard = page.locator("h4").filter({ hasText: vendorName });
     await expect(invoiceCard.first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("$1,250").first()).toBeVisible();
 

@@ -18,7 +18,7 @@ export function useDashboardData() {
   const shared = useDashboardDataShared(adapter);
 
   useWebDashboardAuthRedirect(shared.data, shared.data?.configured, navigate);
-  useWebDashboardProjectRealtime(shared.activeProjectId);
+  useWebDashboardProjectRealtime(shared.project?.id ?? null);
 
   const {
     activeProjectId: _unused1,

@@ -32,8 +32,8 @@ export function parseCachedDashboardPayload(
       scopeItems: Array.isArray(o.scopeItems) ? o.scopeItems : [],
       ledgerEntries: Array.isArray(o.ledgerEntries)
         ? o.ledgerEntries
-        : Array.isArray((o as any).invoices)
-          ? (o as any).invoices
+        : Array.isArray((o as Record<string, unknown>).invoices)
+          ? ((o as Record<string, unknown>).invoices as LedgerEntryRow[])
           : [],
       galleryItems: Array.isArray(o.galleryItems) ? o.galleryItems : [],
       reconciliation: o.reconciliation ?? null,

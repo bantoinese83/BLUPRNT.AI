@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { dashboardQueryKey } from "@/lib/fetch-dashboard-snapshot";
+import { dashboardQueryKey } from "@/lib/query-client";
 import { setupProjectDashboardRealtime } from "@shared/lib/realtime-logic";
 
 /**
- * Subscribes to project / invoices / scope changes for the active dashboard project.
+ * Subscribes to project / ledger / scope changes for the mobile dashboard.
+ * Since mobile uses a single global query key, we refresh everything.
  */
-export function useWebDashboardProjectRealtime(activeProjectId: string | null) {
+export function useMobileDashboardProjectRealtime(
+  activeProjectId: string | null,
+) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -17,17 +20,16 @@ export function useWebDashboardProjectRealtime(activeProjectId: string | null) {
 
     const channel = setupProjectDashboardRealtime(supabase, {
       projectId: activeProjectId,
-      channelPrefix: "project_sync",
-      onUpdate: ({ table, event }) => {
-        console.log(
-          `[Realtime] ${table} ${event} detected, debouncing refetch...`,
-        );
+      channelPrefix: "mobile_sync",
+      onUpdate: ({ table }) => {
+        console.log(`[Realtime] ${table} updated, debouncing refresh...`);
         // Use a small debounce and refetchQueries to ensure we bypass replication lag
-        // and avoid multiple rapid requests when several tables update at once.
+        // and get the absolute latest state from the database.
         clearTimeout(timeout);
         timeout = setTimeout(() => {
           void queryClient.refetchQueries({
-            queryKey: dashboardQueryKey(activeProjectId),
+            queryKey: dashboardQueryKey,
+            exact: true,
           });
         }, 100);
       },

@@ -24,7 +24,7 @@ export function HomeTeamSection({
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
 }) {
-  const team = deriveHomeTeam(ledgerEntries as any);
+  const team = deriveHomeTeam(ledgerEntries as LedgerEntryRow[]);
   const isUnlocked = isArchitect || hasProjectPass;
 
   if (team.length === 0) {

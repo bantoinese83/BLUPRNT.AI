@@ -4,6 +4,10 @@ import { getServiceClient } from "../_shared/auth.ts";
 import { encodeBase64 } from "std/encoding/base64";
 import { extractInvoiceFromPdf } from "../_shared/ocr.ts";
 import { generateEmbedding } from "../_shared/gemini.ts";
+import {
+  MAX_DOCUMENT_UPLOAD_SIZE_BYTES,
+  MAX_DOCUMENT_UPLOAD_SIZE_LABEL,
+} from "../_shared/upload-limits.ts";
 
 const handler = async (req: Request): Promise<Response> => {
   const opt = handleOptions(req);
@@ -26,9 +30,6 @@ const handler = async (req: Request): Promise<Response> => {
     const url = Deno.env.get("SUPABASE_URL");
     console.log(`[process-document-queue] Fetching ID: "${queue_id}" on ${url}`);
 
-    const { data: allItems } = await admin.from("document_processing_queue").select("id");
-    const allIds = allItems?.map(i => i.id).join(", ") || "none";
-
     const { data: items, error: fetchErr } = await admin
       .from("document_processing_queue")
       .select("*")
@@ -37,8 +38,8 @@ const handler = async (req: Request): Promise<Response> => {
     queueItem = items?.[0];
 
     if (fetchErr || !queueItem) {
-      const msg = `Queue item "${queue_id}" not found. DB Error: ${JSON.stringify(fetchErr)}. Found count: ${items?.length || 0}. Visible IDs: [${allIds}]`;
-      console.error("[process-document-queue] " + msg);
+      const msg = `Queue item "${queue_id}" not found.`;
+      console.error(`[process-document-queue] ${msg} Error:`, fetchErr);
       return jsonResponse({ error: msg }, 404, req);
     }
 
@@ -64,8 +65,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`File download failed: ${downloadErr?.message || "No data"}`);
     }
 
-    if (fileData.size > 15 * 1024 * 1024) {
-      throw new Error(`File is too large to process (${(fileData.size / 1024 / 1024).toFixed(1)}MB).`);
+    if (fileData.size > MAX_DOCUMENT_UPLOAD_SIZE_BYTES) {
+      throw new Error(`File is too large to process (${(fileData.size / 1024 / 1024).toFixed(1)}MB). Limit: ${MAX_DOCUMENT_UPLOAD_SIZE_LABEL}`);
     }
 
     console.log(`[process-document-queue] Downloaded file size: ${fileData.size} bytes`);
@@ -128,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("id", queueItem.document_id);
     }
 
-    // 7. Insert Line Items
+    // 7. Insert Line Items (Idempotent: delete existing first if this is a retry)
     let lineItemsToInsert = ocrResult.line_items || [];
 
     // Fallback: If no line items but we have a total, create a single representative line item
@@ -144,6 +145,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (lineItemsToInsert.length > 0) {
+      console.log(`[process-document-queue] Cleaning up existing line items for entry ${ledgerEntry.id}...`);
+      await admin
+        .from("ledger_line_items")
+        .delete()
+        .eq("ledger_entry_id", ledgerEntry.id);
+
       const lineRows = lineItemsToInsert.map((item: any) => ({
         ledger_entry_id: ledgerEntry.id,
         description: item.description,
@@ -172,11 +179,13 @@ const handler = async (req: Request): Promise<Response> => {
     // 9. Generate and Store Semantic Embedding for Retrieval
     console.log("[process-document-queue] Generating embedding...");
     try {
-      const summaryText = `Invoice from ${ocrResult.vendor_name || "Unknown Vendor"} on ${ocrResult.issue_date || "Unknown Date"} for total ${ocrResult.total || 0}. Items: ${ocrResult.line_items?.map((l: any) => l.description).join(", ")}`;
+      const itemSummaries = lineItemsToInsert.map((l: any) => l.description).join(", ");
+      const summaryText = `Invoice from ${ocrResult.vendor_name || "Unknown Vendor"} on ${ocrResult.issue_date || "Unknown Date"} for total ${ocrResult.total || 0}. Items: ${itemSummaries}`;
       const embedding = await generateEmbedding(summaryText);
 
       if (embedding) {
         console.log("[process-document-queue] Storing embedding...");
+        await admin.from("document_embeddings").delete().eq("document_id", queueItem.document_id);
         await admin.from("document_embeddings").insert({
           document_id: queueItem.document_id,
           project_id: queueItem.project_id,

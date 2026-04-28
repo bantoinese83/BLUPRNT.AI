@@ -145,7 +145,7 @@ export function useDashboardSections({
     () => (
       <DocumentsSection
         projectId={project.id}
-        documents={ledgerEntries as any}
+        documents={ledgerEntries as LedgerEntryRow[]}
         onUploaded={load}
         onUpgradeClick={(reason) => {
           setUpgradeReason(

@@ -71,9 +71,7 @@ export function AwarenessProvider({
       (a, b) => a + b,
       0,
     );
-    const capitalDocumentedTotal = capitalImprovementTotal(
-      ledgerEntries as any,
-    );
+    const capitalDocumentedTotal = capitalImprovementTotal(ledgerEntries);
     const scopeMaxSum = scopeItems.reduce(
       (s, it) => s + (it.total_cost_max ?? 0),
       0,

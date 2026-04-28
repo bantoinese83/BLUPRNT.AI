@@ -62,6 +62,7 @@ interface StatItemProps {
   icon: LucideIcon;
   delay?: number;
   badge?: string;
+  badgeColor?: string;
 }
 
 function StatItem({
@@ -71,6 +72,7 @@ function StatItem({
   icon: Icon,
   delay = 0,
   badge,
+  badgeColor,
 }: StatItemProps) {
   return (
     <MotiView
@@ -93,7 +95,12 @@ function StatItem({
               {value}
             </Text>
             {badge && (
-              <View style={styles.badge}>
+              <View
+                style={[
+                  styles.badge,
+                  badgeColor ? { backgroundColor: badgeColor } : {},
+                ]}
+              >
                 <Text style={styles.badgeText}>{badge}</Text>
               </View>
             )}
@@ -111,7 +118,7 @@ export function DashboardStats({
   spendingTotal,
   documentRowCount,
 }: DashboardStatsProps) {
-  const { budgetPct } = calculateBudgetStats(
+  const { budgetPct, statusLabel } = calculateBudgetStats(
     estimatedMin,
     estimatedMax,
     spendingTotal,
@@ -161,7 +168,14 @@ export function DashboardStats({
         subValue={DASHBOARD_STATS_LABELS.investedSub}
         icon={TrendingUp}
         delay={200}
-        badge={budgetPct > 0 ? `${budgetPct}%` : undefined}
+        badge={
+          estimatedMin !== null
+            ? `${statusLabel === "Over" ? "⚠️ " : statusLabel === "Under" ? "↓ " : "✓ "}${statusLabel} • ${budgetPct}%`
+            : undefined
+        }
+        badgeColor={
+          statusLabel === "Over" ? "#f97316" : Theme.colors.brand.primary
+        }
       />
     </ScrollView>
   );

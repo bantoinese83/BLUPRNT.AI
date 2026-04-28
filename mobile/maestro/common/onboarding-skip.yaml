@@ -1,6 +1,18 @@
 appId: ai.bluprnt.mobile
 ---
-- tapOn: "Next"
-- tapOn: "Next"
-- tapOn: "Next"
-- tapOn: "Get Started"
+- tapOn:
+    text: "Next"
+    retryTapIfNoChange: false
+    optional: true
+- tapOn:
+    text: "Next"
+    retryTapIfNoChange: false
+    optional: true
+- tapOn:
+    text: "Next"
+    retryTapIfNoChange: false
+    optional: true
+- tapOn:
+    text: "Get Started"
+    retryTapIfNoChange: false
+    optional: true

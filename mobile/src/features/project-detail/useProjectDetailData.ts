@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import type {
   LedgerEntryRow,
+  LedgerLineItemRow,
   ProjectRow,
   ScopeRow,
 } from "@shared/types/database";
@@ -84,34 +85,31 @@ export function useProjectDetailData() {
 
   const groupedScope = useMemo(() => groupScopeByCategory(scope), [scope]);
 
-  const refreshReconciliation = useCallback(
-    async (
-      currentScope: ScopeRow[],
-      currentLedgerEntries: LedgerEntryRow[],
-    ) => {
-      if (currentLedgerEntries.length === 0) return;
+  const updateReconciliationSync = useCallback(
+    (currentScope: ScopeRow[], lines: LedgerLineItemRow[]) => {
+      if (lines.length === 0) return;
 
-      const { data: lines } = await supabase
-        .from("ledger_line_items")
-        .select("ledger_entry_id, line_total, scope_item_id, category")
-        .in(
-          "ledger_entry_id",
-          currentLedgerEntries.map((i) => i.id),
-        );
-
-      if (lines) {
-        setReconciliation(buildReconciliation(currentScope, lines as any));
-        setSpendByCategory(
-          buildSpendByCategory(
-            lines.map((l) => ({
-              category: l.category,
-              line_total: l.line_total,
-              scope_item_id: l.scope_item_id,
-            })),
-            currentScope,
-          ),
-        );
-      }
+      setReconciliation(
+        buildReconciliation(
+          currentScope,
+          lines as unknown as Array<{
+            ledger_entry_id: string;
+            line_total: number;
+            scope_item_id: string | null;
+            category: string | null;
+          }>,
+        ),
+      );
+      setSpendByCategory(
+        buildSpendByCategory(
+          lines.map((l) => ({
+            category: l.category,
+            line_total: l.line_total,
+            scope_item_id: l.scope_item_id,
+          })),
+          currentScope,
+        ),
+      );
     },
     [],
   );
@@ -127,7 +125,9 @@ export function useProjectDetailData() {
         error: { message: string; code?: string } | null;
       },
       invRes: {
-        data: LedgerEntryRow[] | null;
+        data: Array<
+          LedgerEntryRow & { ledger_line_items: LedgerLineItemRow[] }
+        > | null;
         error: { message: string; code?: string } | null;
       },
     ) => {
@@ -140,7 +140,7 @@ export function useProjectDetailData() {
         );
         setProject(null);
       } else if (projRes.data) {
-        setProject(projRes.data as unknown as ProjectRow);
+        setProject(projRes.data);
         setProjectLoadError(null);
       } else {
         setProject(null);
@@ -152,7 +152,7 @@ export function useProjectDetailData() {
         );
       }
 
-      const newScopes = (scopeRes.data ?? []) as ScopeRow[];
+      const newScopes = scopeRes.data ?? [];
       setScope(newScopes);
       if (scopeRes.error) {
         setScopeLoadWarning(
@@ -165,9 +165,9 @@ export function useProjectDetailData() {
         setScopeLoadWarning(null);
       }
 
-      const newLedgerEntries = (invRes.data ??
-        []) as unknown as LedgerEntryRow[];
-      setDetailLedgerEntries(newLedgerEntries);
+      const newLedgerEntriesRaw = invRes.data ?? [];
+      setDetailLedgerEntries(newLedgerEntriesRaw);
+
       if (invRes.error) {
         setLedgerEntryLoadWarning(
           friendlyDashboardLoadError({
@@ -179,9 +179,12 @@ export function useProjectDetailData() {
         setLedgerEntryLoadWarning(null);
       }
 
-      await refreshReconciliation(newScopes, newLedgerEntries);
+      const allLineItems = newLedgerEntriesRaw.flatMap(
+        (l) => l.ledger_line_items || [],
+      );
+      updateReconciliationSync(newScopes, allLineItems);
     },
-    [refreshReconciliation],
+    [updateReconciliationSync],
   );
 
   const handleShare = useCallback(async () => {
@@ -189,6 +192,20 @@ export function useProjectDetailData() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await presentProjectShareSheet({ id: project.id, name: project.name });
   }, [project]);
+
+  const handleScopeArrived = useCallback(
+    async (newScopes: ScopeRow[]) => {
+      const { data: lines } = await supabase
+        .from("ledger_line_items")
+        .select("ledger_entry_id, category, line_total, scope_item_id")
+        .in(
+          "ledger_entry_id",
+          detailLedgerEntries.map((i) => i.id),
+        );
+      updateReconciliationSync(newScopes, (lines ?? []) as LedgerLineItemRow[]);
+    },
+    [detailLedgerEntries, updateReconciliationSync],
+  );
 
   // Hook 1: Polling
   useProjectPolling({
@@ -199,8 +216,7 @@ export function useProjectDetailData() {
     setScope,
     setScopeLoadWarning,
     setScopePollDone,
-    onScopeArrived: (newScopes) =>
-      refreshReconciliation(newScopes, detailLedgerEntries),
+    onScopeArrived: handleScopeArrived,
   });
 
   // Hook 2: Mutations
@@ -236,12 +252,27 @@ export function useProjectDetailData() {
         .order("created_at", { ascending: true }),
       supabase
         .from("ledger_entries")
-        .select("*")
+        .select("*, ledger_line_items(*)")
         .eq("project_id", id)
         .order("created_at", { ascending: false }),
     ]);
 
-    await ingestFetchResults(projRes as any, scopeRes as any, invRes as any);
+    await ingestFetchResults(
+      projRes as {
+        data: ProjectRow | null;
+        error: { message: string; code?: string } | null;
+      },
+      scopeRes as {
+        data: ScopeRow[] | null;
+        error: { message: string; code?: string } | null;
+      },
+      invRes as {
+        data: Array<
+          LedgerEntryRow & { ledger_line_items: LedgerLineItemRow[] }
+        > | null;
+        error: { message: string; code?: string } | null;
+      },
+    );
     setRefreshing(false);
   }, [id, ingestFetchResults]);
 
@@ -262,14 +293,29 @@ export function useProjectDetailData() {
           .order("created_at", { ascending: true }),
         supabase
           .from("ledger_entries")
-          .select("*")
+          .select("*, ledger_line_items(*)")
           .eq("project_id", id)
           .order("created_at", { ascending: false }),
       ]);
 
       if (cancelled) return;
 
-      await ingestFetchResults(projRes as any, scopeRes as any, invRes as any);
+      await ingestFetchResults(
+        projRes as {
+          data: ProjectRow | null;
+          error: { message: string; code?: string } | null;
+        },
+        scopeRes as {
+          data: ScopeRow[] | null;
+          error: { message: string; code?: string } | null;
+        },
+        invRes as {
+          data: Array<
+            LedgerEntryRow & { ledger_line_items: LedgerLineItemRow[] }
+          > | null;
+          error: { message: string; code?: string } | null;
+        },
+      );
       setLoading(false);
     };
 

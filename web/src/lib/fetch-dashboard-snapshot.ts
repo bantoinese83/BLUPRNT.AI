@@ -33,9 +33,21 @@ export async function fetchDashboardSnapshot(options?: {
     ),
   ]);
 
-  const {
+  let {
     data: { session },
   } = sessionRes;
+
+  // Session Resilience: Occasionally session might not be fully initialized in the client
+  if (!session) {
+    for (let sAttempt = 1; sAttempt <= 2; sAttempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const secondRes = await supabase.auth.getSession();
+      if (secondRes.data.session) {
+        session = secondRes.data.session;
+        break;
+      }
+    }
+  }
 
   if (!session) {
     return {
@@ -45,9 +57,12 @@ export async function fetchDashboardSnapshot(options?: {
   }
 
   const userId = session.user.id;
+  const storedProjectId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("bluprnt_project_id")
+      : null;
 
   // We can fetch the preferences and the project list in parallel.
-  // If options.projectId is provided, we don't need to fetch preferences.
   const [prefProjectId, projListRes] = await Promise.all([
     options?.projectId
       ? Promise.resolve(options.projectId)
@@ -55,8 +70,25 @@ export async function fetchDashboardSnapshot(options?: {
     fetchDashboardProjectsList(supabase, userId),
   ]);
 
-  let projectId = options?.projectId ?? prefProjectId;
-  const { rows, error: projError } = projListRes;
+  let projectId = options?.projectId ?? prefProjectId ?? storedProjectId;
+  let { rows, error: projError } = projListRes;
+
+  // Resilience: If we have a session but the project list came back empty,
+  // check if we have a hint from localStorage (e.g. just signed up).
+  // If we have a hint OR we expect one, wait and retry.
+  if (!projError && rows.length === 0 && (projectId || storedProjectId)) {
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      console.warn(
+        `[fetchDashboardSnapshot] Project list empty but hint exists. Retry ${attempt}/4...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+      const retryRes = await fetchDashboardProjectsList(supabase, userId);
+      rows = retryRes.rows;
+      projError = retryRes.error;
+      if (projError || rows.length > 0) break;
+    }
+  }
+
   if (projError) {
     return {
       ...emptyDashboardSnapshot(),

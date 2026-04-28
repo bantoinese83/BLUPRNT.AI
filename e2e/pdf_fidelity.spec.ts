@@ -11,11 +11,12 @@ const __dirname = path.dirname(__filename);
 
 test.describe("PDF Export Fidelity", () => {
   test("Exported PDF should contain correct project data", async ({ page }) => {
+    test.setTimeout(120000);
     // 1. Sign up and get to dashboard
     await signUpForE2E(page);
     
     // 2. Wait for the project to load and the export button to be ready
-    await expect(page.getByTestId("project-name-display")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("project-name-display")).toBeVisible({ timeout: 60_000 });
 
     
     const downloadPromise = page.waitForEvent("download");

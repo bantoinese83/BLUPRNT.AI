@@ -54,7 +54,7 @@ export function useProjectExport({
           estimated_max_total: project.estimated_max_total,
         },
         scopeForPdf,
-        detailLedgerEntries as any,
+        detailLedgerEntries,
         { includeAppendix },
       );
     } catch {
