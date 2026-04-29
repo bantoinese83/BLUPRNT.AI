@@ -7,6 +7,7 @@ export const estimateStyles = StyleSheet.create({
     borderRadius: 32,
     alignItems: "stretch",
     width: "100%",
+    backgroundColor: "white",
   },
   estimateHeader: {
     flexDirection: "row",
@@ -250,5 +251,45 @@ export const estimateStyles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
+  },
+  itemCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: "white",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.08)",
+  },
+  itemCountText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.muted,
+  },
+  materialQtyTable: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.primary,
+  },
+  viewDetailsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: "rgba(15, 23, 42, 0.05)",
+    marginTop: 8,
+  },
+  activeViewDetailsBtn: {
+    backgroundColor: Theme.colors.brand.primary,
+  },
+  viewDetailsText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.deep,
+  },
+  activeViewDetailsText: {
+    color: "white",
   },
 });

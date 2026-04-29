@@ -97,4 +97,24 @@ export const commonStyles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 60,
   },
+  step1Column: {
+    flex: 1,
+    width: "100%",
+  },
+  step2Column: {
+    flex: 1,
+    width: "100%",
+  },
+  step3Column: {
+    flex: 1,
+    width: "100%",
+  },
+  step4Column: {
+    flex: 1,
+    width: "100%",
+  },
+  step5Column: {
+    flex: 1,
+    width: "100%",
+  },
 });

@@ -82,7 +82,9 @@ export default function FinanceScreen() {
           "This will permanently delete this record and its associated data.",
         confirmLabel: "Remove",
         variant: "destructive",
-        onConfirm: () => handleDelete(id),
+        onConfirm: () => {
+          handleDelete(id);
+        },
       });
     },
     [confirm, handleDelete],

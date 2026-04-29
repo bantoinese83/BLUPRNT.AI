@@ -72,4 +72,8 @@ export const visionStyles = StyleSheet.create({
     fontFamily: Theme.typography.family.regular,
     textAlignVertical: "top",
   },
+  visionAsset: {
+    width: "100%",
+    height: "100%",
+  },
 });

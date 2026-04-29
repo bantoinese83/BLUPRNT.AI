@@ -10,6 +10,7 @@ import { isFreeTierLedgerEntryLimitReached } from "@/lib/ledger-entry-upload-gat
 import {
   DOCUMENT_CAPTURE_LEDGER_COPY,
   presentDocumentCapturePrompt,
+  type PickedFile,
 } from "@/lib/present-document-capture";
 import {
   computeLedgerStats,
@@ -33,7 +34,7 @@ interface UseFinanceLedgerProps {
   hasProjectPass: boolean;
   load: () => void;
   setShowUpgrade: (show: boolean) => void;
-  setUpgradeReason: (reason: string) => void;
+  setUpgradeReason: (reason: "export" | "ledger_limit" | "general") => void;
 }
 
 export function useFinanceLedger({
@@ -131,7 +132,7 @@ export function useFinanceLedger({
   ]);
 
   const runLedgerDocumentUpload = useCallback(
-    async (files: Array<{ uri: string; mimeType?: string }>) => {
+    async (files: PickedFile[]) => {
       if (!project) return;
 
       setIsUploading(true);
@@ -156,6 +157,7 @@ export function useFinanceLedger({
 
           return row as LedgerEntryRow;
         }
+        return undefined;
       } finally {
         setIsUploading(false);
       }
@@ -179,13 +181,12 @@ export function useFinanceLedger({
         return;
       }
 
-      presentDocumentCapturePrompt(
-        DOCUMENT_CAPTURE_LEDGER_COPY,
-        async (files) => {
+      presentDocumentCapturePrompt(DOCUMENT_CAPTURE_LEDGER_COPY, (files) => {
+        void (async () => {
           const entry = await runLedgerDocumentUpload(files);
           if (entry) onUploadSuccess?.(entry);
-        },
-      );
+        })();
+      });
     },
     [
       ledgerEntries,
