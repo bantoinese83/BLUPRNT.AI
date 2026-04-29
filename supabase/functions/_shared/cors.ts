@@ -10,6 +10,16 @@ function resolveAccessControlAllowOrigin(req: Request): string | null {
   const relax = Deno.env.get("CORS_RELAX_LOCAL") === "1";
   const siteBase = Deno.env.get("SITE_URL")?.replace(/\/$/, "") ?? "";
 
+  // If relaxing for local dev, allow localhost/common dev ports
+  if (relax && requestOrigin) {
+    const isLocal =
+      requestOrigin.startsWith("http://localhost:") ||
+      requestOrigin.startsWith("http://127.0.0.1:") ||
+      requestOrigin.startsWith("https://localhost:") ||
+      requestOrigin.startsWith("https://127.0.0.1:");
+    if (isLocal) return requestOrigin;
+  }
+
   if (!raw?.trim()) {
     if (relax) {
       return "*";

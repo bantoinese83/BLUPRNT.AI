@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { PageTransition } from "./PageTransition";
@@ -34,22 +34,30 @@ export function LoadingScreen() {
     return () => clearInterval(interval);
   }, [activeMessages.length]);
 
+  const hasStarted = useRef(false);
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      // Trigger both in parallel: one for the "busy work" (fast), one for the "real work" (slow)
+    /**
+     * StrictMode-safe single-run guard. We deliberately do NOT cancel the
+     * pending work on cleanup: in dev React 18+ runs the synthetic
+     * unmount/remount cycle, and any cleanup-set flag would gate the
+     * `navigate` call below and leave the user stuck on this screen forever.
+     * `hasStarted` prevents the IIFE from starting twice; navigating after a
+     * true unmount is a no-op for React Router 6.
+     */
+    if (hasStarted.current) return;
+    hasStarted.current = true;
+
+    void (async () => {
+      // Run both in parallel: status context (fast) + the real estimate (slow).
       void fetchOnboardingContext();
       await runPhotoToScope();
 
-      // Brief beat so the route transition doesn’t feel abrupt after a fast response
+      // Brief beat so the route transition doesn’t feel abrupt after a fast response.
       await new Promise((resolve) => setTimeout(resolve, 350));
 
-      if (cancelled) return;
       navigate("/onboarding/estimate", { replace: true });
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [runPhotoToScope, fetchOnboardingContext, navigate]);
 
   return (

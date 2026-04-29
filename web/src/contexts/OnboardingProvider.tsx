@@ -41,6 +41,17 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     return digits.length === 5 ? digits : lStr.trim() || "00000";
   }, [locationInput]);
 
+  const estimationParams = useMemo(
+    () => ({
+      projectType,
+      locationUnset,
+      scopeDescription,
+      photos,
+      zipFromLocation,
+    }),
+    [projectType, locationUnset, scopeDescription, photos, zipFromLocation],
+  );
+
   const {
     estimate,
     setEstimate,
@@ -50,13 +61,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     onboardingContext,
     runPhotoToScope,
     fetchOnboardingContext,
-  } = useOnboardingEstimation({
-    projectType,
-    locationUnset,
-    scopeDescription,
-    photos,
-    zipFromLocation,
-  });
+  } = useOnboardingEstimation(estimationParams);
 
   const {
     savedProjectId,

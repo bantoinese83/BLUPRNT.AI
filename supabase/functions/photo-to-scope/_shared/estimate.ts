@@ -444,8 +444,9 @@ function isPriority(v: unknown): v is Priority {
 export async function getSmartFallbackEstimate(
   roomType: string,
   zip: string,
+  providedCity?: string,
 ): Promise<EstimatePayload | null> {
-  const city = await cityFromZipUniversal(zip);
+  const city = providedCity || (await cityFromZipUniversal(zip));
 
   const systemInstruction = `
     You are a regional construction estimator for BLUPRNT.AI.
@@ -479,6 +480,7 @@ export async function getSmartFallbackEstimate(
       systemInstruction,
       responseMimeType: "application/json",
       temperature: 0.1,
+      timeoutMs: 30_000,
     });
 
     if (!response?.data) return null;
@@ -551,6 +553,7 @@ export async function extractScopeWithGemini(input: {
   finish_preference: FinishPreference;
   scopeDescription?: string | null;
   photoParts?: GeminiPart[];
+  providedArea?: string;
 }): Promise<EstimatePayload | null> {
   const {
     room_type,
@@ -558,8 +561,9 @@ export async function extractScopeWithGemini(input: {
     finish_preference,
     scopeDescription,
     photoParts = [],
+    providedArea,
   } = input;
-  const area = await cityFromZipUniversal(zip_code);
+  const area = providedArea || (await cityFromZipUniversal(zip_code));
   const dateStr = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -720,7 +724,7 @@ Please generate the detailed blueprint.`;
       tools: [{ googleSearch: {} }],
       temperature: 0.1,
       maxOutputTokens: 4096,
-      timeoutMs: 95_000,
+      timeoutMs: 80_000,
     });
 
     if (!result?.text) {

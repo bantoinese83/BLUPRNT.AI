@@ -128,6 +128,7 @@ export async function handler(req: Request): Promise<Response> {
         },
       });
     }
+    const area = await cityFromZipUniversal(zip_code);
 
     let payload = await extractScopeWithGemini({
       room_type: room_type as RoomType,
@@ -135,13 +136,14 @@ export async function handler(req: Request): Promise<Response> {
       finish_preference,
       scopeDescription: scope_description,
       photoParts,
+      providedArea: area,
     });
 
     let usedFallback = false;
     let fallbackReason: string | null = null;
     if (!payload) {
       usedFallback = true;
-      payload = await getSmartFallbackEstimate(room_type, zip_code);
+      payload = await getSmartFallbackEstimate(room_type, zip_code, area);
       fallbackReason = "smart_fallback";
 
       // Final fail-safe if even Smart Fallback fails
@@ -228,82 +230,85 @@ export async function handler(req: Request): Promise<Response> {
       }
 
       // Handle onboarding photo storage for the Transformation Slider
-      let firstPhotoPath: string | null = null;
-      if (photoFiles.length > 0) {
-        // Upload the first photo to projects bucket as the initial "Before" state
-        const first = photoFiles[0];
-        if (first) {
-          const ext = first.name.includes(".")
-            ? first.name.slice(first.name.lastIndexOf("."))
-            : ".jpg";
-          const path = `${project_id}/${userId}/before_photo${ext}`;
-          const { error: uploadErr } = await admin.storage
-            .from("project-documents")
-            .upload(path, await first.arrayBuffer(), {
-              contentType: first.type || "image/jpeg",
-              upsert: true,
-            });
+      // We do this in the background to avoid timing out the main response
+      const sideEffects = (async () => {
+        let firstPhotoPath: string | null = null;
+        if (photoFiles.length > 0) {
+          const first = photoFiles[0];
+          if (first) {
+            const ext = first.name.includes(".")
+              ? first.name.slice(first.name.lastIndexOf("."))
+              : ".jpg";
+            const path = `${project_id}/${userId}/before_photo${ext}`;
+            const { error: uploadErr } = await admin.storage
+              .from("project-documents")
+              .upload(path, await first.arrayBuffer(), {
+                contentType: first.type || "image/jpeg",
+                upsert: true,
+              });
 
-          if (!uploadErr) {
-            firstPhotoPath = path;
-            // Create a record in documents table too
-            await admin.from("documents").insert({
-              project_id,
-              type: "photo",
-              storage_path: path,
-              original_filename: first.name,
-              uploaded_by_user_id: userId,
-              ocr_status: "success",
-            });
+            if (!uploadErr) {
+              firstPhotoPath = path;
+              await admin.from("documents").insert({
+                project_id,
+                type: "photo",
+                storage_path: path,
+                original_filename: first.name,
+                uploaded_by_user_id: userId,
+                ocr_status: "success",
+              });
+            }
           }
         }
-      }
 
-      console.log(`[photo-to-scope] Updating project record totals: ${payload.summary.estimated_min_total} - ${payload.summary.estimated_max_total}`);
-      const { error: updErr } = await admin
-        .from("projects")
-        .update({
-          estimated_min_total: payload.summary.estimated_min_total,
-          estimated_max_total: payload.summary.estimated_max_total,
-          confidence_score: payload.summary.confidence_score,
-          grounding_sources: payload.summary.grounding_sources || [],
-          before_photo_storage_path: firstPhotoPath,
-          after_photo_storage_path: firstPhotoPath,
-          metadata: {
-            value_engineering_tips: payload.summary.value_engineering_tips,
-            regional_context: payload.summary.regional_context,
-            regional_signal: payload.summary.regional_signal,
-          },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", project_id);
-
-      if (updErr) {
-        console.error("[photo-to-scope] project update error:", updErr);
-      }
-
-      // 6. Notify user via email
-      try {
-        const [{ data: userRes }, { data: projRes }] = await Promise.all([
-          admin.auth.admin.getUserById(userId),
-          admin.from("projects").select("name").eq("id", project_id).single(),
-        ]);
-
-        if (userRes?.user?.email) {
-          await admin.functions.invoke("send-email", {
-            body: {
-              to: userRes.user.email,
-              template: "project_ready",
-              params: {
-                userName: userRes.user.user_metadata?.full_name || userRes.user.email.split("@")[0],
-                projectName: projRes?.name || "Your project",
-                projectUrl: `https://bluprnt.ai/dashboard?project=${project_id}`,
-              },
+        console.log(`[photo-to-scope] Updating project record totals: ${payload.summary.estimated_min_total} - ${payload.summary.estimated_max_total}`);
+        await admin
+          .from("projects")
+          .update({
+            estimated_min_total: payload.summary.estimated_min_total,
+            estimated_max_total: payload.summary.estimated_max_total,
+            confidence_score: payload.summary.confidence_score,
+            grounding_sources: payload.summary.grounding_sources || [],
+            before_photo_storage_path: firstPhotoPath,
+            after_photo_storage_path: firstPhotoPath,
+            metadata: {
+              value_engineering_tips: payload.summary.value_engineering_tips,
+              regional_context: payload.summary.regional_context,
+              regional_signal: payload.summary.regional_signal,
             },
-          });
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", project_id);
+
+        // Notify user via email
+        try {
+          const [{ data: userRes }, { data: projRes }] = await Promise.all([
+            admin.auth.admin.getUserById(userId),
+            admin.from("projects").select("name").eq("id", project_id).single(),
+          ]);
+
+          if (userRes?.user?.email) {
+            await admin.functions.invoke("send-email", {
+              body: {
+                to: userRes.user.email,
+                template: "project_ready",
+                params: {
+                  userName: userRes.user.user_metadata?.full_name || userRes.user.email.split("@")[0],
+                  projectName: projRes?.name || "Your project",
+                  projectUrl: `https://bluprnt.ai/dashboard?project=${project_id}`,
+                },
+              },
+            });
+          }
+        } catch (emailErr) {
+          console.warn("[photo-to-scope] failed to send completion email", emailErr);
         }
-      } catch (emailErr) {
-        console.warn("[photo-to-scope] failed to send completion email", emailErr);
+      })();
+
+      // @ts-ignore: EdgeRuntime is available in Supabase
+      if (typeof EdgeRuntime !== "undefined") {
+        // @ts-ignore: waitUntil is available in Supabase
+        EdgeRuntime.waitUntil(sideEffects);
       }
 
       return jsonResponse(
