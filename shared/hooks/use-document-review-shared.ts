@@ -107,7 +107,9 @@ export function useDocumentReviewShared(
 
           setVendorName((prevVendor) => {
             if (prevVendor !== (prevDoc?.vendor_name || "")) return prevVendor;
-            return merged.vendor_name || "";
+            const v = merged.vendor_name || "";
+            // Let the user type a real vendor; keep server flag on `document` for UI.
+            return v === "Extraction Failed" ? "" : v;
           });
 
           setAiSummary((prevSummary) => {

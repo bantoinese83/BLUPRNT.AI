@@ -153,6 +153,17 @@ export async function callGemini(params: {
         } catch (e) {
           console.warn("[callGemini] Failed to parse JSON response:", e);
         }
+        if (parsedData == null) {
+          let t = text.trim();
+          if (t.startsWith("```")) {
+            t = t.replace(/^```+(json)?\s*/i, "").replace(/\s*```+$/i, "");
+          }
+          try {
+            parsedData = JSON.parse(t);
+          } catch {
+            /* leave null */
+          }
+        }
       }
 
       return {

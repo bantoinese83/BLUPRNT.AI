@@ -88,43 +88,73 @@ If no reasonable match exists, return null for that field.
 Be accurate: only map if the line item directly contributes to that scope category or description.`;
   }
 
-  const _responseSchema = {
-    type: "OBJECT",
+  /**
+   * Gemini `responseSchema` must use lowercase OpenAPI-style types (`object`,
+   * `string`, `number`). Uppercase (`OBJECT`, `STRING`) causes the API to
+   * reject or ignore the schema, which led to empty `data` and permanent
+   * "Extraction Failed" in the document review flow.
+   */
+  const responseSchema = {
+    type: "object",
     properties: {
-      vendor_name: { type: "STRING", nullable: true },
-      invoice_number: { type: "STRING", nullable: true },
-      issue_date: { type: "STRING", nullable: true, description: "YYYY-MM-DD" },
+      vendor_name: { type: "string", nullable: true },
+      invoice_number: { type: "string", nullable: true },
+      issue_date: {
+        type: "string",
+        nullable: true,
+        description: "YYYY-MM-DD",
+      },
       line_items: {
-        type: "ARRAY",
+        type: "array",
         items: {
-          type: "OBJECT",
+          type: "object",
           properties: {
-            description: { type: "STRING" },
-            quantity: { type: "NUMBER" },
-            unit_price: { type: "NUMBER" },
-            line_total: { type: "NUMBER" },
-            mapped_scope_item_id: { type: "STRING", nullable: true },
+            description: { type: "string" },
+            quantity: { type: "number" },
+            unit_price: { type: "number" },
+            line_total: { type: "number" },
+            mapped_scope_item_id: { type: "string", nullable: true },
           },
           required: ["description", "quantity", "unit_price", "line_total"],
         },
       },
-      subtotal: { type: "NUMBER", nullable: true },
-      tax_total: { type: "NUMBER", nullable: true },
-      total: { type: "NUMBER", nullable: true },
-      document_type: { 
-        type: "STRING", 
-        enum: ["invoice", "quote", "receipt", "permit", "hoa", "warranty", "maintenance", "manual", "insurance", "disclosure", "inspection", "appraisal", "energy", "contract", "lien_waiver", "other"],
-        description: "The primary type of document"
+      subtotal: { type: "number", nullable: true },
+      tax_total: { type: "number", nullable: true },
+      total: { type: "number", nullable: true },
+      document_type: {
+        type: "string",
+        enum: [
+          "invoice",
+          "quote",
+          "receipt",
+          "permit",
+          "hoa",
+          "warranty",
+          "maintenance",
+          "manual",
+          "insurance",
+          "disclosure",
+          "inspection",
+          "appraisal",
+          "energy",
+          "contract",
+          "lien_waiver",
+          "other",
+        ],
+        description: "The primary type of document",
       },
-      warranty_expiry_date: { type: "STRING", nullable: true, description: "YYYY-MM-DD" },
-      summary: { type: "STRING", description: "Brief but descriptive summary including key items purchased" },
+      warranty_expiry_date: {
+        type: "string",
+        nullable: true,
+        description: "YYYY-MM-DD",
+      },
+      summary: {
+        type: "string",
+        description:
+          "Brief but descriptive summary including key items purchased",
+      },
     },
-    required: [
-      "document_type",
-      "vendor_name",
-      "total",
-      "summary",
-    ],
+    required: ["document_type", "total", "summary", "line_items"],
   };
 
   const parts: GeminiPart[] = [
@@ -143,17 +173,33 @@ Be accurate: only map if the line item directly contributes to that scope catego
     const result = await callGemini({
       parts,
       systemInstruction,
-      responseSchema: _responseSchema,
+      responseSchema,
       responseMimeType: "application/json",
       temperature: 0.1,
+      timeoutMs: 120_000,
     });
 
-    if (!result?.data) {
+    let parsed: Record<string, unknown> | null =
+      result?.data && typeof result.data === "object"
+        ? (result.data as Record<string, unknown>)
+        : null;
+
+    if (!parsed && result?.text) {
+      try {
+        let t = result.text.trim();
+        if (t.startsWith("```")) {
+          t = t.replace(/^```+(json)?\s*/i, "").replace(/\s*```+$/i, "");
+        }
+        parsed = JSON.parse(t) as Record<string, unknown>;
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (!parsed) {
       console.warn("[ocr] Gemini returned no structured data");
       return null;
     }
-
-    const parsed = result.data;
     console.log("[ocr] Extracted data:", JSON.stringify(parsed));
 
     return {

@@ -102,7 +102,27 @@ const handler = async (req: Request): Promise<Response> => {
     if (ocrResult.document_type === "receipt") payment_status = "paid";
     if (ocrResult.document_type === "invoice") payment_status = "unpaid";
 
-    // 6. Update Ledger Entry Record
+    // 6. Update Ledger Entry Record (by primary key — avoids .single() errors
+    // if duplicate rows ever exist for the same document_id).
+    const { data: ledgerRows, error: ledgerLookupErr } = await admin
+      .from("ledger_entries")
+      .select("id")
+      .eq("document_id", queueItem.document_id)
+      .order("created_at", { ascending: true })
+      .limit(2);
+
+    if (ledgerLookupErr) throw ledgerLookupErr;
+    const ledgerRow = ledgerRows?.[0];
+    if (!ledgerRow?.id) {
+      throw new Error("No ledger entry found for document");
+    }
+    if ((ledgerRows?.length ?? 0) > 1) {
+      console.warn(
+        "[process-document-queue] Multiple ledger rows for document_id; updating oldest",
+        queueItem.document_id,
+      );
+    }
+
     const { data: ledgerEntry, error: invErr } = await admin
       .from("ledger_entries")
       .update({
@@ -115,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
         warranty_expiry_date: ocrResult.warranty_expiry_date || null,
         ai_summary: ocrResult.summary || null,
       })
-      .eq("document_id", queueItem.document_id)
+      .eq("id", ledgerRow.id)
       .select()
       .single();
 
@@ -233,7 +253,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("[process-document-queue] Failed to update error status in DB:", dbErr);
     }
 
-    return jsonResponse({ error: "[VERSION-DEBUG-999] " + errorString }, 500, req);
+    return jsonResponse({ error: errorString }, 500, req);
   }
 };
 
