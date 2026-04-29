@@ -12,14 +12,11 @@ import {
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import { MotiView } from "moti";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { ChevronLeft } from "lucide-react-native";
-import { GoogleIcon } from "@/components/auth/GoogleIcon";
-import { AppleSignIn } from "@/components/auth/AppleSignIn";
 import { useAuth } from "@/contexts/auth-context";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
@@ -34,6 +31,8 @@ import {
   friendlyAuthErrorFromUrlParam,
 } from "@shared/lib/user-friendly-errors";
 import { isValidEmail } from "@/lib/validation";
+import { LoginHeader } from "@/features/auth/components/LoginHeader";
+import { SocialAuthSection } from "@/features/auth/components/SocialAuthSection";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
@@ -160,15 +159,7 @@ export default function LoginScreen() {
             <ChevronLeft size={24} color={Theme.colors.text.primary} />
           </TouchableOpacity>
 
-          <MotiView
-            from={{ opacity: 0, scale: 0.9, translateY: 20 }}
-            animate={{ opacity: 1, scale: 1, translateY: 0 }}
-            transition={{ type: "timing", duration: 800 }}
-            style={styles.header}
-          >
-            <Text style={styles.title}>Welcome back</Text>
-            <Text style={styles.subtitle}>Sign in to your account</Text>
-          </MotiView>
+          <LoginHeader />
 
           <GlassCard intensity={8} style={styles.formCard}>
             <View style={styles.form}>
@@ -215,34 +206,14 @@ export default function LoginScreen() {
                 style={{ marginTop: 8 }}
               />
 
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <Button
-                title="Continue with Google"
-                onPress={handleGoogleLogin}
-                loading={googleLoading}
-                variant="outline"
-                icon={<GoogleIcon />}
-                style={{ marginTop: 0 }}
-              />
-
-              <AppleSignIn
-                onStart={() => {
+              <SocialAuthSection
+                googleLoading={googleLoading}
+                onGoogleLogin={handleGoogleLogin}
+                onAppleStart={() => {
                   setGoogleLoading(true);
                   void persistPostLoginRedirectForOAuth(params.redirect);
                 }}
-                onSuccess={() => setGoogleLoading(false)}
-                onError={(err) => {
-                  setGoogleLoading(false);
-                  Alert.alert(
-                    "Apple sign-in",
-                    friendlyAuthError(err.message || ""),
-                  );
-                }}
+                onAppleSuccess={() => setGoogleLoading(false)}
               />
             </View>
           </GlassCard>
@@ -290,32 +261,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(15, 23, 42, 0.1)",
   },
-  header: {
-    marginBottom: 32,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 34,
-    fontFamily: "Outfit_800ExtraBold",
-    color: Theme.colors.text.primary,
-    marginBottom: 8,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontFamily: "Outfit_400Regular",
-    color: Theme.colors.text.secondary,
-    textAlign: "center",
-  },
-  formCard: {
-    padding: 24,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "rgba(15, 23, 42, 0.05)",
-  },
-  form: {
-    width: "100%",
-  },
   forgotPassword: {
     alignSelf: "flex-end",
     marginBottom: 20,
@@ -325,21 +270,14 @@ const styles = StyleSheet.create({
     fontFamily: "Outfit_600SemiBold",
     fontSize: 14,
   },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
+  formCard: {
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.05)",
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.08)",
-  },
-  dividerText: {
-    color: Theme.colors.text.muted,
-    fontFamily: "Outfit_400Regular",
-    fontSize: 14,
-    marginHorizontal: 16,
+  form: {
+    width: "100%",
   },
   footer: {
     flexDirection: "row",

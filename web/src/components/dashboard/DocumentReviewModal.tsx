@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Link2, Sparkles, Trash2 } from "lucide-react";
+import { Loader2, Link2, Sparkles } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 import {
   isCapitalLedgerDocumentType,
@@ -12,12 +11,15 @@ import {
 import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { ModalFocusSurface } from "@/components/ui/modal-dialog";
-import { cn } from "@/lib/utils";
 
 // Sub-components
 import { ReviewModalHeader } from "./document-review/ReviewModalHeader";
 import { MetadataSection } from "./document-review/MetadataSection";
 import { LineItemCard } from "./document-review/LineItemCard";
+import { DocumentReviewStatus } from "./document-review/DocumentReviewStatus";
+import { DocumentReviewTotal } from "./document-review/DocumentReviewTotal";
+import { DocumentReviewActions } from "./document-review/DocumentReviewActions";
+import { DeleteConfirmationModal } from "./document-review/DeleteConfirmationModal";
 
 import { useDocumentReviewDetail } from "@/hooks/useDocumentReviewDetail";
 
@@ -209,87 +211,20 @@ export function DocumentReviewModal({
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium text-slate-900 flex items-center gap-2">
-                  {document.vendor_name &&
-                  document.vendor_name !== "Vendor" &&
-                  document.vendor_name !== "Document" &&
-                  document.vendor_name !== "Processing..." ? (
-                    document.vendor_name
-                  ) : (
-                    <span className="flex items-center gap-2 text-slate-500 italic">
-                      <Sparkles className="w-4 h-4 text-teal-500 animate-pulse" />
-                      AI Extracting...
-                    </span>
-                  )}
-                  {isProcessing && showCapitalLineLink && (
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] text-teal-700 border-teal-200 bg-teal-50 animate-pulse"
-                    >
-                      Analyzing Document
-                    </Badge>
-                  )}
-                </h4>
-                {showCapitalLineLink && (
-                  <>
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        "capitalize",
-                        document.payment_status === "unknown" &&
-                          ledgerDocType !== "quote" &&
-                          "animate-pulse bg-teal-50 text-teal-700",
-                      )}
-                    >
-                      {document.payment_status === "unknown"
-                        ? ledgerDocType === "quote"
-                          ? "Pending Review"
-                          : "Processing..."
-                        : document.payment_status}
-                    </Badge>
+              <DocumentReviewStatus
+                vendorName={document.vendor_name || ""}
+                isProcessing={isProcessing}
+                showCapitalLineLink={showCapitalLineLink}
+                paymentStatus={document.payment_status || "unknown"}
+                ledgerDocType={ledgerDocType}
+                aiSummary={aiSummary}
+              />
 
-                    {/* AI Summary Section */}
-                    {(aiSummary || isProcessing) && (
-                      <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-teal-50/50 border border-teal-100/50">
-                        <Sparkles className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
-                        <p className="text-sm text-teal-900 leading-relaxed">
-                          {aiSummary ? (
-                            aiSummary
-                          ) : (
-                            <span className="italic text-teal-700 animate-pulse">
-                              Analyzing Document...
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
               {showCapitalLineLink && (
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-slate-900">
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(document.total ?? 0)}
-                  </p>
-                  {(!document.total || document.total === 0) && (
-                    <p
-                      className={cn(
-                        "text-[10px] font-bold uppercase tracking-wider",
-                        document.vendor_name === "Processing..."
-                          ? "text-teal-600/50 italic animate-pulse"
-                          : "text-amber-700",
-                      )}
-                    >
-                      {document.vendor_name === "Processing..."
-                        ? "Calculating..."
-                        : "Verify Total"}
-                    </p>
-                  )}
-                </div>
+                <DocumentReviewTotal
+                  total={document.total ?? 0}
+                  isProcessing={isProcessing}
+                />
               )}
             </div>
 
@@ -317,64 +252,19 @@ export function DocumentReviewModal({
               </div>
             ) : null}
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-4">
-              <Button
-                variant="ghost"
-                onClick={doDelete}
-                disabled={deleting || saving}
-                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-2 order-2 sm:order-1"
-              >
-                {deleting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-                Delete
-              </Button>
-              <div className="flex-1 flex gap-2 order-1 sm:order-2">
-                <Button variant="outline" onClick={onClose} className="flex-1">
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleSaveMappings}
-                  disabled={
-                    saving ||
-                    deleting ||
-                    vendorName === "Processing..." ||
-                    vendorName === "Needs Review"
-                  }
-                  className={cn(
-                    "flex-1 gap-2 relative overflow-hidden group",
-                    isUnverified &&
-                      "bg-amber-600 hover:bg-amber-700 border-amber-700 shadow-amber-200",
-                  )}
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  {isUnverified ? (
-                    <>
-                      <Sparkles className="w-4 h-4 animate-pulse" />
-                      <span className="flex items-center gap-1.5">
-                        Verify & Save
-                        <kbd className="hidden sm:inline-block text-[10px] font-black bg-amber-800/20 px-1 rounded ml-1">
-                          ⌘+Enter
-                        </kbd>
-                      </span>
-                    </>
-                  ) : (
-                    <span className="flex items-center gap-1.5">
-                      Save changes
-                      <kbd className="hidden sm:inline-block text-[10px] font-black bg-slate-800/10 px-1 rounded ml-1">
-                        ⌘+Enter
-                      </kbd>
-                    </span>
-                  )}
-                </Button>
-              </div>
-            </div>
+            <DocumentReviewActions
+              onDelete={doDelete}
+              onCancel={onClose}
+              onSave={handleSaveMappings}
+              isSaving={saving}
+              isDeleting={deleting}
+              isProcessing={isProcessing}
+              isUnverified={isUnverified}
+            />
           </div>
         </div>
       </ModalFocusSurface>
+
       {originalPreviewOpen ? (
         <OriginalUploadPreviewModal
           key={documentId}
@@ -384,44 +274,12 @@ export function DocumentReviewModal({
       ) : null}
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-teal-950/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-5 animate-in zoom-in-95 duration-200">
-            <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center">
-              <Trash2 className="w-6 h-6 text-rose-600" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-slate-900">
-                Delete this {ledgerDocType}?
-              </h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                This will permanently remove the document and all associated
-                budget mappings from your project. This cannot be undone.
-              </p>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1 bg-rose-600 hover:bg-rose-700 border-rose-700 shadow-rose-200 rounded-xl gap-2"
-                onClick={confirmDelete}
-                disabled={deleting}
-              >
-                {deleting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-                Confirm Delete
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmationModal
+          ledgerDocType={ledgerDocType}
+          onCancel={() => setShowDeleteConfirm(false)}
+          onConfirm={confirmDelete}
+          isDeleting={deleting}
+        />
       )}
     </>
   );

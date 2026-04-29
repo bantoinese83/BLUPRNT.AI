@@ -18,8 +18,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { getAuthCallbackUrl } from "@/lib/auth-redirect";
 import { resolvePostLoginHref } from "@/lib/onboarding-post-auth-redirect";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -31,6 +29,7 @@ import {
   friendlyAuthError,
   friendlyAuthErrorFromUrlParam,
 } from "@shared/lib/user-friendly-errors";
+import { useLogin } from "@/hooks/use-login";
 
 type Mode = "password" | "magic";
 
@@ -52,12 +51,22 @@ export default function Login() {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<Mode>("password");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [magicSent, setMagicSent] = useState(false);
-  const [magicRecipientEmail, setMagicRecipientEmail] = useState("");
   const { user, loading: authLoading } = useAuth();
+
+  const redirectParam = searchParams.get("redirect");
+
+  const {
+    error,
+    setError,
+    loading,
+    magicSent,
+    setMagicSent,
+    magicRecipientEmail,
+    setMagicRecipientEmail,
+    onPasswordLogin,
+    onMagicRequest,
+  } = useLogin(redirectParam);
 
   const {
     register,
@@ -78,73 +87,10 @@ export default function Login() {
 
   const displayError =
     error || friendlyAuthErrorFromUrlParam(searchParams.get("error"));
-  const redirectParam = searchParams.get("redirect");
   const registerHref =
     redirectParam != null && redirectParam.trim() !== ""
       ? `/register?redirect=${encodeURIComponent(redirectParam)}`
       : "/register";
-
-  const onPasswordLogin = handleSubmit(async ({ email, password }) => {
-    setError(null);
-    if (!isSupabaseConfigured()) {
-      setError("Sign-in isn't available right now. Please try again later.");
-      return;
-    }
-    setLoading(true);
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password ?? "",
-    });
-    setLoading(false);
-    if (err) {
-      setError(
-        friendlyAuthError(
-          err.message || "",
-          "status" in err ? (err as { status?: number }).status : undefined,
-        ),
-      );
-      return;
-    }
-    const redirectTo = resolvePostLoginHref(searchParams.get("redirect"));
-    navigate(redirectTo, { replace: true });
-  });
-
-  const onMagicRequest = handleSubmit(async ({ email }) => {
-    setError(null);
-    setMagicSent(false);
-    if (!isSupabaseConfigured()) {
-      setError("Sign-in isn't available right now. Please try again later.");
-      return;
-    }
-    const redirectTo = searchParams.get("redirect");
-    if (redirectTo) {
-      try {
-        sessionStorage.setItem("bluprnt_auth_redirect", redirectTo);
-      } catch {
-        /* ignore */
-      }
-    }
-    setLoading(true);
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: getAuthCallbackUrl(),
-        shouldCreateUser: false,
-      },
-    });
-    setLoading(false);
-    if (err) {
-      setError(
-        friendlyAuthError(
-          err.message || "",
-          "status" in err ? (err as { status?: number }).status : undefined,
-        ),
-      );
-      return;
-    }
-    setMagicRecipientEmail(email.trim());
-    setMagicSent(true);
-  });
 
   function switchMode(next: Mode) {
     setMode(next);
@@ -157,7 +103,7 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-white">
+    <div className="flex min-h-screen flex-col bg-linear-to-b from-slate-50 to-white">
       <Helmet>
         <title>Sign in — BLUPRNT.AI</title>
         <meta
@@ -240,7 +186,11 @@ export default function Login() {
           )}
 
           {mode === "password" ? (
-            <form onSubmit={onPasswordLogin} className="space-y-4" noValidate>
+            <form
+              onSubmit={handleSubmit(onPasswordLogin)}
+              className="space-y-4"
+              noValidate
+            >
               <div className="space-y-2">
                 <label
                   className="text-sm font-bold text-slate-700 ml-1"
@@ -382,7 +332,7 @@ export default function Login() {
                     variant="primary"
                     className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
                     disabled={loading}
-                    onClick={() => void onMagicRequest()}
+                    onClick={() => handleSubmit(onMagicRequest)()}
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" aria-hidden />

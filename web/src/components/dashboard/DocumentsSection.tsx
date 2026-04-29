@@ -224,8 +224,10 @@ export function DocumentsSection({
                 <Search className="h-3.5 w-3.5 text-slate-400" />
               </div>
               <Input
-                type="text"
+                type="search"
+                enterKeyHint="search"
                 placeholder="Search vendor or type..."
+                aria-label="Search documents by vendor or type"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 pr-8 h-9 text-xs rounded-full border-slate-200 bg-white/50 focus:bg-white transition-all shadow-sm"
@@ -235,8 +237,9 @@ export function DocumentsSection({
                   type="button"
                   onClick={() => setSearchQuery("")}
                   className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+                  aria-label="Clear document search"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3.5 w-3.5" aria-hidden />
                 </button>
               )}
             </div>

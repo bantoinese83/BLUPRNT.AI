@@ -80,6 +80,8 @@ export async function uploadPickedDocumentToProject(
 
     if (fileCount > 1) {
       showAppToast(`Uploading ${i + 1} of ${fileCount}...`);
+    } else {
+      showAppToast("Uploading document…", { type: "neutral" });
     }
 
     addUserFlowBreadcrumb("document_upload_started", { kind, batch_index: i });

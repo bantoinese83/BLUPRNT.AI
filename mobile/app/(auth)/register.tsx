@@ -8,27 +8,19 @@ import {
   Keyboard,
   Alert,
   TouchableOpacity,
-  Pressable,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import { MotiView } from "moti";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { ChevronLeft, Check } from "lucide-react-native";
-import { GoogleIcon } from "@/components/auth/GoogleIcon";
-import { AppleSignIn } from "@/components/auth/AppleSignIn";
+import { ChevronLeft } from "lucide-react-native";
 import { useAuth } from "@/contexts/auth-context";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
-import {
-  WEB_APP_PATH_PRIVACY,
-  WEB_APP_PATH_TERMS,
-} from "@shared/constants/public-site";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
 import { getSafeRedirect } from "@shared/lib/safe-redirect";
 import {
@@ -40,6 +32,9 @@ import {
   isValidPassword,
   MIN_PASSWORD_LENGTH,
 } from "@/lib/validation";
+import { RegisterHeader } from "@/features/auth/components/RegisterHeader";
+import { PolicyAgreement } from "@/features/auth/components/PolicyAgreement";
+import { SocialAuthSection } from "@/features/auth/components/SocialAuthSection";
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();
@@ -216,63 +211,14 @@ export default function RegisterScreen() {
             <ChevronLeft size={24} color={Theme.colors.text.primary} />
           </TouchableOpacity>
 
-          <MotiView
-            from={{ opacity: 0, scale: 0.9, translateY: 20 }}
-            animate={{ opacity: 1, scale: 1, translateY: 0 }}
-            transition={{ type: "timing", duration: 800 }}
-            style={styles.header}
-          >
-            <Text style={styles.title}>Create account</Text>
-            <Text style={styles.subtitle}>Join BLUPRNT today</Text>
-          </MotiView>
+          <RegisterHeader />
 
           <GlassCard intensity={10} style={styles.formCard}>
             <View style={styles.form}>
-              <View style={styles.policyRow}>
-                <Pressable
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setAcceptedPolicies((v) => !v);
-                  }}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: acceptedPolicies }}
-                  hitSlop={8}
-                >
-                  <View
-                    style={[
-                      styles.policyCheck,
-                      acceptedPolicies && styles.policyCheckOn,
-                    ]}
-                  >
-                    {acceptedPolicies ? (
-                      <Check size={14} color="#fff" strokeWidth={3} />
-                    ) : null}
-                  </View>
-                </Pressable>
-                <Text style={styles.policyText}>
-                  I agree to the{" "}
-                  <Text
-                    style={styles.policyLink}
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      router.push(WEB_APP_PATH_TERMS);
-                    }}
-                  >
-                    Terms
-                  </Text>{" "}
-                  and{" "}
-                  <Text
-                    style={styles.policyLink}
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      router.push(WEB_APP_PATH_PRIVACY);
-                    }}
-                  >
-                    Privacy Policy
-                  </Text>
-                  .
-                </Text>
-              </View>
+              <PolicyAgreement
+                accepted={acceptedPolicies}
+                onToggle={setAcceptedPolicies}
+              />
 
               <TextField
                 label="Full Name"
@@ -317,36 +263,15 @@ export default function RegisterScreen() {
                 style={{ marginTop: 8 }}
               />
 
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <Button
-                title="Continue with Google"
-                onPress={handleGoogleLogin}
-                loading={googleLoading}
-                variant="outline"
-                icon={<GoogleIcon />}
-                style={{ marginTop: 0 }}
-              />
-
-              <AppleSignIn
-                policyAccepted={acceptedPolicies}
-                busy={googleLoading}
-                onStart={() => {
+              <SocialAuthSection
+                googleLoading={googleLoading}
+                onGoogleLogin={handleGoogleLogin}
+                onAppleStart={() => {
                   setGoogleLoading(true);
                   void persistPostLoginRedirectForOAuth(params.redirect);
                 }}
-                onSuccess={() => setGoogleLoading(false)}
-                onError={(err) => {
-                  setGoogleLoading(false);
-                  Alert.alert(
-                    "Apple sign-in",
-                    friendlyAuthError(err.message || ""),
-                  );
-                }}
+                onAppleSuccess={() => setGoogleLoading(false)}
+                policyAccepted={acceptedPolicies}
               />
             </View>
           </GlassCard>

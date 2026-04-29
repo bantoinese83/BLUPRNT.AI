@@ -1,28 +1,16 @@
-import React, { createElement, useState } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
   Text,
-  TouchableOpacity,
-  Pressable,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   StyleSheet,
+  Pressable,
 } from "react-native";
-import {
-  X,
-  Receipt,
-  ShieldCheck,
-  Trash2,
-  Calendar,
-  ExternalLink,
-  Link2,
-  Sparkles,
-} from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 
@@ -33,20 +21,21 @@ import { useLedgerEntryReviewDetail } from "@/hooks/useLedgerEntryReviewDetail";
 
 import {
   isCapitalLedgerDocumentType,
-  ledgerDocumentTypeLabel,
   ledgerDocumentTheme,
 } from "@shared/lib/ledger-document-labels";
-import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
-import { DEFAULT_DOC_ICON, STATUS_COLORS } from "./constants";
-import { Theme } from "@/constants/Theme";
 import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
-import { LedgerEntryReviewDetailRow } from "./LedgerEntryReviewDetailRow";
 import {
   LedgerEntryReviewLineItemRow,
   type ScopeItemOption,
 } from "./LedgerEntryReviewLineItemRow";
 import { LedgerEntryReviewScopePicker } from "./LedgerEntryReviewScopePicker";
 import { LedgerEntryReviewDocTypePicker } from "./LedgerEntryReviewDocTypePicker";
+import { LedgerEntryReviewHeader } from "./LedgerEntryReviewHeader";
+import { LedgerEntryReviewSummary } from "./LedgerEntryReviewSummary";
+import { LedgerEntryReviewVerifyCallout } from "./LedgerEntryReviewVerifyCallout";
+import { LedgerEntryReviewEditableFields } from "./LedgerEntryReviewEditableFields";
+import { LedgerEntryReviewDetailGrid } from "./LedgerEntryReviewDetailGrid";
+import { LedgerEntryReviewActions } from "./LedgerEntryReviewActions";
 
 import { useConfirmation } from "@/contexts/useConfirmation";
 
@@ -101,18 +90,6 @@ export function LedgerEntryReviewSheet({
   const docType = ledgerDocType;
   const theme = ledgerDocumentTheme(docType);
   const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
-  const statusColor =
-    STATUS_COLORS[detail?.payment_status ?? ledgerEntry.payment_status ?? ""] ||
-    "#64748b";
-
-  const rawStatus =
-    detail?.payment_status ?? ledgerEntry.payment_status ?? "pending";
-  const paymentLabel =
-    rawStatus === "unknown"
-      ? docType === "quote"
-        ? "Pending Review"
-        : "Processing"
-      : rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
 
   const docIdForOpen = detail?.document_id ?? ledgerEntry.document_id;
   const isUnverified = detail?.is_verified === false;
@@ -197,29 +174,11 @@ export function LedgerEntryReviewSheet({
               transition={{ type: "timing", duration: 300 }}
               style={styles.content}
             >
-              <View style={styles.header}>
-                <View style={styles.headerTitleRow}>
-                  <View style={styles.docIconContainer}>
-                    {createElement(
-                      rowIconForLedgerDocumentType(ledgerDocType) ??
-                        DEFAULT_DOC_ICON,
-                      {
-                        size: 28,
-                        color: Theme.colors.brand.primary,
-                      },
-                    )}
-                  </View>
-                  {isUnverified && (
-                    <View style={styles.aiBadgeHeader}>
-                      <ShieldCheck size={10} color="#d97706" />
-                      <Text style={styles.aiTextHeader}>AI Draft</Text>
-                    </View>
-                  )}
-                </View>
-                <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-                  <X size={20} color={Theme.colors.text.secondary} />
-                </TouchableOpacity>
-              </View>
+              <LedgerEntryReviewHeader
+                ledgerDocType={ledgerDocType}
+                isUnverified={isUnverified}
+                onClose={onClose}
+              />
 
               {loadError ? (
                 <Text style={styles.errorText}>{loadError}</Text>
@@ -241,186 +200,67 @@ export function LedgerEntryReviewSheet({
                   nestedScrollEnabled
                   showsVerticalScrollIndicator
                 >
-                  {isUnverified && (
-                    <View style={styles.verifyCallout}>
-                      <ShieldCheck size={20} color="#d97706" />
-                      <View style={styles.verifyCalloutTextWrap}>
-                        <Text style={styles.verifyCalloutTitle}>
-                          Review and Verify
-                        </Text>
-                        <Text style={styles.verifyCalloutDescription}>
-                          This data was extracted by AI. Confirm the vendor,
-                          amounts, and links below.
-                        </Text>
-                      </View>
-                    </View>
-                  )}
+                  {isUnverified && <LedgerEntryReviewVerifyCallout />}
 
-                  {(aiSummary || isProcessing) && (
-                    <View
-                      style={[
-                        styles.summaryBox,
-                        {
-                          backgroundColor: theme.colors?.bg,
-                          borderColor: theme.colors?.border,
-                        },
-                      ]}
-                    >
-                      <Sparkles size={20} color={theme.colors?.icon} />
-                      <Text
-                        style={[
-                          styles.summaryText,
-                          { color: theme.colors?.icon + "cc" }, // Slightly more opaque version of the icon color for text
-                        ]}
-                      >
-                        {aiSummary ? (
-                          aiSummary
-                        ) : (
-                          <Text
-                            style={[
-                              styles.summaryAnalyzing,
-                              { color: theme.colors?.icon },
-                            ]}
-                          >
-                            Analyzing Document...
-                          </Text>
-                        )}
-                      </Text>
-                    </View>
-                  )}
+                  <LedgerEntryReviewSummary
+                    aiSummary={aiSummary}
+                    isProcessing={isProcessing}
+                    theme={theme}
+                  />
 
-                  <View style={styles.editableField}>
-                    <Text style={styles.editableLabel}>{theme.label}</Text>
-                    <TextInput
-                      style={styles.editableInput}
-                      value={vendorName}
-                      onChangeText={setVendorName}
-                      placeholder="e.g. Home Depot"
-                      placeholderTextColor={Theme.colors.text.muted}
-                    />
-                  </View>
+                  <LedgerEntryReviewEditableFields
+                    theme={theme}
+                    vendorName={vendorName}
+                    setVendorName={setVendorName}
+                    totalValue={totalValue}
+                    setTotalValue={setTotalValue}
+                    aiSummary={aiSummary}
+                    setAiSummary={setAiSummary}
+                  />
 
-                  <View style={styles.editableField}>
-                    <Text style={styles.editableLabel}>Total Amount ($)</Text>
-                    <TextInput
-                      style={styles.editableInput}
-                      value={totalValue}
-                      onChangeText={setTotalValue}
-                      keyboardType="decimal-pad"
-                      placeholder="0.00"
-                      placeholderTextColor={Theme.colors.text.muted}
-                    />
-                  </View>
+                  <LedgerEntryReviewDetailGrid
+                    ledgerEntry={ledgerEntry}
+                    detail={detail}
+                    docType={docType}
+                    onOpenDocTypePicker={() => {
+                      void Haptics.selectionAsync();
+                      setDocTypePickerOpen(true);
+                    }}
+                  />
 
-                  <View style={styles.editableField}>
-                    <Text style={styles.editableLabel}>Document Summary</Text>
-                    <TextInput
-                      style={[
-                        styles.editableInput,
-                        styles.editableInputMultiline,
-                      ]}
-                      value={aiSummary}
-                      onChangeText={setAiSummary}
-                      multiline
-                      placeholder="e.g. Purchase of premium roofing materials..."
-                      placeholderTextColor={Theme.colors.text.muted}
-                    />
-                    <Text style={styles.editableHint}>
-                      A brief description of what was purchased or documented.
-                      Used by AI for project insights.
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailGrid}>
-                    <LedgerEntryReviewDetailRow
-                      icon={
-                        <Calendar
-                          size={16}
-                          color={Theme.colors.text.secondary}
-                        />
-                      }
-                      label="Date"
-                      value={new Date(
-                        ledgerEntry.created_at,
-                      ).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    />
-                    <TouchableOpacity
-                      style={styles.docTypeRow}
-                      onPress={() => {
-                        void Haptics.selectionAsync();
-                        setDocTypePickerOpen(true);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel="Change document type"
-                    >
-                      <View style={styles.docTypeRowLeft}>
-                        <Receipt
-                          size={16}
-                          color={Theme.colors.text.secondary}
-                        />
-                        <View style={{ flex: 1, minWidth: 0 }}>
-                          <Text style={styles.detailLabelText}>
-                            Document type
-                          </Text>
-                          <Text style={styles.detailValue}>
-                            {ledgerDocumentTypeLabel(docType)}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text style={styles.docTypeChange}>Change</Text>
-                    </TouchableOpacity>
-                    <LedgerEntryReviewDetailRow
-                      icon={<ShieldCheck size={16} color={statusColor} />}
-                      label="Payment Status"
-                      value={paymentLabel}
-                      valueColor={statusColor}
-                    />
-                  </View>
-
-                  {docIdForOpen ? (
-                    <TouchableOpacity
-                      style={styles.viewOriginalBtn}
-                      onPress={() => {
-                        void Haptics.selectionAsync();
-                        setOriginalPreviewOpen(true);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel="View original upload"
-                    >
-                      <ExternalLink
-                        size={18}
-                        color={Theme.colors.brand.primary}
-                      />
-                      <Text style={styles.viewOriginalBtnText}>
-                        View original
-                      </Text>
-                    </TouchableOpacity>
-                  ) : null}
+                  <LedgerEntryReviewActions
+                    docIdForOpen={docIdForOpen}
+                    onViewOriginal={() => {
+                      void Haptics.selectionAsync();
+                      setOriginalPreviewOpen(true);
+                    }}
+                    showSaveBtn={
+                      !!(
+                        projectId &&
+                        (isUnverified ||
+                          isDirty ||
+                          (showCapitalLineLink &&
+                            lineItems.length > 0 &&
+                            scopeItems.length > 0))
+                      )
+                    }
+                    isUnverified={isUnverified}
+                    isDirty={isDirty}
+                    showCapitalLineLink={showCapitalLineLink}
+                    hasLineItems={lineItems.length > 0}
+                    hasScopeItems={scopeItems.length > 0}
+                    saving={saving}
+                    onSave={() => void handleSave()}
+                    onDelete={handleDelete}
+                    deleting={deleting}
+                    isProcessing={isProcessing}
+                  />
 
                   {projectId && showCapitalLineLink && lineItems.length > 0 ? (
                     <View style={styles.linesSection}>
-                      <View style={styles.linesSectionHeader}>
-                        <Link2 size={16} color={Theme.colors.text.muted} />
-                        <Text style={styles.linesSectionTitle}>
-                          Link to budget (optional)
-                        </Text>
-                      </View>
-                      <Text style={styles.linesHint}>
-                        Match lines to your estimate to track plan vs actual.
+                      <Text style={styles.linesSectionTitle}>
+                        Link to budget (optional)
                       </Text>
-                      {scopeItems.length === 0 ? (
-                        <View style={styles.scopeEmptyBanner}>
-                          <Text style={styles.scopeEmptyBannerText}>
-                            There are no estimate lines on this project yet, so
-                            nothing can be linked. Add scope from your project,
-                            then open this document again.
-                          </Text>
-                        </View>
-                      ) : null}
                       {lineItems.map((line) => (
                         <LedgerEntryReviewLineItemRow
                           key={line.id}
@@ -439,91 +279,9 @@ export function LedgerEntryReviewSheet({
                     </View>
                   ) : null}
 
-                  {showCapitalLineLink &&
-                    lineItems.length === 0 &&
-                    !loadingDetail &&
-                    !loadError && (
-                      <Text style={styles.noLines}>
-                        No line items yet. Totals above still update your
-                        ledger.
-                      </Text>
-                    )}
-
                   <Text style={styles.reviewDismissHint}>
                     You can close anytime — the document stays in your ledger.
                   </Text>
-
-                  {projectId &&
-                    (isUnverified ||
-                      isDirty ||
-                      (showCapitalLineLink &&
-                        lineItems.length > 0 &&
-                        scopeItems.length > 0)) && (
-                      <TouchableOpacity
-                        style={[
-                          styles.saveBtn,
-                          isUnverified ? styles.verifyBtn : undefined,
-                          saving ||
-                          vendorName === "Processing..." ||
-                          vendorName === "Needs Review"
-                            ? styles.saveBtnDisabled
-                            : undefined,
-                        ]}
-                        disabled={
-                          saving ||
-                          vendorName === "Processing..." ||
-                          vendorName === "Needs Review"
-                        }
-                        onPress={() => void handleSave()}
-                      >
-                        {saving ? (
-                          <SnurraLoader
-                            size={SnurraSize.inline}
-                            tone="onPrimary"
-                          />
-                        ) : (
-                          <>
-                            {isUnverified && (
-                              <ShieldCheck
-                                size={18}
-                                color="white"
-                                style={{ marginRight: 8 }}
-                              />
-                            )}
-                            <Text style={styles.saveBtnText}>
-                              {isUnverified
-                                ? "Verify & Save"
-                                : isDirty &&
-                                    !(
-                                      showCapitalLineLink &&
-                                      lineItems.length > 0 &&
-                                      scopeItems.length > 0
-                                    )
-                                  ? "Save record"
-                                  : "Save changes"}
-                            </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    )}
-
-                  <TouchableOpacity
-                    style={styles.deleteBtn}
-                    onPress={handleDelete}
-                    disabled={deleting}
-                  >
-                    {deleting ? (
-                      <SnurraLoader
-                        size={SnurraSize.inline}
-                        tone="destructive"
-                      />
-                    ) : (
-                      <Trash2 size={18} color={Theme.colors.status.error} />
-                    )}
-                    <Text style={styles.deleteBtnText}>
-                      {deleting ? "Deleting..." : "Delete Document"}
-                    </Text>
-                  </TouchableOpacity>
                 </ScrollView>
               )}
             </MotiView>

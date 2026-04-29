@@ -99,9 +99,31 @@ describe("useDocumentManagement Integration", () => {
     });
 
     expect(toast.error).toHaveBeenCalledWith(
-      expect.stringContaining("Failed to upload 1.jpg"),
+      expect.stringContaining("Couldn’t upload 1.jpg"),
+      expect.objectContaining({ description: expect.any(String) }),
     );
     expect(toast.info).toHaveBeenCalled();
+  });
+
+  it("surfaces unexpected upload exceptions with recovery guidance", async () => {
+    const mockInvoke = vi.mocked(supabaseLib.invokeFunction);
+    mockInvoke.mockRejectedValueOnce(new Error("network boom"));
+
+    const { result } = renderHook(() => useDocumentManagement(mockProps), {
+      wrapper,
+    });
+
+    const file = new File(["x"], "crash.pdf", { type: "application/pdf" });
+    const files = { length: 1, 0: file, item: () => file } as any;
+
+    await act(async () => {
+      await result.current.handleUploadFile(files);
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("Unexpected issue with crash.pdf"),
+      expect.objectContaining({ description: expect.any(String) }),
+    );
   });
 
   it("prevents upload when at free tier limit", async () => {

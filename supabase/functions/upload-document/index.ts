@@ -159,7 +159,7 @@ export const handler = async (req: Request): Promise<Response> => {
       if (docErr) throw docErr;
 
       // 5. Create Draft Ledger Entry Record (will be updated by background OCR)
-      const finalTotal = amountHintStr ? parseFloat(amountHintStr) : 0;
+      const finalTotal = amountHintStr ? (parseFloat(amountHintStr) || 0) : 0;
       const { data: ledgerEntry, error: dbErr } = await admin
         .from("ledger_entries")
         .insert({

@@ -208,9 +208,11 @@ export function EstimateSummary({
                                   : "bg-amber-950 text-amber-300",
                             )}
                           >
-                            {recon.status === "reconciled"
-                              ? RECONCILIATION_STATUS_LABELS.reconciled
-                              : recon.status}
+                            {
+                              RECONCILIATION_STATUS_LABELS[
+                                recon.status as keyof typeof RECONCILIATION_STATUS_LABELS
+                              ]
+                            }
                           </Badge>
                         )}
                       </div>

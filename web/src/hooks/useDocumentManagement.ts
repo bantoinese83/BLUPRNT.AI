@@ -216,7 +216,9 @@ export function useDocumentManagement({
             onUpgradeClick("ledger_limit");
             break; // Stop batch on limit
           }
-          toast.error(`Failed to upload ${file.name}: ${failure.message}`);
+          toast.error(`Couldn’t upload ${file.name}`, {
+            description: failure.message,
+          });
           continue;
         }
 
@@ -270,7 +272,10 @@ export function useDocumentManagement({
         });
       } catch (err: unknown) {
         reportClientError("document_upload", err);
-        toast.error(`Unexpected issue uploading ${file.name}`);
+        toast.error(`Unexpected issue with ${file.name}`, {
+          description:
+            "Check your connection and try again. If it keeps happening, pick a smaller PDF or photo.",
+        });
         break;
       }
     }

@@ -23,6 +23,9 @@ export function DocumentUploadHeader({
         <AnimatePresence>
           {uploading && (
             <motion.div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
@@ -36,7 +39,7 @@ export function DocumentUploadHeader({
                   className="absolute inset-x-0 top-0 h-0.5 bg-slate-950 shadow-[0_0_4px_black]"
                 />
               </div>
-              <span>{batchStatus || "AI READING..."}</span>
+              <span>{batchStatus || "Processing files…"}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -52,6 +55,12 @@ export function DocumentUploadHeader({
             onClick={onUploadClick}
             disabled={uploading}
             type="button"
+            aria-busy={uploading}
+            aria-label={
+              uploading
+                ? "Upload in progress, please wait"
+                : "Upload project documents"
+            }
             className={cn(
               "flex-1 sm:flex-none rounded-xl font-bold h-10 order-1 sm:order-2",
               uploading ? "bg-slate-50 border-slate-200" : "",
@@ -62,7 +71,7 @@ export function DocumentUploadHeader({
             ) : (
               <Upload className="w-4 h-4 mr-2 text-slate-500" />
             )}
-            {uploading ? "Wait" : "Upload"}
+            {uploading ? "Uploading…" : "Upload"}
           </Button>
         </div>
       </div>
