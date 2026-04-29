@@ -9,6 +9,10 @@ interface MetadataSectionProps {
   onWarrantyDateChange: (date: string) => void;
   vendorName: string;
   onVendorNameChange: (name: string) => void;
+  aiSummary: string;
+  onAiSummaryChange: (summary: string) => void;
+  totalValue?: string;
+  onTotalValueChange?: (total: string) => void;
   vendorLabel?: string;
 }
 
@@ -19,6 +23,10 @@ export function MetadataSection({
   onWarrantyDateChange,
   vendorName,
   onVendorNameChange,
+  aiSummary,
+  onAiSummaryChange,
+  totalValue,
+  onTotalValueChange,
   vendorLabel = "Vendor Name",
 }: MetadataSectionProps) {
   return (
@@ -40,6 +48,26 @@ export function MetadataSection({
         />
         <p className="text-[11px] text-slate-500 leading-snug">
           The company name identified from the document. Correct if necessary.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
+        <label
+          htmlFor="document-review-total"
+          className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+        >
+          Total Amount ($)
+        </label>
+        <input
+          id="document-review-total"
+          type="text"
+          value={totalValue}
+          onChange={(e) => onTotalValueChange?.(e.target.value)}
+          placeholder="0.00"
+          className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2"
+        />
+        <p className="text-[11px] text-slate-500 leading-snug">
+          The total amount including tax. Correct if the AI misread it.
         </p>
       </div>
 
@@ -67,6 +95,27 @@ export function MetadataSection({
         <p className="text-[11px] text-slate-500 leading-snug">
           Fix a misclassification here — no need to re-upload. This updates your
           ledger and seller packet grouping.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 space-y-1.5">
+        <label
+          htmlFor="document-review-ai-summary"
+          className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+        >
+          Document Summary
+        </label>
+        <textarea
+          id="document-review-ai-summary"
+          rows={3}
+          value={aiSummary}
+          onChange={(e) => onAiSummaryChange(e.target.value)}
+          placeholder="e.g. Purchase of premium roofing materials..."
+          className="w-full text-sm font-medium rounded-lg border border-slate-300 bg-white px-2 py-2 resize-none"
+        />
+        <p className="text-[11px] text-slate-500 leading-snug">
+          A brief description of what was purchased or documented. Used by AI
+          for project insights.
         </p>
       </div>
 

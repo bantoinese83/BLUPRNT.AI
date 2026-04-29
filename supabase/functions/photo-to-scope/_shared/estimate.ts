@@ -306,7 +306,7 @@ function mergeGroundingSources(
 ): GroundingSource[] {
   const sources: GroundingSource[] = [...inPayload];
   const seenUrls = new Set(sources.map((s) => s.url).filter(Boolean));
-  const seenTitles = new Set(sources.filter((s) => !s.url).map((s) => s.title));
+  const _seenTitles = new Set(sources.filter((s) => !s.url).map((s) => s.title));
 
   const meta = groundingMetadata as
     | { groundingChunks?: Array<{ web?: { uri?: string; title?: string } }> }
@@ -397,8 +397,8 @@ function sanitizeScopeItem(
     unit: toStr(s.unit, "unit"),
     unit_cost_min: Math.round(u_min),
     unit_cost_max: Math.round(u_max),
-    total_cost_min: Math.round(qty * u_min),
-    total_cost_max: Math.round(qty * u_max),
+    total_cost_min: Math.round(qty * u_min) || toNum(s.total_cost_min),
+    total_cost_max: Math.round(qty * u_max) || toNum(s.total_cost_max),
     confidence_score: toNum(s.confidence_score) || 3,
     confidence_reason: toStr(s.confidence_reason),
     source: hasPhotos ? "photo" : "text",
@@ -715,6 +715,7 @@ Please generate the detailed blueprint.`;
     const result = await callGemini({
       parts,
       systemInstruction,
+      responseMimeType: "application/json",
       responseSchema,
       tools: [{ googleSearch: {} }],
       temperature: 0.1,

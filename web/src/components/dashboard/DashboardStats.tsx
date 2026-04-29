@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { Wallet, FileText, TrendingUp } from "lucide-react";
+import { Wallet, FileText, TrendingUp, Info } from "lucide-react";
 import { useSpring, useTransform, motion } from "motion/react";
 import { money } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { calculateBudgetStats } from "@/lib/plan-vs-actual";
 import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
+import { Tooltip } from "../ui/tooltip";
 
 type DashboardStatsProps = {
   estimatedMin: number | null;
@@ -12,6 +13,7 @@ type DashboardStatsProps = {
   spendingTotal: number;
   /** All ledger files (invoices, quotes, permits, every type) — not the Free 3 "bill" cap. */
   documentRowCount: number;
+  unreconciledBilled?: number;
   isLoading?: boolean;
 };
 
@@ -61,6 +63,7 @@ export function DashboardStats({
   estimatedMax,
   spendingTotal,
   documentRowCount,
+  unreconciledBilled = 0,
   isLoading = false,
 }: DashboardStatsProps) {
   if (isLoading) {
@@ -190,9 +193,20 @@ export function DashboardStats({
             </motion.span>
           )}
         </div>
-        <p className="text-xs text-slate-400 font-bold">
+        <div className="text-xs text-slate-400 font-bold">
           {DASHBOARD_STATS_LABELS.investedSub}
-        </p>
+          {unreconciledBilled > 0 && (
+            <Tooltip
+              content="This spend is in your archive but hasn't been matched to a specific budget line item."
+              className="max-w-[200px]"
+            >
+              <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded cursor-help transition-colors hover:bg-amber-100">
+                <Info className="w-2.5 h-2.5" />
+                {money(unreconciledBilled)} unlinked
+              </span>
+            </Tooltip>
+          )}
+        </div>
       </motion.div>
     </div>
   );

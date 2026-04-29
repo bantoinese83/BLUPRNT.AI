@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/**
+ * Quick per-workspace lint / test / typecheck (faster feedback than `npm run check`).
+ * Run from repo root: `npm run status`
+ */
 import { execSync } from "node:child_process";
 const workspaces = ["shared", "web", "mobile"];
 

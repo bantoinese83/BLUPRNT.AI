@@ -1,4 +1,4 @@
-import { type OcrInvoiceResult } from "./ocr.ts";
+// @ts-ignore: OcrInvoiceResult is used in other functions via shared types but flagged as unused here
 
 export interface GeminiPart {
   text?: string;
@@ -15,7 +15,7 @@ export interface GeminiResponse {
 }
 
 const DEFAULT_MAX_ATTEMPTS = 2;
-const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 const DEFAULT_EMBEDDING_MODEL = "text-embedding-004";
 
 /**
@@ -49,15 +49,23 @@ export async function callGemini(params: {
     console.error("[callGemini] GEMINI_API_KEY not found in environment");
     return null;
   }
-  console.log(`[callGemini] Using API key: ${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`);
+  console.log(
+    `[callGemini] Using API key: ${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`,
+  );
 
-  const modelName = (modelOverride || Deno.env.get("GEMINI_MODEL") || DEFAULT_GEMINI_MODEL).trim();
+  const modelName = (
+    modelOverride ||
+    Deno.env.get("GEMINI_MODEL") ||
+    DEFAULT_GEMINI_MODEL
+  ).trim();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
   // Map our internal part format to the Google REST API format
   const contentsParts = parts.map((p, i) => {
     if (p.inline_data) {
-      console.log(`[callGemini] Part ${i}: inlineData (${p.inline_data.mime_type}), data length: ${p.inline_data.data.length}`);
+      console.log(
+        `[callGemini] Part ${i}: inlineData (${p.inline_data.mime_type}), data length: ${p.inline_data.data.length}`,
+      );
       return {
         inlineData: {
           mimeType: p.inline_data.mime_type,
@@ -116,14 +124,17 @@ export async function callGemini(params: {
       }
 
       const result = await response.json();
-      
+
       // Log for debugging (don't log full text)
       if (result.promptFeedback) {
-        console.log("[callGemini] Prompt feedback:", JSON.stringify(result.promptFeedback));
+        console.log(
+          "[callGemini] Prompt feedback:",
+          JSON.stringify(result.promptFeedback),
+        );
       }
 
       const candidate = result.candidates?.[0];
-      
+
       if (candidate?.finishReason && candidate.finishReason !== "STOP") {
         console.warn("[callGemini] Finish reason:", candidate.finishReason);
       }
@@ -152,9 +163,9 @@ export async function callGemini(params: {
     } catch (e: unknown) {
       const error = e as Error;
       console.error(`[callGemini] Attempt ${attempt} failed:`, error.message);
-      
+
       if (attempt === DEFAULT_MAX_ATTEMPTS) return null;
-      
+
       const delay = Math.min(4000, 500 * Math.pow(2, attempt - 1));
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -163,14 +174,20 @@ export async function callGemini(params: {
   return null;
 }
 
-export async function generateEmbedding(text: string): Promise<number[] | null> {
+export async function generateEmbedding(
+  text: string,
+): Promise<number[] | null> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey?.trim()) {
-    console.error("[generateEmbedding] GEMINI_API_KEY not found in environment");
+    console.error(
+      "[generateEmbedding] GEMINI_API_KEY not found in environment",
+    );
     return null;
   }
 
-  const modelName = (Deno.env.get("EMBEDDING_MODEL") || DEFAULT_EMBEDDING_MODEL).trim();
+  const modelName = (
+    Deno.env.get("EMBEDDING_MODEL") || DEFAULT_EMBEDDING_MODEL
+  ).trim();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:embedContent?key=${apiKey}`;
 
   for (let attempt = 1; attempt <= DEFAULT_MAX_ATTEMPTS; attempt++) {
@@ -200,10 +217,13 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
       return embedding;
     } catch (e: unknown) {
       const error = e as Error;
-      console.error(`[generateEmbedding] Attempt ${attempt} failed:`, error.message);
-      
+      console.error(
+        `[generateEmbedding] Attempt ${attempt} failed:`,
+        error.message,
+      );
+
       if (attempt === DEFAULT_MAX_ATTEMPTS) return null;
-      
+
       const delay = Math.min(4000, 500 * Math.pow(2, attempt - 1));
       await new Promise((r) => setTimeout(r, delay));
     }

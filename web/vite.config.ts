@@ -44,8 +44,14 @@ export default defineConfig(({ mode }) => {
       /** One React instance (workspace hoisting can otherwise duplicate in odd setups). */
       dedupe: ["react", "react-dom"],
     },
+    /** Pre-bundle heavy deps on first `vite` start — faster dev server cold boot. */
+    optimizeDeps: {
+      include: ["@tanstack/react-query", "@supabase/supabase-js"],
+    },
     server: {
       port: 3000,
+      /** Keep prior terminal output visible (errors, URLs) instead of clearing the screen. */
+      clearScreen: false,
       /** Fail fast with a clear error instead of silently using another port (common DX footgun). */
       strictPort: true,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

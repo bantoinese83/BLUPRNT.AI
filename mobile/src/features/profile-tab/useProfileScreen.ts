@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { usePremium } from "@/hooks/usePremium";
+import { useConfirmation } from "@/contexts/useConfirmation";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
@@ -22,6 +23,7 @@ import type { UseProfileScreenResult } from "./profile-screen.types";
 export function useProfileScreen(): UseProfileScreenResult {
   const { user, signOut } = useAuth();
   const { isPro } = usePremium();
+  const { confirm } = useConfirmation();
   const { configurationMissing, load, subscription } = useDashboardData();
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
 
@@ -176,54 +178,52 @@ export function useProfileScreen(): UseProfileScreenResult {
 
   const onDeleteAccount = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    Alert.alert(
-      "Delete Account",
-      "This permanently removes your projects, documents, and account data. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete Permanently",
-          style: "destructive",
-          onPress: () => {
-            Alert.alert(
-              "Are you absolutely sure?",
-              "Tap “Yes, delete my account” to confirm. This cannot be reversed.",
-              [
-                { text: "Go Back", style: "cancel" },
-                {
-                  text: "Yes, delete my account",
-                  style: "destructive",
-                  onPress: async () => {
-                    try {
-                      const { error } = await invokeFunction("delete-account", {
-                        method: "POST",
-                      });
-                      if (error) throw error;
-                      await signOut();
-                    } catch (err: unknown) {
-                      reportClientError("profile_delete_account", err);
-                      Alert.alert(
-                        "Deletion Failed",
-                        "We couldn't delete your account. Please try again or contact support.",
-                      );
-                    }
-                  },
-                },
-              ],
-            );
+    confirm({
+      title: "Delete Account?",
+      message:
+        "This permanently removes your projects, documents, and account data. This cannot be undone.",
+      confirmLabel: "Delete Permanently",
+      variant: "destructive",
+      onConfirm: async () => {
+        // Double confirmation for extreme safety
+        confirm({
+          title: "Are you absolutely sure?",
+          message:
+            "Tap “Yes, delete my account” to confirm. This cannot be reversed.",
+          confirmLabel: "Yes, delete my account",
+          variant: "destructive",
+          onConfirm: async () => {
+            try {
+              const { error } = await invokeFunction("delete-account", {
+                method: "POST",
+              });
+              if (error) throw error;
+              await signOut();
+            } catch (err: unknown) {
+              reportClientError("profile_delete_account", err);
+              Alert.alert(
+                "Deletion Failed",
+                "We couldn't delete your account. Please try again or contact support.",
+              );
+            }
           },
-        },
-      ],
-    );
-  }, [signOut]);
+        });
+      },
+    });
+  }, [confirm, signOut]);
 
   const onSignOut = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Sign Out", style: "destructive", onPress: signOut },
-    ]);
-  }, [signOut]);
+    confirm({
+      title: "Sign Out",
+      message: "Are you sure you want to sign out?",
+      confirmLabel: "Sign Out",
+      variant: "destructive",
+      onConfirm: async () => {
+        await signOut();
+      },
+    });
+  }, [confirm, signOut]);
 
   const onRetryConfiguration = useCallback(() => {
     void load();

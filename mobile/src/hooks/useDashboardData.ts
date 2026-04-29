@@ -10,6 +10,12 @@ import {
 
 import { useMobileDashboardProjectRealtime } from "./useMobileDashboardProjectRealtime";
 
+import {
+  addScopeItem as sharedAddScopeItem,
+  recalcProjectTotals as sharedRecalcProjectTotals,
+  type NewScopeItem,
+} from "@shared/lib/scope-operations";
+
 export function useDashboardData() {
   const client = useQueryClient();
   const mobileInjected = useMobileDashboardDataInjected();
@@ -24,41 +30,15 @@ export function useDashboardData() {
   const configurationMissing = !isSupabaseConfigured();
 
   const recalcProjectTotals = useCallback(async (pid: string) => {
-    await supabase.rpc("recalc_project_totals", { p_id: pid });
+    await sharedRecalcProjectTotals(supabase, pid);
   }, []);
 
   const addItem = useCallback(
-    async (
-      pid: string,
-      newItem: {
-        category: string;
-        description: string;
-        phase: string;
-        cost: number;
-        quantity: number;
-        unit: string;
-      },
-    ) => {
-      const { error: err } = await supabase.from("scope_items").insert({
-        project_id: pid,
-        category: newItem.category,
-        description: newItem.description || "",
-        phase: newItem.phase,
-        quantity: newItem.quantity,
-        unit: newItem.unit,
-        finish_tier: "mid",
-        unit_cost_min: newItem.cost,
-        unit_cost_max: newItem.cost,
-        total_cost_min: newItem.cost * newItem.quantity,
-        total_cost_max: newItem.cost * newItem.quantity,
-      });
-
-      if (err) throw err;
-
-      await recalcProjectTotals(pid);
+    async (pid: string, newItem: NewScopeItem) => {
+      await sharedAddScopeItem(supabase, pid, newItem);
       void client.invalidateQueries({ queryKey: dashboardQueryKey });
     },
-    [client, recalcProjectTotals],
+    [client],
   );
 
   const { activeProjectId, data, ...publicCore } = shared;

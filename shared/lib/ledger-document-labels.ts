@@ -117,6 +117,11 @@ export function ledgerDocumentTheme(t: string | null | undefined): {
   border: string;
   glow: string;
   label: string;
+  colors?: {
+    bg: string;
+    icon: string;
+    border: string;
+  };
 } {
   const vg = ledgerDocumentVisualGroup(t);
   if (vg === "spend") {
@@ -126,6 +131,11 @@ export function ledgerDocumentTheme(t: string | null | undefined): {
       border: "border-rose-100",
       glow: "shadow-rose-100/50",
       label: "Vendor Name",
+      colors: {
+        bg: "#fff1f2", // rose-50
+        icon: "#e11d48", // rose-600
+        border: "#ffe4e6", // rose-100
+      },
     };
   }
   if (vg === "warranty_care") {
@@ -135,6 +145,11 @@ export function ledgerDocumentTheme(t: string | null | undefined): {
       border: "border-teal-100",
       glow: "shadow-teal-100/50",
       label: "Brand / Provider",
+      colors: {
+        bg: "#f0fdfa", // teal-50
+        icon: "#0d9488", // teal-600
+        border: "#ccfbf1", // teal-100
+      },
     };
   }
   return {
@@ -143,5 +158,10 @@ export function ledgerDocumentTheme(t: string | null | undefined): {
     border: "border-slate-100",
     glow: "shadow-slate-100/50",
     label: "Issuer / Category",
+    colors: {
+      bg: "#f8fafc", // slate-50
+      icon: "#475569", // slate-600
+      border: "#f1f5f9", // slate-100
+    },
   };
 }

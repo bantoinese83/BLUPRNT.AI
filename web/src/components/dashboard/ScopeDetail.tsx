@@ -9,7 +9,12 @@ import { ScopeSummary } from "./ScopeSummary";
 import { ScopeItemRow } from "./ScopeItemRow";
 import { AddScopeItemModal } from "./AddScopeItemModal";
 import { DashboardEmptyPanel } from "@/components/ui/dashboard-empty-panel";
-import type { ProjectRow, ScopeRow } from "@shared/types/database";
+import type {
+  ProjectRow,
+  ScopeRow,
+  LedgerEntryWithLines,
+} from "@shared/types/database";
+import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
 const PHASE_ORDER = [
   "Site Prep",
@@ -26,6 +31,8 @@ const PHASE_ORDER = [
 export function ScopeDetail({
   project,
   scopeItems,
+  ledgerEntries,
+  reconciliation,
   projectId,
   onRefresh,
   isArchitect,
@@ -33,6 +40,8 @@ export function ScopeDetail({
 }: {
   project: ProjectRow;
   scopeItems: ScopeRow[];
+  ledgerEntries: LedgerEntryWithLines[];
+  reconciliation: ReconciliationResult | null;
   projectId: string;
   onRefresh: () => void;
   isArchitect?: boolean;
@@ -179,6 +188,8 @@ export function ScopeDetail({
                       <ScopeItemRow
                         key={item.id}
                         item={item}
+                        reconciliation={reconciliation?.items[item.id]}
+                        ledgerEntries={ledgerEntries}
                         isEditing={editingId === item.id}
                         onEdit={startEdit}
                         onDelete={setDeleteConfirmItem}

@@ -17,6 +17,24 @@ export interface HealthScoreResult {
 }
 
 /**
+ * Thresholds and scores for project health calculations.
+ */
+export const HEALTH_THRESHOLDS = {
+  /** Upper budget limit (85%) */
+  AT_LIMIT_UTILIZATION: 85,
+  /** Initial progress threshold (20%) */
+  EXCELLENT_PROGRESS: 20,
+  /** Base score for over-budget projects */
+  BASE_OVER_BUDGET_SCORE: 70,
+  /** Score for projects at limit */
+  SCORE_AT_LIMIT: 75,
+  /** Score for projects with excellent progress */
+  SCORE_EXCELLENT: 95,
+  /** Default score for healthy projects */
+  SCORE_HEALTHY: 88,
+} as const;
+
+/**
  * Shared logic for project health scoring based on spending vs estimate.
  */
 export function calculateHealthScore(
@@ -49,7 +67,10 @@ export function calculateHealthScore(
     const overPct = budgetUtilization - 100;
     const g = VIZ_GRADIENT.healthOver;
     return {
-      score: Math.max(0, Math.round(70 - overPct)),
+      score: Math.max(
+        0,
+        Math.round(HEALTH_THRESHOLDS.BASE_OVER_BUDGET_SCORE - overPct),
+      ),
       status: "Over Budget",
       stop1: g.stop1,
       stop2: g.stop2,
@@ -57,10 +78,10 @@ export function calculateHealthScore(
     };
   }
 
-  if (budgetUtilization > 85) {
+  if (budgetUtilization > HEALTH_THRESHOLDS.AT_LIMIT_UTILIZATION) {
     const g = VIZ_GRADIENT.healthAtLimit;
     return {
-      score: 75,
+      score: HEALTH_THRESHOLDS.SCORE_AT_LIMIT,
       status: "At Limit",
       stop1: g.stop1,
       stop2: g.stop2,
@@ -68,10 +89,10 @@ export function calculateHealthScore(
     };
   }
 
-  if (progressPct < 20) {
+  if (progressPct < HEALTH_THRESHOLDS.EXCELLENT_PROGRESS) {
     const g = VIZ_GRADIENT.healthExcellent;
     return {
-      score: 95,
+      score: HEALTH_THRESHOLDS.SCORE_EXCELLENT,
       status: "Excellent",
       stop1: g.stop1,
       stop2: g.stop2,
@@ -81,7 +102,7 @@ export function calculateHealthScore(
 
   const g = VIZ_GRADIENT.healthHealthy;
   return {
-    score: 88,
+    score: HEALTH_THRESHOLDS.SCORE_HEALTHY,
     status: "Healthy",
     stop1: g.stop1,
     stop2: g.stop2,

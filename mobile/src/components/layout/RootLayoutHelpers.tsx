@@ -11,6 +11,7 @@ import { Theme } from "@/constants/Theme";
 import { useAuth } from "@/contexts/auth-context";
 import { isNetworkReachable } from "@/lib/network-status";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
+import { consumePostLoginRedirect } from "@/lib/post-login-redirect-storage";
 import { Sentry } from "@/lib/sentry";
 
 export function OfflineBannerHost() {
@@ -89,7 +90,8 @@ export function RootLayoutNav() {
     if ((inAuthGroup || isLanding) && !onRecoveryScreen) {
       void (async () => {
         const href = await getPostAuthRedirectHref();
-        router.replace(href);
+        const target = await consumePostLoginRedirect(href);
+        router.replace(target as never);
       })();
     }
   }, [session, loading, segments, pathname]);

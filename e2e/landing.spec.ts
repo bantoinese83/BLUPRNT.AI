@@ -27,6 +27,10 @@ test.describe("Landing smoke", () => {
     ).toBeVisible();
 
     await expect(
+      page.getByRole("button", { name: /add another renovation/i }),
+    ).toBeVisible();
+
+    await expect(
       page.getByText(/not contractor lead lists/i),
     ).toBeVisible();
 

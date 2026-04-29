@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import { supabase, invokeFunction } from "@/lib/supabase";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { PhotoSlot } from "./PhotoSlot";
+import { useTransformationVaultLogic } from "@shared/hooks/use-transformation-vault";
+import { UI_CONSTANTS } from "@shared/constants/ui";
 
 type TransformationVaultProps = {
   projectId: string;
@@ -27,83 +29,30 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const { load: refreshDashboard } = useDashboardData();
   const [uploading, setUploading] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [activeSetIndex, setActiveSetIndex] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Clear cache when switching projects to manage memory
+  const { sets, signedUrls } = useTransformationVaultLogic(
+    projectId,
+    galleryItems,
+    supabase,
+  );
+
+  // Clear local UI state when switching projects
   useEffect(() => {
-    setSignedUrls({});
     setActiveSetIndex(0);
   }, [projectId]);
 
   useEffect(() => {
-    hintTimerRef.current = setTimeout(() => setShowSwipeHint(false), 2800);
+    hintTimerRef.current = setTimeout(
+      () => setShowSwipeHint(false),
+      UI_CONSTANTS.SWIPE_HINT_DURATION_MS,
+    );
     return () => {
       if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
     };
   }, []);
-
-  // Group items into sets (Optimized single-pass)
-  const sets = useMemo(() => {
-    const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
-    const befores = [];
-    const afters = [];
-    for (const item of safeGallery) {
-      if (item.photo_type === "before") befores.push(item);
-      else if (item.photo_type === "after") afters.push(item);
-    }
-    const count = Math.max(befores.length, afters.length, 1);
-
-    const result = [];
-    for (let i = 0; i < count; i++) {
-      result.push({
-        before: befores[i] || null,
-        after: afters[i] || null,
-      });
-    }
-    const last = result[result.length - 1];
-    if (last && (last.before || last.after)) {
-      result.push({ before: null, after: null });
-    }
-    return result;
-  }, [galleryItems]);
-
-  useEffect(() => {
-    const fetchSignedUrls = async () => {
-      const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
-      const pathsToFetch = safeGallery
-        .map((i) => i.storage_path)
-        .filter((path) => !signedUrls[path]);
-
-      if (pathsToFetch.length === 0) return;
-
-      const { data, error } = await supabase.storage
-        .from("project-photos")
-        .createSignedUrls(pathsToFetch, 3600);
-
-      if (error) {
-        console.error(
-          "[TransformationVault] Error creating signed URLs:",
-          error,
-        );
-        return;
-      }
-
-      if (data) {
-        const newUrls: Record<string, string> = { ...signedUrls };
-        data.forEach((item) => {
-          if (item.signedUrl && item.path) {
-            newUrls[item.path] = item.signedUrl;
-          }
-        });
-        setSignedUrls(newUrls);
-      }
-    };
-    fetchSignedUrls();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [galleryItems]);
 
   const handlePickPhoto = async (type: "before" | "after", index: number) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();

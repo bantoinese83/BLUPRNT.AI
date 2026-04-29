@@ -133,6 +133,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
           <ProjectScopeGroupedList
             groupedScope={groupedScope}
             reconciliation={vm.reconciliation}
+            ledgerEntries={detailLedgerEntries}
             expandedId={expandedId}
             setExpandedId={setExpandedId}
             onPersistScopeMaterials={updateScopeItemMaterials}

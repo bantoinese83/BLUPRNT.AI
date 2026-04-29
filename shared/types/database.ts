@@ -29,6 +29,10 @@ export type ScopeRow = Omit<
 
 export type LedgerEntryRow = PublicSchema["Tables"]["ledger_entries"]["Row"];
 
+export type LedgerEntryWithLines = LedgerEntryRow & {
+  ledger_line_items?: LedgerLineItemRow[];
+};
+
 export type LedgerLineItemRow =
   PublicSchema["Tables"]["ledger_line_items"]["Row"];
 

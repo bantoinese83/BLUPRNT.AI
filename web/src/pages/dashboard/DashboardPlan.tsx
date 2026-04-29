@@ -72,6 +72,7 @@ export function DashboardPlan({
       <EstimateSummary
         project={project}
         scopeItems={scopeItems}
+        ledgerEntries={ledgerEntries}
         reconciliation={reconciliation}
         isArchitect={isArchitect}
         hasProjectPass={hasProjectPass}

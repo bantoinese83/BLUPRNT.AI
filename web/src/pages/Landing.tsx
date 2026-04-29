@@ -164,6 +164,11 @@ export default function Landing() {
                 block: "start",
               });
             }}
+            onAddAnotherProject={() => {
+              navigate(
+                `/login?redirect=${encodeURIComponent("/onboarding?newProject=1")}`,
+              );
+            }}
           />
 
           <LandingBelowFold

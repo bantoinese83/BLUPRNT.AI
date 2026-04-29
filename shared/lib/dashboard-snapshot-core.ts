@@ -6,7 +6,7 @@ import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import type {
   ProjectRow,
   ScopeRow,
-  LedgerEntryRow,
+  LedgerEntryWithLines,
   UserSubscriptionRow,
   ProjectPassRow,
   GalleryItemRow,
@@ -92,7 +92,7 @@ export async function fetchLastActiveProjectIdFromPreferences(
 export type BuiltDashboardForProject = {
   project: ProjectRow;
   scopeItems: import("../types/database.ts").ScopeRow[];
-  ledgerEntries: import("../types/database.ts").LedgerEntryRow[];
+  ledgerEntries: LedgerEntryWithLines[];
   galleryItems: import("../types/database.ts").GalleryItemRow[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
@@ -158,17 +158,14 @@ export async function buildDashboardDataForProject(
   );
 
   const newScopes = (scopesRes.data ?? []) as ScopeRow[];
-  const newLedgerRaw = (invRes.data ?? []) as (LedgerEntryRow & {
-    ledger_line_items?: import("../types/database.ts").LedgerLineItemRow[];
-  })[];
-  const newLedger = newLedgerRaw as LedgerEntryRow[];
+  const newLedger = (invRes.data ?? []) as LedgerEntryWithLines[];
   const newGalleryItems = (galleryRes.data ?? []) as GalleryItemRow[];
   const sub = subRes.data as UserSubscriptionRow | null;
   const pass = subRes2.data as ProjectPassRow | null;
   const isArchitect = isArchitectPlanEffective(sub);
   const hasProjectPass = !!pass;
 
-  const allLineItems = newLedgerRaw.flatMap((l) => {
+  const allLineItems = newLedger.flatMap((l) => {
     const lines = l.ledger_line_items || [];
     if (lines.length === 0 && (l.total || 0) > 0) {
       // Fallback: If no line items but we have a total, create a single representative line item

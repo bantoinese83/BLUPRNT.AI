@@ -46,4 +46,17 @@ describe("getSafeRedirect", () => {
       "/settings?tab=profile",
     );
   });
+
+  it("allows onboarding newProject query (mobile + web)", () => {
+    expect(getSafeRedirect("/onboarding?newProject=1")).toBe(
+      "/onboarding?newProject=1",
+    );
+  });
+
+  it("allows Expo tabs root (mobile)", () => {
+    expect(getSafeRedirect("/(tabs)", "/dashboard")).toBe("/(tabs)");
+    expect(getSafeRedirect("/(tabs)/index", "/dashboard")).toBe(
+      "/(tabs)/index",
+    );
+  });
 });

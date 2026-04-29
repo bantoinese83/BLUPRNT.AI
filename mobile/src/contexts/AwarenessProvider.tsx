@@ -10,6 +10,7 @@ import {
 } from "@/contexts/AwarenessContext";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 import { money } from "@shared/lib/formatters";
+import { AWARENESS_THRESHOLDS } from "@shared/constants/awareness";
 
 export function AwarenessProvider({
   children,
@@ -62,7 +63,11 @@ export function AwarenessProvider({
           category: item.category,
         });
         health = "critical";
-      } else if (item.total_cost_max && actual > item.total_cost_max * 0.8) {
+      } else if (
+        item.total_cost_max &&
+        actual >
+          item.total_cost_max * AWARENESS_THRESHOLDS.CATEGORY_BUDGET_WARNING
+      ) {
         health = health === "critical" ? "critical" : "warning";
       }
     });
@@ -80,7 +85,9 @@ export function AwarenessProvider({
       scopeItems.length > 0 &&
       scopeMaxSum > 0 &&
       capitalDocumentedTotal > scopeMaxSum &&
-      lineBackedTotal < capitalDocumentedTotal * 0.85
+      lineBackedTotal <
+        capitalDocumentedTotal *
+          AWARENESS_THRESHOLDS.AGGREGATE_LINE_BACKED_THRESHOLD
     ) {
       newInsights.push({
         id: "budget-aggregate-over",
@@ -123,7 +130,11 @@ export function AwarenessProvider({
     }
 
     // 3. Opportunity: resale value tip (capital work, not maintenance-only log)
-    if (capitalDocumentedTotal > 5000 && scopeItems.length > 0) {
+    if (
+      capitalDocumentedTotal >
+        AWARENESS_THRESHOLDS.SELLER_PACKET_MIN_INVESTMENT &&
+      scopeItems.length > 0
+    ) {
       newInsights.push({
         id: "resale-opportunity",
         type: "opportunity",

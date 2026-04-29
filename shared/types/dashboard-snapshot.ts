@@ -1,11 +1,12 @@
 import type {
   ProjectRow,
   ScopeRow,
-  LedgerEntryRow,
+  LedgerEntryWithLines,
   UserSubscriptionRow,
-} from "./database";
+  GalleryItemRow,
+} from "./database.ts";
 
-import type { ReconciliationResult } from "../lib/reconciliation";
+import type { ReconciliationResult } from "../lib/reconciliation.ts";
 
 /** Dashboard bundle used by web and mobile data layers. */
 export type DashboardSnapshot = {
@@ -16,12 +17,12 @@ export type DashboardSnapshot = {
   projects: ProjectRow[];
   project: ProjectRow | null;
   scopeItems: ScopeRow[];
-  ledgerEntries: LedgerEntryRow[];
+  ledgerEntries: LedgerEntryWithLines[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
   subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
-  galleryItems: import("./database").GalleryItemRow[];
+  galleryItems: GalleryItemRow[];
   lastProjectId: string | null;
 };

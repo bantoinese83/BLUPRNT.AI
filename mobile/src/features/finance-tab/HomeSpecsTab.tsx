@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
 } from "react-native";
 import {
   Paintbrush,
@@ -24,6 +23,9 @@ import { supabase } from "@/lib/supabase";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { captureEvent } from "@/lib/posthog";
 import type { PhysicalAssetRow } from "@shared/types/database";
+import { STORAGE_CONFIG } from "@shared/constants/storage";
+import { useConfirmation } from "@/contexts/useConfirmation";
+import { showAppToast } from "@/lib/app-toast";
 
 type HomeSpecsTabProps = {
   projectId: string;
@@ -42,6 +44,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const { confirm } = useConfirmation();
 
   const fetchAssets = useCallback(async () => {
     try {
@@ -74,7 +77,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
 
       const { data, error } = await supabase.storage
         .from("project-photos")
-        .createSignedUrls(pathsToFetch, 3600);
+        .createSignedUrls(pathsToFetch, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
 
       if (error) return;
 
@@ -96,13 +99,14 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
     (a) => activeCategory === "all" || a.category === activeCategory,
   );
 
-  const handleDelete = (id: string) => {
-    Alert.alert("Remove spec?", "This will permanently delete this record.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
+  const handleDelete = useCallback(
+    (id: string) => {
+      confirm({
+        title: "Remove spec?",
+        message: "This will permanently delete this record.",
+        confirmLabel: "Remove",
+        variant: "destructive",
+        onConfirm: async () => {
           const { error } = await supabase
             .from("physical_assets")
             .delete()
@@ -112,89 +116,60 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
             captureEvent("asset_deleted", {
               category: assets.find((a) => a.id === id)?.category,
             });
+            showAppToast("Spec removed.");
             fetchAssets();
+          } else {
+            showAppToast("Failed to remove spec.");
           }
         },
-      },
-    ]);
-  };
+      });
+    },
+    [assets, fetchAssets, confirm],
+  );
 
-  const renderAsset = ({ item }: { item: PhysicalAssetRow }) => (
-    <GlassCard style={styles.assetCard}>
-      <View style={styles.assetImageContainer}>
-        {item.storage_path && signedUrls[item.storage_path] ? (
-          <Image
-            source={{ uri: signedUrls[item.storage_path] }}
-            style={styles.assetImage}
-          />
-        ) : (
-          <View style={styles.assetImagePlaceholder}>
-            <Camera size={24} color={Theme.colors.text.muted} opacity={0.3} />
-          </View>
-        )}
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryBadgeText}>
-            {item.category.toUpperCase()}
-          </Text>
-        </View>
+  const renderAsset = useCallback(
+    ({ item }: { item: PhysicalAssetRow }) => (
+      <AssetCard
+        item={item}
+        signedUrl={
+          item.storage_path ? signedUrls[item.storage_path] : undefined
+        }
+        onDelete={handleDelete}
+      />
+    ),
+    [signedUrls, handleDelete],
+  );
+
+  const keyExtractor = useCallback((item: PhysicalAssetRow) => item.id, []);
+
+  const renderCategory = useCallback(
+    ({ item: cat }: { item: (typeof CATEGORIES)[0] }) => {
+      const Icon = cat.icon;
+      const active = activeCategory === cat.id;
+      return (
         <TouchableOpacity
-          style={styles.deleteBtn}
-          onPress={() => handleDelete(item.id)}
-          testID="delete-spec-btn"
+          onPress={() => {
+            setActiveCategory(cat.id);
+            Haptics.selectionAsync();
+          }}
+          style={[styles.filterChip, active && styles.filterChipActive]}
         >
-          <Trash2 size={16} color={Theme.colors.status.error} />
+          <Icon
+            size={14}
+            color={active ? "white" : Theme.colors.text.secondary}
+          />
+          <Text
+            style={[
+              styles.filterChipText,
+              active && styles.filterChipTextActive,
+            ]}
+          >
+            {cat.label}
+          </Text>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.assetInfo}>
-        <Text style={styles.assetName} numberOfLines={1}>
-          {item.name}
-        </Text>
-        {item.location_in_home && (
-          <View style={styles.locationRow}>
-            <MapPin size={10} color={Theme.colors.text.muted} />
-            <Text style={styles.locationText}>{item.location_in_home}</Text>
-          </View>
-        )}
-
-        <View style={styles.specsGrid}>
-          {item.brand && (
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>BRAND</Text>
-              <Text style={styles.specValue}>{item.brand}</Text>
-            </View>
-          )}
-          {item.color_name && (
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>COLOR</Text>
-              <Text style={styles.specValue}>{item.color_name}</Text>
-            </View>
-          )}
-          {item.color_code && (
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>CODE</Text>
-              <Text style={styles.specValue} numberOfLines={1}>
-                {item.color_code}
-              </Text>
-            </View>
-          )}
-          {item.finish && (
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>FINISH</Text>
-              <Text style={styles.specValue}>{item.finish}</Text>
-            </View>
-          )}
-        </View>
-
-        {item.notes && (
-          <View style={styles.notesBox}>
-            <Text style={styles.notesText} numberOfLines={2}>
-              "{item.notes}"
-            </Text>
-          </View>
-        )}
-      </View>
-    </GlassCard>
+      );
+    },
+    [activeCategory],
   );
 
   if (loading) {
@@ -214,38 +189,13 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
           data={CATEGORIES}
           keyExtractor={(c) => c.id}
           contentContainerStyle={styles.filterContent}
-          renderItem={({ item: cat }) => {
-            const Icon = cat.icon;
-            const active = activeCategory === cat.id;
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  setActiveCategory(cat.id);
-                  Haptics.selectionAsync();
-                }}
-                style={[styles.filterChip, active && styles.filterChipActive]}
-              >
-                <Icon
-                  size={14}
-                  color={active ? "white" : Theme.colors.text.secondary}
-                />
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    active && styles.filterChipTextActive,
-                  ]}
-                >
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
+          renderItem={renderCategory}
         />
       </View>
 
       <FlatList
         data={filteredAssets}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         renderItem={renderAsset}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
@@ -261,6 +211,93 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
     </View>
   );
 }
+
+const AssetCard = React.memo(
+  ({
+    item,
+    signedUrl,
+    onDelete,
+  }: {
+    item: PhysicalAssetRow;
+    signedUrl?: string;
+    onDelete: (id: string) => void;
+  }) => {
+    return (
+      <GlassCard style={styles.assetCard}>
+        <View style={styles.assetImageContainer}>
+          {signedUrl ? (
+            <Image source={{ uri: signedUrl }} style={styles.assetImage} />
+          ) : (
+            <View style={styles.assetImagePlaceholder}>
+              <Camera size={24} color={Theme.colors.text.muted} opacity={0.3} />
+            </View>
+          )}
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryBadgeText}>
+              {item.category.toUpperCase()}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.deleteBtn}
+            onPress={() => onDelete(item.id)}
+            testID="delete-spec-btn"
+          >
+            <Trash2 size={16} color={Theme.colors.status.error} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.assetInfo}>
+          <Text style={styles.assetName} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {item.location_in_home && (
+            <View style={styles.locationRow}>
+              <MapPin size={10} color={Theme.colors.text.muted} />
+              <Text style={styles.locationText}>{item.location_in_home}</Text>
+            </View>
+          )}
+
+          <View style={styles.specsGrid}>
+            {item.brand && (
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>BRAND</Text>
+                <Text style={styles.specValue}>{item.brand}</Text>
+              </View>
+            )}
+            {item.color_name && (
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>COLOR</Text>
+                <Text style={styles.specValue}>{item.color_name}</Text>
+              </View>
+            )}
+            {item.color_code && (
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>CODE</Text>
+                <Text style={styles.specValue} numberOfLines={1}>
+                  {item.color_code}
+                </Text>
+              </View>
+            )}
+            {item.finish && (
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>FINISH</Text>
+                <Text style={styles.specValue}>{item.finish}</Text>
+              </View>
+            )}
+          </View>
+
+          {item.notes && (
+            <View style={styles.notesBox}>
+              <Text style={styles.notesText} numberOfLines={2}>
+                "{item.notes}"
+              </Text>
+            </View>
+          )}
+        </View>
+      </GlassCard>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -314,12 +351,13 @@ const styles = StyleSheet.create({
   },
   assetImageContainer: {
     width: "100%",
-    aspectRatio: 16 / 9,
+    aspectRatio: 1,
     backgroundColor: "rgba(148,163,184,0.05)",
   },
   assetImage: {
     width: "100%",
     height: "100%",
+    resizeMode: "cover",
   },
   assetImagePlaceholder: {
     flex: 1,

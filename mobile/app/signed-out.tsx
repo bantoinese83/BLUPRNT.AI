@@ -58,7 +58,7 @@ export default function SignedOutScreen() {
           </Text>
           <Text style={styles.body}>
             {
-              "Thanks for stopping by. When you're ready, you can pick up where you left off from the welcome screen or sign in again."
+              "Thanks for stopping by. Sign in again to continue with your projects, or go to the welcome screen to start fresh."
             }
           </Text>
         </View>

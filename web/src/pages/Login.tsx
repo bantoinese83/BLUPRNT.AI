@@ -27,7 +27,10 @@ import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
-import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import {
+  friendlyAuthError,
+  friendlyAuthErrorFromUrlParam,
+} from "@shared/lib/user-friendly-errors";
 
 type Mode = "password" | "magic";
 
@@ -73,16 +76,8 @@ export default function Login() {
     }
   }, [user, authLoading, navigate, searchParams]);
 
-  const urlErrorParam = searchParams.get("error");
-  let urlError: string | null = null;
-  if (urlErrorParam) {
-    try {
-      urlError = decodeURIComponent(urlErrorParam);
-    } catch {
-      urlError = urlErrorParam;
-    }
-  }
-  const displayError = error || urlError;
+  const displayError =
+    error || friendlyAuthErrorFromUrlParam(searchParams.get("error"));
   const redirectParam = searchParams.get("redirect");
   const registerHref =
     redirectParam != null && redirectParam.trim() !== ""

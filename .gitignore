@@ -3,6 +3,8 @@ build/
 dist/
 web/dist/
 web/coverage/
+# Accidental Vitest redirect output (`vitest run > …`)
+web/test_output.txt
 coverage/
 playwright-report/
 test-results/

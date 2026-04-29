@@ -4,7 +4,9 @@
     "@bluprnt/shared",
     "react-native-screens",
     "react-native-worklets",
-    "react-native-web"
+    "react-native-web",
+    "babel-plugin-module-resolver",
+    "expo-router"
   ],
   "ignore": [
     "src/test/**",

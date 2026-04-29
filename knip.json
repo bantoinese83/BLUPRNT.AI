@@ -2,7 +2,13 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreWorkspaces": ["mobile", "shared"],
   "ignore": ["supabase/**", "scripts/**"],
-  "ignoreDependencies": ["husky", "vitest", "tailwindcss", "nativewind"],
+  "ignoreDependencies": [
+    "husky",
+    "vitest",
+    "tailwindcss",
+    "nativewind",
+    "@bluprnt/shared"
+  ],
   "ignoreBinaries": ["supabase"],
   "metro": false,
   "expo": false

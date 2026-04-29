@@ -23,7 +23,9 @@ export function LoadingScreen() {
     [projectType, locationInput],
   );
 
-  const activeMessages = onboardingContext?.status_messages || staticMessages;
+  const ctxMessages = onboardingContext?.status_messages;
+  const activeMessages =
+    ctxMessages && ctxMessages.length > 0 ? ctxMessages : staticMessages;
 
   useEffect(() => {
     const interval = setInterval(() => {

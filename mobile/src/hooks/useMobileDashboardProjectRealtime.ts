@@ -21,8 +21,7 @@ export function useMobileDashboardProjectRealtime(
     const channel = setupProjectDashboardRealtime(supabase, {
       projectId: activeProjectId,
       channelPrefix: "mobile_sync",
-      onUpdate: ({ table }) => {
-        console.log(`[Realtime] ${table} updated, debouncing refresh...`);
+      onUpdate: () => {
         // Use a small debounce and refetchQueries to ensure we bypass replication lag
         // and get the absolute latest state from the database.
         clearTimeout(timeout);

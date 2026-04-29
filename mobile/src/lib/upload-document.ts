@@ -64,6 +64,8 @@ export async function uploadDocumentWithType(
   );
 }
 
+const UPLOAD_TIMEOUT_MS = 60000;
+
 /** Orchestrates the UI feedback, network call, and error mapping for a document upload. */
 async function executeUploadWorkflow(
   uri: string,
@@ -75,9 +77,6 @@ async function executeUploadWorkflow(
   try {
     showAppToast("Starting upload... please keep the app open.");
 
-    console.log(
-      `[upload-document] Workflow started for URI: ${uri}, Mime: ${mimeType}, Project: ${projectId}`,
-    );
     const formData = prepareUploadFormData(
       uri,
       mimeType,
@@ -85,9 +84,7 @@ async function executeUploadWorkflow(
       projectId,
       originalFileName,
     );
-    console.log("[upload-document] FormData prepared, invoking function...");
     const { data, error } = await invokeUploadWithTimeout(formData);
-    console.log("[upload-document] Response received:", { data, error });
 
     const failure = extractUploadFailureFromInvokeResult(data, error);
     if (failure) {
@@ -161,7 +158,7 @@ function prepareUploadFormData(
 /** Calls the Edge Function with a 60-second race-timeout. */
 async function invokeUploadWithTimeout(formData: FormData) {
   const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Upload timeout")), 60000),
+    setTimeout(() => reject(new Error("Upload timeout")), UPLOAD_TIMEOUT_MS),
   );
 
   return await Promise.race([

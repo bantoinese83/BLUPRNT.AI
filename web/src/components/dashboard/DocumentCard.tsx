@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Eye, Clock, Lock, Sparkles } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
@@ -23,7 +23,7 @@ interface DocumentCardProps {
   onClick: (id: string) => void;
 }
 
-export function DocumentCard({
+export const DocumentCard = memo(function DocumentCard({
   document,
   index,
   hasProjectPass,
@@ -188,4 +188,4 @@ export function DocumentCard({
       ) : null}
     </>
   );
-}
+});

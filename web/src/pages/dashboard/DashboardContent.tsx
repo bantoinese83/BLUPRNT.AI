@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import {
   useNavigate,
   Routes,
@@ -8,15 +8,12 @@ import {
 } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "motion/react";
-import { toast } from "sonner";
 
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
-import { downloadSellerPacket } from "@/lib/seller-packet-download";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 import { generateActivityEvents } from "@/lib/activity";
-import type { UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
 import { DASHBOARD_SECTION_GUIDED_PATH } from "@shared/copy/dashboard";
@@ -24,9 +21,6 @@ import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
 import { countBillOrReceiptUploadsInProject } from "@shared/lib/ledger-entry-quota";
 
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { reportClientError } from "@/lib/sentry";
-import { useLogout } from "@/hooks/use-logout";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
 import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
@@ -46,6 +40,7 @@ import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardActionModals } from "@/components/dashboard/DashboardActionModals";
 import { useDashboardSections } from "./useDashboardSections";
+import { useDashboardActions } from "./useDashboardActions";
 
 export function DashboardContent({
   projects,
@@ -72,17 +67,38 @@ export function DashboardContent({
 }: DashboardContentProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useLogout();
-  const [showUpgrade, setShowUpgrade] = useState(false);
-  const [upgradeReason, setUpgradeReason] =
-    useState<UpgradeOpenReason>("general");
-  const [shareOpen, setShareOpen] = useState(false);
-
-  const [deleteProject, setDeleteProject] = useState<ProjectRow | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-
   const { isSidebarOpen, setIsSidebarOpen } = useAwareness();
+
+  const {
+    showUpgrade,
+    setShowUpgrade,
+    upgradeReason,
+    setUpgradeReason,
+    shareOpen,
+    setShareOpen,
+    deleteProject,
+    showDeleteModal,
+    setShowDeleteModal,
+    isAssistantOpen,
+    setIsAssistantOpen,
+    handleSignOut,
+    handleExportPDF,
+    handleProjectDelete,
+    handleConfirmDelete,
+    handleProjectRename,
+  } = useDashboardActions({
+    project,
+    projects,
+    scopeItems,
+    ledgerEntries,
+    isArchitect,
+    hasProjectPass,
+    load,
+    setProjects,
+    setProject,
+    setScopeItems,
+    setLedgerEntries,
+  });
 
   useDashboardUpgradeQueryEffect(
     location.search,
@@ -116,104 +132,34 @@ export function DashboardContent({
     setUpgradeReason,
   });
 
-  const handleSignOut = useCallback(async () => {
-    await logout();
-    navigate("/");
-  }, [logout, navigate]);
-
-  const handleExportPDF = useCallback(() => {
-    if (!isArchitect && !hasProjectPass && import.meta.env.VITE_E2E !== "1") {
-      setUpgradeReason("export");
-      setShowUpgrade(true);
-      return;
-    }
-
-    void downloadSellerPacket({
-      projectId: project.id,
-      propertyId: project.property_id,
-      project: {
-        name: project.name,
-        estimated_min_total: project.estimated_min_total,
-        estimated_max_total: project.estimated_max_total,
-      },
-      scopeItems,
-      ledgerEntries: ledgerEntries as LedgerEntryRow[],
-    });
-  }, [project, scopeItems, ledgerEntries, isArchitect, hasProjectPass]);
-
-  const handleProjectDelete = useCallback((p: ProjectRow) => {
-    setDeleteProject(p);
-    setShowDeleteModal(true);
-  }, []);
-
-  async function handleConfirmDelete() {
-    if (!deleteProject || !isSupabaseConfigured()) return;
-
-    const id = deleteProject.id;
-    const originalProjects = [...projects];
-    const originalCurrentProject = project;
-
-    setProjects(projects.filter((p: ProjectRow) => p.id !== id));
-    if (id === project?.id) {
-      setProject(null);
-      setScopeItems([]);
-      setLedgerEntries([]);
-    }
-
-    const deleteAction = async () => {
-      const { error } = await supabase.from("projects").delete().eq("id", id);
-      if (error) throw error;
-
-      if (id === localStorage.getItem("bluprnt_project_id")) {
-        localStorage.removeItem("bluprnt_project_id");
-      }
-      return true;
-    };
-
-    setShowDeleteModal(false);
-
-    toast.promise(deleteAction(), {
-      loading: "Deleting project...",
-      success: () => {
-        if (id === originalCurrentProject?.id) {
-          load();
-        }
-        setDeleteProject(null);
-        return "Project permanently removed";
-      },
-      error: () => {
-        setProjects(originalProjects);
-        setProject(originalCurrentProject);
-        setDeleteProject(null);
-        return "Failed to delete project. Check your connection and try again.";
-      },
-    });
-  }
-
   const activityEvents = useMemo(
     () => generateActivityEvents(project, ledgerEntries as LedgerEntryRow[]),
     [project, ledgerEntries],
   );
 
-  const handleProjectRename = async (id: string, newName: string) => {
-    const renameAction = async () => {
-      const { error } = await supabase
-        .from("projects")
-        .update({ name: newName })
-        .eq("id", id);
-      if (error) throw error;
-      load();
-    };
+  const projectOptions = useMemo(
+    () =>
+      projects.map((p: ProjectRow) => ({
+        id: p.id,
+        name: p.name,
+        created_at: p.created_at,
+        estimated_min_total: p.estimated_min_total,
+      })),
+    [projects],
+  );
 
-    toast.promise(renameAction(), {
-      loading: "Renaming project...",
-      success: "Project renamed successfully.",
-      error: (err: unknown) => {
-        reportClientError("dashboard_rename_project", err);
-        return "Failed to rename project. Check your connection and try again.";
-      },
-    });
-  };
+  const handleProjectDeleteOption = useCallback(
+    (id: string) => {
+      const p = projects.find((p: ProjectRow) => p.id === id);
+      if (p) handleProjectDelete(p);
+    },
+    [projects, handleProjectDelete],
+  );
+
+  const handleProjectRenameOption = useCallback(
+    (newName: string) => handleProjectRename(project.id, newName),
+    [project.id, handleProjectRename],
+  );
 
   return (
     <div className="min-h-screen dashboard-bg page-fade-in">
@@ -264,24 +210,16 @@ export function DashboardContent({
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <ProjectSwitcher
-            projects={projects.map((p: ProjectRow) => ({
-              id: p.id,
-              name: p.name,
-              created_at: p.created_at,
-              estimated_min_total: p.estimated_min_total,
-            }))}
+            projects={projectOptions}
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
-            onDelete={(id) => {
-              const p = projects.find((p: ProjectRow) => p.id === id);
-              if (p) handleProjectDelete(p);
-            }}
+            onDelete={handleProjectDeleteOption}
           />
         </motion.div>
         <motion.div variants={itemVariants}>
           <ProjectHeader
             project={project}
-            onRename={(newName) => handleProjectRename(project.id, newName)}
+            onRename={handleProjectRenameOption}
           />
         </motion.div>
 
@@ -294,6 +232,11 @@ export function DashboardContent({
           estimatedMax={project.estimated_max_total ?? 0}
           spendingTotal={memoInvestmentTotal}
           documentRowCount={ledgerEntries.length}
+          unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
+          projectName={project.name}
+          isArchitect={isArchitect}
+          hasProjectPass={hasProjectPass}
+          onUpgradeClick={() => setShowUpgrade(true)}
         />
 
         {project && (
@@ -374,6 +317,8 @@ export function DashboardContent({
                   <DashboardScope
                     project={project}
                     scopeItems={scopeItems}
+                    ledgerEntries={ledgerEntries}
+                    reconciliation={reconciliation}
                     onRefresh={load}
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}

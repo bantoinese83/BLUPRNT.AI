@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { MotiView } from "moti";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
@@ -30,6 +30,11 @@ import {
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
+import { getSafeRedirect } from "@shared/lib/safe-redirect";
+import {
+  clearPostLoginRedirectStorage,
+  persistPostLoginRedirectForOAuth,
+} from "@/lib/post-login-redirect-storage";
 import {
   isValidEmail,
   isValidPassword,
@@ -38,6 +43,7 @@ import {
 
 export default function RegisterScreen() {
   const { signInWithGoogle } = useAuth();
+  const params = useLocalSearchParams<{ redirect?: string | string[] }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -101,9 +107,16 @@ export default function RegisterScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     if (data.session) {
-      const href = await getPostAuthRedirectHref();
+      await clearPostLoginRedirectStorage();
+      const fallback = await getPostAuthRedirectHref();
+      const rawRedirect = Array.isArray(params.redirect)
+        ? params.redirect[0]
+        : params.redirect;
+      const target = rawRedirect?.trim()
+        ? getSafeRedirect(rawRedirect.trim(), fallback)
+        : fallback;
       setLoading(false);
-      router.replace(href);
+      router.replace(target as never);
       return;
     }
 
@@ -113,26 +126,39 @@ export default function RegisterScreen() {
         password,
       });
       if (signInData.session) {
-        const href = await getPostAuthRedirectHref();
+        await clearPostLoginRedirectStorage();
+        const fallback = await getPostAuthRedirectHref();
+        const rawRedirect = Array.isArray(params.redirect)
+          ? params.redirect[0]
+          : params.redirect;
+        const target = rawRedirect?.trim()
+          ? getSafeRedirect(rawRedirect.trim(), fallback)
+          : fallback;
         setLoading(false);
-        router.replace(href);
+        router.replace(target as never);
         return;
       }
     }
 
     setLoading(false);
     const emailParam = email.trim();
+    const rawRedirect = Array.isArray(params.redirect)
+      ? params.redirect[0]
+      : params.redirect;
     Alert.alert(
       "Check your email",
       "We sent a confirmation link. After you confirm, sign in with your password.",
       [
         {
           text: "OK",
-          onPress: () =>
+          onPress: () => {
+            const loginParams: Record<string, string> = { email: emailParam };
+            if (rawRedirect?.trim()) loginParams.redirect = rawRedirect.trim();
             router.replace({
               pathname: "/(auth)/login",
-              params: { email: emailParam },
-            }),
+              params: loginParams,
+            });
+          },
         },
       ],
     );
@@ -148,6 +174,7 @@ export default function RegisterScreen() {
     }
     setGoogleLoading(true);
     try {
+      await persistPostLoginRedirectForOAuth(params.redirect);
       await signInWithGoogle();
     } catch (err) {
       const error = err as Error;
@@ -308,7 +335,10 @@ export default function RegisterScreen() {
               <AppleSignIn
                 policyAccepted={acceptedPolicies}
                 busy={googleLoading}
-                onStart={() => setGoogleLoading(true)}
+                onStart={() => {
+                  setGoogleLoading(true);
+                  void persistPostLoginRedirectForOAuth(params.redirect);
+                }}
                 onSuccess={() => setGoogleLoading(false)}
                 onError={(err) => {
                   setGoogleLoading(false);
@@ -326,7 +356,17 @@ export default function RegisterScreen() {
             <TouchableOpacity
               onPress={() => {
                 Haptics.selectionAsync();
-                router.push("/(auth)/login");
+                const rawRedirect = Array.isArray(params.redirect)
+                  ? params.redirect[0]
+                  : params.redirect;
+                if (rawRedirect?.trim()) {
+                  router.push({
+                    pathname: "/(auth)/login",
+                    params: { redirect: rawRedirect.trim() },
+                  });
+                } else {
+                  router.push("/(auth)/login");
+                }
               }}
             >
               <Text style={styles.linkText}>Sign In</Text>

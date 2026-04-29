@@ -8,15 +8,18 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
+  Sparkles,
+  HeartPulse,
 } from "lucide-react-native";
 import { AnimatePresence } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { projectDetailStyles as styles } from "./project-detail.styles";
 import { ProjectBillOfMaterialsList } from "./ProjectBillOfMaterialsList";
+import { ReconciledDocumentsList } from "./ReconciledDocumentsList";
 
 import { ConfidenceDisplay } from "@/components/ui/ConfidenceDisplay";
-import type { ScopeRow } from "@shared/types/database";
+import type { ScopeRow, LedgerEntryRow } from "@shared/types/database";
 import type { ReconciliationItem } from "@shared/lib/reconciliation";
 import { money } from "@shared/lib/formatters";
 import { type BillOfMaterialItem } from "@shared/types/onboarding";
@@ -25,6 +28,7 @@ import { RECONCILIATION_STATUS_LABELS } from "@shared/copy/dashboard";
 type Props = {
   item: ScopeRow;
   reconciliation?: ReconciliationItem | null;
+  ledgerEntries?: LedgerEntryRow[];
   catIndex: number;
   index: number;
   expandedId: string | null;
@@ -39,6 +43,7 @@ export const ProjectScopeLineCard = React.memo(
   ({
     item,
     reconciliation,
+    ledgerEntries,
     catIndex,
     index,
     expandedId,
@@ -48,6 +53,11 @@ export const ProjectScopeLineCard = React.memo(
     const isOpen = expandedId === item.id;
     const materialRows = item.metadata?.materials;
     const hasMaterialBreakdown = Array.isArray(materialRows);
+
+    // AI Insights from metadata
+    const justification = item.metadata?.justification;
+    const careTips =
+      item.metadata?.care_tips || item.metadata?.maintenance_tips;
 
     return (
       <MotiView
@@ -72,8 +82,36 @@ export const ProjectScopeLineCard = React.memo(
               >
                 {item.description}
               </Text>
-              <View style={{ marginTop: 4 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                  marginTop: 4,
+                }}
+              >
                 <ConfidenceDisplay score={item.confidence_score} size={8} />
+                {(justification || careTips) && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Sparkles size={10} color={Theme.colors.status.info} />
+                    <Text
+                      style={{
+                        fontSize: 9,
+                        fontFamily: Theme.typography.family.bold,
+                        color: Theme.colors.status.info,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      AI Insights
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
             <View style={styles.tierBadge}>
@@ -133,7 +171,10 @@ export const ProjectScopeLineCard = React.memo(
             </Text>
           </View>
 
-          {hasMaterialBreakdown && (
+          {(hasMaterialBreakdown ||
+            ledgerEntries ||
+            justification ||
+            careTips) && (
             <>
               <TouchableOpacity
                 style={[
@@ -169,14 +210,118 @@ export const ProjectScopeLineCard = React.memo(
                     transition={{ type: "timing", duration: 300 }}
                     style={{ overflow: "hidden" }}
                   >
-                    <ProjectBillOfMaterialsList
-                      materials={materialRows}
-                      onPersist={
-                        onPersistScopeMaterials
-                          ? (next) => onPersistScopeMaterials(item.id, next)
-                          : undefined
-                      }
-                    />
+                    {/* Justification Section */}
+                    {justification && (
+                      <View
+                        style={{
+                          padding: 12,
+                          backgroundColor: "rgba(14, 165, 233, 0.05)",
+                          borderRadius: 12,
+                          marginBottom: 8,
+                          marginTop: 8,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 6,
+                            marginBottom: 4,
+                          }}
+                        >
+                          <Sparkles
+                            size={12}
+                            color={Theme.colors.status.info}
+                          />
+                          <Text
+                            style={{
+                              fontSize: 10,
+                              fontFamily: Theme.typography.family.black,
+                              color: Theme.colors.status.info,
+                              textTransform: "uppercase",
+                              letterSpacing: 0.5,
+                            }}
+                          >
+                            Why this cost?
+                          </Text>
+                        </View>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: Theme.colors.text.primary,
+                            lineHeight: 18,
+                          }}
+                        >
+                          {justification}
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* Care Tips Section */}
+                    {careTips && (
+                      <View
+                        style={{
+                          padding: 12,
+                          backgroundColor: "rgba(16, 185, 129, 0.05)",
+                          borderRadius: 12,
+                          marginBottom: 8,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 6,
+                            marginBottom: 4,
+                          }}
+                        >
+                          <HeartPulse
+                            size={12}
+                            color={Theme.colors.status.success}
+                          />
+                          <Text
+                            style={{
+                              fontSize: 10,
+                              fontFamily: Theme.typography.family.black,
+                              color: Theme.colors.status.success,
+                              textTransform: "uppercase",
+                              letterSpacing: 0.5,
+                            }}
+                          >
+                            Maintenance Tips
+                          </Text>
+                        </View>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: Theme.colors.text.primary,
+                            lineHeight: 18,
+                          }}
+                        >
+                          {careTips}
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* Materials Section */}
+                    {hasMaterialBreakdown && (
+                      <ProjectBillOfMaterialsList
+                        materials={materialRows}
+                        onPersist={
+                          onPersistScopeMaterials
+                            ? (next) => onPersistScopeMaterials(item.id, next)
+                            : undefined
+                        }
+                      />
+                    )}
+
+                    {/* Reconciled Spend Section */}
+                    {ledgerEntries && (
+                      <ReconciledDocumentsList
+                        scopeItemId={item.id}
+                        ledgerEntries={ledgerEntries}
+                      />
+                    )}
                   </MotiView>
                 )}
               </AnimatePresence>
@@ -193,6 +338,13 @@ export const ProjectScopeLineCard = React.memo(
       prev.reconciliation === next.reconciliation &&
       prev.item.quantity === next.item.quantity &&
       prev.item.finish_tier === next.item.finish_tier &&
+      prev.item.description === next.item.description &&
+      prev.item.confidence_score === next.item.confidence_score &&
+      prev.item.metadata?.justification === next.item.metadata?.justification &&
+      (prev.item.metadata?.care_tips ||
+        prev.item.metadata?.maintenance_tips) ===
+        (next.item.metadata?.care_tips ||
+          next.item.metadata?.maintenance_tips) &&
       prev.item.metadata?.materials === next.item.metadata?.materials
     );
   },

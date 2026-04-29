@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  Alert,
 } from "react-native";
 import { PlusCircle } from "lucide-react-native";
 import { MotiView } from "moti";
@@ -15,6 +14,12 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import type { ProjectRow } from "@shared/types/database";
 import { ProjectIcon } from "@/lib/project-icons";
+import {
+  useConfirmation,
+  type ConfirmOptions,
+} from "@/contexts/useConfirmation";
+
+import { showAppToast } from "@/lib/app-toast";
 
 type ProjectSwitcherProps = {
   projects: ProjectRow[];
@@ -30,6 +35,7 @@ export const ProjectSwitcher = memo(function ProjectSwitcher({
   onAdd,
 }: ProjectSwitcherProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { confirm } = useConfirmation();
 
   const renderItem = useCallback(
     ({ item: p }: { item: ProjectRow }) => (
@@ -40,9 +46,10 @@ export const ProjectSwitcher = memo(function ProjectSwitcher({
         onSelect={onSelect}
         setDeletingId={setDeletingId}
         isAnyDeleting={!!deletingId}
+        confirm={confirm}
       />
     ),
-    [currentId, deletingId, onSelect],
+    [currentId, deletingId, onSelect, confirm],
   );
 
   const keyExtractor = useCallback((p: ProjectRow) => p.id, []);
@@ -75,6 +82,7 @@ export const ProjectSwitcher = memo(function ProjectSwitcher({
       <Text style={styles.label}>Switch Project</Text>
       <FlatList
         horizontal
+        accessibilityLabel="Your projects"
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
@@ -97,6 +105,7 @@ const ProjectCard = memo(
     onSelect,
     setDeletingId,
     isAnyDeleting,
+    confirm,
   }: {
     project: ProjectRow;
     isActive: boolean;
@@ -104,6 +113,7 @@ const ProjectCard = memo(
     onSelect: (id: string) => void;
     setDeletingId: (id: string | null) => void;
     isAnyDeleting: boolean;
+    confirm: (options: ConfirmOptions) => void;
   }) => {
     return (
       <TouchableOpacity
@@ -120,36 +130,28 @@ const ProjectCard = memo(
         onLongPress={() => {
           if (isAnyDeleting) return;
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          Alert.alert(
-            "Delete Project",
-            `Are you sure you want to delete "${p.name}"? This will remove all associated ledger entries and scope items.`,
-            [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Delete",
-                style: "destructive",
-                onPress: async () => {
-                  setDeletingId(p.id);
-                  const { error } = await supabase
-                    .from("projects")
-                    .delete()
-                    .eq("id", p.id);
-                  setDeletingId(null);
-                  if (error) {
-                    Alert.alert(
-                      "Couldn't delete project",
-                      "Please check your connection and try again.",
-                    );
-                  } else {
-                    Haptics.notificationAsync(
-                      Haptics.NotificationFeedbackType.Success,
-                    );
-                    Alert.alert("Deleted", "Project has been removed.");
-                  }
-                },
-              },
-            ],
-          );
+          confirm({
+            title: "Delete Project",
+            message: `Are you sure you want to delete "${p.name}"? This will remove all associated ledger entries and scope items.`,
+            confirmLabel: "Delete",
+            variant: "destructive",
+            onConfirm: async () => {
+              setDeletingId(p.id);
+              const { error } = await supabase
+                .from("projects")
+                .delete()
+                .eq("id", p.id);
+              setDeletingId(null);
+              if (error) {
+                showAppToast("Couldn't delete project. Please try again.");
+              } else {
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
+                showAppToast("Project permanently removed.");
+              }
+            },
+          });
         }}
       >
         <GlassCard

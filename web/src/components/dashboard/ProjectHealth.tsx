@@ -18,6 +18,12 @@ interface CircleProgressProps {
   strokeWidth: number;
 }
 
+const CIRCLE_CONFIG = {
+  SIZE: 110,
+  STROKE_WIDTH: 14,
+  ANIMATION_DURATION: 1.8,
+} as const;
+
 const CircleProgress = ({
   value,
   color,
@@ -72,7 +78,7 @@ const CircleProgress = ({
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: progress }}
           transition={{
-            duration: 1.8,
+            duration: CIRCLE_CONFIG.ANIMATION_DURATION,
             ease: "easeInOut",
           }}
           strokeLinecap="round"
@@ -171,8 +177,8 @@ export function ProjectHealth({
               value={score}
               color={stop1}
               secondaryColor={stop2}
-              size={110}
-              strokeWidth={14}
+              size={CIRCLE_CONFIG.SIZE}
+              strokeWidth={CIRCLE_CONFIG.STROKE_WIDTH}
             />
           </motion.div>
         </div>

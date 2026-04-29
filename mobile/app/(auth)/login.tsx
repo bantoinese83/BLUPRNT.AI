@@ -24,12 +24,24 @@ import { useAuth } from "@/contexts/auth-context";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { Theme } from "@/constants/Theme";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
-import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { getSafeRedirect } from "@shared/lib/safe-redirect";
+import {
+  clearPostLoginRedirectStorage,
+  persistPostLoginRedirectForOAuth,
+} from "@/lib/post-login-redirect-storage";
+import {
+  friendlyAuthError,
+  friendlyAuthErrorFromUrlParam,
+} from "@shared/lib/user-friendly-errors";
 import { isValidEmail } from "@/lib/validation";
 
 export default function LoginScreen() {
   const { signInWithGoogle } = useAuth();
-  const params = useLocalSearchParams<{ email?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    email?: string | string[];
+    error?: string | string[];
+    redirect?: string | string[];
+  }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,6 +58,14 @@ export default function LoginScreen() {
       setEmail(e.trim());
     }
   }, [params.email]);
+
+  useEffect(() => {
+    const fromUrl = friendlyAuthErrorFromUrlParam(params.error);
+    if (fromUrl) {
+      setErrorMsg(fromUrl);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  }, [params.error]);
 
   const handleLogin = async () => {
     const trimmedEmail = email.trim();
@@ -82,8 +102,15 @@ export default function LoginScreen() {
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const href = await getPostAuthRedirectHref();
-      router.replace(href);
+      await clearPostLoginRedirectStorage();
+      const fallback = await getPostAuthRedirectHref();
+      const rawRedirect = Array.isArray(params.redirect)
+        ? params.redirect[0]
+        : params.redirect;
+      const target = rawRedirect?.trim()
+        ? getSafeRedirect(rawRedirect.trim(), fallback)
+        : fallback;
+      router.replace(target as never);
     } finally {
       setLoading(false);
     }
@@ -92,6 +119,7 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
+      await persistPostLoginRedirectForOAuth(params.redirect);
       await signInWithGoogle();
     } catch (err) {
       const error = err as Error;
@@ -203,7 +231,10 @@ export default function LoginScreen() {
               />
 
               <AppleSignIn
-                onStart={() => setGoogleLoading(true)}
+                onStart={() => {
+                  setGoogleLoading(true);
+                  void persistPostLoginRedirectForOAuth(params.redirect);
+                }}
                 onSuccess={() => setGoogleLoading(false)}
                 onError={(err) => {
                   setGoogleLoading(false);

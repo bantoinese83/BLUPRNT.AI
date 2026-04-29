@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { getPostAuthRedirectHref } from "@/lib/onboarding-draft";
@@ -42,7 +42,11 @@ export default function AuthCallbackScreen() {
         subRef.current?.unsubscribe();
         subRef.current = null;
         if (!cancelled) {
-          router.replace("/(auth)/login");
+          router.replace(
+            `/(auth)/login?error=${encodeURIComponent(
+              "We couldn’t confirm your session in time. Try signing in again.",
+            )}`,
+          );
         }
       }, 25_000);
     })();
@@ -61,11 +65,22 @@ export default function AuthCallbackScreen() {
         color={Theme.colors.brand.primary}
         accessibilityLabel="Signing you in"
       />
+      <Text style={styles.hint} accessibilityRole="text">
+        Finishing sign-in…
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  hint: {
+    marginTop: 16,
+    fontSize: 15,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+    paddingHorizontal: 32,
+  },
   root: {
     flex: 1,
     alignItems: "center",

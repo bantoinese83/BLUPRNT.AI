@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
+import { showAppToast } from "@/lib/app-toast";
 import {
   loadOnboardingDraft,
   clearOnboardingDraft,
@@ -61,6 +62,9 @@ export function useOnboardingLifecycle({
 
       if (cancelled) return;
       if (!error && count && count > 0) {
+        showAppToast("You already have a project — opening your dashboard.", {
+          type: "neutral",
+        });
         router.replace("/(tabs)");
       }
     })();

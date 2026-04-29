@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   friendlyAuthError,
+  friendlyAuthErrorFromUrlParam,
   friendlyDocumentUploadError,
   friendlyPostgrestMutationError,
   friendlyProjectShareError,
@@ -54,6 +55,30 @@ describe("user-friendly-errors shared logic", () => {
       expect(friendlyAuthError("bad request", 400)).toContain(
         "Check what you entered",
       );
+    });
+  });
+
+  describe("friendlyAuthErrorFromUrlParam", () => {
+    it("returns null for empty", () => {
+      expect(friendlyAuthErrorFromUrlParam(null)).toBeNull();
+      expect(friendlyAuthErrorFromUrlParam("")).toBeNull();
+      expect(friendlyAuthErrorFromUrlParam("   ")).toBeNull();
+    });
+
+    it("decodes percent-encoding and maps auth copy", () => {
+      const encoded = encodeURIComponent("Invalid login credentials");
+      expect(friendlyAuthErrorFromUrlParam(encoded)).toContain(
+        "That email or password",
+      );
+    });
+
+    it("accepts first value when array (Expo Router)", () => {
+      expect(
+        friendlyAuthErrorFromUrlParam([
+          encodeURIComponent("over_request_rate"),
+          "ignored",
+        ]),
+      ).toContain("Too many attempts");
     });
   });
 

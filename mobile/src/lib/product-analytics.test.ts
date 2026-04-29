@@ -33,7 +33,7 @@ describe("product-analytics", () => {
 
   it("does not log when consent is off", async () => {
     vi.mocked(AsyncStorage.getItem).mockResolvedValue(null);
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
 
     await getProductAnalyticsConsent();
     trackProductEvent(AnalyticsEvent.ScreenView, { screen: "home" });
@@ -44,7 +44,7 @@ describe("product-analytics", () => {
 
   it("logs in dev when consent is on", async () => {
     vi.mocked(AsyncStorage.getItem).mockResolvedValue("1");
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
 
     await getProductAnalyticsConsent();
     trackProductEvent(AnalyticsEvent.ScreenView, { screen: "home" });
@@ -62,7 +62,7 @@ describe("product-analytics", () => {
     );
     expect(posthog.optIn).toHaveBeenCalled();
 
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
     trackProductEvent(AnalyticsEvent.Tap);
     expect(log).toHaveBeenCalled();
     expect(posthog.capture).toHaveBeenCalledWith(AnalyticsEvent.Tap, undefined);

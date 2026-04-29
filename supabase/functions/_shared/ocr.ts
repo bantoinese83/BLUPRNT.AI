@@ -63,13 +63,14 @@ Guidelines for classification:
 - 'other': Only if it fits none of the above.
 
 Extraction Rules:
-1. For 'total', look for the final amount often labeled as TOTAL, AMOUNT DUE, or GRAND TOTAL. 
-2. If it's a quote, 'total' is the estimated amount.
-3. For line_items, ensure each entry has description, quantity, unit_price, and line_total.
-4. If a field cannot be extracted with high confidence, return null for that field. 
-5. If the document mentions a warranty duration (e.g., '10 year warranty') or an expiration date, calculate the expiration date in 'YYYY-MM-DD' format.
-6. Provide a concise, one-sentence 'summary' describing the document's purpose (e.g. 'A receipt for roofing materials from Home Depot' or 'Building permit for second floor renovation').
-7. If you cannot extract granular line items from the document but a total exists, you MUST still create at least ONE entry in 'line_items' that represents the whole document, using the 'summary' as its description and the document 'total' as its 'line_total'.`;
+1. For 'total', look for the final amount often labeled as TOTAL, AMOUNT DUE, or GRAND TOTAL. This is typically the largest currency value at the bottom of the document.
+2. Ensure 'total' includes all taxes, fees, and discounts.
+3. If it's a quote, 'total' is the estimated amount.
+4. For line_items, ensure each entry has description, quantity, unit_price, and line_total.
+5. If a field cannot be extracted with high confidence, return null for that field. 
+6. If the document mentions a warranty duration (e.g., '10 year warranty') or an expiration date, calculate the expiration date in 'YYYY-MM-DD' format.
+7. Provide a brief but descriptive 'summary' of the document's contents. Mention key items purchased or services rendered (e.g. 'A receipt for premium roofing materials including shingles and underlayment from Home Depot' or 'Detailed building permit for second floor renovation including plumbing and electrical').
+8. If you cannot extract granular line items from the document but a total exists, you MUST still create at least ONE entry in 'line_items' that represents the whole document, using the 'summary' as its description and the document 'total' as its 'line_total'.`;
 
   if (projectScope && projectScope.length > 0) {
     const scopeStr = projectScope.map((s) =>
@@ -88,38 +89,41 @@ Be accurate: only map if the line item directly contributes to that scope catego
   }
 
   const _responseSchema = {
-    type: "object",
+    type: "OBJECT",
     properties: {
-      vendor_name: { type: "string", nullable: true },
-      invoice_number: { type: "string", nullable: true },
-      issue_date: { type: "string", nullable: true, description: "YYYY-MM-DD" },
+      vendor_name: { type: "STRING", nullable: true },
+      invoice_number: { type: "STRING", nullable: true },
+      issue_date: { type: "STRING", nullable: true, description: "YYYY-MM-DD" },
       line_items: {
-        type: "array",
+        type: "ARRAY",
         items: {
-          type: "object",
+          type: "OBJECT",
           properties: {
-            description: { type: "string" },
-            quantity: { type: "number" },
-            unit_price: { type: "number" },
-            line_total: { type: "number" },
-            mapped_scope_item_id: { type: "string", nullable: true },
+            description: { type: "STRING" },
+            quantity: { type: "NUMBER" },
+            unit_price: { type: "NUMBER" },
+            line_total: { type: "NUMBER" },
+            mapped_scope_item_id: { type: "STRING", nullable: true },
           },
           required: ["description", "quantity", "unit_price", "line_total"],
         },
       },
-      subtotal: { type: "number", nullable: true },
-      tax_total: { type: "number", nullable: true },
-      total: { type: "number", nullable: true },
+      subtotal: { type: "NUMBER", nullable: true },
+      tax_total: { type: "NUMBER", nullable: true },
+      total: { type: "NUMBER", nullable: true },
       document_type: { 
-        type: "string", 
+        type: "STRING", 
         enum: ["invoice", "quote", "receipt", "permit", "hoa", "warranty", "maintenance", "manual", "insurance", "disclosure", "inspection", "appraisal", "energy", "contract", "lien_waiver", "other"],
         description: "The primary type of document"
       },
-      warranty_expiry_date: { type: "string", nullable: true, description: "YYYY-MM-DD" },
-      summary: { type: "string", nullable: true, description: "Concise one-sentence summary" },
+      warranty_expiry_date: { type: "STRING", nullable: true, description: "YYYY-MM-DD" },
+      summary: { type: "STRING", description: "Brief but descriptive summary including key items purchased" },
     },
     required: [
       "document_type",
+      "vendor_name",
+      "total",
+      "summary",
     ],
   };
 

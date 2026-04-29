@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { photoToScopeSchema } from "../_shared/validation.ts";
@@ -150,6 +150,9 @@ export async function handler(req: Request): Promise<Response> {
         fallbackReason = "hardcoded_fallback";
       }
     }
+    console.log(`[photo-to-scope] Extraction complete. usedFallback: ${usedFallback}, fallbackReason: ${fallbackReason}`);
+    console.log(`[photo-to-scope] Summary: ${JSON.stringify(payload.summary)}`);
+    console.log(`[photo-to-scope] Scope Items count: ${payload.scope_items?.length || 0}`);
 
     const safeMapItems = (items: any[]) =>
       items.map((r: any, i: number) => {
@@ -187,6 +190,7 @@ export async function handler(req: Request): Promise<Response> {
 
     if (project_id && userId) {
       if (isInitialAnalysis) {
+        console.log(`[photo-to-scope] Initial analysis - clearing existing scope for project ${project_id}`);
         await admin.from("scope_items").delete().eq("project_id", project_id);
       }
 
@@ -212,12 +216,14 @@ export async function handler(req: Request): Promise<Response> {
         },
       }));
 
+      console.log(`[photo-to-scope] Inserting ${rows.length} rows into scope_items`);
       const { data: inserted, error: insErr } = await admin
         .from("scope_items")
         .insert(rows)
         .select();
 
       if (insErr) {
+        console.error("[photo-to-scope] scope_items insertion error:", insErr);
         return jsonResponse({ error: "Could not save scope" }, 500, req);
       }
 
@@ -253,7 +259,8 @@ export async function handler(req: Request): Promise<Response> {
         }
       }
 
-      await admin
+      console.log(`[photo-to-scope] Updating project record totals: ${payload.summary.estimated_min_total} - ${payload.summary.estimated_max_total}`);
+      const { error: updErr } = await admin
         .from("projects")
         .update({
           estimated_min_total: payload.summary.estimated_min_total,
@@ -270,6 +277,10 @@ export async function handler(req: Request): Promise<Response> {
           updated_at: new Date().toISOString(),
         })
         .eq("id", project_id);
+
+      if (updErr) {
+        console.error("[photo-to-scope] project update error:", updErr);
+      }
 
       // 6. Notify user via email
       try {

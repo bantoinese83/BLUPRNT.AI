@@ -15,7 +15,7 @@ import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 interface Props {
   onPress: () => Promise<void> | void;
   title: string;
-  variant?: "primary" | "outline" | "ghost";
+  variant?: "primary" | "outline" | "ghost" | "destructive";
   loading?: boolean;
   icon?: React.ReactNode;
   style?: ViewStyle;
@@ -59,9 +59,20 @@ export function Button({
     onPress();
   };
 
-  if (variant === "primary") {
+  if (variant === "primary" || variant === "destructive") {
+    const gradientColors: [string, string, ...string[]] =
+      variant === "destructive"
+        ? [Theme.colors.status.error, "#b91c1c"]
+        : [Theme.colors.cta.from, Theme.colors.cta.to];
+    const shadowColor =
+      variant === "destructive"
+        ? Theme.colors.status.error
+        : Theme.colors.cta.from;
+
     return (
-      <View style={[styles.shadowContainer, { flex: style?.flex }]}>
+      <View
+        style={[styles.shadowContainer, { flex: style?.flex, shadowColor }]}
+      >
         <TouchableOpacity
           onPress={handlePress}
           disabled={isInteractionDisabled}
@@ -80,7 +91,7 @@ export function Button({
             style={[styles.button, style]}
           >
             <LinearGradient
-              colors={[Theme.colors.cta.from, Theme.colors.cta.to]}
+              colors={gradientColors}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}

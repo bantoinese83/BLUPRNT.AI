@@ -170,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // 8. Update Document OCR Status
+    // 8. Update Document OCR Status (Do this before slow tasks like embeddings)
     await admin
       .from("documents")
       .update({ ocr_status: "success" })

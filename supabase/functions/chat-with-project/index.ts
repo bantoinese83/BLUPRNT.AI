@@ -39,10 +39,12 @@ export const handler = async (req: Request) => {
       );
     }
     const { query, projectId } = parsed.data;
+    console.log(`[chat-with-project] Handling request for project ${projectId}, query: ${query.substring(0, 50)}...`);
 
     const admin = getServiceClient();
     await assertProjectOwner(admin, projectId, userId);
 
+    console.log("[chat-with-project] Fetching project context...");
     const [projectRes, _docsRes, ledgerRes, scopeRes] = await Promise.all([
       admin.from("projects").select("*").eq("id", projectId).single(),
       admin.from("documents").select("*").eq("project_id", projectId),
@@ -51,26 +53,34 @@ export const handler = async (req: Request) => {
     ]);
 
     if (projectRes.error || !projectRes.data) {
+      console.warn("[chat-with-project] Project not found or error:", projectRes.error);
       return jsonResponse({ error: "Project not found" }, 404, req);
     }
 
     const project = projectRes.data;
-    const scope = (scopeRes.data || []).slice(0, 50); // Keep scope manageable
-    const ledgerEntries = (ledgerRes.data || []).slice(0, 20); // Top recent records
+    const scope = (scopeRes.data || []).slice(0, 50);
+    const ledgerEntries = (ledgerRes.data || []).slice(0, 20);
 
-    // 1. Semantic Retrieval for additional context
+    console.log(`[chat-with-project] Found ${scope.length} scope items and ${ledgerEntries.length} ledger entries.`);
+
+    // 1. Semantic Retrieval
     let semanticDocsContext = "";
     try {
+      console.log("[chat-with-project] Generating embedding for query...");
       const queryEmbedding = await generateEmbedding(query);
       if (queryEmbedding) {
-        const { data: matchedDocs } = await admin.rpc("match_document_embeddings", {
+        console.log("[chat-with-project] Matching embeddings in DB...");
+        const { data: matchedDocs, error: rpcErr } = await admin.rpc("match_document_embeddings", {
           query_embedding: queryEmbedding,
           match_threshold: 0.5,
           match_count: 5,
           p_project_id: projectId,
         });
 
-        if (matchedDocs && matchedDocs.length > 0) {
+        if (rpcErr) {
+          console.error("[chat-with-project] RPC error:", rpcErr);
+        } else if (matchedDocs && matchedDocs.length > 0) {
+          console.log(`[chat-with-project] Found ${matchedDocs.length} relevant document snippets.`);
           semanticDocsContext = "\nRelevant Documents found via Semantic Search:\n" +
             (matchedDocs as any[]).map((d) => `- ${d.content}`).join("\n");
         }
@@ -101,26 +111,26 @@ export const handler = async (req: Request) => {
       Recent Ledger Records:
       ${
       (ledgerEntries as Array<
-        { vendor_name: string; total: number; payment_status: string }
+        { vendor_name: string; total: number; payment_status: string; ai_summary: string | null }
       >).map((i) =>
-        `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})`
+        `- ${i.vendor_name || "Vendor"}: $${i.total} (${i.payment_status})${i.ai_summary ? ` - Summary: ${i.ai_summary}` : ""}`
       ).join("\n")
     }
     ${semanticDocsContext}
     `;
 
     const responseSchema = {
-      type: "object",
+      type: "OBJECT",
       properties: {
-        reply: { type: "string" },
+        reply: { type: "STRING" },
         actions: {
-          type: "array",
+          type: "ARRAY",
           items: {
-            type: "object",
+            type: "OBJECT",
             properties: {
-              type: { type: "string", enum: ["add_scope", "update_scope", "suggest_photo"] },
-              data: { type: "object", additionalProperties: true },
-              reason: { type: "string" },
+              type: { type: "STRING", enum: ["add_scope", "update_scope", "suggest_photo"] },
+              data: { type: "OBJECT" },
+              reason: { type: "STRING" },
             },
             required: ["type", "data", "reason"],
           },
@@ -148,16 +158,40 @@ export const handler = async (req: Request) => {
       - "add_scope": When the user mentions work that isn't in their current scope.
       - "update_scope": When the user wants to change quantities or finish tiers.
       - "suggest_photo": When the user asks for a visual appraisal or has reached a milestone.
+      
+      CRITICAL: You MUST return ONLY valid JSON matching the exact schema provided. Do not include any conversational preamble, markdown formatting, or greeting. Your entire response must be parseable by JSON.parse().
     `;
 
+    console.log("[chat-with-project] Calling Gemini...");
     const result = await callGemini({
       parts: [{ text: query }],
       systemInstruction,
-      responseSchema: responseSchema as any,
+      responseMimeType: "application/json",
+      responseSchema,
       temperature: 0.7,
     });
 
-    const parsedResponse = result?.data || JSON.parse(result?.text || '{"reply": "I couldn’t process that.", "actions": []}');
+    if (!result) {
+      console.error("[chat-with-project] callGemini returned null");
+      throw new Error("Failed to generate response from Gemini");
+    }
+
+    let parsedResponse;
+    if (result.data) {
+      parsedResponse = result.data;
+    } else {
+      let text = result.text || '{"reply": "I couldn’t process that.", "actions": []}';
+      if (text.startsWith("```")) {
+        text = text.replace(/^```+(json)?\s*/i, "").replace(/\s*```+$/i, "");
+      }
+      try {
+        parsedResponse = JSON.parse(text);
+      } catch (e) {
+        console.error("[chat-with-project] Failed to parse JSON. Raw text:", text);
+        throw new Error("Invalid response format from AI");
+      }
+    }
+    console.log("[chat-with-project] Success. Reply length:", parsedResponse.reply?.length || 0);
 
     return jsonResponse(
       {
@@ -169,7 +203,7 @@ export const handler = async (req: Request) => {
     );
   } catch (e: unknown) {
     const error = e as Error;
-    console.error(error);
+    console.error("[chat-with-project] FATAL ERROR:", error);
     if (error.message === "not_found") {
       return jsonResponse({ error: "Project not found" }, 404, req);
     }

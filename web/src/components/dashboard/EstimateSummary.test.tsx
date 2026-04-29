@@ -52,6 +52,7 @@ describe("EstimateSummary", () => {
   const defaultProps = {
     project: mockProject,
     scopeItems: mockScopeItems,
+    ledgerEntries: [],
     reconciliation: null,
     isArchitect: true,
   };

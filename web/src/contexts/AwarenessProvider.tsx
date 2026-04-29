@@ -5,6 +5,7 @@ import type {
   LedgerEntryRow,
 } from "@shared/types/database";
 import { AwarenessContext, type SmartInsight } from "./AwarenessContext";
+import { AWARENESS_THRESHOLDS } from "@shared/constants/awareness";
 
 export function AwarenessProvider({
   children,
@@ -46,7 +47,11 @@ export function AwarenessProvider({
           category: item.category,
         });
         health = "critical";
-      } else if (item.total_cost_max && actual > item.total_cost_max * 0.8) {
+      } else if (
+        item.total_cost_max &&
+        actual >
+          item.total_cost_max * AWARENESS_THRESHOLDS.CATEGORY_BUDGET_WARNING
+      ) {
         health = health === "critical" ? "critical" : "warning";
       }
     });
@@ -67,7 +72,8 @@ export function AwarenessProvider({
       scopeItems.length > 0 &&
       scopeMaxSum > 0 &&
       ledgerGrandTotal > scopeMaxSum &&
-      lineBackedTotal < ledgerGrandTotal * 0.85
+      lineBackedTotal <
+        ledgerGrandTotal * AWARENESS_THRESHOLDS.AGGREGATE_LINE_BACKED_THRESHOLD
     ) {
       newInsights.push({
         id: "budget-aggregate-over",
@@ -109,7 +115,10 @@ export function AwarenessProvider({
     }
 
     const ledgerTotal = ledgerEntries.reduce((s, i) => s + (i.total || 0), 0);
-    if (ledgerTotal > 5000 && scopeItems.length > 0) {
+    if (
+      ledgerTotal > AWARENESS_THRESHOLDS.SELLER_PACKET_MIN_INVESTMENT &&
+      scopeItems.length > 0
+    ) {
       newInsights.push({
         id: "resale-opportunity",
         type: "opportunity",

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { Link } from "react-router-dom";
 import {
   FilePlus2,
@@ -24,7 +24,10 @@ interface ProjectHeaderProps {
   onRename?: (newName: string) => void;
 }
 
-export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
+export const ProjectHeader = memo(function ProjectHeader({
+  project,
+  onRename,
+}: ProjectHeaderProps) {
   const [shareOpen, setShareOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(project.name);
@@ -178,4 +181,4 @@ export function ProjectHeader({ project, onRename }: ProjectHeaderProps) {
       </div>
     </div>
   );
-}
+});

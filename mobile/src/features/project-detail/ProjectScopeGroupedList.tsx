@@ -3,7 +3,7 @@ import { Text } from "react-native";
 import { MotiView } from "moti";
 import { projectDetailStyles as styles } from "./project-detail.styles";
 import { ProjectScopeLineCard } from "./ProjectScopeLineCard";
-import type { ScopeRow } from "@shared/types/database";
+import type { ScopeRow, LedgerEntryRow } from "@shared/types/database";
 import type { ReconciliationResult } from "@shared/lib/reconciliation";
 
 import { type BillOfMaterialItem } from "@shared/types/onboarding";
@@ -11,6 +11,7 @@ import { type BillOfMaterialItem } from "@shared/types/onboarding";
 type Props = {
   groupedScope: Record<string, ScopeRow[]>;
   reconciliation: ReconciliationResult | null;
+  ledgerEntries: LedgerEntryRow[];
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
   onPersistScopeMaterials?: (
@@ -22,6 +23,7 @@ type Props = {
 export function ProjectScopeGroupedList({
   groupedScope,
   reconciliation,
+  ledgerEntries,
   expandedId,
   setExpandedId,
   onPersistScopeMaterials,
@@ -50,6 +52,7 @@ export function ProjectScopeGroupedList({
               key={item.id}
               item={item}
               reconciliation={reconciliation?.items[item.id]}
+              ledgerEntries={ledgerEntries}
               catIndex={catIndex}
               index={index}
               expandedId={expandedId}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import {
   Wallet,
@@ -40,29 +40,10 @@ function Counter({
       }
     };
 
-    const handle = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(handle);
+    requestAnimationFrame(animate);
   }, [value, duration]);
 
-  return <Text>{formatter(displayValue)}</Text>;
-}
-
-type DashboardStatsProps = {
-  estimatedMin: number | null;
-  estimatedMax: number | null;
-  spendingTotal: number;
-  /** All document rows in the project (all types) — not the Free-tier bill cap. */
-  documentRowCount: number;
-};
-
-interface StatItemProps {
-  label: string;
-  value: React.ReactNode;
-  subValue: string;
-  icon: LucideIcon;
-  delay?: number;
-  badge?: string;
-  badgeColor?: string;
+  return <Text style={styles.value}>{formatter(displayValue)}</Text>;
 }
 
 function StatItem({
@@ -73,12 +54,20 @@ function StatItem({
   delay = 0,
   badge,
   badgeColor,
-}: StatItemProps) {
+}: {
+  label: string;
+  value: React.ReactNode;
+  subValue: string;
+  icon: LucideIcon;
+  delay?: number;
+  badge?: string;
+  badgeColor?: string;
+}) {
   return (
     <MotiView
       from={{ opacity: 0, scale: 0.9, translateY: 10 }}
       animate={{ opacity: 1, scale: 1, translateY: 0 }}
-      transition={{ type: "timing", duration: 500, delay }}
+      transition={{ type: "timing", duration: 600, delay }}
       style={styles.cardWrapper}
     >
       <GlassCard style={styles.card}>
@@ -91,14 +80,18 @@ function StatItem({
 
         <View style={styles.content}>
           <View style={styles.valueRow}>
-            <Text style={styles.value} numberOfLines={1}>
-              {value}
-            </Text>
+            {typeof value === "string" ? (
+              <Text style={styles.value} numberOfLines={1}>
+                {value}
+              </Text>
+            ) : (
+              value
+            )}
             {badge && (
               <View
                 style={[
                   styles.badge,
-                  badgeColor ? { backgroundColor: badgeColor } : {},
+                  badgeColor ? { backgroundColor: badgeColor } : null,
                 ]}
               >
                 <Text style={styles.badgeText}>{badge}</Text>
@@ -112,15 +105,22 @@ function StatItem({
   );
 }
 
-export function DashboardStats({
+type Props = {
+  estimatedMin: number | null;
+  estimatedMax: number | null;
+  spendingTotal: number;
+  documentRowCount: number;
+};
+
+export const DashboardStats = memo(function DashboardStats({
   estimatedMin,
   estimatedMax,
   spendingTotal,
   documentRowCount,
-}: DashboardStatsProps) {
+}: Props) {
   const { budgetPct, statusLabel } = calculateBudgetStats(
-    estimatedMin,
-    estimatedMax,
+    estimatedMin ?? 0,
+    estimatedMax ?? 0,
     spendingTotal,
   );
 
@@ -179,7 +179,7 @@ export function DashboardStats({
       />
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

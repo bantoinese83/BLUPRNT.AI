@@ -204,6 +204,23 @@ export default function LandingScreen() {
               Already have an account? Sign In
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            testID="landing-add-another-link"
+            style={styles.addAnotherLink}
+            accessibilityRole="link"
+            accessibilityLabel="Add another renovation"
+            accessibilityHint="Sign in, then open the project builder for an additional home"
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push(
+                `/(auth)/login?redirect=${encodeURIComponent("/onboarding?newProject=1")}` as never,
+              );
+            }}
+          >
+            <Text style={styles.addAnotherText}>
+              Already use BLUPRNT? Add another renovation
+            </Text>
+          </TouchableOpacity>
           <View style={styles.footerGap} />
           <Button
             title={activeSlide === slides.length - 1 ? "Get Started" : "Next"}
@@ -354,5 +371,19 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.brand.primary,
     textAlign: "center",
+  },
+  addAnotherLink: {
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginTop: 4,
+  },
+  addAnotherText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+    textDecorationLine: "underline",
+    textDecorationColor: Theme.colors.text.muted,
   },
 });

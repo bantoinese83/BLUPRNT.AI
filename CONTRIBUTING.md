@@ -31,10 +31,11 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 1. **Setup**: Run `npm install` and ensure your `.env` is configured correctly.
 2. **Branching**: Create a branch with a descriptive name (e.g., `refactor/dashboard-header`).
 3. **Coding**: Adhere to the `ARCHITECTURE.md` patterns.
-4. **Testing**:
+4. **Fast feedback**: Run `npm run status` for a quick lint / test / typecheck pass per workspace (`shared`, `web`, `mobile`) before the full `npm run check`. Run `npm run lint:fix` to apply ESLint auto-fixes repo-wide, then `npm run lint` when you need the full lint + typecheck + design-token gate.
+5. **Testing**:
    - Add unit tests for new shared logic.
    - Run `npm run check` to ensure you haven't broken the 100/100 quality score.
-5. **PR**: Submit your PR with a clear description and screenshots of any UI changes.
+6. **PR**: Submit your PR with a clear description and screenshots of any UI changes.
 
 ## 🚀 The Quality Gate
 

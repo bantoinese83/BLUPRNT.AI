@@ -69,7 +69,7 @@ export function buildWebDashboardAdapter(
 
 /**
  * Binds the router + default localStorage to {@link WebDashboardDataInjected}.
- * `storageKey` supports tests (or multi-tab keys) withoutforking the builder.
+ * `storageKey` supports tests (or multi-tab keys) without forking the builder.
  */
 export function useWebDashboardDataInjected(
   storageKey: string = WEB_DASHBOARD_PROJECT_ID_KEY,

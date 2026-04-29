@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React, { useId, memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { Shield, TrendingUp } from "lucide-react-native";
@@ -13,7 +13,7 @@ type Props = {
   spendingTotal?: number;
 };
 
-export function ProjectHealth({
+export const ProjectHealth = memo(function ProjectHealth({
   estimatedMin = 0,
   estimatedMax = 0,
   spendingTotal = 0,
@@ -45,9 +45,13 @@ export function ProjectHealth({
   const activeColors = colorMap[status] ?? colorMap["Healthy"]!;
   const { color, secondary } = activeColors;
 
-  const size = 100;
-  const strokeWidth = 10;
-  const radius = (size - strokeWidth) / 2;
+  const CIRCLE_CONFIG = {
+    SIZE: 100,
+    STROKE_WIDTH: 10,
+    ANIMATION_DURATION: 800,
+  } as const;
+
+  const radius = (CIRCLE_CONFIG.SIZE - CIRCLE_CONFIG.STROKE_WIDTH) / 2;
   const circumference = radius * 2 * Math.PI;
   /** Portion of the ring hidden by dash offset so `score/100` of the stroke shows (clockwise from top). */
   const ringDashOffset = circumference * (1 - score / 100);
@@ -87,13 +91,16 @@ export function ProjectHealth({
         <MotiView
           from={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "timing", duration: 800 }}
+          transition={{
+            type: "timing",
+            duration: CIRCLE_CONFIG.ANIMATION_DURATION,
+          }}
           style={styles.rightCol}
         >
           <Svg
-            width={size}
-            height={size}
-            viewBox={`0 0 ${size} ${size}`}
+            width={CIRCLE_CONFIG.SIZE}
+            height={CIRCLE_CONFIG.SIZE}
+            viewBox={`0 0 ${CIRCLE_CONFIG.SIZE} ${CIRCLE_CONFIG.SIZE}`}
             style={styles.svg}
           >
             <Defs>
@@ -103,25 +110,25 @@ export function ProjectHealth({
               </LinearGradient>
             </Defs>
             <Circle
-              cx={size / 2}
-              cy={size / 2}
+              cx={CIRCLE_CONFIG.SIZE / 2}
+              cy={CIRCLE_CONFIG.SIZE / 2}
               r={radius}
               stroke="rgba(0,0,0,0.06)"
-              strokeWidth={strokeWidth}
+              strokeWidth={CIRCLE_CONFIG.STROKE_WIDTH}
               fill="none"
             />
             {/* Must stay Svg primitives — wrapping with MotiView breaks the ring on device. */}
             <Circle
-              cx={size / 2}
-              cy={size / 2}
+              cx={CIRCLE_CONFIG.SIZE / 2}
+              cy={CIRCLE_CONFIG.SIZE / 2}
               r={radius}
               stroke={`url(#${gradId})`}
-              strokeWidth={strokeWidth}
+              strokeWidth={CIRCLE_CONFIG.STROKE_WIDTH}
               strokeDasharray={`${circumference}`}
               strokeDashoffset={ringDashOffset}
               strokeLinecap="round"
               fill="none"
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              transform={`rotate(-90 ${CIRCLE_CONFIG.SIZE / 2} ${CIRCLE_CONFIG.SIZE / 2})`}
             />
           </Svg>
         </MotiView>
@@ -133,7 +140,7 @@ export function ProjectHealth({
       </View>
     </GlassCard>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

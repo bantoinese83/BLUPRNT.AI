@@ -1,16 +1,11 @@
 import React, { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Package, Pencil, Trash2 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 
 import { Theme } from "@/constants/Theme";
 import { projectDetailStyles as styles } from "./project-detail.styles";
+import { useConfirmation } from "@/contexts/useConfirmation";
 import {
   BillOfMaterialEditModal,
   type BillOfMaterialRow,
@@ -45,26 +40,22 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
     [onPersist],
   );
 
+  const { confirm } = useConfirmation();
+
   const confirmRemove = useCallback(
     (index: number, label: string) => {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Alert.alert(
-        "Remove material",
-        `Remove “${label}” from your list? You can always add a custom line item to the plan from the + button.`,
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Remove",
-            style: "destructive",
-            onPress: () => {
-              const next = materials.filter((_, i) => i !== index);
-              void runPersist(next);
-            },
-          },
-        ],
-      );
+      confirm({
+        title: "Remove material?",
+        message: `Remove “${label}” from your list? You can always add it back later.`,
+        confirmLabel: "Remove",
+        variant: "destructive",
+        onConfirm: async () => {
+          const next = materials.filter((_, i) => i !== index);
+          await runPersist(next);
+        },
+      });
     },
-    [materials, runPersist],
+    [confirm, materials, runPersist],
   );
 
   const handleSaveEdited = useCallback(

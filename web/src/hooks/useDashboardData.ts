@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDashboardDataShared } from "@shared/hooks/use-dashboard-data";
+import { useDashboardDataShared } from "@shared/hooks/use-dashboard-data.js";
 import {
   buildWebDashboardAdapter,
   useWebDashboardDataInjected,

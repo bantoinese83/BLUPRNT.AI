@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import { projectHasEstimateTotals } from "../helpers";
 import type { ProjectRow, ScopeRow } from "@shared/types/database";
+import { UI_CONSTANTS } from "@shared/constants/ui";
 
 interface UseProjectPollingProps {
   id?: string;
@@ -91,7 +92,7 @@ export function useProjectPolling({
         attempts += 1;
         const done = await fetchScopeOnly();
         if (done || attempts >= maxAttempts) finish();
-      }, 2500);
+      }, UI_CONSTANTS.POLLING_INTERVAL_MS);
     })();
 
     return () => {

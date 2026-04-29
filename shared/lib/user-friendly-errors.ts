@@ -73,6 +73,24 @@ export function friendlyAuthError(message: string, status?: number): string {
   return m;
 }
 
+/**
+ * Decode `?error=` from auth redirects (web query string or Expo Router params).
+ * Returns null if missing/empty; otherwise passes through {@link friendlyAuthError}.
+ */
+export function friendlyAuthErrorFromUrlParam(
+  encoded: string | string[] | null | undefined,
+): string | null {
+  const raw = Array.isArray(encoded) ? encoded[0] : encoded;
+  if (raw == null || typeof raw !== "string" || !raw.trim()) return null;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(raw.trim());
+  } catch {
+    decoded = raw.trim();
+  }
+  return friendlyAuthError(decoded);
+}
+
 /** Edge function / upload failures (web + mobile). */
 export function friendlyDocumentUploadError(
   err?: unknown,

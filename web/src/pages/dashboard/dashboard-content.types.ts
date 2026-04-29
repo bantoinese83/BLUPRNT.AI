@@ -1,5 +1,5 @@
 import type {
-  LedgerEntryRow,
+  LedgerEntryWithLines,
   ProjectRow,
   ScopeRow,
   UserSubscriptionRow,
@@ -13,7 +13,7 @@ export interface DashboardContentProps {
   projects: ProjectRow[];
   project: ProjectRow;
   scopeItems: ScopeRow[];
-  ledgerEntries: LedgerEntryRow[];
+  ledgerEntries: LedgerEntryWithLines[];
   spendByCategory: Record<string, number>;
   reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
@@ -30,5 +30,5 @@ export interface DashboardContentProps {
   setProjects: (projects: ProjectRow[]) => void;
   setProject: (project: ProjectRow | null) => void;
   setScopeItems: (items: ScopeRow[]) => void;
-  setLedgerEntries: (entries: LedgerEntryRow[]) => void;
+  setLedgerEntries: (entries: LedgerEntryWithLines[]) => void;
 }

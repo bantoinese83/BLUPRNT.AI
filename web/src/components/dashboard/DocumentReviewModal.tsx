@@ -3,23 +3,15 @@ import { Loader2, Link2, Sparkles, Trash2 } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { supabase, invokeFunction } from "@/lib/supabase";
-import { reportClientError } from "@/lib/sentry";
-import {
-  coerceLedgerDocumentType,
-  type LedgerDocumentType,
-} from "@shared/lib/infer-document-type";
+
 import {
   isCapitalLedgerDocumentType,
-  ledgerDocumentTypeLabel,
   reviewDocumentModalTitle,
   ledgerDocumentTheme,
 } from "@shared/lib/ledger-document-labels";
 import { reviewModalIconForDocumentType } from "@/lib/ledger-type-icons";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { ModalFocusSurface } from "@/components/ui/modal-dialog";
-import { getUserFriendlyErrorMessage } from "@shared/lib/user-friendly-errors";
 import { cn } from "@/lib/utils";
 
 // Sub-components
@@ -27,36 +19,7 @@ import { ReviewModalHeader } from "./document-review/ReviewModalHeader";
 import { MetadataSection } from "./document-review/MetadataSection";
 import { LineItemCard } from "./document-review/LineItemCard";
 
-type LineItem = {
-  id: string;
-  description: string;
-  quantity: number;
-  unit_price: number;
-  line_total: number;
-  category: string | null;
-  scope_item_id?: string | null;
-};
-
-type ScopeSuggestion = {
-  scope_item_id: string;
-  confidence_score: number;
-  reason: string;
-};
-
-type DocumentData = {
-  id: string;
-  vendor_name: string | null;
-  total: number | null;
-  subtotal: number | null;
-  payment_status: string;
-  line_items: LineItem[];
-  budget_mapping_suggestions?: ScopeSuggestion[];
-  document_id?: string | null;
-  document_type?: string | null;
-  warranty_expiry_date?: string | null;
-  ai_summary?: string | null;
-  is_verified?: boolean;
-};
+import { useDocumentReviewDetail } from "@/hooks/useDocumentReviewDetail";
 
 export function DocumentReviewModal({
   documentId,
@@ -71,95 +34,32 @@ export function DocumentReviewModal({
   onSaved?: (id?: string) => void;
   onDeleted?: (id: string) => void;
 }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [document, setDocument] = useState<DocumentData | null>(null);
-  const [scopeItems, setScopeItems] = useState<
-    { id: string; category: string; description: string }[]
-  >([]);
-  const [mappings, setMappings] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
-  const [ledgerDocType, setLedgerDocType] =
-    useState<LedgerDocumentType>("invoice");
-  const [warrantyExpiryDate, setWarrantyExpiryDate] = useState<string>("");
-  const [vendorName, setVendorName] = useState<string>("");
-
-  const handleSaveMappings = useCallback(async () => {
-    if (!document || saving) return;
-    setSaving(true);
-    try {
-      const lineUpdates = Object.entries(mappings).map(
-        ([lineId, scopeItemId]) =>
-          supabase
-            .from("ledger_line_items")
-            .update({ scope_item_id: scopeItemId || null })
-            .eq("id", lineId),
-      );
-
-      const results = await Promise.all(lineUpdates);
-      const firstError = results.find((r) => r.error)?.error;
-      if (firstError) throw firstError;
-
-      const prevType = coerceLedgerDocumentType(document.document_type);
-      const typeChanged = ledgerDocType !== prevType;
-      const dateChanged =
-        warrantyExpiryDate !== (document.warranty_expiry_date || "");
-      const vendorChanged = vendorName !== (document.vendor_name || "");
-      const needsVerification = document.is_verified === false;
-
-      if (typeChanged || dateChanged || vendorChanged || needsVerification) {
-        const { error: invErr } = await supabase
-          .from("ledger_entries")
-          .update({
-            document_type: ledgerDocType,
-            warranty_expiry_date: warrantyExpiryDate || null,
-            vendor_name: vendorName || null,
-            is_verified: true, // Always verify on manual save
-          })
-          .eq("id", document.id);
-        if (invErr) throw invErr;
-
-        if (typeChanged && document.document_id) {
-          const { error: docErr } = await supabase
-            .from("documents")
-            .update({ type: ledgerDocType })
-            .eq("id", document.document_id);
-          if (docErr) throw docErr;
-        }
-      }
-
-      setDocument((prev) =>
-        prev
-          ? { ...prev, document_type: ledgerDocType, is_verified: true }
-          : prev,
-      );
-      toast.success(
-        needsVerification
-          ? "Document verified and saved."
-          : typeChanged
-            ? `Document type updated to ${ledgerDocumentTypeLabel(ledgerDocType)}.`
-            : "Changes saved.",
-      );
-      onSaved?.(projectId);
-      onClose();
-    } catch (err) {
-      setError(getUserFriendlyErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  }, [
+  const {
+    loading,
+    error,
     document,
-    saving,
+    scopeItems,
     mappings,
+    setMappings,
+    saving,
+    deleting,
     ledgerDocType,
+    setLedgerDocType,
     warrantyExpiryDate,
+    setWarrantyExpiryDate,
     vendorName,
-    projectId,
-    onSaved,
-    onClose,
-  ]);
+    setVendorName,
+    aiSummary,
+    setAiSummary,
+    totalValue,
+    setTotalValue,
+    handleSaveMappings,
+    handleDelete,
+  } = useDocumentReviewDetail(documentId, projectId, onSaved, onClose);
+
+  const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const isUnverified = document?.is_verified === false;
 
   // Keyboard shortcut: Cmd/Ctrl + Enter to Save
   useEffect(() => {
@@ -173,126 +73,17 @@ export function DocumentReviewModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleSaveMappings]);
 
-  // Initial load
-  useEffect(() => {
-    let cancelled = false;
-    const load = async (isPoll = false) => {
-      if (!isPoll) setLoading(true);
-      try {
-        const { data: invData, error: invErr } = await invokeFunction<{
-          ledger_entry: DocumentData;
-          line_items: LineItem[];
-          budget_mapping_suggestions?: ScopeSuggestion[];
-        }>("get-ledger-entry", {
-          body: { ledger_entry_id: documentId },
-        });
-        if (cancelled) return;
-        if (invErr || !invData) {
-          if (!isPoll) setError("Couldn't load document.");
-          return;
-        }
-        const inv = invData as unknown as {
-          ledger_entry: DocumentData;
-          line_items: LineItem[];
-          budget_mapping_suggestions?: ScopeSuggestion[];
-        };
-        const merged = {
-          ...inv.ledger_entry,
-          line_items: inv.line_items ?? [],
-          budget_mapping_suggestions: inv.budget_mapping_suggestions,
-        };
+  const doDelete = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
 
-        // Update state if data changed
-        setDocument(merged);
-        setLedgerDocType(coerceLedgerDocumentType(merged.document_type));
-        setWarrantyExpiryDate(merged.warranty_expiry_date || "");
-        setVendorName(merged.vendor_name || "");
-
-        // Only fetch scope items on initial load
-        if (!isPoll) {
-          const { data: scope, error: scopeErr } = await supabase
-            .from("scope_items")
-            .select("id, category, description")
-            .eq("project_id", projectId);
-          if (cancelled) return;
-          if (scopeErr) {
-            reportClientError("document_review_scope_list", scopeErr);
-            toast.error(
-              "We couldn’t load your budget breakdown, so some line links may be missing.",
-              { duration: 8000 },
-            );
-            setScopeItems([]);
-          } else {
-            setScopeItems(
-              (scope ?? []) as {
-                id: string;
-                category: string;
-                description: string;
-              }[],
-            );
-          }
-
-          const initial: Record<string, string> = {};
-          (inv.line_items ?? []).forEach((line: LineItem) => {
-            if (line.scope_item_id) initial[line.id] = line.scope_item_id;
-          });
-          setMappings(initial);
-        }
-      } catch {
-        if (!cancelled && !isPoll) setError("Something went wrong.");
-      } finally {
-        if (!cancelled && !isPoll) setLoading(false);
-      }
-    };
-
-    void load();
-
-    // Start polling if status is unknown/processing
-    const pollInterval = setInterval(() => {
-      setDocument((prev) => {
-        if (
-          prev?.is_verified === false &&
-          (prev.payment_status === "unknown" ||
-            prev.vendor_name === "Processing...")
-        ) {
-          void load(true);
-        }
-        return prev;
-      });
-    }, 3000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(pollInterval);
-    };
-  }, [documentId, projectId]);
-
-  const handleDelete = async () => {
-    if (!document) return;
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete this ${ledgerDocType}? This cannot be undone.`,
-    );
-    if (!confirmDelete) return;
-
-    setDeleting(true);
-    try {
-      const { error } = await supabase
-        .from("ledger_entries")
-        .delete()
-        .eq("id", document.id);
-
-      if (error) throw error;
-
-      toast.success("Document deleted");
+  const confirmDelete = useCallback(async () => {
+    const success = await handleDelete();
+    if (success && document) {
       onDeleted?.(document.id);
       onClose();
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not delete document");
-    } finally {
-      setDeleting(false);
     }
-  };
+  }, [handleDelete, document, onDeleted, onClose]);
 
   if (loading) {
     return (
@@ -332,7 +123,12 @@ export function DocumentReviewModal({
 
   const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
   const theme = ledgerDocumentTheme(ledgerDocType);
-  const isUnverified = document.is_verified === false;
+
+  const isProcessing =
+    !document.vendor_name ||
+    document.vendor_name === "Vendor" ||
+    document.vendor_name === "Document" ||
+    document.vendor_name === "Processing...";
 
   return (
     <>
@@ -340,7 +136,7 @@ export function DocumentReviewModal({
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-teal-950/50 overflow-y-auto"
         titleId="document-review-title"
         onEscape={onClose}
-        active={!originalPreviewOpen}
+        active={!originalPreviewOpen && !showDeleteConfirm}
       >
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <ReviewModalHeader
@@ -403,6 +199,10 @@ export function DocumentReviewModal({
                   onWarrantyDateChange={setWarrantyExpiryDate}
                   vendorName={vendorName}
                   onVendorNameChange={setVendorName}
+                  aiSummary={aiSummary}
+                  onAiSummaryChange={setAiSummary}
+                  totalValue={totalValue}
+                  onTotalValueChange={setTotalValue}
                   vendorLabel={theme.label}
                 />
               </div>
@@ -422,18 +222,14 @@ export function DocumentReviewModal({
                       AI Extracting...
                     </span>
                   )}
-                  {(!document.vendor_name ||
-                    document.vendor_name === "Vendor" ||
-                    document.vendor_name === "Document" ||
-                    document.vendor_name === "Processing...") &&
-                    showCapitalLineLink && (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] text-teal-700 border-teal-200 bg-teal-50 animate-pulse"
-                      >
-                        Analyzing Document
-                      </Badge>
-                    )}
+                  {isProcessing && showCapitalLineLink && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] text-teal-700 border-teal-200 bg-teal-50 animate-pulse"
+                    >
+                      Analyzing Document
+                    </Badge>
+                  )}
                 </h4>
                 {showCapitalLineLink && (
                   <>
@@ -454,12 +250,12 @@ export function DocumentReviewModal({
                     </Badge>
 
                     {/* AI Summary Section */}
-                    {(isUnverified || document.ai_summary) && (
+                    {(aiSummary || isProcessing) && (
                       <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-teal-50/50 border border-teal-100/50">
                         <Sparkles className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
                         <p className="text-sm text-teal-900 leading-relaxed">
-                          {document.ai_summary ? (
-                            document.ai_summary
+                          {aiSummary ? (
+                            aiSummary
                           ) : (
                             <span className="italic text-teal-700 animate-pulse">
                               Analyzing Document...
@@ -524,7 +320,7 @@ export function DocumentReviewModal({
             <div className="flex flex-col sm:flex-row gap-2 pt-4">
               <Button
                 variant="ghost"
-                onClick={handleDelete}
+                onClick={doDelete}
                 disabled={deleting || saving}
                 className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 gap-2 order-2 sm:order-1"
               >
@@ -586,6 +382,47 @@ export function DocumentReviewModal({
           onClose={() => setOriginalPreviewOpen(false)}
         />
       ) : null}
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-teal-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center">
+              <Trash2 className="w-6 h-6 text-rose-600" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-slate-900">
+                Delete this {ledgerDocType}?
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                This will permanently remove the document and all associated
+                budget mappings from your project. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-1 bg-rose-600 hover:bg-rose-700 border-rose-700 shadow-rose-200 rounded-xl gap-2"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Confirm Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

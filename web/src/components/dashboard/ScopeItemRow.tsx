@@ -21,7 +21,9 @@ import type { BillOfMaterialItem as Material } from "@shared/types/onboarding";
 
 // Sub-components
 import { BillOfMaterialsList } from "./scope-item/BillOfMaterialsList";
+import { ReconciledDocumentsList } from "./scope-item/ReconciledDocumentsList";
 import { EditableMaterialList } from "./scope-item/EditableMaterialList";
+import type { LedgerEntryWithLines } from "@shared/types/database";
 
 // Material type now imported as BillOfMaterialItem from shared types
 
@@ -30,6 +32,7 @@ const TIERS = ["economy", "mid", "premium"] as const;
 interface ScopeItemRowProps {
   item: ScopeRow;
   reconciliation?: ReconciliationItem | null;
+  ledgerEntries?: LedgerEntryWithLines[];
   isEditing: boolean;
   onEdit: (item: ScopeRow) => void;
   onDelete: (item: ScopeRow) => void;
@@ -49,6 +52,7 @@ interface ScopeItemRowProps {
 export function ScopeItemRow({
   item,
   reconciliation,
+  ledgerEntries = [],
   isEditing,
   onEdit,
   onDelete,
@@ -67,9 +71,14 @@ export function ScopeItemRow({
   const [isExpanded, setIsExpanded] = useState(false);
   const justification = item.justification || item.metadata?.justification;
   const priority = item.priority || item.metadata?.priority;
-  const maintenance = item.maintenance_tips || item.metadata?.maintenance_tips;
+  const careTips = item.maintenance_tips || item.metadata?.care_tips;
   const confidenceReason =
     item.confidence_reason || item.metadata?.confidence_reason;
+
+  const materials = item.metadata?.materials;
+  const hasMaterials = materials && materials.length > 0;
+  const hasRecon = reconciliation && reconciliation.total_billed > 0;
+  const hasDetails = hasMaterials || hasRecon;
 
   if (isEditing) {
     return (
@@ -208,10 +217,10 @@ export function ScopeItemRow({
               <span>{justification}</span>
             </p>
           )}
-          {(isArchitect || hasProjectPass) && maintenance && (
+          {(isArchitect || hasProjectPass) && careTips && (
             <div className="pt-1 flex items-center gap-1.5 text-[10px] font-bold text-teal-600/70 uppercase tracking-tight">
               <div className="h-1 w-1 rounded-full bg-teal-300" />
-              Care Tip: {maintenance}
+              Care Tip: {careTips}
             </div>
           )}
           <div className="pt-1 flex items-center gap-1 text-[10px] font-medium text-slate-400">
@@ -260,7 +269,7 @@ export function ScopeItemRow({
         </div>
       </div>
 
-      {item.metadata?.materials && item.metadata.materials.length > 0 && (
+      {hasDetails && (
         <div className="flex justify-end mt-2">
           <Button
             variant="ghost"
@@ -284,7 +293,7 @@ export function ScopeItemRow({
       )}
 
       <AnimatePresence>
-        {isExpanded && item.metadata?.materials && (
+        {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -292,7 +301,15 @@ export function ScopeItemRow({
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <BillOfMaterialsList materials={item.metadata.materials} />
+            {hasMaterials && materials && (
+              <BillOfMaterialsList materials={materials} />
+            )}
+            {hasRecon && (
+              <ReconciledDocumentsList
+                scopeItemId={item.id}
+                ledgerEntries={ledgerEntries}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>

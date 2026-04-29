@@ -392,13 +392,14 @@ const styles = StyleSheet.create({
   },
   imagePreviewContainer: {
     width: "100%",
-    aspectRatio: 16 / 9,
+    aspectRatio: 1,
     borderRadius: 16,
     overflow: "hidden",
   },
   imagePreview: {
     width: "100%",
     height: "100%",
+    resizeMode: "cover",
   },
   removeImageBtn: {
     position: "absolute",

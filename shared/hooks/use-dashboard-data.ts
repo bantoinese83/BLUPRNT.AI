@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useQuery, useQueryClient, type QueryKey } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  type QueryKey,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DashboardSnapshot } from "../types/dashboard-snapshot";
 import { persistLastActiveProjectId } from "../lib/persist-last-active-project-id";
@@ -7,6 +12,12 @@ import { useDashboardSnapshotCache } from "./use-dashboard-snapshot-cache";
 import { deriveDashboardQueryStatus } from "./derive-dashboard-query-status";
 import { deriveHomeTeam } from "../lib/home-team";
 import { calculateResaleImpact } from "../lib/resale-value";
+
+/** Slice of TanStack Query options the dashboard hook merges into `useQuery` (typed, no `any`). */
+export type DashboardSnapshotQueryOptions = Pick<
+  UseQueryOptions<DashboardSnapshot, Error, DashboardSnapshot, QueryKey>,
+  "staleTime" | "placeholderData"
+>;
 
 /**
  * Injected platform behavior for `useDashboardDataShared` (one implementation, web + mobile).
@@ -30,11 +41,7 @@ export type UseDashboardDataAdapter = {
   /**
    * Always provided so hook order is identical (web: staleTime + keepPreviousData; mobile: {}).
    */
-  useQueryOptions: () => {
-    staleTime?: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    placeholderData?: any;
-  };
+  useQueryOptions: () => DashboardSnapshotQueryOptions;
 
   shouldSyncFirstResolvedProject: boolean;
   onFirstResolvedProjectId?: (projectId: string) => void;

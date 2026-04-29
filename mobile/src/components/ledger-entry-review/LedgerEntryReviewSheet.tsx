@@ -1,11 +1,10 @@
-import React, { createElement, useState, useEffect } from "react";
+import React, { createElement, useState } from "react";
 import {
   Modal,
   View,
   Text,
   TouchableOpacity,
   Pressable,
-  Alert,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -22,11 +21,11 @@ import {
   Calendar,
   ExternalLink,
   Link2,
+  Sparkles,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 
-import { supabase } from "@/lib/supabase";
 import { OriginalUploadPreviewModal } from "@/components/OriginalUploadPreviewModal";
 import type { LedgerEntryRow } from "@shared/types/database";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
@@ -35,6 +34,7 @@ import { useLedgerEntryReviewDetail } from "@/hooks/useLedgerEntryReviewDetail";
 import {
   isCapitalLedgerDocumentType,
   ledgerDocumentTypeLabel,
+  ledgerDocumentTheme,
 } from "@shared/lib/ledger-document-labels";
 import { rowIconForLedgerDocumentType } from "@/lib/ledger-type-icons";
 import { DEFAULT_DOC_ICON, STATUS_COLORS } from "./constants";
@@ -47,6 +47,8 @@ import {
 } from "./LedgerEntryReviewLineItemRow";
 import { LedgerEntryReviewScopePicker } from "./LedgerEntryReviewScopePicker";
 import { LedgerEntryReviewDocTypePicker } from "./LedgerEntryReviewDocTypePicker";
+
+import { useConfirmation } from "@/contexts/useConfirmation";
 
 export type LedgerEntryReviewSheetProps = {
   ledgerEntry: LedgerEntryRow | null;
@@ -77,30 +79,27 @@ export function LedgerEntryReviewSheet({
     saveMappings,
     ledgerDocType,
     setLedgerDocType,
-    typeDirty,
+    vendorName,
+    setVendorName,
+    totalValue,
+    setTotalValue,
+    aiSummary,
+    setAiSummary,
+    handleDelete: hookDelete,
+    deleting,
   } = useLedgerEntryReviewDetail(ledgerEntry, projectId, isOpen);
 
-  const [deleting, setDeleting] = useState(false);
+  const { confirm } = useConfirmation();
   const [scopePickerLineId, setScopePickerLineId] = useState<string | null>(
     null,
   );
   const [docTypePickerOpen, setDocTypePickerOpen] = useState(false);
   const [originalPreviewOpen, setOriginalPreviewOpen] = useState(false);
 
-  // Editable fields
-  const [vendorName, setVendorName] = useState("");
-  const [totalValue, setTotalValue] = useState("");
-
-  useEffect(() => {
-    if (isOpen && (detail || ledgerEntry)) {
-      setVendorName(detail?.vendor_name ?? ledgerEntry?.vendor_name ?? "");
-      setTotalValue(String(detail?.total ?? ledgerEntry?.total ?? 0));
-    }
-  }, [isOpen, detail, ledgerEntry]);
-
   if (!ledgerEntry) return null;
 
   const docType = ledgerDocType;
+  const theme = ledgerDocumentTheme(docType);
   const showCapitalLineLink = isCapitalLedgerDocumentType(ledgerDocType);
   const statusColor =
     STATUS_COLORS[detail?.payment_status ?? ledgerEntry.payment_status ?? ""] ||
@@ -118,72 +117,43 @@ export function LedgerEntryReviewSheet({
   const docIdForOpen = detail?.document_id ?? ledgerEntry.document_id;
   const isUnverified = detail?.is_verified === false;
 
+  const currentVendor = detail?.vendor_name ?? ledgerEntry.vendor_name;
+  const isProcessing =
+    !currentVendor ||
+    currentVendor === "Vendor" ||
+    currentVendor === "Document" ||
+    currentVendor === "Processing...";
+
   const vendorChanged =
     vendorName !== (detail?.vendor_name ?? ledgerEntry.vendor_name ?? "");
   const totalChanged =
     parseFloat(totalValue) !== (detail?.total ?? ledgerEntry.total ?? 0);
-  const isDirty = typeDirty || vendorChanged || totalChanged;
+  const summaryChanged =
+    aiSummary !== (detail?.ai_summary ?? ledgerEntry.ai_summary ?? "");
+  const isDirty = vendorChanged || totalChanged || summaryChanged;
 
   const handleDelete = () => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert(
-      "Delete Document",
-      `Are you sure you want to remove this ${docType} from ${vendorName || "Unknown Vendor"}? This cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setDeleting(true);
-            const { error } = await supabase
-              .from("ledger_entries")
-              .delete()
-              .eq("id", ledgerEntry.id);
-            setDeleting(false);
-            if (error) {
-              Alert.alert(
-                "Something went wrong",
-                "Could not delete this document. Please try again.",
-              );
-            } else {
-              void Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              onDeleted(ledgerEntry.id);
-              onClose();
-            }
-          },
-        },
-      ],
-    );
+    confirm({
+      title: "Delete Document",
+      message: `Are you sure you want to remove this ${docType} from ${vendorName || "Unknown Vendor"}? This cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "destructive",
+      onConfirm: async () => {
+        const ok = await hookDelete();
+        if (ok) {
+          onDeleted(ledgerEntry.id);
+        }
+      },
+    });
   };
 
   const handleSave = async () => {
-    // If vendor or total changed, update ledger_entries first
-    if (isDirty || isUnverified) {
-      const { error } = await supabase
-        .from("ledger_entries")
-        .update({
-          vendor_name: vendorName.trim() || null,
-          total: parseFloat(totalValue) || 0,
-          document_type: ledgerDocType,
-          is_verified: true,
-        })
-        .eq("id", ledgerEntry.id);
-
-      if (error) {
-        Alert.alert(
-          "Save failed",
-          "We couldn't update the record. Please try again.",
-        );
-        return;
-      }
-    }
-
     const ok = await saveMappings();
     if (ok) {
-      onSaved?.();
+      if (isDirty || isUnverified) {
+        onSaved?.();
+      }
       onClose();
     }
   };
@@ -286,8 +256,41 @@ export function LedgerEntryReviewSheet({
                     </View>
                   )}
 
+                  {(aiSummary || isProcessing) && (
+                    <View
+                      style={[
+                        styles.summaryBox,
+                        {
+                          backgroundColor: theme.colors?.bg,
+                          borderColor: theme.colors?.border,
+                        },
+                      ]}
+                    >
+                      <Sparkles size={20} color={theme.colors?.icon} />
+                      <Text
+                        style={[
+                          styles.summaryText,
+                          { color: theme.colors?.icon + "cc" }, // Slightly more opaque version of the icon color for text
+                        ]}
+                      >
+                        {aiSummary ? (
+                          aiSummary
+                        ) : (
+                          <Text
+                            style={[
+                              styles.summaryAnalyzing,
+                              { color: theme.colors?.icon },
+                            ]}
+                          >
+                            Analyzing Document...
+                          </Text>
+                        )}
+                      </Text>
+                    </View>
+                  )}
+
                   <View style={styles.editableField}>
-                    <Text style={styles.editableLabel}>Vendor Name</Text>
+                    <Text style={styles.editableLabel}>{theme.label}</Text>
                     <TextInput
                       style={styles.editableInput}
                       value={vendorName}
@@ -307,6 +310,25 @@ export function LedgerEntryReviewSheet({
                       placeholder="0.00"
                       placeholderTextColor={Theme.colors.text.muted}
                     />
+                  </View>
+
+                  <View style={styles.editableField}>
+                    <Text style={styles.editableLabel}>Document Summary</Text>
+                    <TextInput
+                      style={[
+                        styles.editableInput,
+                        styles.editableInputMultiline,
+                      ]}
+                      value={aiSummary}
+                      onChangeText={setAiSummary}
+                      multiline
+                      placeholder="e.g. Purchase of premium roofing materials..."
+                      placeholderTextColor={Theme.colors.text.muted}
+                    />
+                    <Text style={styles.editableHint}>
+                      A brief description of what was purchased or documented.
+                      Used by AI for project insights.
+                    </Text>
                   </View>
 
                   <View style={styles.detailGrid}>

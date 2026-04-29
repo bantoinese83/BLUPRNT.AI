@@ -13,10 +13,12 @@ export function HeroSection({
   onStart,
   onCreateAccount,
   onSeeHowItWorks,
+  onAddAnotherProject,
 }: {
   onStart: () => void;
   onCreateAccount: () => void;
   onSeeHowItWorks: () => void;
+  onAddAnotherProject: () => void;
 }) {
   return (
     <section
@@ -100,6 +102,13 @@ export function HeroSection({
                 className="text-center text-sm font-bold text-teal-700 underline-offset-4 hover:underline lg:text-left"
               >
                 {LANDING_HERO_COPY.createAccountLink}
+              </button>
+              <button
+                type="button"
+                onClick={onAddAnotherProject}
+                className="text-center text-sm font-semibold text-slate-600 underline-offset-4 hover:underline hover:text-slate-900 lg:text-left"
+              >
+                {LANDING_HERO_COPY.addAnotherProjectLink}
               </button>
             </div>
 

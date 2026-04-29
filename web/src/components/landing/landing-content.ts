@@ -20,6 +20,8 @@ export const LANDING_HERO_COPY = {
   primaryCta: "Start planning free",
   secondaryCta: "See how it works",
   createAccountLink: "Create free account",
+  /** Signed-out users with an account who want a second renovation (→ login then onboarding). */
+  addAnotherProjectLink: "Add another renovation",
 } as const;
 
 /** Trust & distribution — short pills below the hero */

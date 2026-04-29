@@ -32,6 +32,7 @@ import { BrandedSplash } from "@/components/BrandedSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { AuthProvider } from "@/contexts/AuthProvider";
+import { ConfirmationProvider } from "@/contexts/ConfirmationContext";
 import { AppToastHost } from "@/components/AppToastHost";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -146,10 +147,12 @@ function RootLayout() {
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
-              <RootLayoutNav />
-              <AppToastHost />
-              <OfflineBannerHost />
-              {isOutdated && <LockScreen type="update-required" />}
+              <ConfirmationProvider>
+                <RootLayoutNav />
+                <AppToastHost />
+                <OfflineBannerHost />
+                {isOutdated && <LockScreen type="update-required" />}
+              </ConfirmationProvider>
             </AuthProvider>
           </QueryClientProvider>
         </SafeAreaProvider>

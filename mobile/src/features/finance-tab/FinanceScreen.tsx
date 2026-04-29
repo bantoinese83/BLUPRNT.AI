@@ -38,6 +38,8 @@ import { HomeSpecsTab } from "@/features/finance-tab/HomeSpecsTab";
 import { AddAssetSheet } from "@/features/finance-tab/AddAssetSheet";
 import { Theme } from "@/constants/Theme";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { useConfirmation } from "@/contexts/useConfirmation";
+import { showAppToast } from "@/lib/app-toast";
 
 export default function FinanceScreen() {
   const {
@@ -57,6 +59,7 @@ export default function FinanceScreen() {
   } = useDashboardData();
 
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
+  const { confirm } = useConfirmation();
 
   const [filter, setFilter] = useState<LedgerDocumentFilter>("all");
   const [exporting, setExporting] = useState(false);
@@ -274,6 +277,91 @@ export default function FinanceScreen() {
     ],
   );
 
+  const handleLedgerEntryDelete = useCallback(
+    (id: string) => {
+      confirm({
+        title: "Remove document?",
+        message:
+          "This will permanently delete this record and its associated data.",
+        confirmLabel: "Remove",
+        variant: "destructive",
+        onConfirm: async () => {
+          setDeletingId(id);
+          try {
+            const { error } = await supabase
+              .from("ledger_entries")
+              .delete()
+              .eq("id", id);
+            if (error) {
+              showAppToast("Couldn't remove document. Try again.");
+            } else {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              showAppToast("Document removed.");
+              load();
+            }
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      });
+    },
+    [confirm, load],
+  );
+
+  const renderSectionHeader = useCallback(
+    ({ section: { title } }: { section: { title: string } }) => (
+      <View
+        style={[
+          styles.monthGroup,
+          {
+            paddingHorizontal: 24,
+            paddingTop: 6,
+            paddingBottom: 4,
+            backgroundColor: Theme.colors.background,
+          },
+        ]}
+      >
+        <View style={styles.monthHeader}>
+          <Text style={styles.monthHeaderText}>{title}</Text>
+          <View style={styles.monthHeaderLine} />
+        </View>
+      </View>
+    ),
+    [],
+  );
+
+  const renderLedgerItem = useCallback(
+    ({ item: inv, index }: { item: unknown; index: number }) => (
+      <FinanceLedgerEntryRow
+        inv={inv as LedgerEntryRow}
+        index={index}
+        hasProjectPass={hasProjectPass}
+        isDeleting={deletingId === (inv as LedgerEntryRow).id}
+        onUpgradeClick={() => {
+          setUpgradeReason("general");
+          setShowUpgrade(true);
+        }}
+        onPress={() => {
+          setSelectedLedgerEntry(inv as LedgerEntryRow);
+          setIsReviewOpen(true);
+        }}
+        onViewOriginal={() =>
+          setOriginalPreviewLedgerEntryId((inv as LedgerEntryRow).id)
+        }
+        onDelete={handleLedgerEntryDelete}
+      />
+    ),
+    [
+      hasProjectPass,
+      deletingId,
+      setUpgradeReason,
+      setShowUpgrade,
+      handleLedgerEntryDelete,
+    ],
+  );
+
   if (configurationMissing) {
     return (
       <ScreenWrapper style={styles.centerContainer}>
@@ -318,42 +406,6 @@ export default function FinanceScreen() {
     );
   }
 
-  const handleLedgerEntryDelete = (id: string) => {
-    Alert.alert(
-      "Remove document?",
-      "This will permanently delete this record and its associated data.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            setDeletingId(id);
-            try {
-              const { error } = await supabase
-                .from("ledger_entries")
-                .delete()
-                .eq("id", id);
-              if (error) {
-                Alert.alert(
-                  "Couldn't remove",
-                  "Something went wrong. Try again.",
-                );
-              } else {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success,
-                );
-                load();
-              }
-            } finally {
-              setDeletingId(null);
-            }
-          },
-        },
-      ],
-    );
-  };
-
   return (
     <ScreenWrapper withLogo edges={["top", "left", "right"]}>
       {currentTab === "ledger" && (
@@ -390,44 +442,8 @@ export default function FinanceScreen() {
               )}
             </View>
           }
-          renderSectionHeader={({ section: { title } }) => (
-            <View
-              style={[
-                styles.monthGroup,
-                {
-                  paddingHorizontal: 24,
-                  paddingTop: 6,
-                  paddingBottom: 4,
-                  backgroundColor: Theme.colors.background,
-                },
-              ]}
-            >
-              <View style={styles.monthHeader}>
-                <Text style={styles.monthHeaderText}>{title}</Text>
-                <View style={styles.monthHeaderLine} />
-              </View>
-            </View>
-          )}
-          renderItem={({ item: inv, index }) => (
-            <FinanceLedgerEntryRow
-              inv={inv as LedgerEntryRow}
-              index={index}
-              hasProjectPass={hasProjectPass}
-              isDeleting={deletingId === (inv as LedgerEntryRow).id}
-              onUpgradeClick={() => {
-                setUpgradeReason("general");
-                setShowUpgrade(true);
-              }}
-              onPress={() => {
-                setSelectedLedgerEntry(inv as LedgerEntryRow);
-                setIsReviewOpen(true);
-              }}
-              onViewOriginal={() =>
-                setOriginalPreviewLedgerEntryId((inv as LedgerEntryRow).id)
-              }
-              onDelete={handleLedgerEntryDelete}
-            />
-          )}
+          renderSectionHeader={renderSectionHeader}
+          renderItem={renderLedgerItem}
         />
       )}
 

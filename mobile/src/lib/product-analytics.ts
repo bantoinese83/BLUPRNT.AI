@@ -75,6 +75,7 @@ export function trackProductEvent(
   }
 
   if (__DEV__) {
-    console.log(`[product-analytics] ${name}`, properties ?? {});
+    // Only log in dev to keep production logs clean, but ensure it's high signal
+    console.info(`[Analytics] ${name}`, properties ?? {});
   }
 }

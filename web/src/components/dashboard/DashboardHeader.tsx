@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LogOut,
@@ -42,6 +42,8 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const mobileMenuId = useId();
+  const mobileMenuToggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 6);
@@ -49,6 +51,17 @@ export function DashboardHeader({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMobileMenuOpen(false);
+      queueMicrotask(() => mobileMenuToggleRef.current?.focus());
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileMenuOpen]);
 
   return (
     <header
@@ -255,15 +268,19 @@ export function DashboardHeader({
           </div>
 
           <button
+            ref={mobileMenuToggleRef}
             type="button"
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-all hover:bg-slate-50 lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menu"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls={mobileMenuId}
+            aria-haspopup="dialog"
           >
             {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5" aria-hidden />
             )}
           </button>
         </nav>
@@ -277,98 +294,101 @@ export function DashboardHeader({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-60 bg-slate-900/40 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-60 bg-slate-900/10 backdrop-blur-[2px] lg:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 z-70 w-[min(80vw,320px)] bg-white shadow-2xl lg:hidden flex flex-col"
+              id={mobileMenuId}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Main menu"
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="absolute right-4 top-18 z-70 w-[min(calc(100vw-32px),280px)] origin-top-right overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl lg:hidden flex flex-col"
             >
-              <div className="flex h-16 items-center border-b border-slate-100 px-6">
-                <span className="text-base font-black italic tracking-tighter text-slate-900">
-                  BLUPRNT<span className="text-teal-600">.AI</span>
-                </span>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <div className="flex-1 p-4 space-y-5">
+                <div className="space-y-1.5">
+                  <p className="px-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Project
                   </p>
-                  {projectName && onExportPDF && (
-                    <button
-                      onClick={() => {
-                        onExportPDF();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                    >
-                      <FileDown className="h-5 w-5 text-slate-400" />
-                      Export Archive
-                    </button>
-                  )}
-                  {!isArchitect && onUpgradeClick && (
-                    <button
-                      onClick={() => {
-                        onUpgradeClick();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-xl bg-teal-50 px-4 py-3 text-sm font-bold text-teal-700"
-                    >
-                      <img
-                        src="/upgrade-icon.svg"
-                        alt="Architect plan icon"
-                        className="h-5 w-5"
-                      />
-                      Upgrade to Architect
-                    </button>
-                  )}
-                  {isArchitect && onUpgradeClick && (
-                    <button
-                      onClick={() => {
-                        onUpgradeClick();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                    >
-                      <Settings2 className="h-5 w-5 text-slate-400" />
-                      Manage Plan
-                    </button>
-                  )}
+                  <div className="space-y-1">
+                    {projectName && onExportPDF && (
+                      <button
+                        onClick={() => {
+                          onExportPDF();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 active:bg-slate-100"
+                      >
+                        <FileDown className="h-4.5 w-4.5 text-slate-400" />
+                        Export Archive
+                      </button>
+                    )}
+                    {!isArchitect && onUpgradeClick && (
+                      <button
+                        onClick={() => {
+                          onUpgradeClick();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-xl bg-teal-50 px-3 py-2.5 text-sm font-bold text-teal-700 transition-colors hover:bg-teal-100/50 active:scale-[0.98]"
+                      >
+                        <img
+                          src="/upgrade-icon.svg"
+                          alt=""
+                          className="h-5 w-5"
+                          aria-hidden
+                        />
+                        Upgrade to Architect
+                      </button>
+                    )}
+                    {isArchitect && onUpgradeClick && (
+                      <button
+                        onClick={() => {
+                          onUpgradeClick();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 active:bg-slate-100"
+                      >
+                        <Settings2 className="h-4.5 w-4.5 text-slate-400" />
+                        Manage Plan
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <div className="space-y-1.5">
+                  <p className="px-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Settings
                   </p>
-                  <Link
-                    to="/settings"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                  >
-                    <Settings2 className="h-5 w-5 text-slate-400" />
-                    Account Settings
-                  </Link>
-                  <a
-                    href="mailto:connect@monarch-labs.com"
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                  >
-                    <LifeBuoy className="h-5 w-5 text-slate-400" />
-                    Contact Support
-                  </a>
+                  <div className="space-y-1">
+                    <Link
+                      to="/settings"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 active:bg-slate-100"
+                    >
+                      <Settings2 className="h-4.5 w-4.5 text-slate-400" />
+                      Account Settings
+                    </Link>
+                    <a
+                      href="mailto:connect@monarch-labs.com"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 active:bg-slate-100"
+                    >
+                      <LifeBuoy className="h-4.5 w-4.5 text-slate-400" />
+                      Contact Support
+                    </a>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-6 border-t border-slate-100">
+              <div className="p-2 border-t border-slate-100 bg-slate-50/50">
                 <button
                   onClick={() => {
                     onSignOut();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold text-rose-600 transition-all hover:bg-rose-50 active:scale-[0.98]"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign out

@@ -18,10 +18,7 @@ export function useWebDashboardProjectRealtime(activeProjectId: string | null) {
     const channel = setupProjectDashboardRealtime(supabase, {
       projectId: activeProjectId,
       channelPrefix: "project_sync",
-      onUpdate: ({ table, event }) => {
-        console.log(
-          `[Realtime] ${table} ${event} detected, debouncing refetch...`,
-        );
+      onUpdate: () => {
         // Use a small debounce and refetchQueries to ensure we bypass replication lag
         // and avoid multiple rapid requests when several tables update at once.
         clearTimeout(timeout);

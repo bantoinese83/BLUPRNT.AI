@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo, useId } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -12,7 +12,7 @@ type ProjectOption = {
   estimated_min_total?: number | null;
 };
 
-export function ProjectSwitcher({
+export const ProjectSwitcher = memo(function ProjectSwitcher({
   projects,
   currentId,
   onSelect,
@@ -27,6 +27,8 @@ export function ProjectSwitcher({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const listboxId = useId();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -35,7 +37,13 @@ export function ProjectSwitcher({
       }
     }
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      setOpen((wasOpen) => {
+        if (wasOpen) {
+          queueMicrotask(() => toggleRef.current?.focus());
+        }
+        return false;
+      });
     }
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
@@ -61,7 +69,11 @@ export function ProjectSwitcher({
   if (projects.length <= 1 && !onDelete) {
     return (
       <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-slate-200/60 bg-white/50 px-4 py-2 text-slate-700 shadow-sm">
+        <div
+          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl border border-slate-200/60 bg-white/50 px-4 py-2 text-slate-700 shadow-sm"
+          role="status"
+          aria-label={`Current project: ${label}`}
+        >
           <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
             {getProjectIcon(label)({
               className: "w-4 h-4 object-contain opacity-95",
@@ -78,6 +90,7 @@ export function ProjectSwitcher({
     <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
       <div ref={ref} className="relative min-w-0 flex-1">
         <Button
+          ref={toggleRef}
           variant="outline"
           data-testid="project-switcher-toggle"
           className={`h-11 min-w-0 max-w-full gap-2.5 rounded-2xl border-slate-200/80 bg-white px-4 shadow-sm transition-all hover:border-slate-400 hover:shadow-md group sm:min-w-[160px] sm:max-w-[280px] ${open ? "border-slate-950 ring-2 ring-slate-950/20" : ""}`}
@@ -86,6 +99,8 @@ export function ProjectSwitcher({
           type="button"
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-controls={listboxId}
+          aria-label={`Choose project. Current: ${label}.`}
         >
           <div
             className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${open ? "bg-teal-500/20" : "bg-teal-500/10 group-hover:bg-teal-500/20"}`}
@@ -106,12 +121,14 @@ export function ProjectSwitcher({
         <AnimatePresence>
           {open && (
             <motion.div
+              id={listboxId}
               initial={{ opacity: 0, y: -8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="absolute left-0 top-full z-50 mt-2 w-full min-w-[260px] max-w-[min(100vw-2rem,320px)] rounded-[1.25rem] border border-slate-200 bg-white py-2 shadow-2xl"
               role="listbox"
+              aria-label="Your projects"
             >
               <div className="px-3 pb-2 mb-2 border-b border-slate-50">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">
@@ -130,6 +147,11 @@ export function ProjectSwitcher({
                         type="button"
                         role="option"
                         aria-selected={isActive}
+                        aria-label={
+                          isActive
+                            ? `${p.name}, current project`
+                            : `Switch to ${p.name}`
+                        }
                         className={`flex-1 flex items-center gap-3 px-3 py-2.5 text-left text-sm rounded-xl transition-all ${
                           isActive
                             ? "bg-teal-500/10 text-teal-900 font-bold ring-1 ring-teal-500/20"
@@ -204,4 +226,4 @@ export function ProjectSwitcher({
       {newProjectButton}
     </div>
   );
-}
+});

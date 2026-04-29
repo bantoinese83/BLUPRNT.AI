@@ -51,7 +51,7 @@ describe("TransformationVault", () => {
     render(<TransformationVault projectId="p1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Transformation Gallery")).toBeInTheDocument();
+      expect(screen.getByText("Transformation Vault")).toBeInTheDocument();
     });
 
     expect(screen.getAllByText("Photo").length).toBeGreaterThan(0);
