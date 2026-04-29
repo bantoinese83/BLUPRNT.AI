@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { isSupabaseConfigured, invokeFunction, supabase } from "./supabase";
 
-vi.mock("@supabase/supabase-js", () => ({
-  createClient: vi.fn(() => ({
+vi.mock("@shared/lib/supabase-client.js", () => ({
+  createSupabaseClient: vi.fn(() => ({
     auth: {
       getSession: vi.fn(),
     },
@@ -10,6 +10,7 @@ vi.mock("@supabase/supabase-js", () => ({
       invoke: vi.fn(),
     },
   })),
+  invokeSharedFunction: vi.fn(),
 }));
 
 describe("supabase", () => {
@@ -24,39 +25,34 @@ describe("supabase", () => {
   });
 
   describe("invokeFunction", () => {
-    it("calls supabase.functions.invoke with API version header", async () => {
-      vi.mocked(supabase.functions.invoke).mockResolvedValue({
-        data: { success: true },
-        error: null,
-      });
+    it("calls invokeSharedFunction with correct params", async () => {
+      const { invokeSharedFunction } =
+        await import("@shared/lib/supabase-client.js");
 
-      const result = await invokeFunction("test-func", {
-        body: { foo: "bar" },
-      });
+      await invokeFunction("test-func", { body: { x: 1 } });
 
-      expect(supabase.functions.invoke).toHaveBeenCalledWith("test-func", {
-        body: { foo: "bar" },
-        headers: { "x-bluprnt-api-version": "2026-04-26" },
-      });
-      expect(result.data).toEqual({ success: true });
+      expect(invokeSharedFunction).toHaveBeenCalledWith(
+        supabase,
+        "test-func",
+        expect.objectContaining({ body: { x: 1 } }),
+        expect.any(Object),
+        2,
+      );
     });
 
-    it("merges custom headers with version header", async () => {
-      vi.mocked(supabase.functions.invoke).mockResolvedValue({
-        data: { success: true },
-        error: null,
-      });
+    it("supports custom retries", async () => {
+      const { invokeSharedFunction } =
+        await import("@shared/lib/supabase-client.js");
 
-      await invokeFunction("test-func", {
-        headers: { "X-Custom": "value" },
-      });
+      await invokeFunction("test-func", {}, 5);
 
-      expect(supabase.functions.invoke).toHaveBeenCalledWith("test-func", {
-        headers: {
-          "X-Custom": "value",
-          "x-bluprnt-api-version": "2026-04-26",
-        },
-      });
+      expect(invokeSharedFunction).toHaveBeenCalledWith(
+        supabase,
+        "test-func",
+        expect.any(Object),
+        expect.any(Object),
+        5,
+      );
     });
   });
 });

@@ -11,6 +11,7 @@
     "sanitize-html": "npm:sanitize-html@2.13.1",
     "std/assert": "https://deno.land/std@0.203.0/assert/mod.ts",
     "std/encoding/base64": "jsr:@std/encoding@^0.218.2/base64",
-    "fflate": "https://esm.sh/fflate@0.8.2"
+    "fflate": "https://esm.sh/fflate@0.8.2",
+    "resend": "npm:resend@3.2.0"
   }
 }

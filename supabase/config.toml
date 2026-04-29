@@ -56,7 +56,7 @@ import_map = "./functions/import_map.json"
 [functions.revenuecat-webhook]
 enabled = true
 verify_jwt = false
-import_map = "./functions/revenuecat-webhook/deno.json"
+import_map = "./functions/import_map.json"
 entrypoint = "./functions/revenuecat-webhook/index.ts"
 
 [functions.chat-with-project]
@@ -68,7 +68,7 @@ verify_jwt = false
 [functions.upload-gallery-photo]
 enabled = true
 verify_jwt = true
-import_map = "./functions/upload-gallery-photo/deno.json"
+import_map = "./functions/import_map.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/upload-gallery-photo/index.ts"

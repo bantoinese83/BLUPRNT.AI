@@ -8,6 +8,7 @@ vi.mock("@/lib/supabase", () => ({
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
@@ -63,10 +64,7 @@ describe("DocumentReviewModal", () => {
       />,
     );
 
-    // Wait for load
-    await waitFor(() =>
-      expect(screen.getByText(/Review warranty/i)).toBeInTheDocument(),
-    );
+    await screen.findByText(/Review warranty/i);
 
     const dateInput = screen.getByLabelText(/Warranty Expiration/i);
     fireEvent.change(dateInput, { target: { value: "2026-12-31" } });

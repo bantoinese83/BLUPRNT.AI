@@ -61,4 +61,8 @@ describe("getStars", () => {
     const { container: container4 } = render(<>{stars4}</>);
     expect(container4.querySelectorAll(".fill-amber-400")).toHaveLength(4);
   });
+
+  it("handles identical range in money", () => {
+    expect(money(1000, 1000)).toBe("$1,000");
+  });
 });
