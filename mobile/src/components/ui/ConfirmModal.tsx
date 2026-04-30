@@ -41,12 +41,12 @@ export function ConfirmModal({
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.subtitle}>{message}</Text>
             </View>
-            <View style={styles.row}>
+            <View style={styles.actions}>
               <Button
                 title={cancelLabel}
                 variant="outline"
                 onPress={onCancel}
-                style={styles.button}
+                style={styles.actionButton}
                 titleCase="sentence"
                 disabled={loading}
               />
@@ -56,7 +56,7 @@ export function ConfirmModal({
                 onPress={onConfirm}
                 loading={loading}
                 disabled={loading}
-                style={styles.button}
+                style={styles.actionButton}
                 titleCase="sentence"
               />
             </View>
@@ -109,12 +109,17 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     lineHeight: 20,
   },
-  row: {
-    flexDirection: "row",
+  /**
+   * Stacked actions: a horizontal row with two flex-1 buttons collapses the
+   * second button to zero width on RN when labels differ (minWidth default).
+   */
+  actions: {
+    width: "100%",
     gap: 12,
   },
-  button: {
-    flex: 1,
+  actionButton: {
+    width: "100%",
     height: 48,
+    alignSelf: "stretch",
   },
 });

@@ -1,10 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
+import type { Session } from "@supabase/supabase-js";
 import { useUserSettings } from "./useUserSettings";
 import { supabase } from "@/lib/supabase";
 import { exportUserData } from "@/services/export-service";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+const { defaultSessionUser } = vi.hoisted(() => ({
+  defaultSessionUser: {
+    id: "u1",
+    email: "a@b.com",
+    user_metadata: { full_name: "Test User" },
+  },
+}));
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
@@ -12,6 +21,16 @@ vi.mock("@/lib/supabase", () => ({
       getUser: vi.fn(),
       updateUser: vi.fn(),
       signOut: vi.fn(),
+      onAuthStateChange: vi.fn((callback) => {
+        void callback("INITIAL_SESSION", {
+          user: defaultSessionUser,
+        } as unknown as Session);
+        return {
+          data: { subscription: { unsubscribe: vi.fn() } },
+        } as unknown as ReturnType<
+          import("@supabase/supabase-js").SupabaseClient["auth"]["onAuthStateChange"]
+        >;
+      }),
     },
     from: vi.fn(),
     functions: { invoke: vi.fn() },
@@ -39,15 +58,16 @@ describe("useUserSettings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useNavigate).mockReturnValue(navigate);
-    vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: {
-        user: {
-          id: "u1",
-          email: "a@b.com",
-          user_metadata: { full_name: "Test User" },
-        },
+    vi.mocked(supabase.auth.onAuthStateChange).mockImplementation(
+      (callback) => {
+        void callback("INITIAL_SESSION", {
+          user: defaultSessionUser,
+        } as unknown as Session);
+        return {
+          data: { subscription: { unsubscribe: vi.fn() } },
+        } as unknown as ReturnType<typeof supabase.auth.onAuthStateChange>;
       },
-    } as never);
+    );
     vi.mocked(supabase.from).mockImplementation(
       () =>
         ({
@@ -171,9 +191,14 @@ describe("useUserSettings", () => {
   });
 
   it("does not export when user is missing", async () => {
-    vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: null },
-    } as never);
+    vi.mocked(supabase.auth.onAuthStateChange).mockImplementation(
+      (callback) => {
+        void callback("INITIAL_SESSION", null);
+        return {
+          data: { subscription: { unsubscribe: vi.fn() } },
+        } as unknown as ReturnType<typeof supabase.auth.onAuthStateChange>;
+      },
+    );
 
     const { result } = renderHook(() => useUserSettings());
 

@@ -1,13 +1,29 @@
+import { useId } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, TrendingUp, Activity } from "lucide-react";
+import {
+  Shield,
+  TrendingUp,
+  Activity,
+  FileText,
+  Layers,
+  Receipt,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { Highlighter } from "@/components/ui/Highlighter";
 import { calculateHealthScore } from "@shared/lib/project-health";
+import { money } from "@/lib/formatters";
+import type { LucideIcon } from "lucide-react";
 
 type ProjectHealthProps = {
   estimatedMin?: number | null;
   estimatedMax?: number | null;
   spendingTotal?: number;
+  /** Ledger rows (documents) in the project */
+  documentCount?: number;
+  /** Scope line items */
+  scopeLineCount?: number;
+  /** Billed amount not yet linked to scope (from reconciliation) */
+  unreconciledBilled?: number;
 };
 
 interface CircleProgressProps {
@@ -16,6 +32,8 @@ interface CircleProgressProps {
   secondaryColor: string;
   size: number;
   strokeWidth: number;
+  /** Unique SVG defs id (multiple Health cards / strict mode need distinct ids). */
+  gradientId: string;
 }
 
 const CIRCLE_CONFIG = {
@@ -24,18 +42,99 @@ const CIRCLE_CONFIG = {
   ANIMATION_DURATION: 1.8,
 } as const;
 
+function MetricTile({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-100/90 bg-white/90 px-3 py-2.5 shadow-sm backdrop-blur-sm">
+      <Icon
+        className="mb-1 h-3.5 w-3.5 text-teal-600"
+        aria-hidden
+        strokeWidth={2.25}
+      />
+      <div className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+        {label}
+      </div>
+      <div className="truncate text-sm font-black tabular-nums text-slate-900">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function SpendRunwayBar({
+  min,
+  max,
+  spend,
+}: {
+  min: number;
+  max: number;
+  spend: number;
+}) {
+  const scale = Math.max(min, max, spend) * 1.08 || 1;
+  const loPct = Math.min(100, (min / scale) * 100);
+  const hiPct = Math.min(100, (max / scale) * 100);
+  const spendPctRaw = (spend / scale) * 100;
+  const spendPct = Math.min(100, Math.max(0, spendPctRaw));
+  const bandLeft = Math.min(loPct, hiPct);
+  const bandWidth = Math.max(hiPct - loPct, 0.8);
+  const overHigh = spend > max;
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+        Spend vs estimate band
+      </p>
+      <div className="relative h-10 py-0.5">
+        <div className="absolute inset-x-0 top-1/2 h-9 -translate-y-1/2 overflow-hidden rounded-2xl border border-slate-100/80 bg-slate-100/90">
+          <div
+            className="absolute inset-y-0 bg-teal-100/95"
+            style={{ left: `${bandLeft}%`, width: `${bandWidth}%` }}
+          />
+        </div>
+        <div
+          className="pointer-events-none absolute top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md"
+          style={{
+            left: `${spendPct}%`,
+            backgroundColor: overHigh ? "rgb(244 63 94)" : "rgb(13 148 136)",
+          }}
+          aria-hidden
+        />
+        {overHigh ? (
+          <span className="pointer-events-none absolute right-1 top-1/2 z-10 -translate-y-1/2 text-[8px] font-black uppercase tracking-tighter text-rose-600">
+            Over
+          </span>
+        ) : null}
+      </div>
+      <div className="flex justify-between gap-2 text-[10px] font-bold text-slate-500">
+        <span className="min-w-0 truncate">Low {money(min)}</span>
+        <span className="min-w-0 shrink-0 text-center text-slate-700">
+          Now {money(spend)}
+        </span>
+        <span className="min-w-0 truncate text-right">High {money(max)}</span>
+      </div>
+    </div>
+  );
+}
+
 const CircleProgress = ({
   value,
   color,
   secondaryColor,
   size,
   strokeWidth,
+  gradientId,
 }: CircleProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const progress = ((100 - value) / 100) * circumference;
 
-  const gradientId = "health-gradient";
   const gradientUrl = `url(#${gradientId})`;
 
   return (
@@ -87,9 +186,6 @@ const CircleProgress = ({
           }}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-2.5 h-2.5 rounded-full bg-teal-600 shadow-lg shadow-teal-900/20" />
-      </div>
     </div>
   );
 };
@@ -98,14 +194,22 @@ export function ProjectHealth({
   estimatedMin = 0,
   estimatedMax = 0,
   spendingTotal = 0,
+  documentCount = 0,
+  scopeLineCount = 0,
+  unreconciledBilled = 0,
 }: ProjectHealthProps) {
   const min = estimatedMin || 0;
   const max = estimatedMax || 0;
-  const { score, status, message, stop1, stop2 } = calculateHealthScore(
-    spendingTotal,
-    min,
-    max,
-  );
+  const {
+    score,
+    status,
+    message,
+    stop1,
+    stop2,
+    pctOfEstimateLow,
+    pctOfEstimateHigh,
+    dollarsOverHighEstimate,
+  } = calculateHealthScore(spendingTotal, min, max);
 
   const colorMap: Record<string, string> = {
     Analyzing: "from-slate-400 to-slate-500",
@@ -115,11 +219,16 @@ export function ProjectHealth({
     Healthy: "from-teal-500 to-emerald-600",
   };
   const color = colorMap[status] || "from-teal-500 to-emerald-600";
+  const showRunway = min > 0 && max > 0;
+  const pctHighRounded = Math.round(pctOfEstimateHigh);
+  const pctLowRounded = Math.round(pctOfEstimateLow);
+  const ringGradientId = useId().replace(/:/g, "");
+
   return (
     <Card className="overflow-hidden border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/30 rounded-4xl metal-surface relative">
-      <div className="absolute inset-0 noise-overlay opacity-[0.03] pointer-events-none" />
+      <div className="pointer-events-none absolute inset-0 noise-overlay opacity-[0.03]" />
       <CardHeader className="pb-2">
-        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           <Highlighter
             action="underline"
             color={stop1}
@@ -130,12 +239,12 @@ export function ProjectHealth({
           >
             Health Index
           </Highlighter>
-          <Shield className="w-3.5 h-3.5 text-slate-400" />
+          <Shield className="h-3.5 w-3.5 text-slate-400" aria-hidden />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 pt-2">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-6">
+          <div className="shrink-0 space-y-1 lg:max-w-[200px]">
             <motion.div
               className="flex items-baseline gap-2"
               initial={{ opacity: 0, x: -10 }}
@@ -143,15 +252,15 @@ export function ProjectHealth({
               transition={{ duration: 0.5 }}
             >
               <span
-                className={`text-6xl font-black tracking-tighter tabular-nums bg-linear-to-br ${color} bg-clip-text text-transparent`}
+                className={`bg-linear-to-br ${color} bg-clip-text text-6xl font-black tracking-tighter text-transparent tabular-nums`}
               >
                 {score}
               </span>
-              <span className="text-slate-500 text-lg font-bold">/100</span>
+              <span className="text-lg font-bold text-slate-500">/100</span>
             </motion.div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <motion.div
-                className={`px-2 py-0.5 rounded-full bg-linear-to-br ${color} text-[10px] font-black uppercase tracking-widest text-white`}
+                className={`rounded-full bg-linear-to-br ${color} px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-white`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -159,16 +268,62 @@ export function ProjectHealth({
                 {status}
               </motion.div>
               {spendingTotal > 0 && (
-                <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
-                  <TrendingUp className="w-3 h-3" />
+                <div className="flex items-center gap-1 text-xs font-bold text-emerald-500">
+                  <TrendingUp className="h-3 w-3" aria-hidden />
                   Live
                 </div>
               )}
             </div>
           </div>
 
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-4">
+            <div
+              className={`grid gap-2 ${unreconciledBilled > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}
+            >
+              <MetricTile
+                icon={FileText}
+                label="Documents"
+                value={documentCount > 0 ? String(documentCount) : "—"}
+              />
+              <MetricTile
+                icon={Layers}
+                label="Scope lines"
+                value={scopeLineCount > 0 ? String(scopeLineCount) : "—"}
+              />
+              <MetricTile
+                icon={Activity}
+                label="Vs estimate high"
+                value={
+                  max > 0 && spendingTotal > 0 ? `${pctHighRounded}%` : "—"
+                }
+              />
+              {unreconciledBilled > 0 ? (
+                <MetricTile
+                  icon={Receipt}
+                  label="Unlinked"
+                  value={money(unreconciledBilled)}
+                />
+              ) : null}
+            </div>
+
+            {showRunway && spendingTotal > 0 ? (
+              <SpendRunwayBar min={min} max={max} spend={spendingTotal} />
+            ) : showRunway && status === "Analyzing" ? (
+              <p className="rounded-2xl border border-dashed border-slate-200/80 bg-slate-50/60 px-4 py-3 text-center text-xs font-medium leading-snug text-slate-500">
+                Upload documents to compare spend with your estimate range.
+              </p>
+            ) : null}
+
+            {dollarsOverHighEstimate > 0 && (
+              <p className="text-center text-[11px] font-bold uppercase tracking-wide text-rose-600">
+                {money(dollarsOverHighEstimate)} above high estimate ·{" "}
+                {pctLowRounded}% of low estimate
+              </p>
+            )}
+          </div>
+
           <motion.div
-            className="relative mb-1"
+            className="relative mb-1 flex shrink-0 justify-center lg:justify-end"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -179,27 +334,29 @@ export function ProjectHealth({
               secondaryColor={stop2}
               size={CIRCLE_CONFIG.SIZE}
               strokeWidth={CIRCLE_CONFIG.STROKE_WIDTH}
+              gradientId={ringGradientId}
             />
           </motion.div>
         </div>
 
         <motion.div
-          className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-start gap-3 group hover:bg-white transition-colors duration-300"
+          className="group flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors duration-300 hover:bg-white"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <Activity
-            className={`mt-1.5 w-3 h-3 text-slate-500 shrink-0 opacity-50`}
+            className="mt-1.5 h-3 w-3 shrink-0 text-slate-500 opacity-50"
+            aria-hidden
           />
-          <p className="text-sm font-medium text-slate-600 leading-relaxed italic group-hover:text-slate-900 transition-colors">
-            "{message}"
+          <p className="text-sm font-medium leading-relaxed text-slate-600 italic group-hover:text-slate-900 transition-colors">
+            {`"${message}"`}
           </p>
         </motion.div>
 
         {spendingTotal > 0 && (
           <div className="space-y-2 pt-2">
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 px-1">
+            <div className="flex items-center justify-between px-1 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
               <span>Project Completion</span>
               <span className="text-slate-900">
                 {Math.min(
@@ -209,9 +366,9 @@ export function ProjectHealth({
                 %
               </span>
             </div>
-            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative">
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
               <motion.div
-                className="absolute inset-y-0 left-0 bg-teal-600 rounded-full"
+                className="absolute inset-y-0 left-0 rounded-full bg-teal-600"
                 initial={{ width: 0 }}
                 animate={{
                   width: `${Math.min(100, (spendingTotal / (estimatedMin || 1)) * 100)}%`,
@@ -219,7 +376,7 @@ export function ProjectHealth({
                 transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
               />
             </div>
-            <p className="text-[9px] text-slate-400 font-bold text-center uppercase tracking-widest pt-1">
+            <p className="pt-1 text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
               Based on documented spending vs. the low end of your estimate
             </p>
           </div>

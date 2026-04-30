@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Theme } from "@/constants/Theme";
 import { BlurView } from "expo-blur";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -30,24 +31,30 @@ export function BottomSheet({
   children,
   height = "80%",
 }: BottomSheetProps) {
-  const translateY = useSharedValue(SCREEN_HEIGHT);
-  const opacity = useSharedValue(0);
-
   const sheetHeight =
     typeof height === "number"
       ? height
-      : (SCREEN_HEIGHT * parseFloat(height)) / 100;
+      : (SCREEN_HEIGHT * parseFloat(String(height))) / 100;
+
+  /**
+   * Sheet uses bottom:0 + fixed height. Transform translateY moves the sheet vertically
+   * from that layout position. Visible: translateY = 0. Hidden below fold: translateY = sheetHeight.
+   * (Using SCREEN_HEIGHT - sheetHeight when open incorrectly shifts the sheet down and clips the bottom.)
+   */
+  const translateY = useSharedValue(sheetHeight);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
     if (isOpen) {
       opacity.value = withTiming(1, { duration: 300 });
-      translateY.value = withSpring(SCREEN_HEIGHT - sheetHeight, {
+      translateY.value = sheetHeight;
+      translateY.value = withSpring(0, {
         damping: 20,
         stiffness: 100,
       });
     } else {
       opacity.value = withTiming(0, { duration: 250 });
-      translateY.value = withTiming(SCREEN_HEIGHT, { duration: 250 });
+      translateY.value = withTiming(sheetHeight, { duration: 250 });
     }
   }, [isOpen, sheetHeight, opacity, translateY]);
 
@@ -59,7 +66,7 @@ export function BottomSheet({
     opacity: opacity.value,
   }));
 
-  if (!isOpen && translateY.value === SCREEN_HEIGHT) return null;
+  if (!isOpen) return null;
 
   return (
     <Modal
@@ -68,26 +75,31 @@ export function BottomSheet({
       animationType="none"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <Animated.View style={[styles.backdrop, backdropStyle]}>
-            <BlurView
-              intensity={20}
-              style={StyleSheet.absoluteFill}
-              tint="dark"
-            />
-          </Animated.View>
-        </TouchableWithoutFeedback>
+      {/* Nested provider so bottom insets apply inside transparent Modal (see react-native-safe-area-context docs). */}
+      <SafeAreaProvider>
+        <View style={styles.container}>
+          <TouchableWithoutFeedback onPress={onClose}>
+            <Animated.View style={[styles.backdrop, backdropStyle]}>
+              <BlurView
+                intensity={20}
+                style={StyleSheet.absoluteFill}
+                tint="dark"
+              />
+            </Animated.View>
+          </TouchableWithoutFeedback>
 
-        <Animated.View
-          style={[styles.sheet, { height: sheetHeight }, animatedStyle]}
-        >
-          <View style={styles.handleContainer}>
-            <View style={styles.handle} />
-          </View>
-          {children}
-        </Animated.View>
-      </View>
+          <Animated.View
+            style={[styles.sheet, { height: sheetHeight }, animatedStyle]}
+          >
+            <View style={styles.handleContainer}>
+              <View style={styles.handle} />
+            </View>
+            <SafeAreaView style={styles.sheetBody} edges={["bottom"]}>
+              {children}
+            </SafeAreaView>
+          </Animated.View>
+        </View>
+      </SafeAreaProvider>
     </Modal>
   );
 }
@@ -102,6 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   sheet: {
+    flexDirection: "column",
     backgroundColor: Theme.colors.background,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
@@ -124,5 +137,10 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: "rgba(148,163,184,0.2)",
+  },
+  sheetBody: {
+    flex: 1,
+    minHeight: 0,
+    backgroundColor: Theme.colors.background,
   },
 });

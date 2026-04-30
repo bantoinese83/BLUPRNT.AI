@@ -15,7 +15,8 @@ export const profileTabStyles = StyleSheet.create({
   },
   scrollContent: {
     padding: Theme.spacing.xl,
-    paddingBottom: PROFILE_TAB_BAR_OFFSET + 40,
+    /** Extra clearance so Sign out / Delete sit above the tab bar + home indicator. */
+    paddingBottom: PROFILE_TAB_BAR_OFFSET + 80,
     gap: Theme.spacing.xxl,
   },
   sectionCard: {

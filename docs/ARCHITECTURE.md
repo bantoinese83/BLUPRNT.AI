@@ -23,7 +23,7 @@ The repository is configured with `strict: true` and zero-tolerance for `any`.
 
 - **Elimination of N+1 Queries**: We use Supabase Resource Embedding (Join queries) to fetch related data in a single round-trip.
 - **Optimized Rendering**: `React.memo` and `useCallback` are used strategically for high-frequency interaction points like budget adjustment sliders.
-- **Lighthouse 100/100**: The Web frontend is optimized for zero CLS (Cumulative Layout Shift) and sub-second LCP (Largest Contentful Paint).
+- **Core Web Vitals**: The web app targets strong LCP and minimal CLS; exact Lighthouse scores vary by route, auth state, and third-party scripts—CI enforces correctness and builds, not a single lab score on every page.
 
 ## 2. Monorepo Structure
 

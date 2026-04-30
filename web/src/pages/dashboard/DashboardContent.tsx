@@ -122,6 +122,7 @@ export function DashboardContent({
     projects,
     scopeItems,
     ledgerEntries,
+    unreconciledBilled: reconciliation?.unreconciled_billed ?? 0,
     memoHomeTeam,
     memoInvestmentTotal,
     memoResaleImpact,
@@ -232,6 +233,7 @@ export function DashboardContent({
           estimatedMax={project.estimated_max_total ?? 0}
           spendingTotal={memoInvestmentTotal}
           documentRowCount={ledgerEntries.length}
+          scopeLineCount={scopeItems.length}
           unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
           projectName={project.name}
           isArchitect={isArchitect}

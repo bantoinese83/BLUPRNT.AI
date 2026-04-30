@@ -47,7 +47,12 @@ export const handler = async (req: Request) => {
     resize = ["cover", "contain", "fill"].includes(body?.resize)
       ? body.resize
       : undefined;
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.warn(
+      "[get-document-signed-url] Invalid or empty JSON body:",
+      e instanceof Error ? e.message : String(e),
+    );
+  }
 
   if (!ledger_entry_id) {
     return jsonResponse({ error: "ledger_entry_id required" }, 400, req);

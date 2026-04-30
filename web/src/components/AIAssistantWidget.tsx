@@ -1,15 +1,24 @@
 import { useState, useRef, useEffect, useCallback, memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Send, Bot, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { invokeFunction } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
+import {
+  chatActionButtonLabel,
+  normalizeChatProjectActions,
+  type ChatProjectAction,
+} from "@shared/lib/chat-project-actions";
+
+const MAX_SUGGESTED_ACTIONS = 4;
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  actions?: ChatProjectAction[];
 }
 
 export const AIAssistantWidget = memo(function AIAssistantWidget({
@@ -21,6 +30,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -43,6 +53,27 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
     }
   }, [messages, isOpen, scrollToBottom]);
 
+  const runAction = useCallback(
+    (action: ChatProjectAction) => {
+      onOpenChange(false);
+      switch (action.type) {
+        case "add_scope":
+        case "update_scope":
+          navigate("/dashboard/scope");
+          break;
+        case "suggest_photo":
+          navigate("/dashboard/plan");
+          queueMicrotask(() => {
+            document
+              .getElementById("invoice-upload-anchor")
+              ?.scrollIntoView({ behavior: "smooth" });
+          });
+          break;
+      }
+    },
+    [navigate, onOpenChange],
+  );
+
   const handleSend = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
@@ -59,14 +90,19 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
       setIsTyping(true);
 
       try {
-        const { data, error } = await invokeFunction<{ reply?: string }>(
-          "chat-with-project",
-          {
-            body: { query: msg, projectId },
-          },
-        );
+        const { data, error } = await invokeFunction<{
+          reply?: string;
+          actions?: unknown;
+        }>("chat-with-project", {
+          body: { query: msg, projectId },
+        });
 
         if (error) throw error;
+
+        const actions = normalizeChatProjectActions(data?.actions).slice(
+          0,
+          MAX_SUGGESTED_ACTIONS,
+        );
 
         setMessages((prev) => [
           ...prev,
@@ -76,6 +112,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
             content:
               data?.reply?.trim() ||
               "I couldn't process that. Please try again.",
+            ...(actions.length > 0 ? { actions } : {}),
           },
         ]);
       } catch (err) {
@@ -136,7 +173,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
               aria-label="Chat history"
             >
               {messages.map((m) => (
-                <ChatMessage key={m.id} message={m} />
+                <ChatMessage key={m.id} message={m} onAction={runAction} />
               ))}
               {isTyping && (
                 <div className="flex justify-start">
@@ -207,28 +244,64 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
   );
 });
 
-const ChatMessage = memo(({ message: m }: { message: Message }) => {
-  return (
-    <div
-      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-    >
+const ChatMessage = memo(
+  ({
+    message: m,
+    onAction,
+  }: {
+    message: Message;
+    onAction: (a: ChatProjectAction) => void;
+  }) => {
+    const actions = m.role === "assistant" ? m.actions : undefined;
+    return (
       <div
-        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
-          m.role === "user"
-            ? "bg-teal-600 text-white rounded-br-none"
-            : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
-        }`}
+        className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
       >
-        {m.role === "assistant" ? (
-          <div className="markdown-content prose prose-sm prose-slate">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {m.content}
-            </ReactMarkdown>
-          </div>
-        ) : (
-          m.content
-        )}
+        <div
+          className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
+            m.role === "user"
+              ? "bg-teal-600 text-white rounded-br-none"
+              : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
+          }`}
+        >
+          {m.role === "assistant" ? (
+            <>
+              <div className="markdown-content prose prose-sm prose-slate">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {m.content}
+                </ReactMarkdown>
+              </div>
+              {actions && actions.length > 0 ? (
+                <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Suggested next steps
+                  </p>
+                  <ul className="space-y-2 list-none m-0 p-0">
+                    {actions.map((a, idx) => (
+                      <li key={`${m.id}-act-${idx}`}>
+                        <button
+                          type="button"
+                          onClick={() => onAction(a)}
+                          className="w-full text-left rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2 hover:bg-teal-50 transition-colors"
+                        >
+                          <span className="block text-xs font-bold text-teal-900">
+                            {chatActionButtonLabel(a.type)}
+                          </span>
+                          <span className="block text-[11px] text-slate-600 mt-0.5 leading-snug">
+                            {a.reason}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            m.content
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);

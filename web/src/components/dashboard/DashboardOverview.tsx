@@ -13,6 +13,7 @@ type DashboardOverviewProps = {
   estimatedMax: number;
   spendingTotal: number;
   documentRowCount: number;
+  scopeLineCount?: number;
   unreconciledBilled?: number;
   projectName: string;
   isArchitect: boolean;
@@ -25,6 +26,7 @@ export const DashboardOverview = memo(function DashboardOverview({
   estimatedMax,
   spendingTotal,
   documentRowCount,
+  scopeLineCount = 0,
   unreconciledBilled = 0,
   projectName,
   isArchitect,
@@ -56,6 +58,9 @@ export const DashboardOverview = memo(function DashboardOverview({
         estimatedMin={estimatedMin}
         estimatedMax={estimatedMax}
         spendingTotal={spendingTotal}
+        documentCount={documentRowCount}
+        scopeLineCount={scopeLineCount}
+        unreconciledBilled={unreconciledBilled}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">

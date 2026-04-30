@@ -107,6 +107,13 @@ export function EstimatePreview({
                   styles.viewDetailsBtn,
                   showBreakdown && styles.activeViewDetailsBtn,
                 ]}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: showBreakdown }}
+                accessibilityLabel={
+                  showBreakdown
+                    ? "Hide estimate breakdown"
+                    : "View estimate breakdown"
+                }
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setShowBreakdown(!showBreakdown);

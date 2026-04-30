@@ -4,6 +4,11 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 3000;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
+/**
+ * Web E2E runs against preview with placeholder Supabase env unless you export real
+ * values. Deep billing flows (`e2e/billing-upgrade.spec.ts`) skip unless
+ * `VITE_SUPABASE_URL` points at localhost (e.g. after `supabase start`).
+ */
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -12,7 +17,9 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    /** CI: keep traces for failed attempts so flaky flows are diagnosable without re-run. */
+    trace: process.env.CI ? "retain-on-failure" : "on-first-retry",
+    screenshot: "only-on-failure",
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },

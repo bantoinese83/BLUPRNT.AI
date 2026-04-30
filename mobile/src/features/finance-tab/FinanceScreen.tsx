@@ -82,8 +82,8 @@ export default function FinanceScreen() {
           "This will permanently delete this record and its associated data.",
         confirmLabel: "Remove",
         variant: "destructive",
-        onConfirm: () => {
-          handleDelete(id);
+        onConfirm: async () => {
+          await handleDelete(id);
         },
       });
     },
@@ -206,6 +206,7 @@ export default function FinanceScreen() {
           refreshing={refreshing}
           onRefresh={load}
           renderHeader={renderHeader}
+          isArchitect={isArchitect}
           hasProjectPass={hasProjectPass}
           deletingId={deletingId}
           onEntryPress={(entry) => {

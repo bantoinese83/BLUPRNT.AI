@@ -54,11 +54,26 @@ export function DocumentsSection({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(
-        (doc) =>
-          doc.vendor_name?.toLowerCase().includes(q) ||
-          doc.document_type?.toLowerCase().includes(q),
-      );
+      filtered = filtered.filter((doc) => {
+        const hay = [
+          doc.vendor_name,
+          doc.document_type,
+          doc.ai_summary,
+          doc.invoice_number,
+          doc.payment_status,
+          doc.issue_date,
+          doc.currency,
+          doc.warranty_expiry_date,
+          doc.due_date,
+          doc.total != null ? String(doc.total) : "",
+          doc.subtotal != null ? String(doc.subtotal) : "",
+          doc.tax_total != null ? String(doc.tax_total) : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      });
     }
 
     return filtered;
@@ -226,8 +241,8 @@ export function DocumentsSection({
               <Input
                 type="search"
                 enterKeyHint="search"
-                placeholder="Search vendor or type..."
-                aria-label="Search documents by vendor or type"
+                placeholder="Search vendor, type, invoice #, amount…"
+                aria-label="Search documents by vendor, type, summary, or amounts"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 pr-8 h-9 text-xs rounded-full border-slate-200 bg-white/50 focus:bg-white transition-all shadow-sm"

@@ -2,8 +2,9 @@
 
 [![CI Status](https://github.com/bantoinese83/BLUPRNT.AI/actions/workflows/ci.yml/badge.svg)](https://github.com/bantoinese83/BLUPRNT.AI/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Test Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)](docs/ARCHITECTURE.md)
-[![Quality Score](https://img.shields.io/badge/Quality-100%2F100-gold.svg)](CONTRIBUTING.md)
+[![Coverage](https://img.shields.io/badge/Coverage-critical%20paths%20gated-teal.svg)](CONTRIBUTING.md#coverage-thresholds)
+[![Quality](https://img.shields.io/badge/Quality-CI%20%2B%20E2E%20gates-blue.svg)](CONTRIBUTING.md)
+[![Security](https://img.shields.io/badge/Security-SECURITY.md-informational.svg)](SECURITY.md)
 
 **The homeowner-first financial OS for renovations.**
 
@@ -87,13 +88,19 @@ npm run dev          # Start Web (Vite)
 npm run dev:mobile   # Start Expo (Mobile)
 ```
 
-### 4. The Quality Gate
+### 4. The quality gate
 
-We maintain a zero-warning policy. Before pushing, your code must pass:
+We maintain a **zero-warning** ESLint policy on the paths CI checks. Before pushing, your code must pass:
 
 ```bash
 npm run check        # Lint → Knip → Typecheck → Coverage → Build
 ```
+
+CI also runs **Playwright** (Chromium, Firefox, WebKit), **Deno typecheck** for Supabase edge functions, optional **Supabase DB types** verification (when `SUPABASE_ACCESS_TOKEN` is set), and **Maestro** mobile flows on `main` / PRs (see [.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
+### What “10/10” means here
+
+We treat **10/10** as **defensible excellence**: honest docs, automated gates, and security reporting—not vanity badges. Coverage is enforced on **critical subsets** of web/mobile (see [CONTRIBUTING.md — Coverage thresholds](CONTRIBUTING.md#coverage-thresholds)); full-repo line coverage is not claimed.
 
 ---
 
@@ -101,7 +108,7 @@ npm run check        # Lint → Knip → Typecheck → Coverage → Build
 
 | Path        | Description                                                         |
 | :---------- | :------------------------------------------------------------------ |
-| `web/`      | React 19 SPA. Optimized for 100/100 Lighthouse performance.         |
+| `web/`      | React 19 SPA, performance- and accessibility-oriented UX.           |
 | `mobile/`   | Expo Native app. Features modular components and native gestures.   |
 | `shared/`   | The source of truth for types, database schemas, and billing logic. |
 | `supabase/` | Database migrations and the Deno Edge Function suite.               |
@@ -111,9 +118,10 @@ npm run check        # Lint → Knip → Typecheck → Coverage → Build
 
 ## 📄 Documentation Links
 
-- [**Engineering Architecture**](docs/ARCHITECTURE.md) — Patterns, Performance, & Patterns.
-- [**Contributing Guidelines**](CONTRIBUTING.md) — Setting the bar for code quality.
-- [**Production Launch Handbook**](docs/production_launch_handbook.md) — Deployment and Ops.
+- [**Engineering Architecture**](docs/ARCHITECTURE.md) — Patterns, performance, and structure.
+- [**Contributing Guidelines**](CONTRIBUTING.md) — Quality gate, coverage thresholds, workflow.
+- [**Security**](SECURITY.md) — How to report vulnerabilities responsibly.
+- [**Production Launch Handbook**](docs/production_launch_handbook.md) — Deployment and ops.
 - [**Gemini AI Integration**](docs/gemini-api.md) — How the intelligence layer works.
 
 ---

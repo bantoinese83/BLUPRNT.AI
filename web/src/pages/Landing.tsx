@@ -44,6 +44,22 @@ export default function Landing() {
     checkSubscription();
   }, [user]);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id) return;
+    const refresh = () => {
+      void (async () => {
+        const { data } = await supabase
+          .from("user_subscriptions")
+          .select("status, current_period_end, revenuecat_entitlement_active")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setIsArchitect(isArchitectPlanEffective(data));
+      })();
+    };
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, [user?.id]);
+
   const metaBase = SITE_URL || FALLBACK_SITE_URL;
   const jsonLd = buildLandingJsonLd(metaBase);
 

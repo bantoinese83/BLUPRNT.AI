@@ -25,6 +25,53 @@ export type ProjectScopeItem = {
   description: string | null;
 };
 
+function asStringOrNull(value: unknown): string | null {
+  if (value == null) return null;
+  if (typeof value === "string") {
+    const t = value.trim();
+    return t.length ? t : null;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return null;
+}
+
+function asNumberOrNull(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const cleaned = value.replace(/[$,\s]/g, "");
+    const n = Number.parseFloat(cleaned);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function normalizeLineItems(raw: unknown): OcrInvoiceResult["line_items"] {
+  if (!Array.isArray(raw)) return [];
+  const out: OcrInvoiceResult["line_items"] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as Record<string, unknown>;
+    const description = asStringOrNull(row.description) ?? "Line item";
+    const quantity = asNumberOrNull(row.quantity) ?? 1;
+    const unitPrice = asNumberOrNull(row.unit_price) ?? 0;
+    let lineTotal = asNumberOrNull(row.line_total);
+    if (lineTotal == null) {
+      lineTotal = unitPrice * quantity;
+    }
+    out.push({
+      description,
+      quantity,
+      unit_price: unitPrice,
+      line_total: lineTotal,
+      mapped_scope_item_id: asStringOrNull(row.mapped_scope_item_id),
+    });
+  }
+  return out;
+}
+
 /**
  * Extracts structured data from an invoice PDF/image.
  * If projectScope is provided, it attempts to map each line item to a scope item.
@@ -200,19 +247,28 @@ Be accurate: only map if the line item directly contributes to that scope catego
       console.warn("[ocr] Gemini returned no structured data");
       return null;
     }
-    console.log("[ocr] Extracted data:", JSON.stringify(parsed));
+    const lineItemCount = Array.isArray(parsed.line_items)
+      ? parsed.line_items.length
+      : 0;
+    if (Deno.env.get("OCR_LOG_FULL_JSON") === "1") {
+      console.log("[ocr] Extracted data:", JSON.stringify(parsed));
+    } else {
+      console.log(
+        `[ocr] Extraction ok (keys: ${Object.keys(parsed).join(", ")}; line_items: ${lineItemCount})`,
+      );
+    }
 
     return {
-      vendor_name: parsed.vendor_name || null,
-      invoice_number: parsed.invoice_number || null,
-      issue_date: parsed.issue_date || null,
-      line_items: Array.isArray(parsed.line_items) ? parsed.line_items : [],
-      subtotal: parsed.subtotal ?? null,
-      tax_total: parsed.tax_total ?? null,
-      total: parsed.total ?? null,
-      document_type: parsed.document_type || null,
-      warranty_expiry_date: parsed.warranty_expiry_date || null,
-      summary: parsed.summary || null,
+      vendor_name: asStringOrNull(parsed.vendor_name),
+      invoice_number: asStringOrNull(parsed.invoice_number),
+      issue_date: asStringOrNull(parsed.issue_date),
+      line_items: normalizeLineItems(parsed.line_items),
+      subtotal: asNumberOrNull(parsed.subtotal),
+      tax_total: asNumberOrNull(parsed.tax_total),
+      total: asNumberOrNull(parsed.total),
+      document_type: asStringOrNull(parsed.document_type),
+      warranty_expiry_date: asStringOrNull(parsed.warranty_expiry_date),
+      summary: asStringOrNull(parsed.summary) ?? undefined,
     };
   } catch (e) {
     console.error("OCR extraction error:", e);

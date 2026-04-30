@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "motion/react";
 import { ModalDialog } from "@/components/ui/modal-dialog";
@@ -26,6 +26,7 @@ type LeadFormValues = { email: string };
 export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasShown, setHasShown] = useState(false);
 
@@ -58,6 +59,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
 
   const onSubmit = handleSubmit(async ({ email }) => {
     setLoading(true);
+    setSubmitError(null);
     try {
       const { error } = await supabase.functions.invoke(
         "submit-marketing-lead",
@@ -70,23 +72,33 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
       );
       if (error) {
         console.error("submit-marketing-lead:", error);
+        setSubmitError(
+          "We couldn't save your email right now. Check your connection and try again.",
+        );
+        return;
       }
 
       setSubmitted(true);
       reset();
     } catch (err) {
       console.error("Failed to capture lead:", err);
-      setSubmitted(true);
-      reset();
+      setSubmitError("Something went wrong. Please try again in a moment.");
     } finally {
       setLoading(false);
     }
   });
 
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setSubmitted(false);
+    setSubmitError(null);
+    reset({ email: "" });
+  }, [reset]);
+
   return (
     <ModalDialog
       open={isVisible}
-      onClose={() => setIsVisible(false)}
+      onClose={handleClose}
       titleId={
         submitted ? "lead-capture-success-title" : "lead-capture-form-title"
       }
@@ -95,7 +107,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
     >
       <button
         type="button"
-        onClick={() => setIsVisible(false)}
+        onClick={handleClose}
         className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors z-20"
         aria-label="Close"
       >
@@ -203,6 +215,14 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                   </>
                 )}
               </Button>
+              {submitError ? (
+                <p
+                  role="alert"
+                  className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-sm font-medium text-rose-800"
+                >
+                  {submitError}
+                </p>
+              ) : null}
             </form>
             <div className="space-y-4 pt-2">
               <p className="text-[10px] text-center text-slate-400 font-medium">
@@ -257,7 +277,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                 variant="outline"
                 className="w-full py-6 rounded-2xl font-bold text-slate-600"
                 onClick={() => {
-                  setIsVisible(false);
+                  handleClose();
                   onPlanSelect?.("pass");
                 }}
               >

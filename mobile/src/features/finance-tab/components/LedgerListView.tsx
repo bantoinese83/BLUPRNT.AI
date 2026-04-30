@@ -13,6 +13,7 @@ interface LedgerListViewProps {
   refreshing: boolean;
   onRefresh: () => void;
   renderHeader: () => React.ReactElement | null;
+  isArchitect: boolean;
   hasProjectPass: boolean;
   deletingId: string | null;
   onEntryPress: (entry: LedgerEntryRow) => void;
@@ -29,6 +30,7 @@ export function LedgerListView({
   refreshing,
   onRefresh,
   renderHeader,
+  isArchitect,
   hasProjectPass,
   deletingId,
   onEntryPress,
@@ -72,6 +74,7 @@ export function LedgerListView({
     <FinanceLedgerEntryRow
       inv={inv}
       index={index}
+      isArchitect={isArchitect}
       hasProjectPass={hasProjectPass}
       isDeleting={deletingId === inv.id}
       onUpgradeClick={onUpgradeClick}

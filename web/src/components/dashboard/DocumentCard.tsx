@@ -26,6 +26,7 @@ interface DocumentCardProps {
 export const DocumentCard = memo(function DocumentCard({
   document,
   index,
+  isArchitect = false,
   hasProjectPass,
   onUpgradeClick,
   onClick,
@@ -44,7 +45,7 @@ export const DocumentCard = memo(function DocumentCard({
     document.document_type === "quote"
       ? null
       : getWarrantyStatus(document.warranty_expiry_date);
-  const isWarrantyUnlocked = hasProjectPass;
+  const isWarrantyUnlocked = Boolean(isArchitect || hasProjectPass);
 
   return (
     <>

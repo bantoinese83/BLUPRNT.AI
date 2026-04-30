@@ -1,0 +1,8 @@
+# Keeps npm dependencies current with low noise (monthly, capped PRs).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 8

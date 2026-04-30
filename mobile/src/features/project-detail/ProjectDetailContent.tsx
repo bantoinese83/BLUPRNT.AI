@@ -44,6 +44,8 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
     detailDataWarning,
     clearDetailDataWarnings,
     ledgerTotal,
+    scope,
+    reconciliation,
     groupedScope,
     handleShare,
     handleRefresh,
@@ -120,6 +122,9 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
             <ProjectDetailInsightCards
               project={project}
               ledgerTotal={ledgerTotal}
+              documentCount={detailLedgerEntries.length}
+              scopeLineCount={scope.length}
+              unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
             />
             {isTrustHighPriority && (
               <GroundingSourcesSection project={project} />

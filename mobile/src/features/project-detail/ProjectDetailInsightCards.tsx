@@ -7,9 +7,18 @@ import type { ProjectRow } from "@shared/types/database";
 type Props = {
   project: ProjectRow;
   ledgerTotal: number;
+  documentCount?: number;
+  scopeLineCount?: number;
+  unreconciledBilled?: number;
 };
 
-export function ProjectDetailInsightCards({ project, ledgerTotal }: Props) {
+export function ProjectDetailInsightCards({
+  project,
+  ledgerTotal,
+  documentCount = 0,
+  scopeLineCount = 0,
+  unreconciledBilled = 0,
+}: Props) {
   return (
     <>
       <MotiView
@@ -21,6 +30,9 @@ export function ProjectDetailInsightCards({ project, ledgerTotal }: Props) {
           estimatedMin={project.estimated_min_total}
           estimatedMax={project.estimated_max_total}
           spendingTotal={ledgerTotal}
+          documentCount={documentCount}
+          scopeLineCount={scopeLineCount}
+          unreconciledBilled={unreconciledBilled}
         />
       </MotiView>
 

@@ -82,6 +82,7 @@ export function DocumentReviewModal({
   const confirmDelete = useCallback(async () => {
     const success = await handleDelete();
     if (success && document) {
+      setShowDeleteConfirm(false);
       onDeleted?.(document.id);
       onClose();
     }

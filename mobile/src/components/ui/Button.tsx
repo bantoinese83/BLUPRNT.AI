@@ -69,10 +69,20 @@ export function Button({
         ? Theme.colors.status.error
         : Theme.colors.cta.from;
 
+    const outerLayout = style
+      ? {
+          flex: style.flex,
+          width: style.width,
+          alignSelf: style.alignSelf,
+          minWidth: style.minWidth,
+          maxWidth: style.maxWidth,
+          flexGrow: style.flexGrow,
+          flexShrink: style.flexShrink,
+        }
+      : undefined;
+
     return (
-      <View
-        style={[styles.shadowContainer, { flex: style?.flex, shadowColor }]}
-      >
+      <View style={[styles.shadowContainer, { shadowColor }, outerLayout]}>
         <TouchableOpacity
           onPress={handlePress}
           disabled={isInteractionDisabled}
@@ -81,6 +91,7 @@ export function Button({
           accessibilityLabel={a11yLabel}
           accessibilityState={{ disabled: isInteractionDisabled }}
           testID={testID}
+          style={style?.width === "100%" ? { width: "100%" } : undefined}
         >
           <MotiView
             animate={{

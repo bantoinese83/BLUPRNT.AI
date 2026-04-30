@@ -59,8 +59,15 @@ jobs:
   mobile-verify:
     name: Mobile E2E (Maestro)
     runs-on: macos-latest
-    # Run fully on PRs or when explicitly requested via commit message
-    if: github.event_name == 'pull_request' || contains(github.event.head_commit.message, '[mobile-e2e]')
+    # PRs + every push to main/master (so merges ship with the same gate). Feature
+    # branches can still opt in with [mobile-e2e] in the commit subject/body.
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/master' ||
+      (github.event_name == 'push' &&
+        github.event.head_commit != null &&
+        contains(github.event.head_commit.message, '[mobile-e2e]'))
     steps:
       - uses: actions/checkout@v4
 

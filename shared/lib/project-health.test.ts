@@ -18,6 +18,8 @@ describe("calculateHealthScore", () => {
     const result = calculateHealthScore(1100, 500, 1000);
     expect(result.status).toBe("Over Budget");
     expect(result.score).toBeLessThan(70);
+    expect(result.pctOfEstimateHigh).toBeCloseTo(110);
+    expect(result.dollarsOverHighEstimate).toBe(100);
   });
 
   it("returns At Limit when utilization > 85%", () => {
@@ -36,5 +38,7 @@ describe("calculateHealthScore", () => {
     const result = calculateHealthScore(300, 500, 1000);
     expect(result.status).toBe("Healthy");
     expect(result.score).toBe(88);
+    expect(result.pctOfEstimateHigh).toBeCloseTo(30);
+    expect(result.dollarsOverHighEstimate).toBe(0);
   });
 });

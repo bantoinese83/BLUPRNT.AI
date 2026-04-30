@@ -30,6 +30,13 @@ const paletteKbd = () =>
     ? "⌘K"
     : "Ctrl+K";
 
+const PROJECT_PALETTE_LIMIT = 40;
+
+/** Strip `ilike` metacharacters from user input so patterns cannot be widened accidentally. */
+function sanitizeIlikeUserFragment(value: string): string {
+  return value.replace(/[%_\\]/g, "").trim();
+}
+
 export const CommandPalette = memo(function CommandPalette() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -38,44 +45,59 @@ export const CommandPalette = memo(function CommandPalette() {
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const navigate = useNavigate();
 
+  const closePalette = useCallback(() => {
+    setOpen(false);
+    setSearch("");
+  }, []);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpen((wasOpen) => {
+          if (wasOpen) setSearch("");
+          return !wasOpen;
+        });
       }
       if (e.key === "Escape") {
-        setOpen(false);
+        closePalette();
       }
     };
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [closePalette]);
 
-  const fetchProjects = useCallback(async () => {
-    const { data } = await supabase
+  const fetchProjects = useCallback(async (query: string) => {
+    const q = sanitizeIlikeUserFragment(query);
+    let builder = supabase
       .from("projects")
       .select("id, name")
       .order("updated_at", { ascending: false })
-      .limit(5);
+      .limit(PROJECT_PALETTE_LIMIT);
+    if (q.length > 0) {
+      builder = builder.ilike("name", `%${q}%`);
+    }
+    const { data } = await builder;
     if (data) setProjects(data);
   }, []);
 
   useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => {
-        void fetchProjects();
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [open, fetchProjects]);
+    if (!open) return undefined;
+    const delayMs = search.trim() ? 200 : 0;
+    const id = window.setTimeout(() => {
+      void fetchProjects(search);
+    }, delayMs);
+    return () => window.clearTimeout(id);
+  }, [open, search, fetchProjects]);
 
-  const runCommand = useCallback((command: () => void) => {
-    setOpen(false);
-    command();
-  }, []);
+  const runCommand = useCallback(
+    (command: () => void) => {
+      closePalette();
+      command();
+    },
+    [closePalette],
+  );
 
   return (
     <AnimatePresence>
@@ -92,7 +114,7 @@ export const CommandPalette = memo(function CommandPalette() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            onClick={() => setOpen(false)}
+            onClick={() => closePalette()}
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
             aria-hidden="true"
           />
@@ -153,18 +175,21 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<LayoutDashboard />}
                     label="Dashboard"
+                    value="dashboard home"
                     shortcut="G D"
                     onSelect={() => runCommand(() => navigate("/dashboard"))}
                   />
                   <Item
                     icon={<Plus />}
                     label="Create New Project"
+                    value="new project onboarding"
                     shortcut="N"
                     onSelect={() => runCommand(() => navigate("/onboarding"))}
                   />
                   <Item
                     icon={<Settings />}
                     label="Account Settings"
+                    value="settings account profile billing"
                     shortcut="S"
                     onSelect={() => runCommand(() => navigate("/settings"))}
                   />
@@ -177,6 +202,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<LayoutDashboard />}
                     label="Plan & documents"
+                    value="plan documents vault upload invoices"
                     onSelect={() =>
                       runCommand(() => navigate("/dashboard/plan"))
                     }
@@ -184,6 +210,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<ListTree />}
                     label="Scope line items"
+                    value="scope renovation line items"
                     onSelect={() =>
                       runCommand(() => navigate("/dashboard/scope"))
                     }
@@ -191,6 +218,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<Scale />}
                     label="Budget vs actual"
+                    value="budget execute actual spend"
                     onSelect={() =>
                       runCommand(() => navigate("/dashboard/execute"))
                     }
@@ -198,6 +226,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<BookMarked />}
                     label="Property record"
+                    value="property record home details"
                     onSelect={() =>
                       runCommand(() => navigate("/dashboard/record"))
                     }
@@ -205,6 +234,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<ScanLine />}
                     label="Jump to invoice upload"
+                    value="invoice upload scan document"
                     onSelect={() =>
                       runCommand(() => {
                         navigate("/dashboard/plan");
@@ -222,7 +252,9 @@ export const CommandPalette = memo(function CommandPalette() {
 
                 {projects.length > 0 && (
                   <Command.Group
-                    heading="Recent Projects"
+                    heading={
+                      search.trim() ? "Matching projects" : "Recent projects"
+                    }
                     className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-3 py-2"
                   >
                     {projects.map((p) => (
@@ -230,6 +262,7 @@ export const CommandPalette = memo(function CommandPalette() {
                         key={p.id}
                         icon={<FileText />}
                         label={p.name}
+                        value={`${p.name} ${p.id} project`}
                         onSelect={() =>
                           runCommand(() => {
                             localStorage.setItem("bluprnt_project_id", p.id);
@@ -251,6 +284,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<Shield />}
                     label="Privacy Policy"
+                    value="privacy legal"
                     onSelect={() =>
                       runCommand(() => navigate(WEB_APP_PATH_PRIVACY))
                     }
@@ -258,6 +292,7 @@ export const CommandPalette = memo(function CommandPalette() {
                   <Item
                     icon={<LogOut className="text-rose-400" />}
                     label="Sign Out"
+                    value="sign out logout leave"
                     onSelect={() =>
                       runCommand(async () => {
                         await supabase.auth.signOut();
@@ -295,16 +330,20 @@ const Item = memo(
   ({
     icon,
     label,
+    value,
     shortcut,
     onSelect,
   }: {
     icon: React.ReactNode;
     label: string;
+    /** Optional cmdk filter string (defaults to `label`). */
+    value?: string;
     shortcut?: string;
     onSelect: () => void;
   }) => {
     return (
       <Command.Item
+        value={value ?? label}
         onSelect={onSelect}
         className={cn(
           "flex items-center justify-between px-3 py-3.5 rounded-2xl cursor-pointer transition-all duration-200 group outline-none",

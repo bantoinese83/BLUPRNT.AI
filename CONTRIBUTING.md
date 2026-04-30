@@ -34,8 +34,21 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 4. **Fast feedback**: Run `npm run status` for a quick lint / test / typecheck pass per workspace (`shared`, `web`, `mobile`) before the full `npm run check`. Run `npm run lint:fix` to apply ESLint auto-fixes repo-wide, then `npm run lint` when you need the full lint + typecheck + design-token gate.
 5. **Testing**:
    - Add unit tests for new shared logic.
-   - Run `npm run check` to ensure you haven't broken the 100/100 quality score.
+   - Run `npm run check` so you pass the same gates as CI (lint, knip, coverage thresholds, builds). See [Coverage thresholds](#coverage-thresholds) below.
 6. **PR**: Submit your PR with a clear description and screenshots of any UI changes.
+
+## Coverage thresholds
+
+Coverage is **gated on curated critical paths**, not every file in the repo (see `web/vitest.config.ts`, `mobile/vitest.config.ts`, and workspace `test:coverage` scripts). Approximate Vitest gates:
+
+| Workspace                  | Lines | Branches | Functions | Statements |
+| :------------------------- | ----: | -------: | --------: | ---------: |
+| **Web** (included paths)   | ≥ 80% |    ≥ 72% |     ≥ 78% |      ≥ 80% |
+| **Mobile** (included libs) | ≥ 80% |    ≥ 65% |     ≥ 80% |      ≥ 80% |
+
+Raising thresholds should be paired with tests or justified exclusions—avoid “green by narrowing `include`.”
+
+**`@bluprnt/shared`:** `vitest run --coverage` reports coverage for **modules reached by tests** (no custom `include`/`thresholds` in `shared/` yet). Keep new shared logic covered by unit tests; tightening shared thresholds should mirror `web/vitest.config.ts` style `include` lists when you are ready.
 
 ## 🚀 The Quality Gate
 

@@ -24,6 +24,8 @@ export type PhotoSlotProps = {
   onUpload: () => void;
   onClear: (id: string) => void;
   onUpdateCaption: (id: string, caption: string) => void;
+  /** When true and a photo is shown, the bottom "Change photo" chip is omitted (parent supplies actions). */
+  hideChangeOverlay?: boolean;
 };
 
 export function PhotoSlot({
@@ -34,6 +36,7 @@ export function PhotoSlot({
   onUpload,
   onClear,
   onUpdateCaption,
+  hideChangeOverlay = false,
 }: PhotoSlotProps) {
   const [editingCaption, setEditingCaption] = useState(false);
   const [captionValue, setCaptionValue] = useState(item?.caption || "");
@@ -115,8 +118,8 @@ export function PhotoSlot({
                 </TouchableOpacity>
               </View>
 
-              {/* Change Photo Button (Bottom Overlay - Only when image exists) */}
-              {!editingCaption && (
+              {/* Change photo: optional overlay; vault can use inline replace instead. */}
+              {!editingCaption && !hideChangeOverlay && (
                 <TouchableOpacity
                   activeOpacity={0.9}
                   style={styles.actionOverlay}
@@ -141,7 +144,12 @@ export function PhotoSlot({
 
               {/* Caption Overlay (Bottom) */}
               {!editingCaption && item.caption && (
-                <View style={styles.captionContainer}>
+                <View
+                  style={[
+                    styles.captionContainer,
+                    hideChangeOverlay && styles.captionContainerCompact,
+                  ]}
+                >
                   <Text style={styles.captionText} numberOfLines={2}>
                     {item.caption}
                   </Text>
@@ -280,8 +288,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 12,
-    paddingBottom: 70, // Leave room for badge + actions
+    paddingBottom: 70,
     backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  captionContainerCompact: {
+    paddingBottom: 14,
   },
   captionText: {
     color: "white",

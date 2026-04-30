@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { exportUserData } from "@/services/export-service";
 import { useNavigate } from "react-router-dom";
@@ -29,51 +30,82 @@ export function useUserSettings() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
 
+  const applySession = useCallback(async (u: User | null) => {
+    setUser(u);
+    setDisplayName((u?.user_metadata?.full_name as string) ?? "");
+
+    if (u) {
+      const { data: sub } = await supabase
+        .from("user_subscriptions")
+        .select("status, current_period_end, revenuecat_entitlement_active")
+        .eq("user_id", u.id)
+        .maybeSingle();
+      setIsArchitect(isArchitectPlanEffective(sub));
+
+      const { data: owned } = await supabase
+        .from("properties")
+        .select("id")
+        .eq("owner_user_id", u.id);
+      const propIds = (owned ?? []).map((p) => p.id);
+      if (propIds.length === 0) {
+        setUpgradeProjectId(null);
+      } else {
+        const { data: projs } = await supabase
+          .from("projects")
+          .select("id")
+          .in("property_id", propIds)
+          .order("updated_at", { ascending: false })
+          .limit(1);
+        setUpgradeProjectId(projs?.[0]?.id ?? null);
+      }
+    } else {
+      setUpgradeProjectId(null);
+      setIsArchitect(false);
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      setUserLoading(true);
-      const {
-        data: { user: u },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-      setUser(u);
-      setDisplayName((u?.user_metadata?.full_name as string) ?? "");
 
-      if (u) {
+    const run = async (u: User | null) => {
+      if (cancelled) return;
+      setUserLoading(true);
+      try {
+        await applySession(u);
+      } finally {
+        if (!cancelled) setUserLoading(false);
+      }
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === "TOKEN_REFRESHED") return;
+      void run(session?.user ?? null);
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [applySession]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !user?.id) return;
+    const refreshPlan = () => {
+      void (async () => {
         const { data: sub } = await supabase
           .from("user_subscriptions")
           .select("status, current_period_end, revenuecat_entitlement_active")
-          .eq("user_id", u.id)
+          .eq("user_id", user.id)
           .maybeSingle();
         setIsArchitect(isArchitectPlanEffective(sub));
-
-        const { data: owned } = await supabase
-          .from("properties")
-          .select("id")
-          .eq("owner_user_id", u.id);
-        const propIds = (owned ?? []).map((p) => p.id);
-        if (propIds.length === 0) {
-          setUpgradeProjectId(null);
-        } else {
-          const { data: projs } = await supabase
-            .from("projects")
-            .select("id")
-            .in("property_id", propIds)
-            .order("updated_at", { ascending: false })
-            .limit(1);
-          setUpgradeProjectId(projs?.[0]?.id ?? null);
-        }
-      } else {
-        setUpgradeProjectId(null);
-      }
-      setUserLoading(false);
+      })();
     };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    window.addEventListener("focus", refreshPlan);
+    return () => window.removeEventListener("focus", refreshPlan);
+  }, [user?.id]);
 
   const handleSaveProfile = async () => {
     setProfileSaving(true);

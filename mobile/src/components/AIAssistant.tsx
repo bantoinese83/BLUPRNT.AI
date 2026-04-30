@@ -16,17 +16,27 @@ import Markdown from "react-native-markdown-display";
 import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { invokeFunction } from "@/lib/supabase";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 import { reportClientError } from "@/lib/sentry";
+import {
+  chatActionButtonLabel,
+  normalizeChatProjectActions,
+  type ChatProjectAction,
+} from "@shared/lib/chat-project-actions";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
+
+const MAX_SUGGESTED_ACTIONS = 4;
+
 type Role = "user" | "assistant";
 
 interface Message {
   id: string;
   role: Role;
   content: string;
+  actions?: ChatProjectAction[];
 }
 
 let messageIdSeq = 0;
@@ -83,6 +93,22 @@ export function AIAssistant({ projectId }: Props) {
       contentSize.height - padding;
   }, []);
 
+  const runAction = useCallback(
+    (action: ChatProjectAction) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      switch (action.type) {
+        case "add_scope":
+        case "update_scope":
+          router.push(`/project/${projectId}?focus=scope` as never);
+          break;
+        case "suggest_photo":
+          router.push(`/project/${projectId}` as never);
+          break;
+      }
+    },
+    [projectId],
+  );
+
   const handleSend = async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || isTyping) return;
@@ -98,16 +124,20 @@ export function AIAssistant({ projectId }: Props) {
     scrollToEnd();
 
     try {
-      const { data, error } = await invokeFunction<{ reply?: string }>(
-        "chat-with-project",
-        {
-          body: { query: msg, projectId },
-        },
-      );
+      const { data, error } = await invokeFunction<{
+        reply?: string;
+        actions?: unknown;
+      }>("chat-with-project", {
+        body: { query: msg, projectId },
+      });
 
       if (error) throw error;
 
       if (!isMountedRef.current) return;
+      const actions = normalizeChatProjectActions(data?.actions).slice(
+        0,
+        MAX_SUGGESTED_ACTIONS,
+      );
       setMessages((prev) => [
         ...prev,
         {
@@ -116,6 +146,7 @@ export function AIAssistant({ projectId }: Props) {
           content:
             data?.reply?.trim() ||
             "Something went wrong. Pull to refresh your project data and try again.",
+          ...(actions.length > 0 ? { actions } : {}),
         },
       ]);
     } catch (err) {
@@ -194,7 +225,31 @@ export function AIAssistant({ projectId }: Props) {
               ]}
             >
               {m.role === "assistant" ? (
-                <Markdown style={markdownStyles}>{m.content}</Markdown>
+                <>
+                  <Markdown style={markdownStyles}>{m.content}</Markdown>
+                  {m.actions && m.actions.length > 0 ? (
+                    <View style={styles.actionBlock}>
+                      <Text style={styles.actionBlockTitle}>
+                        Suggested next steps
+                      </Text>
+                      {m.actions.map((a, idx) => (
+                        <TouchableOpacity
+                          key={`${m.id}-a-${idx}`}
+                          style={styles.actionRow}
+                          onPress={() => runAction(a)}
+                          activeOpacity={0.88}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${chatActionButtonLabel(a.type)}. ${a.reason}`}
+                        >
+                          <Text style={styles.actionRowCta}>
+                            {chatActionButtonLabel(a.type)}
+                          </Text>
+                          <Text style={styles.actionRowReason}>{a.reason}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ) : null}
+                </>
               ) : (
                 <Text style={styles.userText}>{m.content}</Text>
               )}
@@ -342,6 +397,40 @@ const styles = StyleSheet.create({
   },
   assistantBubbleShape: {
     borderBottomLeftRadius: Theme.radius.sm,
+  },
+  actionBlock: {
+    marginTop: Theme.spacing.md,
+    paddingTop: Theme.spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Theme.colors.border,
+    gap: Theme.spacing.sm,
+  },
+  actionBlockTitle: {
+    fontSize: Theme.typography.size.xs,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  actionRow: {
+    borderRadius: Theme.radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(13, 148, 136, 0.35)",
+    backgroundColor: "rgba(13, 148, 136, 0.06)",
+    paddingVertical: Theme.spacing.md,
+    paddingHorizontal: Theme.spacing.lg,
+  },
+  actionRowCta: {
+    fontSize: Theme.typography.size.sm,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.deep,
+  },
+  actionRowReason: {
+    marginTop: 4,
+    fontSize: Theme.typography.size.sm,
+    fontFamily: Theme.typography.family.regular,
+    color: Theme.colors.text.secondary,
+    lineHeight: 18,
   },
   typingBubble: {
     paddingVertical: 14,

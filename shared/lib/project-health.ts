@@ -14,6 +14,12 @@ export interface HealthScoreResult {
   // Visual metadata (colors are platform-specific, but stops/tokens can be shared)
   stop1: string;
   stop2: string;
+  /** Documented spend as % of estimate low (0 when min is unusable). */
+  pctOfEstimateLow: number;
+  /** Documented spend as % of estimate high (0 when max is unusable). */
+  pctOfEstimateHigh: number;
+  /** Dollars above the high estimate (0 when at or under). */
+  dollarsOverHighEstimate: number;
 }
 
 /**
@@ -49,6 +55,15 @@ export function calculateHealthScore(
       ? [estimatedMin, estimatedMax]
       : [estimatedMax, estimatedMin];
 
+  const pctOfEstimateLow = min > 0 ? (actualSpend / min) * 100 : 0;
+  const pctOfEstimateHigh = max > 0 ? (actualSpend / max) * 100 : 0;
+  const dollarsOverHighEstimate = Math.max(0, actualSpend - max);
+  const metrics = {
+    pctOfEstimateLow,
+    pctOfEstimateHigh,
+    dollarsOverHighEstimate,
+  };
+
   if (min === 0 || actualSpend === 0) {
     const g = VIZ_GRADIENT.healthAnalyzing;
     return {
@@ -57,6 +72,7 @@ export function calculateHealthScore(
       stop1: g.stop1,
       stop2: g.stop2,
       message: "Processing your initial project data...",
+      ...metrics,
     };
   }
 
@@ -75,6 +91,7 @@ export function calculateHealthScore(
       stop1: g.stop1,
       stop2: g.stop2,
       message: "Careful! You've exceeded your lifecycle estimate.",
+      ...metrics,
     };
   }
 
@@ -86,6 +103,7 @@ export function calculateHealthScore(
       stop1: g.stop1,
       stop2: g.stop2,
       message: "You're approaching the upper limit of your budget.",
+      ...metrics,
     };
   }
 
@@ -97,6 +115,7 @@ export function calculateHealthScore(
       stop1: g.stop1,
       stop2: g.stop2,
       message: "Starting strong! Your initial spending is well-aligned.",
+      ...metrics,
     };
   }
 
@@ -107,5 +126,6 @@ export function calculateHealthScore(
     stop1: g.stop1,
     stop2: g.stop2,
     message: "Your project spending is pacing well against estimates.",
+    ...metrics,
   };
 }

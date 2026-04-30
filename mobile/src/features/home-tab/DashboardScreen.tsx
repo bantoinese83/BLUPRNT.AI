@@ -300,6 +300,8 @@ export default function DashboardScreen() {
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
             spendingTotal={capitalDocumentedTotal}
+            documentCount={ledgerEntries.length}
+            scopeLineCount={scopeItems.length}
           />
         </MotiView>
 
@@ -352,6 +354,7 @@ export default function DashboardScreen() {
             ledgerEntries={ledgerEntries as LedgerEntryRow[]}
             estimatedMin={project.estimated_min_total}
             estimatedMax={project.estimated_max_total}
+            isArchitect={isArchitect}
             hasProjectPass={hasProjectPass}
             onUpgradeClick={onGeneralUpgrade}
             onOpenLedgerEntry={(inv) => {

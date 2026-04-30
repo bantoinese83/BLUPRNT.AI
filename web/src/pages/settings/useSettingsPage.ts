@@ -92,6 +92,24 @@ export function useSettingsPage(): UseSettingsPageResult {
     };
   }, [authUser]);
 
+  /** After Stripe billing portal / checkout, tab focus often returns before authUser changes — refresh plan row. */
+  useEffect(() => {
+    if (typeof window === "undefined" || !authUser) return;
+    const refreshPlan = () => {
+      void (async () => {
+        const { data: sub } = await supabase
+          .from("user_subscriptions")
+          .select("*")
+          .eq("user_id", authUser.id)
+          .maybeSingle();
+        setSubscriptionRow(sub as UserSubscriptionRow | null);
+        setIsArchitect(isArchitectPlanEffective(sub));
+      })();
+    };
+    window.addEventListener("focus", refreshPlan);
+    return () => window.removeEventListener("focus", refreshPlan);
+  }, [authUser]);
+
   const onBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);

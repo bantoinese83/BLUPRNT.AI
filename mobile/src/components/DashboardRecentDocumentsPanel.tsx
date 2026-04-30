@@ -21,6 +21,7 @@ type Props = {
   ledgerEntries: LedgerEntryRow[];
   estimatedMin: number | null;
   estimatedMax: number | null;
+  isArchitect?: boolean;
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
   onOpenLedgerEntry: (entry: LedgerEntryRow) => void;
@@ -30,7 +31,8 @@ type Props = {
 
 export function DashboardRecentDocumentsPanel({
   ledgerEntries,
-  hasProjectPass,
+  isArchitect = false,
+  hasProjectPass = false,
   onUpgradeClick,
   onOpenLedgerEntry,
   onOpenLedger,
@@ -61,7 +63,7 @@ export function DashboardRecentDocumentsPanel({
         <View style={styles.rowsWrap} testID="dashboard-recent-documents">
           {recent.map((inv, index) => {
             const warranty = getWarrantyStatus(inv.warranty_expiry_date);
-            const isWarrantyUnlocked = hasProjectPass;
+            const isWarrantyUnlocked = Boolean(isArchitect || hasProjectPass);
 
             return (
               <Pressable

@@ -181,6 +181,9 @@ export const ProjectScopeLineCard = React.memo(
                   styles.viewDetailsBtn,
                   isOpen && styles.activeViewDetailsBtn,
                 ]}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: isOpen }}
+                accessibilityLabel={`${item.category}. ${isOpen ? "Hide breakdown" : "View breakdown"}`}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onToggleExpand(item.id);

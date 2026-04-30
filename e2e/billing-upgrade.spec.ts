@@ -6,8 +6,10 @@ test.describe("Billing & Upgrades", () => {
   test.beforeEach(async ({ page }) => {
     // Skip if no local Supabase
     test.skip(
-      !process.env.VITE_SUPABASE_URL || (!process.env.VITE_SUPABASE_URL.includes("127.0.0.1") && !process.env.VITE_SUPABASE_URL.includes("localhost")),
-      "Billing E2E should run against local Supabase to avoid creating real Stripe sessions or junk data."
+      !process.env.VITE_SUPABASE_URL ||
+        (!process.env.VITE_SUPABASE_URL.includes("127.0.0.1") &&
+          !process.env.VITE_SUPABASE_URL.includes("localhost")),
+      "Set VITE_SUPABASE_URL to local Supabase (supabase start) so signup + billing UI run without real Stripe or prod data.",
     );
     await signUpForE2E(page);
   });

@@ -1,30 +1,63 @@
-import React, { useId, memo } from "react";
+import React, { useId, memo, useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
-import { Shield, TrendingUp } from "lucide-react-native";
+import {
+  Shield,
+  TrendingUp,
+  FileText,
+  Layers,
+  Receipt,
+  Percent,
+  Activity,
+  type LucideIcon,
+} from "lucide-react-native";
 import { MotiView } from "moti";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { calculateHealthScore } from "@shared/lib/project-health";
+import { money } from "@shared/lib/formatters";
 
 type Props = {
   estimatedMin?: number | null;
   estimatedMax?: number | null;
   spendingTotal?: number;
+  documentCount?: number;
+  scopeLineCount?: number;
+  unreconciledBilled?: number;
 };
+
+function MetricChip({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <View style={metricStyles.chip}>
+      <Icon size={12} color={Theme.colors.brand.primary} />
+      <Text style={metricStyles.chipLabel}>{label}</Text>
+      <Text style={metricStyles.chipValue} numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
 
 export const ProjectHealth = memo(function ProjectHealth({
   estimatedMin = 0,
   estimatedMax = 0,
   spendingTotal = 0,
+  documentCount = 0,
+  scopeLineCount = 0,
+  unreconciledBilled = 0,
 }: Props) {
   const min = estimatedMin || 0;
   const max = estimatedMax || 0;
-  const { score, status, message } = calculateHealthScore(
-    spendingTotal,
-    min,
-    max,
-  );
+  const { score, status, message, pctOfEstimateHigh, dollarsOverHighEstimate } =
+    calculateHealthScore(spendingTotal, min, max);
 
   const colorMap: Record<string, { color: string; secondary: string }> = {
     Analyzing: {
@@ -53,9 +86,22 @@ export const ProjectHealth = memo(function ProjectHealth({
 
   const radius = (CIRCLE_CONFIG.SIZE - CIRCLE_CONFIG.STROKE_WIDTH) / 2;
   const circumference = radius * 2 * Math.PI;
-  /** Portion of the ring hidden by dash offset so `score/100` of the stroke shows (clockwise from top). */
   const ringDashOffset = circumference * (1 - score / 100);
   const gradId = `healthRing-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+
+  const runway = useMemo(() => {
+    if (min <= 0 || max <= 0) return null;
+    const scale = Math.max(min, max, spendingTotal) * 1.08 || 1;
+    const loPct = Math.min(100, (min / scale) * 100);
+    const hiPct = Math.min(100, (max / scale) * 100);
+    const spendPctRaw = (spendingTotal / scale) * 100;
+    const spendPct = Math.min(100, Math.max(0, spendPctRaw));
+    const bandLeft = Math.min(loPct, hiPct);
+    const bandWidth = Math.max(hiPct - loPct, 0.8);
+    return { bandLeft, bandWidth, spendPct, overHigh: spendingTotal > max };
+  }, [min, max, spendingTotal]);
+
+  const pctHighRounded = Math.round(pctOfEstimateHigh);
 
   return (
     <GlassCard style={styles.card}>
@@ -64,8 +110,8 @@ export const ProjectHealth = memo(function ProjectHealth({
         <Shield size={14} color={Theme.colors.text.secondary} />
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.leftCol}>
+      <View style={styles.topRow}>
+        <View style={styles.scoreBlock}>
           <MotiView
             from={{ opacity: 0, translateX: -10 }}
             animate={{ opacity: 1, translateX: 0 }}
@@ -95,7 +141,7 @@ export const ProjectHealth = memo(function ProjectHealth({
             type: "timing",
             duration: CIRCLE_CONFIG.ANIMATION_DURATION,
           }}
-          style={styles.rightCol}
+          style={styles.ringWrap}
         >
           <Svg
             width={CIRCLE_CONFIG.SIZE}
@@ -117,7 +163,6 @@ export const ProjectHealth = memo(function ProjectHealth({
               strokeWidth={CIRCLE_CONFIG.STROKE_WIDTH}
               fill="none"
             />
-            {/* Must stay Svg primitives — wrapping with MotiView breaks the ring on device. */}
             <Circle
               cx={CIRCLE_CONFIG.SIZE / 2}
               cy={CIRCLE_CONFIG.SIZE / 2}
@@ -134,12 +179,125 @@ export const ProjectHealth = memo(function ProjectHealth({
         </MotiView>
       </View>
 
+      <View style={styles.metricsBlock}>
+        <View
+          style={[
+            styles.metricsRow,
+            unreconciledBilled > 0 && styles.metricsRowFour,
+          ]}
+        >
+          <MetricChip
+            icon={FileText}
+            label="Docs"
+            value={documentCount > 0 ? String(documentCount) : "—"}
+          />
+          <MetricChip
+            icon={Layers}
+            label="Scope"
+            value={scopeLineCount > 0 ? String(scopeLineCount) : "—"}
+          />
+          <MetricChip
+            icon={Percent}
+            label="Vs high"
+            value={max > 0 && spendingTotal > 0 ? `${pctHighRounded}%` : "—"}
+          />
+          {unreconciledBilled > 0 ? (
+            <MetricChip
+              icon={Receipt}
+              label="Unlinked"
+              value={money(unreconciledBilled)}
+            />
+          ) : null}
+        </View>
+      </View>
+
+      {runway && spendingTotal > 0 ? (
+        <View style={styles.runwayWrap}>
+          <Text style={styles.runwayCaption}>Spend vs estimate band</Text>
+          <View style={styles.runwayTrackOuter}>
+            <View style={styles.runwayTrack}>
+              <View
+                style={[
+                  styles.runwayBand,
+                  {
+                    left: `${runway.bandLeft}%`,
+                    width: `${runway.bandWidth}%`,
+                  },
+                ]}
+              />
+            </View>
+            <View
+              style={[
+                styles.runwayDot,
+                {
+                  left: `${runway.spendPct}%`,
+                  backgroundColor: runway.overHigh
+                    ? Theme.colors.status.error
+                    : Theme.colors.brand.primary,
+                  transform: [{ translateX: -7 }],
+                },
+              ]}
+            />
+            {runway.overHigh ? (
+              <Text style={styles.runwayOverLabel}>Over</Text>
+            ) : null}
+          </View>
+          <View style={styles.runwayLabels}>
+            <Text style={styles.runwayLabelText} numberOfLines={1}>
+              Low {money(min)}
+            </Text>
+            <Text style={styles.runwayLabelCenter} numberOfLines={1}>
+              Now {money(spendingTotal)}
+            </Text>
+            <Text style={styles.runwayLabelText} numberOfLines={1}>
+              High {money(max)}
+            </Text>
+          </View>
+        </View>
+      ) : runway && status === "Analyzing" ? (
+        <Text style={styles.runwayHint}>
+          Upload documents to compare spend with your estimate range.
+        </Text>
+      ) : null}
+
+      {dollarsOverHighEstimate > 0 ? (
+        <Text style={styles.overCopy}>
+          {money(dollarsOverHighEstimate)} above high estimate
+        </Text>
+      ) : null}
+
       <View style={styles.messageBox}>
-        <View style={[styles.dot, { backgroundColor: color }]} />
+        <Activity size={14} color={Theme.colors.text.muted} />
         <Text style={styles.messageText}>{message}</Text>
       </View>
     </GlassCard>
   );
+});
+
+const metricStyles = StyleSheet.create({
+  chip: {
+    flex: 1,
+    minWidth: 72,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.2)",
+    backgroundColor: "rgba(255,255,255,0.85)",
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 4,
+  },
+  chipLabel: {
+    fontSize: 8,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  chipValue: {
+    fontSize: 13,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.primary,
+  },
 });
 
 const styles = StyleSheet.create({
@@ -160,15 +318,116 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
   },
-  content: {
+  topRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: Theme.spacing.md,
   },
-  leftCol: {
+  scoreBlock: {
     flex: 1,
     minWidth: 0,
-    paddingRight: 12,
+  },
+  ringWrap: {
+    flexShrink: 0,
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+  },
+  metricsBlock: {
+    width: "100%",
+    marginBottom: Theme.spacing.sm,
+  },
+  metricsRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  metricsRowFour: {
+    flexWrap: "wrap",
+  },
+  runwayWrap: {
+    gap: 6,
+    marginBottom: Theme.spacing.sm,
+  },
+  runwayCaption: {
+    fontSize: 8,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  runwayTrackOuter: {
+    height: 36,
+    justifyContent: "center",
+    position: "relative",
+  },
+  runwayTrack: {
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(148, 163, 184, 0.18)",
+    overflow: "hidden",
+    position: "relative",
+  },
+  runwayOverLabel: {
+    position: "absolute",
+    right: 6,
+    top: "50%",
+    marginTop: -6,
+    fontSize: 8,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.status.error,
+    textTransform: "uppercase",
+    letterSpacing: 0.2,
+    zIndex: 2,
+  },
+  runwayBand: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    backgroundColor: "rgba(13, 148, 136, 0.22)",
+  },
+  runwayDot: {
+    position: "absolute",
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    top: "50%",
+    marginTop: -7,
+    borderWidth: 2,
+    borderColor: "#fff",
+    zIndex: 10,
+  },
+  runwayLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 4,
+  },
+  runwayLabelText: {
+    flex: 1,
+    fontSize: 9,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.muted,
+  },
+  runwayLabelCenter: {
+    fontSize: 9,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+    maxWidth: "34%",
+  },
+  runwayHint: {
+    fontSize: 12,
+    color: Theme.colors.text.muted,
+    lineHeight: 17,
+    textAlign: "center",
+    marginBottom: Theme.spacing.sm,
+  },
+  overCopy: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.status.error,
+    textAlign: "center",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   scoreRow: {
     flexDirection: "row",
@@ -176,12 +435,12 @@ const styles = StyleSheet.create({
     marginBottom: Theme.spacing.xs,
   },
   score: {
-    fontSize: 56,
+    fontSize: 48,
     fontFamily: Theme.typography.family.black,
     letterSpacing: -1.5,
   },
   scoreMax: {
-    fontSize: Theme.typography.size.xl,
+    fontSize: Theme.typography.size.lg,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.secondary,
     marginLeft: 4,
@@ -190,6 +449,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    flexWrap: "wrap",
   },
   statusBadge: {
     paddingHorizontal: 10,
@@ -214,29 +474,19 @@ const styles = StyleSheet.create({
     color: Theme.colors.status.success,
     textTransform: "uppercase",
   },
-  rightCol: {
-    width: 100,
-    flexShrink: 0,
-    alignItems: "flex-end",
-  },
   svg: {
     transform: [{ rotate: "0deg" }],
   },
   messageBox: {
-    marginTop: Theme.spacing.xl,
+    marginTop: Theme.spacing.lg,
     padding: 14,
     backgroundColor: "rgba(15, 23, 42, 0.03)",
     borderRadius: Theme.radius.lg,
     flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    alignItems: "flex-start",
+    gap: 10,
     borderWidth: 1,
     borderColor: "rgba(15, 23, 42, 0.05)",
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
   },
   messageText: {
     flex: 1,
@@ -244,5 +494,6 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
     lineHeight: 18,
+    paddingTop: 1,
   },
 });

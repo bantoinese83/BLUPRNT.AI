@@ -23,7 +23,12 @@ export type WebDashboardDataInjected = {
 
 function useWebDashboardQueryOptions() {
   return useMemo(
-    () => ({ staleTime: 30_000, placeholderData: keepPreviousData }),
+    () => ({
+      staleTime: 30_000,
+      placeholderData: keepPreviousData,
+      /** Subscription + snapshot after Stripe / external billing tab returns. */
+      refetchOnWindowFocus: true,
+    }),
     [],
   );
 }

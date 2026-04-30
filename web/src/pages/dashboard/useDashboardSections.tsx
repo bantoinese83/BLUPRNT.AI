@@ -21,6 +21,8 @@ type UseDashboardSectionsProps = {
   projects: ProjectRow[];
   scopeItems: ScopeRow[];
   ledgerEntries: LedgerEntryRow[];
+  /** Billed ledger total not linked to scope (optional; dashboard plan tab) */
+  unreconciledBilled?: number;
   memoHomeTeam: Contractor[];
   memoInvestmentTotal: number;
   memoResaleImpact: ResaleImpactResult;
@@ -35,6 +37,7 @@ export function useDashboardSections({
   project,
   scopeItems,
   ledgerEntries,
+  unreconciledBilled = 0,
   memoHomeTeam,
   memoInvestmentTotal,
   memoResaleImpact,
@@ -67,12 +70,18 @@ export function useDashboardSections({
         estimatedMin={project.estimated_min_total}
         estimatedMax={project.estimated_max_total}
         spendingTotal={memoInvestmentTotal}
+        documentCount={ledgerEntries.length}
+        scopeLineCount={scopeItems.length}
+        unreconciledBilled={unreconciledBilled}
       />
     ),
     [
       project.estimated_min_total,
       project.estimated_max_total,
       memoInvestmentTotal,
+      ledgerEntries.length,
+      scopeItems.length,
+      unreconciledBilled,
     ],
   );
 

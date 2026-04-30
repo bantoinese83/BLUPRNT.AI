@@ -4,7 +4,6 @@ import * as Haptics from "expo-haptics";
 import { useDocumentReviewShared } from "@shared/hooks/use-document-review-shared";
 import { reportClientError as reportError } from "@/lib/sentry";
 import type { LedgerEntryRow } from "@shared/types/database";
-import { useConfirmation } from "@/contexts/useConfirmation";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { showAppToast } from "@/lib/app-toast";
 
@@ -13,13 +12,15 @@ export type {
   LedgerReviewDocument as LedgerEntryDetail,
 } from "@shared/types/ledger-review";
 
+/**
+ * Ledger review for mobile. Confirmation before delete is owned by
+ * {@link LedgerEntryReviewSheet} (same pattern as web: modal confirms, shared hook deletes).
+ */
 export function useLedgerEntryReviewDetail(
   ledgerEntry: LedgerEntryRow | null,
   projectId: string | null,
   isOpen: boolean,
 ) {
-  const { confirm } = useConfirmation();
-
   const adapter = useMemo(
     () => ({
       getSupabase: () => supabase,
@@ -36,25 +37,13 @@ export function useLedgerEntryReviewDetail(
         showAppToast(msg, { type });
       },
       onSaved: () => {
-        // We could refresh data here if needed, but the caller usually handles onSaved
+        // Caller usually handles refresh
       },
       onClose: () => {
         // Handled by the sheet component
       },
-      confirmDelete: async () => {
-        return new Promise<boolean>((resolve) => {
-          confirm({
-            title: "Remove document?",
-            message: "This will permanently delete this record and its data.",
-            confirmLabel: "Remove",
-            variant: "destructive",
-            onConfirm: () => resolve(true),
-            onCancel: () => resolve(false),
-          });
-        });
-      },
     }),
-    [confirm],
+    [],
   );
 
   const shared = useDocumentReviewShared(

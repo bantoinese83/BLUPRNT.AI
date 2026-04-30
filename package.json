@@ -15,7 +15,7 @@
     "dev": "npm run dev -w web",
     "dev:mobile": "npm run start -w mobile",
     "status": "node scripts/monorepo-status.mjs",
-    "check": "npm run lint && npm run knip:check && npm run test:coverage && npm run build",
+    "check": "npm run lint && npm run knip:check && npm run test:coverage && npm run build && npm run functions:check",
     "quality": "npm run check",
     "lint": "eslint web mobile shared e2e scripts --max-warnings 0 && npm run typecheck -w shared && npm run typecheck -w web && npm run typecheck -w mobile && node scripts/check-design-token-parity.mjs",
     "lint:fix": "eslint web mobile shared e2e scripts --fix --max-warnings 0",

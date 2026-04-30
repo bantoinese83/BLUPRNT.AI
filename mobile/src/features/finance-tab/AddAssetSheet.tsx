@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   Image,
+  useWindowDimensions,
 } from "react-native";
 import { Camera, X, ChevronDown } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -35,6 +36,13 @@ export function AddAssetSheet({
   onSuccess,
   projectId,
 }: AddAssetSheetProps) {
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  /** Keep reference preview from eating the whole sheet so the footer stays visible */
+  const referencePreviewMaxHeight = Math.min(
+    windowWidth - 48,
+    Math.round(windowHeight * 0.28),
+    240,
+  );
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -128,11 +136,8 @@ export function AddAssetSheet({
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} height="85%">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
+    <BottomSheet isOpen={isOpen} onClose={onClose} height="92%">
+      <View style={styles.inner}>
         <View style={styles.header}>
           <Text style={styles.title}>New Home Spec</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -140,153 +145,177 @@ export function AddAssetSheet({
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          style={styles.content}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.kav}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 12 : 0}
         >
-          <View style={styles.section}>
-            <Text style={styles.label}>ASSET NAME *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Living Room Walls"
-              placeholderTextColor={Theme.colors.text.muted + "80"}
-              value={formData.name}
-              onChangeText={(t) => setFormData({ ...formData, name: t })}
-            />
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.section, { flex: 1 }]}>
-              <Text style={styles.label}>CATEGORY</Text>
-              <TouchableOpacity
-                style={styles.select}
-                onPress={() => {
-                  Alert.alert(
-                    "Select Category",
-                    "",
-                    CATEGORIES.map((c) => ({
-                      text: c,
-                      onPress: () => setFormData({ ...formData, category: c }),
-                    })),
-                  );
-                }}
-              >
-                <Text style={styles.selectText}>{formData.category}</Text>
-                <ChevronDown size={14} color={Theme.colors.text.muted} />
-              </TouchableOpacity>
-            </View>
-            <View style={[styles.section, { flex: 1 }]}>
-              <Text style={styles.label}>LOCATION</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Kitchen"
-                placeholderTextColor={Theme.colors.text.muted + "80"}
-                value={formData.location_in_home}
-                onChangeText={(t) =>
-                  setFormData({ ...formData, location_in_home: t })
-                }
-              />
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.section, { flex: 1 }]}>
-              <Text style={styles.label}>BRAND</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Sherwin Williams"
-                placeholderTextColor={Theme.colors.text.muted + "80"}
-                value={formData.brand}
-                onChangeText={(t) => setFormData({ ...formData, brand: t })}
-              />
-            </View>
-            <View style={[styles.section, { flex: 1 }]}>
-              <Text style={styles.label}>FINISH</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Eggshell"
-                placeholderTextColor={Theme.colors.text.muted + "80"}
-                value={formData.finish}
-                onChangeText={(t) => setFormData({ ...formData, finish: t })}
-              />
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.section, { flex: 1 }]}>
-              <Text style={styles.label}>COLOR NAME</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Agreeable Gray"
-                placeholderTextColor={Theme.colors.text.muted + "80"}
-                value={formData.color_name}
-                onChangeText={(t) =>
-                  setFormData({ ...formData, color_name: t })
-                }
-              />
-            </View>
-            <View style={[styles.section, { flex: 1 }]}>
-              <Text style={styles.label}>COLOR CODE</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  { fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" },
-                ]}
-                placeholder="e.g. SW 7029"
-                placeholderTextColor={Theme.colors.text.muted + "80"}
-                value={formData.color_code}
-                onChangeText={(t) =>
-                  setFormData({ ...formData, color_code: t })
-                }
-              />
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>NOTES</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Any extra details..."
-              placeholderTextColor={Theme.colors.text.muted + "80"}
-              multiline
-              numberOfLines={3}
-              value={formData.notes}
-              onChangeText={(t) => setFormData({ ...formData, notes: t })}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.label}>REFERENCE PHOTO</Text>
-            {imageUri ? (
-              <View style={styles.imagePreviewContainer}>
-                <Image source={{ uri: imageUri }} style={styles.imagePreview} />
-                <TouchableOpacity
-                  style={styles.removeImageBtn}
-                  onPress={() => setImageUri(null)}
-                >
-                  <X size={16} color="white" />
-                </TouchableOpacity>
+          <View style={styles.scrollWrap}>
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+            >
+              <View style={styles.section}>
+                <Text style={styles.label}>ASSET NAME *</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. Living Room Walls"
+                  placeholderTextColor={Theme.colors.text.muted + "80"}
+                  value={formData.name}
+                  onChangeText={(t) => setFormData({ ...formData, name: t })}
+                />
               </View>
-            ) : (
-              <View style={styles.photoActions}>
-                <TouchableOpacity
-                  style={styles.photoBtn}
-                  onPress={handleTakePhoto}
-                >
-                  <Camera size={20} color={Theme.colors.text.primary} />
-                  <Text style={styles.photoBtnText}>Take Photo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.photoBtn}
-                  onPress={handlePickImage}
-                >
-                  <Text style={styles.photoBtnText}>Choose Library</Text>
-                </TouchableOpacity>
+
+              <View style={styles.row}>
+                <View style={[styles.section, { flex: 1 }]}>
+                  <Text style={styles.label}>CATEGORY</Text>
+                  <TouchableOpacity
+                    style={styles.select}
+                    onPress={() => {
+                      Alert.alert(
+                        "Select Category",
+                        "",
+                        CATEGORIES.map((c) => ({
+                          text: c,
+                          onPress: () =>
+                            setFormData({ ...formData, category: c }),
+                        })),
+                      );
+                    }}
+                  >
+                    <Text style={styles.selectText}>{formData.category}</Text>
+                    <ChevronDown size={14} color={Theme.colors.text.muted} />
+                  </TouchableOpacity>
+                </View>
+                <View style={[styles.section, { flex: 1 }]}>
+                  <Text style={styles.label}>LOCATION</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Kitchen"
+                    placeholderTextColor={Theme.colors.text.muted + "80"}
+                    value={formData.location_in_home}
+                    onChangeText={(t) =>
+                      setFormData({ ...formData, location_in_home: t })
+                    }
+                  />
+                </View>
               </View>
-            )}
+
+              <View style={styles.row}>
+                <View style={[styles.section, { flex: 1 }]}>
+                  <Text style={styles.label}>BRAND</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Sherwin Williams"
+                    placeholderTextColor={Theme.colors.text.muted + "80"}
+                    value={formData.brand}
+                    onChangeText={(t) => setFormData({ ...formData, brand: t })}
+                  />
+                </View>
+                <View style={[styles.section, { flex: 1 }]}>
+                  <Text style={styles.label}>FINISH</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Eggshell"
+                    placeholderTextColor={Theme.colors.text.muted + "80"}
+                    value={formData.finish}
+                    onChangeText={(t) =>
+                      setFormData({ ...formData, finish: t })
+                    }
+                  />
+                </View>
+              </View>
+
+              <View style={styles.row}>
+                <View style={[styles.section, { flex: 1 }]}>
+                  <Text style={styles.label}>COLOR NAME</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Agreeable Gray"
+                    placeholderTextColor={Theme.colors.text.muted + "80"}
+                    value={formData.color_name}
+                    onChangeText={(t) =>
+                      setFormData({ ...formData, color_name: t })
+                    }
+                  />
+                </View>
+                <View style={[styles.section, { flex: 1 }]}>
+                  <Text style={styles.label}>COLOR CODE</Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        fontFamily:
+                          Platform.OS === "ios" ? "Menlo" : "monospace",
+                      },
+                    ]}
+                    placeholder="e.g. SW 7029"
+                    placeholderTextColor={Theme.colors.text.muted + "80"}
+                    value={formData.color_code}
+                    onChangeText={(t) =>
+                      setFormData({ ...formData, color_code: t })
+                    }
+                  />
+                </View>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.label}>NOTES</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Any extra details..."
+                  placeholderTextColor={Theme.colors.text.muted + "80"}
+                  multiline
+                  numberOfLines={3}
+                  value={formData.notes}
+                  onChangeText={(t) => setFormData({ ...formData, notes: t })}
+                />
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.label}>REFERENCE PHOTO</Text>
+                {imageUri ? (
+                  <View
+                    style={[
+                      styles.imagePreviewContainer,
+                      { maxHeight: referencePreviewMaxHeight },
+                    ]}
+                  >
+                    <Image
+                      source={{ uri: imageUri }}
+                      style={styles.imagePreview}
+                    />
+                    <TouchableOpacity
+                      style={styles.removeImageBtn}
+                      onPress={() => setImageUri(null)}
+                    >
+                      <X size={16} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={styles.photoActions}>
+                    <TouchableOpacity
+                      style={styles.photoBtn}
+                      onPress={handleTakePhoto}
+                    >
+                      <Camera size={20} color={Theme.colors.text.primary} />
+                      <Text style={styles.photoBtnText}>Take Photo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.photoBtn}
+                      onPress={handlePickImage}
+                    >
+                      <Text style={styles.photoBtnText}>Choose Library</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
           </View>
-        </ScrollView>
+        </KeyboardAvoidingView>
 
         <View style={styles.footer}>
           <Button
@@ -296,13 +325,27 @@ export function AddAssetSheet({
             style={styles.submitBtn}
           />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
+  inner: {
+    flex: 1,
+    minHeight: 0,
+  },
+  kav: {
+    flex: 1,
+    minHeight: 0,
+  },
+  scrollWrap: {
+    flex: 1,
+    minHeight: 0,
+    flexBasis: 0,
+  },
   header: {
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -319,12 +362,15 @@ const styles = StyleSheet.create({
   closeBtn: {
     padding: 4,
   },
-  content: {
+  scroll: {
     flex: 1,
+    flexGrow: 1,
+    minHeight: 0,
   },
   scrollContent: {
     padding: 24,
     gap: 20,
+    paddingBottom: 28,
   },
   section: {
     gap: 8,
@@ -410,9 +456,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   footer: {
-    padding: 24,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(148,163,184,0.05)",
+    flexShrink: 0,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: Theme.colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(148,163,184,0.12)",
   },
   submitBtn: {
     height: 56,

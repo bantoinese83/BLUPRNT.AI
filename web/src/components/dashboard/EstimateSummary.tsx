@@ -183,7 +183,10 @@ export function EstimateSummary({
                   <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
                     <div className="space-y-2 min-w-0 flex-1">
                       <div className="flex items-center flex-wrap gap-2.5">
-                        <h4 className="font-bold text-teal-950 tracking-tight group-hover:text-teal-800 transition-colors uppercase">
+                        <h4
+                          id={`estimate-summary-title-${item.id}`}
+                          className="font-bold text-teal-950 tracking-tight group-hover:text-teal-800 transition-colors uppercase"
+                        >
                           {item.category}
                         </h4>
 
@@ -280,11 +283,14 @@ export function EstimateSummary({
 
                       {hasDetails && (
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() =>
                             setExpandedId(isExpanded ? null : item.id)
                           }
+                          aria-expanded={isExpanded}
+                          aria-controls={`estimate-summary-panel-${item.id}`}
                           className={cn(
                             "h-8 px-3 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all",
                             isExpanded
@@ -306,6 +312,9 @@ export function EstimateSummary({
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
+                        id={`estimate-summary-panel-${item.id}`}
+                        role="region"
+                        aria-labelledby={`estimate-summary-title-${item.id}`}
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}

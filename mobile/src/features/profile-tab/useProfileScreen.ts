@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Alert, Share } from "react-native";
 import * as Haptics from "expo-haptics";
 
@@ -12,6 +12,7 @@ import { reportClientError } from "@/lib/sentry";
 import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
 import { showAppToast } from "@/lib/app-toast";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { validatePassword } from "@shared/lib/validation";
 import {
   getProductAnalyticsConsent,
@@ -22,10 +23,17 @@ import type { UseProfileScreenResult } from "./profile-screen.types";
 
 export function useProfileScreen(): UseProfileScreenResult {
   const { user, signOut } = useAuth();
-  const { isPro } = usePremium();
+  const rcPremium = usePremium();
   const { confirm } = useConfirmation();
   const { configurationMissing, load, subscription } = useDashboardData();
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
+
+  /** RevenueCat (App Store) or Stripe/web row in Supabase — same rule as web settings billing. */
+  const isPro = useMemo(
+    () =>
+      rcPremium.isPro || isArchitectPlanEffective(subscription ?? undefined),
+    [rcPremium.isPro, subscription],
+  );
 
   const [displayName, setDisplayName] = useState(
     user?.user_metadata?.full_name || "",

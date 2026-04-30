@@ -21,6 +21,7 @@ import { ledgerDocumentTypeLabel } from "@shared/lib/ledger-document-labels";
 type FinanceLedgerEntryRowProps = {
   inv: LedgerEntryRow;
   index: number;
+  isArchitect?: boolean;
   hasProjectPass?: boolean;
   isDeleting?: boolean;
   onUpgradeClick?: () => void;
@@ -32,7 +33,8 @@ type FinanceLedgerEntryRowProps = {
 export function FinanceLedgerEntryRow({
   inv,
   index,
-  hasProjectPass,
+  isArchitect = false,
+  hasProjectPass = false,
   isDeleting,
   onUpgradeClick,
   onPress,
@@ -44,7 +46,7 @@ export function FinanceLedgerEntryRow({
     inv.document_type === "quote"
       ? null
       : getWarrantyStatus(inv.warranty_expiry_date);
-  const isWarrantyUnlocked = hasProjectPass;
+  const isWarrantyUnlocked = Boolean(isArchitect || hasProjectPass);
 
   const renderRightActions = (
     _progress: Animated.AnimatedInterpolation<number>,

@@ -46,6 +46,7 @@ import {
   OfflineBannerHost,
   RootLayoutNav,
 } from "@/components/layout/RootLayoutHelpers";
+import { DashboardForegroundRefresh } from "@/components/layout/DashboardForegroundRefresh";
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -146,6 +147,7 @@ function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
+            <DashboardForegroundRefresh />
             <AuthProvider>
               <ConfirmationProvider>
                 <RootLayoutNav />

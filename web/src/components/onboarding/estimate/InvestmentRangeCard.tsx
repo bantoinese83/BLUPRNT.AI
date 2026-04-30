@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { motion } from "motion/react";
 import {
   BadgeCheck,
@@ -39,6 +40,10 @@ export function InvestmentRangeCard({
   showBreakdown,
   setShowBreakdown,
 }: InvestmentRangeCardProps) {
+  const disclosureId = useId();
+  const breakdownHeadingId = `${disclosureId}-heading`;
+  const breakdownPanelId = `${disclosureId}-panel`;
+
   const materials =
     scopeItems?.flatMap(
       (s) => (s.metadata as ScopeMetadata)?.materials || [],
@@ -86,7 +91,10 @@ export function InvestmentRangeCard({
                 {summary.regional_signal}
               </p>
             )}
-            <p className="text-xs text-teal-600 font-black uppercase tracking-[0.2em]">
+            <p
+              id={breakdownHeadingId}
+              className="text-xs text-teal-600 font-black uppercase tracking-[0.2em]"
+            >
               Investment Range
             </p>
             <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter py-2">
@@ -120,9 +128,12 @@ export function InvestmentRangeCard({
               </div>
               {scopeItems && scopeItems.length > 0 && (
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowBreakdown(!showBreakdown)}
+                  aria-expanded={showBreakdown}
+                  aria-controls={breakdownPanelId}
                   className={`h-8 px-3 rounded-full gap-2 transition-all duration-300 ${
                     showBreakdown
                       ? "bg-teal-600 text-white hover:bg-teal-700 shadow-md"
@@ -143,6 +154,9 @@ export function InvestmentRangeCard({
 
             {showBreakdown && scopeItems && (
               <motion.div
+                id={breakdownPanelId}
+                role="region"
+                aria-labelledby={breakdownHeadingId}
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 className="space-y-6 overflow-hidden"

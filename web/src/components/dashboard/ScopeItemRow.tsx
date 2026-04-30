@@ -166,7 +166,12 @@ export function ScopeItemRow({
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-1.5 min-w-0">
           <div className="flex items-center flex-wrap gap-2">
-            <h4 className="font-semibold text-slate-900">{item.category}</h4>
+            <h4
+              id={`scope-item-title-${item.id}`}
+              className="font-semibold text-slate-900"
+            >
+              {item.category}
+            </h4>
             {priority && (
               <Badge
                 variant="secondary"
@@ -272,9 +277,12 @@ export function ScopeItemRow({
       {hasDetails && (
         <div className="flex justify-end mt-2">
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
+            aria-expanded={isExpanded}
+            aria-controls={`scope-item-panel-${item.id}`}
             className={cn(
               "h-8 px-3 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all",
               isExpanded
@@ -295,6 +303,9 @@ export function ScopeItemRow({
       <AnimatePresence>
         {isExpanded && (
           <motion.div
+            id={`scope-item-panel-${item.id}`}
+            role="region"
+            aria-labelledby={`scope-item-title-${item.id}`}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
