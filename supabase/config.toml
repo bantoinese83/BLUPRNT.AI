@@ -65,6 +65,9 @@ verify_jwt = false
 [functions.submit-marketing-lead]
 verify_jwt = false
 
+[functions.get-onboarding-sync-payload]
+verify_jwt = false
+
 [functions.upload-gallery-photo]
 enabled = true
 verify_jwt = true

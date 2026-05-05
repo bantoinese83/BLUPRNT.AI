@@ -12,6 +12,7 @@ export const EDGE_FUNCTIONS = {
   CHAT_WITH_PROJECT: "chat-with-project",
   DELETE_ACCOUNT: "delete-account",
   GET_ONBOARDING_CONTEXT: "get-onboarding-context",
+  GET_ONBOARDING_SYNC_PAYLOAD: "get-onboarding-sync-payload",
   SUBMIT_LEAD: "submit-marketing-lead",
 } as const;
 

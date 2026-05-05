@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { invokeFunction } from "@/lib/supabase";
 import type { PhotoToScopeResult } from "@/types/estimate";
 import type { ProjectTypeOption, StageOption } from "@/types/onboarding";
 
@@ -23,16 +23,17 @@ export function useOnboardingSync(params: {
     const loadSync = async () => {
       const dismiss = toast.loading("Resuming your mobile draft...");
       try {
-        const { data: payloadJson, error } = await supabase.rpc(
-          "get_onboarding_sync_payload",
-          { p_token: syncToken },
-        );
+        const { data: payloadJson, error } = await invokeFunction<
+          Record<string, unknown>
+        >("get-onboarding-sync-payload", {
+          body: { token: syncToken },
+        });
 
         if (error || payloadJson == null) {
           throw new Error("Link expired or invalid");
         }
 
-        const payload = payloadJson as Record<string, unknown>;
+        const payload = payloadJson;
         if (payload.projectType)
           params.setProjectType(payload.projectType as ProjectTypeOption);
         if (payload.location)
