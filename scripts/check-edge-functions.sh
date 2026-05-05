@@ -20,6 +20,7 @@ FILES=(
   supabase/functions/delete-account/index.ts
   supabase/functions/get-ledger-entry/index.ts
   supabase/functions/get-document-signed-url/index.ts
+  supabase/functions/get-onboarding-sync-payload/index.ts
   supabase/functions/get-project-view/index.ts
   supabase/functions/photo-to-scope/index.ts
   supabase/functions/send-email/index.ts
