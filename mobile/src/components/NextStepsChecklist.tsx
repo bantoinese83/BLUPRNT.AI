@@ -10,7 +10,6 @@ import {
   ArrowRight,
   FileText,
   Hammer,
-  Shield,
   Share2,
   type LucideIcon,
 } from "lucide-react-native";
@@ -44,14 +43,15 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
       },
       {
         id: "upload-quote",
-        label: "Upload Quote",
-        description: "Snap a photo of a contractor bid.",
+        label: "Upload first quote",
+        description: "Snap a photo of a contractor bid to compare.",
         icon: Hammer,
       },
       {
         id: "export-packet",
-        label: "Export Brief",
-        description: "Get a PDF to share with pros.",
+        label: "Export seller packet",
+        description:
+          "Download the full ledger PDF—scope, plan vs spend, and costs.",
         icon: Share2,
       },
     );
@@ -59,20 +59,20 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
     steps.push(
       {
         id: "upload-document",
-        label: "Add to Ledger",
+        label: "Track an invoice",
         description: "Start building your property ledger.",
         icon: FileText,
       },
       {
         id: "review-health",
-        label: "Budget health",
-        description: "Compare spending to your estimate range.",
-        icon: Shield,
+        label: "Check project health",
+        description: "See if you're staying within your baseline.",
+        icon: Hammer,
       },
       {
         id: "share-access",
-        label: "Share project link",
-        description: "Send a read-only web link to your project.",
+        label: "Share with partner",
+        description: "Invite someone to view the project records.",
         icon: Share2,
       },
     );

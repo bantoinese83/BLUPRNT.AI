@@ -2,6 +2,7 @@ import { InteractionManager } from "react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { money, formatShortUsDate } from "@shared/lib/formatters";
+import { escapeHtml } from "@shared/lib/escape-html";
 import { supabase } from "@/lib/supabase";
 import {
   capitalImprovementTotal,
@@ -10,15 +11,11 @@ import {
   type LedgerEntryLike,
 } from "@shared/lib/plan-vs-actual";
 import type { LedgerEntryRow } from "@shared/types/database";
+import type {
+  SellerPacketScopeInput,
+  SellerPacketProjectInput,
+} from "@shared/types/seller-packet";
 import { buildSellerPacketAppendixHtml } from "@/lib/seller-packet-appendix";
-import { escapeHtml } from "./image-utils";
-
-type ScopeItem = {
-  category: string;
-  description: string;
-  total_cost_min: number | null;
-  total_cost_max: number | null;
-};
 
 type LedgerEntryItem = {
   id: string;
@@ -29,22 +26,14 @@ type LedgerEntryItem = {
   document_id?: string | null;
 };
 
-type ProjectInfo = {
-  id: string;
-  property_id?: string;
-  name: string;
-  estimated_min_total: number | null;
-  estimated_max_total: number | null;
-};
-
 export type SellerPacketPdfOptions = {
   /** Larger PDF; may embed receipt images. PDF uploads stay as notes only. */
   includeAppendix?: boolean;
 };
 
 export async function generateSellerPacketPDF(
-  project: ProjectInfo,
-  scopeItems: ScopeItem[],
+  project: SellerPacketProjectInput,
+  scopeItems: SellerPacketScopeInput[],
   ledgerEntries: LedgerEntryItem[],
   options?: SellerPacketPdfOptions,
 ) {
@@ -214,7 +203,7 @@ export async function generateSellerPacketPDF(
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        if (!session?.user) return;
+        if (!session?.user || !project.id) return;
 
         const storagePath = `${project.id}/${session.user.id}/${fileName}`;
         const response = await fetch(uri);

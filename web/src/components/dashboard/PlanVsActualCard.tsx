@@ -5,7 +5,7 @@ import { money } from "@/lib/formatters";
 import {
   capitalImprovementTotal,
   planVsActualNarrative,
-  type InvoiceLike,
+  type LedgerEntryLike,
 } from "@/lib/plan-vs-actual";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ import { DASHBOARD_STATS_LABELS } from "@shared/copy/dashboard";
 type PlanVsActualCardProps = {
   estimatedMin: number | null;
   estimatedMax: number | null;
-  ledgerEntries: InvoiceLike[];
+  ledgerEntries: LedgerEntryLike[];
 };
 
 const toneStyles: Record<

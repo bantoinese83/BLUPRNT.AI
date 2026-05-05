@@ -168,15 +168,24 @@ export const ProjectHeader = memo(function ProjectHeader({
           onClose={() => setShareOpen(false)}
           projectId={project.id}
         />
-        <Link to="/dashboard/execute?type=quote">
-          <Button
-            variant="primary"
-            type="button"
-            className="rounded-xl shadow-sm w-full sm:w-auto px-5 h-10"
-          >
-            <FilePlus2 className="w-4 h-4 shrink-0" aria-hidden />
-            Add quote
-          </Button>
+        <Link
+          to="/dashboard/execute"
+          className={cn(
+            "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-900 focus-visible:ring-offset-2 active:scale-[0.98]",
+            "liquid-metal-button text-white hover:shadow-lg hover:shadow-teal-500/10",
+            "h-10 px-5 rounded-xl shadow-sm w-full sm:w-auto",
+          )}
+          onClick={() => {
+            window.setTimeout(() => {
+              document.getElementById("dashboard-phase-nav")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }, 150);
+          }}
+        >
+          <FilePlus2 className="w-4 h-4 shrink-0" aria-hidden />
+          Add document
         </Link>
       </div>
     </div>

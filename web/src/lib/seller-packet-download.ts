@@ -2,19 +2,10 @@ import { supabase } from "@/lib/supabase";
 import { generateSellerPacketBlob } from "@/lib/pdf-export";
 import { buildSellerPacketAppendixItems } from "@/lib/seller-packet-appendix";
 import type { LedgerEntryRow } from "@shared/types/database";
-
-export type SellerPacketScopeInput = {
-  category: string;
-  description: string;
-  total_cost_min: number | null;
-  total_cost_max: number | null;
-};
-
-export type SellerPacketProjectInput = {
-  name: string;
-  estimated_min_total: number | null;
-  estimated_max_total: number | null;
-};
+import type {
+  SellerPacketScopeInput,
+  SellerPacketProjectInput,
+} from "@shared/types/seller-packet";
 
 export type DownloadSellerPacketParams = {
   projectId: string;

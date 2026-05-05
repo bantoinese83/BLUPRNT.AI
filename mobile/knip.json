@@ -2,11 +2,11 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreDependencies": [
     "@bluprnt/shared",
+    "expo-router",
     "react-native-screens",
     "react-native-worklets",
     "react-native-web",
-    "babel-plugin-module-resolver",
-    "expo-router"
+    "babel-plugin-module-resolver"
   ],
   "ignore": [
     "src/test/**",

@@ -26,6 +26,13 @@ export function initMobileSentry(): void {
     sendDefaultPii: false,
     tracesSampleRate: __DEV__ ? 0 : 0.1,
     beforeSend(event) {
+      const combined =
+        event.exception?.values
+          ?.map((v) => `${v.type ?? ""}: ${v.value ?? ""}`)
+          .join(" | ") ?? "";
+      if (/camera not available|simulator.*camera/i.test(combined)) {
+        return null;
+      }
       if (event.request?.headers) {
         const h = { ...event.request.headers };
         if (h.Authorization) h.Authorization = "[redacted]";

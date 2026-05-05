@@ -1,31 +1,15 @@
-import { escapeHtml } from "./image-utils";
+import { escapeHtml } from "@shared/lib/escape-html";
+import { uint8ToBase64 } from "@shared/lib/uint8-to-base64";
 import { supabase } from "./supabase";
-import type { LedgerEntryRow, ScopeRow } from "@shared/types/database";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 /**
  * PDF Template Part: Appendix
  * Renders full-page images of original receipt uploads.
  */
 
-/**
- * Inefficient for large arrays because of string concatenation.
- * Chunked conversion is much faster and memory-friendly.
- */
-function uint8ToBase64(arr: Uint8Array): string {
-  const CHUNK_SIZE = 0x8000; // 32KB chunks
-  let binary = "";
-  for (let i = 0; i < arr.length; i += CHUNK_SIZE) {
-    binary += String.fromCharCode.apply(
-      null,
-      arr.subarray(i, i + CHUNK_SIZE) as unknown as number[],
-    );
-  }
-  return btoa(binary);
-}
-
 export async function buildSellerPacketAppendixHtml(
   ledgerEntries: (LedgerEntryRow & { storage_path?: string | null })[],
-  _scopeItems?: ScopeRow[],
 ) {
   const items = ledgerEntries.filter(
     (inv) =>

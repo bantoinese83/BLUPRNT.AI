@@ -138,14 +138,14 @@ export function UpgradeModal({
             </View>
           )}
 
-          <UpgradeFeatures />
-
           <UpgradePlanSelection
             selectedPlan={selectedPlan}
             setSelectedPlan={setSelectedPlan}
             isArchitect={isArchitect}
             hasProjectPass={hasProjectPass}
           />
+
+          <UpgradeFeatures />
 
           <View style={styles.footer}>
             <Text style={styles.priceHint}>

@@ -63,7 +63,14 @@ export function RegisterMagicForm({
   }
 
   return (
-    <div className="space-y-4">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void onMagicRegister();
+      }}
+      className="space-y-4"
+      noValidate
+    >
       <div className="space-y-2">
         <label
           className="text-sm font-bold text-slate-700 ml-1"
@@ -112,12 +119,11 @@ export function RegisterMagicForm({
         </div>
       </div>
       <Button
-        type="button"
+        type="submit"
         size="lg"
         variant="primary"
         className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
         disabled={loading || !watch("acceptedPolicies")}
-        onClick={() => void onMagicRegister()}
       >
         {loading ? (
           <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
@@ -126,6 +132,6 @@ export function RegisterMagicForm({
         )}
         {loading ? "Sending…" : "Email me a magic link"}
       </Button>
-    </div>
+    </form>
   );
 }

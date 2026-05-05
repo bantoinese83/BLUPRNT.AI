@@ -1,5 +1,6 @@
 import { invokeFunction } from "@/lib/supabase";
 import type { LedgerEntryRow } from "@shared/types/database";
+import { uint8ToBase64 } from "@shared/lib/uint8-to-base64";
 
 export type SellerPacketAppendixItem =
   | {
@@ -22,15 +23,6 @@ type SignedUrlResponse = {
   filename?: string;
   error?: string;
 };
-
-function uint8ToBase64(bytes: Uint8Array): string {
-  let binary = "";
-  const chunk = 8192;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
-}
 
 function formatDate(iso: string): string {
   try {

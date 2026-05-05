@@ -532,11 +532,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Theme.colors.text.disabled,
   },
-  grid: {
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 4,
-  },
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",

@@ -13,32 +13,17 @@ import {
   planVsActualPdfLines,
 } from "@/lib/plan-vs-actual";
 import type { SellerPacketAppendixItem } from "@/lib/seller-packet-appendix";
+import type {
+  SellerPacketScopeInput,
+  SellerPacketLedgerInput,
+  SellerPacketProjectInput,
+} from "@shared/types/seller-packet";
 
 export type { SellerPacketAppendixItem } from "@/lib/seller-packet-appendix";
 
 export type SellerPacketExportOptions = {
   /** Optional pages with embedded images / notes for originals (off by default for privacy & size). */
   appendixItems?: SellerPacketAppendixItem[];
-};
-
-type ScopeItem = {
-  category: string;
-  description: string;
-  total_cost_min: number | null;
-  total_cost_max: number | null;
-};
-
-type LedgerEntryItem = {
-  vendor_name: string | null;
-  total: number | null;
-  created_at: string;
-  document_type?: string | null;
-};
-
-type ProjectInfo = {
-  name: string;
-  estimated_min_total: number | null;
-  estimated_max_total: number | null;
 };
 
 const FONT_SIZE = 10;
@@ -51,7 +36,7 @@ const LINE_HEIGHT = 6;
 function drawPlanVsActualSection(
   doc: JsPdfInstance,
   y: number,
-  project: ProjectInfo,
+  project: SellerPacketProjectInput,
   capitalTotal: number,
   addPageIfNeeded: (needed: number) => void,
 ): number {
@@ -165,9 +150,9 @@ function drawSellerPacketAppendix(
  * Generate PDF as Blob for upload to storage.
  */
 export async function generateSellerPacketBlob(
-  project: ProjectInfo,
-  scopeItems: ScopeItem[],
-  ledgerEntries: LedgerEntryItem[],
+  project: SellerPacketProjectInput,
+  scopeItems: SellerPacketScopeInput[],
+  ledgerEntries: SellerPacketLedgerInput[],
   options?: SellerPacketExportOptions,
 ): Promise<Blob> {
   const { jsPDF: JsPDF } = await import("jspdf");

@@ -58,7 +58,7 @@ export function AddAssetSheet({
 
   const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       quality: 0.7,
     });
@@ -76,10 +76,22 @@ export function AddAssetSheet({
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 0.7,
-    });
+    let result: ImagePicker.ImagePickerResult;
+    try {
+      result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 0.7,
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      Alert.alert(
+        "Camera unavailable",
+        /simulator|not available|unavailable/i.test(message)
+          ? "Use the simulator-friendly Photo Library option, or test on a physical device."
+          : "We couldn’t open the camera. Try Photo Library instead.",
+      );
+      return;
+    }
 
     if (!result.canceled) {
       setImageUri(result.assets[0]!.uri);

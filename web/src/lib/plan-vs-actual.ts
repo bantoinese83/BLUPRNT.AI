@@ -1,13 +1,13 @@
 export {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
-  filterLedgerEntriesByDocumentFilter as filterInvoicesByLedgerDocumentFilter,
+  filterLedgerEntriesByDocumentFilter,
   planVsActualNarrative,
   planVsActualPdfLines,
   calculateBudgetStats,
 } from "@shared/lib/plan-vs-actual";
 export type {
-  LedgerEntryLike as InvoiceLike,
+  LedgerEntryLike,
   LedgerDocumentFilter,
   PlanVsActualKind,
 } from "@shared/lib/plan-vs-actual";

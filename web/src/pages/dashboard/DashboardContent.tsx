@@ -337,7 +337,6 @@ export function DashboardContent({
                   <DashboardExecute
                     project={project}
                     ledgerEntries={ledgerEntries}
-                    health={health}
                     documentsComp={documentsComp}
                   />
                 }

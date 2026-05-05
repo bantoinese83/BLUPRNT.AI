@@ -29,6 +29,20 @@ export function RenameProjectModal({
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
 
+  const handleSave = async () => {
+    const t = name.trim();
+    if (!t || saving) return;
+    setSaving(true);
+    try {
+      await onSave(t);
+    } catch (err) {
+      console.error("Rename project error:", err);
+      showAppToast("Failed to rename project.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -59,6 +73,8 @@ export function RenameProjectModal({
                   autoFocus
                   autoCorrect={false}
                   editable={!saving}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSave}
                 />
               </View>
               <View style={styles.row}>
@@ -72,19 +88,7 @@ export function RenameProjectModal({
                 />
                 <Button
                   title={saving ? "Saving..." : "Save"}
-                  onPress={async () => {
-                    const t = name.trim();
-                    if (!t || saving) return;
-                    setSaving(true);
-                    try {
-                      await onSave(t);
-                    } catch (err) {
-                      console.error("Rename project error:", err);
-                      showAppToast("Failed to rename project.");
-                    } finally {
-                      setSaving(false);
-                    }
-                  }}
+                  onPress={handleSave}
                   disabled={!name.trim() || saving}
                   loading={saving}
                   style={styles.button}

@@ -382,7 +382,7 @@ export default function OnboardingScreen() {
               style={StyleSheet.absoluteFill}
             />
             <Button
-              title={step === 3 ? "Start build my bluprnt" : "Continue"}
+              title={step === 3 ? "Start my blueprint estimate" : "Continue"}
               titleCase="sentence"
               onPress={handleNext}
               loading={loading}

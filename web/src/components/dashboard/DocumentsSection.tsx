@@ -18,7 +18,7 @@ import type {
 } from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import {
-  filterInvoicesByLedgerDocumentFilter,
+  filterLedgerEntriesByDocumentFilter,
   type LedgerDocumentFilter,
 } from "@/lib/plan-vs-actual";
 
@@ -47,10 +47,7 @@ export function DocumentsSection({
   const [searchQuery, setSearchQuery] = useState("");
 
   const visibleDocuments = useMemo(() => {
-    let filtered = filterInvoicesByLedgerDocumentFilter(
-      documents,
-      ledgerFilter,
-    );
+    let filtered = filterLedgerEntriesByDocumentFilter(documents, ledgerFilter);
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();

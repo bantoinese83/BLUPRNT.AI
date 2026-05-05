@@ -19,7 +19,7 @@ export type {
 export function useLedgerEntryReviewDetail(
   ledgerEntry: LedgerEntryRow | null,
   projectId: string | null,
-  isOpen: boolean,
+  isOpen = false,
 ) {
   const adapter = useMemo(
     () => ({

@@ -27,9 +27,12 @@ export function buildDashboardHeaderLines(params: {
   } = params;
 
   const trimmedProject = projectDisplayName?.trim();
+  // Strip a leading possessive "my " so the greeting doesn't read
+  // "Here's your My project." when the user named it "My project".
+  const greetingProject = trimmedProject?.replace(/^my\s+/i, "") ?? "";
   const line2 =
-    trimmedProject && trimmedProject.length > 0
-      ? `Here's your ${trimmedProject}.`
+    greetingProject.length > 0
+      ? `Here's your ${greetingProject}.`
       : "Here's your overview.";
 
   if (ledgerEntriesLength > 0) {

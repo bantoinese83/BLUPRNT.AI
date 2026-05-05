@@ -81,6 +81,14 @@ export function Button({
         }
       : undefined;
 
+    const innerStyle = style ? { ...style } : undefined;
+    if (innerStyle) {
+      delete innerStyle.flex;
+      delete innerStyle.alignSelf;
+      delete innerStyle.flexGrow;
+      delete innerStyle.flexShrink;
+    }
+
     return (
       <View style={[styles.shadowContainer, { shadowColor }, outerLayout]}>
         <TouchableOpacity
@@ -91,7 +99,11 @@ export function Button({
           accessibilityLabel={a11yLabel}
           accessibilityState={{ disabled: isInteractionDisabled }}
           testID={testID}
-          style={style?.width === "100%" ? { width: "100%" } : undefined}
+          style={
+            style?.width === "100%" || style?.flex
+              ? { width: "100%" }
+              : undefined
+          }
         >
           <MotiView
             animate={{
@@ -99,7 +111,7 @@ export function Button({
               opacity: isInteractionDisabled ? 0.6 : 1,
             }}
             transition={{ type: "timing", duration: 150 }}
-            style={[styles.button, style]}
+            style={[styles.button, innerStyle]}
           >
             <LinearGradient
               colors={gradientColors}

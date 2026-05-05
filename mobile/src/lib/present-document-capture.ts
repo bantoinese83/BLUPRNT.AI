@@ -30,10 +30,22 @@ async function openCamera(
     return;
   }
 
-  const result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ["images"],
-    quality: 0.8,
-  });
+  let result: ImagePicker.ImagePickerResult;
+  try {
+    result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    Alert.alert(
+      copy.cameraDeniedTitle,
+      /simulator|not available|unavailable/i.test(message)
+        ? "Camera is not available here (for example on the iOS Simulator). Use Photo Library or Choose Files instead."
+        : copy.cameraDeniedMessage,
+    );
+    return;
+  }
 
   if (!result.canceled && result.assets && result.assets[0]) {
     const asset = result.assets[0]!;

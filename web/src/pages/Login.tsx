@@ -292,7 +292,11 @@ export default function Login() {
                   </button>
                 </div>
               ) : (
-                <>
+                <form
+                  onSubmit={handleSubmit(onMagicRequest)}
+                  className="space-y-4"
+                  noValidate
+                >
                   <div className="space-y-2">
                     <label
                       className="text-sm font-bold text-slate-700 ml-1"
@@ -327,12 +331,11 @@ export default function Login() {
                     </p>
                   </div>
                   <Button
-                    type="button"
+                    type="submit"
                     size="lg"
                     variant="primary"
                     className="w-full h-14 font-black text-base shadow-xl shadow-teal-500/10"
                     disabled={loading}
-                    onClick={() => handleSubmit(onMagicRequest)()}
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
@@ -341,7 +344,7 @@ export default function Login() {
                     )}
                     {loading ? "Sending…" : "Email me a magic link"}
                   </Button>
-                </>
+                </form>
               )}
             </div>
           )}

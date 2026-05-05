@@ -97,6 +97,18 @@ describe("buildDashboardHeaderLines", () => {
     expect(line1).toBe("Good evening, Alex");
     expect(line2).toBe("Here's your overview.");
   });
+
+  it("strips leading 'My' from project name to avoid double-possessive", () => {
+    vi.spyOn(Date.prototype, "getHours").mockReturnValue(9);
+    const { line2 } = buildDashboardHeaderLines({
+      ledgerEntriesLength: 1,
+      capitalDocumentedTotal: 10,
+      estimatedMinTotal: 100,
+      firstName: "Jordan",
+      projectDisplayName: "My project",
+    });
+    expect(line2).toBe("Here's your project.");
+  });
 });
 
 describe("getPeriodGreeting", () => {

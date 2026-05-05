@@ -39,6 +39,20 @@ function initBrowserSentry(): void {
     // Tracing (session replay disabled: requires explicit consent in many jurisdictions)
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
     beforeSend(event) {
+      const combined =
+        event.exception?.values
+          ?.map((v) => `${v.type ?? ""}: ${v.value ?? ""}`)
+          .join(" | ") ?? "";
+      if (combined.includes("unit-test-boom")) {
+        return null;
+      }
+      if (
+        import.meta.env.DEV &&
+        combined.includes("Failed to fetch dynamically imported module") &&
+        combined.includes("localhost")
+      ) {
+        return null;
+      }
       if (event.request?.headers) {
         const h = { ...event.request.headers };
         if (h.Authorization) h.Authorization = "[redacted]";

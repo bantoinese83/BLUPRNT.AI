@@ -120,10 +120,22 @@ export function VisionCapture({
               );
               return;
             }
-            const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ["images"],
-              quality: 0.8,
-            });
+            let result: ImagePicker.ImagePickerResult;
+            try {
+              result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ["images"],
+                quality: 0.8,
+              });
+            } catch (e) {
+              const message = e instanceof Error ? e.message : String(e);
+              Alert.alert(
+                "Camera unavailable",
+                /simulator|not available|unavailable/i.test(message)
+                  ? "Camera isn’t available on the simulator. Use Gallery to upload photos instead."
+                  : "We couldn’t open the camera. Try Gallery instead.",
+              );
+              return;
+            }
             if (!result.canceled) setPhotos([...photos, result.assets[0]!.uri]);
           }}
         >

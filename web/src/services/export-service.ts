@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from "@/lib/supabase";
 
 export async function exportUserData(userId: string, email: string) {
@@ -18,7 +17,7 @@ export async function exportUserData(userId: string, email: string) {
             "*, scope_items(*), ledger_entries(*, ledger_line_items(*)), documents(id, project_id, type, original_filename, created_at)",
           )
           .in("property_id", propIds)
-      : { data: [] };
+      : { data: [] as Array<Record<string, unknown>> };
 
   const projsNested = projsRes.data ?? [];
 
@@ -28,21 +27,33 @@ export async function exportUserData(userId: string, email: string) {
       ledger_entries: _i,
       documents: _d,
       ...rest
-    } = p as any;
+    } = p as Record<string, unknown>;
     return rest;
   });
 
-  const scopeItems = projsNested.flatMap((p: any) => p.scope_items ?? []);
+  type NestedProject = Record<string, unknown> & {
+    scope_items?: unknown[];
+    ledger_entries?: Array<
+      Record<string, unknown> & { ledger_line_items?: unknown[] }
+    >;
+    documents?: unknown[];
+  };
+
+  const scopeItems = projsNested.flatMap(
+    (p) => (p as NestedProject).scope_items ?? [],
+  );
   const ledgerEntries = projsNested
-    .flatMap((p: any) => p.ledger_entries ?? [])
-    .map((inv: any) => {
+    .flatMap((p) => (p as NestedProject).ledger_entries ?? [])
+    .map((inv) => {
       const { ledger_line_items: _li, ...rest } = inv;
       return rest;
     });
   const lineItems = projsNested
-    .flatMap((p: any) => p.ledger_entries ?? [])
-    .flatMap((inv: any) => inv.ledger_line_items ?? []);
-  const documents = projsNested.flatMap((p: any) => p.documents ?? []);
+    .flatMap((p) => (p as NestedProject).ledger_entries ?? [])
+    .flatMap((inv) => inv.ledger_line_items ?? []);
+  const documents = projsNested.flatMap(
+    (p) => (p as NestedProject).documents ?? [],
+  );
 
   const exportData = {
     exported_at: new Date().toISOString(),

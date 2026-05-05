@@ -27,9 +27,10 @@ export function DashboardTabs() {
   const location = useLocation();
   return (
     <nav
+      id="dashboard-phase-nav"
       role="tablist"
       aria-label="Project phases"
-      className="glass flex rounded-2xl p-1.5 gap-1 shadow-drop-sm border-white/40 mb-2 relative"
+      className="glass flex rounded-2xl p-1.5 gap-1 shadow-drop-sm border-white/40 mb-2 relative scroll-mt-28"
     >
       {tabs.map(({ to, label, subtitle, icon: Icon }) => {
         const isActive =

@@ -37,8 +37,9 @@ interface CircleProgressProps {
 }
 
 const CIRCLE_CONFIG = {
-  SIZE: 110,
-  STROKE_WIDTH: 14,
+  /** Fits narrow dashboard sidebar without clipping the ring. */
+  SIZE: 92,
+  STROKE_WIDTH: 11,
   ANIMATION_DURATION: 1.8,
 } as const;
 
@@ -52,7 +53,7 @@ function MetricTile({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-100/90 bg-white/90 px-3 py-2.5 shadow-sm backdrop-blur-sm">
+    <div className="min-w-0 rounded-2xl border border-slate-100/90 bg-white/90 px-3 py-2.5 shadow-sm backdrop-blur-sm">
       <Icon
         className="mb-1 h-3.5 w-3.5 text-teal-600"
         aria-hidden
@@ -112,12 +113,14 @@ function SpendRunwayBar({
           </span>
         ) : null}
       </div>
-      <div className="flex justify-between gap-2 text-[10px] font-bold text-slate-500">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[10px] font-bold text-slate-500">
         <span className="min-w-0 truncate">Low {money(min)}</span>
-        <span className="min-w-0 shrink-0 text-center text-slate-700">
+        <span className="min-w-0 shrink-0 text-slate-700">
           Now {money(spend)}
         </span>
-        <span className="min-w-0 truncate text-right">High {money(max)}</span>
+        <span className="min-w-0 truncate text-right sm:ml-auto">
+          High {money(max)}
+        </span>
       </div>
     </div>
   );
@@ -225,7 +228,7 @@ export function ProjectHealth({
   const ringGradientId = useId().replace(/:/g, "");
 
   return (
-    <Card className="overflow-hidden border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-xl shadow-slate-200/30 rounded-4xl metal-surface relative">
+    <Card className="relative min-w-0 overflow-hidden rounded-4xl border-slate-200/60 bg-white/70 shadow-xl shadow-slate-200/30 backdrop-blur-xl metal-surface">
       <div className="pointer-events-none absolute inset-0 noise-overlay opacity-[0.03]" />
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
@@ -242,21 +245,24 @@ export function ProjectHealth({
           <Shield className="h-3.5 w-3.5 text-slate-400" aria-hidden />
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6 pt-2">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-6">
-          <div className="shrink-0 space-y-1 lg:max-w-[200px]">
+      <CardContent className="min-w-0 space-y-5 pt-2">
+        {/* Score + ring on one row so narrow sidebars never squeeze three parallel columns */}
+        <div className="flex min-w-0 flex-row items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-1">
             <motion.div
-              className="flex items-baseline gap-2"
+              className="flex flex-wrap items-baseline gap-x-2 gap-y-0"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
               <span
-                className={`bg-linear-to-br ${color} bg-clip-text text-6xl font-black tracking-tighter text-transparent tabular-nums`}
+                className={`bg-linear-to-br ${color} bg-clip-text text-5xl font-black tracking-tighter text-transparent tabular-nums sm:text-6xl`}
               >
                 {score}
               </span>
-              <span className="text-lg font-bold text-slate-500">/100</span>
+              <span className="text-base font-bold text-slate-500 sm:text-lg">
+                /100
+              </span>
             </motion.div>
             <div className="flex flex-wrap items-center gap-2">
               <motion.div
@@ -276,54 +282,8 @@ export function ProjectHealth({
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-1 flex-col justify-center gap-4">
-            <div
-              className={`grid gap-2 ${unreconciledBilled > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}
-            >
-              <MetricTile
-                icon={FileText}
-                label="Documents"
-                value={documentCount > 0 ? String(documentCount) : "—"}
-              />
-              <MetricTile
-                icon={Layers}
-                label="Scope lines"
-                value={scopeLineCount > 0 ? String(scopeLineCount) : "—"}
-              />
-              <MetricTile
-                icon={Activity}
-                label="Vs estimate high"
-                value={
-                  max > 0 && spendingTotal > 0 ? `${pctHighRounded}%` : "—"
-                }
-              />
-              {unreconciledBilled > 0 ? (
-                <MetricTile
-                  icon={Receipt}
-                  label="Unlinked"
-                  value={money(unreconciledBilled)}
-                />
-              ) : null}
-            </div>
-
-            {showRunway && spendingTotal > 0 ? (
-              <SpendRunwayBar min={min} max={max} spend={spendingTotal} />
-            ) : showRunway && status === "Analyzing" ? (
-              <p className="rounded-2xl border border-dashed border-slate-200/80 bg-slate-50/60 px-4 py-3 text-center text-xs font-medium leading-snug text-slate-500">
-                Upload documents to compare spend with your estimate range.
-              </p>
-            ) : null}
-
-            {dollarsOverHighEstimate > 0 && (
-              <p className="text-center text-[11px] font-bold uppercase tracking-wide text-rose-600">
-                {money(dollarsOverHighEstimate)} above high estimate ·{" "}
-                {pctLowRounded}% of low estimate
-              </p>
-            )}
-          </div>
-
           <motion.div
-            className="relative mb-1 flex shrink-0 justify-center lg:justify-end"
+            className="relative shrink-0"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -337,6 +297,54 @@ export function ProjectHealth({
               gradientId={ringGradientId}
             />
           </motion.div>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <div
+            className={`grid min-w-0 gap-2 ${
+              unreconciledBilled > 0
+                ? "grid-cols-2"
+                : "grid-cols-2 sm:grid-cols-3"
+            }`}
+          >
+            <MetricTile
+              icon={FileText}
+              label="Documents"
+              value={documentCount > 0 ? String(documentCount) : "—"}
+            />
+            <MetricTile
+              icon={Layers}
+              label="Scope lines"
+              value={scopeLineCount > 0 ? String(scopeLineCount) : "—"}
+            />
+            <MetricTile
+              icon={Activity}
+              label="Vs estimate high"
+              value={max > 0 && spendingTotal > 0 ? `${pctHighRounded}%` : "—"}
+            />
+            {unreconciledBilled > 0 ? (
+              <MetricTile
+                icon={Receipt}
+                label="Unlinked"
+                value={money(unreconciledBilled)}
+              />
+            ) : null}
+          </div>
+
+          {showRunway && spendingTotal > 0 ? (
+            <SpendRunwayBar min={min} max={max} spend={spendingTotal} />
+          ) : showRunway && status === "Analyzing" ? (
+            <p className="rounded-2xl border border-dashed border-slate-200/80 bg-slate-50/60 px-4 py-3 text-left text-xs font-medium leading-snug text-slate-500 sm:text-center">
+              Upload documents to compare spend with your estimate range.
+            </p>
+          ) : null}
+
+          {dollarsOverHighEstimate > 0 && (
+            <p className="break-words text-left text-[11px] font-bold uppercase leading-snug tracking-wide text-rose-600 sm:text-center">
+              {money(dollarsOverHighEstimate)} above high estimate ·{" "}
+              {pctLowRounded}% of low estimate
+            </p>
+          )}
         </div>
 
         <motion.div

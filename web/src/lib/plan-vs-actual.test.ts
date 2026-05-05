@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   capitalImprovementTotal,
   maintenanceDocumentTotal,
-  filterInvoicesByLedgerDocumentFilter,
+  filterLedgerEntriesByDocumentFilter,
   planVsActualNarrative,
   planVsActualPdfLines,
 } from "./plan-vs-actual";
@@ -36,7 +36,7 @@ describe("maintenanceDocumentTotal", () => {
   });
 });
 
-describe("filterInvoicesByLedgerDocumentFilter", () => {
+describe("filterLedgerEntriesByDocumentFilter", () => {
   const rows = [
     { total: 1, document_type: "invoice" as const },
     { total: 2, document_type: "receipt" as const },
@@ -45,18 +45,18 @@ describe("filterInvoicesByLedgerDocumentFilter", () => {
   ];
 
   it("returns all when filter is all", () => {
-    expect(filterInvoicesByLedgerDocumentFilter(rows, "all").length).toBe(4);
+    expect(filterLedgerEntriesByDocumentFilter(rows, "all").length).toBe(4);
   });
 
   it("returns capital subset (invoice, quote, receipt)", () => {
-    expect(filterInvoicesByLedgerDocumentFilter(rows, "capital")).toEqual([
+    expect(filterLedgerEntriesByDocumentFilter(rows, "capital")).toEqual([
       rows[0],
       rows[1],
     ]);
   });
 
   it("returns records subset", () => {
-    expect(filterInvoicesByLedgerDocumentFilter(rows, "maintenance")).toEqual([
+    expect(filterLedgerEntriesByDocumentFilter(rows, "maintenance")).toEqual([
       rows[2],
       rows[3],
     ]);
