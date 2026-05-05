@@ -129,7 +129,7 @@ export function PlanVsActualCard({
               type="button"
               variant="outline"
               size="sm"
-              className="w-full gap-2 rounded-xl border-slate-200 sm:w-auto"
+              className="group w-full gap-2 rounded-xl border-slate-200 sm:w-auto transition-all hover:bg-slate-50"
               onClick={() => {
                 const el = document.getElementById("document-vault-anchor");
                 if (el) {
@@ -140,7 +140,10 @@ export function PlanVsActualCard({
               }}
             >
               Home Archive includes this story
-              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+              <ArrowRight
+                className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
             </Button>
             <Button
               type="button"

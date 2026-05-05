@@ -139,18 +139,21 @@ export const ProjectHeader = memo(function ProjectHeader({
             </Button>
           </div>
         ) : (
-          <div
-            className="group flex items-center gap-3 cursor-pointer"
+          <button
+            type="button"
+            className="group flex items-center gap-3 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-4 rounded-xl transition-all"
             data-testid="project-name-display"
             onClick={() => setIsEditing(true)}
+            aria-label={`Rename project: ${project.name}`}
+            title="Click to rename project"
           >
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 group-hover:text-slate-700 transition-colors">
               {project.name}
             </h1>
-            <div className="p-1.5 rounded-lg bg-slate-50 text-slate-400 opacity-0 group-hover:opacity-100 transition-all hover:text-brand-primary hover:bg-brand-primary/5">
+            <div className="p-1.5 rounded-lg bg-slate-50 text-slate-400 opacity-0 group-hover:opacity-100 transition-all group-hover:text-teal-600 group-hover:bg-teal-50 shadow-sm group-active:scale-95">
               <Pencil className="w-4 h-4" />
             </div>
-          </div>
+          </button>
         )}
       </div>
       <div className="flex items-center space-x-3">

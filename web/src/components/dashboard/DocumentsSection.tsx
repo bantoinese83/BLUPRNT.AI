@@ -111,6 +111,23 @@ export function DocumentsSection({
     wasUploading.current = uploading;
   }, [uploading, documents.length]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't focus if we're already in an input, textarea, or contenteditable
+      if (
+        e.key === "/" &&
+        !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName) &&
+        !(e.target as HTMLElement)?.isContentEditable
+      ) {
+        e.preventDefault();
+        document.getElementById("document-search-input")?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const dropDisabled = uploading || blockRecordOnlyUpload;
   const isArchitectActive = isArchitectPlanEffective(subscription ?? null);
 
@@ -236,14 +253,29 @@ export function DocumentsSection({
                 <Search className="h-3.5 w-3.5 text-slate-400" />
               </div>
               <Input
+                id="document-search-input"
                 type="search"
                 enterKeyHint="search"
-                placeholder="Search vendor, type, invoice #, amount…"
+                placeholder="Search vendor, type, invoice #…"
                 aria-label="Search documents by vendor, type, summary, or amounts"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-8 h-9 text-xs rounded-full border-slate-200 bg-white/50 focus:bg-white transition-all shadow-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    setSearchQuery("");
+                    e.currentTarget.blur();
+                  }
+                }}
+                className="pl-9 pr-14 h-9 text-xs rounded-full border-slate-200 bg-white/50 focus:bg-white transition-all shadow-sm"
               />
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none gap-1">
+                {!searchQuery && (
+                  <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 font-mono text-[10px] font-medium text-slate-400 opacity-100">
+                    /
+                  </kbd>
+                )}
+              </div>
               {searchQuery && (
                 <button
                   type="button"

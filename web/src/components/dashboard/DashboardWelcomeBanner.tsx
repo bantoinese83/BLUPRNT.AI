@@ -48,37 +48,49 @@ export function DashboardWelcomeBanner() {
               type="button"
               title="Upload project docs"
               aria-label="Upload project docs"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-teal-700 bg-teal-950 text-white shadow-sm transition-colors hover:bg-teal-900 hover:border-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-teal-700 bg-teal-950 text-white shadow-sm transition-all duration-300 hover:bg-teal-900 hover:border-teal-600 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/execute");
               }}
             >
-              <Upload className="w-5 h-5" strokeWidth={2} aria-hidden />
+              <Upload
+                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={2}
+                aria-hidden
+              />
             </button>
             <button
               type="button"
               title="See line-by-line budget"
               aria-label="See line-by-line budget"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-colors hover:border-teal-400 hover:bg-teal-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-all duration-300 hover:border-teal-400 hover:bg-teal-50/60 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/scope");
               }}
             >
-              <ListTree className="w-5 h-5" strokeWidth={2} aria-hidden />
+              <ListTree
+                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={2}
+                aria-hidden
+              />
             </button>
             <button
               type="button"
               title="Export Home Archive"
               aria-label="Export Home Archive"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-colors hover:border-teal-400 hover:bg-teal-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-all duration-300 hover:border-teal-400 hover:bg-teal-50/60 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               onClick={() => {
                 dismiss();
                 navigate("/dashboard/record");
               }}
             >
-              <FileDown className="w-5 h-5" strokeWidth={2} aria-hidden />
+              <FileDown
+                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={2}
+                aria-hidden
+              />
             </button>
           </div>
           <p className="text-xs text-slate-500 pt-1">

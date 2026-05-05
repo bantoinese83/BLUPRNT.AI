@@ -55,7 +55,7 @@ export const DocumentCard = memo(function DocumentCard({
         transition={{ delay: index * 0.05 }}
       >
         <Card
-          className="border-slate-200/80 shadow-drop-sm hover:shadow-drop-lg hover:border-slate-400 transition-all duration-300 cursor-pointer overflow-hidden group relative"
+          className="border-slate-200/80 shadow-drop-sm hover:shadow-drop-lg hover:border-slate-400 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden group relative"
           onClick={() => onClick(document.id)}
         >
           <div className="absolute top-0 left-0 w-1 h-full bg-teal-600 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -170,9 +170,12 @@ export const DocumentCard = memo(function DocumentCard({
                     e.stopPropagation();
                     setOriginalPreviewId(document.id);
                   }}
-                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2"
+                  className="group/btn mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2"
                 >
-                  <Eye className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                  <Eye
+                    className="w-3.5 h-3.5 shrink-0 transition-colors group-hover/btn:text-teal-600"
+                    aria-hidden
+                  />
                   View original
                 </button>
               ) : null}

@@ -162,7 +162,10 @@ export function ScopeItemRow({
   }
 
   return (
-    <div className="p-4 sm:p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors">
+    <div
+      className="group p-4 sm:p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors cursor-default"
+      onDoubleClick={() => onEdit(item)}
+    >
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-1.5 min-w-0">
           <div className="flex items-center flex-wrap gap-2">
@@ -194,19 +197,25 @@ export function ScopeItemRow({
                 {item.finish_tier} tier
               </Badge>
             )}
-            <div className="flex gap-1">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
               <button
                 type="button"
-                onClick={() => onEdit(item)}
-                className="p-1 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(item);
+                }}
+                className="p-1 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                 aria-label="Edit"
               >
                 <Pencil className="w-3 h-3" />
               </button>
               <button
                 type="button"
-                onClick={() => onDelete(item)}
-                className="p-1 text-slate-400 hover:text-amber-600 rounded-md hover:bg-amber-50 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(item);
+                }}
+                className="p-1 text-slate-400 hover:text-amber-600 rounded-md hover:bg-amber-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                 aria-label="Remove"
               >
                 <Trash2 className="w-3 h-3" />
