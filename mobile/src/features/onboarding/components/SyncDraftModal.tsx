@@ -8,12 +8,14 @@ import {
   Pressable,
   Share,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Monitor, X, Copy, Check } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/constants/Theme";
+import { reportClientError } from "@/lib/sentry";
 import type { Json } from "@shared/types/supabase.gen";
 
 interface Props {
@@ -39,8 +41,13 @@ export function SyncDraftModal({ isOpen, onClose, payload }: Props) {
       if (error) throw error;
       setToken(newToken);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (_err) {
+    } catch (err) {
+      void reportClientError("onboarding_sync_handoff", err);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert(
+        "Couldn't create link",
+        "Please try again. Check your connection and try once more.",
+      );
     } finally {
       setLoading(false);
     }

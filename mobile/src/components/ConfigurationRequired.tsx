@@ -1,9 +1,10 @@
 import React from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Settings } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/contexts/auth-context";
+import { useConfirmation } from "@/contexts/useConfirmation";
 
 type Props = {
   onRetry?: () => void;
@@ -11,18 +12,18 @@ type Props = {
 
 export function ConfigurationRequired({ onRetry }: Props) {
   const { session, signOut } = useAuth();
+  const { confirm } = useConfirmation();
 
   const handleSignOut = () => {
-    Alert.alert("Sign out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Sign out",
-        style: "destructive",
-        onPress: () => {
-          void signOut();
-        },
+    confirm({
+      title: "Sign out",
+      message: "Are you sure you want to sign out?",
+      confirmLabel: "Sign out",
+      variant: "destructive",
+      onConfirm: async () => {
+        await signOut();
       },
-    ]);
+    });
   };
 
   return (

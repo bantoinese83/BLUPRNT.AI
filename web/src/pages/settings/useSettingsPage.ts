@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
-import { supabase } from "@/lib/supabase";
+import { supabase, invokeFunction } from "@/lib/supabase";
 import type { UserSubscriptionRow } from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 import { setAnalyticsEnabled as setPostHogCapturing } from "@/lib/posthog";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 import type {
   SettingsUser,
@@ -48,43 +49,45 @@ export function useSettingsPage(): UseSettingsPageResult {
     let cancelled = false;
     const load = async () => {
       setUserLoading(true);
-      const u = authUser;
-      if (cancelled) return;
-      setUser(u ?? null);
-      setDisplayName((u?.user_metadata?.full_name as string) ?? "");
+      try {
+        const u = authUser;
+        if (cancelled) return;
+        setUser(u ?? null);
+        setDisplayName((u?.user_metadata?.full_name as string) ?? "");
 
-      if (u) {
-        const { data: sub } = await supabase
-          .from("user_subscriptions")
-          .select("*")
-          .eq("user_id", u.id)
-          .maybeSingle();
-        setSubscriptionRow(sub as UserSubscriptionRow | null);
-        setIsArchitect(isArchitectPlanEffective(sub));
+        if (u) {
+          const { data: sub } = await supabase
+            .from("user_subscriptions")
+            .select("*")
+            .eq("user_id", u.id)
+            .maybeSingle();
+          setSubscriptionRow(sub as UserSubscriptionRow | null);
+          setIsArchitect(isArchitectPlanEffective(sub));
 
-        const { data: owned } = await supabase
-          .from("properties")
-          .select("id")
-          .eq("owner_user_id", u.id);
-        const propIds = (owned ?? []).map((p) => p.id);
-        if (propIds.length === 0) {
-          setUpgradeProjectId(null);
-        } else {
-          const { data: projs } = await supabase
-            .from("projects")
+          const { data: owned } = await supabase
+            .from("properties")
             .select("id")
-            .in("property_id", propIds)
-            .order("updated_at", { ascending: false })
-            .limit(1);
-          setUpgradeProjectId(projs?.[0]?.id ?? null);
+            .eq("owner_user_id", u.id);
+          const propIds = (owned ?? []).map((p) => p.id);
+          if (propIds.length === 0) {
+            setUpgradeProjectId(null);
+          } else {
+            const { data: projs } = await supabase
+              .from("projects")
+              .select("id")
+              .in("property_id", propIds)
+              .order("updated_at", { ascending: false })
+              .limit(1);
+            setUpgradeProjectId(projs?.[0]?.id ?? null);
+          }
+        } else {
+          setUpgradeProjectId(null);
+          setSubscriptionRow(null);
+          setIsArchitect(false);
         }
-      } else {
-        setUpgradeProjectId(null);
-        setSubscriptionRow(null);
-        setIsArchitect(false);
+      } finally {
+        if (!cancelled) setUserLoading(false);
       }
-
-      setUserLoading(false);
     };
     void load();
     return () => {
@@ -139,11 +142,9 @@ export function useSettingsPage(): UseSettingsPageResult {
     setExportMessage(null);
     setExportLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "generate-data-export",
-        {
-          method: "POST",
-        },
+      const { data, error } = await invokeFunction(
+        EDGE_FUNCTIONS.GENERATE_DATA_EXPORT,
+        { method: "POST" },
       );
 
       if (error) throw error;
@@ -200,13 +201,19 @@ export function useSettingsPage(): UseSettingsPageResult {
     setDeleteMessage(null);
     setDeleteLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke<{
+      const { data, error } = await invokeFunction<{
         success?: boolean;
         error?: string;
-      }>("delete-account", {
+      }>(EDGE_FUNCTIONS.DELETE_ACCOUNT, {
         method: "POST",
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        const msg =
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: string }).message ?? "")
+            : "";
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
       await supabase.auth.signOut();
       navigate("/signed-out", { replace: true });

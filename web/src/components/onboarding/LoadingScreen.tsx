@@ -13,6 +13,7 @@ export function LoadingScreen() {
     estimateError,
     locationInput,
     onboardingContext,
+    onboardingContextError,
     fetchOnboardingContext,
   } = useOnboarding();
   const navigate = useNavigate();
@@ -105,6 +106,28 @@ export function LoadingScreen() {
         <p className="mt-4 text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">
           Pulling your details together
         </p>
+
+        {onboardingContextError && !onboardingContext ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mt-6 flex flex-col items-center gap-2 text-xs text-slate-500"
+          >
+            <span>
+              We couldn’t load market context — your estimate is still on the
+              way.
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                void fetchOnboardingContext();
+              }}
+              className="text-teal-700 hover:text-teal-800 font-semibold underline underline-offset-2"
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
       </div>
     </PageTransition>
   );

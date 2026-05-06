@@ -142,10 +142,6 @@ export function RootLayoutNav() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="signed-out" />
         <Stack.Screen name="+not-found" />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", headerShown: false }}
-        />
       </Stack>
     </ThemeProvider>
   );

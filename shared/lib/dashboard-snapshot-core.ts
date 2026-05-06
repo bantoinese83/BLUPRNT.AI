@@ -47,7 +47,7 @@ const SCOPE_SELECT =
   "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";
 
 const LEDGER_SELECT =
-  "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date, ai_summary";
+  "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date, insurance_renewal_date, permit_expiration_date, ai_summary";
 
 const LEDGER_WITH_LINES_SELECT = `${LEDGER_SELECT}, ledger_line_items(ledger_entry_id, category, line_total, scope_item_id)`;
 

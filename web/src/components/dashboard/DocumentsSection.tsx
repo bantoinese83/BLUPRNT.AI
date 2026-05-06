@@ -21,6 +21,7 @@ import {
   filterLedgerEntriesByDocumentFilter,
   type LedgerDocumentFilter,
 } from "@/lib/plan-vs-actual";
+import { LEDGER_UPLOAD_ANCHOR_ID } from "@shared/constants/ui";
 
 type DocumentsSectionProps = {
   projectId: string;
@@ -161,7 +162,7 @@ export function DocumentsSection({
   return (
     <div
       ref={scrollRef}
-      id="document-upload-anchor"
+      id={LEDGER_UPLOAD_ANCHOR_ID}
       className="space-y-5 scroll-mt-24"
     >
       <input

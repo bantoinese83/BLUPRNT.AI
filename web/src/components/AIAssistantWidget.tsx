@@ -11,6 +11,8 @@ import {
   normalizeChatProjectActions,
   type ChatProjectAction,
 } from "@shared/lib/chat-project-actions";
+import { LEDGER_UPLOAD_ANCHOR_ID } from "@shared/constants/ui";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 const MAX_SUGGESTED_ACTIONS = 4;
 
@@ -65,7 +67,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
           navigate("/dashboard/plan");
           queueMicrotask(() => {
             document
-              .getElementById("invoice-upload-anchor")
+              .getElementById(LEDGER_UPLOAD_ANCHOR_ID)
               ?.scrollIntoView({ behavior: "smooth" });
           });
           break;
@@ -93,7 +95,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
         const { data, error } = await invokeFunction<{
           reply?: string;
           actions?: unknown;
-        }>("chat-with-project", {
+        }>(EDGE_FUNCTIONS.CHAT_WITH_PROJECT, {
           body: { query: msg, projectId },
         });
 
@@ -190,6 +192,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
             {/* Input */}
             <form
               onSubmit={handleSend}
+              aria-busy={isTyping}
               className="p-4 bg-white border-t border-slate-100"
             >
               <div className="relative">
@@ -204,6 +207,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
                 />
                 <button
                   type="submit"
+                  aria-label="Send message"
                   disabled={!input.trim() || isTyping}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:hover:bg-teal-600 transition-colors"
                 >

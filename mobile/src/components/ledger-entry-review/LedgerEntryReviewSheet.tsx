@@ -23,6 +23,8 @@ import {
   isCapitalLedgerDocumentType,
   ledgerDocumentTheme,
 } from "@shared/lib/ledger-document-labels";
+import { coerceLedgerDocumentType } from "@shared/lib/infer-document-type";
+import { effectiveLedgerEntryTotalForSave } from "@shared/lib/document-review-form-config";
 import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
 import {
   LedgerEntryReviewLineItemRow,
@@ -74,6 +76,8 @@ export function LedgerEntryReviewSheet({
     setTotalValue,
     aiSummary,
     setAiSummary,
+    reviewDates,
+    setReviewDateField,
     handleDelete: hookDelete,
     deleting,
   } = useLedgerEntryReviewDetail(ledgerEntry, projectId, isOpen);
@@ -101,13 +105,36 @@ export function LedgerEntryReviewSheet({
     currentVendor === "Document" ||
     currentVendor === "Processing...";
 
+  const storedDocType = coerceLedgerDocumentType(
+    detail?.document_type ?? ledgerEntry.document_type,
+  );
+  const docTypeChanged = ledgerDocType !== storedDocType;
+
   const vendorChanged =
     vendorName !== (detail?.vendor_name ?? ledgerEntry.vendor_name ?? "");
-  const totalChanged =
-    parseFloat(totalValue) !== (detail?.total ?? ledgerEntry.total ?? 0);
+  const nextTotal = effectiveLedgerEntryTotalForSave(ledgerDocType, totalValue);
+  const totalChanged = nextTotal !== (detail?.total ?? ledgerEntry.total ?? 0);
   const summaryChanged =
     aiSummary !== (detail?.ai_summary ?? ledgerEntry.ai_summary ?? "");
-  const isDirty = vendorChanged || totalChanged || summaryChanged;
+
+  const serverWarranty =
+    detail?.warranty_expiry_date ?? ledgerEntry.warranty_expiry_date ?? "";
+  const serverInsurance =
+    detail?.insurance_renewal_date ?? ledgerEntry.insurance_renewal_date ?? "";
+  const serverPermit =
+    detail?.permit_expiration_date ?? ledgerEntry.permit_expiration_date ?? "";
+
+  const datesDirty =
+    reviewDates.warranty_expiry_date !== String(serverWarranty) ||
+    reviewDates.insurance_renewal_date !== String(serverInsurance) ||
+    reviewDates.permit_expiration_date !== String(serverPermit);
+
+  const isDirty =
+    docTypeChanged ||
+    vendorChanged ||
+    totalChanged ||
+    summaryChanged ||
+    datesDirty;
 
   const handleDelete = () => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -209,6 +236,7 @@ export function LedgerEntryReviewSheet({
                   />
 
                   <LedgerEntryReviewEditableFields
+                    ledgerDocType={ledgerDocType}
                     theme={theme}
                     vendorName={vendorName}
                     setVendorName={setVendorName}
@@ -216,6 +244,8 @@ export function LedgerEntryReviewSheet({
                     setTotalValue={setTotalValue}
                     aiSummary={aiSummary}
                     setAiSummary={setAiSummary}
+                    reviewDates={reviewDates}
+                    onReviewDateChange={setReviewDateField}
                   />
 
                   <LedgerEntryReviewDetailGrid

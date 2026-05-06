@@ -15,6 +15,7 @@ import {
   loadingScreenMessages,
   onboardingZipCode,
 } from "@shared/constants/onboarding";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 
 export type OnboardingEstimateState = {
   min: number;
@@ -110,7 +111,7 @@ export function useOnboardingAnalysis(
         }
 
         const { data, error } = await invokeFunction<PhotoToScopeResult>(
-          "photo-to-scope",
+          EDGE_FUNCTIONS.PHOTO_TO_SCOPE,
           { body: fd },
         );
 

@@ -2,6 +2,7 @@ import { friendlyDocumentUploadError } from "@shared/lib/user-friendly-errors";
 import { extractUploadFailureFromInvokeResult } from "@shared/lib/upload-invoke-result";
 import { invokeFunction } from "@/lib/supabase";
 import { showAppToast } from "@/lib/app-toast";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 
 import type { UploadFormDocumentType } from "@shared/lib/infer-document-type";
 
@@ -172,7 +173,7 @@ async function invokeUploadWithTimeout(formData: FormData) {
         isNearingBudget: boolean;
         percentOfMax: number;
       };
-    }>("upload-document", { body: formData }),
+    }>(EDGE_FUNCTIONS.UPLOAD_DOCUMENT, { body: formData }),
     timeout,
   ]);
 }

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useSettingsPage } from "./useSettingsPage";
 import { useAuth } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
-import { supabase } from "@/lib/supabase";
+import { supabase, invokeFunction } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 
 vi.mock("react-router-dom", () => ({
@@ -36,6 +36,7 @@ vi.mock("@/lib/supabase", () => ({
       invoke: vi.fn(),
     },
   },
+  invokeFunction: vi.fn(),
 }));
 
 vi.mock("@shared/lib/architect-entitlement", () => ({
@@ -167,7 +168,7 @@ describe("useSettingsPage", () => {
   it("handles account deletion", async () => {
     const { result } = renderHook(() => useSettingsPage());
 
-    (supabase.functions.invoke as any).mockResolvedValue({
+    (invokeFunction as any).mockResolvedValue({
       data: { success: true },
       error: null,
     });
@@ -177,7 +178,7 @@ describe("useSettingsPage", () => {
     await act(async () => {
       await result.current.onDeleteAccount();
     });
-    expect(supabase.functions.invoke).not.toHaveBeenCalled();
+    expect(invokeFunction).not.toHaveBeenCalled();
 
     // Confirm and delete
     await act(async () => {
@@ -188,7 +189,7 @@ describe("useSettingsPage", () => {
       await result.current.onDeleteAccount();
     });
 
-    expect(supabase.functions.invoke).toHaveBeenCalledWith("delete-account", {
+    expect(invokeFunction).toHaveBeenCalledWith("delete-account", {
       method: "POST",
     });
     expect(mockNavigate).toHaveBeenCalledWith("/signed-out", { replace: true });

@@ -23,6 +23,7 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { useFocusTrap } from "@/lib/use-focus-trap";
 import { WEB_APP_PATH_PRIVACY } from "@shared/constants/public-site";
+import { LEDGER_UPLOAD_ANCHOR_ID } from "@shared/constants/ui";
 
 const paletteKbd = () =>
   typeof navigator !== "undefined" &&
@@ -233,14 +234,14 @@ export const CommandPalette = memo(function CommandPalette() {
                   />
                   <Item
                     icon={<ScanLine />}
-                    label="Jump to invoice upload"
-                    value="invoice upload scan document"
+                    label="Jump to ledger upload"
+                    value="ledger upload scan document bill receipt"
                     onSelect={() =>
                       runCommand(() => {
                         navigate("/dashboard/plan");
                         window.requestAnimationFrame(() => {
                           document
-                            .getElementById("invoice-upload-anchor")
+                            .getElementById(LEDGER_UPLOAD_ANCHOR_ID)
                             ?.scrollIntoView({ behavior: "smooth" });
                         });
                       })

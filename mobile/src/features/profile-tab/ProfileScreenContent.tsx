@@ -11,6 +11,7 @@ import {
   FileText,
   HelpCircle,
   TrendingUp,
+  MessageSquare,
 } from "lucide-react-native";
 import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
@@ -208,11 +209,20 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
         <GlassCard style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>Security & Data</Text>
           <ProfileSettingItem
-            testID="profile-row-help-support"
-            icon={<HelpCircle size={20} color={Theme.colors.brand.primary} />}
-            title="Concierge Support"
-            subtitle="Chat with our AI-powered team"
+            testID="profile-row-ai-assistant"
+            icon={
+              <MessageSquare size={20} color={Theme.colors.brand.primary} />
+            }
+            title="AI assistant"
+            subtitle="Ask questions about your project"
             onPress={() => router.push("/(tabs)/ai")}
+          />
+          <ProfileSettingItem
+            testID="profile-row-help-support"
+            icon={<HelpCircle size={20} color={Theme.colors.text.muted} />}
+            title="Help & support"
+            subtitle="FAQs and email"
+            onPress={() => router.push("/support")}
           />
           <View
             style={styles.analyticsRow}

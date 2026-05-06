@@ -25,7 +25,7 @@ describe("useTransformationVaultLogic", () => {
     createSignedUrls.mockResolvedValue({ data: [], error: null });
   });
 
-  it("groups before and after photos into sets correctly", () => {
+  it("groups before and after photos into sets correctly", async () => {
     const galleryItems: GalleryItem[] = [
       { id: "1", photo_type: "before", storage_path: "b1.jpg" } as GalleryItem,
       { id: "2", photo_type: "after", storage_path: "a1.jpg" } as GalleryItem,
@@ -44,9 +44,12 @@ describe("useTransformationVaultLogic", () => {
     expect(result.current.sets[1]!.after).toBeNull();
     expect(result.current.sets[2]!.before).toBeNull();
     expect(result.current.sets[2]!.after).toBeNull();
+    // Wait for the deferred fetchSignedUrls effect to settle so its setState
+    // doesn't fire after teardown (would throw "window is not defined").
+    await waitFor(() => expect(createSignedUrls).toHaveBeenCalled());
   });
 
-  it("handles empty gallery items correctly", () => {
+  it("handles empty gallery items correctly", async () => {
     const { result } = renderHook(() =>
       useTransformationVaultLogic("p1", [], mockSupabase),
     );
@@ -55,6 +58,9 @@ describe("useTransformationVaultLogic", () => {
     expect(result.current.sets).toHaveLength(1);
     expect(result.current.sets[0]!.before).toBeNull();
     expect(result.current.sets[0]!.after).toBeNull();
+    // No signed URLs requested when there are no items, but still let
+    // any microtasks flush before teardown.
+    await Promise.resolve();
   });
 
   it("fetches signed URLs for items not in cache", async () => {

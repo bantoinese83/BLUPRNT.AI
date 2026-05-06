@@ -5,6 +5,7 @@ import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/supabase";
 import { PRICING } from "@shared/constants/pricing";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 import {
   ArchitectPlanIcon,
   ProjectPassIcon,
@@ -88,7 +89,7 @@ export function UpgradeModal({
       const { data, error } = await invokeFunction<{
         url?: string;
         error?: string;
-      }>("create-checkout", {
+      }>(EDGE_FUNCTIONS.CREATE_CHECKOUT, {
         body: {
           priceId: priceId.trim(),
           projectId: plan === "pass" ? projectId : undefined,

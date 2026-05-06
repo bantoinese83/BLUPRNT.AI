@@ -59,7 +59,7 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
     steps.push(
       {
         id: "upload-document",
-        label: "Track an invoice",
+        label: "Add a ledger entry",
         description: "Start building your property ledger.",
         icon: FileText,
       },

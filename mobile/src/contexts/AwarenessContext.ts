@@ -4,6 +4,13 @@ export type SmartInsightActionKind = "scope" | "execute" | "record";
 
 export interface SmartInsight {
   id: string;
+  /**
+   * Previous id under which this insight was emitted to analytics. Set so
+   * dashboards built against the old id keep functioning while we transition
+   * to the new naming. Safe to remove the legacy id after one release where
+   * both keys have been emitted.
+   */
+  legacyId?: string;
   type: "anomaly" | "tip" | "opportunity";
   title: string;
   description: string;

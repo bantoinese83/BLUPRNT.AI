@@ -123,7 +123,7 @@ test.describe("Realtime Sync Integrity", () => {
     }
 
     // Ensure we are looking at the documents section
-    await page.locator("#document-upload-anchor").scrollIntoViewIfNeeded();
+    await page.locator("#document-upload-anchor").scrollIntoViewIfNeeded(); // LEDGER_UPLOAD_ANCHOR_ID
 
     // 6. Verify it appears in the UI
     await expect(invoiceCard.first()).toBeVisible({ timeout: 30_000 });

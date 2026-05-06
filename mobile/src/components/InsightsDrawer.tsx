@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -16,6 +16,7 @@ import { useAwareness, type SmartInsight } from "@/contexts/AwarenessContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { showAppToast } from "@/lib/app-toast";
+import { captureEvent } from "@/lib/posthog";
 
 const HEALTH_COLORS = {
   optimal: {
@@ -126,9 +127,39 @@ export function InsightsDrawer() {
     setIsInsightsOpen(false);
   };
 
+  /**
+   * Emit an analytics event for each insight the user actually sees, deduped
+   * per drawer-open. We intentionally pass both `insight_id` and
+   * `legacy_insight_id` so dashboards built against the previous id keep
+   * working for one release while we migrate.
+   */
+  const seenInsightIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!isInsightsOpen) {
+      seenInsightIdsRef.current = new Set();
+      return;
+    }
+    insights.forEach((insight) => {
+      if (seenInsightIdsRef.current.has(insight.id)) return;
+      seenInsightIdsRef.current.add(insight.id);
+      captureEvent("awareness_insight_seen", {
+        insight_id: insight.id,
+        legacy_insight_id: insight.legacyId ?? null,
+        type: insight.type,
+        project_id: activeProjectId,
+      });
+    });
+  }, [insights, isInsightsOpen, activeProjectId]);
+
   const handleInsightAction = useCallback(
     (insight: SmartInsight) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      captureEvent("awareness_insight_action_clicked", {
+        insight_id: insight.id,
+        legacy_insight_id: insight.legacyId ?? null,
+        action_kind: insight.actionKind ?? null,
+        project_id: activeProjectId,
+      });
       setIsInsightsOpen(false);
       const { actionKind } = insight;
       if (!actionKind) return;

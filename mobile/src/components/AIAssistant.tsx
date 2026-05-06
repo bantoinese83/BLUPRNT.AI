@@ -27,6 +27,7 @@ import {
 } from "@shared/lib/chat-project-actions";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 
 const MAX_SUGGESTED_ACTIONS = 4;
 
@@ -127,7 +128,7 @@ export function AIAssistant({ projectId }: Props) {
       const { data, error } = await invokeFunction<{
         reply?: string;
         actions?: unknown;
-      }>("chat-with-project", {
+      }>(EDGE_FUNCTIONS.CHAT_WITH_PROJECT, {
         body: { query: msg, projectId },
       });
 

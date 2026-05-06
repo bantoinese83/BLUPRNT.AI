@@ -9,6 +9,7 @@ import {
 } from "@/lib/onboarding-helpers";
 import type { PhotoToScopeResult } from "@/types/estimate";
 import type { ProjectTypeOption } from "@/types/onboarding";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 export function useOnboardingEstimation(params: {
   projectType: ProjectTypeOption | null;
@@ -32,6 +33,9 @@ export function useOnboardingEstimation(params: {
     market_bulletin: string;
     value_tips: string[];
   } | null>(null);
+  const [onboardingContextError, setOnboardingContextError] = useState<
+    string | null
+  >(null);
 
   const runPhotoToScope = useCallback(
     async (opts?: { textOnly?: boolean; maxRetries?: number }) => {
@@ -89,7 +93,7 @@ export function useOnboardingEstimation(params: {
         let error: unknown = null;
         for (let attempt = 0; attempt <= retries; attempt++) {
           const result = await invokeFunction<PhotoToScopeResult>(
-            "photo-to-scope",
+            EDGE_FUNCTIONS.PHOTO_TO_SCOPE,
             {
               body: formData,
             },
@@ -135,23 +139,32 @@ export function useOnboardingEstimation(params: {
   );
 
   const fetchOnboardingContext = useCallback(async () => {
+    setOnboardingContextError(null);
     try {
       const { data, error } = await invokeFunction<{
         status_messages: string[];
         market_bulletin: string;
         value_tips: string[];
-      }>("get-onboarding-context", {
+      }>(EDGE_FUNCTIONS.GET_ONBOARDING_CONTEXT, {
         body: {
           projectType: params.projectType,
           zipCode: params.zipFromLocation(),
         },
       });
 
-      if (!error && data) {
-        setOnboardingContext(data);
+      if (error) {
+        const msg =
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: string }).message)
+            : "Couldn't load status tips.";
+        setOnboardingContextError(msg);
+        return;
       }
+      if (data) setOnboardingContext(data);
     } catch (err) {
-      console.warn("[OnboardingEstimation] Failed to fetch context:", err);
+      setOnboardingContextError(
+        err instanceof Error ? err.message : "Couldn't load status tips.",
+      );
     }
   }, [params]);
 
@@ -162,6 +175,7 @@ export function useOnboardingEstimation(params: {
     setEstimateError,
     estimateLoading,
     onboardingContext,
+    onboardingContextError,
     runPhotoToScope,
     fetchOnboardingContext,
   };

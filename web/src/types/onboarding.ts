@@ -34,6 +34,7 @@ export type OnboardingContextValue = {
     market_bulletin: string;
     value_tips: string[];
   } | null;
+  onboardingContextError: string | null;
   fetchOnboardingContext: () => Promise<void>;
   runPhotoToScope: (opts?: {
     textOnly?: boolean;

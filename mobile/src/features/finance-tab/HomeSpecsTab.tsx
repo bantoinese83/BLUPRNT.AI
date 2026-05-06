@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 import {
   Paintbrush,
@@ -42,29 +43,49 @@ const CATEGORIES = [
 export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
   const [assets, setAssets] = useState<PhysicalAssetRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const { confirm } = useConfirmation();
 
-  const fetchAssets = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("physical_assets")
-        .select("*")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false });
+  const fetchAssets = useCallback(
+    async (opts?: { showFullPageLoader?: boolean }) => {
+      const showFull = opts?.showFullPageLoader ?? true;
+      setFetchError(null);
+      if (showFull) setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("physical_assets")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setAssets(data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
+        if (error) throw error;
+        setAssets(data || []);
+      } catch (err) {
+        const msg =
+          err instanceof Error ? err.message : "Couldn't load home specs.";
+        setFetchError(msg);
+        console.error(err);
+      } finally {
+        if (showFull) setLoading(false);
+      }
+    },
+    [projectId],
+  );
 
   useEffect(() => {
-    fetchAssets();
+    void fetchAssets({ showFullPageLoader: true });
+  }, [fetchAssets]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchAssets({ showFullPageLoader: false });
+    } finally {
+      setRefreshing(false);
+    }
   }, [fetchAssets]);
 
   useEffect(() => {
@@ -182,6 +203,19 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
 
   return (
     <View style={styles.container}>
+      {fetchError ? (
+        <View style={styles.errorBanner} accessibilityRole="alert">
+          <Text style={styles.errorText}>{fetchError}</Text>
+          <TouchableOpacity
+            onPress={() => void fetchAssets({ showFullPageLoader: false })}
+            style={styles.retryBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Retry loading home specs"
+          >
+            <Text style={styles.retryBtnText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
       <View style={styles.filterBar}>
         <FlatList
           horizontal
@@ -198,6 +232,9 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
         keyExtractor={keyExtractor}
         renderItem={renderAsset}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyTitle}>No specs recorded</Text>
@@ -457,5 +494,33 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.muted,
     textAlign: "center",
     lineHeight: 20,
+  },
+  errorBanner: {
+    marginHorizontal: 24,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: "rgba(239,68,68,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(239,68,68,0.35)",
+    gap: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Theme.colors.status.error,
+    textAlign: "center",
+  },
+  retryBtn: {
+    alignSelf: "center",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: Theme.colors.text.primary,
+  },
+  retryBtnText: {
+    color: Theme.colors.card,
+    fontSize: 13,
+    fontWeight: "800",
   },
 });

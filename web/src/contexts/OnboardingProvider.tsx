@@ -59,6 +59,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setEstimateError,
     estimateLoading,
     onboardingContext,
+    onboardingContextError,
     runPhotoToScope,
     fetchOnboardingContext,
   } = useOnboardingEstimation(estimationParams);
@@ -73,13 +74,24 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     persistProjectAfterSignup: hookPersistSignup,
   } = useOnboardingAuthPersistence(setSavedProjectId);
 
-  useOnboardingSync({
-    setProjectType,
-    setLocationInput,
-    setStage,
-    setScopeDescription,
-    setEstimate,
-  });
+  const onboardingSyncParams = useMemo(
+    () => ({
+      setProjectType,
+      setLocationInput,
+      setStage,
+      setScopeDescription,
+      setEstimate,
+    }),
+    [
+      setProjectType,
+      setLocationInput,
+      setStage,
+      setScopeDescription,
+      setEstimate,
+    ],
+  );
+
+  useOnboardingSync(onboardingSyncParams);
 
   const persistProject = useCallback(() => {
     return hookPersistProject({
@@ -192,6 +204,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       estimateError,
       estimateLoading,
       onboardingContext,
+      onboardingContextError,
       fetchOnboardingContext,
       runPhotoToScope,
       persistProject,
@@ -219,6 +232,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       estimateError,
       estimateLoading,
       onboardingContext,
+      onboardingContextError,
       fetchOnboardingContext,
       runPhotoToScope,
       persistProject,

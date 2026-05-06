@@ -226,6 +226,8 @@ export type Database = {
           vendor_contact_info: Json | null;
           vendor_name: string | null;
           warranty_expiry_date: string | null;
+          insurance_renewal_date: string | null;
+          permit_expiration_date: string | null;
           warranty_notified_at: string | null;
         };
         Insert: {
@@ -249,6 +251,8 @@ export type Database = {
           vendor_contact_info?: Json | null;
           vendor_name?: string | null;
           warranty_expiry_date?: string | null;
+          insurance_renewal_date?: string | null;
+          permit_expiration_date?: string | null;
           warranty_notified_at?: string | null;
         };
         Update: {
@@ -272,6 +276,8 @@ export type Database = {
           vendor_contact_info?: Json | null;
           vendor_name?: string | null;
           warranty_expiry_date?: string | null;
+          insurance_renewal_date?: string | null;
+          permit_expiration_date?: string | null;
           warranty_notified_at?: string | null;
         };
         Relationships: [

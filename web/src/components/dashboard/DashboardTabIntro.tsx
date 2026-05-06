@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClipboardList, Hammer, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LEDGER_UPLOAD_ANCHOR_ID } from "@shared/constants/ui";
 
 const TAB_CONFIG = {
   "/dashboard/plan": {
@@ -71,7 +72,7 @@ export function DashboardTabIntro() {
           onClick={() => {
             if ("scrollToUpload" in cfg && cfg.scrollToUpload) {
               document
-                .getElementById("document-upload-anchor")
+                .getElementById(LEDGER_UPLOAD_ANCHOR_ID)
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
               return;
             }

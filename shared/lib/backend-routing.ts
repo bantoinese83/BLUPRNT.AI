@@ -14,6 +14,12 @@ export const EDGE_FUNCTIONS = {
   GET_ONBOARDING_CONTEXT: "get-onboarding-context",
   GET_ONBOARDING_SYNC_PAYLOAD: "get-onboarding-sync-payload",
   SUBMIT_LEAD: "submit-marketing-lead",
+  PHOTO_TO_SCOPE: "photo-to-scope",
+  UPLOAD_GALLERY_PHOTO: "upload-gallery-photo",
+  GET_DOCUMENT_SIGNED_URL: "get-document-signed-url",
+  CREATE_CHECKOUT: "create-checkout",
+  GENERATE_DATA_EXPORT: "generate-data-export",
+  SEND_EMAIL: "send-email",
 } as const;
 
 export const API_VERSIONS = {

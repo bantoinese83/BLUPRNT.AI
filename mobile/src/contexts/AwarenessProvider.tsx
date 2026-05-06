@@ -119,7 +119,8 @@ export function AwarenessProvider({
       ledgerEntries.length === 0
     ) {
       newInsights.push({
-        id: "no-invoices",
+        id: "no-ledger-entries",
+        legacyId: "no-invoices",
         type: "tip",
         title: "Track your spending",
         description:

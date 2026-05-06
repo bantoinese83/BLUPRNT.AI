@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 
 import type { GalleryItemRow } from "@shared/types/database";
 import { useTransformationVaultLogic } from "@shared/hooks/use-transformation-vault";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 type GalleryItem = GalleryItemRow;
 
@@ -233,7 +234,7 @@ export function TransformationVault({
       fd.set("type", type);
 
       const { error: fnErr } = await invokeFunction<{ storagePath: string }>(
-        "upload-gallery-photo",
+        EDGE_FUNCTIONS.UPLOAD_GALLERY_PHOTO,
         { body: fd },
       );
 

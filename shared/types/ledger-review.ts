@@ -25,8 +25,12 @@ export type LedgerReviewDocument = {
   document_id?: string | null;
   document_type?: string | null;
   warranty_expiry_date?: string | null;
+  insurance_renewal_date?: string | null;
+  permit_expiration_date?: string | null;
   ai_summary?: string | null;
   is_verified?: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export type LedgerReviewSnapshot = {

@@ -1,4 +1,5 @@
-import { supabase } from "./supabase";
+import { invokeFunction } from "./supabase";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 export interface SendEmailParams {
   to: string | string[];
@@ -8,7 +9,7 @@ export interface SendEmailParams {
 
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
   try {
-    const { data, error } = await supabase.functions.invoke("send-email", {
+    const { data, error } = await invokeFunction(EDGE_FUNCTIONS.SEND_EMAIL, {
       body: { to, subject, html },
     });
 

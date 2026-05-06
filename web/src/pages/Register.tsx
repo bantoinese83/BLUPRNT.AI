@@ -293,7 +293,7 @@ export default function Register() {
               onClick={() => navigate(loginHref)}
             >
               <LogIn className="w-5 h-5 shrink-0" aria-hidden />
-              Sign in to account
+              Sign in
             </Button>
           </div>
         </div>

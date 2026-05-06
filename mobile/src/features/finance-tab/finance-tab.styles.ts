@@ -190,15 +190,15 @@ export const financeTabStyles = StyleSheet.create({
   listContainer: {
     gap: 12,
   },
-  invoiceCard: {
+  ledgerCard: {
     padding: 12,
   },
-  invoiceMain: {
+  ledgerMain: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-  invoiceIcon: {
+  ledgerIcon: {
     width: 36,
     height: 36,
     borderRadius: 10,
@@ -206,7 +206,7 @@ export const financeTabStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  invoiceText: {
+  ledgerText: {
     flex: 1,
     gap: 2,
   },
@@ -216,12 +216,12 @@ export const financeTabStyles = StyleSheet.create({
     color: Theme.colors.text.primary,
     letterSpacing: -0.2,
   },
-  invoiceDate: {
+  ledgerDate: {
     fontSize: 11,
     fontFamily: Theme.typography.family.regular,
     color: Theme.colors.text.secondary,
   },
-  invoiceAmount: {
+  ledgerAmount: {
     fontSize: 15,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,

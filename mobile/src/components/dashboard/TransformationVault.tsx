@@ -21,6 +21,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { PhotoSlot } from "./PhotoSlot";
 import { useTransformationVaultLogic } from "@shared/hooks/use-transformation-vault";
 import { UI_CONSTANTS } from "@shared/constants/ui";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -136,9 +137,10 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
-      const { error: fnErr } = await invokeFunction("upload-gallery-photo", {
-        body: formData,
-      });
+      const { error: fnErr } = await invokeFunction(
+        EDGE_FUNCTIONS.UPLOAD_GALLERY_PHOTO,
+        { body: formData },
+      );
 
       if (fnErr) throw fnErr;
       void refreshDashboard();

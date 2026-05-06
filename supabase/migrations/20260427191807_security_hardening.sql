@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.get_system_config(config_key TEXT)
 RETURNS TEXT AS $$
 BEGIN
   IF config_key = 'edge_functions_base_url' THEN
-    RETURN 'http://supabase_functions_blueprintai-v3:9000';
+    RETURN 'https://elucgaegaihkklnfoasm.supabase.co/functions/v1';
   END IF;
   RETURN NULL;
 END;

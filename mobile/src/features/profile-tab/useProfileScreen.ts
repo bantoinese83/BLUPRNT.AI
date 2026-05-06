@@ -18,6 +18,7 @@ import {
   getProductAnalyticsConsent,
   setProductAnalyticsConsent,
 } from "@/lib/product-analytics";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 
 import type { UseProfileScreenResult } from "./profile-screen.types";
 
@@ -202,9 +203,10 @@ export function useProfileScreen(): UseProfileScreenResult {
           variant: "destructive",
           onConfirm: async () => {
             try {
-              const { error } = await invokeFunction("delete-account", {
-                method: "POST",
-              });
+              const { error } = await invokeFunction(
+                EDGE_FUNCTIONS.DELETE_ACCOUNT,
+                { method: "POST" },
+              );
               if (error) throw error;
               await signOut();
             } catch (err: unknown) {

@@ -35,8 +35,8 @@ export function HomeTeamSection({
         </View>
         <Text style={styles.emptyTitle}>Building your Team</Text>
         <Text style={styles.emptyText}>
-          As you upload invoices, we’ll automatically build a directory of your
-          contractors.
+          As you add ledger entries, we’ll automatically build a directory of
+          your contractors.
         </Text>
       </View>
     );

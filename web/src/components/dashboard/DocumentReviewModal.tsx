@@ -20,6 +20,7 @@ import { DocumentReviewStatus } from "./document-review/DocumentReviewStatus";
 import { DocumentReviewTotal } from "./document-review/DocumentReviewTotal";
 import { DocumentReviewActions } from "./document-review/DocumentReviewActions";
 import { DeleteConfirmationModal } from "./document-review/DeleteConfirmationModal";
+import { AuditTrailRow } from "./document-review/AuditTrailRow";
 
 import { useDocumentReviewDetail } from "@/hooks/useDocumentReviewDetail";
 
@@ -47,8 +48,8 @@ export function DocumentReviewModal({
     deleting,
     ledgerDocType,
     setLedgerDocType,
-    warrantyExpiryDate,
-    setWarrantyExpiryDate,
+    reviewDates,
+    setReviewDateField,
     vendorName,
     setVendorName,
     aiSummary,
@@ -160,9 +161,19 @@ export function DocumentReviewModal({
                     Review and Verify
                   </p>
                   <p className="text-xs text-amber-800 leading-relaxed">
-                    This data was extracted by AI. Please confirm the vendor,
-                    amounts, and line links before verifying. Once saved, this
-                    becomes a verified record in your ledger.
+                    {showCapitalLineLink ? (
+                      <>
+                        This data was extracted by AI. Please confirm the
+                        vendor, totals, and line links before verifying. Once
+                        saved, this becomes a verified record in your ledger.
+                      </>
+                    ) : (
+                      <>
+                        This data was extracted by AI. Please confirm the issuer
+                        name, document type, and summary before verifying. Once
+                        saved, this becomes a verified record in your ledger.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -198,8 +209,8 @@ export function DocumentReviewModal({
                 <MetadataSection
                   ledgerDocType={ledgerDocType}
                   onDocTypeChange={setLedgerDocType}
-                  warrantyExpiryDate={warrantyExpiryDate}
-                  onWarrantyDateChange={setWarrantyExpiryDate}
+                  reviewDates={reviewDates}
+                  onReviewDateChange={setReviewDateField}
                   vendorName={vendorName}
                   onVendorNameChange={setVendorName}
                   aiSummary={aiSummary}
@@ -207,6 +218,11 @@ export function DocumentReviewModal({
                   totalValue={totalValue}
                   onTotalValueChange={setTotalValue}
                   vendorLabel={theme.label}
+                />
+                <AuditTrailRow
+                  isVerified={document.is_verified}
+                  createdAt={document.created_at}
+                  updatedAt={document.updated_at}
                 />
               </div>
             </div>

@@ -8,6 +8,7 @@ import {
   type StageOption,
 } from "@shared/lib/onboarding-helpers";
 import { sharedSaveOnboardingProject } from "@shared/lib/onboarding-logic";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 import type {
   OnboardingPhotoToScopeResult,
   OnboardingScopeItem,
@@ -90,9 +91,11 @@ export async function saveOnboardingProject(params: {
       } as unknown as string);
     });
 
-    invokeFunction("photo-to-scope", { body: fd }).catch((err: unknown) => {
-      reportClientError("onboarding_photo_to_scope_background", err);
-    });
+    invokeFunction(EDGE_FUNCTIONS.PHOTO_TO_SCOPE, { body: fd }).catch(
+      (err: unknown) => {
+        reportClientError("onboarding_photo_to_scope_background", err);
+      },
+    );
   }
 
   return projectId;

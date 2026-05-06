@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   coerceLedgerDocumentType,
   type LedgerDocumentType,
 } from "../lib/infer-document-type.ts";
+import {
+  effectiveLedgerEntryTotalForSave,
+  type LedgerReviewDateFieldKey,
+} from "../lib/document-review-form-config.ts";
 import {
   type LineItem,
   type LedgerReviewDocument,
@@ -44,6 +48,8 @@ export function useDocumentReviewShared(
   const [ledgerDocType, setLedgerDocType] =
     useState<LedgerDocumentType>("invoice");
   const [warrantyExpiryDate, setWarrantyExpiryDate] = useState<string>("");
+  const [insuranceRenewalDate, setInsuranceRenewalDate] = useState<string>("");
+  const [permitExpirationDate, setPermitExpirationDate] = useState<string>("");
   const [vendorName, setVendorName] = useState<string>("");
   const [aiSummary, setAiSummary] = useState<string>("");
   const [totalValue, setTotalValue] = useState<string>("");
@@ -103,6 +109,18 @@ export function useDocumentReviewShared(
             if (prevDate !== (prevDoc?.warranty_expiry_date || ""))
               return prevDate;
             return merged.warranty_expiry_date || "";
+          });
+
+          setInsuranceRenewalDate((prevDate) => {
+            if (prevDate !== (prevDoc?.insurance_renewal_date || ""))
+              return prevDate;
+            return merged.insurance_renewal_date || "";
+          });
+
+          setPermitExpirationDate((prevDate) => {
+            if (prevDate !== (prevDoc?.permit_expiration_date || ""))
+              return prevDate;
+            return merged.permit_expiration_date || "";
           });
 
           setVendorName((prevVendor) => {
@@ -215,11 +233,23 @@ export function useDocumentReviewShared(
 
       const prevType = coerceLedgerDocumentType(document.document_type);
       const typeChanged = ledgerDocType !== prevType;
+      const nextWarranty =
+        ledgerDocType === "warranty" ? warrantyExpiryDate || null : null;
+      const nextInsurance =
+        ledgerDocType === "insurance" ? insuranceRenewalDate || null : null;
+      const nextPermit =
+        ledgerDocType === "permit" ? permitExpirationDate || null : null;
       const dateChanged =
-        warrantyExpiryDate !== (document.warranty_expiry_date || "");
+        nextWarranty !== (document.warranty_expiry_date ?? null) ||
+        nextInsurance !== (document.insurance_renewal_date ?? null) ||
+        nextPermit !== (document.permit_expiration_date ?? null);
       const vendorChanged = vendorName !== (document.vendor_name || "");
       const summaryChanged = aiSummary !== (document.ai_summary || "");
-      const totalChanged = parseFloat(totalValue) !== (document.total ?? 0);
+      const nextTotal = effectiveLedgerEntryTotalForSave(
+        ledgerDocType,
+        totalValue,
+      );
+      const totalChanged = nextTotal !== (document.total ?? 0);
       const needsVerification = document.is_verified === false;
 
       if (
@@ -234,10 +264,12 @@ export function useDocumentReviewShared(
           .from("ledger_entries")
           .update({
             document_type: ledgerDocType,
-            warranty_expiry_date: warrantyExpiryDate || null,
+            warranty_expiry_date: nextWarranty,
+            insurance_renewal_date: nextInsurance,
+            permit_expiration_date: nextPermit,
             vendor_name: vendorName || null,
             ai_summary: aiSummary || null,
-            total: parseFloat(totalValue) || 0,
+            total: nextTotal,
             is_verified: true,
           })
           .eq("id", document.id);
@@ -257,8 +289,11 @@ export function useDocumentReviewShared(
           ? {
               ...prev,
               document_type: ledgerDocType,
+              warranty_expiry_date: nextWarranty,
+              insurance_renewal_date: nextInsurance,
+              permit_expiration_date: nextPermit,
               ai_summary: aiSummary,
-              total: parseFloat(totalValue) || 0,
+              total: nextTotal,
               is_verified: true,
             }
           : prev,
@@ -284,6 +319,8 @@ export function useDocumentReviewShared(
     mappings,
     ledgerDocType,
     warrantyExpiryDate,
+    insuranceRenewalDate,
+    permitExpirationDate,
     vendorName,
     aiSummary,
     totalValue,
@@ -321,6 +358,32 @@ export function useDocumentReviewShared(
     }
   }, [document, adapter]);
 
+  const reviewDates: Record<LedgerReviewDateFieldKey, string> = useMemo(
+    () => ({
+      warranty_expiry_date: warrantyExpiryDate,
+      insurance_renewal_date: insuranceRenewalDate,
+      permit_expiration_date: permitExpirationDate,
+    }),
+    [warrantyExpiryDate, insuranceRenewalDate, permitExpirationDate],
+  );
+
+  const setReviewDateField = useCallback(
+    (key: LedgerReviewDateFieldKey, value: string) => {
+      switch (key) {
+        case "warranty_expiry_date":
+          setWarrantyExpiryDate(value);
+          break;
+        case "insurance_renewal_date":
+          setInsuranceRenewalDate(value);
+          break;
+        case "permit_expiration_date":
+          setPermitExpirationDate(value);
+          break;
+      }
+    },
+    [],
+  );
+
   return {
     loading,
     error,
@@ -332,8 +395,8 @@ export function useDocumentReviewShared(
     deleting,
     ledgerDocType,
     setLedgerDocType,
-    warrantyExpiryDate,
-    setWarrantyExpiryDate,
+    reviewDates,
+    setReviewDateField,
     vendorName,
     setVendorName,
     aiSummary,

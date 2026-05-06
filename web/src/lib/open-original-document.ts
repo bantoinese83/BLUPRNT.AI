@@ -4,6 +4,7 @@ import {
   ledgerOriginalMessages,
   messageForLedgerOriginalApiError,
 } from "@shared/lib/ledger-original-messages";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 type SignedUrlResponse = {
   signedUrl?: string;
@@ -20,7 +21,7 @@ export async function fetchLedgerEntryOriginalSignedUrl(
   options?: { width?: number; height?: number; resize?: string },
 ): Promise<LedgerEntryOriginalFetchResult> {
   const { data, error } = await invokeFunction<SignedUrlResponse>(
-    "get-document-signed-url",
+    EDGE_FUNCTIONS.GET_DOCUMENT_SIGNED_URL,
     { body: { ledger_entry_id: ledgerEntryId, ...options } },
   );
 

@@ -15,7 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/lib/supabase";
+import { invokeFunction } from "@/lib/supabase";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 interface LeadCaptureModalProps {
   onPlanSelect?: (plan: "architect" | "pass") => void;
@@ -61,15 +62,12 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
     setLoading(true);
     setSubmitError(null);
     try {
-      const { error } = await supabase.functions.invoke(
-        "submit-marketing-lead",
-        {
-          body: {
-            email: email.trim().toLowerCase(),
-            source: "exit_intent_modal",
-          },
+      const { error } = await invokeFunction(EDGE_FUNCTIONS.SUBMIT_LEAD, {
+        body: {
+          email: email.trim().toLowerCase(),
+          source: "exit_intent_modal",
         },
-      );
+      });
       if (error) {
         console.error("submit-marketing-lead:", error);
         setSubmitError(

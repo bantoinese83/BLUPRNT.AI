@@ -16,6 +16,7 @@ import {
   createSupabaseClient,
   invokeSharedFunction,
 } from "@shared/lib/supabase-client";
+import type { EdgeFunctionName } from "@shared/lib/backend-routing";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -49,7 +50,7 @@ function devWarn(...args: unknown[]) {
  * Use this instead of supabase.functions.invoke() to avoid 'Invalid JWT' errors.
  */
 export async function invokeFunction<T = unknown>(
-  name: string,
+  name: EdgeFunctionName | (string & {}),
   options?: {
     body?:
       | string

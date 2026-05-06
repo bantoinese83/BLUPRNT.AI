@@ -138,6 +138,8 @@ export const handler = async (req: Request) => {
           ai_summary: inv.ai_summary,
           is_verified: inv.is_verified,
           warranty_expiry_date: inv.warranty_expiry_date,
+          insurance_renewal_date: inv.insurance_renewal_date,
+          permit_expiration_date: inv.permit_expiration_date,
         },
         line_items: (lines ?? []).map((l) => ({
           id: l.id,

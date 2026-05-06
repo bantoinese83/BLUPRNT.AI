@@ -99,16 +99,16 @@ export function FinanceLedgerEntryRow({
           friction={2}
           rightThreshold={40}
         >
-          <GlassCard intensity={8} style={styles.invoiceCard}>
+          <GlassCard intensity={8} style={styles.ledgerCard}>
             <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
-              <View style={styles.invoiceMain}>
+              <View style={styles.ledgerMain}>
                 <DocumentThumbnail
                   ledgerEntryId={inv.id}
                   size={44}
                   fileType={inv.document_type}
                   style={{ marginRight: 12 }}
                 />
-                <View style={styles.invoiceText}>
+                <View style={styles.ledgerText}>
                   <Text
                     style={styles.vendorName}
                     numberOfLines={2}
@@ -148,7 +148,7 @@ export function FinanceLedgerEntryRow({
                       gap: 6,
                     }}
                   >
-                    <Text style={styles.invoiceDate}>
+                    <Text style={styles.ledgerDate}>
                       {new Date(inv.created_at).toLocaleDateString()} •{" "}
                       {ledgerDocumentTypeLabel(inv.document_type ?? "invoice")}
                     </Text>
@@ -233,7 +233,7 @@ export function FinanceLedgerEntryRow({
                 ) : inv.total != null &&
                   inv.total > 0 &&
                   inv.vendor_name !== "Processing..." ? (
-                  <Text style={styles.invoiceAmount}>{money(inv.total)}</Text>
+                  <Text style={styles.ledgerAmount}>{money(inv.total)}</Text>
                 ) : (
                   <MotiView
                     from={{ opacity: 0.5, scale: 0.95 }}

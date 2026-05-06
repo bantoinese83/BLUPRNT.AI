@@ -14,7 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Theme } from "@/constants/Theme";
 import { BlurView } from "expo-blur";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -75,31 +75,28 @@ export function BottomSheet({
       animationType="none"
       onRequestClose={onClose}
     >
-      {/* Nested provider so bottom insets apply inside transparent Modal (see react-native-safe-area-context docs). */}
-      <SafeAreaProvider>
-        <View style={styles.container}>
-          <TouchableWithoutFeedback onPress={onClose}>
-            <Animated.View style={[styles.backdrop, backdropStyle]}>
-              <BlurView
-                intensity={20}
-                style={StyleSheet.absoluteFill}
-                tint="dark"
-              />
-            </Animated.View>
-          </TouchableWithoutFeedback>
-
-          <Animated.View
-            style={[styles.sheet, { height: sheetHeight }, animatedStyle]}
-          >
-            <View style={styles.handleContainer}>
-              <View style={styles.handle} />
-            </View>
-            <SafeAreaView style={styles.sheetBody} edges={["bottom"]}>
-              {children}
-            </SafeAreaView>
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <Animated.View style={[styles.backdrop, backdropStyle]}>
+            <BlurView
+              intensity={20}
+              style={StyleSheet.absoluteFill}
+              tint="dark"
+            />
           </Animated.View>
-        </View>
-      </SafeAreaProvider>
+        </TouchableWithoutFeedback>
+
+        <Animated.View
+          style={[styles.sheet, { height: sheetHeight }, animatedStyle]}
+        >
+          <View style={styles.handleContainer}>
+            <View style={styles.handle} />
+          </View>
+          <SafeAreaView style={styles.sheetBody} edges={["bottom"]}>
+            {children}
+          </SafeAreaView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 }

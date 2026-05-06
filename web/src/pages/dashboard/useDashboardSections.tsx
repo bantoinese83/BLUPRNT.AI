@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { PropertyLedger } from "@/components/dashboard/PropertyLedger";
 import { DocumentsSection } from "@/components/dashboard/DocumentsSection";
@@ -7,6 +7,7 @@ import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { HomeSpecsVault } from "@/components/dashboard/HomeSpecsVault";
 import { ProjectHealth } from "@/components/dashboard/ProjectHealth";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { UpcomingRenewalsCard } from "@/components/dashboard/UpcomingRenewalsCard";
 import type { UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
 import type {
   ProjectRow,
@@ -31,6 +32,17 @@ type UseDashboardSectionsProps = {
   load: (overrideId?: string) => Promise<void>;
   setShowUpgrade: (val: boolean) => void;
   setUpgradeReason: (reason: UpgradeOpenReason) => void;
+};
+
+type UseDashboardSectionsResult = {
+  stats: ReactNode;
+  health: ReactNode;
+  transformationVault: ReactNode;
+  homeSpecsVault: ReactNode;
+  homeTeam: ReactNode;
+  ledger: ReactNode;
+  documentsComp: ReactNode;
+  upcomingRenewals: ReactNode;
 };
 
 export function useDashboardSections({
@@ -176,7 +188,20 @@ export function useDashboardSections({
     ],
   );
 
-  return {
+  const upcomingRenewals = useMemo(
+    () => (
+      <UpcomingRenewalsCard
+        projectId={project.id}
+        ledgerEntries={ledgerEntries}
+        onChanged={() => {
+          void load();
+        }}
+      />
+    ),
+    [project.id, ledgerEntries, load],
+  );
+
+  const result: UseDashboardSectionsResult = {
     stats,
     health,
     transformationVault,
@@ -184,5 +209,7 @@ export function useDashboardSections({
     homeTeam,
     ledger,
     documentsComp,
+    upcomingRenewals,
   };
+  return result;
 }

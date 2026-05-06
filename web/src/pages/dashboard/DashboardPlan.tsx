@@ -31,6 +31,7 @@ interface DashboardPlanProps {
   homeSpecsVault: React.ReactNode;
   ledger: React.ReactNode;
   documentsComp: React.ReactNode;
+  upcomingRenewals?: React.ReactNode;
   onUpgradeClick: () => void;
 }
 
@@ -48,6 +49,7 @@ export function DashboardPlan({
   homeSpecsVault,
   ledger,
   documentsComp,
+  upcomingRenewals,
   onUpgradeClick,
 }: DashboardPlanProps) {
   const navigate = useNavigate();
@@ -60,6 +62,7 @@ export function DashboardPlan({
           {transformationVault}
           {homeSpecsVault}
           {health}
+          {upcomingRenewals}
           <GroundingSourcesSection project={project} />
           {homeTeam}
           {location.pathname.endsWith("/plan") && (

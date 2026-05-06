@@ -65,21 +65,21 @@ export function LedgerListView({
   );
 
   const renderItem = ({
-    item: inv,
+    item: entry,
     index,
   }: {
     item: LedgerEntryRow;
     index: number;
   }) => (
     <FinanceLedgerEntryRow
-      inv={inv}
+      inv={entry}
       index={index}
       isArchitect={isArchitect}
       hasProjectPass={hasProjectPass}
-      isDeleting={deletingId === inv.id}
+      isDeleting={deletingId === entry.id}
       onUpgradeClick={onUpgradeClick}
-      onPress={() => onEntryPress(inv)}
-      onViewOriginal={() => onViewOriginal(inv.id)}
+      onPress={() => onEntryPress(entry)}
+      onViewOriginal={() => onViewOriginal(entry.id)}
       onDelete={onDelete}
     />
   );

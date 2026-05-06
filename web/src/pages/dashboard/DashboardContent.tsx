@@ -117,6 +117,7 @@ export function DashboardContent({
     homeTeam,
     ledger,
     documentsComp,
+    upcomingRenewals,
   } = useDashboardSections({
     project,
     projects,
@@ -309,6 +310,7 @@ export function DashboardContent({
                     homeSpecsVault={homeSpecsVault}
                     ledger={ledger}
                     documentsComp={documentsComp}
+                    upcomingRenewals={upcomingRenewals}
                     onUpgradeClick={() => setShowUpgrade(true)}
                   />
                 }

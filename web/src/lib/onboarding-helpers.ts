@@ -8,6 +8,7 @@ import {
 } from "@shared/lib/onboarding-helpers";
 import { sharedSaveOnboardingProject } from "@shared/lib/onboarding-logic";
 import type { OnboardingPhotoToScopeResult } from "@shared/types/onboarding";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 /**
  * Persists an onboarding project to Supabase and triggers vision analysis if photos exist.
@@ -55,9 +56,11 @@ export async function saveOnboardingProject(params: {
     photos.forEach((f) => fd.append("photos[]", f));
 
     // Fire-and-forget background re-estimate with photos
-    invokeFunction("photo-to-scope", { body: fd }).catch((err: unknown) => {
-      reportClientError("onboarding_photo_to_scope_background", err);
-    });
+    invokeFunction(EDGE_FUNCTIONS.PHOTO_TO_SCOPE, { body: fd }).catch(
+      (err: unknown) => {
+        reportClientError("onboarding_photo_to_scope_background", err);
+      },
+    );
   }
 
   return projectId;

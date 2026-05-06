@@ -1,6 +1,7 @@
 import { invokeFunction } from "@/lib/supabase";
 import type { LedgerEntryRow } from "@shared/types/database";
 import { uint8ToBase64 } from "@shared/lib/uint8-to-base64";
+import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
 export type SellerPacketAppendixItem =
   | {
@@ -73,7 +74,7 @@ export async function buildSellerPacketAppendixItems(
       const title = appendixTitle(inv);
       try {
         const { data, error } = await invokeFunction<SignedUrlResponse>(
-          "get-document-signed-url",
+          EDGE_FUNCTIONS.GET_DOCUMENT_SIGNED_URL,
           { body: { ledger_entry_id: inv.id } },
         );
 
