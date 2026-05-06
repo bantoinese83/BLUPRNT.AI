@@ -112,6 +112,169 @@ describe("dashboard-snapshot-core", () => {
       expect(result.isArchitect).toBe(true);
     });
 
+    it("synthesizes line items when an entry has a total but no line items", async () => {
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
+          then: (callback: (v: unknown) => unknown) =>
+            Promise.resolve({ data: [], error: null }).then(callback),
+        }),
+      } as unknown as SupabaseClient;
+
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        const chain = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
+          then: (callback: (v: unknown) => unknown) => {
+            let data: unknown[] = [];
+            if (table === "scope_items") data = [];
+            if (table === "ledger_entries") {
+              data = [
+                {
+                  id: "flat-1",
+                  vendor_name: "",
+                  total: 199,
+                  ledger_line_items: [],
+                  ai_summary: "From OCR",
+                  is_verified: true,
+                },
+              ];
+            }
+            if (table === "project_gallery") data = [];
+            return Promise.resolve({ data, error: null }).then(callback);
+          },
+        };
+        return chain as never;
+      });
+
+      const result = await buildDashboardDataForProject(mockSupabase, {
+        userId: "u1",
+        projectId: "p1",
+        allProjects: [{ id: "p1", name: "Project 1" } as never],
+        partialMessageVariant: "web",
+      });
+
+      expect(result.spendByCategory.Uncategorized).toBe(199);
+    });
+
+    it("uses Document Total label when synthesis has no vendor or summary", async () => {
+      const mockSupabase = {
+        from: vi.fn(),
+      } as unknown as SupabaseClient;
+
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        const chain = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
+          then: (callback: (v: unknown) => unknown) => {
+            let data: unknown[] = [];
+            if (table === "scope_items") data = [];
+            if (table === "ledger_entries") {
+              data = [
+                {
+                  id: "flat-2",
+                  vendor_name: "",
+                  total: 10,
+                  ledger_line_items: [],
+                  ai_summary: null,
+                  is_verified: false,
+                },
+              ];
+            }
+            if (table === "project_gallery") data = [];
+            return Promise.resolve({ data, error: null }).then(callback);
+          },
+        };
+        return chain as never;
+      });
+
+      const result = await buildDashboardDataForProject(mockSupabase, {
+        userId: "u1",
+        projectId: "p1",
+        allProjects: [{ id: "p1", name: "P" } as never],
+        partialMessageVariant: "web",
+      });
+
+      expect(result.spendByCategory.Uncategorized).toBe(10);
+    });
+
+    it("uses ledger line items when present instead of total fallback", async () => {
+      const mockSupabase = {
+        from: vi.fn(),
+      } as unknown as SupabaseClient;
+
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        const chain = {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockImplementation(() => {
+            if (table === "user_subscriptions") {
+              return Promise.resolve({
+                data: {
+                  status: "active",
+                  revenuecat_entitlement_active: false,
+                },
+                error: null,
+              });
+            }
+            return Promise.resolve({ data: null, error: null });
+          }),
+          then: (callback: (v: unknown) => unknown) => {
+            let data: unknown[] = [];
+            if (table === "scope_items") {
+              data = [{ id: "s1", category: "Plumbing" }];
+            }
+            if (table === "ledger_entries") {
+              data = [
+                {
+                  id: "inv-lined",
+                  vendor_name: "Pipe Co",
+                  total: 999,
+                  ledger_line_items: [
+                    {
+                      ledger_entry_id: "inv-lined",
+                      category: null,
+                      line_total: 42,
+                      scope_item_id: "s1",
+                    },
+                  ],
+                  is_verified: true,
+                },
+              ];
+            }
+            if (table === "project_gallery") data = [];
+            return Promise.resolve({ data, error: null }).then(callback);
+          },
+        };
+        return chain as never;
+      });
+
+      const result = await buildDashboardDataForProject(mockSupabase, {
+        userId: "u1",
+        projectId: "p1",
+        allProjects: [{ id: "p1", name: "Project 1" } as never],
+        partialMessageVariant: "web",
+      });
+
+      expect(result.spendByCategory.Plumbing).toBe(42);
+    });
+
     it("handles partial load errors correctly", async () => {
       const mockSupabase = {
         from: vi.fn().mockReturnValue({
@@ -177,6 +340,21 @@ describe("dashboard-snapshot-core", () => {
         m.fetchDashboardProjectsList(mockSupabase, "u1"),
       );
       expect(res.error?.message).toBe("Fail");
+    });
+
+    it("returns empty rows when projects response has no data", async () => {
+      const mockSupabase = {
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({ data: null, error: null }),
+        }),
+      } as unknown as SupabaseClient;
+
+      const res = await import("./dashboard-snapshot-core").then((m) =>
+        m.fetchDashboardProjectsList(mockSupabase, "u1"),
+      );
+      expect(res.error).toBeNull();
+      expect(res.rows).toEqual([]);
     });
   });
 
