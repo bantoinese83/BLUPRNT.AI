@@ -92,6 +92,19 @@ describe("architect-entitlement", () => {
       ).toBe(true);
     });
 
+    it("treats non-lowercase Stripe status as active", () => {
+      expect(
+        isArchitectPlanEffective(
+          {
+            status: "Active",
+            current_period_end: future,
+            revenuecat_entitlement_active: false,
+          },
+          now,
+        ),
+      ).toBe(true);
+    });
+
     it("is false for canceled without RC", () => {
       expect(
         isArchitectPlanEffective(

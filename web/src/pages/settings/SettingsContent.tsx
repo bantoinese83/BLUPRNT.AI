@@ -165,6 +165,7 @@ export function SettingsContent(props: SettingsContentProps) {
         onClose={() => setShowUpgrade(false)}
         openReason="general"
         projectId={upgradeProjectId}
+        subscription={subscriptionRow}
         isArchitect={isArchitect}
       />
 

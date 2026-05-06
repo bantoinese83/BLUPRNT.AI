@@ -20,13 +20,7 @@ vi.mock("@/hooks/use-logout", () => ({
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn(),
-    in: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
+    from: vi.fn(),
     auth: {
       updateUser: vi.fn(),
       getUser: vi.fn(),
@@ -67,14 +61,34 @@ describe("useSettingsPage", () => {
     });
     (useLogout as any).mockReturnValue({ logout: mockLogout });
 
-    // Default supabase mocks
-    (supabase.from as any)().maybeSingle.mockResolvedValue({
-      data: null,
-      error: null,
-    });
-    (supabase.from as any)().order().limit.mockResolvedValue({
-      data: [],
-      error: null,
+    vi.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === "user_subscriptions") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }
+      if (table === "properties") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        };
+      }
+      if (table === "projects") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
     });
   });
 

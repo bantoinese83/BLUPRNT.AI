@@ -41,6 +41,7 @@ describe("dashboard-snapshot-core", () => {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
           in: vi.fn().mockResolvedValue({ data: [], error: null }),
           maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
           // Default mock implementation
@@ -56,6 +57,7 @@ describe("dashboard-snapshot-core", () => {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
           in: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockImplementation(() => {
             if (table === "user_subscriptions")
@@ -116,6 +118,7 @@ describe("dashboard-snapshot-core", () => {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
           maybeSingle: vi
             .fn()
             .mockResolvedValue({ data: null, error: { message: "Fail" } }),

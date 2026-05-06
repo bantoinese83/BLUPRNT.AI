@@ -8,7 +8,7 @@ import { DeleteProjectModal } from "@/components/dashboard/DeleteProjectModal";
 import { AIAssistantWidget } from "@/components/AIAssistantWidget";
 import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 
-import type { ProjectRow } from "@shared/types/database";
+import type { ProjectRow, UserSubscriptionRow } from "@shared/types/database";
 
 type DashboardActionModalsProps = {
   project: ProjectRow | null;
@@ -25,6 +25,8 @@ type DashboardActionModalsProps = {
   isAssistantOpen: boolean;
   setIsAssistantOpen: (val: boolean) => void;
   isArchitect: boolean;
+  subscription: UserSubscriptionRow | null;
+  hasProjectPass: boolean;
 };
 
 export function DashboardActionModals({
@@ -42,6 +44,8 @@ export function DashboardActionModals({
   isAssistantOpen,
   setIsAssistantOpen,
   isArchitect,
+  subscription,
+  hasProjectPass,
 }: DashboardActionModalsProps) {
   return (
     <>
@@ -53,7 +57,10 @@ export function DashboardActionModals({
             setUpgradeReason("general");
           }}
           openReason={upgradeReason}
+          projectId={project?.id ?? null}
+          subscription={subscription}
           isArchitect={isArchitect}
+          hasProjectPass={hasProjectPass}
         />
       </ComponentErrorBoundary>
 

@@ -12,6 +12,15 @@ export type ArchitectEntitlementFields = Pick<
   "status" | "current_period_end" | "revenuecat_entitlement_active"
 >;
 
+/** Normalize DB / webhook quirks (e.g. accidental casing) before comparing. */
+function normalizedSubscriptionStatus(
+  status: string | null | undefined,
+): string {
+  return String(status ?? "")
+    .trim()
+    .toLowerCase();
+}
+
 /**
  * Stripe row alone indicates Architect access (web billing), ignoring RevenueCat.
  * Aligns with `isArchitectPlanEffective` when the store flag is off: active/trialing
@@ -22,7 +31,7 @@ export function isStripeArchitectSubscriptionEntitled(
   now: Date = new Date(),
 ): boolean {
   if (!sub) return false;
-  const st = sub.status;
+  const st = normalizedSubscriptionStatus(sub.status);
   if (st !== "active" && st !== "trialing") return false;
   const pe = sub.current_period_end ? new Date(sub.current_period_end) : null;
   if (!pe) return true;
@@ -45,7 +54,7 @@ export function isStripeArchitectUploadPeriodOpen(
   now: Date = new Date(),
 ): boolean {
   if (!sub) return false;
-  const st = sub.status;
+  const st = normalizedSubscriptionStatus(sub.status);
   if (st !== "active" && st !== "trialing") return false;
   const pe = sub.current_period_end ? new Date(sub.current_period_end) : null;
   return Boolean(pe && pe > now);

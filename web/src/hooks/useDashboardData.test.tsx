@@ -81,6 +81,7 @@ describe("useDashboardData", () => {
     eq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
     then: (resolve: (v: unknown) => void) =>
       Promise.resolve({ data, error: null }).then(resolve),

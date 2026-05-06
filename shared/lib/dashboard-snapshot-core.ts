@@ -133,6 +133,8 @@ export async function buildDashboardDataForProject(
       .from("user_subscriptions")
       .select("*")
       .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
       .maybeSingle(),
     supabase
       .from("project_passes")

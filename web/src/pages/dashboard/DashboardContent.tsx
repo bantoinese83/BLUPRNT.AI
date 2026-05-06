@@ -50,7 +50,7 @@ export function DashboardContent({
   spendByCategory: _spendByCategory,
   reconciliation,
   isArchitect,
-  subscription: _subscription,
+  subscription,
   hasProjectPass,
   homeTeam: memoHomeTeam,
   investmentTotal: memoInvestmentTotal,
@@ -369,6 +369,8 @@ export function DashboardContent({
         isAssistantOpen={isAssistantOpen}
         setIsAssistantOpen={setIsAssistantOpen}
         isArchitect={isArchitect}
+        subscription={subscription}
+        hasProjectPass={hasProjectPass}
       />
 
       <SmartSidebar

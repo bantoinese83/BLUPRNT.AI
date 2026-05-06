@@ -11,6 +11,8 @@ import {
   ProjectPassIcon,
 } from "@/components/icons/PlanMarks";
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
+import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
+import type { UserSubscriptionRow } from "@shared/types/database";
 
 const ARCHITECT_LEDGER_LIMIT = 10;
 
@@ -23,6 +25,8 @@ interface UpgradeModalProps {
   projectId?: string | null;
   openReason?: UpgradeOpenReason;
   showDiscount?: boolean;
+  /** Subscription row — preferred source for Architect entitlement in this modal. */
+  subscription?: UserSubscriptionRow | null;
   isArchitect?: boolean;
   hasProjectPass?: boolean;
 }
@@ -50,9 +54,12 @@ export function UpgradeModal({
   projectId,
   openReason = "general",
   showDiscount = false,
+  subscription = null,
   isArchitect = false,
   hasProjectPass = false,
 }: UpgradeModalProps) {
+  const architectEntitled =
+    isArchitectPlanEffective(subscription) || isArchitect;
   const [loadingPlan, setLoadingPlan] = useState<"architect" | "pass" | null>(
     null,
   );
@@ -71,6 +78,9 @@ export function UpgradeModal({
 
   const handleUpgrade = async (plan: "architect" | "pass") => {
     setCheckoutError(null);
+    if (plan === "architect" && architectEntitled) {
+      return;
+    }
     const priceId = plan === "architect" ? ARCHITECT_PRICE_ID : PASS_PRICE_ID;
     if (!priceId?.trim()) {
       setCheckoutError(
@@ -153,7 +163,7 @@ export function UpgradeModal({
           </p>
         )}
 
-        {openReason === "ledger_limit" && isArchitect && (
+        {openReason === "ledger_limit" && architectEntitled && (
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             You&apos;ve used your{" "}
             <strong>{ARCHITECT_LEDGER_LIMIT} bill or receipt uploads</strong>{" "}
@@ -164,18 +174,22 @@ export function UpgradeModal({
             </span>
           </p>
         )}
-        {openReason === "ledger_limit" && !isArchitect && !hasProjectPass && (
-          <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
-            You&apos;ve used all{" "}
-            <strong>{FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt</strong>{" "}
-            uploads on this project. Upgrade to add more anytime.{" "}
-            <span className="text-slate-600">
-              Quotes, estimates, permits, and other records don&apos;t use that
-              cap.
-            </span>
-          </p>
-        )}
-        {openReason === "export" && !isArchitect && !hasProjectPass && (
+        {openReason === "ledger_limit" &&
+          !architectEntitled &&
+          !hasProjectPass && (
+            <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+              You&apos;ve used all{" "}
+              <strong>
+                {FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt
+              </strong>{" "}
+              uploads on this project. Upgrade to add more anytime.{" "}
+              <span className="text-slate-600">
+                Quotes, estimates, permits, and other records don&apos;t use
+                that cap.
+              </span>
+            </p>
+          )}
+        {openReason === "export" && !architectEntitled && !hasProjectPass && (
           <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
             The full <strong>seller packet PDF</strong> (estimate scope, plan vs
             documented spend, and recorded costs) is included with{" "}
@@ -264,7 +278,9 @@ export function UpgradeModal({
                 className="w-full premium-gradient"
                 size="lg"
                 disabled={
-                  loadingPlan !== null || !ARCHITECT_PRICE_ID || isArchitect
+                  loadingPlan !== null ||
+                  !ARCHITECT_PRICE_ID ||
+                  architectEntitled
                 }
                 onClick={() => handleUpgrade("architect")}
               >
@@ -273,7 +289,7 @@ export function UpgradeModal({
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Redirecting...
                   </>
-                ) : isArchitect ? (
+                ) : architectEntitled ? (
                   "Current Plan"
                 ) : (
                   "Subscribe to Architect"

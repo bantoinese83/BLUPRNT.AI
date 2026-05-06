@@ -60,6 +60,8 @@ export function useSettingsPage(): UseSettingsPageResult {
             .from("user_subscriptions")
             .select("*")
             .eq("user_id", u.id)
+            .order("updated_at", { ascending: false })
+            .limit(1)
             .maybeSingle();
           setSubscriptionRow(sub as UserSubscriptionRow | null);
           setIsArchitect(isArchitectPlanEffective(sub));
@@ -104,6 +106,8 @@ export function useSettingsPage(): UseSettingsPageResult {
           .from("user_subscriptions")
           .select("*")
           .eq("user_id", authUser.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
           .maybeSingle();
         setSubscriptionRow(sub as UserSubscriptionRow | null);
         setIsArchitect(isArchitectPlanEffective(sub));
