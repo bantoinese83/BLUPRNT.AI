@@ -22,6 +22,8 @@ import { PhotoSlot } from "./PhotoSlot";
 import { useTransformationVaultLogic } from "@shared/hooks/use-transformation-vault";
 import { UI_CONSTANTS } from "@shared/constants/ui";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
+import { TRANSFORMATION_VAULT_COPY } from "@shared/copy/dashboard";
+import { showAppToast } from "@/lib/app-toast";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -41,11 +43,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const compareScrollRef = useRef<ScrollView>(null);
 
-  const { sets, signedUrls } = useTransformationVaultLogic(
-    projectId,
-    galleryItems,
-    supabase,
-  );
+  const { sets, signedUrls, signedUrlsError, refreshSignedUrls } =
+    useTransformationVaultLogic(projectId, galleryItems, supabase);
 
   // Clear local UI state when switching projects
   useEffect(() => {
@@ -143,10 +142,13 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
       );
 
       if (fnErr) throw fnErr;
+      showAppToast(TRANSFORMATION_VAULT_COPY.uploadSuccess, {
+        type: "success",
+      });
       void refreshDashboard();
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Failed to upload photo");
+      Alert.alert("Upload", TRANSFORMATION_VAULT_COPY.uploadFailed);
     } finally {
       setUploading(null);
     }
@@ -197,6 +199,13 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
     : null;
   const hasBeforePhoto = Boolean(activeSet.before && beforeUrl);
   const hasAfterPhoto = Boolean(activeSet.after && afterUrl);
+
+  const beforePending = Boolean(activeSet.before && !beforeUrl);
+  const afterPending = Boolean(activeSet.after && !afterUrl);
+  const beforeSlotResolving = Boolean(beforePending && !signedUrlsError);
+  const afterSlotResolving = Boolean(afterPending && !signedUrlsError);
+  const beforeSlotFailed = Boolean(beforePending && signedUrlsError);
+  const afterSlotFailed = Boolean(afterPending && signedUrlsError);
   const compareSide: "before" | "after" =
     beforeAfterPage === 0 ? "before" : "after";
   const canReplaceActive =
@@ -206,11 +215,15 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTitles}>
-          <Text style={styles.headerEyebrow}>Transformation</Text>
-          <Text style={styles.headerTitle}>Before & after</Text>
+          <Text style={styles.headerEyebrow}>Home story</Text>
+          <Text style={styles.headerTitle}>
+            {TRANSFORMATION_VAULT_COPY.title}
+          </Text>
           <Text style={styles.headerSubtitle}>
+            {TRANSFORMATION_VAULT_COPY.strap}
+            {" · "}
             Angle {activeSetIndex + 1} of {sets.length}
-            {sets.length > 1 ? " · Swipe photo or use tabs" : ""}
+            {sets.length > 1 ? " · Swipe or use tabs" : ""}
           </Text>
         </View>
         <View style={styles.navControls}>
@@ -258,6 +271,24 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
           </TouchableOpacity>
         </View>
       </View>
+
+      {signedUrlsError ? (
+        <View style={styles.urlErrorBanner}>
+          <Text style={styles.urlErrorText}>
+            {TRANSFORMATION_VAULT_COPY.signedUrlError}
+          </Text>
+          <TouchableOpacity
+            onPress={() => void refreshSignedUrls()}
+            style={styles.urlErrorRetry}
+            accessibilityRole="button"
+            accessibilityLabel={TRANSFORMATION_VAULT_COPY.retry}
+          >
+            <Text style={styles.urlErrorRetryText}>
+              {TRANSFORMATION_VAULT_COPY.retry}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       <View style={styles.segmentWrap}>
         <TouchableOpacity
@@ -314,6 +345,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
             signedUrl={beforeUrl}
             uploading={uploading === `before-${activeSetIndex}`}
             working={workingId === activeSet.before?.id}
+            imageResolving={beforeSlotResolving}
+            imageLoadFailed={beforeSlotFailed}
             onUpload={() => handlePickPhoto("before", activeSetIndex)}
             onClear={handleClear}
             onUpdateCaption={handleUpdateCaption}
@@ -327,6 +360,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
             signedUrl={afterUrl}
             uploading={uploading === `after-${activeSetIndex}`}
             working={workingId === activeSet.after?.id}
+            imageResolving={afterSlotResolving}
+            imageLoadFailed={afterSlotFailed}
             onUpload={() => handlePickPhoto("after", activeSetIndex)}
             onClear={handleClear}
             onUpdateCaption={handleUpdateCaption}
@@ -420,6 +455,36 @@ const styles = StyleSheet.create({
   headerTitles: {
     flex: 1,
     marginRight: 12,
+  },
+  urlErrorBanner: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: "rgba(251, 191, 36, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(251, 191, 36, 0.45)",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  urlErrorText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.primary,
+    lineHeight: 16,
+  },
+  urlErrorRetry: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: Theme.colors.brand.primary,
+  },
+  urlErrorRetryText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.bold,
+    color: "#ffffff",
   },
   headerEyebrow: {
     fontSize: 10,

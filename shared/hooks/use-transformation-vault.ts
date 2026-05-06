@@ -17,7 +17,12 @@ export function useTransformationVaultLogic(
   supabase: SupabaseClient,
 ) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [signedUrlsError, setSignedUrlsError] = useState<string | null>(null);
+  const [isResolvingUrls, setIsResolvingUrls] = useState(false);
+  const signedUrlsRef = useRef(signedUrls);
   const isMounted = useRef(true);
+
+  signedUrlsRef.current = signedUrls;
 
   useEffect(() => {
     isMounted.current = true;
@@ -29,6 +34,8 @@ export function useTransformationVaultLogic(
   // Clear cache when switching projects
   useEffect(() => {
     setSignedUrls({});
+    setSignedUrlsError(null);
+    setIsResolvingUrls(false);
   }, [projectId]);
 
   // Group items into sets (Optimized single-pass)
@@ -63,45 +70,64 @@ export function useTransformationVaultLogic(
     const safeGallery = Array.isArray(galleryItems) ? galleryItems : [];
     const pathsToFetch = safeGallery
       .map((i) => i.storage_path)
-      .filter((path) => path && !signedUrls[path]);
+      .filter((path) => path && !signedUrlsRef.current[path]);
 
-    if (pathsToFetch.length === 0) return;
-
-    const { data, error } = await supabase.storage
-      .from("project-photos")
-      .createSignedUrls(
-        pathsToFetch as string[],
-        STORAGE_CONFIG.SIGNED_URL_EXPIRY,
-      );
-
-    if (error) {
-      console.error(
-        "[useTransformationVaultLogic] Error creating signed URLs:",
-        error,
-      );
+    if (pathsToFetch.length === 0) {
+      setSignedUrlsError(null);
       return;
     }
 
-    if (data && isMounted.current) {
-      setSignedUrls((current) => {
-        const newUrls = { ...current };
-        data.forEach((item) => {
-          if (item.signedUrl && item.path) {
-            newUrls[item.path] = item.signedUrl;
-          }
+    setSignedUrlsError(null);
+    setIsResolvingUrls(true);
+
+    try {
+      const { data, error } = await supabase.storage
+        .from("project-photos")
+        .createSignedUrls(
+          pathsToFetch as string[],
+          STORAGE_CONFIG.SIGNED_URL_EXPIRY,
+        );
+
+      if (error) {
+        console.error(
+          "[useTransformationVaultLogic] Error creating signed URLs:",
+          error,
+        );
+        if (isMounted.current) {
+          setSignedUrlsError(
+            error.message || "Could not load photos from storage.",
+          );
+        }
+        return;
+      }
+
+      if (data && isMounted.current) {
+        setSignedUrls((current) => {
+          const newUrls = { ...current };
+          data.forEach((item) => {
+            if (item.signedUrl && item.path) {
+              newUrls[item.path] = item.signedUrl;
+            }
+          });
+          return newUrls;
         });
-        return newUrls;
-      });
+      }
+    } finally {
+      if (isMounted.current) {
+        setIsResolvingUrls(false);
+      }
     }
-  }, [galleryItems, signedUrls, supabase]);
+  }, [galleryItems, supabase]);
 
   useEffect(() => {
-    fetchSignedUrls();
+    void fetchSignedUrls();
   }, [fetchSignedUrls]);
 
   return {
     sets,
     signedUrls,
+    signedUrlsError,
+    isResolvingUrls,
     refreshSignedUrls: fetchSignedUrls,
   };
 }

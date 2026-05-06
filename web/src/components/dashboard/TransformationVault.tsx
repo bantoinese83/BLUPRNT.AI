@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import type { GalleryItemRow } from "@shared/types/database";
 import { useTransformationVaultLogic } from "@shared/hooks/use-transformation-vault";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
+import { TRANSFORMATION_VAULT_COPY } from "@shared/copy/dashboard";
 
 type GalleryItem = GalleryItemRow;
 
@@ -191,11 +192,8 @@ export function TransformationVault({
   const [targetIndex, setTargetIndex] = useState<number>(0);
   const [activeSetIndex, setActiveSetIndex] = useState(0);
 
-  const { sets, signedUrls } = useTransformationVaultLogic(
-    projectId,
-    items,
-    supabase,
-  );
+  const { sets, signedUrls, signedUrlsError, refreshSignedUrls } =
+    useTransformationVaultLogic(projectId, items, supabase);
 
   const fetchGallery = useCallback(async () => {
     try {
@@ -239,11 +237,11 @@ export function TransformationVault({
       );
 
       if (fnErr) throw fnErr;
-      toast.success("Photo uploaded successfully.");
+      toast.success(TRANSFORMATION_VAULT_COPY.uploadSuccess);
       fetchGallery();
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed");
+      toast.error(TRANSFORMATION_VAULT_COPY.uploadFailed);
     } finally {
       setUploading(null);
     }
@@ -299,10 +297,11 @@ export function TransformationVault({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-            Transformation Vault
+            {TRANSFORMATION_VAULT_COPY.title}
           </h2>
           <p className="text-xs text-slate-500 font-medium">
-            Angle {activeSetIndex + 1} of {Math.max(sets.length, 1)}
+            {TRANSFORMATION_VAULT_COPY.strap} · Angle {activeSetIndex + 1} of{" "}
+            {Math.max(sets.length, 1)}
           </p>
         </div>
 
@@ -332,6 +331,23 @@ export function TransformationVault({
         </div>
       </div>
 
+      {signedUrlsError ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-amber-900 font-medium">
+            {TRANSFORMATION_VAULT_COPY.signedUrlError}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0 border-amber-300"
+            onClick={() => void refreshSignedUrls()}
+          >
+            {TRANSFORMATION_VAULT_COPY.retry}
+          </Button>
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
@@ -353,7 +369,11 @@ export function TransformationVault({
             }}
             onClear={handleRemove}
             onUpdateCaption={handleUpdateCaption}
-            error={false}
+            error={Boolean(
+              signedUrlsError &&
+              activeSet?.before &&
+              !signedUrls[activeSet.before.storage_path],
+            )}
           />
         </div>
 
@@ -377,7 +397,11 @@ export function TransformationVault({
             }}
             onClear={handleRemove}
             onUpdateCaption={handleUpdateCaption}
-            error={false}
+            error={Boolean(
+              signedUrlsError &&
+              activeSet?.after &&
+              !signedUrls[activeSet.after.storage_path],
+            )}
           />
         </div>
       </div>

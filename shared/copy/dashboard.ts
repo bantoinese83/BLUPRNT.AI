@@ -35,3 +35,20 @@ export const CONFIDENCE_LABELS = {
   marketPrecision: "Market Precision",
   confidence: "Confidence",
 } as const;
+
+/** Transformation vault (before/after photos) — keep web + mobile headers aligned. */
+export const TRANSFORMATION_VAULT_COPY = {
+  title: "Transformation vault",
+  /** Short label for the before/after concept (used as subtitle on mobile). */
+  strap: "Before & after",
+  uploadSuccess: "Photo uploaded.",
+  uploadFailed: "Could not upload photo. Try again.",
+  signedUrlError:
+    "Photos could not be loaded. Try Retry or refresh this screen.",
+  retry: "Retry",
+} as const;
+
+export const UPCOMING_RENEWALS_COPY = {
+  title: "Renewals & expirations",
+  subtitle: "Warranties, insurance, and permits we’re tracking.",
+} as const;

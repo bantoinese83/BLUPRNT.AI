@@ -13,6 +13,7 @@ import {
   type UpcomingRenewal,
 } from "@shared/lib/upcoming-renewals";
 import { DocumentReviewModal } from "@/components/dashboard/DocumentReviewModal";
+import { UPCOMING_RENEWALS_COPY } from "@shared/copy/dashboard";
 
 const KIND_ICON: Record<RenewalKind, typeof Shield> = {
   warranty: BadgeCheck,
@@ -83,10 +84,10 @@ export function UpcomingRenewalsCard({
             <div className="space-y-1">
               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <CalendarClock className="w-4 h-4 text-slate-500" aria-hidden />
-                Upcoming renewals & expirations
+                {UPCOMING_RENEWALS_COPY.title}
               </CardTitle>
               <p className="text-xs text-slate-500 leading-snug">
-                Warranties, insurance and permits we're tracking for this home.
+                {UPCOMING_RENEWALS_COPY.subtitle}
               </p>
             </div>
             {summary.expired + summary.soon > 0 ? (

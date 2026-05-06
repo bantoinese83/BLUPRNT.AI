@@ -31,6 +31,7 @@ import type { LedgerEntryRow } from "@shared/types/database";
 import { buildDashboardHeaderLines } from "@/features/home-tab/dashboard-greeting";
 import { presentProjectShareSheet } from "@/lib/share-project";
 import { TransformationVault } from "@/components/dashboard/TransformationVault";
+import { UpcomingRenewalsSection } from "@/components/dashboard/UpcomingRenewalsSection";
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
@@ -61,6 +62,7 @@ export default function DashboardScreen() {
     handleProjectSelect,
     isArchitect,
     hasProjectPass,
+    reconciliation,
   } = useDashboardData();
 
   const {
@@ -294,6 +296,21 @@ export default function DashboardScreen() {
         <MotiView
           from={{ opacity: 0, translateY: 12 }}
           animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: "timing", duration: 380, delay: 90 }}
+        >
+          <UpcomingRenewalsSection
+            ledgerEntries={ledgerEntries as LedgerEntryRow[]}
+            onOpenLedgerEntry={(inv) => {
+              Haptics.selectionAsync();
+              setReviewLedgerEntry(inv);
+              setReviewOpen(true);
+            }}
+          />
+        </MotiView>
+
+        <MotiView
+          from={{ opacity: 0, translateY: 12 }}
+          animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: "timing", duration: 380, delay: 100 }}
         >
           <ProjectHealth
@@ -302,6 +319,7 @@ export default function DashboardScreen() {
             spendingTotal={capitalDocumentedTotal}
             documentCount={ledgerEntries.length}
             scopeLineCount={scopeItems.length}
+            unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
           />
         </MotiView>
 

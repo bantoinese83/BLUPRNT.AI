@@ -21,6 +21,10 @@ export type PhotoSlotProps = {
   signedUrl: string | null;
   uploading: boolean;
   working?: boolean;
+  /** True while we are fetching a signed URL for an existing gallery row. */
+  imageResolving?: boolean;
+  /** True when signing failed but the row exists (show recovery hint). */
+  imageLoadFailed?: boolean;
   onUpload: () => void;
   onClear: (id: string) => void;
   onUpdateCaption: (id: string, caption: string) => void;
@@ -33,6 +37,8 @@ export function PhotoSlot({
   signedUrl,
   uploading,
   working,
+  imageResolving = false,
+  imageLoadFailed = false,
   onUpload,
   onClear,
   onUpdateCaption,
@@ -45,7 +51,14 @@ export function PhotoSlot({
     setCaptionValue(item?.caption || "");
   }, [item?.caption]);
 
-  const showPlaceholder = !signedUrl || !item;
+  const showImage = Boolean(item && signedUrl);
+  const showFailed = Boolean(item && !signedUrl && imageLoadFailed);
+  const showResolving = Boolean(
+    item && !signedUrl && !imageLoadFailed && imageResolving,
+  );
+  const showEmptySlot = Boolean(
+    !item || (!signedUrl && !imageLoadFailed && !imageResolving),
+  );
 
   const handleSaveCaption = async () => {
     if (!item) return;
@@ -61,31 +74,7 @@ export function PhotoSlot({
     <View style={styles.slotContainer}>
       <GlassCard intensity={12} style={styles.slotCard}>
         <View style={styles.flex1}>
-          {showPlaceholder ? (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={onUpload}
-              disabled={uploading}
-              style={styles.placeholder}
-            >
-              <View style={styles.placeholderContent}>
-                <View style={styles.logoWrapper}>
-                  {uploading ? (
-                    <ActivityIndicator color={Theme.colors.brand.primary} />
-                  ) : (
-                    <Logo size={48} />
-                  )}
-                </View>
-
-                {!uploading && (
-                  <View style={styles.centeredActionBtn}>
-                    <Camera size={16} color="white" />
-                    <Text style={styles.centeredActionText}>Capture Photo</Text>
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
-          ) : (
+          {showImage && item ? (
             <View style={StyleSheet.absoluteFill}>
               <Image
                 source={{ uri: signedUrl! }}
@@ -156,7 +145,55 @@ export function PhotoSlot({
                 </View>
               )}
             </View>
-          )}
+          ) : showFailed ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={onUpload}
+              disabled={uploading}
+              style={styles.placeholder}
+            >
+              <View style={styles.placeholderContent}>
+                <Text style={styles.failedTitle}>Could not load photo</Text>
+                <Text style={styles.failedHint}>
+                  Tap to try again or replace this slot.
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ) : showResolving ? (
+            <View style={styles.placeholder}>
+              <View style={styles.placeholderContent}>
+                <ActivityIndicator
+                  size="large"
+                  color={Theme.colors.brand.primary}
+                />
+                <Text style={styles.resolvingCaption}>Loading photo…</Text>
+              </View>
+            </View>
+          ) : showEmptySlot ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={onUpload}
+              disabled={uploading}
+              style={styles.placeholder}
+            >
+              <View style={styles.placeholderContent}>
+                <View style={styles.logoWrapper}>
+                  {uploading ? (
+                    <ActivityIndicator color={Theme.colors.brand.primary} />
+                  ) : (
+                    <Logo size={48} />
+                  )}
+                </View>
+
+                {!uploading && (
+                  <View style={styles.centeredActionBtn}>
+                    <Camera size={16} color="white" />
+                    <Text style={styles.centeredActionText}>Capture Photo</Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          ) : null}
 
           {/* Inline Caption Editor */}
           {editingCaption && (
@@ -256,6 +293,27 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     fontFamily: Theme.typography.family.bold,
+  },
+  resolvingCaption: {
+    marginTop: 12,
+    fontSize: 13,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+  },
+  failedTitle: {
+    fontSize: 15,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+    textAlign: "center",
+  },
+  failedHint: {
+    marginTop: 8,
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+    textAlign: "center",
+    lineHeight: 18,
+    paddingHorizontal: 12,
   },
   topControls: {
     position: "absolute",

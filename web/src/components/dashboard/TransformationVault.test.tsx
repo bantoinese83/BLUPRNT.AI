@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { TransformationVault } from "./TransformationVault";
 import { supabase } from "@/lib/supabase";
+import { TRANSFORMATION_VAULT_COPY } from "@shared/copy/dashboard";
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
@@ -51,7 +52,12 @@ describe("TransformationVault", () => {
     render(<TransformationVault projectId="p1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Transformation Vault")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", {
+          level: 2,
+          name: TRANSFORMATION_VAULT_COPY.title,
+        }),
+      ).toBeInTheDocument();
     });
 
     expect(screen.getAllByText("Photo").length).toBeGreaterThan(0);
@@ -141,7 +147,7 @@ describe("TransformationVault", () => {
     render(<TransformationVault projectId="p1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Angle 1 of 3")).toBeInTheDocument();
+      expect(screen.getByText(/Angle 1 of 3/)).toBeInTheDocument();
     });
 
     const nextBtn = screen.getByLabelText("Next angle");
@@ -149,7 +155,7 @@ describe("TransformationVault", () => {
     if (nextBtn) {
       nextBtn.click();
       await waitFor(() => {
-        expect(screen.getByText("Angle 2 of 3")).toBeInTheDocument();
+        expect(screen.getByText(/Angle 2 of 3/)).toBeInTheDocument();
       });
     }
   });

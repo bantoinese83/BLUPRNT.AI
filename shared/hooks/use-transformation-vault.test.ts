@@ -120,4 +120,26 @@ describe("useTransformationVaultLogic", () => {
 
     expect(result.current.signedUrls).toEqual({});
   });
+
+  it("surfaces storage error when createSignedUrls fails", async () => {
+    const galleryItems: GalleryItem[] = [
+      { id: "1", photo_type: "before", storage_path: "b1.jpg" } as GalleryItem,
+    ];
+
+    createSignedUrls.mockResolvedValue({
+      data: null,
+      error: { message: "not allowed" },
+    });
+
+    const { result } = renderHook(() =>
+      useTransformationVaultLogic("p1", galleryItems, mockSupabase),
+    );
+
+    await waitFor(
+      () => {
+        expect(result.current.signedUrlsError).toBe("not allowed");
+      },
+      { timeout: 2000 },
+    );
+  });
 });
