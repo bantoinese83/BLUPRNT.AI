@@ -227,7 +227,7 @@ export function useProjectDetailData() {
   });
 
   // Hook 3: Export
-  const { exportSellerPacket } = useProjectExport({
+  const { exportSellerPacket, exporting } = useProjectExport({
     id,
     project,
     scope,
@@ -359,6 +359,7 @@ export function useProjectDetailData() {
     handleShare,
     handleRefresh,
     exportSellerPacket,
+    exporting,
     updateScopeItemMaterials,
   };
 }

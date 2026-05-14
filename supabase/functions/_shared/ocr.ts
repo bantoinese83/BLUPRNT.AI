@@ -88,8 +88,8 @@ export async function extractInvoiceFromPdf(
   ];
 
   let systemInstruction =
-    `Extract structured data from the provided document.
-Vendor name is the company that issued the document. LOOK CAREFULLY for logos, company headers, or footers to identify the company name. 
+    `Extract structured data from the provided document with elite optical character recognition and forensic accounting precision.
+Vendor name is the company that issued the document. LOOK CAREFULLY for logos, company headers, fine print, or footers to identify the exact vendor entity. 
 
 Identify the 'document_type' as one of these specific keys:
 ${ledgerTypes.map(t => `- ${t}`).join('\n')}
@@ -109,15 +109,15 @@ Guidelines for classification:
 - 'manual': User manuals for appliances or home systems.
 - 'other': Only if it fits none of the above.
 
-Extraction Rules:
-1. For 'total', look for the final amount often labeled as TOTAL, AMOUNT DUE, or GRAND TOTAL. This is typically the largest currency value at the bottom of the document.
-2. Ensure 'total' includes all taxes, fees, and discounts.
-3. If it's a quote, 'total' is the estimated amount.
-4. For line_items, ensure each entry has description, quantity, unit_price, and line_total.
+Extraction Rules & Forensic Intelligence:
+1. For 'total', look for the final amount often labeled as TOTAL, AMOUNT DUE, GRAND TOTAL, or BALANCE. This is typically the largest currency value at the bottom or top-right of the document.
+2. Ensure 'total' includes all taxes, shipping, handling fees, and discounts. Extract subtotal and tax_total separately when clearly itemized.
+3. If it's a quote or estimate, 'total' is the projected amount.
+4. For line_items, extract with high SKU-level fidelity. Capture exact brand names, dimensions, model numbers, description, quantity, unit_price, and line_total. Handle multi-page invoices and handwritten contractor scrawls gracefully.
 5. If a field cannot be extracted with high confidence, return null for that field. 
-6. If the document mentions a warranty duration (e.g., '10 year warranty') or an expiration date, calculate the expiration date in 'YYYY-MM-DD' format.
-7. Provide a brief but descriptive 'summary' of the document's contents. Mention key items purchased or services rendered (e.g. 'A receipt for premium roofing materials including shingles and underlayment from Home Depot' or 'Detailed building permit for second floor renovation including plumbing and electrical').
-8. If you cannot extract granular line items from the document but a total exists, you MUST still create at least ONE entry in 'line_items' that represents the whole document, using the 'summary' as its description and the document 'total' as its 'line_total'.`;
+6. If the document mentions a warranty duration (e.g., '10 year warranty', 'lifetime limited') or an expiration date, calculate the exact expiration date in 'YYYY-MM-DD' format.
+7. Provide an insightful, professional 'summary' of the document's contents. Specify key structural items purchased or trades involved (e.g., 'A receipt for premium roofing materials including architectural shingles and underlayment from Home Depot' or 'Detailed municipal building permit for second-floor bathroom addition including plumbing and electrical inspections').
+8. If you cannot extract granular line items from the document but a total exists, you MUST still create at least ONE comprehensive entry in 'line_items' that represents the whole document, using the 'summary' as its description and the document 'total' as its 'line_total'.`;
 
   if (projectScope && projectScope.length > 0) {
     const scopeStr = projectScope.map((s) =>

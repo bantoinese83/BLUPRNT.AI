@@ -7,7 +7,15 @@ import { logEdge } from "../_shared/log.ts";
 
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
 
+import { PUBLIC_SITE_ORIGIN } from "../../../shared/constants/public-site.ts";
+
+function getAppBaseUrl(): string {
+  const env = Deno.env.get("SITE_URL")?.replace(/\/$/, "");
+  return env || PUBLIC_SITE_ORIGIN;
+}
+
 function discountEmailHtml(): string {
+  const baseUrl = getAppBaseUrl();
   return `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; line-height: 1.6;">
 <h1 style="color: #14b8a6; text-transform: uppercase; tracking: tight;">35% OFF LOCKED IN</h1>
 <p>Hello!</p>
@@ -18,7 +26,7 @@ function discountEmailHtml(): string {
 <p>This code gives you <strong>35% off</strong> the Architect Plan or a single Project Pass.</p>
 <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
 <p style="font-size: 14px; color: #64748b;">
-You can continue in your <a href="https://bluprnt.ai/dashboard" style="color: #14b8a6; text-decoration: none; font-weight: bold;">Dashboard</a>.
+You can continue in your <a href="${baseUrl}/dashboard" style="color: #14b8a6; text-decoration: none; font-weight: bold;">Dashboard</a>.
 </p>
 </div>`;
 }

@@ -75,8 +75,8 @@ export async function generateSellerPacketPDF(
       </head>
       <body>
         <div class="header">
-          <p class="subtitle">BLUPRNT.AI — PROPERTY LEDGER</p>
-          <h1 class="title">Property Improvement Ledger</h1>
+          <p class="subtitle">BLUPRNT.AI — PERMANENT RECORD</p>
+          <h1 class="title">Home Archive &amp; Property Ledger</h1>
           <p class="subtitle">Project: ${escapeHtml(project.name)} | Generated: ${formatShortUsDate(new Date().toISOString())}</p>
         </div>
 

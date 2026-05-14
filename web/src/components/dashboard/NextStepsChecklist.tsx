@@ -40,7 +40,7 @@ export function NextStepsChecklist({
       },
       {
         id: "export-packet",
-        label: "Export seller packet",
+        label: "Export Home Archive",
         description:
           "Download the full ledger PDF—scope, plan vs spend, and costs.",
         icon: Share2,

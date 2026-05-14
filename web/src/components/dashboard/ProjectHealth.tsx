@@ -88,39 +88,50 @@ function SpendRunwayBar({
   const overHigh = spend > max;
 
   return (
-    <div className="space-y-1.5">
-      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-        Spend vs estimate band
-      </p>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+          Spend vs estimate band
+        </p>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 border border-teal-100/60">
+          <span className="text-[9px] font-black uppercase tracking-wider text-teal-700">
+            Current Spend:
+          </span>
+          <span
+            className={`text-xs font-black tabular-nums ${overHigh ? "text-rose-600" : "text-teal-900"}`}
+          >
+            {money(spend)}
+          </span>
+        </div>
+      </div>
       <div className="relative h-10 py-0.5">
-        <div className="absolute inset-x-0 top-1/2 h-9 -translate-y-1/2 overflow-hidden rounded-2xl border border-slate-100/80 bg-slate-100/90">
+        <div className="absolute inset-x-0 top-1/2 h-7 -translate-y-1/2 overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-100/60">
           <div
-            className="absolute inset-y-0 bg-teal-100/95"
+            className="absolute inset-y-0 bg-teal-100/80 border-x-2 border-teal-500/50"
             style={{ left: `${bandLeft}%`, width: `${bandWidth}%` }}
           />
         </div>
         <div
-          className="pointer-events-none absolute top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md"
-          style={{
-            left: `${spendPct}%`,
-            backgroundColor: overHigh ? "rgb(244 63 94)" : "rgb(13 148 136)",
-          }}
-          aria-hidden
-        />
+          className="absolute top-1/2 z-10 w-6 h-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/95 flex items-center justify-center shadow-md border border-slate-100"
+          style={{ left: `${spendPct}%` }}
+        >
+          <div
+            className="w-3 h-3 rounded-full shadow-xs"
+            style={{
+              backgroundColor: overHigh ? "rgb(244 63 94)" : "rgb(13 148 136)",
+            }}
+            aria-hidden
+          />
+        </div>
         {overHigh ? (
-          <span className="pointer-events-none absolute right-1 top-1/2 z-10 -translate-y-1/2 text-[8px] font-black uppercase tracking-tighter text-rose-600">
+          <span className="pointer-events-none absolute right-2 top-1/2 z-10 -translate-y-1/2 text-[8px] font-black uppercase tracking-tighter text-rose-600">
             Over
           </span>
         ) : null}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[10px] font-bold text-slate-500">
+      <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
         <span className="min-w-0 truncate">Low {money(min)}</span>
-        <span className="min-w-0 shrink-0 text-slate-700">
-          Now {money(spend)}
-        </span>
-        <span className="min-w-0 truncate text-right sm:ml-auto">
-          High {money(max)}
-        </span>
+        <span className="min-w-0 truncate text-right">High {money(max)}</span>
       </div>
     </div>
   );
@@ -340,7 +351,7 @@ export function ProjectHealth({
           ) : null}
 
           {dollarsOverHighEstimate > 0 && (
-            <p className="break-words text-left text-[11px] font-bold uppercase leading-snug tracking-wide text-rose-600 sm:text-center">
+            <p className="wrap-break-word text-left text-[11px] font-bold uppercase leading-snug tracking-wide text-rose-600 sm:text-center">
               {money(dollarsOverHighEstimate)} above high estimate ·{" "}
               {pctLowRounded}% of low estimate
             </p>

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * CSS variables mirror `mobile/tailwind.config.js` slate scale and
+ * `@shared/constants/design-tokens` (web: `web/src/index.css` @theme).
+ */
 @layer base {
   :root {
     --primary: #134e4a;
@@ -15,8 +19,13 @@
     /* Body ink — align with web + shared/design-tokens `ink` */
     --slate-900: #111827;
     --slate-800: #1e293b;
-    --slate-500: #64748b;
-    --slate-400: #94a3b8;
+    --slate-700: #334155;
+    --slate-600: #3d4b5f;
+    --slate-500: #475569;
+    --slate-400: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
     --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
   }
 }

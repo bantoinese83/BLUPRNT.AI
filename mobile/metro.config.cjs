@@ -1,4 +1,5 @@
 const path = require("path");
+const { getDefaultConfig } = require("expo/metro-config");
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 const { withNativeWind } = require("nativewind/metro");
 
@@ -12,8 +13,14 @@ const workspaceRoot = path.resolve(projectRoot, "..");
  * @see https://github.com/getsentry/sentry-react-native/issues/5315
  */
 let config = getSentryExpoConfig(projectRoot);
-
-config.watchFolders = [workspaceRoot];
+const expoDefaults = getDefaultConfig(projectRoot);
+config.watchFolders = [
+  ...new Set([
+    ...(expoDefaults.watchFolders ?? []),
+    ...(config.watchFolders ?? []),
+    workspaceRoot,
+  ]),
+];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),

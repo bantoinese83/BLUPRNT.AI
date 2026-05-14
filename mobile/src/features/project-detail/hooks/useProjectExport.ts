@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { Alert } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -30,14 +30,18 @@ export function useProjectExport({
   includeAppendix,
   setShowUpgrade,
 }: UseProjectExportProps) {
+  const [exporting, setExporting] = useState(false);
+
   const exportSellerPacket = useCallback(async () => {
     if (!project || !id) return;
+    if (exporting) return; // prevent double-tap
     if (!isArchitect && !hasProjectPass) {
       setShowUpgrade(true);
       return;
     }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setExporting(true);
     try {
       const scopeForPdf = scope.map((s) => ({
         category: s.category,
@@ -60,12 +64,15 @@ export function useProjectExport({
     } catch {
       Alert.alert(
         "Export Failed",
-        "We couldn’t generate the PDF. Check your connection and try again.",
+        "We couldn't generate the PDF. Check your connection and try again.",
       );
+    } finally {
+      setExporting(false);
     }
   }, [
     project,
     id,
+    exporting,
     isArchitect,
     hasProjectPass,
     scope,
@@ -74,5 +81,5 @@ export function useProjectExport({
     setShowUpgrade,
   ]);
 
-  return { exportSellerPacket };
+  return { exportSellerPacket, exporting };
 }

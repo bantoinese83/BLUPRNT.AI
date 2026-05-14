@@ -158,7 +158,7 @@ export function FinanceLedgerHeader({
                 <Text style={styles.appendixLabel}>Include uploads in PDF</Text>
                 <Text style={styles.appendixHint}>
                   {canIncludeUploads
-                    ? "Adds receipt photos at the end of your seller packet. Larger download. If an invoice is a PDF, we add a short note instead of the full file."
+                    ? "Adds receipt photos at the end of your Home Archive. If a document is a PDF, we add a short note instead of the full file. Larger download — only turn on if you are comfortable sharing those images."
                     : "Turn this on after you attach a photo or file to at least one document — nothing is linked yet, so the switch stays off."}
                 </Text>
               </View>
@@ -166,7 +166,7 @@ export function FinanceLedgerHeader({
                 value={includeAppendix}
                 onValueChange={onIncludeAppendixChange}
                 disabled={exporting || !canIncludeUploads}
-                accessibilityLabel="Include uploads in seller packet PDF"
+                accessibilityLabel="Include uploads in Home Archive PDF"
                 accessibilityHint={
                   canIncludeUploads
                     ? "Adds an extra section with images from linked files"
@@ -181,7 +181,7 @@ export function FinanceLedgerHeader({
             </View>
 
             <Button
-              title={exporting ? "Generating…" : "Export Seller Packet"}
+              title={exporting ? "Generating…" : "Export Home Archive"}
               onPress={onExport}
               disabled={exporting || isUploading}
               style={styles.exportButton}

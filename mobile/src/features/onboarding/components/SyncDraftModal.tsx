@@ -16,6 +16,7 @@ import * as Clipboard from "expo-clipboard";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/constants/Theme";
 import { reportClientError } from "@/lib/sentry";
+import { shareLinkBaseUrl } from "@/lib/share-project";
 import type { Json } from "@shared/types/supabase.gen";
 
 interface Props {
@@ -53,7 +54,7 @@ export function SyncDraftModal({ isOpen, onClose, payload }: Props) {
     }
   };
 
-  const syncUrl = `https://bluprnt.ai/onboarding?sync=${token}`;
+  const syncUrl = `${shareLinkBaseUrl()}/onboarding?sync=${token}`;
 
   const handleCopy = async () => {
     await Clipboard.setStringAsync(syncUrl);

@@ -271,7 +271,7 @@ const ChatMessage = memo(
           {m.role === "assistant" ? (
             <>
               <div className="markdown-content prose prose-sm prose-slate">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
                   {m.content}
                 </ReactMarkdown>
               </div>

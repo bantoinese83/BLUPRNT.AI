@@ -1,15 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { buildSellerPacketAppendixHtml } from "./seller-packet-appendix";
-import { supabase } from "./supabase";
+import { fetchLedgerEntryOriginalSignedUrl } from "./open-original-document";
 
-vi.mock("./supabase", () => ({
-  supabase: {
-    storage: {
-      from: vi.fn().mockReturnThis(),
-      download: vi.fn(),
-    },
-  },
-  invokeFunction: vi.fn(),
+vi.mock("./open-original-document", () => ({
+  fetchLedgerEntryOriginalSignedUrl: vi.fn(),
 }));
 
 describe("buildSellerPacketAppendixHtml", () => {
@@ -19,11 +13,11 @@ describe("buildSellerPacketAppendixHtml", () => {
     vendor_name: "Acme",
     issue_date: "2025-01-15T12:00:00.000Z",
     created_at: "2025-01-15T12:00:00.000Z",
-    storage_path: "receipt.jpg",
   });
 
   beforeEach(() => {
     vi.clearAllMocks();
+    global.fetch = vi.fn();
   });
 
   afterEach(() => {
@@ -32,28 +26,33 @@ describe("buildSellerPacketAppendixHtml", () => {
 
   it("returns empty string when no invoices have documents", async () => {
     const html = await buildSellerPacketAppendixHtml([
-      { ...getBaseInv(), storage_path: null } as any,
+      { ...getBaseInv(), document_id: null } as any,
     ]);
     expect(html).toBe("");
   });
 
-  it("includes error block when download fails", async () => {
-    vi.mocked((supabase.storage as any).download).mockResolvedValue({
-      data: null,
-      error: new Error("network"),
-    } as any);
+  it("includes error block when signed URL fetch fails", async () => {
+    vi.mocked(fetchLedgerEntryOriginalSignedUrl).mockResolvedValue({
+      ok: false,
+      message: "network",
+    });
 
     const html = await buildSellerPacketAppendixHtml([getBaseInv() as any]);
     expect(html).toContain("Appendix: Original uploads");
-    expect(html).toContain("couldn’t download");
+    expect(html).toContain("couldn’t load this file");
   });
 
   it("embeds small JPEG when download succeeds", async () => {
+    vi.mocked(fetchLedgerEntryOriginalSignedUrl).mockResolvedValue({
+      ok: true,
+      signedUrl: "https://example.com/file.jpg",
+      filename: "file.jpg",
+    });
     const blob = new Blob([new Uint8Array(10)], { type: "image/jpeg" });
-    vi.mocked((supabase.storage as any).download).mockResolvedValue({
-      data: blob,
-      error: null,
-    } as any);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      blob: async () => blob,
+    } as Response);
 
     const html = await buildSellerPacketAppendixHtml([getBaseInv() as any]);
     expect(html).toContain('src="data:image/jpeg;base64,');
@@ -61,46 +60,64 @@ describe("buildSellerPacketAppendixHtml", () => {
   });
 
   it("notes PDFs instead of embedding", async () => {
+    vi.mocked(fetchLedgerEntryOriginalSignedUrl).mockResolvedValue({
+      ok: true,
+      signedUrl: "https://example.com/file.pdf",
+      filename: "file.pdf",
+    });
     const blob = new Blob([new Uint8Array(10)], { type: "application/pdf" });
-    vi.mocked((supabase.storage as any).download).mockResolvedValue({
-      data: blob,
-      error: null,
-    } as any);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      blob: async () => blob,
+    } as Response);
 
-    const pdfInv = { ...getBaseInv(), storage_path: "receipt.pdf" };
-    const html = await buildSellerPacketAppendixHtml([pdfInv as any]);
-    expect(html).toContain("type can’t be embedded");
+    const html = await buildSellerPacketAppendixHtml([getBaseInv() as any]);
+    expect(html).toContain("This upload is a PDF");
   });
 
   it("handles non-OK download result", async () => {
-    vi.mocked((supabase.storage as any).download).mockResolvedValue({
-      data: null,
-      error: new Error("download error"),
-    } as any);
+    vi.mocked(fetchLedgerEntryOriginalSignedUrl).mockResolvedValue({
+      ok: true,
+      signedUrl: "https://example.com/file.jpg",
+      filename: "file.jpg",
+    });
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: false,
+      status: 500,
+      blob: async () => new Blob(),
+    } as Response);
 
     const html = await buildSellerPacketAppendixHtml([getBaseInv() as any]);
-    expect(html).toContain("couldn’t download");
+    expect(html).toContain("couldn’t download this file");
   });
 
   it("handles download throw", async () => {
-    vi.mocked((supabase.storage as any).download).mockRejectedValue(
-      new Error("offline"),
-    );
+    vi.mocked(fetchLedgerEntryOriginalSignedUrl).mockResolvedValue({
+      ok: true,
+      signedUrl: "https://example.com/file.jpg",
+      filename: "file.jpg",
+    });
+    vi.mocked(global.fetch).mockRejectedValue(new Error("offline"));
 
     const html = await buildSellerPacketAppendixHtml([getBaseInv() as any]);
-    expect(html).toContain("couldn’t download");
+    expect(html).toContain("An unexpected error occurred");
   });
 
   it("handles unknown file types by noting they can't be embedded", async () => {
+    vi.mocked(fetchLedgerEntryOriginalSignedUrl).mockResolvedValue({
+      ok: true,
+      signedUrl: "https://example.com/file.zip",
+      filename: "file.zip",
+    });
     const unknownBlob = new Blob([new Uint8Array(10)], {
       type: "application/zip",
     });
-    vi.mocked((supabase.storage as any).download).mockResolvedValue({
-      data: unknownBlob,
-      error: null,
-    } as any);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      blob: async () => unknownBlob,
+    } as Response);
 
     const html = await buildSellerPacketAppendixHtml([getBaseInv() as any]);
-    expect(html).toContain("<img ");
+    expect(html).toContain("type can’t be embedded");
   });
 });

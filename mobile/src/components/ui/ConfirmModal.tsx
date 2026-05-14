@@ -15,6 +15,7 @@ export type ConfirmModalProps = {
   loading?: boolean;
 };
 
+/** @public */
 export function ConfirmModal({
   visible,
   title,

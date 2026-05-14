@@ -96,7 +96,7 @@ We maintain a **zero-warning** ESLint policy on the paths CI checks. Before push
 npm run check        # Lint → Knip → Typecheck → Coverage → Build
 ```
 
-CI also runs **Playwright** (Chromium, Firefox, WebKit), **Deno typecheck** for Supabase edge functions, optional **Supabase DB types** verification (when `SUPABASE_ACCESS_TOKEN` is set), and **Maestro** mobile flows on `main` / PRs (see [.github/workflows/ci.yml](.github/workflows/ci.yml)).
+CI also runs **Playwright** (Chromium and WebKit per `playwright.config.ts`), **Deno typecheck** for Supabase edge functions, optional **Supabase DB types** verification via `npm run db:types:check` (when `SUPABASE_ACCESS_TOKEN` is set), and **Maestro** mobile flows on `main` / PRs (see [.github/workflows/ci.yml](.github/workflows/ci.yml)). Local E2E: `npm run test:e2e` (full), `npm run test:e2e:smoke` (fast subset), `npm run test:e2e:probes` (popup/offline probes only).
 
 ### What “10/10” means here
 

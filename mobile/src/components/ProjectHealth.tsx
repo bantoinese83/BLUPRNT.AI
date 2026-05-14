@@ -213,7 +213,20 @@ export const ProjectHealth = memo(function ProjectHealth({
 
       {runway && spendingTotal > 0 ? (
         <View style={styles.runwayWrap}>
-          <Text style={styles.runwayCaption}>Spend vs estimate band</Text>
+          <View style={styles.runwayHeader}>
+            <Text style={styles.runwayCaption}>Spend vs estimate band</Text>
+            <View style={styles.spendBadge}>
+              <Text style={styles.spendBadgeLabel}>Current Spend:</Text>
+              <Text
+                style={[
+                  styles.spendBadgeValue,
+                  runway.overHigh ? { color: Theme.colors.status.error } : null,
+                ]}
+              >
+                {money(spendingTotal)}
+              </Text>
+            </View>
+          </View>
           <View style={styles.runwayTrackOuter}>
             <View style={styles.runwayTrack}>
               <View
@@ -228,16 +241,24 @@ export const ProjectHealth = memo(function ProjectHealth({
             </View>
             <View
               style={[
-                styles.runwayDot,
+                styles.runwayDotRing,
                 {
                   left: `${runway.spendPct}%`,
-                  backgroundColor: runway.overHigh
-                    ? Theme.colors.status.error
-                    : Theme.colors.brand.primary,
-                  transform: [{ translateX: -7 }],
+                  transform: [{ translateX: -12 }],
                 },
               ]}
-            />
+            >
+              <View
+                style={[
+                  styles.runwayDotInner,
+                  {
+                    backgroundColor: runway.overHigh
+                      ? Theme.colors.status.error
+                      : Theme.colors.brand.primary,
+                  },
+                ]}
+              />
+            </View>
             {runway.overHigh ? (
               <Text style={styles.runwayOverLabel}>Over</Text>
             ) : null}
@@ -246,10 +267,7 @@ export const ProjectHealth = memo(function ProjectHealth({
             <Text style={styles.runwayLabelText} numberOfLines={1}>
               Low {money(min)}
             </Text>
-            <Text style={styles.runwayLabelCenter} numberOfLines={1}>
-              Now {money(spendingTotal)}
-            </Text>
-            <Text style={styles.runwayLabelText} numberOfLines={1}>
+            <Text style={styles.runwayLabelTextRight} numberOfLines={1}>
               High {money(max)}
             </Text>
           </View>
@@ -346,15 +364,39 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   runwayWrap: {
-    gap: 6,
+    gap: 8,
     marginBottom: Theme.spacing.sm,
   },
+  runwayHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   runwayCaption: {
-    fontSize: 8,
-    fontFamily: Theme.typography.family.black,
-    color: Theme.colors.text.muted,
+    fontSize: 10,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.secondary,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 1,
+  },
+  spendBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Theme.colors.brand.light,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  spendBadgeLabel: {
+    fontSize: 9,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.deep,
+  },
+  spendBadgeValue: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.brand.deep,
   },
   runwayTrackOuter: {
     height: 36,
@@ -362,11 +404,13 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   runwayTrack: {
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(148, 163, 184, 0.18)",
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(148, 163, 184, 0.15)",
     overflow: "hidden",
     position: "relative",
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.2)",
   },
   runwayOverLabel: {
     position: "absolute",
@@ -384,35 +428,48 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     bottom: 0,
-    backgroundColor: "rgba(13, 148, 136, 0.22)",
+    backgroundColor: "rgba(13, 148, 136, 0.25)",
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderColor: "rgba(13, 148, 136, 0.6)",
   },
-  runwayDot: {
+  runwayDotRing: {
     position: "absolute",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    top: "50%",
+    marginTop: -12,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  runwayDotInner: {
     width: 14,
     height: 14,
     borderRadius: 7,
-    top: "50%",
-    marginTop: -7,
-    borderWidth: 2,
-    borderColor: "#fff",
-    zIndex: 10,
   },
   runwayLabels: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 4,
+    alignItems: "center",
   },
   runwayLabelText: {
-    flex: 1,
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.muted,
   },
-  runwayLabelCenter: {
-    fontSize: 9,
+  runwayLabelTextRight: {
+    fontSize: 10,
     fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-    maxWidth: "34%",
+    color: Theme.colors.text.muted,
+    textAlign: "right",
   },
   runwayHint: {
     fontSize: 12,

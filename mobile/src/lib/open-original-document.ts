@@ -40,12 +40,25 @@ export async function fetchLedgerEntryOriginalSignedUrl(
     };
   }
 
-  const url = body?.signedUrl;
+  let url = body?.signedUrl;
   if (!url) {
     return { ok: false, message: ledgerOriginalMessages.generic };
   }
 
-  return { ok: true, signedUrl: url, filename: body.filename };
+  const configuredUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  if (configuredUrl) {
+    try {
+      const baseOrigin = new URL(configuredUrl).origin;
+      url = url
+        .replace(/^https?:\/\/localhost(:\d+)?/, baseOrigin)
+        .replace(/^https?:\/\/127\.0\.0\.1(:\d+)?/, baseOrigin)
+        .replace(/^https?:\/\/kong(:\d+)?/, baseOrigin);
+    } catch {
+      // ignore invalid URL
+    }
+  }
+
+  return { ok: true, signedUrl: url, filename: body?.filename };
 }
 
 export async function openOriginalDocumentForLedgerEntry(

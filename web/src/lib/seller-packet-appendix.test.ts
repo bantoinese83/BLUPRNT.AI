@@ -67,7 +67,7 @@ describe("buildSellerPacketAppendixItems", () => {
 
   it("embeds jpeg when fetch returns small image blob", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://cdn.example.com/a.jpg", filename: "a.jpg" },
+      data: { signedUrl: "https://cdn.example.com/a.jpg", filename: "a.jpg" },
       error: null,
     });
     const blob = new Blob([new Uint8Array(100)], { type: "image/jpeg" });
@@ -86,7 +86,7 @@ describe("buildSellerPacketAppendixItems", () => {
 
   it("uses pdf_note for pdf blobs", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://cdn.example.com/a.pdf", filename: "a.pdf" },
+      data: { signedUrl: "https://cdn.example.com/a.pdf", filename: "a.pdf" },
       error: null,
     });
     const blob = new Blob([""], { type: "application/pdf" });
@@ -101,7 +101,7 @@ describe("buildSellerPacketAppendixItems", () => {
     expect(items[0]!.kind).toBe("pdf_note");
   });
 
-  it("adds pdf_note when signed_url is missing", async () => {
+  it("adds pdf_note when signedUrl is missing", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
       data: { filename: "orphan.bin" },
       error: null,
@@ -119,7 +119,7 @@ describe("buildSellerPacketAppendixItems", () => {
 
   it("adds pdf_note when fetch throws", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://cdn.example.com/x.png", filename: "x.png" },
+      data: { signedUrl: "https://cdn.example.com/x.png", filename: "x.png" },
       error: null,
     });
     vi.mocked(global.fetch).mockRejectedValue(new Error("network"));
@@ -132,7 +132,7 @@ describe("buildSellerPacketAppendixItems", () => {
 
   it("adds pdf_note when response is not ok", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://cdn.example.com/x.png", filename: "x.png" },
+      data: { signedUrl: "https://cdn.example.com/x.png", filename: "x.png" },
       error: null,
     });
     vi.mocked(global.fetch).mockResolvedValue({
@@ -150,7 +150,7 @@ describe("buildSellerPacketAppendixItems", () => {
   it("rejects oversized blobs with a friendly note", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
       data: {
-        signed_url: "https://cdn.example.com/big.png",
+        signedUrl: "https://cdn.example.com/big.png",
         filename: "big.png",
       },
       error: null,
@@ -177,7 +177,7 @@ describe("buildSellerPacketAppendixItems", () => {
     ] as const) {
       vi.mocked(invokeFunction).mockResolvedValue({
         data: {
-          signed_url: `https://cdn.example.com/a.${fmt.toLowerCase()}`,
+          signedUrl: `https://cdn.example.com/a.${fmt.toLowerCase()}`,
           filename: `a.${fmt.toLowerCase()}`,
         },
         error: null,
@@ -198,7 +198,7 @@ describe("buildSellerPacketAppendixItems", () => {
 
   it("uses pdf_note for unsupported image types", async () => {
     vi.mocked(invokeFunction).mockResolvedValue({
-      data: { signed_url: "https://cdn.example.com/a.gif", filename: "a.gif" },
+      data: { signedUrl: "https://cdn.example.com/a.gif", filename: "a.gif" },
       error: null,
     });
     vi.mocked(global.fetch).mockResolvedValue({

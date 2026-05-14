@@ -17,6 +17,12 @@ import {
   type RoomType,
 } from "./_shared/estimate.ts";
 import { type GeminiPart } from "../_shared/gemini.ts";
+import { PUBLIC_SITE_ORIGIN } from "../../../shared/constants/public-site.ts";
+
+function getAppBaseUrl(): string {
+  const env = Deno.env.get("SITE_URL")?.replace(/\/$/, "");
+  return env || PUBLIC_SITE_ORIGIN;
+}
 
 /** Keeps vision requests under Edge wall-clock limits (150s free / busy Gemini). */
 const MAX_VISION_PHOTOS = 4;
@@ -295,7 +301,7 @@ export async function handler(req: Request): Promise<Response> {
                 params: {
                   userName: userRes.user.user_metadata?.full_name || userRes.user.email.split("@")[0],
                   projectName: projRes?.name || "Your project",
-                  projectUrl: `https://bluprnt.ai/dashboard?project=${project_id}`,
+                  projectUrl: `${getAppBaseUrl()}/dashboard?project=${project_id}`,
                 },
               },
             });

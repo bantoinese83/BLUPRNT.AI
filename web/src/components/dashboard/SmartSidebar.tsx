@@ -126,7 +126,7 @@ export function SmartSidebar({
                           {insight.title}
                         </h4>
                         <div className="text-xs text-slate-500 leading-relaxed markdown-content">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
                             {insight.description}
                           </ReactMarkdown>
                         </div>

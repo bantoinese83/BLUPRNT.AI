@@ -90,7 +90,10 @@ export function ProjectDetailHeader({
 
         <View style={styles.actions}>
           <TouchableOpacity
-            onPress={onShare}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onShare();
+            }}
             style={styles.actionBtn}
             accessibilityRole="button"
             accessibilityLabel="Share project"

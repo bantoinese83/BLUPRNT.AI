@@ -42,10 +42,10 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Install Playwright (Chromium, Firefox, WebKit)
+      - name: Install Playwright (Chromium, WebKit — see playwright.config.ts projects)
         run: npx playwright install --with-deps
 
-      - name: E2E smoke (web)
+      - name: E2E (web, full Playwright suite)
         run: npm run test:e2e
 
       - name: Setup Deno

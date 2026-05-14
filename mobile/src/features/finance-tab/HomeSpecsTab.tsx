@@ -16,6 +16,7 @@ import {
   Trash2,
   MapPin,
   Camera,
+  Wrench,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { Theme } from "@/constants/Theme";
@@ -37,6 +38,7 @@ const CATEGORIES = [
   { id: "Paint", label: "Paint", icon: Paintbrush },
   { id: "Tile", label: "Tile", icon: Grid },
   { id: "Fixture", label: "Fixtures", icon: Lightbulb },
+  { id: "Hardware", label: "Hardware", icon: Wrench },
   { id: "Other", label: "Other", icon: MoreHorizontal },
 ];
 
@@ -364,8 +366,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(148,163,184,0.1)",
   },
   filterChipActive: {
-    backgroundColor: Theme.colors.text.primary,
-    borderColor: Theme.colors.text.primary,
+    backgroundColor: Theme.colors.brand.primary,
+    borderColor: Theme.colors.brand.primary,
   },
   filterChipText: {
     fontSize: 11,
@@ -516,7 +518,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: Theme.colors.text.primary,
+    backgroundColor: Theme.colors.brand.primary,
   },
   retryBtnText: {
     color: Theme.colors.card,

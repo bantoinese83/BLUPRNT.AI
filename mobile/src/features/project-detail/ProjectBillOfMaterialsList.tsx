@@ -1,6 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-import { Package, Pencil, Trash2 } from "lucide-react-native";
+import {
+  Package,
+  Pencil,
+  Trash2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 
 import { Theme } from "@/constants/Theme";
@@ -12,6 +18,7 @@ import {
 } from "./BillOfMaterialEditModal";
 
 import { type BillOfMaterialItem } from "@shared/types/onboarding";
+import { money } from "@shared/lib/formatters";
 
 type MaterialsList = BillOfMaterialItem[];
 
@@ -26,6 +33,15 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
     row: BillOfMaterialRow;
   } | null>(null);
   const [persisting, setPersisting] = useState(false);
+
+  const totalBomCost = useMemo(() => {
+    if (!materials) return 0;
+    return materials.reduce((acc, curr) => {
+      const cost = curr.estimated_cost || 0;
+      const qty = curr.quantity ? Number(curr.quantity) || 1 : 1;
+      return acc + cost * qty;
+    }, 0);
+  }, [materials]);
 
   const runPersist = useCallback(
     async (next: MaterialsList) => {
@@ -74,7 +90,7 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
   return (
     <View style={styles.materialContainer}>
       <View style={styles.materialHeader}>
-        <Package size={12} color={Theme.colors.brand.primary} />
+        <Package size={14} color={Theme.colors.brand.primary} />
         <Text style={styles.materialHeaderText}>Bill of Materials</Text>
         <View style={styles.materialHeaderSpacer} />
         {persisting ? (
@@ -98,77 +114,176 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
               <Text style={styles.materialTableLabel}>Qty</Text>
             </View>
             <View style={styles.materialColPrice}>
-              <Text style={styles.materialTableLabel}>Est</Text>
+              <Text style={styles.materialTableLabel}>Est Total</Text>
             </View>
             {onPersist && <View style={{ width: 44 }} />}
           </View>
 
-          {materials.map((m: BillOfMaterialRow, idx: number) => (
-            <View
-              key={`${m.name}-${idx}`}
-              style={[
-                styles.materialTableRow,
-                idx === materials.length - 1 && { borderBottomWidth: 0 },
-              ]}
-            >
-              <View style={styles.materialColMain}>
-                <Text style={styles.materialNameTable} numberOfLines={1}>
-                  {m.name}
-                </Text>
-                {m.brand && (
-                  <Text style={styles.materialBrandTable}>{m.brand}</Text>
-                )}
-              </View>
+          {materials.map((m: BillOfMaterialRow, idx: number) => {
+            const qtyNum = m.quantity ? Number(m.quantity) || 1 : 1;
+            const lineTotal = m.estimated_cost
+              ? m.estimated_cost * qtyNum
+              : null;
 
-              <View style={styles.materialColQty}>
-                <Text style={styles.materialQtyTable}>
-                  {m.quantity} {m.unit || "pc"}
-                </Text>
-              </View>
-
-              <View style={styles.materialColPrice}>
-                {m.estimated_cost ? (
-                  <Text style={styles.materialPriceTable}>
-                    ${m.estimated_cost}
+            return (
+              <View
+                key={`${m.name}-${idx}`}
+                style={[
+                  styles.materialTableRow,
+                  idx === materials.length - 1 && { borderBottomWidth: 0 },
+                ]}
+              >
+                <View style={styles.materialColMain}>
+                  <Text style={styles.materialNameTable} numberOfLines={1}>
+                    {m.name}
                   </Text>
-                ) : (
-                  <Text
-                    style={[
-                      styles.materialPriceTable,
-                      { color: Theme.colors.text.muted },
-                    ]}
-                  >
-                    —
-                  </Text>
-                )}
-              </View>
-
-              {onPersist ? (
-                <View style={styles.materialColActions}>
-                  <TouchableOpacity
-                    disabled={persisting}
-                    onPress={() => {
-                      void Haptics.selectionAsync();
-                      setEditItem({ index: idx, row: m });
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                      marginTop: 2,
                     }}
                   >
-                    <Pencil size={14} color={Theme.colors.brand.primary} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    disabled={persisting}
-                    onPress={() => confirmRemove(idx, m.name)}
-                  >
-                    <Trash2 size={14} color={Theme.colors.status.error} />
-                  </TouchableOpacity>
+                    {m.brand ? (
+                      <Text style={styles.materialBrandTable}>{m.brand}</Text>
+                    ) : (
+                      <Text
+                        style={[
+                          styles.materialBrandTable,
+                          {
+                            color: Theme.colors.text.muted,
+                            textTransform: "none",
+                            fontWeight: "normal",
+                          },
+                        ]}
+                      >
+                        Standard Spec
+                      </Text>
+                    )}
+                    {m.model ? (
+                      <Text
+                        style={{
+                          fontSize: 9,
+                          color: Theme.colors.text.muted,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {m.model}
+                      </Text>
+                    ) : null}
+                  </View>
                 </View>
-              ) : null}
+
+                <View style={styles.materialColQty}>
+                  <Text style={styles.materialQtyTable}>
+                    {m.quantity} {m.unit || "pc"}
+                  </Text>
+                </View>
+
+                <View style={styles.materialColPrice}>
+                  {lineTotal != null ? (
+                    <View style={{ alignItems: "flex-end" }}>
+                      <Text style={styles.materialPriceTable}>
+                        ${lineTotal}
+                      </Text>
+                      {qtyNum > 1 && (
+                        <Text
+                          style={{
+                            fontSize: 9,
+                            color: Theme.colors.text.muted,
+                            fontStyle: "italic",
+                            marginTop: 1,
+                          }}
+                        >
+                          ${m.estimated_cost} ea
+                        </Text>
+                      )}
+                    </View>
+                  ) : (
+                    <Text
+                      style={[
+                        styles.materialPriceTable,
+                        { color: Theme.colors.text.muted },
+                      ]}
+                    >
+                      —
+                    </Text>
+                  )}
+                </View>
+
+                {onPersist ? (
+                  <View style={styles.materialColActions}>
+                    <TouchableOpacity
+                      disabled={persisting}
+                      onPress={() => {
+                        void Haptics.selectionAsync();
+                        setEditItem({ index: idx, row: m });
+                      }}
+                    >
+                      <Pencil size={14} color={Theme.colors.brand.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      disabled={persisting}
+                      onPress={() => confirmRemove(idx, m.name)}
+                    >
+                      <Trash2 size={14} color={Theme.colors.status.error} />
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
+
+          {/* BOM Summary Footer */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingVertical: 10,
+              paddingHorizontal: 12,
+              backgroundColor: "rgba(13, 148, 136, 0.06)",
+              borderTopWidth: 1,
+              borderTopColor: "rgba(13, 148, 136, 0.12)",
+            }}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
+              <ShieldCheck size={14} color={Theme.colors.brand.primary} />
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontFamily: Theme.typography.family.bold,
+                  color: Theme.colors.brand.deep,
+                }}
+              >
+                Estimated BOM Total ({materials.length} items)
+              </Text>
             </View>
-          ))}
+            <Text
+              style={{
+                fontSize: 13,
+                fontFamily: Theme.typography.family.black,
+                color: Theme.colors.brand.primary,
+              }}
+            >
+              {money(totalBomCost)}
+            </Text>
+          </View>
         </View>
       )}
 
-      <View style={{ marginTop: 12, alignItems: "center" }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+      <View style={{ marginTop: 12, gap: 6 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}
+        >
           <View
             style={{
               width: 4,
@@ -187,6 +302,27 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
             }}
           >
             Quantities grounded in regional waste factors
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}
+        >
+          <Sparkles size={10} color={Theme.colors.status.info} />
+          <Text
+            style={{
+              fontSize: 9,
+              fontFamily: Theme.typography.family.bold,
+              color: Theme.colors.status.info,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+            }}
+          >
+            +15% Contractor Contingency Reserve Included
           </Text>
         </View>
       </View>

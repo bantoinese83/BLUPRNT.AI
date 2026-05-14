@@ -2,10 +2,11 @@ import { Alert, Share } from "react-native";
 import { randomUUID } from "expo-crypto";
 import { supabase } from "@/lib/supabase";
 import { friendlyProjectShareError } from "@shared/lib/user-friendly-errors";
+import { PUBLIC_SITE_ORIGIN } from "@shared/constants/public-site";
 
-function shareLinkBaseUrl(): string {
+export function shareLinkBaseUrl(): string {
   const raw = process.env.EXPO_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  return raw && raw.startsWith("http") ? raw : "https://bluprnt.ai";
+  return raw && raw.startsWith("http") ? raw : PUBLIC_SITE_ORIGIN;
 }
 
 /**

@@ -4,7 +4,9 @@
 
 import { getPublicSiteUrl } from "@/lib/site-url";
 
-const SEO_FALLBACK_ORIGIN = "https://bluprntai.com";
+import { PUBLIC_SITE_ORIGIN } from "@shared/constants/public-site";
+
+const SEO_FALLBACK_ORIGIN = PUBLIC_SITE_ORIGIN;
 
 /**
  * Stable origin for canonical and absolute OG URLs. Prefer VITE_SITE_URL in production.

@@ -158,7 +158,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
             </View>
             <View style={styles.planInfo}>
               <Text style={styles.planName}>
-                {isPro ? "Bluprntai Pro" : "Free Explorer"}
+                {isPro ? "Architect Plan" : "Free Explorer"}
               </Text>
               <Text style={styles.planStatus}>
                 {isPro

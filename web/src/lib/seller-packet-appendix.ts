@@ -20,7 +20,7 @@ export type SellerPacketAppendixItem =
 const MAX_BYTES_PER_FILE = 2_500_000;
 
 type SignedUrlResponse = {
-  signed_url?: string;
+  signedUrl?: string;
   filename?: string;
   error?: string;
 };
@@ -88,7 +88,7 @@ export async function buildSellerPacketAppendixItems(
           };
         }
 
-        const signedUrl = (data as SignedUrlResponse).signed_url;
+        const signedUrl = (data as SignedUrlResponse).signedUrl;
         const filename = (data as SignedUrlResponse).filename ?? "document";
 
         if (!signedUrl) {

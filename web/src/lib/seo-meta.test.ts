@@ -28,7 +28,7 @@ describe("seoCanonicalOrigin", () => {
     try {
       // @ts-expect-error — prerender / non-DOM environments
       delete globalThis.window;
-      expect(seoCanonicalOrigin()).toBe("https://bluprntai.com");
+      expect(seoCanonicalOrigin()).toBe("https://bluprnt.ai");
     } finally {
       globalThis.window = prev;
     }

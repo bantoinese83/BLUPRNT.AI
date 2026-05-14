@@ -35,3 +35,8 @@ for f in "${FILES[@]}"; do
   echo "deno check $f"
   "${DENO_BIN[@]}" check --config "$CONFIG" "$f"
 done
+
+echo "deno test supabase/functions/_shared/*.test.ts"
+"${DENO_BIN[@]}" test --config "$CONFIG" \
+  "$ROOT/supabase/functions/_shared/auth.test.ts" \
+  "$ROOT/supabase/functions/_shared/versioning.test.ts"

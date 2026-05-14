@@ -90,7 +90,10 @@ export function LandingPricing({
                   key={i}
                   className="flex items-center gap-3 text-slate-700 font-medium"
                 >
-                  <HammerIcon className="w-5 h-5 opacity-40 shrink-0" />
+                  <HammerIcon
+                    className="w-5 h-5 shrink-0 text-slate-600"
+                    aria-hidden
+                  />
                   {feature}
                 </li>
               ))}
@@ -152,7 +155,10 @@ export function LandingPricing({
                   key={i}
                   className="flex items-center gap-3 text-slate-700 font-medium"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-teal-600 shrink-0" />
+                  <CheckCircle2
+                    className="w-5 h-5 shrink-0 text-teal-900"
+                    aria-hidden
+                  />
                   {feature}
                 </li>
               ))}
@@ -183,7 +189,7 @@ export function LandingPricing({
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="mb-8 text-center sm:mb-10">
-            <p className="mb-2 inline-flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.22em] text-teal-600 sm:text-[11px]">
+            <p className="mb-2 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-teal-950">
               <Hammer className="h-3.5 w-3.5" aria-hidden />
               Plans
             </p>

@@ -171,7 +171,7 @@ export async function generateSellerPacketBlob(
 
   doc.setFontSize(TITLE_SIZE);
   doc.setFont("helvetica", "bold");
-  doc.text("Property Improvement Ledger", MARGIN, y);
+  doc.text("Home Archive & Property Ledger", MARGIN, y);
   y += LINE_HEIGHT * 2;
 
   doc.setFontSize(FONT_SIZE);

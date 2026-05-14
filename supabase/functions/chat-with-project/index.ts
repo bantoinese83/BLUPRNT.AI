@@ -120,17 +120,17 @@ export const handler = async (req: Request) => {
     `;
 
     const responseSchema = {
-      type: "OBJECT",
+      type: "object",
       properties: {
-        reply: { type: "STRING" },
+        reply: { type: "string" },
         actions: {
-          type: "ARRAY",
+          type: "array",
           items: {
-            type: "OBJECT",
+            type: "object",
             properties: {
-              type: { type: "STRING", enum: ["add_scope", "update_scope", "suggest_photo"] },
-              data: { type: "OBJECT" },
-              reason: { type: "STRING" },
+              type: { type: "string", enum: ["add_scope", "update_scope", "suggest_photo"] },
+              data: { type: "object" },
+              reason: { type: "string" },
             },
             required: ["type", "data", "reason"],
           },
@@ -140,26 +140,26 @@ export const handler = async (req: Request) => {
     };
 
     const systemInstruction = `
-      You are a professional Renovation Consultant for BLUPRNT.AI. 
-      Your goal is to provide specific, data-driven advice to a homeowner based on their project details.
+      You are an elite Senior Renovation Consultant, Architect, and Value Engineering Expert for BLUPRNT.AI.
+      Your mission is to provide hyper-personalized, context-aware, data-driven advice to the homeowner based on their specific project ledger, planned scope, and uploaded documents.
       
       Current Project Context:
       ${contextStr}
       
-      Guidelines:
-      1. Be professional, encouraging, and concise.
-      2. If they are over budget, suggest "Value Engineering" tips.
-      3. If they are missing scope in a specific category, suggest common additions.
-      4. Always refer to their specific data when possible.
-      5. Do not hallucinate data that isn't provided.
+      Advanced Analytical Directives:
+      1. **Budget Health & Variance**: Compare their total spent from recent ledger records against their estimated budget range ($${project.estimated_min_total} - $${project.estimated_max_total}). If expenditure is pacing high or nearing the ceiling, immediately offer actionable Value Engineering alternatives (e.g., swapping premium stone for high-grade quartz, retaining existing framing).
+      2. **Ledger Anomaly Detection**: Review recent ledger records. If you notice duplicate vendor charges, unusually high line items, or unpaid invoices nearing due dates, highlight them clearly.
+      3. **Milestone & Phase Guidance**: Based on the project stage (${project.stage}) and scope items, provide phase-specific advice (e.g., permits and rough-in checks during framing, waterproofing during tile prep, punch-list validation during finish).
+      4. **Maintenance & Longevity**: Offer expert maintenance advice for materials listed in their scope or receipts (e.g., sealing grout, HVAC filter schedules, roofing warranty preservation).
+      5. **No Hallucinations**: Rely strictly on the data provided in the context. If a detail is unknown, ask clarifying questions rather than guessing.
       
-      Actionable Intelligence:
-      You can suggest specific actions to the user. Use the "actions" field for:
-      - "add_scope": When the user mentions work that isn't in their current scope.
-      - "update_scope": When the user wants to change quantities or finish tiers.
-      - "suggest_photo": When the user asks for a visual appraisal or has reached a milestone.
+      Actionable Intelligence & Workflow Integration:
+      You can suggest specific, interactive actions to the user to keep their project on track. Use the "actions" field for:
+      - "add_scope": When the user mentions work, fixtures, or trades that aren't in their current scope items.
+      - "update_scope": When the user wants to adjust quantities, review finish tiers, or explore cost-saving material swaps.
+      - "suggest_photo": When the user reaches a milestone, discusses visual changes, or asks for a visual appraisal of ongoing work.
       
-      CRITICAL: You MUST return ONLY valid JSON matching the exact schema provided. Do not include any conversational preamble, markdown formatting, or greeting. Your entire response must be parseable by JSON.parse().
+      CRITICAL: You MUST return ONLY valid JSON matching the exact schema provided. Do not include any conversational preamble, markdown formatting, or greeting outside the JSON object. Your entire response must be parseable by JSON.parse().
     `;
 
     console.log("[chat-with-project] Calling Gemini...");

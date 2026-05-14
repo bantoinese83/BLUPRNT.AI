@@ -1,6 +1,10 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
-import { getUserIdFromRequest, getServiceClient } from "../_shared/auth.ts";
+import {
+  getUserIdFromRequest,
+  getServiceClient,
+  isBearerServiceRoleKey,
+} from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 import { sanitizeUserEmailHtml } from "../_shared/sanitize-email-html.ts";
@@ -21,41 +25,48 @@ interface TemplateParams {
   [key: string]: any;
 }
 
+import { PUBLIC_SITE_ORIGIN } from "../../../shared/constants/public-site.ts";
+
+function getAppBaseUrl(): string {
+  const env = Deno.env.get("SITE_URL")?.replace(/\/$/, "");
+  return env || PUBLIC_SITE_ORIGIN;
+}
+
 const TemplateEngine = {
-  welcome: (params: TemplateParams) => ({
+  welcome: (params: TemplateParams, baseUrl: string) => ({
     subject: "Welcome to BLUPRNT.AI!",
     html: `
       <div style="font-family: sans-serif; color: #334155; line-height: 1.6; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #0f172a;">Welcome, ${params.userName || "Friend"}!</h1>
         <p>Thanks for joining BLUPRNT.AI. We're here to help you document and maximize the value of your home improvements.</p>
         <p>Ready to get started? Log in to create your first project snapshot.</p>
-        <a href="https://bluprnt.ai/dashboard" style="display: inline-block; background-color: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Go to Dashboard</a>
+        <a href="${baseUrl}/dashboard" style="display: inline-block; background-color: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Go to Dashboard</a>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
         <p style="font-size: 12px; color: #94a3b8;">You received this because you signed up for BLUPRNT.AI.</p>
       </div>
     `,
   }),
-  project_ready: (params: TemplateParams) => ({
+  project_ready: (params: TemplateParams, baseUrl: string) => ({
     subject: `Your BLUPRNT Analysis is Ready: ${params.projectName}`,
     html: `
       <div style="font-family: sans-serif; color: #334155; line-height: 1.6; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #0f172a;">Good news!</h1>
         <p>Our AI has finished analyzing the photos for <strong>${params.projectName}</strong>.</p>
         <p>You can now view your line-item estimate and starting budget in the app.</p>
-        <a href="${params.projectUrl || "https://bluprnt.ai/dashboard"}" style="display: inline-block; background-color: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">View Project</a>
+        <a href="${params.projectUrl || `${baseUrl}/dashboard`}" style="display: inline-block; background-color: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">View Project</a>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
         <p style="font-size: 12px; color: #94a3b8;">Sent by BLUPRNT.AI Automated Analysis.</p>
       </div>
     `,
   }),
-  subscription_active: (params: TemplateParams) => ({
+  subscription_active: (params: TemplateParams, baseUrl: string) => ({
     subject: `Your ${params.planName || "Architect"} Plan is Active!`,
     html: `
       <div style="font-family: sans-serif; color: #334155; line-height: 1.6; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #0f172a;">Upgrade Confirmed!</h1>
         <p>Your account has been upgraded to the <strong>${params.planName || "Architect"}</strong> plan.</p>
         <p>You now have full access to professional ledger exports, unlimited projects, and enhanced AI analysis.</p>
-        <a href="https://bluprnt.ai/dashboard" style="display: inline-block; background-color: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Unlock Your Tools</a>
+        <a href="${baseUrl}/dashboard" style="display: inline-block; background-color: #14b8a6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Unlock Your Tools</a>
       </div>
     `,
   }),
@@ -119,9 +130,9 @@ export const handler = async (req: Request, preParsedBody?: any): Promise<Respon
   }
 
   try {
-    const authHeader = req.headers.get("Authorization") || "";
+    const authHeader = req.headers.get("Authorization");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const isServiceRole = !!(serviceKey && authHeader.includes(serviceKey));
+    const isServiceRole = isBearerServiceRoleKey(authHeader, serviceKey);
 
     // DONT CALL req.json() if preParsedBody exists
     let body: any;
@@ -160,7 +171,8 @@ export const handler = async (req: Request, preParsedBody?: any): Promise<Respon
 
     if (body?.template && TemplateEngine[body.template as EmailTemplate]) {
       const sanitizedParams = sanitizeParams(body.params || {});
-      const result = TemplateEngine[body.template as EmailTemplate](sanitizedParams);
+      const baseUrl = getAppBaseUrl();
+      const result = TemplateEngine[body.template as EmailTemplate](sanitizedParams, baseUrl);
       subject = result.subject;
       html = result.html;
     } else {

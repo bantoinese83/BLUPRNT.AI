@@ -79,7 +79,7 @@ describe("pdf-export", () => {
 
     // Verify main title
     expect(mockText).toHaveBeenCalledWith(
-      "Property Improvement Ledger",
+      "Home Archive & Property Ledger",
       expect.any(Number),
       expect.any(Number),
     );

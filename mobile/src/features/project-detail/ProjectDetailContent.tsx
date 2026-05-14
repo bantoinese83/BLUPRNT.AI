@@ -50,6 +50,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
     handleShare,
     handleRefresh,
     exportSellerPacket,
+    exporting,
     updateScopeItemMaterials,
   } = vm;
 
@@ -163,6 +164,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
           setIncludeAppendix={setIncludeAppendix}
           onShare={handleShare}
           onExportSellerPacket={exportSellerPacket}
+          exporting={exporting}
         />
       </View>
 
