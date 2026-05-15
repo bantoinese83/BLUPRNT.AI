@@ -34,7 +34,9 @@ export function UIPreferencesSection({
 
           <Tabs
             value={preferences.theme}
-            onValueChange={(v) => onUpdate({ theme: v as any })}
+            onValueChange={(v) =>
+              onUpdate({ theme: v as UIPreferences["theme"] })
+            }
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-3 bg-slate-100/50 p-1 rounded-2xl h-12">

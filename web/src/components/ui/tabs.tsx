@@ -15,12 +15,18 @@ const Tabs = ({
   return (
     <div className={cn("w-full", className)}>
       {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child as React.ReactElement<any>, {
+        if (
+          React.isValidElement<{
+            value: string;
+            onValueChange: (v: string) => void;
+          }>(child)
+        ) {
+          return React.cloneElement(child, {
             value,
             onValueChange,
           });
         }
+
         return child;
       })}
     </div>
@@ -41,12 +47,18 @@ const TabsList = ({
   return (
     <div className={cn("flex items-center", className)}>
       {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child as React.ReactElement<any>, {
-            activeValue: value,
-            onValueChange,
+        if (
+          React.isValidElement<{
+            activeValue: string;
+            onValueChange: (v: string) => void;
+          }>(child)
+        ) {
+          return React.cloneElement(child, {
+            activeValue: value!,
+            onValueChange: onValueChange!,
           });
         }
+
         return child;
       })}
     </div>

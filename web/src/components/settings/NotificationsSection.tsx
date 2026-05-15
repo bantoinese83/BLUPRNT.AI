@@ -82,7 +82,12 @@ export function NotificationsSection({
 
           <Tabs
             value={preferences.preferred_channel}
-            onValueChange={(v) => onUpdate({ preferred_channel: v as any })}
+            onValueChange={(v) =>
+              onUpdate({
+                preferred_channel:
+                  v as NotificationPreferences["preferred_channel"],
+              })
+            }
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-3 bg-slate-100/50 p-1 rounded-2xl h-12">
