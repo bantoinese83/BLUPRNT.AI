@@ -233,7 +233,7 @@ export function useSettingsPage(): UseSettingsPageResult {
       const blob =
         data instanceof Blob
           ? data
-          : new Blob([data as ArrayBuffer | Uint8Array | string], {
+          : new Blob([data as BlobPart], {
               type: "application/zip",
             });
       const url = URL.createObjectURL(blob);
