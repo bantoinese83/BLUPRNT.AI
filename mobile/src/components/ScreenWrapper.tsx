@@ -8,6 +8,8 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GradientBackground } from "@/components/ui/GradientBackground";
@@ -30,6 +32,8 @@ interface Props {
   contentContainerStyle?: ViewStyle;
   /** When `withScroll` is true, attaches to the inner `ScrollView` (e.g. programmatic scroll). */
   scrollViewRef?: React.RefObject<ScrollView | null>;
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  scrollEventThrottle?: number;
 }
 
 export function ScreenWrapper({
@@ -45,13 +49,18 @@ export function ScreenWrapper({
   keyboardVerticalOffset = 0,
   contentContainerStyle,
   scrollViewRef,
+  onScroll,
+  scrollEventThrottle = 16,
 }: Props) {
   const content = withScroll ? (
     <ScrollView
       ref={scrollViewRef}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
+      onScroll={onScroll}
+      scrollEventThrottle={scrollEventThrottle}
       contentContainerStyle={[
         styles.scrollContent,
         withTabBar && { paddingBottom: TAB_BAR_SCROLL_PADDING },

@@ -20,6 +20,7 @@ import { generateActivityEvents } from "@/lib/activity";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DASHBOARD_EMPTY_STATE } from "@shared/copy/dashboard";
 import { PlusCircle } from "lucide-react-native";
+import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import { DashboardWelcomeBanner } from "@/components/DashboardWelcomeBanner";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { Confetti } from "@/components/ui/Confetti";
@@ -82,6 +83,7 @@ export default function DashboardScreen() {
   const [reviewLedgerEntry, setReviewLedgerEntry] =
     useState<LedgerEntryRow | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [fabVisible, setFabVisible] = useState(false);
 
   const capitalDocumentedTotal = useMemo(
     () => capitalImprovementTotal(ledgerEntries as LedgerEntryRow[]),
@@ -216,6 +218,10 @@ export default function DashboardScreen() {
       onRefresh={load}
       refreshing={refreshing}
       style={styles.scrollContent}
+      onScroll={(e) => {
+        const offset = e.nativeEvent.contentOffset.y;
+        setFabVisible(offset > 200);
+      }}
     >
       {loadError && (
         <DashboardLoadErrorBanner
@@ -438,6 +444,11 @@ export default function DashboardScreen() {
         onSaved={load}
       />
       <Confetti active={isCelebrating} />
+      <FloatingActionButton
+        visible={fabVisible}
+        onPress={openDashboardDocumentCapture}
+        disabled={isUploading || isExporting}
+      />
     </ScreenWrapper>
   );
 }

@@ -38,7 +38,11 @@ export function useOnboardingEstimation(params: {
   >(null);
 
   const runPhotoToScope = useCallback(
-    async (opts?: { textOnly?: boolean; maxRetries?: number }) => {
+    async (opts?: {
+      textOnly?: boolean;
+      maxRetries?: number;
+      confirmWipe?: boolean;
+    }) => {
       setEstimateError(null);
       setEstimateLoading(true);
       try {
@@ -79,6 +83,7 @@ export function useOnboardingEstimation(params: {
         formData.set("room_type", projectTypeToRoomType(params.projectType));
         formData.set("finish_preference", "mid");
         formData.set("location_unset", params.locationUnset ? "1" : "0");
+        if (opts?.confirmWipe) formData.set("confirm_wipe", "1");
         if (String(params.scopeDescription || "").trim())
           formData.set(
             "scope_description",

@@ -114,6 +114,7 @@ export function PlanVsActualCard({
           Haptics.selectionAsync();
           router.push("/(tabs)/finance");
         }}
+        hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
         accessibilityRole="button"
         accessibilityLabel="Open finance tab to export home archive"
       >
@@ -126,6 +127,7 @@ export function PlanVsActualCard({
           Haptics.selectionAsync();
           router.push(`/project/${projectId}`);
         }}
+        hitSlop={{ top: 10, bottom: 10, left: 12, right: 12 }}
         accessibilityRole="button"
         accessibilityLabel="Open project detail"
         style={styles.projectDetailLink}

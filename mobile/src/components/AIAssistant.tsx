@@ -28,6 +28,7 @@ import {
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
+import { chatHistoryPayloadFromMessages } from "@shared/lib/chat-with-project-client";
 
 const MAX_SUGGESTED_ACTIONS = 4;
 
@@ -58,7 +59,7 @@ export function AIAssistant({ projectId }: Props) {
       id: nextMessageId(),
       role: "assistant",
       content:
-        "Hi! I'm your Project Assistant. Ask me anything about your renovation budget, scope, or next steps.",
+        "Hi! I'm your Project Assistant. Ask about **budget vs. your ledger**, **scope**, **documents**, or **next steps** — I keep context across messages in this chat.",
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -124,12 +125,14 @@ export function AIAssistant({ projectId }: Props) {
     setIsTyping(true);
     scrollToEnd();
 
+    const history = chatHistoryPayloadFromMessages(messages);
+
     try {
       const { data, error } = await invokeFunction<{
         reply?: string;
         actions?: unknown;
       }>(EDGE_FUNCTIONS.CHAT_WITH_PROJECT, {
-        body: { query: msg, projectId },
+        body: { query: msg, projectId, history },
       });
 
       if (error) throw error;

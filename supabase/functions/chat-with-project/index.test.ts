@@ -96,6 +96,82 @@ Deno.test({
 });
 
 Deno.test({
+  name: "chat-with-project - returns 200 with optional conversation history",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    Deno.env.set("GEMINI_API_KEY", "test-key");
+    Deno.env.set("UPSTASH_REDIS_REST_URL", "");
+    Deno.env.set("UPSTASH_REDIS_REST_TOKEN", "");
+
+    const mockUser = { id: USER_1, email: "test@example.com" };
+    const mockProject = {
+      id: PROJECT_1,
+      name: "Test Project",
+      stage: "Planning",
+      estimated_min_total: 1000,
+      estimated_max_total: 5000,
+    };
+
+    const restoreFetch = mockFetch({
+      "/auth/v1/user": { user: mockUser },
+      "/rest/v1/projects": (req: Request) => {
+        const url = req.url;
+        if (url.includes("select=id") && url.includes("owner_user_id=eq.")) {
+          return [{ id: PROJECT_1 }];
+        }
+        if (url.includes("select=*") && url.includes("id=eq.")) {
+          return mockProject;
+        }
+        return [];
+      },
+      "/rest/v1/rpc/match_document_embeddings": [],
+      "/rest/v1/scope_items": [],
+      "/rest/v1/ledger_entries": [],
+      "googleapis.com": {
+        candidates: [{
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                reply: "Follow-up ok.",
+                actions: [],
+              }),
+            }],
+          },
+          finishReason: "STOP",
+        }],
+      },
+    });
+
+    try {
+      const req = new Request("http://localhost/chat-with-project", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer some-jwt",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectId: PROJECT_1,
+          query: "What did we just discuss?",
+          history: [
+            { role: "user", content: "What is my budget?" },
+            { role: "assistant", content: "Roughly $1k–$5k per your estimate." },
+          ],
+        }),
+      });
+
+      const res = await handler(req);
+      assertEquals(res.status, 200);
+      const body = await res.json();
+      assertEquals(body.reply, "Follow-up ok.");
+    } finally {
+      restoreFetch();
+    }
+  },
+});
+
+Deno.test({
   name: "chat-with-project - returns 400 for malformed JSON",
   sanitizeResources: false,
   sanitizeOps: false,

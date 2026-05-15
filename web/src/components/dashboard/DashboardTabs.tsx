@@ -30,7 +30,7 @@ export function DashboardTabs() {
       id="dashboard-phase-nav"
       role="tablist"
       aria-label="Project phases"
-      className="glass flex rounded-2xl p-1.5 gap-1 shadow-drop-sm border-white/40 mb-2 relative scroll-mt-28"
+      className="glass flex rounded-2xl p-1.5 gap-1 shadow-drop-sm border-white/40 mb-2 sticky top-[4.5rem] z-30 bg-white/60 backdrop-blur-xl scroll-mt-32"
     >
       {tabs.map(({ to, label, subtitle, icon: Icon }) => {
         const isActive =

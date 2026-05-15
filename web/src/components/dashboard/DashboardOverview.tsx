@@ -19,6 +19,7 @@ type DashboardOverviewProps = {
   isArchitect: boolean;
   hasProjectPass: boolean;
   onUpgradeClick: () => void;
+  onStatClick?: (statId: "estimate" | "documents" | "invested") => void;
 };
 
 export const DashboardOverview = memo(function DashboardOverview({
@@ -32,6 +33,7 @@ export const DashboardOverview = memo(function DashboardOverview({
   isArchitect,
   hasProjectPass,
   onUpgradeClick,
+  onStatClick,
 }: DashboardOverviewProps) {
   const resaleImpact = useMemo(
     () => calculateResaleImpact(spendingTotal),
@@ -51,24 +53,29 @@ export const DashboardOverview = memo(function DashboardOverview({
           spendingTotal={spendingTotal}
           documentRowCount={documentRowCount}
           unreconciledBilled={unreconciledBilled}
+          onStatClick={onStatClick}
         />
       </div>
 
-      <ProjectHealth
-        estimatedMin={estimatedMin}
-        estimatedMax={estimatedMax}
-        spendingTotal={spendingTotal}
-        documentCount={documentRowCount}
-        scopeLineCount={scopeLineCount}
-        unreconciledBilled={unreconciledBilled}
-      />
+      <div id="project-health-anchor">
+        <ProjectHealth
+          estimatedMin={estimatedMin}
+          estimatedMax={estimatedMax}
+          spendingTotal={spendingTotal}
+          documentCount={documentRowCount}
+          scopeLineCount={scopeLineCount}
+          unreconciledBilled={unreconciledBilled}
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <ResaleValueImpact
-          investment={spendingTotal}
-          resaleImpact={resaleImpact}
-          projectName={projectName}
-        />
+        <div id="resale-impact-anchor">
+          <ResaleValueImpact
+            investment={spendingTotal}
+            resaleImpact={resaleImpact}
+            projectName={projectName}
+          />
+        </div>
         <div className="space-y-6">
           {!isUnlocked && (
             <div className="rounded-3xl border border-slate-100 overflow-hidden shadow-sm">

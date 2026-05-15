@@ -21,8 +21,32 @@ const DEFAULT_EMBEDDING_MODEL = "text-embedding-004";
 /**
  * Robustly calls the Gemini API via REST to avoid SDK versioning issues in Edge Functions.
  */
+function mapPartToGeminiApi(p: GeminiPart, index: number, label: string): Record<string, unknown> {
+  if (p.inline_data) {
+    console.log(
+      `[callGemini] ${label} part ${index}: inlineData (${p.inline_data.mime_type}), data length: ${p.inline_data.data.length}`,
+    );
+    return {
+      inlineData: {
+        mimeType: p.inline_data.mime_type,
+        data: p.inline_data.data,
+      },
+    };
+  }
+  console.log(
+    `[callGemini] ${label} part ${index}: text, length: ${p.text?.length || 0}`,
+  );
+  return { text: p.text || "" };
+}
+
 export async function callGemini(params: {
-  parts: GeminiPart[];
+  /** Single-turn user message (ignored when `contents` is non-empty). */
+  parts?: GeminiPart[];
+  /**
+   * Multi-turn conversation for Gemini `contents` (roles `user` | `model`).
+   * When provided and non-empty, overrides `parts`.
+   */
+  contents?: { role: "user" | "model"; parts: GeminiPart[] }[];
   systemInstruction?: string;
   responseMimeType?: "application/json" | "text/plain";
   responseSchema?: any;
@@ -34,6 +58,7 @@ export async function callGemini(params: {
 }): Promise<GeminiResponse | null> {
   const {
     parts,
+    contents: contentsParam,
     systemInstruction,
     responseMimeType = "text/plain",
     responseSchema,
@@ -60,25 +85,30 @@ export async function callGemini(params: {
   ).trim();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-  // Map our internal part format to the Google REST API format
-  const contentsParts = parts.map((p, i) => {
-    if (p.inline_data) {
-      console.log(
-        `[callGemini] Part ${i}: inlineData (${p.inline_data.mime_type}), data length: ${p.inline_data.data.length}`,
-      );
-      return {
-        inlineData: {
-          mimeType: p.inline_data.mime_type,
-          data: p.inline_data.data,
-        },
-      };
-    }
-    console.log(`[callGemini] Part ${i}: text, length: ${p.text?.length || 0}`);
-    return { text: p.text || "" };
-  });
+  const contents: { role: string; parts: Record<string, unknown>[] }[] =
+    contentsParam && contentsParam.length > 0
+      ? contentsParam.map((block, bi) => ({
+        role: block.role,
+        parts: block.parts.map((p, i) => mapPartToGeminiApi(p, i, `block${bi}`)),
+      }))
+      : (() => {
+        const rawParts = parts ?? [];
+        if (rawParts.length === 0) {
+          console.error("[callGemini] Neither parts nor contents provided");
+          return [];
+        }
+        return [{
+          role: "user",
+          parts: rawParts.map((p, i) => mapPartToGeminiApi(p, i, "single")),
+        }];
+      })();
+
+  if (contents.length === 0) {
+    return null;
+  }
 
   const body: any = {
-    contents: [{ parts: contentsParts }],
+    contents,
     generationConfig: {
       temperature,
       maxOutputTokens,

@@ -6,7 +6,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { MotionConfig, motion } from "motion/react";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { OnboardingProvider } from "@/contexts/OnboardingProvider";
@@ -85,6 +85,11 @@ export default function App() {
 
   return (
     <HelmetProvider>
+      {/*
+        Keep document language on lazy routes: while Suspense shows a fallback, page-level Helmet is not mounted
+        yet — react-helmet-async can otherwise clear <html lang> until hydration completes.
+      */}
+      <Helmet htmlAttributes={{ lang: "en" }} />
       {/*
         Motion’s default is reducedMotion="never" — opt into OS “reduce motion” for all motion.* / AnimatePresence.
         Transform and layout animations are then skipped; opacity-style transitions may still run.

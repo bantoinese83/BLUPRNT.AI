@@ -54,7 +54,7 @@ export function useOnboardingAnalysis(
   );
 
   const runAnalysis = useCallback(
-    async (opts?: { textOnly?: boolean }) => {
+    async (opts?: { textOnly?: boolean; confirmWipe?: boolean }) => {
       const textOnly = opts?.textOnly === true;
       setAnalysisAwaitingChoice(false);
 
@@ -90,6 +90,7 @@ export function useOnboardingAnalysis(
         fd.append("zip_code", zip);
         fd.append("room_type", projectTypeToRoomType(projectType));
         fd.append("finish_preference", "mid");
+        if (opts?.confirmWipe) fd.append("confirm_wipe", "1");
 
         if (scopeDescription?.trim()) {
           fd.append("scope_description", scopeDescription.trim());

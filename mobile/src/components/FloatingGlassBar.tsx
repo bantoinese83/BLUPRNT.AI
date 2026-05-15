@@ -116,6 +116,8 @@ export function FloatingGlassBar({
             onPress={pressFab}
             style={styles.fab}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Add new"
           >
             <View style={styles.fabInner}>
               <Plus size={24} color="#ffffff" strokeWidth={2.5} />
@@ -159,6 +161,9 @@ function TabButton({ focused, asset, label, onPress }: TabButtonProps) {
       onPress={onPress}
       style={styles.tabBtn}
       activeOpacity={0.7}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: focused }}
+      accessibilityLabel={label}
     >
       <MotiView
         animate={{

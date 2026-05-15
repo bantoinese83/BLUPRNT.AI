@@ -70,9 +70,9 @@ export function cityFromZip(zip: string): string {
   if (prefix >= 200 && prefix <= 201) result = "Washington DC area";
   // Boston uses a 3-digit prefix; 021–022 maps cleanly.
   else if (prefix >= 21 && prefix <= 22) result = "Boston area";
-
   else if (prefix >= 100 && prefix <= 119) result = "NYC Metro area";
-  else if (prefix >= 202 && prefix <= 212) result = "Chicago area"; // avoids DC collision
+  else if (prefix >= 202 && prefix <= 212)
+    result = "Chicago area"; // avoids DC collision
   else if (prefix >= 900 && prefix <= 918) result = "Los Angeles area";
   else if (prefix >= 770 && prefix <= 775) result = "Houston area";
   else if (prefix >= 190 && prefix <= 191) result = "Philadelphia area";
@@ -142,7 +142,7 @@ export async function cityFromZipUniversal(zip: string): Promise<string> {
     const place = data.places?.[0];
     const city = place?.["place name"]?.trim();
     const state = place?.["state abbreviation"]?.trim();
-    
+
     let result = "your area";
     if (city && state) result = `${city}, ${state} area`;
     else if (city) result = `${city} area`;
@@ -338,7 +338,9 @@ function mergeGroundingSources(
 ): GroundingSource[] {
   const sources: GroundingSource[] = [...inPayload];
   const seenUrls = new Set(sources.map((s) => s.url).filter(Boolean));
-  const _seenTitles = new Set(sources.filter((s) => !s.url).map((s) => s.title));
+  const _seenTitles = new Set(
+    sources.filter((s) => !s.url).map((s) => s.title),
+  );
 
   const meta = groundingMetadata as
     | { groundingChunks?: Array<{ web?: { uri?: string; title?: string } }> }

@@ -332,7 +332,9 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
               setActiveSetIndex(i);
             }}
             hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            accessibilityLabel={`Angle ${i + 1}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: i === activeSetIndex }}
+            accessibilityLabel={`Angle ${i + 1} of ${sets.length}`}
           >
             <View
               style={[
@@ -351,6 +353,8 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
             setActiveSetIndex(sets.length - 1);
           }}
           style={styles.addSetBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Add another before and after angle"
         >
           <Plus size={14} color={Theme.colors.text.secondary} />
           <Text style={styles.addSetText}>Add another angle</Text>

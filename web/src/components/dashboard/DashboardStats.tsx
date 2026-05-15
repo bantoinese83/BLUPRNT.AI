@@ -15,6 +15,7 @@ type DashboardStatsProps = {
   documentRowCount: number;
   unreconciledBilled?: number;
   isLoading?: boolean;
+  onStatClick?: (statId: "estimate" | "documents" | "invested") => void;
 };
 
 function StatSkeleton() {
@@ -65,6 +66,7 @@ export function DashboardStats({
   documentRowCount,
   unreconciledBilled = 0,
   isLoading = false,
+  onStatClick,
 }: DashboardStatsProps) {
   if (isLoading) {
     return (
@@ -84,11 +86,14 @@ export function DashboardStats({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <motion.div
+      <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)" }}
+        whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.3 }}
-        className="glass-card flex flex-col items-start p-5 sm:p-6"
+        onClick={() => onStatClick?.("estimate")}
+        className="glass-card flex flex-col items-start p-5 sm:p-6 text-left w-full transition-all"
       >
         <div className="flex items-center gap-3 mb-4">
           <motion.div
@@ -110,13 +115,16 @@ export function DashboardStats({
             {DASHBOARD_STATS_LABELS.estimateSub}
           </p>
         </div>
-      </motion.div>
+      </motion.button>
 
-      <motion.div
+      <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)" }}
+        whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.3, delay: 0.05 }}
-        className="glass-card flex flex-col items-start p-5 sm:p-6"
+        onClick={() => onStatClick?.("documents")}
+        className="glass-card flex flex-col items-start p-5 sm:p-6 text-left w-full transition-all"
       >
         <div className="flex items-center gap-3 mb-4">
           <motion.div
@@ -141,13 +149,16 @@ export function DashboardStats({
             {DASHBOARD_STATS_LABELS.documentsSub}
           </p>
         </div>
-      </motion.div>
+      </motion.button>
 
-      <motion.div
+      <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -2, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)" }}
+        whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="glass-card flex flex-col items-start p-5 sm:p-6 sm:col-span-2 lg:col-span-1"
+        onClick={() => onStatClick?.("invested")}
+        className="glass-card flex flex-col items-start p-5 sm:p-6 text-left w-full transition-all sm:col-span-2 lg:col-span-1"
       >
         <div className="flex items-center gap-3 mb-4">
           <motion.div
@@ -211,7 +222,7 @@ export function DashboardStats({
             </Tooltip>
           )}
         </div>
-      </motion.div>
+      </motion.button>
     </div>
   );
 }

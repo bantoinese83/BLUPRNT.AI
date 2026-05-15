@@ -7,6 +7,9 @@ import App from "./App.tsx";
 import "./index.css";
 import { initPostHog, setAnalyticsEnabled } from "./lib/posthog";
 
+/** Before React/Helmet so `<html lang>` is never cleared during lazy-route Suspense. */
+document.documentElement.lang = "en";
+
 /** Recover from chunk load failures after deployment by forcing a reload to get the latest index.html/manifest. */
 window.addEventListener(
   "error",

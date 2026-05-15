@@ -42,6 +42,7 @@ import { DashboardActionModals } from "@/components/dashboard/DashboardActionMod
 import { useDashboardSections } from "./useDashboardSections";
 import { useDashboardActions } from "./useDashboardActions";
 import { ProductionReadinessCard } from "@/components/dashboard/ProductionReadinessCard";
+import { DashboardJumpMenu } from "@/components/dashboard/DashboardJumpMenu";
 
 export function DashboardContent({
   projects,
@@ -237,20 +238,27 @@ export function DashboardContent({
           />
         </motion.div>
 
-        <DashboardOverview
-          estimatedMin={project.estimated_min_total ?? 0}
-          estimatedMax={project.estimated_max_total ?? 0}
-          spendingTotal={memoInvestmentTotal}
-          documentRowCount={ledgerEntries.length}
-          scopeLineCount={scopeItems.length}
-          unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
-          projectName={project.name}
-          isArchitect={isArchitect}
-          hasProjectPass={hasProjectPass}
-          onUpgradeClick={() => setShowUpgrade(true)}
-        />
+        <div id="dashboard-stats-anchor">
+          <DashboardOverview
+            estimatedMin={project.estimated_min_total ?? 0}
+            estimatedMax={project.estimated_max_total ?? 0}
+            spendingTotal={memoInvestmentTotal}
+            documentRowCount={ledgerEntries.length}
+            scopeLineCount={scopeItems.length}
+            unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
+            projectName={project.name}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={() => setShowUpgrade(true)}
+            onStatClick={(statId) => {
+              if (statId === "estimate") navigate("/dashboard/scope");
+              if (statId === "documents" || statId === "invested")
+                navigate("/dashboard/execute");
+            }}
+          />
+        </div>
 
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} id="production-readiness-anchor">
           <ProductionReadinessCard
             documentCount={ledgerEntries.length}
             hasQuotes={ledgerEntries.some(
@@ -372,6 +380,7 @@ export function DashboardContent({
             </Routes>
           </motion.div>
         </AnimatePresence>
+        <DashboardJumpMenu />
       </motion.main>
 
       <AppSlimFooter className="border-slate-200/60 bg-white/40 backdrop-blur-sm" />

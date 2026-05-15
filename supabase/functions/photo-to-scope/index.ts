@@ -158,9 +158,13 @@ export async function handler(req: Request): Promise<Response> {
         fallbackReason = "hardcoded_fallback";
       }
     }
-    console.log(`[photo-to-scope] Extraction complete. usedFallback: ${usedFallback}, fallbackReason: ${fallbackReason}`);
+    console.log(
+      `[photo-to-scope] Extraction complete. usedFallback: ${usedFallback}, fallbackReason: ${fallbackReason}`,
+    );
     console.log(`[photo-to-scope] Summary: ${JSON.stringify(payload.summary)}`);
-    console.log(`[photo-to-scope] Scope Items count: ${payload.scope_items?.length || 0}`);
+    console.log(
+      `[photo-to-scope] Scope Items count: ${payload.scope_items?.length || 0}`,
+    );
 
     const safeMapItems = (items: any[]) =>
       items.map((r: any, i: number) => {
@@ -169,8 +173,8 @@ export async function handler(req: Request): Promise<Response> {
         const materials = Array.isArray(metadata.materials)
           ? metadata.materials
           : Array.isArray(r.materials)
-          ? r.materials
-          : [];
+            ? r.materials
+            : [];
 
         return {
           id: isFromDB ? r.id : `scope_${i + 1}`,
@@ -198,7 +202,9 @@ export async function handler(req: Request): Promise<Response> {
 
     if (project_id && userId) {
       if (isInitialAnalysis) {
-        console.log(`[photo-to-scope] Initial analysis - clearing existing scope for project ${project_id}`);
+        console.log(
+          `[photo-to-scope] Initial analysis - clearing existing scope for project ${project_id}`,
+        );
         await admin.from("scope_items").delete().eq("project_id", project_id);
       }
 
@@ -224,7 +230,9 @@ export async function handler(req: Request): Promise<Response> {
         },
       }));
 
-      console.log(`[photo-to-scope] Inserting ${rows.length} rows into scope_items`);
+      console.log(
+        `[photo-to-scope] Inserting ${rows.length} rows into scope_items`,
+      );
       const { data: inserted, error: insErr } = await admin
         .from("scope_items")
         .insert(rows)
@@ -267,7 +275,9 @@ export async function handler(req: Request): Promise<Response> {
           }
         }
 
-        console.log(`[photo-to-scope] Updating project record totals: ${payload.summary.estimated_min_total} - ${payload.summary.estimated_max_total}`);
+        console.log(
+          `[photo-to-scope] Updating project record totals: ${payload.summary.estimated_min_total} - ${payload.summary.estimated_max_total}`,
+        );
         await admin
           .from("projects")
           .update({
@@ -299,7 +309,9 @@ export async function handler(req: Request): Promise<Response> {
                 to: userRes.user.email,
                 template: "project_ready",
                 params: {
-                  userName: userRes.user.user_metadata?.full_name || userRes.user.email.split("@")[0],
+                  userName:
+                    userRes.user.user_metadata?.full_name ||
+                    userRes.user.email.split("@")[0],
                   projectName: projRes?.name || "Your project",
                   projectUrl: `${getAppBaseUrl()}/dashboard?project=${project_id}`,
                 },
@@ -307,7 +319,10 @@ export async function handler(req: Request): Promise<Response> {
             });
           }
         } catch (emailErr) {
-          console.warn("[photo-to-scope] failed to send completion email", emailErr);
+          console.warn(
+            "[photo-to-scope] failed to send completion email",
+            emailErr,
+          );
         }
       })();
 

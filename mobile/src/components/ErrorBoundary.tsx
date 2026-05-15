@@ -1,8 +1,16 @@
 import React, { Component, type ReactNode } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Linking,
+} from "react-native";
 import { AlertTriangle, RefreshCcw, Mail } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
 import { reportClientError } from "@/lib/sentry";
+import { PUBLIC_SUPPORT_PAGE_URL } from "@shared/constants/public-site";
 
 import logoAsset from "@assets/images/icon.png";
 
@@ -68,6 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <TouchableOpacity
                   style={styles.primaryButton}
                   onPress={this.handleRetry}
+                  accessibilityRole="button"
                   accessibilityLabel="Try again"
                 >
                   <RefreshCcw size={20} color="white" />
@@ -79,8 +88,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <TouchableOpacity
               style={styles.supportLink}
               onPress={() => {
-                // In a real app, you'd use Linking.openURL
+                void Linking.openURL(PUBLIC_SUPPORT_PAGE_URL);
               }}
+              accessibilityRole="link"
+              accessibilityLabel="Contact support, opens in browser"
             >
               <Mail size={14} color={Theme.colors.text.secondary} />
               <Text style={styles.supportText}>Contact support</Text>

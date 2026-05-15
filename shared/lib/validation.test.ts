@@ -254,8 +254,33 @@ describe("validation logic", () => {
         }).success,
       ).toBe(true);
       expect(
+        chatWithProjectSchema.safeParse({
+          projectId: validUuid,
+          query: "hello",
+          history: [
+            { role: "assistant", content: "Hi" },
+            { role: "user", content: "Budget?" },
+          ],
+        }).success,
+      ).toBe(true);
+      expect(
         chatWithProjectSchema.safeParse({ projectId: validUuid, query: "   " })
           .success,
+      ).toBe(false);
+    });
+
+    it("rejects oversized history arrays", () => {
+      const validUuid = "550e8400-e29b-41d4-a716-446655440000";
+      const history = Array.from({ length: 25 }, (_, i) => ({
+        role: i % 2 === 0 ? ("user" as const) : ("assistant" as const),
+        content: "x",
+      }));
+      expect(
+        chatWithProjectSchema.safeParse({
+          projectId: validUuid,
+          query: "hello",
+          history,
+        }).success,
       ).toBe(false);
     });
   });

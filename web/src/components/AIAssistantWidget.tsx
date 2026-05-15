@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, Bot, X, MessageSquare } from "lucide-react";
+import { Send, Bot, X, MessageSquare, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -13,8 +13,16 @@ import {
 } from "@shared/lib/chat-project-actions";
 import { LEDGER_UPLOAD_ANCHOR_ID } from "@shared/constants/ui";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
+import { chatHistoryPayloadFromMessages } from "@shared/lib/chat-with-project-client";
 
 const MAX_SUGGESTED_ACTIONS = 4;
+
+const SUGGESTION_PROMPTS = [
+  "How does my spend compare to the estimate?",
+  "What should I tackle next for this stage?",
+  "Any red flags in my recent invoices?",
+  "How can I stretch this budget further?",
+] as const;
 
 interface Message {
   id: string;
@@ -22,6 +30,13 @@ interface Message {
   content: string;
   actions?: ChatProjectAction[];
 }
+
+const INITIAL_ASSISTANT: Message = {
+  id: "initial",
+  role: "assistant",
+  content:
+    "Hi! I'm your Project Assistant. Ask about **budget vs. your ledger**, **scope**, **documents**, or **next steps** — I keep context across messages in this chat.",
+};
 
 export const AIAssistantWidget = memo(function AIAssistantWidget({
   projectId,
@@ -34,16 +49,10 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
 }) {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "initial",
-      role: "assistant",
-      content:
-        "Hi! I'm your Project Assistant. Ask me anything about your renovation budget, scope, or next steps.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([INITIAL_ASSISTANT]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,6 +63,14 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
       scrollToBottom();
     }
   }, [messages, isOpen, scrollToBottom]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const id = requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [isOpen]);
 
   const runAction = useCallback(
     (action: ChatProjectAction) => {
@@ -77,10 +94,12 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
   );
 
   const handleSend = useCallback(
-    async (e?: React.FormEvent) => {
+    async (e?: React.FormEvent, textOverride?: string) => {
       e?.preventDefault();
-      const msg = input.trim();
-      if (!msg || isTyping) return;
+      const msg = (textOverride ?? input).trim();
+      if (!msg || isTyping || !projectId.trim()) return;
+
+      const history = chatHistoryPayloadFromMessages(messages);
 
       setInput("");
       const userMsg: Message = {
@@ -96,7 +115,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
           reply?: string;
           actions?: unknown;
         }>(EDGE_FUNCTIONS.CHAT_WITH_PROJECT, {
-          body: { query: msg, projectId },
+          body: { query: msg, projectId, history },
         });
 
         if (error) throw error;
@@ -132,18 +151,23 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
         setIsTyping(false);
       }
     },
-    [input, isTyping, projectId],
+    [input, isTyping, projectId, messages],
   );
 
+  const resetConversation = useCallback(() => {
+    setMessages([INITIAL_ASSISTANT]);
+    setInput("");
+  }, []);
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end relative">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="mb-4 w-96 h-[500px] bg-white rounded-2xl shadow-spatial border border-slate-200 overflow-hidden flex flex-col"
+            className="mb-4 w-96 h-[min(32rem,calc(100vh-8rem))] min-h-[28rem] bg-white rounded-2xl shadow-spatial border border-slate-200 overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-teal-950 p-4 text-white flex items-center justify-between">
@@ -158,13 +182,25 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => onOpenChange(false)}
-                className="text-white/60 hover:text-white p-1 transition-colors"
-                aria-label="Close assistant"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={resetConversation}
+                  className="text-white/60 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                  aria-label="Start conversation over"
+                  title="Start over"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="text-white/60 hover:text-white p-1 transition-colors"
+                  aria-label="Close assistant"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
@@ -191,31 +227,55 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
 
             {/* Input */}
             <form
-              onSubmit={handleSend}
+              onSubmit={(e) => void handleSend(e)}
               aria-busy={isTyping}
               className="p-4 bg-white border-t border-slate-100"
             >
+              <div
+                className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1"
+                role="toolbar"
+                aria-label="Suggested questions"
+              >
+                {SUGGESTION_PROMPTS.map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    disabled={isTyping}
+                    onClick={() => void handleSend(undefined, label)}
+                    className="shrink-0 rounded-full border border-teal-200/80 bg-teal-50/80 px-3 py-1.5 text-[11px] font-semibold text-teal-900 hover:bg-teal-100/90 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <div className="relative">
-                <input
-                  type="text"
+                <textarea
+                  ref={inputRef}
+                  rows={2}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask a question..."
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" || e.shiftKey) return;
+                    e.preventDefault();
+                    void handleSend();
+                  }}
+                  placeholder="Ask a question… (Shift+Enter for new line)"
                   aria-label="Ask a question"
-                  className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                  className="w-full min-h-[44px] max-h-28 resize-y pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                   disabled={isTyping}
                 />
                 <button
                   type="submit"
                   aria-label="Send message"
                   disabled={!input.trim() || isTyping}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:hover:bg-teal-600 transition-colors"
+                  className="absolute right-2 bottom-2 w-8 h-8 flex items-center justify-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:hover:bg-teal-600 transition-colors"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-              <p className="mt-2 text-[10px] text-slate-400 text-center">
-                Powered by Gemini 3.1 & Blueprint Data
+              <p className="mt-2 text-[10px] text-slate-400 text-center leading-snug">
+                Uses your project scope, ledger, and matched documents. Powered
+                by Gemini (configurable) &amp; Blueprint data.
               </p>
             </form>
           </motion.div>

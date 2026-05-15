@@ -2,8 +2,57 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { assertProjectOwner, getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
-import { callGemini, generateEmbedding } from "../_shared/gemini.ts";
+import {
+  callGemini,
+  generateEmbedding,
+  type GeminiPart,
+} from "../_shared/gemini.ts";
 import { chatWithProjectSchema } from "../_shared/validation.ts";
+
+const MAX_HISTORY_CHARS = 2000;
+const MAX_GEMINI_CONTENT_BLOCKS = 14;
+
+/**
+ * Maps client `history` + latest `query` to Gemini `contents` (roles user/model).
+ * Strips leading assistant-only turns and folds a trailing orphan user into `query`.
+ */
+function buildGeminiChatContents(
+  history: { role: "user" | "assistant"; content: string }[] | undefined,
+  query: string,
+): { role: "user" | "model"; parts: GeminiPart[] }[] {
+  const trimMsg = (s: string) => {
+    const t = s.trim();
+    if (t.length <= MAX_HISTORY_CHARS) return t;
+    return `${t.slice(0, MAX_HISTORY_CHARS)}…`;
+  };
+
+  let q = trimMsg(query);
+  const entries = (history ?? []).map((h) => ({
+    role: h.role,
+    content: trimMsg(h.content),
+  }));
+
+  let start = 0;
+  while (start < entries.length && entries[start]!.role === "assistant") {
+    start += 1;
+  }
+  const sliced = entries.slice(start).slice(-MAX_GEMINI_CONTENT_BLOCKS);
+
+  while (sliced.length > 0 && sliced[sliced.length - 1]!.role === "user") {
+    const dangling = sliced.pop()!;
+    q = `${dangling.content}\n\n${q}`;
+  }
+
+  const out: { role: "user" | "model"; parts: GeminiPart[] }[] = [];
+  for (const m of sliced) {
+    out.push({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    });
+  }
+  out.push({ role: "user", parts: [{ text: q }] });
+  return out;
+}
 
 export const handler = async (req: Request) => {
   const opt = handleOptions(req);
@@ -38,7 +87,7 @@ export const handler = async (req: Request) => {
         req,
       );
     }
-    const { query, projectId } = parsed.data;
+    const { query, projectId, history } = parsed.data;
     console.log(`[chat-with-project] Handling request for project ${projectId}, query: ${query.substring(0, 50)}...`);
 
     const admin = getServiceClient();
@@ -146,6 +195,9 @@ export const handler = async (req: Request) => {
       Current Project Context:
       ${contextStr}
       
+      Conversation:
+      The user message may be part of an ongoing chat. Use prior turns for continuity, pronouns, and follow-ups. If earlier turns conflict with the project context above, trust the context block.
+      
       Advanced Analytical Directives:
       1. **Budget Health & Variance**: Compare their total spent from recent ledger records against their estimated budget range ($${project.estimated_min_total} - $${project.estimated_max_total}). If expenditure is pacing high or nearing the ceiling, immediately offer actionable Value Engineering alternatives (e.g., swapping premium stone for high-grade quartz, retaining existing framing).
       2. **Ledger Anomaly Detection**: Review recent ledger records. If you notice duplicate vendor charges, unusually high line items, or unpaid invoices nearing due dates, highlight them clearly.
@@ -159,12 +211,13 @@ export const handler = async (req: Request) => {
       - "update_scope": When the user wants to adjust quantities, review finish tiers, or explore cost-saving material swaps.
       - "suggest_photo": When the user reaches a milestone, discusses visual changes, or asks for a visual appraisal of ongoing work.
       
-      CRITICAL: You MUST return ONLY valid JSON matching the exact schema provided. Do not include any conversational preamble, markdown formatting, or greeting outside the JSON object. Your entire response must be parseable by JSON.parse().
+      CRITICAL: Return ONLY valid JSON matching the schema. No prose outside the JSON object. The "reply" string may use markdown (headings, lists, bold) for readability; keep "actions" machine-oriented.
     `;
 
     console.log("[chat-with-project] Calling Gemini...");
+    const contents = buildGeminiChatContents(history, query);
     const result = await callGemini({
-      parts: [{ text: query }],
+      contents,
       systemInstruction,
       responseMimeType: "application/json",
       responseSchema,

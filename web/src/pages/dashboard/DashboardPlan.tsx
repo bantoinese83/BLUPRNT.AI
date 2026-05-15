@@ -65,10 +65,12 @@ export function DashboardPlan({
           {upcomingRenewals}
           <GroundingSourcesSection project={project} />
           {homeTeam}
-          {location.pathname.endsWith("/plan") && (
-            <ActivityFeed events={activityEvents} />
-          )}
-          {ledger}
+          <div id="activity-feed-anchor">
+            {location.pathname.endsWith("/plan") && (
+              <ActivityFeed events={activityEvents} />
+            )}
+          </div>
+          <div id="document-vault-anchor">{ledger}</div>
         </div>
       }
     >

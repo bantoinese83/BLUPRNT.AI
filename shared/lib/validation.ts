@@ -110,10 +110,23 @@ export const marketingLeadSchema = z.object({
   source: z.string().trim().min(1).max(64),
 });
 
-/** AI chat: bounded prompt + project scope. */
+/** Max prior turns accepted by `chatWithProjectSchema` (each user + assistant counts as one entry). */
+export const CHAT_WITH_PROJECT_HISTORY_MAX = 24;
+
+/** One prior turn for `chat-with-project` (client sends full transcript minus the latest user message). */
+export const chatProjectHistoryEntrySchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1).max(4000),
+});
+
+/** AI chat: bounded prompt + project scope + optional conversation memory. */
 export const chatWithProjectSchema = z.object({
   projectId: uuidSchema,
   query: z.string().trim().min(1).max(8000),
+  history: z
+    .array(chatProjectHistoryEntrySchema)
+    .max(CHAT_WITH_PROJECT_HISTORY_MAX)
+    .optional(),
 });
 
 export const PASSWORD_MIN_LENGTH = 8;

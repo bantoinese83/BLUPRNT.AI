@@ -57,4 +57,18 @@ test.describe("Accessibility (WCAG 2.1)", () => {
 
     expect(accessibilityScanResults.violations).toEqual([]);
   });
+
+  test("Terms of service page has no automatically detectable a11y issues", async ({
+    page,
+  }) => {
+    await page.goto("/terms");
+    await dismissOptionalCookies(page);
+    await page.waitForLoadState("networkidle");
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags([...WCAG_TAGS])
+      .analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
 });

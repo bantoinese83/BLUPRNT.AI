@@ -103,6 +103,13 @@ export function PhotoSlot({
                     styles.controlBtn,
                     editingCaption && styles.controlBtnActive,
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    editingCaption
+                      ? "Close caption editor"
+                      : "Edit photo caption"
+                  }
+                  accessibilityState={{ selected: editingCaption }}
                 >
                   <MessageSquare size={14} color="white" />
                 </TouchableOpacity>
@@ -110,6 +117,8 @@ export function PhotoSlot({
                   onPress={() => onClear(item.id)}
                   disabled={working || uploading}
                   style={[styles.controlBtn, styles.clearBtn]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove photo"
                 >
                   {working ? (
                     <ActivityIndicator size="small" color="white" />
@@ -126,6 +135,8 @@ export function PhotoSlot({
                   style={styles.actionOverlay}
                   onPress={onUpload}
                   disabled={uploading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Change photo"
                 >
                   <View style={styles.actionBtn}>
                     {uploading ? (
@@ -163,6 +174,8 @@ export function PhotoSlot({
               onPress={onUpload}
               disabled={uploading}
               style={styles.placeholder}
+              accessibilityRole="button"
+              accessibilityLabel="Retry loading or replace photo"
             >
               <View style={styles.placeholderContent}>
                 <Text style={styles.failedTitle}>Could not load photo</Text>
@@ -187,6 +200,8 @@ export function PhotoSlot({
               onPress={onUpload}
               disabled={uploading}
               style={styles.placeholder}
+              accessibilityRole="button"
+              accessibilityLabel="Add or capture photo"
             >
               <View
                 style={[
@@ -240,11 +255,14 @@ export function PhotoSlot({
                   placeholderTextColor="rgba(255,255,255,0.5)"
                   style={styles.captionInput}
                   autoFocus
+                  accessibilityLabel="Photo caption"
                 />
                 <TouchableOpacity
                   onPress={handleSaveCaption}
                   disabled={working}
                   style={styles.saveBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save caption"
                 >
                   {working ? (
                     <ActivityIndicator

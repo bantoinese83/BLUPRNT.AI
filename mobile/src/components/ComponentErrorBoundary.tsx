@@ -2,6 +2,7 @@ import React, { Component, type ReactNode } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { AlertCircle, RefreshCw } from "lucide-react-native";
 import { Theme } from "@/constants/Theme";
+import { reportClientError } from "@/lib/sentry";
 
 interface Props {
   children: ReactNode;
@@ -28,7 +29,10 @@ export class ComponentErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(`[ErrorBoundary:${this.props.name || "Component"}]`, error, errorInfo);
+    const scope = `mobile-component:${this.props.name ?? "unnamed"}`;
+    reportClientError(scope, error, {
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   handleReset = () => {
@@ -56,6 +60,8 @@ export class ComponentErrorBoundary extends Component<Props, State> {
             onPress={this.handleReset}
             style={styles.retryButton}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Try again"
           >
             <RefreshCw size={16} color="white" style={styles.retryIcon} />
             <Text style={styles.retryText}>Try again</Text>

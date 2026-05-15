@@ -22,13 +22,19 @@ const handler = async (req: Request): Promise<Response> => {
   let queueItem: any = null;
 
   try {
-    const raw_queue_id = await req.json().then(j => j.queue_id).catch(() => null);
-    if (!raw_queue_id) return jsonResponse({ error: "queue_id required" }, 400, req);
-    
+    const raw_queue_id = await req
+      .json()
+      .then((j) => j.queue_id)
+      .catch(() => null);
+    if (!raw_queue_id)
+      return jsonResponse({ error: "queue_id required" }, 400, req);
+
     queue_id = String(raw_queue_id).trim();
-    
+
     const url = Deno.env.get("SUPABASE_URL");
-    console.log(`[process-document-queue] Fetching ID: "${queue_id}" on ${url}`);
+    console.log(
+      `[process-document-queue] Fetching ID: "${queue_id}" on ${url}`,
+    );
 
     const { data: items, error: fetchErr } = await admin
       .from("document_processing_queue")
@@ -44,17 +50,21 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // 2. Mark as processing
-    console.log(`[process-document-queue] Marking item ${queue_id} as processing...`);
+    console.log(
+      `[process-document-queue] Marking item ${queue_id} as processing...`,
+    );
     await admin
       .from("document_processing_queue")
-      .update({ 
-        status: "processing", 
-        attempts: (queueItem.attempts || 0) + 1, 
-        updated_at: new Date().toISOString() 
+      .update({
+        status: "processing",
+        attempts: (queueItem.attempts || 0) + 1,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", queue_id);
 
-    console.log(`[process-document-queue] Processing document: ${queueItem.document_id} (${queueItem.file_path})`);
+    console.log(
+      `[process-document-queue] Processing document: ${queueItem.document_id} (${queueItem.file_path})`,
+    );
 
     // 3. Download file from storage
     const { data: fileData, error: downloadErr } = await admin.storage
@@ -62,23 +72,31 @@ const handler = async (req: Request): Promise<Response> => {
       .download(queueItem.file_path);
 
     if (downloadErr || !fileData) {
-      throw new Error(`File download failed: ${downloadErr?.message || "No data"}`);
+      throw new Error(
+        `File download failed: ${downloadErr?.message || "No data"}`,
+      );
     }
 
     if (fileData.size > MAX_DOCUMENT_UPLOAD_SIZE_BYTES) {
-      throw new Error(`File is too large to process (${(fileData.size / 1024 / 1024).toFixed(1)}MB). Limit: ${MAX_DOCUMENT_UPLOAD_SIZE_LABEL}`);
+      throw new Error(
+        `File is too large to process (${(fileData.size / 1024 / 1024).toFixed(1)}MB). Limit: ${MAX_DOCUMENT_UPLOAD_SIZE_LABEL}`,
+      );
     }
 
-    console.log(`[process-document-queue] Downloaded file size: ${fileData.size} bytes`);
-    
+    console.log(
+      `[process-document-queue] Downloaded file size: ${fileData.size} bytes`,
+    );
+
     if (fileData.size === 0) {
       throw new Error("Downloaded file is empty (0 bytes)");
     }
 
     const arrayBuffer = await fileData.arrayBuffer();
     const base64 = encodeBase64(arrayBuffer);
-    
-    console.log(`[process-document-queue] Encoded base64 length: ${base64.length}`);
+
+    console.log(
+      `[process-document-queue] Encoded base64 length: ${base64.length}`,
+    );
 
     // 4. Fetch scope items for mapping
     const { data: scopeItems } = await admin
@@ -129,7 +147,8 @@ const handler = async (req: Request): Promise<Response> => {
         vendor_name: ocrResult.vendor_name || "Unknown Vendor",
         total: ocrResult.total || 0,
         tax_total: ocrResult.tax_total,
-        issue_date: ocrResult.issue_date || new Date().toISOString().split("T")[0],
+        issue_date:
+          ocrResult.issue_date || new Date().toISOString().split("T")[0],
         document_type: ocrResult.document_type || undefined,
         payment_status: payment_status,
         warranty_expiry_date: ocrResult.warranty_expiry_date || null,
@@ -154,18 +173,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Fallback: If no line items but we have a total, create a single representative line item
     if (lineItemsToInsert.length === 0 && (ocrResult.total || 0) > 0) {
-      console.log("[process-document-queue] No line items found, creating fallback line item from total.");
-      lineItemsToInsert = [{
-        description: ocrResult.summary || `Total from ${ocrResult.vendor_name || "Document"}`,
-        quantity: 1,
-        unit_price: ocrResult.total ?? 0,
-        line_total: ocrResult.total ?? 0,
-        mapped_scope_item_id: null
-      }];
+      console.log(
+        "[process-document-queue] No line items found, creating fallback line item from total.",
+      );
+      lineItemsToInsert = [
+        {
+          description:
+            ocrResult.summary ||
+            `Total from ${ocrResult.vendor_name || "Document"}`,
+          quantity: 1,
+          unit_price: ocrResult.total ?? 0,
+          line_total: ocrResult.total ?? 0,
+          mapped_scope_item_id: null,
+        },
+      ];
     }
 
     if (lineItemsToInsert.length > 0) {
-      console.log(`[process-document-queue] Cleaning up existing line items for entry ${ledgerEntry.id}...`);
+      console.log(
+        `[process-document-queue] Cleaning up existing line items for entry ${ledgerEntry.id}...`,
+      );
       await admin
         .from("ledger_line_items")
         .delete()
@@ -186,7 +213,10 @@ const handler = async (req: Request): Promise<Response> => {
         .insert(lineRows);
 
       if (linesErr) {
-        console.warn("[process-document-queue] Failed to insert line items:", linesErr);
+        console.warn(
+          "[process-document-queue] Failed to insert line items:",
+          linesErr,
+        );
       }
     }
 
@@ -199,13 +229,18 @@ const handler = async (req: Request): Promise<Response> => {
     // 9. Generate and Store Semantic Embedding for Retrieval
     console.log("[process-document-queue] Generating embedding...");
     try {
-      const itemSummaries = lineItemsToInsert.map((l: any) => l.description).join(", ");
+      const itemSummaries = lineItemsToInsert
+        .map((l: any) => l.description)
+        .join(", ");
       const summaryText = `Invoice from ${ocrResult.vendor_name || "Unknown Vendor"} on ${ocrResult.issue_date || "Unknown Date"} for total ${ocrResult.total || 0}. Items: ${itemSummaries}`;
       const embedding = await generateEmbedding(summaryText);
 
       if (embedding) {
         console.log("[process-document-queue] Storing embedding...");
-        await admin.from("document_embeddings").delete().eq("document_id", queueItem.document_id);
+        await admin
+          .from("document_embeddings")
+          .delete()
+          .eq("document_id", queueItem.document_id);
         await admin.from("document_embeddings").insert({
           document_id: queueItem.document_id,
           project_id: queueItem.project_id,
@@ -214,7 +249,10 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
     } catch (embErr) {
-      console.warn("[process-document-queue] Embedding generation failed:", embErr);
+      console.warn(
+        "[process-document-queue] Embedding generation failed:",
+        embErr,
+      );
     }
 
     // 10. Mark queue as completed
@@ -225,7 +263,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     return jsonResponse({ success: true }, 200, req);
   } catch (e: unknown) {
-    const errorString = e instanceof Error ? e.message : typeof e === "string" ? e : JSON.stringify(e);
+    const errorString =
+      e instanceof Error
+        ? e.message
+        : typeof e === "string"
+          ? e
+          : JSON.stringify(e);
     console.error("[process-document-queue] Fatal:", errorString);
 
     try {
@@ -250,7 +293,10 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("document_id", queueItem?.document_id);
       }
     } catch (dbErr) {
-      console.error("[process-document-queue] Failed to update error status in DB:", dbErr);
+      console.error(
+        "[process-document-queue] Failed to update error status in DB:",
+        dbErr,
+      );
     }
 
     return jsonResponse({ error: errorString }, 500, req);
