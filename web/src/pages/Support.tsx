@@ -1,128 +1,179 @@
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, HelpCircle, ArrowLeft } from "lucide-react";
-import { PUBLIC_SUPPORT_EMAIL } from "@shared/constants/public-site";
+import { PublicPageSEO } from "@/components/seo/PublicPageSEO";
+import {
+  PUBLIC_SUPPORT_EMAIL,
+  WEB_APP_PATH_SUPPORT,
+} from "@shared/constants/public-site";
+import { buildContactPageJsonLd, buildFaqPageJsonLd } from "@/lib/seo-json-ld";
+
+const SUPPORT_FAQ = [
+  {
+    question: "How does the AI cost estimate work?",
+    answer:
+      "BLUPRNT uses your photos and project details together with regional cost context to suggest scope lines and a planning range. Estimates cite regional labor and material sources so you can see what grounds the numbers.",
+  },
+  {
+    question: "How do I track my budget against the estimate?",
+    answer:
+      "Upload invoices and quotes; the Reconciliation Engine maps line items to your plan and shows Matched, Under, or Over status so you can spot drift early.",
+  },
+  {
+    question: "Can I use my subscription on web and mobile?",
+    answer:
+      "Yes—sign in with the same account on web and iOS. Web billing uses Stripe; the iOS app uses the App Store via RevenueCat. Projects and documents sync across devices.",
+  },
+  {
+    question: "What is the Home Team directory?",
+    answer:
+      "BLUPRNT builds a contractor and vendor directory from uploaded invoices, including contact details and spend totals—useful for maintenance and resale documentation.",
+  },
+  {
+    question: "How do I request a refund?",
+    answer:
+      "For App Store purchases, use Apple’s subscription management. For web (Stripe) purchases, email support and we will help you resolve billing questions.",
+  },
+] as const;
+
+const SUPPORT_META = {
+  title: "Help & Support",
+  description:
+    "Get help with BLUPRNT estimates, billing, account access, and using the app on web and mobile. Email support with a response in under 24 hours.",
+};
 
 export default function Support() {
+  const jsonLd = [
+    buildContactPageJsonLd({
+      path: WEB_APP_PATH_SUPPORT,
+      name: SUPPORT_META.title,
+      description: SUPPORT_META.description,
+      email: PUBLIC_SUPPORT_EMAIL,
+    }),
+    buildFaqPageJsonLd(SUPPORT_FAQ),
+  ];
+
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-teal-500/30">
-      {/* Navigation */}
-      <nav className="border-b border-white/5 bg-white/2 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <PublicPageSEO
+        title={SUPPORT_META.title}
+        description={SUPPORT_META.description}
+        canonicalPath={WEB_APP_PATH_SUPPORT}
+        jsonLd={jsonLd}
+      />
+
+      <nav
+        className="sticky top-0 z-50 border-b border-white/5 bg-white/2 backdrop-blur-xl"
+        aria-label="Support"
+      >
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link
             to="/"
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+            className="group flex items-center gap-2 text-slate-400 transition-colors hover:text-white"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft
+              className="h-4 w-4 transition-transform group-hover:-translate-x-1"
+              aria-hidden
+            />
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center shadow-lg shadow-teal-500/20">
-              <span className="text-white font-black text-xs">B.</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 shadow-lg shadow-teal-500/20">
+              <span className="text-xs font-black text-white">B.</span>
             </div>
             <span className="font-bold tracking-tight">BLUPRNT.AI Support</span>
           </div>
-          <div className="w-20" /> {/* Spacer */}
+          <div className="w-20" aria-hidden />
         </div>
       </nav>
 
-      <main className="mx-auto w-full max-w-4xl px-4 py-20">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
+      <main id="main-content" className="mx-auto w-full max-w-4xl px-4 py-20">
+        <header className="mb-16 text-center">
+          <h1 className="mb-4 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-4xl font-black tracking-tight text-transparent md:text-5xl">
             How can we help?
           </h1>
           <p className="mx-auto max-th text-lg leading-relaxed text-slate-400">
             Our support team can help with estimates, billing, account access,
             and how to use BLUPRNT on web and mobile.
           </p>
-        </div>
+        </header>
 
-        {/* Quick Help Grid */}
-        <div className="grid md:grid-cols-2 gap-6 mb-20">
-          <div className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-teal-500/30 transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Mail className="w-6 h-6 text-teal-400" />
+        <div className="mb-20 grid gap-6 md:grid-cols-2">
+          <div className="group rounded-3xl border border-white/5 bg-white/2 p-8 transition-all hover:border-teal-500/30">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/10 transition-transform group-hover:scale-110">
+              <Mail className="h-6 w-6 text-teal-400" aria-hidden />
             </div>
-            <h3 className="text-xl font-bold mb-2">Email Support</h3>
-            <p className="text-slate-400 mb-6 italic">
-              Response time: &lt; 24h
+            <h2 className="mb-2 text-xl font-bold">Email Support</h2>
+            <p className="mb-6 italic text-slate-400">
+              Response time: under 24h
             </p>
             <a
               href={`mailto:${PUBLIC_SUPPORT_EMAIL}`}
-              className="text-teal-400 font-semibold hover:text-teal-300 transition-colors inline-flex items-center gap-2"
+              className="inline-flex items-center gap-2 font-semibold text-teal-400 transition-colors hover:text-teal-300"
             >
               {PUBLIC_SUPPORT_EMAIL}
             </a>
           </div>
 
-          <a
-            href="#faq"
-            className="p-8 rounded-3xl bg-white/2 border border-white/5 hover:border-teal-500/30 transition-all group block no-underline"
+          <Link
+            to={{ pathname: "/", hash: "faq" }}
+            className="group block rounded-3xl border border-white/5 bg-white/2 p-8 no-underline transition-all hover:border-teal-500/30"
           >
-            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <HelpCircle className="w-6 h-6 text-teal-400" />
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/10 transition-transform group-hover:scale-110">
+              <HelpCircle className="h-6 w-6 text-teal-400" aria-hidden />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-white">FAQs</h3>
-            <p className="text-slate-400 mb-6 italic">
-              Answers to common questions — jump to the list below.
+            <h2 className="mb-2 text-xl font-bold text-white">Product FAQs</h2>
+            <p className="mb-6 italic text-slate-400">
+              Answers on the marketing site FAQ section.
             </p>
-            <span className="text-teal-400 font-semibold group-hover:text-teal-300 transition-colors">
-              Browse FAQs
+            <span className="font-semibold text-teal-400 transition-colors group-hover:text-teal-300">
+              Browse FAQs on the homepage →
             </span>
-          </a>
+          </Link>
         </div>
 
-        {/* FAQ Section */}
-        <div id="faq" className="mb-20 scroll-mt-24">
-          <h2 className="mb-8 flex items-center gap-3 text-2xl font-bold">
-            <MessageCircle className="text-teal-400" />
+        <section
+          id="faq"
+          className="mb-20 scroll-mt-24"
+          aria-labelledby="faq-heading"
+        >
+          <h2
+            id="faq-heading"
+            className="mb-8 flex items-center gap-3 text-2xl font-bold"
+          >
+            <MessageCircle className="text-teal-400" aria-hidden />
             Common Questions
           </h2>
           <div className="mx-auto w-full max-th space-y-4">
-            {[
-              {
-                q: "How does the AI cost estimate work?",
-                a: "BLUPRNT uses your photos and project details together with regional cost context to suggest scope lines and a planning range. Every estimate is anchored in real-world data points like regional labor rates and current material costs, which we cite directly to ensure accuracy and trust.",
-              },
-              {
-                q: "How do I track my budget against the estimate?",
-                a: "Our Reconciliation Engine automatically maps line items from your uploaded invoices to your planned budget. You'll see status badges (Matched, Under, or Over) that show precisely how your actual spending compares to the AI's initial predictions.",
-              },
-              {
-                q: "Can I use my subscription on web and mobile?",
-                a: "Yes—sign in with the same account everywhere. Web subscriptions are billed through Stripe; the iOS app is billed through the App Store (via RevenueCat). All features, including your Home Team directory and Transformation Slider, sync perfectly across all your devices.",
-              },
-              {
-                q: "What is the 'Home Team' directory?",
-                a: "BLUPRNT automatically builds a directory of every contractor and vendor you've worked with based on the invoices you upload. It merges contact info and tracks total spend per pro, giving you a ready-made rolodex for future maintenance or resale documentation.",
-              },
-              {
-                q: "How do I request a refund?",
-                a: "For purchases made in the iOS app, use Apple’s subscription management or Report a Problem flow. For web (Stripe) purchases, simply email our support team and we’ll help you out immediately.",
-              },
-            ].map((faq, i) => (
+            {SUPPORT_FAQ.map((faq) => (
               <details
-                key={i}
-                className="group p-6 rounded-2xl bg-white/2 border border-white/5 [&_summary::-webkit-details-marker]:hidden"
+                key={faq.question}
+                className="group rounded-2xl border border-white/5 bg-white/2 p-6 [&_summary::-webkit-details-marker]:hidden"
               >
-                <summary className="flex items-center justify-between cursor-pointer">
-                  <h4 className="font-semibold text-lg">{faq.q}</h4>
-                  <span className="text-teal-400 group-open:rotate-180 transition-transform font-bold text-xl">
+                <summary className="flex cursor-pointer items-center justify-between">
+                  <h3 className="text-lg font-semibold">{faq.question}</h3>
+                  <span
+                    className="text-xl font-bold text-teal-400 transition-transform group-open:rotate-180"
+                    aria-hidden
+                  >
                     +
                   </span>
                 </summary>
                 <p className="mt-4 text-base leading-[1.7] text-slate-400">
-                  {faq.a}
+                  {faq.answer}
                 </p>
               </details>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Closing */}
-        <div className="p-12 rounded-[2rem] bg-gradient-to-br from-teal-600/20 to-teal-800/20 border border-white/10 text-center">
-          <h3 className="text-2xl font-bold mb-4">Still stuck?</h3>
-          <p className="mx-auto mb-8 max-th text-slate-300 leading-relaxed">
+        <section
+          className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-teal-600/20 to-teal-800/20 p-12 text-center"
+          aria-labelledby="contact-heading"
+        >
+          <h2 id="contact-heading" className="mb-4 text-2xl font-bold">
+            Still stuck?
+          </h2>
+          <p className="mx-auto mb-8 max-th leading-relaxed text-slate-300">
             Email us and someone from the team will get back to you.
           </p>
           <a
@@ -131,11 +182,14 @@ export default function Support() {
           >
             Contact Support
           </a>
-        </div>
+        </section>
       </main>
 
-      <footer className="max-w-7xl mx-auto px-4 py-20 border-t border-white/5 text-center">
-        <p className="text-slate-500 text-sm italic">
+      <footer
+        className="border-t border-white/5 px-4 py-20 text-center"
+        role="contentinfo"
+      >
+        <p className="text-sm italic text-slate-500">
           BLUPRNT.AI is a project by Monarch Labs Inc. All rights reserved.
         </p>
       </footer>

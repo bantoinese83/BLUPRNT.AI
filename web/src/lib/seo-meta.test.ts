@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { seoAbsoluteUrl, seoCanonicalOrigin } from "./seo-meta";
+import {
+  LANDING_PAGE_TITLE,
+  seoAbsoluteUrl,
+  seoCanonicalOrigin,
+  seoOgImageUrl,
+  seoPageTitle,
+} from "./seo-meta";
 
 describe("seoCanonicalOrigin", () => {
   beforeEach(() => {
@@ -45,5 +51,29 @@ describe("seoAbsoluteUrl", () => {
   it("normalizes paths without a leading slash", () => {
     const u = seoAbsoluteUrl("terms");
     expect(u).toContain("/terms");
+  });
+});
+
+describe("seoOgImageUrl", () => {
+  beforeEach(() => {
+    vi.stubEnv("VITE_SITE_URL", "https://bluprnt.ai");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("returns absolute OG image URL", () => {
+    expect(seoOgImageUrl()).toBe("https://bluprnt.ai/og-image.png");
+  });
+});
+
+describe("seoPageTitle", () => {
+  it("does not duplicate brand when title already includes BLUPRNT", () => {
+    expect(seoPageTitle(LANDING_PAGE_TITLE)).toBe(LANDING_PAGE_TITLE);
+  });
+
+  it("appends brand for short page titles", () => {
+    expect(seoPageTitle("Privacy Policy")).toBe("Privacy Policy — BLUPRNT.AI");
   });
 });

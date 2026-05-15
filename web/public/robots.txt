@@ -2,11 +2,17 @@
 User-agent: *
 Allow: /
 
-# App and auth surfaces (prefer noindex on pages; disallow reduces crawler budget on private URLs)
+# Private app, auth, and transactional surfaces
 Disallow: /dashboard
 Disallow: /settings
 Disallow: /auth/
 Disallow: /project/
 Disallow: /onboarding
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /signed-out
+Disallow: /e2e/
 
-Sitemap: https://bluprntai.com/sitemap.xml
+Sitemap: https://bluprnt.ai/sitemap.xml

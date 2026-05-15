@@ -1,16 +1,14 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PublicPageSEO } from "@/components/seo/PublicPageSEO";
 import { openCookieSettings } from "@/lib/cookie-consent";
-import { getPublicSiteUrl } from "@/lib/site-url";
+import { buildWebPageJsonLd } from "@/lib/seo-json-ld";
 import {
   WEB_APP_PATH_PRIVACY,
   WEB_APP_PATH_TERMS,
 } from "@shared/constants/public-site";
-
-const FALLBACK_ORIGIN = "https://bluprntai.com";
 
 type LegalPageShellProps = {
   title: string;
@@ -31,43 +29,29 @@ export function LegalPageShell({
   lastUpdated = "March 23, 2026",
   children,
 }: LegalPageShellProps) {
-  const base =
-    getPublicSiteUrl() ||
-    (typeof window !== "undefined" ? window.location.origin : FALLBACK_ORIGIN);
   const path = canonicalPath.startsWith("/")
     ? canonicalPath
     : `/${canonicalPath}`;
-  const canonicalUrl = `${base.replace(/\/$/, "")}${path}`;
+  const jsonLd = buildWebPageJsonLd({
+    path,
+    name: title,
+    description: metaDescription,
+    breadcrumbs: [
+      { name: "Home", path: "/" },
+      { name: title, path },
+    ],
+  });
 
   return (
     <div className="min-h-screen mesh-bg text-slate-900">
-      <Helmet htmlAttributes={{ lang: "en" }}>
-        <title>{title} — BLUPRNT</title>
-        <meta name="description" content={metaDescription} />
-        <meta name="robots" content="index, follow, max-image-preview:large" />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:title" content={`${title} — BLUPRNT`} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:site_name" content="BLUPRNT" />
-        <meta property="og:locale" content="en_US" />
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={`${title} — BLUPRNT`} />
-        <meta name="twitter:description" content={metaDescription} />
-        <meta
-          property="og:image"
-          content={`${base.replace(/\/$/, "")}/og-image.webp`}
-        />
-        <meta
-          property="og:image:alt"
-          content="BLUPRNT — home renovation financial planning"
-        />
-        <meta
-          name="twitter:image"
-          content={`${base.replace(/\/$/, "")}/og-image.webp`}
-        />
-      </Helmet>
+      <PublicPageSEO
+        title={title}
+        description={metaDescription}
+        canonicalPath={path}
+        ogType="article"
+        twitterCard="summary_large_image"
+        jsonLd={jsonLd}
+      />
 
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <nav
