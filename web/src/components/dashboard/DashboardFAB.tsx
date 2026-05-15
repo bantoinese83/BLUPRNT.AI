@@ -54,7 +54,7 @@ export function DashboardFAB({
   return (
     <div
       className={cn(
-        "fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3",
+        "fixed bottom-6 right-6 z-60 flex flex-col items-end gap-3",
         className,
       )}
     >
@@ -94,10 +94,10 @@ export function DashboardFAB({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-14 h-14 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all duration-300 active:scale-90",
+          "w-14 h-14 rounded-3xl flex items-center justify-center text-white shadow-2xl transition-all duration-300 active:scale-90",
           isOpen
             ? "bg-slate-900 rotate-90"
-            : "bg-gradient-to-br from-teal-500 to-indigo-600 hover:shadow-teal-500/20",
+            : "bg-linear-to-br from-teal-500 to-indigo-600 hover:shadow-teal-500/20",
         )}
       >
         {isOpen ? <X className="w-6 h-6" /> : <Plus className="w-7 h-7" />}
