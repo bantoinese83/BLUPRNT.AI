@@ -16,7 +16,8 @@ import { ProductionReadinessCard } from "@/components/dashboard/ProductionReadin
 import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
 import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 import { DASHBOARD_SECTION_GUIDED_PATH } from "@shared/copy/dashboard";
-import { countBillOrReceiptUploadsInProject } from "@shared/lib/ledger-count";
+import { countBillOrReceiptUploadsInProject } from "@shared/lib/ledger-entry-quota";
+import type { UpgradeOpenReason } from "@/components/dashboard/UpgradeModal";
 import type {
   ProjectRow,
   ScopeRow,
@@ -39,7 +40,7 @@ interface DashboardPlanProps {
   onUpgradeClick: () => void;
   onExportPDF: () => void;
   onOpenSidebar: () => void;
-  setUpgradeReason: (reason: string) => void;
+  setUpgradeReason: (reason: UpgradeOpenReason) => void;
   setShareOpen: (open: boolean) => void;
 }
 
@@ -86,7 +87,7 @@ export function DashboardPlan({
             estimatedMin={project.estimated_min_total ?? 0}
             estimatedMax={project.estimated_max_total ?? 0}
             spendingTotal={ledgerEntries.reduce(
-              (acc, curr) => acc + (curr.amount || 0),
+              (acc, curr) => acc + (curr.total || 0),
               0,
             )}
             documentRowCount={ledgerEntries.length}

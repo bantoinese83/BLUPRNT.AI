@@ -182,8 +182,6 @@ export function DashboardContent({
           setShowUpgrade(true);
         }}
         onExportPDF={handleExportPDF}
-        onOpenInsights={() => setIsSidebarOpen(true)}
-        onOpenAssistant={() => setIsAssistantOpen(true)}
       />
 
       <DashboardDataStatus
