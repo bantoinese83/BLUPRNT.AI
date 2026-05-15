@@ -87,7 +87,8 @@ describe("useSettingsPage", () => {
       }
       return {
         select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
       };
     });
   });
@@ -209,14 +210,31 @@ describe("useSettingsPage", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/signed-out", { replace: true });
   });
 
-  it("toggles analytics", async () => {
+  it("updates notification preferences", async () => {
     const { result } = renderHook(() => useSettingsPage());
 
-    await act(async () => {
-      result.current.onAnalyticsToggle(false);
+    const mockUpsert = vi.fn().mockResolvedValue({ error: null });
+    vi.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === "user_preferences") {
+        return {
+          upsert: mockUpsert,
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        } as any;
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        upsert: vi.fn().mockReturnThis(),
+      } as any;
     });
 
-    expect(localStorage.getItem("bluprnt_analytics_opt_in")).toBe("false");
-    expect(result.current.analyticsEnabled).toBe(false);
+    await act(async () => {
+      await result.current.onUpdateNotifications({ budget_alerts: false });
+    });
+
+    expect(mockUpsert).toHaveBeenCalled();
   });
 });

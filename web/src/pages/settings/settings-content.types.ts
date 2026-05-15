@@ -1,4 +1,8 @@
-import type { UserSubscriptionRow } from "@shared/types/database";
+import type {
+  UserSubscriptionRow,
+  NotificationPreferences,
+  UIPreferences,
+} from "@shared/types/database";
 
 export type SettingsUser = {
   email?: string;
@@ -37,8 +41,12 @@ export type SettingsContentProps = {
   setShowUpgrade: (v: boolean) => void;
   upgradeProjectId: string | null;
 
-  analyticsEnabled: boolean;
-  onAnalyticsToggle: (v: boolean) => void;
+  notificationPreferences: NotificationPreferences | null;
+  onUpdateNotifications: (
+    prefs: Partial<NotificationPreferences>,
+  ) => void | Promise<void>;
+  uiPreferences: UIPreferences | null;
+  onUpdateUI: (prefs: Partial<UIPreferences>) => void | Promise<void>;
   isAssistantOpen: boolean;
   setIsAssistantOpen: (v: boolean) => void;
   signOutLoading: boolean;

@@ -144,6 +144,29 @@ export function useDashboardActions({
     });
   };
 
+  const handleProjectArchive = useCallback(
+    async (id: string, archived: boolean) => {
+      const archiveAction = async () => {
+        const { error } = await supabase
+          .from("projects")
+          .update({ archived })
+          .eq("id", id);
+        if (error) throw error;
+        await load();
+      };
+
+      toast.promise(archiveAction(), {
+        loading: archived ? "Archiving project..." : "Restoring project...",
+        success: archived ? "Project archived" : "Project restored",
+        error: (err: unknown) => {
+          reportClientError("dashboard_archive_project", err);
+          return `Failed to ${archived ? "archive" : "restore"} project.`;
+        },
+      });
+    },
+    [load],
+  );
+
   return {
     showUpgrade,
     setShowUpgrade,
@@ -161,5 +184,6 @@ export function useDashboardActions({
     handleProjectDelete,
     handleConfirmDelete,
     handleProjectRename,
+    handleProjectArchive,
   };
 }

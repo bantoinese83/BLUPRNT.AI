@@ -5,11 +5,11 @@ import { getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
-  apiVersion: "2023-10-16",
-});
+export const handler = async (req: Request) => {
+  const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
+    apiVersion: "2023-10-16",
+  });
 
-Deno.serve(async (req: Request) => {
   const opt = handleOptions(req);
   if (opt) return opt;
 
@@ -50,8 +50,8 @@ Deno.serve(async (req: Request) => {
 
     if (!sub?.stripe_customer_id) {
       return jsonResponse(
-        { error: "No active billing account found. Upgrade first to manage your plan." },
-        400,
+        { error: "No Stripe customer found for this user." },
+        404,
         req,
       );
     }
@@ -71,4 +71,6 @@ Deno.serve(async (req: Request) => {
     });
     return jsonResponse({ error: "Failed to open billing portal" }, 500, req);
   }
-});
+};
+
+Deno.serve(handler);

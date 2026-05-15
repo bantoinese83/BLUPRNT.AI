@@ -67,6 +67,7 @@ export function ScopeDetail({
     addItem,
     isAdding,
     setIsAdding,
+    toggleStatus,
   } = useScopeManagement({ projectId, onRefresh });
 
   const conf = project.confidence_score ?? 4.5;
@@ -195,6 +196,7 @@ export function ScopeDetail({
                         onDelete={setDeleteConfirmItem}
                         onCancelEdit={() => setEditingId(null)}
                         onSave={handleSave}
+                        onStatusToggle={toggleStatus}
                         editQty={editQty}
                         setEditQty={setEditQty}
                         editTier={editTier}

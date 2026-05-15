@@ -13,6 +13,8 @@ import { AccountProfileSection } from "@/components/settings/AccountProfileSecti
 import { SecuritySection } from "@/components/settings/SecuritySection";
 import { BillingSection } from "@/components/settings/BillingSection";
 import { PrivacySection } from "@/components/settings/PrivacySection";
+import { NotificationsSection } from "@/components/settings/NotificationsSection";
+import { UIPreferencesSection } from "@/components/settings/UIPreferencesSection";
 
 import type { SettingsContentProps } from "./settings-content.types";
 
@@ -47,8 +49,10 @@ export function SettingsContent(props: SettingsContentProps) {
     signOutLoading,
     onSignOut,
     onBack,
-    analyticsEnabled,
-    onAnalyticsToggle,
+    notificationPreferences,
+    onUpdateNotifications,
+    uiPreferences,
+    onUpdateUI,
     isAssistantOpen,
     setIsAssistantOpen,
   } = props;
@@ -101,6 +105,16 @@ export function SettingsContent(props: SettingsContentProps) {
           onChangePassword={onChangePassword}
         />
 
+        <NotificationsSection
+          preferences={notificationPreferences}
+          onUpdate={onUpdateNotifications}
+        />
+
+        <UIPreferencesSection
+          preferences={uiPreferences}
+          onUpdate={onUpdateUI}
+        />
+
         <BillingSection
           isArchitect={isArchitect}
           subscriptionRow={subscriptionRow}
@@ -111,8 +125,6 @@ export function SettingsContent(props: SettingsContentProps) {
           exportMessage={exportMessage}
           exportLoading={exportLoading}
           onExportData={onExportData}
-          analyticsEnabled={analyticsEnabled}
-          onAnalyticsToggle={onAnalyticsToggle}
           deleteConfirm={deleteConfirm}
           setDeleteConfirm={setDeleteConfirm}
           deleteMessage={deleteMessage}

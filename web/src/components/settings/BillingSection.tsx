@@ -112,25 +112,38 @@ export function BillingSection({
               </p>
             </div>
           </div>
-          <Button
-            variant={isArchitect ? "outline" : "primary"}
-            size="lg"
-            className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-teal-200/50" : "border-slate-200"}`}
-            onClick={handleManagePlan}
-            disabled={loadingPortal}
-            type="button"
-          >
-            {loadingPortal ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : isArchitect ? (
-              "Manage Plan"
-            ) : (
-              "Upgrade Now"
-            )}
-          </Button>
+          <div className="flex flex-col gap-3 w-full sm:w-auto">
+            <Button
+              variant={isArchitect ? "outline" : "primary"}
+              size="lg"
+              className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-teal-200/50" : "border-slate-200"}`}
+              onClick={handleManagePlan}
+              disabled={loadingPortal}
+              type="button"
+            >
+              {loadingPortal ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : isArchitect ? (
+                "Manage Plan"
+              ) : (
+                "Upgrade Now"
+              )}
+            </Button>
+            {isArchitect &&
+              subscriptionRow &&
+              architectBillingChannel(subscriptionRow) === "stripe" && (
+                <button
+                  type="button"
+                  onClick={handleManagePlan}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-bold text-center underline decoration-slate-200 underline-offset-4"
+                >
+                  Cancel or Downgrade to Free
+                </button>
+              )}
+          </div>
         </div>
 
         <div className="px-2">

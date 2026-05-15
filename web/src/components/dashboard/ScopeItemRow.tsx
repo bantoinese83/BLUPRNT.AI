@@ -38,6 +38,7 @@ interface ScopeItemRowProps {
   onDelete: (item: ScopeRow) => void;
   onCancelEdit: () => void;
   onSave: (item: ScopeRow) => void;
+  onStatusToggle?: (id: string, current: string | null) => void;
   editQty: string;
   setEditQty: (qty: string) => void;
   editTier: string;
@@ -58,6 +59,7 @@ export function ScopeItemRow({
   onDelete,
   onCancelEdit,
   onSave,
+  onStatusToggle,
   editQty,
   setEditQty,
   editTier,
@@ -69,6 +71,7 @@ export function ScopeItemRow({
   hasProjectPass,
 }: ScopeItemRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const isCompleted = item.status === "completed";
   const justification = item.justification || item.metadata?.justification;
   const priority = item.priority || item.metadata?.priority;
   const careTips = item.maintenance_tips || item.metadata?.care_tips;
@@ -163,91 +166,149 @@ export function ScopeItemRow({
 
   return (
     <div
-      className="group p-4 sm:p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors cursor-default"
+      className={cn(
+        "group p-4 sm:p-6 flex flex-col gap-4 transition-all cursor-default",
+        isCompleted ? "bg-slate-50/30 opacity-70" : "hover:bg-slate-50",
+      )}
       onDoubleClick={() => onEdit(item)}
     >
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="space-y-1.5 min-w-0">
-          <div className="flex items-center flex-wrap gap-2">
-            <h4
-              id={`scope-item-title-${item.id}`}
-              className="font-semibold text-slate-900"
+        <div className="flex items-start gap-4 min-w-0">
+          <button
+            type="button"
+            onClick={() => onStatusToggle?.(item.id, item.status)}
+            className={cn(
+              "mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+              isCompleted
+                ? "bg-teal-500 border-teal-500 text-white shadow-sm"
+                : "border-slate-200 hover:border-teal-400 bg-white",
+            )}
+            aria-label={isCompleted ? "Mark as pending" : "Mark as complete"}
+          >
+            {isCompleted && <CheckCircle2 className="w-3.5 h-3.5" />}
+          </button>
+
+          <div className="space-y-1.5 min-w-0 flex-1">
+            <div className="flex items-center flex-wrap gap-2">
+              <h4
+                id={`scope-item-title-${item.id}`}
+                className={cn(
+                  "font-semibold transition-all",
+                  isCompleted
+                    ? "text-slate-400 line-through"
+                    : "text-slate-900",
+                )}
+              >
+                {item.category}
+              </h4>
+              {priority && (
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    "text-[10px] h-4.5 px-1.5 uppercase font-black border-none",
+                    isCompleted
+                      ? "bg-slate-100 text-slate-400"
+                      : priority === "high"
+                        ? "bg-red-50 text-red-600"
+                        : priority === "medium"
+                          ? "bg-amber-50 text-amber-600"
+                          : "bg-slate-50 text-slate-500",
+                  )}
+                >
+                  {priority}
+                </Badge>
+              )}
+              {item.finish_tier && (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-[10px] h-4.5 px-1.5 capitalize border-slate-200",
+                    isCompleted
+                      ? "text-slate-300 border-slate-100"
+                      : "text-slate-500",
+                  )}
+                >
+                  {item.finish_tier} tier
+                </Badge>
+              )}
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(item);
+                  }}
+                  className="p-1 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                  aria-label="Edit"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(item);
+                  }}
+                  className="p-1 text-slate-400 hover:text-amber-600 rounded-md hover:bg-amber-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                  aria-label="Remove"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+            <p
+              className={cn(
+                "text-sm leading-snug",
+                isCompleted ? "text-slate-400" : "text-slate-600",
+              )}
             >
-              {item.category}
-            </h4>
-            {priority && (
-              <Badge
-                variant="secondary"
-                className={`text-[10px] h-4.5 px-1.5 uppercase font-black border-none ${
-                  priority === "high"
-                    ? "bg-red-50 text-red-600"
-                    : priority === "medium"
-                      ? "bg-amber-50 text-amber-600"
-                      : "bg-slate-50 text-slate-500"
-                }`}
-              >
-                {priority}
-              </Badge>
-            )}
-            {item.finish_tier && (
-              <Badge
-                variant="outline"
-                className="text-[10px] h-4.5 px-1.5 capitalize border-slate-200 text-slate-500"
-              >
-                {item.finish_tier} tier
-              </Badge>
-            )}
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(item);
-                }}
-                className="p-1 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-                aria-label="Edit"
-              >
-                <Pencil className="w-3 h-3" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(item);
-                }}
-                className="p-1 text-slate-400 hover:text-amber-600 rounded-md hover:bg-amber-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-                aria-label="Remove"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-          <p className="text-sm text-slate-600 leading-snug">
-            {item.description}
-          </p>
-          {(isArchitect || hasProjectPass) && justification && (
-            <p className="text-xs text-slate-400 flex items-start gap-1.5">
-              <Hammer className="w-3.5 h-3.5 mt-0.5 shrink-0 text-teal-400" />
-              <span>{justification}</span>
+              {item.description}
             </p>
-          )}
-          {(isArchitect || hasProjectPass) && careTips && (
-            <div className="pt-1 flex items-center gap-1.5 text-[10px] font-bold text-teal-600/70 uppercase tracking-tight">
-              <div className="h-1 w-1 rounded-full bg-teal-300" />
-              Care Tip: {careTips}
+            {(isArchitect || hasProjectPass) && justification && (
+              <p className="text-xs text-slate-400 flex items-start gap-1.5">
+                <Hammer
+                  className={cn(
+                    "w-3.5 h-3.5 mt-0.5 shrink-0",
+                    isCompleted ? "text-slate-300" : "text-teal-400",
+                  )}
+                />
+                <span>{justification}</span>
+              </p>
+            )}
+            {(isArchitect || hasProjectPass) && careTips && (
+              <div
+                className={cn(
+                  "pt-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-tight",
+                  isCompleted ? "text-slate-300" : "text-teal-600/70",
+                )}
+              >
+                <div
+                  className={cn(
+                    "h-1 w-1 rounded-full",
+                    isCompleted ? "bg-slate-200" : "bg-teal-300",
+                  )}
+                />
+                Care Tip: {careTips}
+              </div>
+            )}
+            <div className="pt-1 flex items-center gap-1 text-[10px] font-medium text-slate-400">
+              {stars(item.confidence_score)}
+              <span className="ml-1">
+                {confidenceReason || "Regional pricing accuracy"}
+              </span>
             </div>
-          )}
-          <div className="pt-1 flex items-center gap-1 text-[10px] font-medium text-slate-400">
-            {stars(item.confidence_score)}
-            <span className="ml-1">
-              {confidenceReason || "Regional pricing accuracy"}
-            </span>
           </div>
         </div>
         <div className="text-right shrink-0 space-y-1">
-          <div className="font-bold text-slate-900">
+          <div
+            className={cn(
+              "font-bold",
+              isCompleted ? "text-slate-400" : "text-slate-900",
+            )}
+          >
             {money(item.total_cost_min, item.total_cost_max)}
           </div>
+
           {reconciliation && reconciliation.total_billed > 0 && (
             <div
               className={cn(

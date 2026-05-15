@@ -13,6 +13,7 @@ export type ProjectRow = {
   estimated_max_total: number | null;
   confidence_score: number | null;
   stage: string | null;
+  archived: boolean;
   created_at: string;
   metadata: ProjectMetadata | null;
   before_photo_storage_path: string | null;
@@ -22,9 +23,31 @@ export type ProjectRow = {
 
 export type ScopeRow = Omit<
   PublicSchema["Tables"]["scope_items"]["Row"],
-  "metadata"
+  "metadata" | "status"
 > & {
   metadata: ScopeMetadata | null;
+  status: "pending" | "completed";
+};
+
+export type NotificationPreferences = {
+  budget_alerts: boolean;
+  ocr_completion: boolean;
+  marketing: boolean;
+  preferred_channel: "email" | "push" | "both";
+};
+
+export type UIPreferences = {
+  theme: "light" | "dark" | "system";
+  compact_view: boolean;
+};
+
+export type UserPreferencesRow = {
+  user_id: string;
+  last_active_project_id: string | null;
+  push_token: string | null;
+  notification_preferences: NotificationPreferences;
+  ui_preferences: UIPreferences;
+  updated_at: string;
 };
 
 export type LedgerEntryRow = PublicSchema["Tables"]["ledger_entries"]["Row"];
@@ -38,6 +61,7 @@ export type LedgerLineItemRow =
 
 export type UserSubscriptionRow =
   PublicSchema["Tables"]["user_subscriptions"]["Row"];
+
 export type ProjectPassRow = PublicSchema["Tables"]["project_passes"]["Row"];
 
 export type OnboardingSyncRow = {

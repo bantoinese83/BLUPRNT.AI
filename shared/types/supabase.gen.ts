@@ -598,6 +598,7 @@ export type Database = {
           stripe_session_id: string | null;
           type: string;
           updated_at: string;
+          archived: boolean;
         };
         Insert: {
           after_photo_storage_path?: string | null;
@@ -617,6 +618,7 @@ export type Database = {
           stripe_session_id?: string | null;
           type: string;
           updated_at?: string;
+          archived?: boolean;
         };
         Update: {
           after_photo_storage_path?: string | null;
@@ -636,6 +638,7 @@ export type Database = {
           stripe_session_id?: string | null;
           type?: string;
           updated_at?: string;
+          archived?: boolean;
         };
         Relationships: [
           {
@@ -714,6 +717,7 @@ export type Database = {
           unit_cost_min: number | null;
           updated_at: string;
           verification_required: boolean | null;
+          status: string;
         };
         Insert: {
           category: string;
@@ -739,6 +743,7 @@ export type Database = {
           unit_cost_min?: number | null;
           updated_at?: string;
           verification_required?: boolean | null;
+          status?: string;
         };
         Update: {
           category?: string;
@@ -764,6 +769,7 @@ export type Database = {
           unit_cost_min?: number | null;
           updated_at?: string;
           verification_required?: boolean | null;
+          status?: string;
         };
         Relationships: [
           {
@@ -824,6 +830,7 @@ export type Database = {
         Row: {
           last_active_project_id: string | null;
           notification_preferences: Json | null;
+          ui_preferences: Json | null;
           push_token: string | null;
           updated_at: string;
           user_id: string;
@@ -831,6 +838,7 @@ export type Database = {
         Insert: {
           last_active_project_id?: string | null;
           notification_preferences?: Json | null;
+          ui_preferences?: Json | null;
           push_token?: string | null;
           updated_at?: string;
           user_id: string;
@@ -838,6 +846,7 @@ export type Database = {
         Update: {
           last_active_project_id?: string | null;
           notification_preferences?: Json | null;
+          ui_preferences?: Json | null;
           push_token?: string | null;
           updated_at?: string;
           user_id?: string;

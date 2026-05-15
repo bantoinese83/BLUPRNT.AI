@@ -1,14 +1,11 @@
-import { Shield, TrendingUp, Download, Trash2, Loader2 } from "lucide-react";
+import { Shield, Download, Trash2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 
 type PrivacySectionProps = {
   exportMessage: string | null;
   exportLoading: boolean;
   onExportData: () => void | Promise<void>;
-  analyticsEnabled: boolean;
-  onAnalyticsToggle: (val: boolean) => void;
   deleteConfirm: boolean;
   setDeleteConfirm: (val: boolean) => void;
   deleteMessage: string | null;
@@ -20,8 +17,6 @@ export function PrivacySection({
   exportMessage,
   exportLoading,
   onExportData,
-  analyticsEnabled,
-  onAnalyticsToggle,
   deleteConfirm,
   setDeleteConfirm,
   deleteMessage,
@@ -67,28 +62,6 @@ export function PrivacySection({
             )}
             Generate Export
           </Button>
-        </div>
-
-        <div className="border-t border-slate-100 pt-8 space-y-4">
-          <div className="space-y-1">
-            <h4 className="font-bold text-slate-900 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-teal-500" />
-              Product Analytics
-            </h4>
-            <p className="text-sm text-slate-500 font-medium leading-relaxed">
-              Share anonymous usage data to help us improve BLUPRNT. We never
-              track personal project details or identity.
-            </p>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-200 rounded-2xl">
-            <span className="text-sm font-bold text-slate-700">
-              Allow usage insights
-            </span>
-            <Switch
-              checked={analyticsEnabled}
-              onCheckedChange={onAnalyticsToggle}
-            />
-          </div>
         </div>
 
         <div className="border-t border-slate-100 pt-8 space-y-4">

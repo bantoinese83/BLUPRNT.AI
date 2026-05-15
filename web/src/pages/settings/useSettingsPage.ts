@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
 import { supabase, invokeFunction } from "@/lib/supabase";
-import type { UserSubscriptionRow } from "@shared/types/database";
+import type {
+  UserSubscriptionRow,
+  NotificationPreferences,
+  UIPreferences,
+} from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 import { setAnalyticsEnabled as setPostHogCapturing } from "@/lib/posthog";
@@ -40,9 +44,11 @@ export function useSettingsPage(): UseSettingsPageResult {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(() => {
-    return localStorage.getItem("bluprnt_analytics_opt_in") === "true";
-  });
+  const [notificationPreferences, setNotificationPreferences] =
+    useState<NotificationPreferences | null>(null);
+  const [uiPreferences, setUiPreferences] = useState<UIPreferences | null>(
+    null,
+  );
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   useEffect(() => {
@@ -56,15 +62,38 @@ export function useSettingsPage(): UseSettingsPageResult {
         setDisplayName((u?.user_metadata?.full_name as string) ?? "");
 
         if (u) {
-          const { data: sub } = await supabase
-            .from("user_subscriptions")
-            .select("*")
-            .eq("user_id", u.id)
-            .order("updated_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+          // Parallel fetch for sub and prefs
+          const [{ data: sub }, { data: prefs }] = await Promise.all([
+            supabase
+              .from("user_subscriptions")
+              .select("*")
+              .eq("user_id", u.id)
+              .order("updated_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("user_preferences")
+              .select("notification_preferences, ui_preferences")
+              .eq("user_id", u.id)
+              .maybeSingle(),
+          ]);
+
+          if (cancelled) return;
+
           setSubscriptionRow(sub as UserSubscriptionRow | null);
           setIsArchitect(isArchitectPlanEffective(sub));
+
+          if (prefs) {
+            setNotificationPreferences(
+              prefs.notification_preferences as NotificationPreferences,
+            );
+            setUiPreferences(prefs.ui_preferences as UIPreferences);
+            // Sync analytics setting to PostHog
+            setPostHogCapturing(
+              (prefs.notification_preferences as NotificationPreferences)
+                ?.marketing ?? false,
+            );
+          }
 
           const { data: owned } = await supabase
             .from("properties")
@@ -86,6 +115,8 @@ export function useSettingsPage(): UseSettingsPageResult {
           setUpgradeProjectId(null);
           setSubscriptionRow(null);
           setIsArchitect(false);
+          setNotificationPreferences(null);
+          setUiPreferences(null);
         }
       } finally {
         if (!cancelled) setUserLoading(false);
@@ -96,6 +127,46 @@ export function useSettingsPage(): UseSettingsPageResult {
       cancelled = true;
     };
   }, [authUser]);
+
+  const onUpdateNotifications = useCallback(
+    async (prefs: Partial<NotificationPreferences>) => {
+      if (!authUser) return;
+      const newPrefs = { ...notificationPreferences, ...prefs };
+      setNotificationPreferences(newPrefs as NotificationPreferences);
+
+      const { error } = await supabase.from("user_preferences").upsert({
+        user_id: authUser.id,
+        notification_preferences: newPrefs,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error("Failed to save notification preferences:", error);
+      } else if (prefs.marketing !== undefined) {
+        setPostHogCapturing(prefs.marketing);
+      }
+    },
+    [authUser, notificationPreferences],
+  );
+
+  const onUpdateUI = useCallback(
+    async (prefs: Partial<UIPreferences>) => {
+      if (!authUser) return;
+      const newPrefs = { ...uiPreferences, ...prefs };
+      setUiPreferences(newPrefs as UIPreferences);
+
+      const { error } = await supabase.from("user_preferences").upsert({
+        user_id: authUser.id,
+        ui_preferences: newPrefs,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error("Failed to save UI preferences:", error);
+      }
+    },
+    [authUser, uiPreferences],
+  );
 
   /** After Stripe billing portal / checkout, tab focus often returns before authUser changes — refresh plan row. */
   useEffect(() => {
@@ -245,15 +316,6 @@ export function useSettingsPage(): UseSettingsPageResult {
     }
   }, [deleteConfirm, navigate]);
 
-  const onAnalyticsToggle = useCallback((enabled: boolean) => {
-    setAnalyticsEnabled(enabled);
-    localStorage.setItem(
-      "bluprnt_analytics_opt_in",
-      enabled ? "true" : "false",
-    );
-    setPostHogCapturing(enabled);
-  }, []);
-
   return {
     userLoading,
     user,
@@ -287,8 +349,11 @@ export function useSettingsPage(): UseSettingsPageResult {
     setShowUpgrade,
     upgradeProjectId,
 
-    analyticsEnabled,
-    onAnalyticsToggle,
+    notificationPreferences,
+    onUpdateNotifications,
+    uiPreferences,
+    onUpdateUI,
+
     isAssistantOpen,
     setIsAssistantOpen,
 

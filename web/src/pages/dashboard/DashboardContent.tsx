@@ -43,6 +43,7 @@ import { useDashboardSections } from "./useDashboardSections";
 import { useDashboardActions } from "./useDashboardActions";
 import { ProductionReadinessCard } from "@/components/dashboard/ProductionReadinessCard";
 import { DashboardJumpMenu } from "@/components/dashboard/DashboardJumpMenu";
+import { DashboardFAB } from "@/components/dashboard/DashboardFAB";
 
 export function DashboardContent({
   projects,
@@ -88,6 +89,7 @@ export function DashboardContent({
     handleProjectDelete,
     handleConfirmDelete,
     handleProjectRename,
+    handleProjectArchive,
   } = useDashboardActions({
     project,
     projects,
@@ -147,6 +149,7 @@ export function DashboardContent({
         id: p.id,
         name: p.name,
         created_at: p.created_at,
+        archived: p.archived,
         estimated_min_total: p.estimated_min_total,
       })),
     [projects],
@@ -218,6 +221,7 @@ export function DashboardContent({
             currentId={project?.id ?? null}
             onSelect={handleProjectSelect}
             onDelete={handleProjectDeleteOption}
+            onArchive={handleProjectArchive}
           />
         </motion.div>
         <motion.div variants={itemVariants}>
@@ -402,6 +406,12 @@ export function DashboardContent({
         isArchitect={isArchitect}
         subscription={subscription}
         hasProjectPass={hasProjectPass}
+      />
+
+      <DashboardFAB
+        onUpload={() => navigate("/dashboard/execute")}
+        onAddScope={() => navigate("/dashboard/scope")}
+        onAskAI={() => setIsAssistantOpen(true)}
       />
 
       <SmartSidebar

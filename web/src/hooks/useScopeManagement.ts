@@ -198,5 +198,26 @@ export function useScopeManagement({
     addItem,
     isAdding,
     setIsAdding,
+    toggleStatus: async (id: string, currentStatus: string | null) => {
+      const nextStatus =
+        currentStatus === "completed" ? "pending" : "completed";
+      const action = async () => {
+        const { error } = await supabase
+          .from("scope_items")
+          .update({ status: nextStatus })
+          .eq("id", id);
+        if (error) throw error;
+        onRefresh(projectId);
+      };
+
+      toast.promise(action(), {
+        loading: "Updating status...",
+        success:
+          nextStatus === "completed"
+            ? "Task completed! 🎉"
+            : "Task marked as pending",
+        error: "Failed to update task status.",
+      });
+    },
   };
 }

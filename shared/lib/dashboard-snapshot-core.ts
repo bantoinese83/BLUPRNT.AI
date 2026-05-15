@@ -45,7 +45,7 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
 }
 
 const PROJECTS_LIST_SELECT =
-  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, before_photo_storage_path, after_photo_storage_path";
+  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, before_photo_storage_path, after_photo_storage_path, archived";
 
 /**
  * Cover image path (project-photos bucket) and ledger entry count per project for switcher UI.
@@ -98,7 +98,7 @@ export async function fetchProjectSwitcherHints(
 }
 
 const SCOPE_SELECT =
-  "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";
+  "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase, status";
 
 const LEDGER_SELECT =
   "id, vendor_name, total, created_at, payment_status, document_type, document_id, issue_date, project_id, vendor_contact_info, warranty_expiry_date, insurance_renewal_date, permit_expiration_date, ai_summary";
