@@ -90,6 +90,9 @@ We established global DDoS protection for your AI and Email endpoints.
 - Created a free Redis database in the US-East-1 region via Upstash.
 - Injected `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` into Supabase Edge Function secrets.
 - The `_shared/rate-limit.ts` utility automatically detected these keys and switched from "Per-Server In-Memory limit" to a **Global Shared limit**.
+- Kinds: `default`, `marketing`, `public_share` (unauthenticated `get-project-view`), and `ai`. Optional env: `RATE_LIMIT_PUBLIC_SHARE_REQUESTS` (default 30/min per IP).
+
+Public share links are documented in [security-share-tokens.md](./security-share-tokens.md).
 
 ---
 

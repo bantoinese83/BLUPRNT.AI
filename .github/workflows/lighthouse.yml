@@ -1,0 +1,47 @@
+name: Lighthouse
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "web/**"
+      - "shared/**"
+      - "scripts/lighthouse-*.sh"
+      - "scripts/lighthouse-*.mjs"
+      - ".github/workflows/lighthouse.yml"
+
+concurrency:
+  group: lighthouse-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse-mobile:
+    name: Lighthouse (mobile preset)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lighthouse against production build
+        run: bash scripts/lighthouse-local.sh mobile
+
+      - name: Enforce category budgets
+        run: node scripts/lighthouse-ci-budget.mjs web/lighthouse-report.report.json
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: |
+            web/lighthouse-report.report.html
+            web/lighthouse-report.report.json
+          retention-days: 14

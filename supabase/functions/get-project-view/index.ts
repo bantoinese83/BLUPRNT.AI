@@ -14,7 +14,7 @@ export const handler = async (req: Request) => {
     return jsonResponse({ error: "Method not allowed" }, 405, req);
   }
 
-  const { ok, retryAfter } = await checkRateLimit(req);
+  const { ok, retryAfter } = await checkRateLimit(req, "public_share");
   if (!ok) {
     return jsonResponse(
       { error: "Too many requests. Please try again later." },

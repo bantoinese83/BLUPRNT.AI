@@ -29,6 +29,10 @@ Out of scope (use normal issues):
 - Denial-of-service against shared infrastructure without a clear product bug
 - Social engineering or physical access scenarios
 
+## Public share links
+
+Read-only project URLs (`/project/:token`) use UUID tokens, 30-day expiry, RLS on `project_view_tokens`, and the `get-project-view` edge function with per-IP rate limiting. See [docs/security-share-tokens.md](docs/security-share-tokens.md) for the threat model and operational checklist.
+
 ## Secure development
 
-Contributors should run **`npm run check`** before merging; CI runs lint, typecheck, tests with coverage gates, production builds, Playwright e2e, and Deno checks for edge functions. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributors should run **`npm run check`** before merging; CI runs lint, typecheck, tests with coverage gates, production builds, Playwright e2e, Maestro (mobile), Lighthouse (web PRs), and Deno checks for edge functions. See [CONTRIBUTING.md](CONTRIBUTING.md).

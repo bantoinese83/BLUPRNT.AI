@@ -4,12 +4,13 @@
  * Kinds:
  * - `default` — RATE_LIMIT_REQUESTS / RATE_LIMIT_WINDOW_MS (default 60/min)
  * - `marketing` — stricter for public lead capture (default 10/hour)
+ * - `public_share` — unauthenticated project view by token (default 30/min)
  * - `ai` — chat / LLM endpoints (default 20/min)
  */
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 
-export type RateLimitKind = "default" | "marketing" | "ai";
+export type RateLimitKind = "default" | "marketing" | "public_share" | "ai";
 
 function specFor(kind: RateLimitKind): {
   requests: number;
@@ -36,6 +37,20 @@ function specFor(kind: RateLimitKind): {
           parseInt(Deno.env.get("RATE_LIMIT_AI_WINDOW_MS") ?? "60000", 10) ||
           60_000,
         prefix: "blueprint-edge-ai",
+      };
+    case "public_share":
+      return {
+        requests:
+          parseInt(
+            Deno.env.get("RATE_LIMIT_PUBLIC_SHARE_REQUESTS") ?? "30",
+            10,
+          ) || 30,
+        windowMs:
+          parseInt(
+            Deno.env.get("RATE_LIMIT_PUBLIC_SHARE_WINDOW_MS") ?? "60000",
+            10,
+          ) || 60_000,
+        prefix: "blueprint-edge-public-share",
       };
     default:
       return {

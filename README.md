@@ -106,37 +106,39 @@ npm run status       # Faster lint / typecheck / tests per workspace (pre-push s
 | **Shared validation**  | Zod schemas in `shared/lib/validation.ts` (auth, onboarding, settings, marketing); re-exported for Edge Functions                                 |
 | **Web E2E**            | Playwright — `npm run test:e2e` (full), `npm run test:e2e:smoke` (marketing + auth redirect + axe on key routes), `npm run test:e2e:probes`       |
 | **Web a11y**           | `@axe-core/playwright` on landing, register, forgot-password, and authenticated dashboard routes                                                  |
-| **Mobile E2E**         | Maestro — `bash scripts/e2e-mobile-maestro.sh` (default: `app-smoke`); full folder with `MAESTRO_CLEAR_STATE=true` on CI                          |
+| **Mobile E2E**         | Maestro — `npm run test:e2e:mobile` (default: `app-smoke`); full folder with `MAESTRO_CLEAR_STATE=true` on CI                                     |
 | **Mobile auth smokes** | `mobile/maestro/auth-forgot-password.yaml`, `auth-signed-out-login.yaml` (no credentials); `auth-login.yaml` needs `USER_EMAIL` / `USER_PASSWORD` |
+| **Lighthouse (web)**   | PR workflow [lighthouse.yml](.github/workflows/lighthouse.yml) — mobile preset; local: `npm run lighthouse:ci`                                    |
+| **Public share links** | `get-project-view` + `public_share` rate limit (30/min/IP); see [security-share-tokens.md](docs/security-share-tokens.md)                         |
 | **Errors**             | Sentry via `reportClientError` on web/mobile error boundaries                                                                                     |
 | **Analytics (mobile)** | PostHog gated behind explicit consent (`optOut` by default)                                                                                       |
 | **DB**                 | Optional `npm run db:types:check` when `SUPABASE_ACCESS_TOKEN` is set; `npm run db:migrations:check` before releases                              |
 
-See [.github/workflows/ci.yml](.github/workflows/ci.yml) for the full pipeline. Coverage thresholds apply to **critical subsets** of web/mobile — details in [CONTRIBUTING.md — Coverage thresholds](CONTRIBUTING.md#coverage-thresholds).
+See [.github/workflows/ci.yml](.github/workflows/ci.yml) and [.github/workflows/lighthouse.yml](.github/workflows/lighthouse.yml). Coverage thresholds apply to **critical subsets** of web/mobile — details in [CONTRIBUTING.md — Coverage thresholds](CONTRIBUTING.md#coverage-thresholds).
 
 #### Local-only checks (optional)
 
 ```bash
 npm run db:lint
 npm run security:audit
-bash scripts/lighthouse-local.sh   # see docs/web-lighthouse.md
+npm run lighthouse:mobile          # or npm run lighthouse:ci (with PR budgets)
 ```
 
 ### What “10/10” means here
 
-We treat **10/10** as **defensible excellence**: honest docs, automated gates, and security reporting—not vanity badges. Phases 1–2 of our quality roadmap (shared Zod, auth hardening, lazy onboarding, full edge-function checks, Maestro auth smokes) are **in place**. Longer-term items (Storybook/Ladle, Lighthouse CI budgets on PRs, i18n, session-storage hardening, public share-token review) stay on the backlog until product priorities call for them.
+We treat **10/10** as **defensible excellence**: honest docs, automated gates, and security reporting—not vanity badges. **Phases 1–3 (core)** are in place: shared Zod, auth hardening, lazy onboarding, full edge-function checks, Maestro auth smokes, share-token security docs + `public_share` rate limits, Lighthouse CI on PRs, and mobile session-storage hardening notes. **Deferred:** Storybook/Ladle, i18n scaffold, SecureStore implementation.
 
 ---
 
 ## 📂 Repository Guide
 
-| Path        | Description                                                                          |
-| :---------- | :----------------------------------------------------------------------------------- |
-| `web/`      | React 19 SPA, performance- and accessibility-oriented UX.                            |
-| `mobile/`   | Expo Native app. Features modular components and native gestures.                    |
-| `shared/`   | Types, Zod validation (`shared/lib/validation.ts`), formatters, and billing helpers. |
-| `supabase/` | Database migrations and the Deno Edge Function suite.                                |
-| `docs/`     | [**Architecture Deep-Dive**](docs/ARCHITECTURE.md)                                   |
+| Path        | Description                                                                                                  |
+| :---------- | :----------------------------------------------------------------------------------------------------------- |
+| `web/`      | React 19 SPA, performance- and accessibility-oriented UX.                                                    |
+| `mobile/`   | Expo Native app. Features modular components and native gestures.                                            |
+| `shared/`   | Types, Zod validation (`shared/lib/validation.ts`), formatters, and billing helpers.                         |
+| `supabase/` | Database migrations and the Deno Edge Function suite.                                                        |
+| `docs/`     | Architecture, security, Lighthouse, launch handbook — see [Documentation Links](#-documentation-links) below |
 
 ---
 
@@ -148,6 +150,8 @@ We treat **10/10** as **defensible excellence**: honest docs, automated gates, a
 - [**Production Launch Handbook**](docs/production_launch_handbook.md) — Deployment and ops.
 - [**Gemini AI Integration**](docs/gemini-api.md) — How the intelligence layer works.
 - [**Web Lighthouse (local)**](docs/web-lighthouse.md) — Performance and a11y lab runs against the production build.
+- [**Share token security**](docs/security-share-tokens.md) — Public project links, rate limits, threat model.
+- [**Session storage (mobile)**](docs/session-storage-hardening.md) — SecureStore and auth hardening research.
 
 ---
 

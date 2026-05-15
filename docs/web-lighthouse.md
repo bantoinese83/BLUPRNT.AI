@@ -7,7 +7,23 @@ This document explains how to run [Lighthouse](https://developer.chrome.com/docs
 ```bash
 npm run lighthouse:mobile    # throttled mobile emulation (default lab profile)
 npm run lighthouse:desktop   # desktop emulation (--preset=desktop)
+npm run lighthouse:ci        # mobile + enforce CI budgets (see scripts/lighthouse-ci-budget.mjs)
 ```
+
+Pull requests that touch `web/**` also run [`.github/workflows/lighthouse.yml`](../.github/workflows/lighthouse.yml) (mobile preset, category score floors).
+
+### CI budgets (defaults)
+
+Enforced by [`scripts/lighthouse-ci-budget.mjs`](../scripts/lighthouse-ci-budget.mjs):
+
+| Category       | Minimum score |
+| :------------- | ------------: |
+| performance    |            85 |
+| accessibility  |           100 |
+| best-practices |           100 |
+| seo            |           100 |
+
+Override per run with `LH_BUDGET_PERFORMANCE`, `LH_BUDGET_ACCESSIBILITY`, `LH_BUDGET_BEST_PRACTICES`, or `LH_BUDGET_SEO`.
 
 These invoke [`scripts/lighthouse-local.sh`](../scripts/lighthouse-local.sh), which:
 

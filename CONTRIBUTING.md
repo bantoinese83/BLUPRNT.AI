@@ -35,7 +35,10 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 5. **Testing**:
    - Add unit tests for new shared logic.
    - Run `npm run check` so you pass the same gates as CI (lint, knip, coverage thresholds, builds). See [Coverage thresholds](#coverage-thresholds) below.
-   - Web E2E: `npm run test:e2e` (full suite), `npm run test:e2e:smoke` (marketing + a11y + probes), `npm run test:e2e:probes` (dev routes only). Regenerate DB types when schema changes: `npm run db:types` (requires `SUPABASE_ACCESS_TOKEN`); verify drift: `npm run db:types:check`.
+   - Web E2E: `npm run test:e2e` (full suite), `npm run test:e2e:smoke` (marketing + a11y + probes), `npm run test:e2e:probes` (dev routes only).
+   - Mobile E2E (Maestro, device/simulator required): `npm run test:e2e:mobile` — see `mobile/maestro/`. Full folder on CI uses `MAESTRO_CLEAR_STATE=true npm run test:e2e:mobile -- mobile/maestro/`.
+   - Web Lighthouse: `npm run lighthouse:mobile`, `npm run lighthouse:ci` (build + budgets). PRs touching `web/**` also run [.github/workflows/lighthouse.yml](.github/workflows/lighthouse.yml).
+   - Regenerate DB types when schema changes: `npm run db:types` (requires `SUPABASE_ACCESS_TOKEN`); verify drift: `npm run db:types:check`.
 6. **PR**: Submit your PR with a clear description and screenshots of any UI changes.
 
 ## Coverage thresholds
