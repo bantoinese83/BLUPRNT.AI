@@ -4,18 +4,14 @@ import { Send, Bot, X, MessageSquare, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { invokeFunction } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
 import {
   chatActionButtonLabel,
-  normalizeChatProjectActions,
   type ChatProjectAction,
 } from "@shared/lib/chat-project-actions";
 import { LEDGER_UPLOAD_ANCHOR_ID } from "@shared/constants/ui";
-import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
-import { chatHistoryPayloadFromMessages } from "@shared/lib/chat-with-project-client";
-
-const MAX_SUGGESTED_ACTIONS = 4;
+import { useAIAssistant, type Message } from "@shared/hooks/use-ai-assistant";
 
 const SUGGESTION_PROMPTS = [
   "How does my spend compare to the estimate?",
@@ -23,20 +19,6 @@ const SUGGESTION_PROMPTS = [
   "Any red flags in my recent invoices?",
   "How can I stretch this budget further?",
 ] as const;
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  actions?: ChatProjectAction[];
-}
-
-const INITIAL_ASSISTANT: Message = {
-  id: "initial",
-  role: "assistant",
-  content:
-    "Hi! I'm your Project Assistant. Ask about **budget vs. your ledger**, **scope**, **documents**, or **next steps** — I keep context across messages in this chat.",
-};
 
 export const AIAssistantWidget = memo(function AIAssistantWidget({
   projectId,
@@ -49,8 +31,15 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
 }) {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([INITIAL_ASSISTANT]);
-  const [isTyping, setIsTyping] = useState(false);
+
+  const { messages, isTyping, handleSend, resetConversation } = useAIAssistant({
+    projectId,
+    supabase,
+    onError: (err) => reportClientError("ai_assistant_web", err),
+    formatErrorMessage: () =>
+      "Sorry, I'm having trouble connecting. Check your connection and try again.",
+  });
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -93,71 +82,25 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
     [navigate, onOpenChange],
   );
 
-  const handleSend = useCallback(
+  const onSend = useCallback(
     async (e?: React.FormEvent, textOverride?: string) => {
       e?.preventDefault();
       const msg = (textOverride ?? input).trim();
-      if (!msg || isTyping || !projectId.trim()) return;
+      if (!msg) return;
 
-      const history = chatHistoryPayloadFromMessages(messages);
-
-      setInput("");
-      const userMsg: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: msg,
-      };
-      setMessages((prev) => [...prev, userMsg]);
-      setIsTyping(true);
-
-      try {
-        const { data, error } = await invokeFunction<{
-          reply?: string;
-          actions?: unknown;
-        }>(EDGE_FUNCTIONS.CHAT_WITH_PROJECT, {
-          body: { query: msg, projectId, history },
-        });
-
-        if (error) throw error;
-
-        const actions = normalizeChatProjectActions(data?.actions).slice(
-          0,
-          MAX_SUGGESTED_ACTIONS,
-        );
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            role: "assistant",
-            content:
-              data?.reply?.trim() ||
-              "I couldn't process that. Please try again.",
-            ...(actions.length > 0 ? { actions } : {}),
-          },
-        ]);
-      } catch (err) {
-        reportClientError("ai_assistant_web", err);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            role: "assistant",
-            content:
-              "Sorry, I'm having trouble connecting. Check your connection and try again.",
-          },
-        ]);
-      } finally {
-        setIsTyping(false);
+      if (textOverride === undefined) {
+        setInput("");
       }
+
+      await handleSend(msg);
     },
-    [input, isTyping, projectId, messages],
+    [input, handleSend],
   );
 
-  const resetConversation = useCallback(() => {
-    setMessages([INITIAL_ASSISTANT]);
+  const onReset = useCallback(() => {
+    resetConversation();
     setInput("");
-  }, []);
+  }, [resetConversation]);
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
@@ -185,7 +128,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
-                  onClick={resetConversation}
+                  onClick={onReset}
                   className="text-white/60 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                   aria-label="Start conversation over"
                   title="Start over"
@@ -227,7 +170,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
 
             {/* Input */}
             <form
-              onSubmit={(e) => void handleSend(e)}
+              onSubmit={(e) => void onSend(e)}
               aria-busy={isTyping}
               className="p-4 bg-white border-t border-slate-100"
             >
@@ -241,7 +184,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
                     key={label}
                     type="button"
                     disabled={isTyping}
-                    onClick={() => void handleSend(undefined, label)}
+                    onClick={() => void onSend(undefined, label)}
                     className="shrink-0 rounded-full border border-teal-200/80 bg-teal-50/80 px-3 py-1.5 text-[11px] font-semibold text-teal-900 hover:bg-teal-100/90 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                   >
                     {label}
@@ -257,7 +200,7 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
                   onKeyDown={(e) => {
                     if (e.key !== "Enter" || e.shiftKey) return;
                     e.preventDefault();
-                    void handleSend();
+                    void onSend();
                   }}
                   placeholder="Ask a question… (Shift+Enter for new line)"
                   aria-label="Ask a question"

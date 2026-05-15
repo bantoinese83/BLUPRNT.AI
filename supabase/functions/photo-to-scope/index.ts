@@ -16,6 +16,8 @@ import {
   normalizeScopeSourceForDb,
   type RoomType,
 } from "./_shared/estimate.ts";
+import { assertAiDailyQuota } from "../_shared/ai-usage-quota.ts";
+import { aiGuardrailResponse, logEdgeFatal } from "../_shared/ai-errors.ts";
 import { type GeminiPart } from "../_shared/gemini.ts";
 import { PUBLIC_SITE_ORIGIN } from "../../../shared/constants/public-site.ts";
 
@@ -110,6 +112,9 @@ export async function handler(req: Request): Promise<Response> {
     }
 
     const userId = await getUserIdFromRequest(req);
+    if (userId) {
+      await assertAiDailyQuota(userId);
+    }
     const admin = getServiceClient();
 
     if (project_id && userId) {
@@ -361,8 +366,9 @@ export async function handler(req: Request): Promise<Response> {
       req,
     );
   } catch (e: unknown) {
-    const error = e as Error;
-    console.error("[photo-to-scope] top-level:", error.stack || error);
+    const guardrail = aiGuardrailResponse(e, req, "photo-to-scope");
+    if (guardrail) return guardrail;
+    logEdgeFatal("photo-to-scope", e);
     return jsonResponse({ error: "Something went wrong." }, 500, req);
   }
 }

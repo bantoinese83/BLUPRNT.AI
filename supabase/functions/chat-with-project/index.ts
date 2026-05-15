@@ -7,6 +7,8 @@ import {
   generateEmbedding,
   type GeminiPart,
 } from "../_shared/gemini.ts";
+import { assertAiDailyQuota } from "../_shared/ai-usage-quota.ts";
+import { aiGuardrailResponse, logEdgeFatal } from "../_shared/ai-errors.ts";
 import { chatWithProjectSchema } from "../_shared/validation.ts";
 
 const MAX_HISTORY_CHARS = 2000;
@@ -89,6 +91,8 @@ export const handler = async (req: Request) => {
     }
     const { query, projectId, history } = parsed.data;
     console.log(`[chat-with-project] Handling request for project ${projectId}, query: ${query.substring(0, 50)}...`);
+
+    await assertAiDailyQuota(userId);
 
     const admin = getServiceClient();
     await assertProjectOwner(admin, projectId, userId);
@@ -255,8 +259,11 @@ export const handler = async (req: Request) => {
       req,
     );
   } catch (e: unknown) {
+    const guardrail = aiGuardrailResponse(e, req, "chat-with-project");
+    if (guardrail) return guardrail;
+
     const error = e as Error;
-    console.error("[chat-with-project] FATAL ERROR:", error);
+    logEdgeFatal("chat-with-project", error);
     if (error.message === "not_found") {
       return jsonResponse({ error: "Project not found" }, 404, req);
     }

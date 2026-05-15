@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { invokeFunction } from "@/lib/supabase";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
+import { marketingLeadSchema } from "@shared/lib/validation";
 
 interface LeadCaptureModalProps {
   onPlanSelect?: (plan: "architect" | "pass") => void;
@@ -61,12 +62,20 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
   const onSubmit = handleSubmit(async ({ email }) => {
     setLoading(true);
     setSubmitError(null);
+    const parsed = marketingLeadSchema.safeParse({
+      email,
+      source: "exit_intent_modal",
+    });
+    if (!parsed.success) {
+      setSubmitError(
+        parsed.error.errors[0]?.message ?? "Enter a valid email address.",
+      );
+      setLoading(false);
+      return;
+    }
     try {
       const { error } = await invokeFunction(EDGE_FUNCTIONS.SUBMIT_LEAD, {
-        body: {
-          email: email.trim().toLowerCase(),
-          source: "exit_intent_modal",
-        },
+        body: parsed.data,
       });
       if (error) {
         console.error("submit-marketing-lead:", error);

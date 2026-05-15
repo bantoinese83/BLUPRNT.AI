@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { captureEvent } from "@/lib/posthog";
+import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";
+import { PHYSICAL_ASSET_CATEGORIES } from "@shared/constants/home-specs";
 
 type AddAssetSheetProps = {
   isOpen: boolean;
@@ -27,8 +29,6 @@ type AddAssetSheetProps = {
   onSuccess: () => void;
   projectId: string;
 };
-
-const CATEGORIES = ["Paint", "Tile", "Fixture", "Hardware", "Other"];
 
 export function AddAssetSheet({
   isOpen,
@@ -43,10 +43,21 @@ export function AddAssetSheet({
     Math.round(windowHeight * 0.28),
     240,
   );
+
+  const { saveAsset } = usePhysicalAssets({
+    projectId,
+    supabase,
+    skipFetch: true,
+    onError: (err) => {
+      console.error(err);
+      Alert.alert("Error", "Could not save spec. Please try again.");
+    },
+  });
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    category: "Paint",
+    category: PHYSICAL_ASSET_CATEGORIES[0].id as string,
     brand: "",
     color_name: "",
     color_code: "",
@@ -128,8 +139,7 @@ export function AddAssetSheet({
         storagePath = fileName;
       }
 
-      const { error } = await supabase.from("physical_assets").insert({
-        project_id: projectId,
+      const { error } = await saveAsset({
         ...formData,
         storage_path: storagePath,
       });
@@ -139,9 +149,8 @@ export function AddAssetSheet({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       captureEvent("asset_created", { category: formData.category });
       onSuccess();
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Could not save spec. Please try again.");
+    } catch {
+      // Error handled by hook's onError but we catch here to stop execution
     } finally {
       setLoading(false);
     }
@@ -190,15 +199,19 @@ export function AddAssetSheet({
                       Alert.alert(
                         "Select Category",
                         "",
-                        CATEGORIES.map((c) => ({
-                          text: c,
+                        PHYSICAL_ASSET_CATEGORIES.map((c) => ({
+                          text: c.label,
                           onPress: () =>
-                            setFormData({ ...formData, category: c }),
+                            setFormData({ ...formData, category: c.id }),
                         })),
                       );
                     }}
                   >
-                    <Text style={styles.selectText}>{formData.category}</Text>
+                    <Text style={styles.selectText}>
+                      {PHYSICAL_ASSET_CATEGORIES.find(
+                        (c) => c.id === formData.category,
+                      )?.label || formData.category}
+                    </Text>
                     <ChevronDown size={14} color={Theme.colors.text.muted} />
                   </TouchableOpacity>
                 </View>

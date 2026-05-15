@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Paintbrush,
   Grid,
@@ -9,6 +9,7 @@ import {
   Trash2,
   MapPin,
   Camera,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -17,92 +18,50 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { captureEvent } from "@/lib/posthog";
-import type { PhysicalAssetRow } from "@shared/types/database";
 import { AddAssetModal } from "./vault/AddAssetModal";
 import { AssetDetailModal } from "./vault/AssetDetailModal";
+import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";
+import { PHYSICAL_ASSET_CATEGORIES } from "@shared/constants/home-specs";
 
 type HomeSpecsVaultProps = {
   projectId: string;
   className?: string;
 };
 
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  all: <Grid className="w-3.5 h-3.5" />,
+  Paint: <Paintbrush className="w-3.5 h-3.5" />,
+  Tile: <Grid className="w-3.5 h-3.5" />,
+  Fixture: <Lightbulb className="w-3.5 h-3.5" />,
+  Hardware: <Wrench className="w-3.5 h-3.5" />,
+  Other: <MoreHorizontal className="w-3.5 h-3.5" />,
+};
+
 const CATEGORIES = [
-  { id: "all", label: "All Specs", icon: <Grid className="w-3.5 h-3.5" /> },
-  { id: "Paint", label: "Paint", icon: <Paintbrush className="w-3.5 h-3.5" /> },
-  { id: "Tile", label: "Tile & Stone", icon: <Grid className="w-3.5 h-3.5" /> },
-  {
-    id: "Fixture",
-    label: "Fixtures",
-    icon: <Lightbulb className="w-3.5 h-3.5" />,
-  },
-  {
-    id: "Other",
-    label: "Other",
-    icon: <MoreHorizontal className="w-3.5 h-3.5" />,
-  },
+  { id: "all", label: "All Specs", icon: CATEGORY_ICONS.all },
+  ...PHYSICAL_ASSET_CATEGORIES.map((c) => ({
+    ...c,
+    icon: CATEGORY_ICONS[c.id] || CATEGORY_ICONS.Other,
+  })),
 ];
 
 export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
-  const [assets, setAssets] = useState<PhysicalAssetRow[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [isAdding, setIsAdding] = useState(false);
   const [limit, setLimit] = useState(6);
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
-  const fetchAssets = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("physical_assets")
-        .select("*")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false });
+  const handleFetchError = useCallback((err: unknown) => {
+    console.error(err);
+    toast.error("Could not load home specs");
+  }, []);
 
-      if (error) throw error;
-      setAssets(data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not load home specs");
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    fetchAssets();
-  }, [fetchAssets]);
-
-  useEffect(() => {
-    const fetchSignedUrls = async () => {
-      const pathsToFetch = assets
-        .map((a) => a.storage_path)
-        .filter((path): path is string => !!path && !signedUrls[path]);
-
-      if (pathsToFetch.length === 0) return;
-
-      const { data, error } = await supabase.storage
-        .from("project-photos")
-        .createSignedUrls(pathsToFetch, 3600);
-
-      if (error) {
-        console.error("Error creating signed URLs:", error);
-        return;
-      }
-
-      if (data) {
-        const newUrls: Record<string, string> = { ...signedUrls };
-        data.forEach((item) => {
-          if (item.signedUrl && item.path) {
-            newUrls[item.path] = item.signedUrl;
-          }
-        });
-        setSignedUrls(newUrls);
-      }
-    };
-
-    fetchSignedUrls();
-  }, [assets, signedUrls]);
+  const { assets, loading, signedUrls, refresh, deleteAsset } =
+    usePhysicalAssets({
+      projectId,
+      supabase,
+      onError: handleFetchError,
+    });
 
   const filteredAssets = useMemo(() => {
     if (activeCategory === "all") return assets;
@@ -116,16 +75,12 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
 
   const handleDelete = async (id: string) => {
     const deleteAction = async () => {
-      const { error } = await supabase
-        .from("physical_assets")
-        .delete()
-        .eq("id", id);
+      const { error } = await deleteAsset(id);
       if (error) throw error;
       captureEvent("asset_deleted", {
         category: assets.find((a) => a.id === id)?.category,
       });
       if (selectedAssetId === id) setSelectedAssetId(null);
-      fetchAssets();
     };
 
     toast.promise(deleteAction(), {
@@ -296,11 +251,10 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
       {isAdding && (
         <AddAssetModal
           projectId={projectId}
-          categories={CATEGORIES}
           onClose={() => setIsAdding(false)}
           onSuccess={() => {
             setIsAdding(false);
-            fetchAssets();
+            refresh();
           }}
         />
       )}

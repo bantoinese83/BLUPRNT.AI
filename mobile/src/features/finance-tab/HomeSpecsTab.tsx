@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -24,99 +24,60 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { supabase } from "@/lib/supabase";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { captureEvent } from "@/lib/posthog";
-import type { PhysicalAssetRow } from "@shared/types/database";
-import { STORAGE_CONFIG } from "@shared/constants/storage";
 import { useConfirmation } from "@/contexts/useConfirmation";
 import { showAppToast } from "@/lib/app-toast";
+import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";
+import { PHYSICAL_ASSET_CATEGORIES } from "@shared/constants/home-specs";
+import type { PhysicalAssetRow } from "@shared/types/database";
+
+import type { LucideIcon } from "lucide-react-native";
 
 type HomeSpecsTabProps = {
   projectId: string;
 };
 
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Paint: Paintbrush,
+  Tile: Grid,
+  Fixture: Lightbulb,
+  Hardware: Wrench,
+  Other: MoreHorizontal,
+};
+
 const CATEGORIES = [
   { id: "all", label: "All", icon: Grid },
-  { id: "Paint", label: "Paint", icon: Paintbrush },
-  { id: "Tile", label: "Tile", icon: Grid },
-  { id: "Fixture", label: "Fixtures", icon: Lightbulb },
-  { id: "Hardware", label: "Hardware", icon: Wrench },
-  { id: "Other", label: "Other", icon: MoreHorizontal },
+  ...PHYSICAL_ASSET_CATEGORIES.map((c) => ({
+    ...c,
+    icon: CATEGORY_ICONS[c.id] || MoreHorizontal,
+  })),
 ];
 
 export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
-  const [assets, setAssets] = useState<PhysicalAssetRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const { confirm } = useConfirmation();
 
-  const fetchAssets = useCallback(
-    async (opts?: { showFullPageLoader?: boolean }) => {
-      const showFull = opts?.showFullPageLoader ?? true;
-      setFetchError(null);
-      if (showFull) setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("physical_assets")
-          .select("*")
-          .eq("project_id", projectId)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setAssets(data || []);
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Couldn't load home specs.";
-        setFetchError(msg);
-        console.error(err);
-      } finally {
-        if (showFull) setLoading(false);
-      }
+  const {
+    assets,
+    loading,
+    refreshing,
+    error: fetchError,
+    signedUrls,
+    refresh,
+    deleteAsset,
+  } = usePhysicalAssets({
+    projectId,
+    supabase,
+    onError: (err) => {
+      const msg =
+        err instanceof Error ? err.message : "Couldn't load home specs.";
+      showAppToast(msg);
+      console.error(err);
     },
-    [projectId],
-  );
-
-  useEffect(() => {
-    void fetchAssets({ showFullPageLoader: true });
-  }, [fetchAssets]);
+  });
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await fetchAssets({ showFullPageLoader: false });
-    } finally {
-      setRefreshing(false);
-    }
-  }, [fetchAssets]);
-
-  useEffect(() => {
-    const fetchSignedUrls = async () => {
-      const pathsToFetch = assets
-        .map((a) => a.storage_path)
-        .filter((path): path is string => !!path && !signedUrls[path]);
-
-      if (pathsToFetch.length === 0) return;
-
-      const { data, error } = await supabase.storage
-        .from("project-photos")
-        .createSignedUrls(pathsToFetch, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
-
-      if (error) return;
-
-      if (data) {
-        const newUrls: Record<string, string> = { ...signedUrls };
-        data.forEach((item) => {
-          if (item.signedUrl && item.path) {
-            newUrls[item.path] = item.signedUrl;
-          }
-        });
-        setSignedUrls(newUrls);
-      }
-    };
-
-    fetchSignedUrls();
-  }, [assets, signedUrls]);
+    await refresh({ silent: true });
+  }, [refresh]);
 
   const filteredAssets = React.useMemo(() => {
     return assets.filter(
@@ -132,24 +93,20 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
         confirmLabel: "Remove",
         variant: "destructive",
         onConfirm: async () => {
-          const { error } = await supabase
-            .from("physical_assets")
-            .delete()
-            .eq("id", id);
+          const { error } = await deleteAsset(id);
           if (!error) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             captureEvent("asset_deleted", {
               category: assets.find((a) => a.id === id)?.category,
             });
             showAppToast("Spec removed.");
-            fetchAssets();
           } else {
             showAppToast("Failed to remove spec.");
           }
         },
       });
     },
-    [assets, fetchAssets, confirm],
+    [confirm, deleteAsset, assets],
   );
 
   const renderAsset = useCallback(
@@ -211,7 +168,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
         <View style={styles.errorBanner} accessibilityRole="alert">
           <Text style={styles.errorText}>{fetchError}</Text>
           <TouchableOpacity
-            onPress={() => void fetchAssets({ showFullPageLoader: false })}
+            onPress={() => void refresh({ silent: false })}
             style={styles.retryBtn}
             accessibilityRole="button"
             accessibilityLabel="Retry loading home specs"

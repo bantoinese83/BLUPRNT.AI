@@ -37,6 +37,7 @@ for f in "${FILES[@]}"; do
 done
 
 echo "deno test supabase/functions/_shared/*.test.ts"
-"${DENO_BIN[@]}" test --config "$CONFIG" \
+"${DENO_BIN[@]}" test --allow-all --config "$CONFIG" \
   "$ROOT/supabase/functions/_shared/auth.test.ts" \
-  "$ROOT/supabase/functions/_shared/versioning.test.ts"
+  "$ROOT/supabase/functions/_shared/versioning.test.ts" \
+  "$ROOT/supabase/functions/_shared/gemini-circuit-breaker.test.ts"

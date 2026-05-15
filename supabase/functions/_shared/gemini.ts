@@ -1,5 +1,12 @@
 // @ts-ignore: OcrInvoiceResult is used in other functions via shared types but flagged as unused here
 
+import {
+  assertGeminiCircuitClosed,
+  recordGeminiFailure,
+  recordGeminiSuccess,
+} from "./gemini-circuit-breaker.ts";
+import { captureEdgeException } from "./sentry.ts";
+
 export interface GeminiPart {
   text?: string;
   inline_data?: {
@@ -107,6 +114,13 @@ export async function callGemini(params: {
     return null;
   }
 
+  try {
+    assertGeminiCircuitClosed();
+  } catch (e) {
+    captureEdgeException(e, { tags: { gemini_circuit: "open" } });
+    throw e;
+  }
+
   const body: any = {
     contents,
     generationConfig: {
@@ -150,8 +164,11 @@ export async function callGemini(params: {
 
       if (!response.ok) {
         const errText = await response.text();
+        recordGeminiFailure(response.status);
         throw new Error(`Gemini API error (${response.status}): ${errText}`);
       }
+
+      recordGeminiSuccess();
 
       const result = await response.json();
 
@@ -205,7 +222,13 @@ export async function callGemini(params: {
       const error = e as Error;
       console.error(`[callGemini] Attempt ${attempt} failed:`, error.message);
 
-      if (attempt === DEFAULT_MAX_ATTEMPTS) return null;
+      if (attempt === DEFAULT_MAX_ATTEMPTS) {
+        captureEdgeException(error, {
+          tags: { gemini: "callGemini" },
+          extra: { attempt, model: modelName },
+        });
+        return null;
+      }
 
       const delay = Math.min(4000, 500 * Math.pow(2, attempt - 1));
       await new Promise((r) => setTimeout(r, delay));
@@ -231,6 +254,13 @@ export async function generateEmbedding(
   ).trim();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:embedContent?key=${apiKey}`;
 
+  try {
+    assertGeminiCircuitClosed();
+  } catch (e) {
+    captureEdgeException(e, { tags: { gemini_circuit: "open", op: "embed" } });
+    throw e;
+  }
+
   for (let attempt = 1; attempt <= DEFAULT_MAX_ATTEMPTS; attempt++) {
     try {
       const response = await fetch(url, {
@@ -244,8 +274,11 @@ export async function generateEmbedding(
 
       if (!response.ok) {
         const errText = await response.text();
+        recordGeminiFailure(response.status);
         throw new Error(`Embedding API error (${response.status}): ${errText}`);
       }
+
+      recordGeminiSuccess();
 
       const result = await response.json();
       const embedding = result.embedding?.values;
@@ -263,7 +296,13 @@ export async function generateEmbedding(
         error.message,
       );
 
-      if (attempt === DEFAULT_MAX_ATTEMPTS) return null;
+      if (attempt === DEFAULT_MAX_ATTEMPTS) {
+        captureEdgeException(error, {
+          tags: { gemini: "generateEmbedding" },
+          extra: { attempt, model: modelName },
+        });
+        return null;
+      }
 
       const delay = Math.min(4000, 500 * Math.pow(2, attempt - 1));
       await new Promise((r) => setTimeout(r, delay));

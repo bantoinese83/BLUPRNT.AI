@@ -164,47 +164,11 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.handle_welcome_email() FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.handle_welcome_email() FROM anon, authenticated;
--- public.reserve_architect_ledger_upload_slot
-REVOKE ALL ON FUNCTION public.reserve_architect_ledger_upload_slot(uuid, int) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.reserve_architect_ledger_upload_slot(uuid, int) FROM anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.reserve_architect_ledger_upload_slot(uuid, int) TO authenticated;
--- public.release_architect_ledger_upload_slot
-REVOKE ALL ON FUNCTION public.release_architect_ledger_upload_slot(uuid) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.release_architect_ledger_upload_slot(uuid) FROM anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.release_architect_ledger_upload_slot(uuid) TO authenticated;
--- 3. RLS Performance Optimization (Initplan)
-
--- project_gallery
-ALTER TABLE public.project_gallery ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES auth.users(id);
-UPDATE public.project_gallery pg
-SET owner_user_id = pr.owner_user_id
-FROM public.projects p
-JOIN public.properties pr ON p.property_id = pr.id
-WHERE pg.project_id = p.id AND pg.owner_user_id IS NULL;
-CREATE OR REPLACE TRIGGER on_project_gallery_insert_sync_owner
-  BEFORE INSERT OR UPDATE OF project_id, owner_user_id ON public.project_gallery
-  FOR EACH ROW EXECUTE FUNCTION public.handle_child_owner_sync();
-DROP POLICY IF EXISTS "Users can manage their project gallery" ON public.project_gallery;
-CREATE POLICY "Users can manage their project gallery"
-ON public.project_gallery
-FOR ALL
-TO authenticated
-USING (owner_user_id = (SELECT auth.uid()))
-WITH CHECK (owner_user_id = (SELECT auth.uid()));
--- physical_assets
-ALTER TABLE public.physical_assets ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES auth.users(id);
-UPDATE public.physical_assets pa
-SET owner_user_id = pr.owner_user_id
-FROM public.projects p
-JOIN public.properties pr ON p.property_id = pr.id
-WHERE pa.project_id = p.id AND pa.owner_user_id IS NULL;
-CREATE OR REPLACE TRIGGER on_physical_assets_insert_sync_owner
-  BEFORE INSERT OR UPDATE OF project_id, owner_user_id ON public.physical_assets
-  FOR EACH ROW EXECUTE FUNCTION public.handle_child_owner_sync();
-DROP POLICY IF EXISTS "Owners can manage physical assets" ON public.physical_assets;
-CREATE POLICY "Owners can manage physical assets"
-ON public.physical_assets
-FOR ALL
-TO authenticated
-USING (owner_user_id = (SELECT auth.uid()))
-WITH CHECK (owner_user_id = (SELECT auth.uid()));
+-- Architect upload slot RPCs (invoice naming until 20260525000000_refactor_ledger_entitlements)
+REVOKE ALL ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) TO authenticated;
+REVOKE ALL ON FUNCTION public.release_architect_invoice_upload_slot(uuid) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.release_architect_invoice_upload_slot(uuid) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.release_architect_invoice_upload_slot(uuid) TO authenticated;
+-- project_gallery + physical_assets RLS: see 20260528000000_security_hardening_child_tables.sql

@@ -45,6 +45,10 @@
     "test:e2e:probes": "playwright test e2e/e2e-probes.spec.ts",
     "db:types": "bash scripts/gen-db-types.sh",
     "db:types:check": "bash scripts/check-db-types.sh",
+    "db:lint": "bash scripts/db-lint.sh",
+    "db:migrations:check": "bash scripts/check-migrations-safety.sh",
+    "security:audit": "npm audit --audit-level=high",
+    "db:restore-drill": "bash scripts/db-restore-drill.sh",
     "prepare": "node -e \"if (process.env.VERCEL || process.env.CI) process.exit(0); const { spawnSync } = require('child_process'); const r = spawnSync('husky', { shell: true, stdio: 'inherit' }); process.exit(r.status ?? 1);\"",
     "android": "expo run:android",
     "ios": "expo run:ios"

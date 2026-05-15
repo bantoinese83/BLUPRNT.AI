@@ -17,35 +17,16 @@ import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { invokeFunction } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { friendlyPostgrestMutationError } from "@shared/lib/user-friendly-errors";
 import { reportClientError } from "@/lib/sentry";
 import {
   chatActionButtonLabel,
-  normalizeChatProjectActions,
   type ChatProjectAction,
 } from "@shared/lib/chat-project-actions";
 import { Theme } from "@/constants/Theme";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
-import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
-import { chatHistoryPayloadFromMessages } from "@shared/lib/chat-with-project-client";
-
-const MAX_SUGGESTED_ACTIONS = 4;
-
-type Role = "user" | "assistant";
-
-interface Message {
-  id: string;
-  role: Role;
-  content: string;
-  actions?: ChatProjectAction[];
-}
-
-let messageIdSeq = 0;
-function nextMessageId(): string {
-  messageIdSeq += 1;
-  return `msg-${messageIdSeq}`;
-}
+import { useAIAssistant } from "@shared/hooks/use-ai-assistant";
 
 interface Props {
   projectId: string;
@@ -54,38 +35,28 @@ interface Props {
 export function AIAssistant({ projectId }: Props) {
   const insets = useSafeAreaInsets();
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: nextMessageId(),
-      role: "assistant",
-      content:
-        "Hi! I'm your Project Assistant. Ask about **budget vs. your ledger**, **scope**, **documents**, or **next steps** — I keep context across messages in this chat.",
-    },
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
+
+  const { messages, isTyping, handleSend } = useAIAssistant({
+    projectId,
+    supabase,
+    onError: (err) => reportClientError("ai_assistant_chat", err),
+    formatErrorMessage: (err) => friendlyPostgrestMutationError(err),
+  });
+
   const scrollViewRef = useRef<ScrollView>(null);
   const nearBottomRef = useRef(true);
-  const isMountedRef = useRef(true);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const SUGGESTIONS = [
-    "Analyze my budget",
-    "What's my next milestone?",
-    "Check for invoice anomalies",
-    "Maintenance tips for this stage",
-  ];
 
   const scrollToEnd = useCallback(() => {
     requestAnimationFrame(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     });
   }, []);
+
+  useEffect(() => {
+    if (nearBottomRef.current) {
+      scrollToEnd();
+    }
+  }, [messages, scrollToEnd]);
 
   const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
@@ -111,63 +82,30 @@ export function AIAssistant({ projectId }: Props) {
     [projectId],
   );
 
-  const handleSend = async (text?: string) => {
-    const msg = text || input.trim();
-    if (!msg || isTyping) return;
+  const onSend = useCallback(
+    async (text?: string) => {
+      const msg = text || input.trim();
+      if (!msg || isTyping) return;
 
-    setInput("");
-    nearBottomRef.current = true;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setMessages((prev) => [
-      ...prev,
-      { id: nextMessageId(), role: "user", content: msg },
-    ]);
-    setIsTyping(true);
-    scrollToEnd();
+      if (!text) {
+        setInput("");
+      }
 
-    const history = chatHistoryPayloadFromMessages(messages);
+      nearBottomRef.current = true;
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      scrollToEnd();
 
-    try {
-      const { data, error } = await invokeFunction<{
-        reply?: string;
-        actions?: unknown;
-      }>(EDGE_FUNCTIONS.CHAT_WITH_PROJECT, {
-        body: { query: msg, projectId, history },
-      });
+      await handleSend(msg);
+    },
+    [input, isTyping, handleSend, scrollToEnd],
+  );
 
-      if (error) throw error;
-
-      if (!isMountedRef.current) return;
-      const actions = normalizeChatProjectActions(data?.actions).slice(
-        0,
-        MAX_SUGGESTED_ACTIONS,
-      );
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: nextMessageId(),
-          role: "assistant",
-          content:
-            data?.reply?.trim() ||
-            "Something went wrong. Pull to refresh your project data and try again.",
-          ...(actions.length > 0 ? { actions } : {}),
-        },
-      ]);
-    } catch (err) {
-      reportClientError("ai_assistant_chat", err);
-      if (!isMountedRef.current) return;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: nextMessageId(),
-          role: "assistant",
-          content: friendlyPostgrestMutationError(err),
-        },
-      ]);
-    } finally {
-      if (isMountedRef.current) setIsTyping(false);
-    }
-  };
+  const SUGGESTIONS = [
+    "Analyze my budget",
+    "What's my next milestone?",
+    "Check for invoice anomalies",
+    "Maintenance tips for this stage",
+  ];
 
   /** Logo row (~56) + title block (~84) — iOS keyboard offset above tab system. */
   const keyboardOffset =
@@ -298,7 +236,7 @@ export function AIAssistant({ projectId }: Props) {
             <TouchableOpacity
               key={label}
               style={styles.chip}
-              onPress={() => handleSend(label)}
+              onPress={() => onSend(label)}
               disabled={isTyping}
               activeOpacity={0.85}
               accessibilityRole="button"
@@ -325,7 +263,7 @@ export function AIAssistant({ projectId }: Props) {
             maxLength={4000}
           />
           <TouchableOpacity
-            onPress={() => void handleSend()}
+            onPress={() => void onSend()}
             disabled={!input.trim() || isTyping}
             style={[
               styles.sendButton,

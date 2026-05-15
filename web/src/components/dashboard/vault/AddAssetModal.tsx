@@ -6,24 +6,34 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { captureEvent } from "@/lib/posthog";
 import { cn } from "@/lib/utils";
+import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";
+import { PHYSICAL_ASSET_CATEGORIES } from "@shared/constants/home-specs";
 
 type AddAssetModalProps = {
   projectId: string;
   onClose: () => void;
   onSuccess: () => void;
-  categories: { id: string; label: string }[];
 };
 
 export function AddAssetModal({
   projectId,
   onClose,
   onSuccess,
-  categories,
 }: AddAssetModalProps) {
+  const { saveAsset } = usePhysicalAssets({
+    projectId,
+    supabase,
+    skipFetch: true,
+    onError: (err) => {
+      console.error(err);
+      toast.error("Failed to save spec");
+    },
+  });
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    category: "Paint",
+    category: PHYSICAL_ASSET_CATEGORIES[0].id as string,
     brand: "",
     color_name: "",
     color_code: "",
@@ -68,8 +78,7 @@ export function AddAssetModal({
         storagePath = fileName;
       }
 
-      const { error } = await supabase.from("physical_assets").insert({
-        project_id: projectId,
+      const { error } = await saveAsset({
         ...formData,
         storage_path: storagePath,
       });
@@ -78,9 +87,8 @@ export function AddAssetModal({
       toast.success("Spec saved to vault");
       captureEvent("asset_created", { category: formData.category });
       onSuccess();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to save spec");
+    } catch {
+      // Error handled by hook's onError
     } finally {
       setLoading(false);
     }
@@ -136,13 +144,11 @@ export function AddAssetModal({
                     setFormData({ ...formData, category: e.target.value })
                   }
                 >
-                  {categories
-                    .filter((c) => c.id !== "all")
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.label}
-                      </option>
-                    ))}
+                  {PHYSICAL_ASSET_CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
