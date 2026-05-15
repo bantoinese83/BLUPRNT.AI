@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { Sparkles } from "lucide-react-native";
+import { FileSearch } from "lucide-react-native";
 import type { ledgerDocumentTheme } from "@shared/lib/ledger-document-labels";
 import { ledgerEntryReviewSheetStyles as styles } from "./ledgerEntryReviewSheet.styles";
 
@@ -27,7 +27,7 @@ export function LedgerEntryReviewSummary({
         },
       ]}
     >
-      <Sparkles size={20} color={theme.colors?.icon} />
+      <FileSearch size={20} color={theme.colors?.icon} />
       <Text style={[styles.summaryText, { color: theme.colors?.icon + "cc" }]}>
         {aiSummary ? (
           aiSummary

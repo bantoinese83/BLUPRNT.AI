@@ -196,11 +196,12 @@ export function AIAssistant({ projectId }: Props) {
         {messages.map((m) => (
           <MotiView
             key={m.id}
-            from={{ opacity: 0, scale: 0.97, translateY: 8 }}
+            from={{ opacity: 0, scale: 0.9, translateY: 15 }}
             animate={{ opacity: 1, scale: 1, translateY: 0 }}
             transition={{
-              type: "timing",
-              duration: 280,
+              type: "spring",
+              damping: 20,
+              stiffness: 150,
             }}
             style={[
               styles.messageWrapper,
@@ -470,9 +471,11 @@ const styles = StyleSheet.create({
   },
   chip: {
     paddingHorizontal: Theme.spacing.lg,
-    paddingVertical: 11,
-    borderRadius: Theme.radius.full,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Theme.colors.inputBg,
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: Theme.colors.inputBorder,
     shadowColor: "#000",

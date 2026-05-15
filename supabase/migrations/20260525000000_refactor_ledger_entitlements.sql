@@ -1,10 +1,8 @@
 -- Refactor user_subscriptions and RPCs to use 'ledger' terminology instead of 'invoice'
 BEGIN;
-
 -- 1. Rename columns in user_subscriptions
 ALTER TABLE public.user_subscriptions RENAME COLUMN invoice_uploads_count TO ledger_uploads_count;
 ALTER TABLE public.user_subscriptions RENAME COLUMN invoice_uploads_reset_at TO ledger_uploads_reset_at;
-
 -- 2. Rename and update RPC functions
 -- Note: We drop and recreate because return type and parameter names might change slightly for clarity
 
@@ -46,9 +44,7 @@ BEGIN
   RETURNING true, public.user_subscriptions.ledger_uploads_count;
 END;
 $$;
-
 COMMENT ON FUNCTION public.reserve_architect_ledger_upload_slot(uuid, int) IS 'Locks user_subscriptions row and increments ledger_uploads_count when under cap and entitled.';
-
 DROP FUNCTION IF EXISTS public.release_architect_invoice_upload_slot(uuid);
 CREATE OR REPLACE FUNCTION public.release_architect_ledger_upload_slot(
   p_user_id uuid
@@ -67,7 +63,5 @@ BEGIN
     AND COALESCE(ledger_uploads_count, 0) > 0;
 END;
 $$;
-
 COMMENT ON FUNCTION public.release_architect_ledger_upload_slot(uuid) IS 'Decrements ledger_uploads_count for a user, used to undo a reservation if upload fails.';
-
 COMMIT;

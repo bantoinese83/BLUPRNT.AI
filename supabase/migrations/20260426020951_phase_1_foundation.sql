@@ -5,16 +5,13 @@ ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENC
 ALTER TABLE public.documents ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES auth.users(id);
 ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES auth.users(id);
 ALTER TABLE public.scope_items ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES auth.users(id);
-
 -- Add AI verification flag
 ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT true;
-
 -- Backfill existing records
 UPDATE public.projects p
 SET owner_user_id = pr.owner_user_id
 FROM public.properties pr
 WHERE p.property_id = pr.id AND p.owner_user_id IS NULL;
-
 -- Triggers to maintain owner_user_id (Defense in depth)
 CREATE OR REPLACE FUNCTION public.handle_project_owner_sync()
 RETURNS TRIGGER AS $$
@@ -27,11 +24,9 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 CREATE OR REPLACE TRIGGER on_project_insert_sync_owner
   BEFORE INSERT OR UPDATE OF property_id, owner_user_id ON public.projects
   FOR EACH ROW EXECUTE FUNCTION public.handle_project_owner_sync();
-
 CREATE OR REPLACE FUNCTION public.handle_child_owner_sync()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -43,19 +38,15 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 CREATE OR REPLACE TRIGGER on_document_insert_sync_owner
   BEFORE INSERT OR UPDATE OF project_id, owner_user_id ON public.documents
   FOR EACH ROW EXECUTE FUNCTION public.handle_child_owner_sync();
-
 CREATE OR REPLACE TRIGGER on_invoice_insert_sync_owner
   BEFORE INSERT OR UPDATE OF project_id, owner_user_id ON public.invoices
   FOR EACH ROW EXECUTE FUNCTION public.handle_child_owner_sync();
-
 CREATE OR REPLACE TRIGGER on_scope_item_insert_sync_owner
   BEFORE INSERT OR UPDATE OF project_id, owner_user_id ON public.scope_items
   FOR EACH ROW EXECUTE FUNCTION public.handle_child_owner_sync();
-
 -- RLS Policies with Robust Join Fallback
 -- This ensures that even if triggers are bypassed or mid-transaction, 
 -- existing join-based auth still works, preventing timeouts/empty data.
@@ -70,7 +61,6 @@ CREATE POLICY "projects_access_policy"
     owner_user_id = (SELECT auth.uid()) OR 
     EXISTS (SELECT 1 FROM properties WHERE properties.id = projects.property_id AND properties.owner_user_id = (SELECT auth.uid()))
   );
-
 -- Documents
 DROP POLICY IF EXISTS "documents_all_via_project" ON public.documents;
 DROP POLICY IF EXISTS "documents_access_policy" ON public.documents;
@@ -81,7 +71,6 @@ CREATE POLICY "documents_access_policy"
     owner_user_id = (SELECT auth.uid()) OR
     EXISTS (SELECT 1 FROM projects JOIN properties ON projects.property_id = properties.id WHERE projects.id = documents.project_id AND properties.owner_user_id = (SELECT auth.uid()))
   );
-
 -- Invoices
 DROP POLICY IF EXISTS "invoices_all_via_project" ON public.invoices;
 DROP POLICY IF EXISTS "invoices_access_policy" ON public.invoices;
@@ -92,7 +81,6 @@ CREATE POLICY "invoices_access_policy"
     owner_user_id = (SELECT auth.uid()) OR
     EXISTS (SELECT 1 FROM projects JOIN properties ON projects.property_id = properties.id WHERE projects.id = invoices.project_id AND properties.owner_user_id = (SELECT auth.uid()))
   );
-
 -- Scope Items
 DROP POLICY IF EXISTS "Users can manage scope items of their own projects" ON public.scope_items;
 DROP POLICY IF EXISTS "scope_items_access_policy" ON public.scope_items;
@@ -103,10 +91,8 @@ CREATE POLICY "scope_items_access_policy"
     owner_user_id = (SELECT auth.uid()) OR
     EXISTS (SELECT 1 FROM projects JOIN properties ON projects.property_id = properties.id WHERE projects.id = scope_items.project_id AND properties.owner_user_id = (SELECT auth.uid()))
   );
-
 -- 3. Storage Cleanup Automation
 CREATE EXTENSION IF NOT EXISTS pg_net;
-
 -- Centralized configuration helper for Service Discovery
 CREATE OR REPLACE FUNCTION public.get_system_config(config_key TEXT)
 RETURNS TEXT AS $$
@@ -119,7 +105,6 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
-
 CREATE OR REPLACE FUNCTION public.handle_storage_cleanup()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -135,7 +120,6 @@ BEGIN
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- Trigger on document deletion
 CREATE OR REPLACE TRIGGER on_document_deleted_cleanup_storage
   AFTER DELETE ON public.documents

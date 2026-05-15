@@ -14,10 +14,8 @@ CREATE TABLE IF NOT EXISTS public.document_processing_queue (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
 -- RLS for queue with robust join fallback
 ALTER TABLE public.document_processing_queue ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Users can view their own queue items" ON public.document_processing_queue;
 DROP POLICY IF EXISTS "queue_access_policy" ON public.document_processing_queue;
 CREATE POLICY "queue_access_policy"
@@ -31,7 +29,6 @@ CREATE POLICY "queue_access_policy"
       WHERE p.id = project_id AND pr.owner_user_id = (SELECT auth.uid())
     )
   );
-
 -- Trigger to process queue via Edge Function
 CREATE OR REPLACE FUNCTION public.handle_document_queue_insert()
 RETURNS TRIGGER AS $$
@@ -48,14 +45,11 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 CREATE OR REPLACE TRIGGER on_document_queue_inserted
   AFTER INSERT ON public.document_processing_queue
   FOR EACH ROW EXECUTE FUNCTION public.handle_document_queue_insert();
-
 -- 2. Daily Subscription Reconciliation Cron
 CREATE EXTENSION IF NOT EXISTS pg_cron;
-
 -- Schedule the reconciliation job to run every day at 2 AM
 SELECT cron.schedule(
   'daily-subscription-reconciliation',

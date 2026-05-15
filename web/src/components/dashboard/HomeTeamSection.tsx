@@ -1,7 +1,8 @@
-import { Users, Phone, Mail, ExternalLink, Lock } from "lucide-react";
+import { Users, Phone, Mail, Lock, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { money } from "@/lib/formatters";
 import type { Contractor } from "@shared/lib/home-team";
+import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 
 export function HomeTeamSection({
   team,
@@ -34,40 +35,60 @@ export function HomeTeamSection({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between px-2">
+    <div className="space-y-4 pt-0.5">
+      <div className="flex items-center justify-between px-2 pt-0.5">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           The Home Team
         </h3>
-        <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full ring-1 ring-teal-100">
+        <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full ring-1 ring-teal-100">
           {team.length} Professionals
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3 pt-0.5">
         {team.map((pro) => (
           <Card
             key={pro.name}
-            className="border-slate-200/60 shadow-sm hover:shadow-md transition-all group"
+            className="border-slate-200/60 shadow-sm hover:shadow-md transition-all group overflow-visible"
           >
             <CardContent className="p-4">
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 font-black text-xs uppercase">
-                    {pro.name.slice(0, 2)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm">
+                <div className="flex items-center gap-3 min-w-0">
+                  {pro.preview_ledger_entry_id ? (
+                    <DocumentThumbnail
+                      ledgerEntryId={pro.preview_ledger_entry_id}
+                      size="sm"
+                      className="shrink-0 rounded-xl border border-slate-100 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100/80 flex items-center justify-center text-teal-600 font-black text-xs uppercase shrink-0">
+                      {pro.name.slice(0, 2)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-slate-900 text-sm leading-snug">
                       {pro.name}
                     </h4>
-                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight mt-0.5">
                       Billed {money(pro.total_billed)} • Last active{" "}
                       {new Date(pro.last_activity).getFullYear()}
                     </p>
+                    {pro.documents_count > 0 ? (
+                      <p className="text-[10px] font-semibold text-teal-700/90 mt-1.5 flex items-center gap-1.5">
+                        <FileText
+                          className="w-3.5 h-3.5 shrink-0"
+                          aria-hidden
+                        />
+                        <span className="truncate normal-case tracking-normal">
+                          {pro.documents_count} ledger file
+                          {pro.documents_count === 1 ? "" : "s"}
+                        </span>
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1.5 opacity-85 hover:opacity-100 transition-opacity shrink-0">
                   {isUnlocked ? (
                     <>
                       {pro.contact_info.phone && (
@@ -99,9 +120,6 @@ export function HomeTeamSection({
                       Unlock Contact
                     </button>
                   )}
-                  <div className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 transition-colors">
-                    <ExternalLink className="w-4 h-4" />
-                  </div>
                 </div>
               </div>
             </CardContent>

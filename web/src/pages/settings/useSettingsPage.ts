@@ -143,6 +143,7 @@ export function useSettingsPage(): UseSettingsPageResult {
   }, [displayName]);
 
   const onExportData = useCallback(async () => {
+    if (exportLoading) return;
     setExportMessage(null);
     setExportLoading(true);
     try {
@@ -153,13 +154,24 @@ export function useSettingsPage(): UseSettingsPageResult {
 
       if (error) throw error;
 
-      // Handle the binary response
-      const blob = data as Blob;
+      if (!data) {
+        throw new Error("No data received from export function.");
+      }
+
+      // In browser, supabase-js returns application/zip as a Blob
+      const blob =
+        data instanceof Blob
+          ? data
+          : new Blob([data as ArrayBuffer | Uint8Array | string], {
+              type: "application/zip",
+            });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `bluprnt-export-${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
       setExportMessage("Download started.");
@@ -170,7 +182,7 @@ export function useSettingsPage(): UseSettingsPageResult {
     } finally {
       setExportLoading(false);
     }
-  }, []);
+  }, [exportLoading]);
 
   const onChangePassword = useCallback(async () => {
     setPasswordMessage(null);

@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import { Users, Phone, Mail, Lock } from "lucide-react-native";
+import { Users, Phone, Mail, Lock, FileText } from "lucide-react-native";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { deriveHomeTeam } from "@shared/lib/home-team";
 import type { LedgerEntryRow } from "@shared/types/database";
 import { money } from "@shared/lib/formatters";
+import { DocumentThumbnail } from "@/components/DocumentThumbnail";
 
 export function HomeTeamSection({
   ledgerEntries,
@@ -52,22 +53,46 @@ export function HomeTeamSection({
       </View>
 
       <View style={styles.list}>
-        {team.slice(0, 3).map((pro) => (
+        {team.slice(0, 10).map((pro) => (
           <GlassCard key={pro.name} style={styles.proCard} intensity={4}>
             <View style={styles.proMain}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {pro.name.slice(0, 2).toUpperCase()}
-                </Text>
+              <View style={styles.avatarWrap}>
+                {pro.preview_ledger_entry_id ? (
+                  <DocumentThumbnail
+                    ledgerEntryId={pro.preview_ledger_entry_id}
+                    size={44}
+                    style={styles.docThumb}
+                    fileType={null}
+                  />
+                ) : (
+                  <View style={styles.avatarFallback}>
+                    <Text style={styles.avatarText}>
+                      {pro.name.slice(0, 2).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
               </View>
               <View style={styles.proInfo}>
-                <Text style={styles.proName} numberOfLines={1}>
+                <Text style={styles.proName} numberOfLines={2}>
                   {pro.name}
                 </Text>
-                <Text style={styles.proMeta}>
+                <Text style={styles.proMeta} numberOfLines={1}>
                   Billed {money(pro.total_billed)} •{" "}
                   {new Date(pro.last_activity).getFullYear()}
                 </Text>
+                {pro.documents_count > 0 ? (
+                  <View style={styles.docHint}>
+                    <FileText
+                      size={12}
+                      color="rgba(13, 148, 136, 0.75)"
+                      strokeWidth={2.2}
+                    />
+                    <Text style={styles.docHintText} numberOfLines={1}>
+                      {pro.documents_count} ledger file
+                      {pro.documents_count === 1 ? "" : "s"}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
 
               <View style={styles.actions}>
@@ -76,9 +101,15 @@ export function HomeTeamSection({
                     {pro.contact_info.phone && (
                       <TouchableOpacity
                         style={styles.actionBtn}
-                        onPress={() =>
-                          Linking.openURL(`tel:${pro.contact_info.phone}`)
-                        }
+                        onPress={async () => {
+                          try {
+                            await Linking.openURL(
+                              `tel:${pro.contact_info.phone}`,
+                            );
+                          } catch {
+                            // gracefully ignore unhandled scheme errors on simulators/iPads
+                          }
+                        }}
                       >
                         <Phone size={16} color={Theme.colors.brand.primary} />
                       </TouchableOpacity>
@@ -86,9 +117,15 @@ export function HomeTeamSection({
                     {pro.contact_info.email && (
                       <TouchableOpacity
                         style={styles.actionBtn}
-                        onPress={() =>
-                          Linking.openURL(`mailto:${pro.contact_info.email}`)
-                        }
+                        onPress={async () => {
+                          try {
+                            await Linking.openURL(
+                              `mailto:${pro.contact_info.email}`,
+                            );
+                          } catch {
+                            // gracefully ignore
+                          }
+                        }}
                       >
                         <Mail size={16} color={Theme.colors.brand.primary} />
                       </TouchableOpacity>
@@ -115,13 +152,15 @@ export function HomeTeamSection({
 const styles = StyleSheet.create({
   container: {
     marginTop: 24,
+    paddingTop: 2,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 14,
     paddingHorizontal: 4,
+    paddingTop: 2,
   },
   headerTitle: {
     fontSize: 10,
@@ -131,8 +170,8 @@ const styles = StyleSheet.create({
   },
   badge: {
     backgroundColor: "rgba(13, 148, 136, 0.08)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 99,
   },
   badgeText: {
@@ -142,9 +181,11 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 10,
+    paddingTop: 2,
   },
   proCard: {
-    padding: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     borderRadius: Theme.radius.xl,
   },
   proMain: {
@@ -152,21 +193,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+  avatarWrap: {
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  docThumb: {
+    borderRadius: 14,
+  },
+  avatarFallback: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: "rgba(13, 148, 136, 0.05)",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(13, 148, 136, 0.12)",
   },
   avatarText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: Theme.typography.family.black,
     color: Theme.colors.brand.primary,
   },
   proInfo: {
     flex: 1,
+    minWidth: 0,
   },
   proName: {
     fontSize: 14,
@@ -177,11 +228,25 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Theme.typography.family.medium,
     color: Theme.colors.text.muted,
-    marginTop: 1,
+    marginTop: 2,
+  },
+  docHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 5,
+  },
+  docHintText: {
+    flex: 1,
+    fontSize: 10,
+    fontFamily: Theme.typography.family.semibold,
+    color: "rgba(13, 148, 136, 0.8)",
   },
   actions: {
     flexDirection: "row",
     gap: 4,
+    alignSelf: "flex-start",
+    paddingTop: 2,
   },
   actionBtn: {
     width: 32,

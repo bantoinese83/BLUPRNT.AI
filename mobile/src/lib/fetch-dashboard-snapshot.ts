@@ -9,6 +9,7 @@ import {
   buildDashboardDataForProject,
   fetchDashboardProjectsList,
   fetchLastActiveProjectIdFromPreferences,
+  fetchProjectSwitcherHints,
 } from "@shared/lib/dashboard-snapshot-core";
 
 async function loadStaleDashboardFromCache(
@@ -39,6 +40,7 @@ async function loadStaleDashboardFromCache(
     subscription: c.subscription,
     hasProjectPass: c.hasProjectPass,
     lastProjectId,
+    projectSwitcherHints: c.projectSwitcherHints ?? {},
   };
 }
 
@@ -87,6 +89,8 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
   }
 
   if (rows.length > 0) {
+    const hintsPromise = fetchProjectSwitcherHints(supabase, rows);
+
     const firstRow = rows[0]!;
     if (!projectId) {
       projectId = firstRow.id;
@@ -102,20 +106,25 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
     }
 
     if (!projectId || !project) {
+      const projectSwitcherHints = await hintsPromise;
       return {
         ...emptyDashboardSnapshot(),
         projects: rows,
         project: null,
         lastProjectId: null,
+        projectSwitcherHints,
       };
     }
 
-    const built = await buildDashboardDataForProject(supabase, {
-      userId,
-      projectId,
-      allProjects: rows,
-      partialMessageVariant: "mobile",
-    });
+    const [built, projectSwitcherHints] = await Promise.all([
+      buildDashboardDataForProject(supabase, {
+        userId,
+        projectId,
+        allProjects: rows,
+        partialMessageVariant: "mobile",
+      }),
+      hintsPromise,
+    ]);
 
     await AsyncStorage.setItem(
       cacheKey,
@@ -130,6 +139,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
         isArchitect: built.isArchitect,
         subscription: built.subscription,
         hasProjectPass: built.hasProjectPass,
+        projectSwitcherHints,
       }),
     );
 
@@ -148,6 +158,7 @@ export async function fetchMobileDashboardSnapshot(): Promise<DashboardSnapshot>
       subscription: built.subscription,
       hasProjectPass: built.hasProjectPass,
       lastProjectId: built.lastProjectId,
+      projectSwitcherHints,
     };
   }
 

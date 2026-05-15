@@ -1,4 +1,4 @@
-import { Sparkles, ShieldCheck, Clock } from "lucide-react";
+import { BrainCircuit, ShieldCheck, Clock } from "lucide-react";
 
 import { formatShortUsDate } from "@shared/lib/formatters";
 
@@ -47,7 +47,7 @@ export function AuditTrailRow({
         </span>
       ) : isVerified === false ? (
         <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
-          <Sparkles className="w-3 h-3" aria-hidden />
+          <BrainCircuit className="w-3 h-3" aria-hidden />
           AI draft — needs review
         </span>
       ) : null}

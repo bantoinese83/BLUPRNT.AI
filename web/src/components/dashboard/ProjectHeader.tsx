@@ -147,7 +147,7 @@ export const ProjectHeader = memo(function ProjectHeader({
             aria-label={`Rename project: ${project.name}`}
             title="Click to rename project"
           >
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 group-hover:text-slate-700 transition-colors">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 group-hover:text-slate-700 transition-colors break-words">
               {project.name}
             </h1>
             <div className="p-1.5 rounded-lg bg-slate-50 text-slate-400 opacity-0 group-hover:opacity-100 transition-all group-hover:text-teal-600 group-hover:bg-teal-50 shadow-sm group-active:scale-95">

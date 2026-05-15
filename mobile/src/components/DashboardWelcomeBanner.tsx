@@ -14,10 +14,11 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { WelcomeActionOrb } from "@/components/WelcomeActionOrb";
 
 interface Props {
+  hasDocuments?: boolean;
   onAction: (id: string) => void;
 }
 
-export function DashboardWelcomeBanner({ onAction }: Props) {
+export function DashboardWelcomeBanner({ hasDocuments, onAction }: Props) {
   const [visible, setVisible] = useState(true);
 
   if (!visible) return null;
@@ -26,30 +27,49 @@ export function DashboardWelcomeBanner({ onAction }: Props) {
     <AnimatePresence>
       {visible && (
         <MotiView
-          from={{ opacity: 0, scale: 0.95, translateY: -10 }}
+          from={{ opacity: 0, scale: 0.9, translateY: -20 }}
           animate={{ opacity: 1, scale: 1, translateY: 0 }}
-          exit={{ opacity: 0, scale: 0.95, translateY: -10 }}
-          transition={{ type: "timing", duration: 320 }}
+          exit={{ opacity: 0, scale: 0.9, translateY: -20 }}
+          transition={{
+            type: "spring",
+            damping: 15,
+            stiffness: 120,
+          }}
           style={styles.container}
         >
           <GlassCard style={styles.card}>
             <View style={styles.header}>
               <View style={styles.textContainer}>
-                <Text style={styles.title}>Your estimate is saved</Text>
+                <Text style={styles.title}>
+                  {hasDocuments
+                    ? "Your ledger is active"
+                    : "Your estimate is saved"}
+                </Text>
                 <Text style={styles.description}>
-                  Pick a next step to get the most from BLUPRNT.AI.
+                  {hasDocuments
+                    ? "Keep adding documents to maximize your home's resale value impact."
+                    : "Pick a next step to get the most from BLUPRNT.AI."}
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => setVisible(false)}
+                onPress={() => {
+                  void Haptics.selectionAsync();
+                  setVisible(false);
+                }}
                 style={styles.closeBtn}
+                activeOpacity={0.65}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                accessibilityRole="button"
+                accessibilityLabel="Close welcome banner"
               >
-                <X size={18} color={Theme.colors.text.secondary} />
+                <X size={20} color={Theme.colors.text.secondary} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.actions}>
-              <WelcomeActionOrb label="Upload invoice">
+              <WelcomeActionOrb
+                label={hasDocuments ? "Add document" : "Upload invoice"}
+              >
                 <TouchableOpacity
                   accessibilityRole="button"
                   accessibilityLabel="Upload an invoice"
@@ -139,7 +159,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   closeBtn: {
-    padding: 4,
+    marginTop: -2,
+    marginRight: -4,
+    minWidth: 40,
+    minHeight: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    backgroundColor: "rgba(15, 23, 42, 0.04)",
   },
   actions: {
     flexDirection: "row",

@@ -1,5 +1,5 @@
 import { useState, memo } from "react";
-import { Eye, Clock, Lock, Sparkles } from "lucide-react";
+import { Eye, Clock, Lock, BrainCircuit } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { OriginalUploadPreviewModal } from "@/components/dashboard/OriginalUploadPreviewModal";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,7 +68,7 @@ export const DocumentCard = memo(function DocumentCard({
             />
             <div className="space-y-1 min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors">
+                <h4 className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-950 transition-colors min-w-0 flex-1">
                   {document.vendor_name &&
                   document.vendor_name !== "Processing..."
                     ? document.vendor_name
@@ -84,7 +84,7 @@ export const DocumentCard = memo(function DocumentCard({
                       exit={{ opacity: 0, scale: 0.5, y: -5 }}
                       className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 shrink-0 shadow-sm shadow-amber-100/50"
                     >
-                      <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                      <BrainCircuit className="w-2.5 h-2.5 animate-pulse" />
                       AI Draft
                     </motion.div>
                   )}

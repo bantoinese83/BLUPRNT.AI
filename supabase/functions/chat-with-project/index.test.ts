@@ -30,27 +30,43 @@ Deno.test({
   fn: async () => {
     setupTestEnv();
     Deno.env.set("GEMINI_API_KEY", "test-key");
+    Deno.env.set("UPSTASH_REDIS_REST_URL", "");
+    Deno.env.set("UPSTASH_REDIS_REST_TOKEN", "");
 
     const mockUser = { id: USER_1, email: "test@example.com" };
     const mockProject = {
       id: PROJECT_1,
       name: "Test Project",
       stage: "Planning",
+      estimated_min_total: 1000,
+      estimated_max_total: 5000,
     };
 
     const restoreFetch = mockFetch({
       "/auth/v1/user": { user: mockUser },
-      "/rest/v1/projects": (url: string) => {
-        if (url.includes("properties.owner_user_id")) {
-          return [{ id: PROJECT_1, properties: { owner_user_id: USER_1 } }];
+      "/rest/v1/projects": (req: Request) => {
+        const url = req.url;
+        if (url.includes("select=id") && url.includes("owner_user_id=eq.")) {
+          return [{ id: PROJECT_1 }];
         }
-        return mockProject;
+        if (url.includes("select=*") && url.includes("id=eq.")) {
+          return mockProject;
+        }
+        return [];
       },
+      "/rest/v1/rpc/match_document_embeddings": [],
       "/rest/v1/scope_items": [],
-      "/rest/v1/invoices": [],
+      "/rest/v1/ledger_entries": [],
       "googleapis.com": {
         candidates: [{
-          content: { parts: [{ text: "This is a test reply from Gemini." }] },
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                reply: "This is a test reply from Gemini.",
+                actions: [],
+              }),
+            }],
+          },
           finishReason: "STOP",
         }],
       },
@@ -73,6 +89,95 @@ Deno.test({
       assertEquals(res.status, 200);
       const body = await res.json();
       assertEquals(body.reply, "This is a test reply from Gemini.");
+    } finally {
+      restoreFetch();
+    }
+  },
+});
+
+Deno.test({
+  name: "chat-with-project - returns 400 for malformed JSON",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    const restoreFetch = mockFetch({
+      "/auth/v1/user": { user: { id: USER_1 } },
+    });
+    try {
+      const req = new Request("http://localhost/chat-with-project", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer some-jwt",
+          "Content-Type": "application/json",
+        },
+        body: "invalid-json",
+      });
+
+      const res = await handler(req);
+      assertEquals(res.status, 400);
+    } finally {
+      restoreFetch();
+    }
+  },
+});
+
+Deno.test({
+  name: "chat-with-project - returns 400 for excessively long query",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    const restoreFetch = mockFetch({
+      "/auth/v1/user": { user: { id: USER_1 } },
+    });
+    try {
+      const longQuery = "a".repeat(8001);
+      const req = new Request("http://localhost/chat-with-project", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer some-jwt",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectId: PROJECT_1,
+          query: longQuery,
+        }),
+      });
+
+      const res = await handler(req);
+      assertEquals(res.status, 400);
+    } finally {
+      restoreFetch();
+    }
+  },
+});
+
+Deno.test({
+  name: "chat-with-project - returns 500 when Gemini returns garbage",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    const restoreFetch = mockFetch({
+      "/auth/v1/user": { user: { id: USER_1 } },
+      "/rest/v1/projects": [{ id: PROJECT_1 }],
+      "googleapis.com": { candidates: [{ content: { parts: [{ text: "NOT JSON" }] } }] },
+    });
+    try {
+      const req = new Request("http://localhost/chat-with-project", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer some-jwt",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectId: PROJECT_1,
+          query: "hi",
+        }),
+      });
+      const res = await handler(req);
+      assertEquals(res.status, 500);
     } finally {
       restoreFetch();
     }

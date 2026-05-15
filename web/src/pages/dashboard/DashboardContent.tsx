@@ -41,6 +41,7 @@ import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardActionModals } from "@/components/dashboard/DashboardActionModals";
 import { useDashboardSections } from "./useDashboardSections";
 import { useDashboardActions } from "./useDashboardActions";
+import { ProductionReadinessCard } from "@/components/dashboard/ProductionReadinessCard";
 
 export function DashboardContent({
   projects,
@@ -226,7 +227,14 @@ export function DashboardContent({
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <DashboardWelcomeBanner />
+          <DashboardWelcomeBanner
+            hasDocuments={ledgerEntries.length > 0}
+            onAction={(id) => {
+              if (id === "upload") navigate("/dashboard/execute");
+              if (id === "scope") navigate("/dashboard/scope");
+              if (id === "export") void handleExportPDF();
+            }}
+          />
         </motion.div>
 
         <DashboardOverview
@@ -242,6 +250,19 @@ export function DashboardContent({
           onUpgradeClick={() => setShowUpgrade(true)}
         />
 
+        <motion.div variants={itemVariants}>
+          <ProductionReadinessCard
+            documentCount={ledgerEntries.length}
+            hasQuotes={ledgerEntries.some(
+              (e: LedgerEntryRow) => e.document_type === "quote",
+            )}
+            hasInvoices={ledgerEntries.some(
+              (e: LedgerEntryRow) => e.document_type === "invoice",
+            )}
+            onPressAudit={() => setIsSidebarOpen(true)}
+          />
+        </motion.div>
+
         {project && (
           <motion.div variants={itemVariants}>
             <div className="space-y-4">
@@ -250,6 +271,7 @@ export function DashboardContent({
               </h3>
               <NextStepsChecklist
                 stage={project.stage || "planning"}
+                ledgerEntries={ledgerEntries}
                 onAction={(id) => {
                   if (id === "review-scope") navigate("/dashboard/scope");
                   if (id === "upload-quote" || id === "upload-document") {

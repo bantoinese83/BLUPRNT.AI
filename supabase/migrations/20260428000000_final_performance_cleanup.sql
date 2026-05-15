@@ -12,6 +12,5 @@
 -- Redundant: idx_properties_owner_postal(owner_user_id, postal_code) 
 -- already covers this prefix.
 DROP INDEX IF EXISTS public.idx_properties_owner_user_id;
-
 COMMENT ON INDEX public.idx_properties_owner_postal IS 
   'Primary composite index for property ownership and location lookups. Covers owner_user_id prefix.';

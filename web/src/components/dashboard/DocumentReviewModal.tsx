@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Link2, Sparkles } from "lucide-react";
+import { Loader2, Link2, FileSearch } from "lucide-react";
 import { DocumentThumbnail } from "@/components/dashboard/DocumentThumbnail";
 import { Button } from "@/components/ui/button";
 
@@ -155,7 +155,7 @@ export function DocumentReviewModal({
           <div className="p-4 space-y-4">
             {isUnverified ? (
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-amber-600 mt-0.5 shrink-0 animate-pulse" />
+                <FileSearch className="w-5 h-5 text-amber-600 mt-0.5 shrink-0 animate-pulse" />
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-amber-900">
                     Review and Verify

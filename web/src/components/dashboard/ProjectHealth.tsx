@@ -89,16 +89,20 @@ function SpendRunwayBar({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-          Spend vs estimate band
+          Spend on your estimate range
         </p>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 border border-teal-100/60">
-          <span className="text-[9px] font-black uppercase tracking-wider text-teal-700">
-            Current Spend:
-          </span>
+        <div
+          className={`max-w-[min(100%,14rem)] shrink-0 rounded-full border px-3 py-1 shadow-sm ${
+            overHigh
+              ? "border-rose-200/80 bg-rose-600 text-white"
+              : "border-teal-200/80 bg-teal-600 text-white"
+          }`}
+        >
           <span
-            className={`text-xs font-black tabular-nums ${overHigh ? "text-rose-600" : "text-teal-900"}`}
+            className="block truncate text-center text-xs font-black tabular-nums text-white"
+            title={money(spend)}
           >
             {money(spend)}
           </span>
@@ -107,7 +111,14 @@ function SpendRunwayBar({
       <div className="relative h-10 py-0.5">
         <div className="absolute inset-x-0 top-1/2 h-7 -translate-y-1/2 overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-100/60">
           <div
-            className="absolute inset-y-0 bg-teal-100/80 border-x-2 border-teal-500/50"
+            className={`absolute inset-y-0 left-0 z-0 rounded-l-[0.65rem] ${
+              overHigh ? "bg-rose-400/35" : "bg-teal-400/35"
+            }`}
+            style={{ width: `${spendPct}%` }}
+            aria-hidden
+          />
+          <div
+            className="absolute inset-y-0 z-[1] bg-teal-100/80 border-x-2 border-teal-500/50"
             style={{ left: `${bandLeft}%`, width: `${bandWidth}%` }}
           />
         </div>
@@ -373,16 +384,12 @@ export function ProjectHealth({
           </p>
         </motion.div>
 
-        {spendingTotal > 0 && (
+        {spendingTotal > 0 && min > 0 && (
           <div className="space-y-2 pt-2">
             <div className="flex items-center justify-between px-1 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
               <span>Project Completion</span>
               <span className="text-slate-900">
-                {Math.min(
-                  100,
-                  Math.round((spendingTotal / (estimatedMin || 1)) * 100),
-                )}
-                %
+                {Math.min(100, Math.round((spendingTotal / min) * 100))}%
               </span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
@@ -390,7 +397,7 @@ export function ProjectHealth({
                 className="absolute inset-y-0 left-0 rounded-full bg-teal-600"
                 initial={{ width: 0 }}
                 animate={{
-                  width: `${Math.min(100, (spendingTotal / (estimatedMin || 1)) * 100)}%`,
+                  width: `${Math.min(100, (spendingTotal / min) * 100)}%`,
                 }}
                 transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
               />

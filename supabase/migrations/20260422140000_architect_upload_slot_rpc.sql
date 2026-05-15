@@ -65,11 +65,8 @@ BEGIN
   RETURN QUERY SELECT true, COALESCE(v_count, 0) + 1;
 END;
 $$;
-
 COMMENT ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) IS
   'Locks user_subscriptions row and increments invoice_uploads_count when under cap and entitled. Align with shared/lib/architect-entitlement.ts.';
-
-
 CREATE OR REPLACE FUNCTION public.release_architect_invoice_upload_slot(p_user_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -85,15 +82,12 @@ BEGIN
     AND COALESCE(invoice_uploads_count, 0) > 0;
 END;
 $$;
-
 COMMENT ON FUNCTION public.release_architect_invoice_upload_slot(uuid) IS
   'Rolls back one reserved Architect upload slot if the upload pipeline fails after reserve.';
-
 REVOKE ALL ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) FROM anon;
 REVOKE ALL ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.reserve_architect_invoice_upload_slot(uuid, int) TO service_role;
-
 REVOKE ALL ON FUNCTION public.release_architect_invoice_upload_slot(uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.release_architect_invoice_upload_slot(uuid) FROM anon;
 REVOKE ALL ON FUNCTION public.release_architect_invoice_upload_slot(uuid) FROM authenticated;

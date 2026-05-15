@@ -39,7 +39,12 @@ function MetricChip({
     <View style={metricStyles.chip}>
       <Icon size={12} color={Theme.colors.brand.primary} />
       <Text style={metricStyles.chipLabel}>{label}</Text>
-      <Text style={metricStyles.chipValue} numberOfLines={1}>
+      <Text
+        style={metricStyles.chipValue}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+      >
         {value}
       </Text>
     </View>
@@ -107,7 +112,9 @@ export const ProjectHealth = memo(function ProjectHealth({
     <GlassCard style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Health Index</Text>
-        <Shield size={14} color={Theme.colors.text.secondary} />
+        <View style={styles.headerIconWrap} accessibilityLabel="Health shield">
+          <Shield size={15} color={Theme.colors.text.secondary} />
+        </View>
       </View>
 
       <View style={styles.topRow}>
@@ -214,21 +221,62 @@ export const ProjectHealth = memo(function ProjectHealth({
       {runway && spendingTotal > 0 ? (
         <View style={styles.runwayWrap}>
           <View style={styles.runwayHeader}>
-            <Text style={styles.runwayCaption}>Spend vs estimate band</Text>
-            <View style={styles.spendBadge}>
-              <Text style={styles.spendBadgeLabel}>Current Spend:</Text>
-              <Text
+            <Text style={styles.runwayCaption}>
+              Spend on your estimate range
+            </Text>
+          </View>
+
+          <View style={styles.runwayStack}>
+            <View style={styles.badgeRow}>
+              <View
                 style={[
-                  styles.spendBadgeValue,
-                  runway.overHigh ? { color: Theme.colors.status.error } : null,
+                  styles.spendBadgeAnchor,
+                  { left: `${runway.spendPct}%` },
                 ]}
               >
-                {money(spendingTotal)}
-              </Text>
+                <MotiView
+                  from={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", delay: 400, damping: 18 }}
+                  style={[
+                    styles.spendBadge,
+                    runway.overHigh && styles.spendBadgeOver,
+                  ]}
+                >
+                  <Text
+                    style={styles.spendBadgeValue}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.82}
+                  >
+                    {money(spendingTotal)}
+                  </Text>
+                  <View
+                    style={[
+                      styles.spendBadgeArrow,
+                      {
+                        borderTopColor: runway.overHigh
+                          ? Theme.colors.status.error
+                          : Theme.colors.brand.primary,
+                      },
+                    ]}
+                  />
+                </MotiView>
+              </View>
             </View>
-          </View>
-          <View style={styles.runwayTrackOuter}>
+
             <View style={styles.runwayTrack}>
+              <View
+                style={[
+                  styles.runwaySpendFill,
+                  {
+                    width: `${runway.spendPct}%`,
+                    backgroundColor: runway.overHigh
+                      ? "rgba(220, 38, 38, 0.35)"
+                      : "rgba(13, 148, 136, 0.35)",
+                  },
+                ]}
+              />
               <View
                 style={[
                   styles.runwayBand,
@@ -238,30 +286,30 @@ export const ProjectHealth = memo(function ProjectHealth({
                   },
                 ]}
               />
-            </View>
-            <View
-              style={[
-                styles.runwayDotRing,
-                {
-                  left: `${runway.spendPct}%`,
-                  transform: [{ translateX: -12 }],
-                },
-              ]}
-            >
               <View
                 style={[
-                  styles.runwayDotInner,
+                  styles.runwayDotRing,
                   {
-                    backgroundColor: runway.overHigh
-                      ? Theme.colors.status.error
-                      : Theme.colors.brand.primary,
+                    left: `${runway.spendPct}%`,
+                    marginLeft: -12,
                   },
                 ]}
-              />
+              >
+                <View
+                  style={[
+                    styles.runwayDotInner,
+                    {
+                      backgroundColor: runway.overHigh
+                        ? Theme.colors.status.error
+                        : Theme.colors.brand.primary,
+                    },
+                  ]}
+                />
+              </View>
+              {runway.overHigh ? (
+                <Text style={styles.runwayOverLabel}>Over</Text>
+              ) : null}
             </View>
-            {runway.overHigh ? (
-              <Text style={styles.runwayOverLabel}>Over</Text>
-            ) : null}
           </View>
           <View style={styles.runwayLabels}>
             <Text style={styles.runwayLabelText} numberOfLines={1}>
@@ -327,7 +375,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Theme.spacing.md,
+    paddingTop: 4,
+    marginBottom: Theme.spacing.md + 2,
+  },
+  headerIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(15, 23, 42, 0.04)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(148, 163, 184, 0.25)",
   },
   headerTitle: {
     fontSize: Theme.typography.size.xs,
@@ -354,7 +413,8 @@ const styles = StyleSheet.create({
   },
   metricsBlock: {
     width: "100%",
-    marginBottom: Theme.spacing.sm,
+    marginTop: 4,
+    marginBottom: Theme.spacing.md,
   },
   metricsRow: {
     flexDirection: "row",
@@ -362,10 +422,12 @@ const styles = StyleSheet.create({
   },
   metricsRowFour: {
     flexWrap: "wrap",
+    rowGap: 8,
   },
   runwayWrap: {
-    gap: 8,
-    marginBottom: Theme.spacing.sm,
+    gap: 10,
+    marginTop: 4,
+    marginBottom: Theme.spacing.md,
   },
   runwayHeader: {
     flexDirection: "row",
@@ -378,30 +440,63 @@ const styles = StyleSheet.create({
     color: Theme.colors.text.secondary,
     textTransform: "uppercase",
     letterSpacing: 1,
+    lineHeight: 14,
+  },
+  runwayStack: {
+    width: "100%",
+    gap: 10,
+  },
+  badgeRow: {
+    position: "relative",
+    width: "100%",
+    minHeight: 44,
+    justifyContent: "flex-end",
+    paddingBottom: 2,
+  },
+  spendBadgeAnchor: {
+    position: "absolute",
+    bottom: 0,
+    width: 0,
+    alignItems: "center",
+    zIndex: 20,
   },
   spendBadge: {
-    flexDirection: "row",
+    backgroundColor: Theme.colors.brand.primary,
+    position: "relative",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    paddingBottom: 9,
+    borderRadius: 10,
     alignItems: "center",
-    backgroundColor: Theme.colors.brand.light,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
+    justifyContent: "center",
+    maxWidth: "72%",
+    minWidth: 72,
+    ...Theme.shadows.brand,
   },
-  spendBadgeLabel: {
-    fontSize: 9,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.brand.deep,
+  spendBadgeOver: {
+    backgroundColor: Theme.colors.status.error,
+  },
+  spendBadgeArrow: {
+    position: "absolute",
+    bottom: -4,
+    left: "50%",
+    marginLeft: -4,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderTopWidth: 4,
+    borderStyle: "solid",
+    backgroundColor: "transparent",
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
   },
   spendBadgeValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: Theme.typography.family.black,
-    color: Theme.colors.brand.deep,
-  },
-  runwayTrackOuter: {
-    height: 36,
-    justifyContent: "center",
-    position: "relative",
+    color: "white",
+    textAlign: "center",
+    width: "100%",
   },
   runwayTrack: {
     height: 24,
@@ -411,6 +506,15 @@ const styles = StyleSheet.create({
     position: "relative",
     borderWidth: 1,
     borderColor: "rgba(148, 163, 184, 0.2)",
+  },
+  runwaySpendFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderTopLeftRadius: 11,
+    borderBottomLeftRadius: 11,
+    zIndex: 0,
   },
   runwayOverLabel: {
     position: "absolute",
@@ -422,16 +526,17 @@ const styles = StyleSheet.create({
     color: Theme.colors.status.error,
     textTransform: "uppercase",
     letterSpacing: 0.2,
-    zIndex: 2,
+    zIndex: 4,
   },
   runwayBand: {
     position: "absolute",
     top: 0,
     bottom: 0,
-    backgroundColor: "rgba(13, 148, 136, 0.25)",
+    backgroundColor: "rgba(13, 148, 136, 0.18)",
     borderLeftWidth: 2,
     borderRightWidth: 2,
-    borderColor: "rgba(13, 148, 136, 0.6)",
+    borderColor: "rgba(13, 148, 136, 0.55)",
+    zIndex: 2,
   },
   runwayDotRing: {
     position: "absolute",

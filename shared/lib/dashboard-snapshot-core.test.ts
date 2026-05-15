@@ -31,6 +31,7 @@ describe("dashboard-snapshot-core", () => {
       expect(snapshot.project).toBeNull();
       expect(snapshot.galleryItems).toEqual([]);
       expect(snapshot.loadError).toBeNull();
+      expect(snapshot.projectSwitcherHints).toEqual({});
     });
   });
 

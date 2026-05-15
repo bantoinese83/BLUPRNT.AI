@@ -3,26 +3,37 @@ import {
   FileText,
   Hammer,
   Share2,
+  TrendingUp,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 type Step = {
   id: string;
   label: string;
   description: string;
   icon: LucideIcon;
-  action?: () => void;
 };
 
 export function NextStepsChecklist({
   stage,
+  ledgerEntries = [],
   onAction,
 }: {
   stage: string;
+  ledgerEntries?: LedgerEntryRow[];
   onAction: (id: string) => void;
 }) {
   const steps: Step[] = [];
+
+  const hasQuotes = ledgerEntries.some(
+    (e: LedgerEntryRow) => e.document_type === "quote",
+  );
+  const hasInvoices = ledgerEntries.some(
+    (e: LedgerEntryRow) => e.document_type === "invoice",
+  );
 
   if (stage === "planning") {
     steps.push(
@@ -34,13 +45,15 @@ export function NextStepsChecklist({
       },
       {
         id: "upload-quote",
-        label: "Upload first quote",
-        description: "Snap a photo of a contractor bid to compare.",
-        icon: Hammer,
+        label: hasQuotes ? "Compare second bid" : "Upload first quote",
+        description: hasQuotes
+          ? "Better data means better leverage. Snap another quote."
+          : "Snap a photo of a contractor bid to compare.",
+        icon: hasQuotes ? TrendingUp : Hammer,
       },
       {
         id: "export-packet",
-        label: "Export Home Archive",
+        label: "Export seller packet",
         description:
           "Download the full ledger PDF—scope, plan vs spend, and costs.",
         icon: Share2,
@@ -50,9 +63,11 @@ export function NextStepsChecklist({
     steps.push(
       {
         id: "upload-document",
-        label: "Track an invoice",
-        description: "Start building your property ledger.",
-        icon: FileText,
+        label: hasInvoices ? "Verify another invoice" : "Add a ledger entry",
+        description: hasInvoices
+          ? "Keep your property's value documentation growing."
+          : "Start building your property ledger.",
+        icon: hasInvoices ? ShieldCheck : FileText,
       },
       {
         id: "review-health",
@@ -74,11 +89,13 @@ export function NextStepsChecklist({
       {steps.map((step, i) => (
         <motion.button
           key={step.id}
+          type="button"
+          aria-label={step.label}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
           onClick={() => onAction(step.id)}
-          className="group flex flex-col items-start p-5 rounded-3xl bg-white border border-slate-200 shadow-drop-sm hover:border-teal-200 hover:shadow-drop-md transition-all text-left"
+          className="group flex flex-col items-start p-5 rounded-3xl bg-white border border-slate-200 shadow-drop-sm hover:border-teal-200 hover:shadow-drop-md active:scale-[0.99] transition-all text-left"
         >
           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-teal-50 transition-colors">
             <step.icon className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />

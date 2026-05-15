@@ -189,6 +189,7 @@ export function useDashboardDataShared(adapter: UseDashboardDataAdapter) {
       homeTeam,
       investmentTotal,
       resaleImpact,
+      projectSwitcherHints: snapshot?.projectSwitcherHints ?? {},
       load,
       handleProjectSelect,
       setProjects,

@@ -1,4 +1,4 @@
-import { X, Sparkles, type LucideIcon } from "lucide-react";
+import { X, BrainCircuit, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ReviewModalHeaderProps {
@@ -37,7 +37,7 @@ export function ReviewModalHeader({
               variant="outline"
               className="bg-amber-50 text-amber-700 border-amber-200 ml-2 shrink-0"
             >
-              <Sparkles className="w-2.5 h-2.5 mr-1" />
+              <BrainCircuit className="w-2.5 h-2.5 mr-1" />
               AI Draft
             </Badge>
           )}

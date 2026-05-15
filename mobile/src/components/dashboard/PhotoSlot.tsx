@@ -30,6 +30,13 @@ export type PhotoSlotProps = {
   onUpdateCaption: (id: string, caption: string) => void;
   /** When true and a photo is shown, the bottom "Change photo" chip is omitted (parent supplies actions). */
   hideChangeOverlay?: boolean;
+  /**
+   * Square slot width/height in px. Defaults to nearly full screen width (single-column vault).
+   * Use a smaller value for side-by-side before/after rows.
+   */
+  slotSize?: number;
+  /** How the photo fills the slot (default cover). */
+  imageContentFit?: "cover" | "contain";
 };
 
 export function PhotoSlot({
@@ -43,6 +50,8 @@ export function PhotoSlot({
   onClear,
   onUpdateCaption,
   hideChangeOverlay = false,
+  slotSize,
+  imageContentFit = "cover",
 }: PhotoSlotProps) {
   const [editingCaption, setEditingCaption] = useState(false);
   const [captionValue, setCaptionValue] = useState(item?.caption || "");
@@ -70,8 +79,11 @@ export function PhotoSlot({
     }
   };
 
+  const slotDim = slotSize ?? CARD_SIZE;
+  const isCompactSlot = slotSize != null;
+
   return (
-    <View style={styles.slotContainer}>
+    <View style={[styles.slotContainer, { width: slotDim, height: slotDim }]}>
       <GlassCard intensity={12} style={styles.slotCard}>
         <View style={styles.flex1}>
           {showImage && item ? (
@@ -79,7 +91,7 @@ export function PhotoSlot({
               <Image
                 source={{ uri: signedUrl! }}
                 style={StyleSheet.absoluteFill}
-                contentFit="cover"
+                contentFit={imageContentFit}
               />
 
               {/* Controls Overlay (Top) */}
@@ -176,19 +188,41 @@ export function PhotoSlot({
               disabled={uploading}
               style={styles.placeholder}
             >
-              <View style={styles.placeholderContent}>
-                <View style={styles.logoWrapper}>
+              <View
+                style={[
+                  styles.placeholderContent,
+                  isCompactSlot && styles.placeholderContentCompact,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.logoWrapper,
+                    isCompactSlot && styles.logoWrapperCompact,
+                  ]}
+                >
                   {uploading ? (
                     <ActivityIndicator color={Theme.colors.brand.primary} />
                   ) : (
-                    <Logo size={48} />
+                    <Logo size={isCompactSlot ? 32 : 48} />
                   )}
                 </View>
 
                 {!uploading && (
-                  <View style={styles.centeredActionBtn}>
-                    <Camera size={16} color="white" />
-                    <Text style={styles.centeredActionText}>Capture Photo</Text>
+                  <View
+                    style={[
+                      styles.centeredActionBtn,
+                      isCompactSlot && styles.centeredActionBtnCompact,
+                    ]}
+                  >
+                    <Camera size={isCompactSlot ? 14 : 16} color="white" />
+                    <Text
+                      style={[
+                        styles.centeredActionText,
+                        isCompactSlot && styles.centeredActionTextCompact,
+                      ]}
+                    >
+                      Capture Photo
+                    </Text>
                   </View>
                 )}
               </View>
@@ -239,8 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   slotContainer: {
-    width: CARD_SIZE,
-    height: CARD_SIZE,
+    alignSelf: "center",
   },
   slotCard: {
     flex: 1,
@@ -261,6 +294,10 @@ const styles = StyleSheet.create({
     gap: 16,
     padding: 20,
   },
+  placeholderContentCompact: {
+    gap: 8,
+    padding: 10,
+  },
   logoWrapper: {
     width: 80,
     height: 80,
@@ -273,6 +310,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 3,
+  },
+  logoWrapperCompact: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
   },
   centeredActionBtn: {
     flexDirection: "row",
@@ -289,10 +331,20 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  centeredActionBtnCompact: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    gap: 6,
+    marginTop: 4,
+    borderRadius: 10,
+  },
   centeredActionText: {
     color: "white",
     fontSize: 12,
     fontFamily: Theme.typography.family.bold,
+  },
+  centeredActionTextCompact: {
+    fontSize: 10,
   },
   resolvingCaption: {
     marginTop: 12,

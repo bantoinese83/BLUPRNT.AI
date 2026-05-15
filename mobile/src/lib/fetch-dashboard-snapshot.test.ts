@@ -209,10 +209,48 @@ describe("fetchMobileDashboardSnapshot", () => {
       if (table === "project_gallery") {
         return {
           select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({
             data: [
-              { id: "g1", photo_type: "before", storage_path: "path.jpg" },
+              {
+                id: "g1",
+                project_id: "p1",
+                photo_type: "before",
+                storage_path: "path.jpg",
+                caption: null,
+                uploaded_by_user_id: userId,
+                created_at: "2026-01-01T00:00:00Z",
+              },
+            ],
+            error: null,
+          }),
+        };
+      }
+      if (table === "ledger_entries") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: [
+              {
+                id: "inv1",
+                vendor_name: "Vendor",
+                total: 0,
+                created_at: "2026-01-01T00:00:00Z",
+                payment_status: null,
+                document_type: null,
+                document_id: null,
+                issue_date: null,
+                project_id: "p1",
+                vendor_contact_info: null,
+                warranty_expiry_date: null,
+                insurance_renewal_date: null,
+                permit_expiration_date: null,
+                ai_summary: null,
+                ledger_line_items: [],
+              },
             ],
             error: null,
           }),

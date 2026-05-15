@@ -128,6 +128,7 @@ export function PlanVsActualCard({
         }}
         accessibilityRole="button"
         accessibilityLabel="Open project detail"
+        style={styles.projectDetailLink}
       >
         <Text style={styles.link}>Project detail</Text>
       </TouchableOpacity>
@@ -138,7 +139,9 @@ export function PlanVsActualCard({
 const styles = StyleSheet.create({
   card: {
     padding: 20,
+    paddingBottom: 22,
     gap: 16,
+    marginBottom: 4,
   },
   row: {
     flexDirection: "row",
@@ -206,17 +209,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 10,
     paddingHorizontal: 4,
+    marginBottom: 4,
   },
   ctaText: {
     fontSize: 14,
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.brand.primary,
   },
+  projectDetailLink: {
+    marginTop: 6,
+    paddingTop: 6,
+    paddingBottom: 6,
+  },
   link: {
     fontSize: 13,
     fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.text.muted,
     textAlign: "center",
-    paddingBottom: 4,
   },
 });

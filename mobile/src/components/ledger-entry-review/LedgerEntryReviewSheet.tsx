@@ -80,7 +80,7 @@ export function LedgerEntryReviewSheet({
     setReviewDateField,
     handleDelete: hookDelete,
     deleting,
-  } = useLedgerEntryReviewDetail(ledgerEntry, projectId, isOpen);
+  } = useLedgerEntryReviewDetail(ledgerEntry, projectId, isOpen, onSaved);
 
   const { confirm } = useConfirmation();
   const [scopePickerLineId, setScopePickerLineId] = useState<string | null>(

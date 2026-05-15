@@ -8,7 +8,6 @@
 
 -- 1. project-documents
 DROP POLICY IF EXISTS "Users can manage project documents" ON storage.objects;
-
 CREATE POLICY "Users can manage project documents"
 ON storage.objects
 FOR ALL
@@ -35,10 +34,8 @@ WITH CHECK (
     )
   )
 );
-
 -- 2. project-photos
 DROP POLICY IF EXISTS "Users can manage project photos" ON storage.objects;
-
 CREATE POLICY "Users can manage project photos"
 ON storage.objects
 FOR ALL
@@ -65,6 +62,5 @@ WITH CHECK (
     )
   )
 );
-
 -- 3. project-view-tokens (for shared views) - if applicable, but usually tokens are for reading.
--- We keep them as is for now unless they cause issues.
+-- We keep them as is for now unless they cause issues.;

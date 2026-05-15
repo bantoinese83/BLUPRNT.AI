@@ -20,6 +20,7 @@ export function useLedgerEntryReviewDetail(
   ledgerEntry: LedgerEntryRow | null,
   projectId: string | null,
   isOpen = false,
+  onSaved?: () => void,
 ) {
   const adapter = useMemo(
     () => ({
@@ -37,13 +38,13 @@ export function useLedgerEntryReviewDetail(
         showAppToast(msg, { type });
       },
       onSaved: () => {
-        // Caller usually handles refresh
+        onSaved?.();
       },
       onClose: () => {
         // Handled by the sheet component
       },
     }),
-    [],
+    [onSaved],
   );
 
   const shared = useDocumentReviewShared(

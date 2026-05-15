@@ -259,7 +259,7 @@ export function UpgradeModal({
                 {[
                   "Expert AI Insights & Project Strategy",
                   `Up to ${ARCHITECT_LEDGER_LIMIT} ledger record uploads per billing period, total across all projects`,
-                  "Track up to 2 active projects",
+                  "Full app access (Architect tier)",
                   "Cloud-backed Seller Packet PDF",
                 ].map((item, i) => (
                   <li

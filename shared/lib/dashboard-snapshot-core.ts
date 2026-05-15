@@ -12,7 +12,10 @@ import type {
   GalleryItemRow,
   LedgerLineItemRow,
 } from "../types/database.ts";
-import type { DashboardSnapshot } from "../types/dashboard-snapshot.ts";
+import type {
+  DashboardSnapshot,
+  ProjectSwitcherHints,
+} from "../types/dashboard-snapshot.ts";
 import { buildSpendByCategory } from "./spend-by-category.ts";
 import { partialDashboardLoadMessage } from "./dashboard-partial-load.ts";
 import { isArchitectPlanEffective } from "./architect-entitlement.ts";
@@ -37,11 +40,62 @@ export function emptyDashboardSnapshot(): DashboardSnapshot {
     hasProjectPass: false,
     galleryItems: [],
     lastProjectId: null,
+    projectSwitcherHints: {},
   };
 }
 
 const PROJECTS_LIST_SELECT =
-  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at";
+  "id, name, property_id, estimated_min_total, estimated_max_total, confidence_score, stage, created_at, before_photo_storage_path, after_photo_storage_path";
+
+/**
+ * Cover image path (project-photos bucket) and ledger entry count per project for switcher UI.
+ */
+export async function fetchProjectSwitcherHints(
+  supabase: SupabaseClient,
+  projects: ProjectRow[],
+): Promise<ProjectSwitcherHints> {
+  if (projects.length === 0) return {};
+  const ids = projects.map((p) => p.id);
+  const hints: ProjectSwitcherHints = {};
+
+  const [galleryRes, ledgerRes] = await Promise.all([
+    supabase
+      .from("project_gallery")
+      .select("project_id, storage_path, photo_type, created_at")
+      .in("project_id", ids)
+      .order("created_at", { ascending: true }),
+    supabase.from("ledger_entries").select("project_id").in("project_id", ids),
+  ]);
+
+  const firstAnyPath: Record<string, string> = {};
+  const firstBeforePath: Record<string, string> = {};
+  for (const row of galleryRes.data ?? []) {
+    const pid = row.project_id as string;
+    const path = row.storage_path as string | null;
+    if (!path) continue;
+    if (!firstAnyPath[pid]) firstAnyPath[pid] = path;
+    if (row.photo_type === "before" && !firstBeforePath[pid]) {
+      firstBeforePath[pid] = path;
+    }
+  }
+
+  for (const p of projects) {
+    const fromGallery = firstBeforePath[p.id] ?? firstAnyPath[p.id] ?? null;
+    const fromProject =
+      p.before_photo_storage_path ?? p.after_photo_storage_path ?? null;
+    hints[p.id] = {
+      coverStoragePath: fromGallery ?? fromProject,
+      documentCount: 0,
+    };
+  }
+
+  for (const row of ledgerRes.data ?? []) {
+    const pid = row.project_id as string;
+    if (hints[pid]) hints[pid].documentCount += 1;
+  }
+
+  return hints;
+}
 
 const SCOPE_SELECT =
   "id, category, description, finish_tier, quantity, unit, unit_cost_min, unit_cost_max, total_cost_min, total_cost_max, confidence_score, source, metadata, justification, maintenance_tips, priority, phase";

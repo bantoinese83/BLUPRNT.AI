@@ -22,3 +22,4 @@ mobile/maestro/common/launch-app.active.yaml
 # Supabase CLI (local; never commit)
 supabase/.temp/
 supabase/.branches/
+.gemini/

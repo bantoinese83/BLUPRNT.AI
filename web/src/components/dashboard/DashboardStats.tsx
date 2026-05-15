@@ -102,12 +102,14 @@ export function DashboardStats({
           </span>
         </div>
 
-        <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5">
-          {money(estimatedMin, estimatedMax)}
-        </p>
-        <p className="text-xs text-slate-400 font-bold">
-          {DASHBOARD_STATS_LABELS.estimateSub}
-        </p>
+        <div className="min-w-0 flex-1">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5 truncate">
+            {money(estimatedMin, estimatedMax)}
+          </p>
+          <p className="text-xs text-slate-400 font-bold truncate">
+            {DASHBOARD_STATS_LABELS.estimateSub}
+          </p>
+        </div>
       </motion.div>
 
       <motion.div
@@ -128,15 +130,17 @@ export function DashboardStats({
           </span>
         </div>
 
-        <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5">
-          <AnimatedNumber value={documentRowCount} />{" "}
-          <span className="text-sm font-bold text-slate-400">
-            {documentRowCount === 1 ? "file" : "files"}
-          </span>
-        </p>
-        <p className="text-xs text-slate-400 font-bold">
-          {DASHBOARD_STATS_LABELS.documentsSub}
-        </p>
+        <div className="min-w-0 flex-1">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none mb-1.5 truncate">
+            <AnimatedNumber value={documentRowCount} />{" "}
+            <span className="text-sm font-bold text-slate-400">
+              {documentRowCount === 1 ? "file" : "files"}
+            </span>
+          </p>
+          <p className="text-xs text-slate-400 font-bold truncate">
+            {DASHBOARD_STATS_LABELS.documentsSub}
+          </p>
+        </div>
       </motion.div>
 
       <motion.div
@@ -157,7 +161,7 @@ export function DashboardStats({
           </span>
         </div>
 
-        <div className="flex items-baseline gap-2 mb-1.5">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-1.5 min-w-0">
           <p className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums leading-none">
             <AnimatedMoney value={spendingTotal} />
           </p>

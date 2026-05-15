@@ -11,13 +11,10 @@ CREATE TABLE IF NOT EXISTS public.project_gallery (
   uploaded_by_user_id uuid NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 -- Indexing for performance
 CREATE INDEX IF NOT EXISTS idx_project_gallery_project_id ON public.project_gallery (project_id);
-
 -- Enable RLS
 ALTER TABLE public.project_gallery ENABLE ROW LEVEL SECURITY;
-
 -- RLS Policy: Users can manage gallery items for projects they own
 CREATE POLICY "Users can manage their project gallery"
 ON public.project_gallery
@@ -39,10 +36,8 @@ WITH CHECK (
     AND pr.owner_user_id = auth.uid()
   )
 );
-
 -- Update Storage Policy to be even more robust for the new table
 DROP POLICY IF EXISTS "Users can manage project photos" ON storage.objects;
-
 CREATE POLICY "Users can manage project photos"
 ON storage.objects
 FOR ALL

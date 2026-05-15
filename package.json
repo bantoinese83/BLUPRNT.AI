@@ -30,7 +30,7 @@
     "functions:check": "bash scripts/check-edge-functions.sh",
     "functions:deploy": "supabase functions deploy --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:photo": "supabase functions deploy photo-to-scope --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
-    "functions:deploy:invoices": "supabase functions deploy upload-document get-ledger-entry --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
+    "functions:deploy:ledger": "supabase functions deploy upload-document get-ledger-entry --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:project-view": "supabase functions deploy get-project-view --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:delete-account": "supabase functions deploy delete-account --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",

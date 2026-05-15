@@ -7,6 +7,7 @@ import {
   buildDashboardDataForProject,
   fetchDashboardProjectsList,
   fetchLastActiveProjectIdFromPreferences,
+  fetchProjectSwitcherHints,
 } from "@shared/lib/dashboard-snapshot-core";
 import { dashboardSnapshotQueryKey } from "@shared/lib/dashboard-query-key";
 
@@ -101,12 +102,17 @@ export async function fetchDashboardSnapshot(options?: {
       projectId = rows[0]!.id;
     }
 
-    const built = await buildDashboardDataForProject(supabase, {
-      userId,
-      projectId: projectId!,
-      allProjects: rows,
-      partialMessageVariant: "web",
-    });
+    const hintsPromise = fetchProjectSwitcherHints(supabase, rows);
+
+    const [built, projectSwitcherHints] = await Promise.all([
+      buildDashboardDataForProject(supabase, {
+        userId,
+        projectId: projectId!,
+        allProjects: rows,
+        partialMessageVariant: "web",
+      }),
+      hintsPromise,
+    ]);
 
     return {
       configured: true,
@@ -123,6 +129,7 @@ export async function fetchDashboardSnapshot(options?: {
       subscription: built.subscription,
       hasProjectPass: built.hasProjectPass,
       lastProjectId: built.lastProjectId,
+      projectSwitcherHints,
     };
   }
 

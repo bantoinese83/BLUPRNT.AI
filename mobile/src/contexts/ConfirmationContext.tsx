@@ -46,8 +46,10 @@ export function ConfirmationProvider({
     );
   }, []);
 
+  const value = React.useMemo(() => ({ confirm }), [confirm]);
+
   return (
-    <ConfirmationContext.Provider value={{ confirm }}>
+    <ConfirmationContext.Provider value={value}>
       {children}
     </ConfirmationContext.Provider>
   );

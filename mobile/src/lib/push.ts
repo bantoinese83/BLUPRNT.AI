@@ -18,6 +18,7 @@ Notifications.setNotificationHandler({
 });
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { reportClientError } from "@/lib/sentry";
 
 const LAST_PUSH_SYNC_KEY = "bluprnt_last_push_sync";
 const LAST_PUSH_TOKEN_KEY = "bluprnt_last_push_token";
@@ -85,7 +86,7 @@ export async function registerForPushNotificationsAsync(userId: string) {
     );
 
     if (error) {
-      console.warn("[Push] Failed to sync token to Supabase:", error);
+      reportClientError("push_token_sync", error, { userId });
     } else {
       await Promise.all([
         AsyncStorage.setItem(LAST_PUSH_SYNC_KEY, now.toString()),
@@ -95,7 +96,7 @@ export async function registerForPushNotificationsAsync(userId: string) {
 
     return token;
   } catch (err) {
-    console.error("[Push] Registration error:", err);
+    reportClientError("push_registration", err, { userId });
     return null;
   }
 }

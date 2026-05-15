@@ -11,6 +11,5 @@ DROP POLICY IF EXISTS marketing_leads_insert_public ON public.marketing_leads;
 DROP POLICY IF EXISTS "marketing_leads_insert_public" ON public.marketing_leads;
 DROP POLICY IF EXISTS "Public can insert leads" ON public.marketing_leads;
 DROP POLICY IF EXISTS "Authenticated users can insert leads" ON public.marketing_leads;
-
 -- No INSERT policy = only service_role (used by the Edge function) can insert.
--- The existing SELECT policy for service_role is retained unchanged.
+-- The existing SELECT policy for service_role is retained unchanged.;

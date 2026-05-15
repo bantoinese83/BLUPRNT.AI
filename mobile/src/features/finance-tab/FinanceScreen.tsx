@@ -30,6 +30,7 @@ export default function FinanceScreen() {
     clearLoadError,
     configurationMissing,
     projects,
+    projectSwitcherHints,
     project,
     scopeItems,
     ledgerEntries,
@@ -112,6 +113,7 @@ export default function FinanceScreen() {
               onRetryLoad={() => void load()}
               onDismissLoadError={clearLoadError}
               projects={projects}
+              projectSwitcherHints={projectSwitcherHints}
               project={project}
               onProjectSelect={handleProjectSelect}
               onPressAddDocument={() =>
@@ -140,6 +142,7 @@ export default function FinanceScreen() {
       load,
       clearLoadError,
       projects,
+      projectSwitcherHints,
       handleProjectSelect,
       openLedgerDocumentCapture,
       isUploading,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BookOpen, FileDown, Loader2, Wrench, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,8 +59,14 @@ export function PropertyLedger({
   const [message, setMessage] = useState<string | null>(null);
   const [includeOriginalAppendix, setIncludeOriginalAppendix] = useState(false);
 
-  const capitalTotal = capitalImprovementTotal(ledgerEntries);
-  const maintenanceTotal = maintenanceDocumentTotal(ledgerEntries);
+  const capitalTotal = useMemo(
+    () => capitalImprovementTotal(ledgerEntries),
+    [ledgerEntries],
+  );
+  const maintenanceTotal = useMemo(
+    () => maintenanceDocumentTotal(ledgerEntries),
+    [ledgerEntries],
+  );
 
   async function handleExportPDF() {
     if (!project || !projectId || !propertyId) {

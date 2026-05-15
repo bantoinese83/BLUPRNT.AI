@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Alert, Share } from "react-native";
+import { Alert } from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 import * as Haptics from "expo-haptics";
 
 import { useAuth } from "@/contexts/auth-context";
@@ -19,6 +21,7 @@ import {
   setProductAnalyticsConsent,
 } from "@/lib/product-analytics";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
+import { uint8ToBase64 } from "@shared/lib/uint8-to-base64";
 
 import type { UseProfileScreenResult } from "./profile-screen.types";
 
@@ -147,43 +150,56 @@ export function useProfileScreen(): UseProfileScreenResult {
   }, [newPassword, confirmPassword]);
 
   const onExportData = useCallback(async () => {
+    if (exporting) return;
     setExporting(true);
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      const { data: props } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("owner_user_id", user?.id || "");
+      const { data, error } = await invokeFunction(
+        EDGE_FUNCTIONS.GENERATE_DATA_EXPORT,
+        { method: "POST" },
+      );
 
-      const propIds = (props || []).map((p: { id: string }) => p.id);
-      const { data: projs } =
-        propIds.length > 0
-          ? await supabase
-              .from("projects")
-              .select("*")
-              .in("property_id", propIds)
-          : { data: [] };
+      if (error) throw error;
+      if (!data) throw new Error("No data received from export function.");
 
-      const exportData = {
-        exported_at: new Date().toISOString(),
-        user: { email: user?.email },
-        properties: props || [],
-        projects: projs || [],
-      };
+      // Supabase invoke in Hermes/React Native usually returns ArrayBuffer or Uint8Array for binary
+      let base64: string;
+      if (data instanceof Uint8Array) {
+        base64 = uint8ToBase64(data);
+      } else if (data instanceof ArrayBuffer) {
+        base64 = uint8ToBase64(new Uint8Array(data));
+      } else {
+        // Fallback or handle unexpected type
+        throw new Error("Unexpected data format received from export.");
+      }
 
-      const json = JSON.stringify(exportData, null, 2);
-      await Share.share({
-        message: json,
-        title: "BLUPRNT.AI Data Export",
+      const fileName = `bluprnt-export-${new Date().toISOString().slice(0, 10)}.zip`;
+      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+
+      await FileSystem.writeAsStringAsync(fileUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
       });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: "application/zip",
+          dialogTitle: "Export My Project Data",
+          UTI: "public.zip-archive",
+        });
+      } else {
+        Alert.alert("Sharing unavailable", "Could not open sharing dialog.");
+      }
     } catch (err: unknown) {
       reportClientError("profile_data_export", err);
-      Alert.alert("Export Failed", "Couldn't generate data archive.");
+      Alert.alert(
+        "Export Failed",
+        "Couldn't generate data archive. Try again.",
+      );
     } finally {
       setExporting(false);
     }
-  }, [user?.email, user?.id]);
+  }, [exporting]);
 
   const onDeleteAccount = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

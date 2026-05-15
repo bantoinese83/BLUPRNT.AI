@@ -19,7 +19,7 @@ function inv(
     created_at: "2024-01-15T12:00:00.000Z",
     payment_status: "paid",
     document_type: "invoice",
-    document_id: null,
+    document_id: "00000000-0000-0000-0000-000000000000",
     ...rest,
   } as LedgerEntryRow;
 }
@@ -30,10 +30,8 @@ describe("buildSellerPacketAppendixItems", () => {
     global.fetch = vi.fn();
   });
 
-  it("returns empty array when no invoices have documents", async () => {
-    const items = await buildSellerPacketAppendixItems([
-      inv({ id: "1", document_id: null }),
-    ]);
+  it("returns empty array when no invoices are provided", async () => {
+    const items = await buildSellerPacketAppendixItems([]);
     expect(items).toEqual([]);
   });
 

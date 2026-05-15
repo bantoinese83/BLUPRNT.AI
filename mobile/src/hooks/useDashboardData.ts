@@ -41,19 +41,15 @@ export function useDashboardData() {
     [client],
   );
 
-  const { activeProjectId, data, ...publicCore } = shared;
-  void activeProjectId;
-  void data;
-
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    const { activeProjectId: _unused1, data: _unused2, ...publicCore } = shared;
+    void _unused1;
+    void _unused2;
+    return {
       ...publicCore,
       configurationMissing,
       addItem,
       recalcProjectTotals,
-      ledgerEntries: publicCore.ledgerEntries,
-      galleryItems: publicCore.galleryItems,
-    }),
-    [publicCore, configurationMissing, addItem, recalcProjectTotals],
-  );
+    };
+  }, [shared, configurationMissing, addItem, recalcProjectTotals]);
 }

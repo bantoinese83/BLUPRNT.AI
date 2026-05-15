@@ -48,6 +48,7 @@ export function useProjectDetailData() {
     hasProjectPass,
     addItem,
     projects,
+    projectSwitcherHints,
     handleProjectSelect,
     galleryItems,
   } = useDashboardData();
@@ -334,6 +335,7 @@ export function useProjectDetailData() {
     projectLoadError,
     project,
     projects,
+    projectSwitcherHints,
     handleProjectSelect,
     scope,
     expandedId,

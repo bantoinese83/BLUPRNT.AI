@@ -42,7 +42,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 -- 2. Trigger on public.properties
 CREATE OR REPLACE TRIGGER on_first_property_created_welcome_email
   AFTER INSERT ON public.properties

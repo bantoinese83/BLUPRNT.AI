@@ -6,10 +6,8 @@
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES ('project-photos', 'project-photos', false, 10485760, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
 ON CONFLICT (id) DO UPDATE SET public = false;
-
 -- 1. project-photos (Robust policy)
 DROP POLICY IF EXISTS "Users can manage project photos" ON storage.objects;
-
 CREATE POLICY "Users can manage project photos"
 ON storage.objects
 FOR ALL
@@ -36,10 +34,8 @@ WITH CHECK (
     )
   )
 );
-
 -- 2. project-documents (Consistent policy)
 DROP POLICY IF EXISTS "Users can manage project documents" ON storage.objects;
-
 CREATE POLICY "Users can manage project documents"
 ON storage.objects
 FOR ALL

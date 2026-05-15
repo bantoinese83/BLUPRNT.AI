@@ -8,7 +8,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
-  Sparkles,
+  BrainCircuit,
+  CircleHelp,
   HeartPulse,
 } from "lucide-react-native";
 import { AnimatePresence } from "moti";
@@ -99,7 +100,7 @@ export const ProjectScopeLineCard = React.memo(
                       gap: 4,
                     }}
                   >
-                    <Sparkles size={10} color={Theme.colors.status.info} />
+                    <BrainCircuit size={10} color={Theme.colors.status.info} />
                     <Text
                       style={{
                         fontSize: 9,
@@ -232,7 +233,7 @@ export const ProjectScopeLineCard = React.memo(
                             marginBottom: 4,
                           }}
                         >
-                          <Sparkles
+                          <CircleHelp
                             size={12}
                             color={Theme.colors.status.info}
                           />

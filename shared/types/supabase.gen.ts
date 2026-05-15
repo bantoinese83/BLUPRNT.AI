@@ -7,30 +7,10 @@ export type Json =
   | Json[];
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.4";
   };
   public: {
     Tables: {
@@ -162,36 +142,36 @@ export type Database = {
       };
       documents: {
         Row: {
-          created_at: string;
           id: string;
           ocr_status: string;
-          original_filename: string | null;
+          original_filename: string;
           owner_user_id: string | null;
           project_id: string;
           storage_path: string;
           type: string;
+          uploaded_at: string;
           uploaded_by_user_id: string;
         };
         Insert: {
-          created_at?: string;
           id?: string;
           ocr_status?: string;
-          original_filename?: string | null;
+          original_filename: string;
           owner_user_id?: string | null;
           project_id: string;
           storage_path: string;
           type: string;
+          uploaded_at?: string;
           uploaded_by_user_id: string;
         };
         Update: {
-          created_at?: string;
           id?: string;
           ocr_status?: string;
-          original_filename?: string | null;
+          original_filename?: string;
           owner_user_id?: string | null;
           project_id?: string;
           storage_path?: string;
           type?: string;
+          uploaded_at?: string;
           uploaded_by_user_id?: string;
         };
         Relationships: [
@@ -207,84 +187,99 @@ export type Database = {
       ledger_entries: {
         Row: {
           ai_summary: string | null;
+          category: string | null;
           created_at: string;
-          currency: string;
-          document_id: string | null;
-          document_type: string;
+          currency: string | null;
+          document_id: string;
+          document_type: string | null;
           due_date: string | null;
           id: string;
+          insurance_renewal_date: string | null;
           invoice_number: string | null;
           is_verified: boolean | null;
           issue_date: string | null;
           owner_user_id: string | null;
+          payment_method: string | null;
           payment_status: string;
+          permit_expiration_date: string | null;
           project_id: string;
           subtotal: number | null;
           tax_total: number | null;
-          total: number;
-          updated_at: string | null;
+          total: number | null;
+          updated_at: string;
+          vendor_address: string | null;
           vendor_contact_info: Json | null;
+          vendor_email: string | null;
           vendor_name: string | null;
+          vendor_phone: string | null;
           warranty_expiry_date: string | null;
-          insurance_renewal_date: string | null;
-          permit_expiration_date: string | null;
           warranty_notified_at: string | null;
         };
         Insert: {
           ai_summary?: string | null;
+          category?: string | null;
           created_at?: string;
-          currency?: string;
-          document_id?: string | null;
-          document_type?: string;
+          currency?: string | null;
+          document_id: string;
+          document_type?: string | null;
           due_date?: string | null;
           id?: string;
+          insurance_renewal_date?: string | null;
           invoice_number?: string | null;
           is_verified?: boolean | null;
           issue_date?: string | null;
           owner_user_id?: string | null;
+          payment_method?: string | null;
           payment_status?: string;
+          permit_expiration_date?: string | null;
           project_id: string;
           subtotal?: number | null;
           tax_total?: number | null;
-          total?: number;
-          updated_at?: string | null;
+          total?: number | null;
+          updated_at?: string;
+          vendor_address?: string | null;
           vendor_contact_info?: Json | null;
+          vendor_email?: string | null;
           vendor_name?: string | null;
+          vendor_phone?: string | null;
           warranty_expiry_date?: string | null;
-          insurance_renewal_date?: string | null;
-          permit_expiration_date?: string | null;
           warranty_notified_at?: string | null;
         };
         Update: {
           ai_summary?: string | null;
+          category?: string | null;
           created_at?: string;
-          currency?: string;
-          document_id?: string | null;
-          document_type?: string;
+          currency?: string | null;
+          document_id?: string;
+          document_type?: string | null;
           due_date?: string | null;
           id?: string;
+          insurance_renewal_date?: string | null;
           invoice_number?: string | null;
           is_verified?: boolean | null;
           issue_date?: string | null;
           owner_user_id?: string | null;
+          payment_method?: string | null;
           payment_status?: string;
+          permit_expiration_date?: string | null;
           project_id?: string;
           subtotal?: number | null;
           tax_total?: number | null;
-          total?: number;
-          updated_at?: string | null;
+          total?: number | null;
+          updated_at?: string;
+          vendor_address?: string | null;
           vendor_contact_info?: Json | null;
+          vendor_email?: string | null;
           vendor_name?: string | null;
+          vendor_phone?: string | null;
           warranty_expiry_date?: string | null;
-          insurance_renewal_date?: string | null;
-          permit_expiration_date?: string | null;
           warranty_notified_at?: string | null;
         };
         Relationships: [
           {
             foreignKeyName: "invoices_document_id_fkey";
             columns: ["document_id"];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: "documents";
             referencedColumns: ["id"];
           },
@@ -300,46 +295,52 @@ export type Database = {
       ledger_line_items: {
         Row: {
           category: string | null;
-          created_at: string;
-          description: string;
+          description: string | null;
+          discount_amount: number | null;
+          discount_rate: number | null;
           id: string;
           ledger_entry_id: string;
           line_total: number | null;
+          product_code: string | null;
           quantity: number | null;
           scope_item_id: string | null;
-          tax_amount: number;
-          tax_rate: number;
-          unit_of_measure: string;
+          tax_amount: number | null;
+          tax_rate: number | null;
+          unit_of_measure: string | null;
           unit_price: number | null;
           updated_at: string | null;
         };
         Insert: {
           category?: string | null;
-          created_at?: string;
-          description?: string;
+          description?: string | null;
+          discount_amount?: number | null;
+          discount_rate?: number | null;
           id?: string;
           ledger_entry_id: string;
           line_total?: number | null;
+          product_code?: string | null;
           quantity?: number | null;
           scope_item_id?: string | null;
-          tax_amount?: number;
-          tax_rate?: number;
-          unit_of_measure?: string;
+          tax_amount?: number | null;
+          tax_rate?: number | null;
+          unit_of_measure?: string | null;
           unit_price?: number | null;
           updated_at?: string | null;
         };
         Update: {
           category?: string | null;
-          created_at?: string;
-          description?: string;
+          description?: string | null;
+          discount_amount?: number | null;
+          discount_rate?: number | null;
           id?: string;
           ledger_entry_id?: string;
           line_total?: number | null;
+          product_code?: string | null;
           quantity?: number | null;
           scope_item_id?: string | null;
-          tax_amount?: number;
-          tax_rate?: number;
-          unit_of_measure?: string;
+          tax_amount?: number | null;
+          tax_rate?: number | null;
+          unit_of_measure?: string | null;
           unit_price?: number | null;
           updated_at?: string | null;
         };
@@ -362,22 +363,25 @@ export type Database = {
       };
       marketing_leads: {
         Row: {
-          created_at: string | null;
+          captured_at: string | null;
           email: string;
           id: string;
-          source: string;
+          metadata: Json | null;
+          source: string | null;
         };
         Insert: {
-          created_at?: string | null;
+          captured_at?: string | null;
           email: string;
           id?: string;
-          source?: string;
+          metadata?: Json | null;
+          source?: string | null;
         };
         Update: {
-          created_at?: string | null;
+          captured_at?: string | null;
           email?: string;
           id?: string;
-          source?: string;
+          metadata?: Json | null;
+          source?: string | null;
         };
         Relationships: [];
       };
@@ -417,6 +421,7 @@ export type Database = {
           location_in_home: string | null;
           name: string;
           notes: string | null;
+          owner_user_id: string | null;
           project_id: string;
           storage_path: string | null;
           updated_at: string | null;
@@ -432,6 +437,7 @@ export type Database = {
           location_in_home?: string | null;
           name: string;
           notes?: string | null;
+          owner_user_id?: string | null;
           project_id: string;
           storage_path?: string | null;
           updated_at?: string | null;
@@ -447,6 +453,7 @@ export type Database = {
           location_in_home?: string | null;
           name?: string;
           notes?: string | null;
+          owner_user_id?: string | null;
           project_id?: string;
           storage_path?: string | null;
           updated_at?: string | null;
@@ -466,6 +473,7 @@ export type Database = {
           caption: string | null;
           created_at: string;
           id: string;
+          owner_user_id: string | null;
           photo_type: string;
           project_id: string;
           storage_path: string;
@@ -475,6 +483,7 @@ export type Database = {
           caption?: string | null;
           created_at?: string;
           id?: string;
+          owner_user_id?: string | null;
           photo_type: string;
           project_id: string;
           storage_path: string;
@@ -484,6 +493,7 @@ export type Database = {
           caption?: string | null;
           created_at?: string;
           id?: string;
+          owner_user_id?: string | null;
           photo_type?: string;
           project_id?: string;
           storage_path?: string;
@@ -582,10 +592,12 @@ export type Database = {
           metadata: Json | null;
           name: string;
           owner_user_id: string | null;
+          payment_status: string | null;
           property_id: string;
-          stage: string | null;
-          type: string | null;
-          updated_at: string | null;
+          stage: string;
+          stripe_session_id: string | null;
+          type: string;
+          updated_at: string;
         };
         Insert: {
           after_photo_storage_path?: string | null;
@@ -599,10 +611,12 @@ export type Database = {
           metadata?: Json | null;
           name: string;
           owner_user_id?: string | null;
+          payment_status?: string | null;
           property_id: string;
-          stage?: string | null;
-          type?: string | null;
-          updated_at?: string | null;
+          stage: string;
+          stripe_session_id?: string | null;
+          type: string;
+          updated_at?: string;
         };
         Update: {
           after_photo_storage_path?: string | null;
@@ -616,10 +630,12 @@ export type Database = {
           metadata?: Json | null;
           name?: string;
           owner_user_id?: string | null;
+          payment_status?: string | null;
           property_id?: string;
-          stage?: string | null;
-          type?: string | null;
-          updated_at?: string | null;
+          stage?: string;
+          stripe_session_id?: string | null;
+          type?: string;
+          updated_at?: string;
         };
         Relationships: [
           {
@@ -633,6 +649,7 @@ export type Database = {
       };
       properties: {
         Row: {
+          address_line1: string | null;
           approximate_location: string | null;
           city: string;
           country: string;
@@ -641,20 +658,24 @@ export type Database = {
           owner_user_id: string;
           postal_code: string;
           state: string;
-          updated_at: string | null;
+          updated_at: string;
+          year_built: number | null;
         };
         Insert: {
+          address_line1?: string | null;
           approximate_location?: string | null;
           city?: string;
           country?: string;
           created_at?: string;
           id?: string;
           owner_user_id: string;
-          postal_code: string;
+          postal_code?: string;
           state?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          year_built?: number | null;
         };
         Update: {
+          address_line1?: string | null;
           approximate_location?: string | null;
           city?: string;
           country?: string;
@@ -663,22 +684,8 @@ export type Database = {
           owner_user_id?: string;
           postal_code?: string;
           state?: string;
-          updated_at?: string | null;
-        };
-        Relationships: [];
-      };
-      revenuecat_webhook_events: {
-        Row: {
-          id: string;
-          received_at: string;
-        };
-        Insert: {
-          id: string;
-          received_at?: string;
-        };
-        Update: {
-          id?: string;
-          received_at?: string;
+          updated_at?: string;
+          year_built?: number | null;
         };
         Relationships: [];
       };
@@ -699,13 +706,13 @@ export type Database = {
           priority: string | null;
           project_id: string;
           quantity: number | null;
-          source: string | null;
+          source: string;
           total_cost_max: number | null;
           total_cost_min: number | null;
           unit: string | null;
           unit_cost_max: number | null;
           unit_cost_min: number | null;
-          updated_at: string | null;
+          updated_at: string;
           verification_required: boolean | null;
         };
         Insert: {
@@ -713,7 +720,7 @@ export type Database = {
           confidence_reason?: string | null;
           confidence_score?: number | null;
           created_at?: string;
-          description?: string;
+          description: string;
           finish_tier?: string | null;
           id?: string;
           justification?: string | null;
@@ -724,13 +731,13 @@ export type Database = {
           priority?: string | null;
           project_id: string;
           quantity?: number | null;
-          source?: string | null;
+          source: string;
           total_cost_max?: number | null;
           total_cost_min?: number | null;
           unit?: string | null;
           unit_cost_max?: number | null;
           unit_cost_min?: number | null;
-          updated_at?: string | null;
+          updated_at?: string;
           verification_required?: boolean | null;
         };
         Update: {
@@ -749,13 +756,13 @@ export type Database = {
           priority?: string | null;
           project_id?: string;
           quantity?: number | null;
-          source?: string | null;
+          source?: string;
           total_cost_max?: number | null;
           total_cost_min?: number | null;
           unit?: string | null;
           unit_cost_max?: number | null;
           unit_cost_min?: number | null;
-          updated_at?: string | null;
+          updated_at?: string;
           verification_required?: boolean | null;
         };
         Relationships: [
@@ -816,18 +823,21 @@ export type Database = {
       user_preferences: {
         Row: {
           last_active_project_id: string | null;
+          notification_preferences: Json | null;
           push_token: string | null;
           updated_at: string;
           user_id: string;
         };
         Insert: {
           last_active_project_id?: string | null;
+          notification_preferences?: Json | null;
           push_token?: string | null;
           updated_at?: string;
           user_id: string;
         };
         Update: {
           last_active_project_id?: string | null;
+          notification_preferences?: Json | null;
           push_token?: string | null;
           updated_at?: string;
           user_id?: string;
@@ -892,6 +902,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      cleanup_stale_onboarding_sync: { Args: never; Returns: undefined };
       get_onboarding_sync_payload: { Args: { p_token: string }; Returns: Json };
       get_system_config: { Args: { config_key: string }; Returns: string };
       get_user_id_by_email: { Args: { user_email: string }; Returns: string };
@@ -1052,9 +1063,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

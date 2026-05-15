@@ -14,7 +14,7 @@ export type MobileDashboardDataInjected = {
 };
 
 function useMobileDashboardQueryOptions() {
-  return useMemo(() => ({}), []);
+  return useMemo(() => ({ staleTime: 30000 }), []);
 }
 
 function useMobileProjectIdStateStub() {

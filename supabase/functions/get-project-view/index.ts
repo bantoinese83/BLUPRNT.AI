@@ -89,6 +89,8 @@ export const handler = async (req: Request) => {
       },
       200,
       req,
+      undefined,
+      { "Cache-Control": "public, max-age=10, stale-while-revalidate=50" },
     );
   } catch (e) {
     console.error(e);

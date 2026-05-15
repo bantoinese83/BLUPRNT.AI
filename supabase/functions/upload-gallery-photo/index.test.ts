@@ -26,6 +26,8 @@ Deno.test({
   sanitizeOps: false,
   fn: async () => {
     setupTestEnv();
+    Deno.env.set("UPSTASH_REDIS_REST_URL", "");
+    Deno.env.set("UPSTASH_REDIS_REST_TOKEN", "");
 
     const mockUser = {
       id: "550e8400-e29b-41d4-a716-446655440000",
@@ -37,15 +39,21 @@ Deno.test({
     };
 
     const restoreFetch = mockFetch({
-      "http://localhost:54321/auth/v1/user": { user: mockUser },
-      "http://localhost:54321/rest/v1/projects": {
-        id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
-        properties: { owner_user_id: "550e8400-e29b-41d4-a716-446655440000" },
+      "/auth/v1/user": { user: mockUser },
+      "/rest/v1/projects": (req: Request) => {
+        const url = req.url;
+        if (url.includes("select=id") && url.includes("owner_user_id=eq.")) {
+          return [{ id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8" }];
+        }
+        return {
+          id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+          properties: { owner_user_id: "550e8400-e29b-41d4-a716-446655440000" },
+        };
       },
-      "http://localhost:54321/storage/v1/object/project-photos": {
+      "/storage/v1/object/project-photos": {
         Key: "some-key",
       },
-      "http://localhost:54321/rest/v1/project_gallery": { id: "gallery-1" },
+      "/rest/v1/project_gallery": { id: "gallery-1" },
     });
 
     try {

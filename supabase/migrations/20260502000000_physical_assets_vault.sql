@@ -16,14 +16,11 @@ CREATE TABLE IF NOT EXISTS public.physical_assets (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
 -- Indices
 CREATE INDEX IF NOT EXISTS idx_physical_assets_project ON public.physical_assets(project_id);
 CREATE INDEX IF NOT EXISTS idx_physical_assets_category ON public.physical_assets(category);
-
 -- RLS
 ALTER TABLE public.physical_assets ENABLE ROW LEVEL SECURITY;
-
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'physical_assets' AND policyname = 'Owners can manage physical assets') THEN
     CREATE POLICY "Owners can manage physical assets" ON public.physical_assets
@@ -38,13 +35,11 @@ DO $$ BEGIN
       ));
   END IF;
 END $$;
-
 -- Updated at trigger
 DROP TRIGGER IF EXISTS on_physical_assets_updated ON public.physical_assets;
 CREATE TRIGGER on_physical_assets_updated
   BEFORE UPDATE ON public.physical_assets
   FOR EACH ROW
   EXECUTE FUNCTION handle_updated_at();
-
 -- Add to Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE public.physical_assets;

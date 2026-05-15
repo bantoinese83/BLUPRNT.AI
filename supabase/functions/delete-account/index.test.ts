@@ -31,7 +31,7 @@ Deno.test({
       "/rest/v1/properties": [{ id: "prop-1" }],
       "/rest/v1/projects": [{ id: "p1" }],
       "/rest/v1/documents": [{ id: "d1" }],
-      "/rest/v1/invoices": [],
+      "/rest/v1/ledger_entries": [],
       "/rest/v1/seller_packets": [],
       "/storage/v1/object/list/project-photos": [],
       "/storage/v1/object/list/project-documents": [],

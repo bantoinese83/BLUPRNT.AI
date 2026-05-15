@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { PlusCircle } from "lucide-react-native";
-import { MotiView } from "moti";
+import { Image } from "expo-image";
+import { PlusCircle, FileText } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { supabase } from "@/lib/supabase";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import type { ProjectRow } from "@shared/types/database";
+import type { ProjectSwitcherHints } from "@shared/types/dashboard-snapshot";
 import { ProjectIcon } from "@/lib/project-icons";
 import {
   useConfirmation,
@@ -20,36 +21,85 @@ import {
 } from "@/contexts/useConfirmation";
 
 import { showAppToast } from "@/lib/app-toast";
+import { STORAGE_CONFIG } from "@shared/constants/storage";
 
 type ProjectSwitcherProps = {
   projects: ProjectRow[];
   currentId: string;
   onSelect: (id: string) => void;
   onAdd: () => void;
+  projectSwitcherHints?: ProjectSwitcherHints;
 };
+
+function useProjectCoverSignedUrls(hints: ProjectSwitcherHints) {
+  const [urlsByPath, setUrlsByPath] = useState<Record<string, string>>({});
+  const pathsKey = useMemo(() => {
+    const paths = new Set<string>();
+    for (const id of Object.keys(hints)) {
+      const p = hints[id]?.coverStoragePath;
+      if (p) paths.add(p);
+    }
+    return [...paths].sort().join("|");
+  }, [hints]);
+
+  useEffect(() => {
+    if (!pathsKey) return;
+    const paths = pathsKey.split("|").filter(Boolean);
+    if (paths.length === 0) return;
+
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase.storage
+        .from("project-photos")
+        .createSignedUrls(paths, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
+      if (cancelled || error || !data) return;
+      setUrlsByPath((prev) => {
+        const next = { ...prev };
+        for (const item of data) {
+          if (item.signedUrl && item.path) next[item.path] = item.signedUrl;
+        }
+        return next;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathsKey]);
+
+  return urlsByPath;
+}
 
 export const ProjectSwitcher = memo(function ProjectSwitcher({
   projects,
   currentId,
   onSelect,
   onAdd,
+  projectSwitcherHints = {},
 }: ProjectSwitcherProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { confirm } = useConfirmation();
+  const coverUrls = useProjectCoverSignedUrls(projectSwitcherHints);
 
   const renderItem = useCallback(
-    ({ item: p }: { item: ProjectRow }) => (
-      <ProjectCard
-        project={p}
-        isActive={p.id === currentId}
-        isDeleting={deletingId === p.id}
-        onSelect={onSelect}
-        setDeletingId={setDeletingId}
-        isAnyDeleting={!!deletingId}
-        confirm={confirm}
-      />
-    ),
-    [currentId, deletingId, onSelect, confirm],
+    ({ item: p }: { item: ProjectRow }) => {
+      const path = projectSwitcherHints[p.id]?.coverStoragePath ?? null;
+      const coverUrl = path ? (coverUrls[path] ?? null) : null;
+      return (
+        <ProjectCard
+          project={p}
+          hint={projectSwitcherHints[p.id]}
+          coverUrl={coverUrl}
+          isActive={p.id === currentId}
+          isDeleting={deletingId === p.id}
+          onSelect={onSelect}
+          setDeletingId={setDeletingId}
+          isAnyDeleting={!!deletingId}
+          confirm={confirm}
+        />
+      );
+    },
+    [currentId, deletingId, onSelect, confirm, projectSwitcherHints, coverUrls],
   );
 
   const keyExtractor = useCallback((p: ProjectRow) => p.id, []);
@@ -100,6 +150,8 @@ export const ProjectSwitcher = memo(function ProjectSwitcher({
 const ProjectCard = memo(
   ({
     project: p,
+    hint,
+    coverUrl,
     isActive,
     isDeleting,
     onSelect,
@@ -108,6 +160,8 @@ const ProjectCard = memo(
     confirm,
   }: {
     project: ProjectRow;
+    hint?: { coverStoragePath: string | null; documentCount: number };
+    coverUrl: string | null;
     isActive: boolean;
     isDeleting: boolean;
     onSelect: (id: string) => void;
@@ -115,6 +169,8 @@ const ProjectCard = memo(
     isAnyDeleting: boolean;
     confirm: (options: ConfirmOptions) => void;
   }) => {
+    const docCount = hint?.documentCount ?? 0;
+
     return (
       <TouchableOpacity
         testID={`project-card-${p.name}`}
@@ -158,42 +214,67 @@ const ProjectCard = memo(
           intensity={isActive ? 0 : 8}
           style={[styles.card, isActive && styles.activeCard]}
         >
-          <MotiView
-            from={{ scale: 1 }}
-            animate={{ scale: isActive ? 1.1 : 1 }}
-            transition={{
-              type: "spring",
-              damping: 10,
-              loop: isActive ? true : false,
-            }}
-            style={[
-              styles.iconContainer,
-              isActive && styles.activeIconContainer,
-            ]}
-          >
-            <ProjectIcon name={p.name} size={14} />
-          </MotiView>
-          <View style={styles.textContainer}>
-            <Text
-              style={[styles.name, isActive && styles.activeName]}
-              numberOfLines={1}
+          <View style={styles.cardRow}>
+            <View
+              style={[styles.thumbWrap, isActive && styles.thumbWrapActive]}
             >
-              {p.name}
-            </Text>
-            <Text
-              style={[styles.metaText, isActive && styles.activeMetaText]}
-              numberOfLines={1}
-            >
-              {p.created_at
-                ? new Date(p.created_at).toLocaleDateString(undefined, {
-                    month: "short",
-                    year: "numeric",
-                  })
-                : ""}
-              {p.estimated_min_total
-                ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
-                : " • Planning"}
-            </Text>
+              {coverUrl ? (
+                <Image
+                  source={{ uri: coverUrl }}
+                  style={styles.thumbImage}
+                  contentFit="cover"
+                  transition={180}
+                  accessibilityIgnoresInvertColors
+                />
+              ) : (
+                <View style={styles.thumbPlaceholder}>
+                  <ProjectIcon name={p.name} size={20} />
+                </View>
+              )}
+            </View>
+            <View style={styles.textColumn}>
+              <Text
+                style={[styles.name, isActive && styles.activeName]}
+                numberOfLines={2}
+              >
+                {p.name}
+              </Text>
+              <Text
+                style={[styles.metaText, isActive && styles.activeMetaText]}
+                numberOfLines={1}
+              >
+                {p.created_at
+                  ? new Date(p.created_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : ""}
+                {p.estimated_min_total
+                  ? ` • $${Math.round(p.estimated_min_total / 1000)}k`
+                  : " • Planning"}
+              </Text>
+              {docCount > 0 ? (
+                <View style={styles.docRow}>
+                  <FileText
+                    size={11}
+                    color={
+                      isActive
+                        ? "rgba(13, 148, 136, 0.85)"
+                        : Theme.colors.text.secondary
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.docRowText,
+                      isActive && styles.docRowTextActive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {docCount} ledger doc{docCount === 1 ? "" : "s"}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
         </GlassCard>
       </TouchableOpacity>
@@ -220,16 +301,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardWrapper: {
-    width: 160,
+    width: 208,
   },
   addCardWrapper: {
     width: 80,
   },
   card: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Theme.colors.divider,
@@ -239,10 +318,77 @@ const styles = StyleSheet.create({
     borderColor: "rgba(13, 148, 136, 0.2)",
   },
   addCard: {
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
+    minHeight: 86,
+    padding: 16,
     backgroundColor: "rgba(0, 0, 0, 0.02)",
     borderStyle: "dashed",
     borderColor: Theme.colors.divider,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  thumbWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: Theme.colors.inputBg,
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.06)",
+  },
+  thumbWrapActive: {
+    borderColor: "rgba(13, 148, 136, 0.35)",
+  },
+  thumbImage: {
+    width: "100%",
+    height: "100%",
+  },
+  thumbPlaceholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textColumn: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "center",
+    gap: 2,
+  },
+  name: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.text.primary,
+  },
+  activeName: {
+    color: Theme.colors.brand.primary,
+  },
+  metaText: {
+    fontSize: 11,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.text.secondary,
+  },
+  activeMetaText: {
+    color: "rgba(13, 148, 136, 0.6)",
+  },
+  docRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  docRowText: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.semibold,
+    color: Theme.colors.text.secondary,
+    flex: 1,
+  },
+  docRowTextActive: {
+    color: "rgba(13, 148, 136, 0.85)",
   },
   iconContainer: {
     width: 24,
@@ -252,37 +398,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  activeIconContainer: {
-    backgroundColor: "rgba(13, 148, 136, 0.15)",
-  },
-  name: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.primary,
-  },
-  activeName: {
-    color: Theme.colors.brand.primary,
-  },
-  textContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  metaText: {
-    fontSize: 12,
-    fontFamily: Theme.typography.family.medium,
-    color: Theme.colors.text.secondary,
-    marginTop: 2,
-  },
-  activeMetaText: {
-    color: "rgba(13, 148, 136, 0.6)",
-  },
   addIconContainer: {
     backgroundColor: Theme.colors.brand.primary,
-  },
-  addText: {
-    fontSize: 14,
-    fontFamily: Theme.typography.family.bold,
-    color: Theme.colors.text.secondary,
   },
 });

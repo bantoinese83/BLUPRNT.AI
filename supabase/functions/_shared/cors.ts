@@ -105,10 +105,12 @@ export function jsonResponse(
   status: number,
   req: Request,
   retryAfter?: number,
+  extraHeaders?: Record<string, string>,
 ): Response {
   const headers: Record<string, string> = {
     ...getCorsHeaders(req),
     "Content-Type": "application/json",
+    ...extraHeaders,
   };
   if (retryAfter != null && status === 429) {
     headers["Retry-After"] = String(retryAfter);

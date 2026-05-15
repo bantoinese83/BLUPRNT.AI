@@ -8,6 +8,14 @@ import type {
 
 import type { ReconciliationResult } from "../lib/reconciliation.ts";
 
+/** Per-project visuals for the horizontal project switcher (cover path + ledger size). */
+export type ProjectSwitcherHint = {
+  coverStoragePath: string | null;
+  documentCount: number;
+};
+
+export type ProjectSwitcherHints = Record<string, ProjectSwitcherHint>;
+
 /** Dashboard bundle used by web and mobile data layers. */
 export type DashboardSnapshot = {
   configured: boolean;
@@ -25,4 +33,6 @@ export type DashboardSnapshot = {
   hasProjectPass: boolean;
   galleryItems: GalleryItemRow[];
   lastProjectId: string | null;
+  /** Keys are `project_id`; used by mobile project cards (thumbnails, doc counts). */
+  projectSwitcherHints: ProjectSwitcherHints;
 };

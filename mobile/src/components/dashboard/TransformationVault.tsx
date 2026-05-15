@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ScrollView,
   Dimensions,
-  type NativeSyntheticEvent,
-  type NativeScrollEvent,
 } from "react-native";
-import { MotiView } from "moti";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import { Plus, ChevronLeft, ChevronRight, Camera } from "lucide-react-native";
@@ -20,12 +16,14 @@ import { useAwareness } from "@/contexts/AwarenessContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { PhotoSlot } from "./PhotoSlot";
 import { useTransformationVaultLogic } from "@shared/hooks/use-transformation-vault";
-import { UI_CONSTANTS } from "@shared/constants/ui";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 import { TRANSFORMATION_VAULT_COPY } from "@shared/copy/dashboard";
 import { showAppToast } from "@/lib/app-toast";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+/** Space between Before and After cards (split across column margins). */
+const COMPARE_GUTTER = 16;
+const COMPARE_SLOT_SIZE = Math.floor((SCREEN_WIDTH - 32 - COMPARE_GUTTER) / 2);
 
 type TransformationVaultProps = {
   projectId: string;
@@ -38,10 +36,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [activeSetIndex, setActiveSetIndex] = useState(0);
-  const [beforeAfterPage, setBeforeAfterPage] = useState(0);
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
-  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const compareScrollRef = useRef<ScrollView>(null);
 
   const { sets, signedUrls, signedUrlsError, refreshSignedUrls } =
     useTransformationVaultLogic(projectId, galleryItems, supabase);
@@ -49,7 +43,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   // Clear local UI state when switching projects
   useEffect(() => {
     setActiveSetIndex(0);
-    setBeforeAfterPage(0);
   }, [projectId]);
 
   useEffect(() => {
@@ -57,44 +50,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
       setActiveSetIndex(Math.max(0, sets.length - 1));
     }
   }, [sets.length, activeSetIndex]);
-
-  // New angle: start on Before; horizontal scroll reset
-  useEffect(() => {
-    setBeforeAfterPage(0);
-    compareScrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [activeSetIndex]);
-
-  const goToComparePage = useCallback((page: 0 | 1) => {
-    setBeforeAfterPage(page);
-    compareScrollRef.current?.scrollTo({
-      x: page * SCREEN_WIDTH,
-      animated: true,
-    });
-  }, []);
-
-  const onCompareScrollEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const x = e.nativeEvent.contentOffset.x;
-      const page = Math.min(1, Math.max(0, Math.round(x / SCREEN_WIDTH))) as
-        | 0
-        | 1;
-      if (page !== beforeAfterPage) {
-        void Haptics.selectionAsync();
-      }
-      setBeforeAfterPage(page);
-    },
-    [beforeAfterPage],
-  );
-
-  useEffect(() => {
-    hintTimerRef.current = setTimeout(
-      () => setShowSwipeHint(false),
-      UI_CONSTANTS.SWIPE_HINT_DURATION_MS,
-    );
-    return () => {
-      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
-    };
-  }, []);
 
   const handlePickPhoto = async (type: "before" | "after", index: number) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -206,10 +161,6 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
   const afterSlotResolving = Boolean(afterPending && !signedUrlsError);
   const beforeSlotFailed = Boolean(beforePending && signedUrlsError);
   const afterSlotFailed = Boolean(afterPending && signedUrlsError);
-  const compareSide: "before" | "after" =
-    beforeAfterPage === 0 ? "before" : "after";
-  const canReplaceActive =
-    compareSide === "before" ? hasBeforePhoto : hasAfterPhoto;
 
   return (
     <View style={styles.container}>
@@ -223,7 +174,7 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
             {TRANSFORMATION_VAULT_COPY.strap}
             {" · "}
             Angle {activeSetIndex + 1} of {sets.length}
-            {sets.length > 1 ? " · Swipe or use tabs" : ""}
+            {sets.length > 1 ? " · Use arrows for another angle" : ""}
           </Text>
         </View>
         <View style={styles.navControls}>
@@ -290,56 +241,15 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
         </View>
       ) : null}
 
-      <View style={styles.segmentWrap}>
-        <TouchableOpacity
+      <View style={styles.compareRow}>
+        <View
           style={[
-            styles.segmentBtn,
-            beforeAfterPage === 0 && styles.segmentBtnActive,
+            styles.compareCol,
+            styles.compareColBefore,
+            { width: COMPARE_SLOT_SIZE },
           ]}
-          onPress={() => goToComparePage(0)}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: beforeAfterPage === 0 }}
         >
-          <Text
-            style={[
-              styles.segmentLabel,
-              beforeAfterPage === 0 && styles.segmentLabelActive,
-            ]}
-          >
-            Before
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.segmentBtn,
-            beforeAfterPage === 1 && styles.segmentBtnActive,
-          ]}
-          onPress={() => goToComparePage(1)}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: beforeAfterPage === 1 }}
-        >
-          <Text
-            style={[
-              styles.segmentLabel,
-              beforeAfterPage === 1 && styles.segmentLabelActive,
-            ]}
-          >
-            After
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        ref={compareScrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        decelerationRate="fast"
-        onMomentumScrollEnd={onCompareScrollEnd}
-        contentContainerStyle={styles.swipeContainer}
-      >
-        <View style={styles.swipeCard}>
+          <Text style={styles.compareColLabel}>Before</Text>
           <PhotoSlot
             item={activeSet.before}
             signedUrl={beforeUrl}
@@ -351,10 +261,20 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
             onClear={handleClear}
             onUpdateCaption={handleUpdateCaption}
             hideChangeOverlay={hasBeforePhoto}
+            slotSize={COMPARE_SLOT_SIZE}
+            imageContentFit="contain"
           />
         </View>
-
-        <View style={styles.swipeCard}>
+        <View
+          style={[
+            styles.compareCol,
+            styles.compareColAfter,
+            { width: COMPARE_SLOT_SIZE },
+          ]}
+        >
+          <Text style={[styles.compareColLabel, styles.compareColLabelAfter]}>
+            After
+          </Text>
           <PhotoSlot
             item={activeSet.after}
             signedUrl={afterUrl}
@@ -366,42 +286,42 @@ export function TransformationVault({ projectId }: TransformationVaultProps) {
             onClear={handleClear}
             onUpdateCaption={handleUpdateCaption}
             hideChangeOverlay={hasAfterPhoto}
+            slotSize={COMPARE_SLOT_SIZE}
+            imageContentFit="contain"
           />
         </View>
-      </ScrollView>
+      </View>
 
-      {showSwipeHint && (
-        <MotiView
-          from={{ opacity: 0, translateY: 4 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          exit={{ opacity: 0, translateY: -4 }}
-          transition={{ type: "timing", duration: 400 }}
-          style={styles.swipeHint}
-        >
-          <Text style={styles.swipeHintText}>Swipe on the photo</Text>
-          <Text style={styles.swipeHintMid}>·</Text>
-          <Text style={styles.swipeHintText}>or tap Before / After</Text>
-        </MotiView>
+      {(hasBeforePhoto || hasAfterPhoto) && (
+        <View style={styles.replaceRow}>
+          {hasBeforePhoto ? (
+            <TouchableOpacity
+              style={styles.replaceLinkHalf}
+              onPress={() => void handlePickPhoto("before", activeSetIndex)}
+              disabled={Boolean(uploading)}
+              accessibilityLabel="Replace before photo"
+            >
+              <Camera size={14} color={Theme.colors.brand.primary} />
+              <Text style={styles.replaceLinkText}>Replace before</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.replaceLinkSpacer} />
+          )}
+          {hasAfterPhoto ? (
+            <TouchableOpacity
+              style={styles.replaceLinkHalf}
+              onPress={() => void handlePickPhoto("after", activeSetIndex)}
+              disabled={Boolean(uploading)}
+              accessibilityLabel="Replace after photo"
+            >
+              <Camera size={14} color={Theme.colors.brand.primary} />
+              <Text style={styles.replaceLinkText}>Replace after</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.replaceLinkSpacer} />
+          )}
+        </View>
       )}
-
-      {canReplaceActive ? (
-        <TouchableOpacity
-          style={styles.replaceLink}
-          onPress={() =>
-            void handlePickPhoto(
-              compareSide === "before" ? "before" : "after",
-              activeSetIndex,
-            )
-          }
-          disabled={Boolean(uploading)}
-          accessibilityLabel={`Replace ${compareSide} photo`}
-        >
-          <Camera size={14} color={Theme.colors.brand.primary} />
-          <Text style={styles.replaceLinkText}>
-            Replace {compareSide} photo
-          </Text>
-        </TouchableOpacity>
-      ) : null}
 
       <View style={styles.dotsContainer}>
         {sets.map((_, i) => (
@@ -526,78 +446,56 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.inputBg,
     borderColor: Theme.colors.divider,
   },
-  segmentWrap: {
+  compareRow: {
     flexDirection: "row",
     marginHorizontal: 16,
-    marginBottom: 12,
-    padding: 3,
-    borderRadius: 14,
-    backgroundColor: Theme.colors.inputBg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Theme.colors.border,
-  },
-  segmentBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center",
+    marginBottom: 4,
+    alignItems: "flex-start",
     justifyContent: "center",
-    borderRadius: 11,
   },
-  segmentBtnActive: {
-    backgroundColor: "#ffffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  segmentLabel: {
-    fontSize: 14,
-    fontFamily: Theme.typography.family.semibold,
-    color: Theme.colors.text.secondary,
-  },
-  segmentLabelActive: {
-    color: Theme.colors.brand.primary,
-  },
-  replaceLink: {
-    flexDirection: "row",
+  compareCol: {
     alignItems: "center",
-    justifyContent: "center",
     gap: 8,
-    marginTop: 4,
+  },
+  compareColBefore: {
+    marginRight: COMPARE_GUTTER / 2,
+  },
+  compareColAfter: {
+    marginLeft: COMPARE_GUTTER / 2,
+  },
+  compareColLabel: {
+    fontSize: 10,
+    fontFamily: Theme.typography.family.black,
+    color: Theme.colors.text.muted,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+  },
+  compareColLabelAfter: {
+    color: "rgba(13, 148, 136, 0.65)",
+  },
+  replaceRow: {
+    flexDirection: "row",
     marginHorizontal: 16,
+    marginTop: 8,
+    gap: 8,
+    alignItems: "stretch",
+  },
+  replaceLinkHalf: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
     paddingVertical: 10,
+    minHeight: 44,
+  },
+  replaceLinkSpacer: {
+    flex: 1,
   },
   replaceLinkText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.brand.primary,
-  },
-  swipeContainer: {
-    paddingHorizontal: 0,
-  },
-  swipeCard: {
-    width: SCREEN_WIDTH,
-    paddingHorizontal: 16,
-    alignItems: "center",
-  },
-  swipeHint: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: 6,
-    marginTop: 10,
-    paddingHorizontal: 20,
-  },
-  swipeHintText: {
-    fontSize: 11,
-    fontFamily: Theme.typography.family.medium,
-    color: Theme.colors.text.muted,
-  },
-  swipeHintMid: {
-    fontSize: 11,
-    color: Theme.colors.text.disabled,
   },
   dotsContainer: {
     flexDirection: "row",

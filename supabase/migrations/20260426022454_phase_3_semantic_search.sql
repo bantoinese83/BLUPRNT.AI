@@ -2,7 +2,6 @@
 
 -- 1. Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
-
 -- 2. Document Embeddings Table
 CREATE TABLE IF NOT EXISTS public.document_embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -12,10 +11,8 @@ CREATE TABLE IF NOT EXISTS public.document_embeddings (
   embedding vector(768) NOT NULL, -- Assuming Gemini models/text-embedding-004
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
 -- RLS for embeddings with robust join fallback
 ALTER TABLE public.document_embeddings ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Users can manage their own embeddings" ON public.document_embeddings;
 DROP POLICY IF EXISTS "embeddings_access_policy" ON public.document_embeddings;
 CREATE POLICY "embeddings_access_policy"
@@ -28,10 +25,8 @@ CREATE POLICY "embeddings_access_policy"
       WHERE p.id = project_id AND pr.owner_user_id = (SELECT auth.uid())
     )
   );
-
 -- 3. HNSW Index for Performance
 CREATE INDEX ON public.document_embeddings USING hnsw (embedding vector_cosine_ops);
-
 -- 4. Similarity Search Function
 CREATE OR REPLACE FUNCTION public.match_document_embeddings (
   query_embedding vector(768),

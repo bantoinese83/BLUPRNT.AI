@@ -118,9 +118,11 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
     fetchSignedUrls();
   }, [assets, signedUrls]);
 
-  const filteredAssets = assets.filter(
-    (a) => activeCategory === "all" || a.category === activeCategory,
-  );
+  const filteredAssets = React.useMemo(() => {
+    return assets.filter(
+      (a) => activeCategory === "all" || a.category === activeCategory,
+    );
+  }, [assets, activeCategory]);
 
   const handleDelete = useCallback(
     (id: string) => {

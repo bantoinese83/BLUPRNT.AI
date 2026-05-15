@@ -94,7 +94,7 @@ export const ActivityFeed = React.memo(function ActivityFeed({
 
               <View style={styles.eventContent}>
                 <TouchableOpacity
-                  activeOpacity={0.7}
+                  activeOpacity={0.78}
                   onPress={() => {
                     if (event.link) {
                       Haptics.selectionAsync();
@@ -113,9 +113,11 @@ export const ActivityFeed = React.memo(function ActivityFeed({
                         />
                       )}
                     </View>
-                    <Text style={styles.eventTime}>
-                      {formatRelativeTime(event.timestamp)}
-                    </Text>
+                    <View style={styles.timePill}>
+                      <Text style={styles.eventTime}>
+                        {formatRelativeTime(event.timestamp)}
+                      </Text>
+                    </View>
                   </View>
                   <Text style={styles.eventDescription}>
                     {event.description}
@@ -204,11 +206,20 @@ const styles = StyleSheet.create({
     fontFamily: Theme.typography.family.bold,
     color: Theme.colors.text.primary,
   },
+  timePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: "rgba(15, 23, 42, 0.04)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(15, 23, 42, 0.06)",
+  },
   eventTime: {
     fontSize: 10,
     fontFamily: Theme.typography.family.semibold,
     color: Theme.colors.text.secondary,
     textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   eventDescription: {
     fontSize: 12,

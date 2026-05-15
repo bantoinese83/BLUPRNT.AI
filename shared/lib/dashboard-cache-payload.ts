@@ -5,6 +5,7 @@ import type {
   UserSubscriptionRow,
   GalleryItemRow,
 } from "../types/database.ts";
+import type { ProjectSwitcherHints } from "../types/dashboard-snapshot.ts";
 
 /** Shape stored in sessionStorage (web) / AsyncStorage (mobile) after a successful dashboard load. */
 export type CachedDashboardPayload = {
@@ -18,6 +19,7 @@ export type CachedDashboardPayload = {
   hasProjectPass: boolean;
   galleryItems?: GalleryItemRow[];
   reconciliation: import("../lib/reconciliation").ReconciliationResult | null;
+  projectSwitcherHints?: ProjectSwitcherHints;
 };
 
 export function parseCachedDashboardPayload(
@@ -44,6 +46,12 @@ export function parseCachedDashboardPayload(
       isArchitect: Boolean(o.isArchitect),
       subscription: o.subscription ?? null,
       hasProjectPass: Boolean(o.hasProjectPass),
+      projectSwitcherHints:
+        o.projectSwitcherHints &&
+        typeof o.projectSwitcherHints === "object" &&
+        !Array.isArray(o.projectSwitcherHints)
+          ? (o.projectSwitcherHints as ProjectSwitcherHints)
+          : undefined,
     };
   } catch {
     return null;

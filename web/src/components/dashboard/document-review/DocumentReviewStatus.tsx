@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
+import { FileSearch, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LedgerDocumentType } from "@shared/lib/infer-document-type";
 
@@ -37,7 +37,7 @@ export function DocumentReviewStatus({
           </span>
         ) : (
           <span className="flex items-center gap-2 text-slate-500 italic">
-            <Sparkles className="w-4 h-4 text-teal-500 animate-pulse" />
+            <FileSearch className="w-4 h-4 text-teal-500 animate-pulse" />
             AI Extracting...
           </span>
         )}
@@ -91,7 +91,7 @@ export function DocumentReviewStatus({
                   : "flex items-start gap-2 px-3 py-2 rounded-xl bg-teal-50/50 border border-teal-100/50"
               }
             >
-              <Sparkles
+              <BrainCircuit
                 className={
                   extractionFailed
                     ? "w-4 h-4 text-amber-700 mt-0.5 shrink-0"

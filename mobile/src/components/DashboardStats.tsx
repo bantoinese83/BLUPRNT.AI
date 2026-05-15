@@ -65,9 +65,14 @@ function StatItem({
 }) {
   return (
     <MotiView
-      from={{ opacity: 0, scale: 0.9, translateY: 10 }}
+      from={{ opacity: 0, scale: 0.85, translateY: 20 }}
       animate={{ opacity: 1, scale: 1, translateY: 0 }}
-      transition={{ type: "timing", duration: 600, delay }}
+      transition={{
+        type: "spring",
+        damping: 20,
+        stiffness: 120,
+        delay,
+      }}
       style={styles.cardWrapper}
     >
       <GlassCard style={styles.card}>

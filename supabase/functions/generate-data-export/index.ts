@@ -1,6 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { zipSync } from "fflate";
-import { handleOptions, jsonResponse } from "../_shared/cors.ts";
+import { getCorsHeaders, handleOptions, jsonResponse } from "../_shared/cors.ts";
 import { getServiceClient, getUserIdFromRequest } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 
@@ -125,7 +125,7 @@ export const handler = async (req: Request): Promise<Response> => {
     return new Response(zipped, {
       status: 200,
       headers: {
-        ...handleOptions(req)?.headers,
+        ...getCorsHeaders(req),
         "Content-Type": "application/zip",
         "Content-Disposition": `attachment; filename="bluprnt-export-${new Date().toISOString().slice(0, 10)}.zip"`,
       },

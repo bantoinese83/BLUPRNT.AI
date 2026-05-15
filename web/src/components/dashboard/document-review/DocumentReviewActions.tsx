@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, Trash2, Sparkles } from "lucide-react";
+import { Loader2, Trash2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DocumentReviewActionsProps {
@@ -53,7 +53,7 @@ export function DocumentReviewActions({
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {isUnverified ? (
             <>
-              <Sparkles className="w-4 h-4 animate-pulse" />
+              <ShieldCheck className="w-4 h-4 animate-pulse" />
               <span className="flex items-center gap-1.5">
                 Verify & Save
                 <kbd className="hidden sm:inline-block text-[10px] font-black bg-amber-800/20 px-1 rounded ml-1">

@@ -98,6 +98,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
         <View style={{ marginTop: 4, marginBottom: 16 }}>
           <ProjectSwitcher
             projects={vm.projects}
+            projectSwitcherHints={vm.projectSwitcherHints}
             currentId={id ?? ""}
             onSelect={(newId) => {
               vm.handleProjectSelect(newId);

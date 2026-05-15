@@ -2,18 +2,27 @@ import { assertEquals } from "std/assert";
 import { handler } from "./index.ts";
 import { mockFetch, setupTestEnv } from "../_shared/test-utils.ts";
 
-Deno.test("send-email - returns 401 when no session", async () => {
-  const payload = { subject: "Test", html: "<p>Hello</p>" };
-  // Mocking the request object as a plain object since Request methods are failing in this env
-  const req = {
-    method: "POST",
-    headers: new Headers({ "Authorization": "Bearer invalid" }),
-    clone: function() { return this; },
-    json: async () => payload,
-  } as unknown as Request;
+Deno.test({
+  name: "send-email - returns 401 when no session",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
+    setupTestEnv();
+    Deno.env.set("UPSTASH_REDIS_REST_URL", "");
+    Deno.env.set("UPSTASH_REDIS_REST_TOKEN", "");
 
-  const res = await handler(req, payload);
-  assertEquals(res.status, 401);
+    const payload = { subject: "Test", html: "<p>Hello</p>" };
+    // Mocking the request object as a plain object since Request methods are failing in this env
+    const req = {
+      method: "POST",
+      headers: new Headers({ "Authorization": "Bearer invalid" }),
+      clone: function() { return this; },
+      json: async () => payload,
+    } as unknown as Request;
+
+    const res = await handler(req, payload);
+    assertEquals(res.status, 401);
+  },
 });
 
 Deno.test({
@@ -23,6 +32,8 @@ Deno.test({
   fn: async () => {
     setupTestEnv();
     Deno.env.set("BREVO_API_KEY", "test-key");
+    Deno.env.set("UPSTASH_REDIS_REST_URL", "");
+    Deno.env.set("UPSTASH_REDIS_REST_TOKEN", "");
 
     const mockUser = {
       id: "u1",

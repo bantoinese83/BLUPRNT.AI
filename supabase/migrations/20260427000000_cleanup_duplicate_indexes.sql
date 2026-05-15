@@ -13,7 +13,6 @@ DROP INDEX IF EXISTS public.idx_projects_property;
 DROP INDEX IF EXISTS public.idx_properties_owner;
 DROP INDEX IF EXISTS public.idx_scope_items_project;
 DROP INDEX IF EXISTS public.idx_seller_packets_project;
-
 -- Ensure the primary indexes exist (they are defined in previous migrations, 
 -- but this migration serves as the final source of truth for these names).
 CREATE INDEX IF NOT EXISTS idx_documents_project_id ON public.documents(project_id);

@@ -89,7 +89,7 @@ Deno.test("calculateLedgerEntryTotals - handles non-invoice documents as $0", ()
   assertEquals(result.total, 0);
 });
 
-Deno.test("calculateLedgerEntryTotals - defaults to $1850 for invoices with no data", () => {
+Deno.test("calculateLedgerEntryTotals - defaults to $1850 for ledger records with no data", () => {
   const result = calculateLedgerEntryTotals({ type: "invoice" });
   assertEquals(result.subtotal, 1850);
   assertEquals(result.total, 1998); // 1850 + 148

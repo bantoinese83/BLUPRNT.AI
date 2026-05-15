@@ -13,6 +13,7 @@ import { ProjectHealth } from "@/components/ProjectHealth";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ResaleValueImpact } from "@/components/ResaleValueImpact";
 import { ProjectSwitcher } from "@/components/ProjectSwitcher";
+import { ProductionReadinessCard } from "@/components/ProductionReadinessCard";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { generateActivityEvents } from "@/lib/activity";
@@ -55,6 +56,7 @@ export default function DashboardScreen() {
     clearLoadError,
     configurationMissing,
     projects,
+    projectSwitcherHints,
     project,
     ledgerEntries,
     scopeItems,
@@ -237,6 +239,7 @@ export default function DashboardScreen() {
       />
 
       <DashboardWelcomeBanner
+        hasDocuments={ledgerEntries.length > 0}
         onAction={(id) => {
           if (id === "upload") openDashboardDocumentCapture();
           if (id === "scope") router.push(`/project/${project.id}`);
@@ -247,6 +250,7 @@ export default function DashboardScreen() {
       <View style={{ marginTop: 4, marginBottom: 8 }}>
         <ProjectSwitcher
           projects={projects}
+          projectSwitcherHints={projectSwitcherHints}
           currentId={project.id}
           onSelect={handleProjectSelect}
           onAdd={() => router.push("/onboarding?newProject=1")}
@@ -255,6 +259,7 @@ export default function DashboardScreen() {
 
       <DashboardGuidedPath
         stage={project.stage}
+        ledgerEntries={ledgerEntries}
         onAction={(id) => {
           if (id === "review-health") {
             router.push(`/project/${project.id}`);
@@ -282,6 +287,15 @@ export default function DashboardScreen() {
         invoiceTotal={capitalDocumentedTotal}
         ledgerEntries={ledgerEntries as LedgerEntryRow[]}
         projectId={project.id}
+      />
+
+      <ProductionReadinessCard
+        documentCount={ledgerEntries.length}
+        hasQuotes={ledgerEntries.some((e) => e.document_type === "quote")}
+        hasInvoices={ledgerEntries.some((e) => e.document_type === "invoice")}
+        onPressAudit={() => {
+          setIsInsightsOpen(true);
+        }}
       />
 
       <View style={{ gap: 24, marginTop: 24 }}>

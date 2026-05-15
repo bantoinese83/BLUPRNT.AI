@@ -28,6 +28,8 @@ const SUMMARY_DRIFT_TOLERANCE = 0.05;
 
 // ─── ZIP → Region / City ──────────────────────────────────────────────────────
 
+const ZIP_CACHE = new Map<string, string>();
+
 const ZIP_REGION_RANGES: ReadonlyArray<{
   min: number;
   max: number;
@@ -53,50 +55,63 @@ const ZIP_REGION_RANGES: ReadonlyArray<{
 export function cityFromZip(zip: string): string {
   const z = zip.replace(/\D/g, "").slice(0, 5);
   if (z.length !== 5) return "your area";
+
+  // Check cache first
+  const cached = ZIP_CACHE.get(z);
+  if (cached) return cached;
+
   const prefix = parseInt(z.slice(0, 3), 10);
   if (Number.isNaN(prefix)) return "your area";
 
+  let result = "your area";
+
   // ── Detailed Metro-Prefix Mapping (ordered: most-specific first) ──────────
   // DC must come before the broader Mid-Atlantic range (200–299).
-  if (prefix >= 200 && prefix <= 201) return "Washington DC area";
+  if (prefix >= 200 && prefix <= 201) result = "Washington DC area";
   // Boston uses a 3-digit prefix; 021–022 maps cleanly.
-  if (prefix >= 21 && prefix <= 22) return "Boston area";
+  else if (prefix >= 21 && prefix <= 22) result = "Boston area";
 
-  if (prefix >= 100 && prefix <= 119) return "NYC Metro area";
-  if (prefix >= 202 && prefix <= 212) return "Chicago area"; // avoids DC collision
-  if (prefix >= 900 && prefix <= 918) return "Los Angeles area";
-  if (prefix >= 770 && prefix <= 775) return "Houston area";
-  if (prefix >= 190 && prefix <= 191) return "Philadelphia area";
-  if (prefix >= 850 && prefix <= 853) return "Phoenix area";
-  if (prefix >= 780 && prefix <= 782) return "San Antonio area";
-  if (prefix >= 920 && prefix <= 921) return "San Diego area";
-  if (prefix >= 750 && prefix <= 753) return "Dallas/Fort Worth area";
-  if (prefix >= 940 && prefix <= 951) return "SF Bay Area";
-  if (prefix >= 320 && prefix <= 333) return "Florida East Coast";
-  if (prefix >= 300 && prefix <= 303) return "Atlanta area";
-  if (prefix >= 480 && prefix <= 483) return "Detroit area";
-  if (prefix >= 980 && prefix <= 981) return "Seattle area";
-  if (prefix >= 550 && prefix <= 555) return "Minneapolis/St Paul";
-  if (prefix >= 800 && prefix <= 802) return "Denver area";
-  if (prefix >= 275 && prefix <= 277) return "Research Triangle (NC)";
-  if (prefix >= 370 && prefix <= 372) return "Nashville area";
-  if (prefix >= 890 && prefix <= 891) return "Las Vegas area";
-  if (prefix >= 430 && prefix <= 432) return "Columbus area";
-  if (prefix >= 460 && prefix <= 462) return "Indianapolis area";
-  if (prefix >= 530 && prefix <= 532) return "Milwaukee area";
-  if (prefix >= 630 && prefix <= 631) return "St. Louis area";
-  if (prefix >= 327 && prefix <= 328) return "Orlando area";
-  if (prefix >= 970 && prefix <= 972) return "Portland area";
-  if (prefix >= 730 && prefix <= 731) return "Oklahoma City area";
-  if (prefix >= 840 && prefix <= 841) return "Salt Lake City area";
-  if (prefix >= 600 && prefix <= 606) return "Chicago North Suburban";
-  if (prefix >= 926 && prefix <= 928) return "Orange County area";
-  if (prefix >= 335 && prefix <= 337) return "Tampa Bay area";
+  else if (prefix >= 100 && prefix <= 119) result = "NYC Metro area";
+  else if (prefix >= 202 && prefix <= 212) result = "Chicago area"; // avoids DC collision
+  else if (prefix >= 900 && prefix <= 918) result = "Los Angeles area";
+  else if (prefix >= 770 && prefix <= 775) result = "Houston area";
+  else if (prefix >= 190 && prefix <= 191) result = "Philadelphia area";
+  else if (prefix >= 850 && prefix <= 853) result = "Phoenix area";
+  else if (prefix >= 780 && prefix <= 782) result = "San Antonio area";
+  else if (prefix >= 920 && prefix <= 921) result = "San Diego area";
+  else if (prefix >= 750 && prefix <= 753) result = "Dallas/Fort Worth area";
+  else if (prefix >= 940 && prefix <= 951) result = "SF Bay Area";
+  else if (prefix >= 320 && prefix <= 333) result = "Florida East Coast";
+  else if (prefix >= 300 && prefix <= 303) result = "Atlanta area";
+  else if (prefix >= 480 && prefix <= 483) result = "Detroit area";
+  else if (prefix >= 980 && prefix <= 981) result = "Seattle area";
+  else if (prefix >= 550 && prefix <= 555) result = "Minneapolis/St Paul";
+  else if (prefix >= 800 && prefix <= 802) result = "Denver area";
+  else if (prefix >= 275 && prefix <= 277) result = "Research Triangle (NC)";
+  else if (prefix >= 370 && prefix <= 372) result = "Nashville area";
+  else if (prefix >= 890 && prefix <= 891) result = "Las Vegas area";
+  else if (prefix >= 430 && prefix <= 432) result = "Columbus area";
+  else if (prefix >= 460 && prefix <= 462) result = "Indianapolis area";
+  else if (prefix >= 530 && prefix <= 532) result = "Milwaukee area";
+  else if (prefix >= 630 && prefix <= 631) result = "St. Louis area";
+  else if (prefix >= 327 && prefix <= 328) result = "Orlando area";
+  else if (prefix >= 970 && prefix <= 972) result = "Portland area";
+  else if (prefix >= 730 && prefix <= 731) result = "Oklahoma City area";
+  else if (prefix >= 840 && prefix <= 841) result = "Salt Lake City area";
+  else if (prefix >= 600 && prefix <= 606) result = "Chicago North Suburban";
+  else if (prefix >= 926 && prefix <= 928) result = "Orange County area";
+  else if (prefix >= 335 && prefix <= 337) result = "Tampa Bay area";
+  else {
+    const region = ZIP_REGION_RANGES.find(
+      (r) => prefix >= r.min && prefix <= r.max,
+    );
+    if (region) result = region.label;
+  }
 
-  const region = ZIP_REGION_RANGES.find(
-    (r) => prefix >= r.min && prefix <= r.max,
-  );
-  return region ? region.label : "your area";
+  if (result !== "your area") {
+    ZIP_CACHE.set(z, result);
+  }
+  return result;
 }
 
 /**
@@ -108,22 +123,39 @@ export async function cityFromZipUniversal(zip: string): Promise<string> {
   const z = zip.replace(/\D/g, "").slice(0, 5);
   if (z.length !== 5) return "your area";
 
+  // Check cache first
+  const cached = ZIP_CACHE.get(z);
+  if (cached) return cached;
+
   try {
     const res = await fetch(`https://api.zippopotam.us/us/${z}`, {
       headers: { Accept: "application/json" },
     });
-    if (!res.ok) return cityFromZip(z);
+    if (!res.ok) {
+      const fallback = cityFromZip(z);
+      if (fallback !== "your area") ZIP_CACHE.set(z, fallback);
+      return fallback;
+    }
     const data = (await res.json()) as {
       places?: Array<{ "place name"?: string; "state abbreviation"?: string }>;
     };
     const place = data.places?.[0];
     const city = place?.["place name"]?.trim();
     const state = place?.["state abbreviation"]?.trim();
-    if (city && state) return `${city}, ${state} area`;
-    if (city) return `${city} area`;
-    return cityFromZip(z);
+    
+    let result = "your area";
+    if (city && state) result = `${city}, ${state} area`;
+    else if (city) result = `${city} area`;
+    else result = cityFromZip(z);
+
+    if (result !== "your area") {
+      ZIP_CACHE.set(z, result);
+    }
+    return result;
   } catch {
-    return cityFromZip(z);
+    const fallback = cityFromZip(z);
+    if (fallback !== "your area") ZIP_CACHE.set(z, fallback);
+    return fallback;
   }
 }
 

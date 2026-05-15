@@ -11,12 +11,15 @@ import {
   FileText,
   Hammer,
   Share2,
+  TrendingUp,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react-native";
 import { MotiView } from "moti";
 import * as Haptics from "expo-haptics";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
+import type { LedgerEntryRow } from "@shared/types/database";
 
 type Step = {
   id: string;
@@ -27,11 +30,23 @@ type Step = {
 
 interface Props {
   stage: string;
+  ledgerEntries?: LedgerEntryRow[];
   onAction: (id: string) => void;
 }
 
-export function NextStepsChecklist({ stage, onAction }: Props) {
+export function NextStepsChecklist({
+  stage,
+  ledgerEntries = [],
+  onAction,
+}: Props) {
   const steps: Step[] = [];
+
+  const hasQuotes = ledgerEntries.some(
+    (e: LedgerEntryRow) => e.document_type === "quote",
+  );
+  const hasInvoices = ledgerEntries.some(
+    (e: LedgerEntryRow) => e.document_type === "invoice",
+  );
 
   if (stage === "planning") {
     steps.push(
@@ -43,9 +58,11 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
       },
       {
         id: "upload-quote",
-        label: "Upload first quote",
-        description: "Snap a photo of a contractor bid to compare.",
-        icon: Hammer,
+        label: hasQuotes ? "Compare second bid" : "Upload first quote",
+        description: hasQuotes
+          ? "Better data means better leverage. Snap another quote."
+          : "Snap a photo of a contractor bid to compare.",
+        icon: hasQuotes ? TrendingUp : Hammer,
       },
       {
         id: "export-packet",
@@ -59,9 +76,11 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
     steps.push(
       {
         id: "upload-document",
-        label: "Add a ledger entry",
-        description: "Start building your property ledger.",
-        icon: FileText,
+        label: hasInvoices ? "Verify another invoice" : "Add a ledger entry",
+        description: hasInvoices
+          ? "Keep your property's value documentation growing."
+          : "Start building your property ledger.",
+        icon: hasInvoices ? ShieldCheck : FileText,
       },
       {
         id: "review-health",
@@ -94,6 +113,9 @@ export function NextStepsChecklist({ stage, onAction }: Props) {
           style={styles.stepWrapper}
         >
           <TouchableOpacity
+            activeOpacity={0.88}
+            accessibilityRole="button"
+            accessibilityLabel={step.label}
             onPress={() => {
               Haptics.selectionAsync();
               onAction(step.id);

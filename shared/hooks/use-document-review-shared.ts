@@ -347,6 +347,7 @@ export function useDocumentReviewShared(
       if (error) throw error;
 
       adapter.showToast("Document deleted.", "success");
+      adapter.onSaved?.(projectId);
       adapter.onClose?.();
       return true;
     } catch (err) {
@@ -356,7 +357,7 @@ export function useDocumentReviewShared(
     } finally {
       setDeleting(false);
     }
-  }, [document, adapter]);
+  }, [document, adapter, projectId]);
 
   const reviewDates: Record<LedgerReviewDateFieldKey, string> = useMemo(
     () => ({

@@ -111,10 +111,10 @@ export function ActivityFeed({ events, className }: ActivityFeedProps) {
 
               <div className="flex-1 pt-1 space-y-1">
                 <div className="flex items-center justify-between gap-2">
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-slate-950 transition-colors">
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-slate-950 transition-colors min-w-0">
                     {event.title}
                   </h4>
-                  <span className="text-[10px] font-bold text-slate-400 tabular-nums uppercase tracking-wider">
+                  <span className="shrink-0 inline-flex items-center rounded-md border border-slate-200/80 bg-slate-100/70 px-2 py-0.5 text-[10px] font-semibold text-slate-500 tabular-nums uppercase tracking-wide">
                     {formatDistanceToNow(new Date(event.timestamp), {
                       addSuffix: true,
                     })}

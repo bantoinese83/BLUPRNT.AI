@@ -1,15 +1,21 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { X, Upload, FileDown, Share2, ListTree } from "lucide-react";
+import { X, Upload, FileDown, ListTree } from "lucide-react";
 import {
   clearDashboardWelcomeFlag,
   readDashboardWelcomeFlag,
 } from "@/lib/dashboard-welcome";
-import { Highlighter } from "@/components/ui/Highlighter";
-import { ROUGH_NOTATION } from "@shared/constants/visualization";
 
-export function DashboardWelcomeBanner() {
-  const navigate = useNavigate();
+export type DashboardWelcomeBannerAction = "upload" | "scope" | "export";
+
+type Props = {
+  hasDocuments?: boolean;
+  onAction: (id: DashboardWelcomeBannerAction) => void;
+};
+
+export function DashboardWelcomeBanner({
+  hasDocuments = false,
+  onAction,
+}: Props) {
   const [visible, setVisible] = useState(readDashboardWelcomeFlag);
 
   function dismiss() {
@@ -19,6 +25,8 @@ export function DashboardWelcomeBanner() {
 
   if (!visible) return null;
 
+  const uploadLabel = hasDocuments ? "Add document" : "Upload invoice";
+
   return (
     <div
       role="region"
@@ -26,89 +34,88 @@ export function DashboardWelcomeBanner() {
       className="rounded-2xl border border-slate-200/80 bg-linear-to-r from-slate-50 to-slate-100/80 p-5 sm:p-6 shadow-drop-md transition-shadow duration-300 hover:shadow-drop-lg"
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-3 min-w-0 flex-1">
-          <h2 className="text-lg font-bold text-slate-900">
-            <Highlighter
-              action="highlight"
-              color={ROUGH_NOTATION.highlightRose}
-              padding={2}
-              iterations={1}
-              isView={true}
-              delay={0.6}
-            >
-              Your estimate is saved
-            </Highlighter>
-          </h2>
-          <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
-            Here&apos;s what to do next—pick one to get the most from
-            BLUPRNT.AI.
-          </p>
-          <div className="flex w-full max-w-full flex-row items-center justify-between gap-2 pt-2 sm:justify-evenly sm:gap-3">
-            <button
-              type="button"
-              title="Upload project docs"
-              aria-label="Upload project docs"
-              className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-teal-700 bg-teal-950 text-white shadow-sm transition-all duration-300 hover:bg-teal-900 hover:border-teal-600 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
-              onClick={() => {
-                dismiss();
-                navigate("/dashboard/execute");
-              }}
-            >
-              <Upload
-                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={2}
-                aria-hidden
-              />
-            </button>
-            <button
-              type="button"
-              title="See line-by-line budget"
-              aria-label="See line-by-line budget"
-              className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-all duration-300 hover:border-teal-400 hover:bg-teal-50/60 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
-              onClick={() => {
-                dismiss();
-                navigate("/dashboard/scope");
-              }}
-            >
-              <ListTree
-                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={2}
-                aria-hidden
-              />
-            </button>
-            <button
-              type="button"
-              title="Export Home Archive"
-              aria-label="Export Home Archive"
-              className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dotted border-slate-300 bg-white text-teal-600 shadow-sm transition-all duration-300 hover:border-teal-400 hover:bg-teal-50/60 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
-              onClick={() => {
-                dismiss();
-                navigate("/dashboard/record");
-              }}
-            >
-              <FileDown
-                className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={2}
-                aria-hidden
-              />
-            </button>
+        <div className="min-w-0 flex-1 space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-slate-900">
+              {hasDocuments
+                ? "Your ledger is active"
+                : "Your estimate is saved"}
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-600">
+              {hasDocuments
+                ? "Keep adding documents to maximize your home's resale value impact."
+                : "Pick a next step to get the most from BLUPRNT.AI."}
+            </p>
           </div>
-          <p className="text-xs text-slate-500 pt-1">
-            You can also use{" "}
-            <Share2
-              className="w-3.5 h-3.5 inline align-text-bottom"
-              aria-hidden
-            />{" "}
-            Share to send a read-only view of your estimate.
-          </p>
+
+          <div className="flex w-full max-w-full flex-row items-end justify-between gap-2 sm:justify-evenly sm:gap-3">
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5">
+              <span className="w-full text-center text-[11px] font-semibold leading-tight tracking-wide text-slate-500">
+                {uploadLabel}
+              </span>
+              <button
+                type="button"
+                title={uploadLabel}
+                aria-label={
+                  hasDocuments ? "Add a document" : "Upload an invoice"
+                }
+                className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-teal-800 bg-teal-950 text-white shadow-sm transition-all duration-300 hover:border-teal-600 hover:bg-teal-900 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                onClick={() => onAction("upload")}
+              >
+                <Upload
+                  className="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </button>
+            </div>
+
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5">
+              <span className="w-full text-center text-[11px] font-semibold leading-tight tracking-wide text-slate-500">
+                View scope
+              </span>
+              <button
+                type="button"
+                title="View scope"
+                aria-label="See line-by-line scope"
+                className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-slate-300 bg-white text-teal-600 shadow-sm transition-all duration-300 hover:border-teal-400 hover:bg-teal-50/60 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                onClick={() => onAction("scope")}
+              >
+                <ListTree
+                  className="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </button>
+            </div>
+
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5">
+              <span className="w-full text-center text-[11px] font-semibold leading-tight tracking-wide text-slate-500">
+                Export archive
+              </span>
+              <button
+                type="button"
+                title="Export archive"
+                aria-label="Export home archive"
+                className="group inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-slate-300 bg-white text-teal-600 shadow-sm transition-all duration-300 hover:border-teal-400 hover:bg-teal-50/60 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                onClick={() => onAction("export")}
+              >
+                <FileDown
+                  className="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </button>
+            </div>
+          </div>
         </div>
         <button
           type="button"
           onClick={dismiss}
-          className="p-2 rounded-xl text-slate-500 hover:bg-white/80 hover:text-slate-800 shrink-0"
-          aria-label="Dismiss"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-transparent bg-slate-200/35 text-slate-500 transition-all hover:bg-slate-200/70 hover:text-slate-900 active:scale-95"
+          aria-label="Close welcome banner"
         >
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
     </div>

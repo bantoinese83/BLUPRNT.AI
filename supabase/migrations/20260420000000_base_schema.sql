@@ -19,10 +19,8 @@ CREATE TABLE IF NOT EXISTS public.properties (
   approximate_location text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_properties_owner_user_id ON public.properties (owner_user_id);
 CREATE INDEX IF NOT EXISTS idx_properties_owner_postal ON public.properties (owner_user_id, postal_code);
-
 -- -----------------------------------------------------------------------------
 -- projects
 -- -----------------------------------------------------------------------------
@@ -38,9 +36,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
   metadata jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_projects_property_id ON public.projects (property_id);
-
 -- -----------------------------------------------------------------------------
 -- scope_items
 -- -----------------------------------------------------------------------------
@@ -60,9 +56,7 @@ CREATE TABLE IF NOT EXISTS public.scope_items (
   metadata jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_scope_items_project_id ON public.scope_items (project_id);
-
 -- -----------------------------------------------------------------------------
 -- documents (Storage metadata for project-documents bucket)
 -- -----------------------------------------------------------------------------
@@ -76,10 +70,8 @@ CREATE TABLE IF NOT EXISTS public.documents (
   ocr_status text NOT NULL DEFAULT 'pending',
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_documents_project_id ON public.documents (project_id);
 CREATE INDEX IF NOT EXISTS idx_documents_uploaded_by_user_id ON public.documents (uploaded_by_user_id);
-
 -- -----------------------------------------------------------------------------
 -- invoices
 -- -----------------------------------------------------------------------------
@@ -99,10 +91,8 @@ CREATE TABLE IF NOT EXISTS public.invoices (
   payment_status text NOT NULL DEFAULT 'unpaid',
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_invoices_project_id ON public.invoices (project_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_document_id ON public.invoices (document_id);
-
 -- -----------------------------------------------------------------------------
 -- invoice_line_items
 -- -----------------------------------------------------------------------------
@@ -120,6 +110,5 @@ CREATE TABLE IF NOT EXISTS public.invoice_line_items (
   scope_item_id uuid REFERENCES public.scope_items (id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-
 CREATE INDEX IF NOT EXISTS idx_invoice_line_items_invoice_id ON public.invoice_line_items (invoice_id);
 CREATE INDEX IF NOT EXISTS idx_invoice_line_items_scope_item_id ON public.invoice_line_items (scope_item_id);

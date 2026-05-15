@@ -91,7 +91,7 @@ function getRedisLimit(kind: RateLimitKind): Ratelimit | null {
       redis,
       limiter: Ratelimit.slidingWindow(spec.requests, `${windowSeconds} s`),
       prefix: spec.prefix,
-      analytics: true,
+      analytics: Deno.env.get("ENABLE_RATE_LIMIT_ANALYTICS") === "true",
     });
     redisLimits.set(kind, rl);
     return rl;

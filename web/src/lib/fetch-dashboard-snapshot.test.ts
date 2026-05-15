@@ -135,6 +135,7 @@ describe("fetchDashboardSnapshot", () => {
       if (table === "ledger_entries") {
         return {
           select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({ data: [], error: null }),
         };
@@ -153,6 +154,14 @@ describe("fetchDashboardSnapshot", () => {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }
+      if (table === "project_gallery") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
       return {
@@ -282,6 +291,7 @@ describe("fetchDashboardSnapshot", () => {
       if (table === "ledger_entries") {
         return {
           select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockResolvedValue({ data: [], error: null }),
           eq: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({
             data: [{ id: "inv-1", vendor_name: "V", total: 10 }],
@@ -306,6 +316,14 @@ describe("fetchDashboardSnapshot", () => {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }
+      if (table === "project_gallery") {
+        return {
+          select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
       if (table === "ledger_line_items") {

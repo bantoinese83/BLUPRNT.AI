@@ -20,22 +20,10 @@ export function useDashboardData() {
   useWebDashboardAuthRedirect(shared.data, shared.data?.configured, navigate);
   useWebDashboardProjectRealtime(shared.project?.id ?? null);
 
-  const {
-    activeProjectId: _unused1,
-    data: _unused2,
-    load,
-    handleProjectSelect,
-    ...publicApi
-  } = shared;
-  void _unused1;
-  void _unused2;
-
-  return useMemo(
-    () => ({
-      ...publicApi,
-      load,
-      handleProjectSelect,
-    }),
-    [publicApi, load, handleProjectSelect],
-  );
+  return useMemo(() => {
+    const { activeProjectId: _unused1, data: _unused2, ...publicApi } = shared;
+    void _unused1;
+    void _unused2;
+    return publicApi;
+  }, [shared]);
 }

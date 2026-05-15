@@ -320,10 +320,14 @@ export default function OnboardingScreen() {
           <AnimatePresence exitBeforeEnter>
             <MotiView
               key={step}
-              from={{ opacity: 0, translateX: 20 }}
-              animate={{ opacity: 1, translateX: 0 }}
-              exit={{ opacity: 0, translateX: -20 }}
-              transition={{ type: "timing", duration: 400 }}
+              from={{ opacity: 0, translateX: 24, scale: 0.98 }}
+              animate={{ opacity: 1, translateX: 0, scale: 1 }}
+              exit={{ opacity: 0, translateX: -24, scale: 0.98 }}
+              transition={{
+                type: "spring",
+                damping: 18,
+                stiffness: 140,
+              }}
               style={{ flex: 1 }}
             >
               <OnboardingStepContent

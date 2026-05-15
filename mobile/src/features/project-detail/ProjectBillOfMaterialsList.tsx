@@ -5,7 +5,7 @@ import {
   Pencil,
   Trash2,
   ShieldCheck,
-  Sparkles,
+  ShieldPlus,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 
@@ -312,7 +312,7 @@ export function ProjectBillOfMaterialsList({ materials, onPersist }: Props) {
             gap: 6,
           }}
         >
-          <Sparkles size={10} color={Theme.colors.status.info} />
+          <ShieldPlus size={10} color={Theme.colors.status.info} />
           <Text
             style={{
               fontSize: 9,

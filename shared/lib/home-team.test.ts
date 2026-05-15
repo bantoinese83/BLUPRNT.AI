@@ -33,6 +33,8 @@ describe("deriveHomeTeam", () => {
 
     const john = team.find((t) => t.name.toLowerCase() === "john plumbing");
     expect(john?.total_billed).toBe(1500);
+    expect(john?.documents_count).toBe(0);
+    expect(john?.preview_ledger_entry_id).toBeNull();
     expect(john?.contact_info.phone).toBe("555-0101");
     expect(john?.contact_info.email).toBe("john@example.com");
     expect(john?.last_activity).toBe("2026-02-01");
@@ -63,6 +65,45 @@ describe("deriveHomeTeam", () => {
     const team = deriveHomeTeam(invoices as any[]);
     expect(team[0]!.last_activity).toBe("2026-02-01");
     expect(team[0]!.total_billed).toBe(300);
+    expect(team[0]!.documents_count).toBe(0);
+    expect(team[0]!.preview_ledger_entry_id).toBeNull();
+  });
+
+  it("counts uploaded documents per vendor and picks the newest for preview", () => {
+    const rows: Partial<LedgerEntryRow>[] = [
+      {
+        id: "e1",
+        vendor_name: "Acme Build",
+        total: 100,
+        issue_date: "2026-01-10",
+        created_at: "2026-01-10",
+        project_id: "p1",
+        document_id: "d1" as unknown as string,
+      },
+      {
+        id: "e2",
+        vendor_name: "acme build",
+        total: 200,
+        issue_date: "2026-03-01",
+        created_at: "2026-03-01",
+        project_id: "p1",
+        document_id: "d2" as unknown as string,
+      },
+      {
+        id: "e3",
+        vendor_name: "Acme Build",
+        total: 50,
+        issue_date: "2026-02-15",
+        created_at: "2026-02-15",
+        project_id: "p1",
+        document_id: "" as unknown as string,
+      },
+    ];
+    const team = deriveHomeTeam(rows as LedgerEntryRow[]);
+    expect(team).toHaveLength(1);
+    expect(team[0]!.documents_count).toBe(2);
+    expect(team[0]!.preview_ledger_entry_id).toBe("e2");
+    expect(team[0]!.total_billed).toBe(350);
   });
 
   it("handles null project_id gracefully", () => {

@@ -19,6 +19,7 @@ import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { DashboardLoadErrorBanner } from "@/components/DashboardLoadErrorBanner";
 import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
+import type { ProjectSwitcherHints } from "@shared/types/dashboard-snapshot";
 import type { LedgerDocumentFilter } from "@/features/finance-tab/ledger-helpers";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
 
@@ -27,6 +28,7 @@ type FinanceLedgerHeaderProps = {
   onRetryLoad: () => void;
   onDismissLoadError: () => void;
   projects: ProjectRow[];
+  projectSwitcherHints?: ProjectSwitcherHints;
   project: ProjectRow;
   onProjectSelect: (id: string) => void;
   onPressAddDocument: () => void;
@@ -46,6 +48,7 @@ export function FinanceLedgerHeader({
   onRetryLoad,
   onDismissLoadError,
   projects,
+  projectSwitcherHints,
   project,
   onProjectSelect,
   onPressAddDocument,
@@ -111,6 +114,7 @@ export function FinanceLedgerHeader({
         </View>
         <ProjectSwitcher
           projects={projects}
+          projectSwitcherHints={projectSwitcherHints}
           currentId={project.id}
           onSelect={onProjectSelect}
           onAdd={() => router.push("/onboarding?newProject=1")}
