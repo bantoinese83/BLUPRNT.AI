@@ -39,11 +39,8 @@ export function DashboardScope({
     <DashboardSubPage
       side={
         <div className="space-y-8">
-          {transformationVault}
-          {health}
           <GroundingSourcesSection project={project} />
           {homeTeam}
-          {ledger}
         </div>
       }
     >

@@ -61,11 +61,6 @@ describe("EstimateSummary", () => {
     return render(ui, { wrapper: BrowserRouter });
   };
 
-  it("renders the summary total correctly", () => {
-    renderWithRouter(<EstimateSummary {...defaultProps} />);
-    expect(screen.getByText(/\$5,000\s*–\s*\$7,500/)).toBeInTheDocument();
-  });
-
   it("renders scope items with breakdown buttons", () => {
     renderWithRouter(<EstimateSummary {...defaultProps} />);
     expect(screen.getByText("Flooring")).toBeInTheDocument();

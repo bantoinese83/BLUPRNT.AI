@@ -122,11 +122,6 @@ export function useDashboardSections({
   const ledger = useMemo(
     () => (
       <div className="space-y-6">
-        <ResaleValueImpact
-          investment={memoInvestmentTotal}
-          resaleImpact={memoResaleImpact}
-          projectName={project.name}
-        />
         <PropertyLedger
           projectId={project.id}
           propertyId={project.property_id}

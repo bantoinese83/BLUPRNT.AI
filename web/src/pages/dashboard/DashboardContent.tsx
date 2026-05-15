@@ -231,88 +231,18 @@ export function DashboardContent({
           />
         </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <DashboardWelcomeBanner
-            hasDocuments={ledgerEntries.length > 0}
-            onAction={(id) => {
-              if (id === "upload") navigate("/dashboard/execute");
-              if (id === "scope") navigate("/dashboard/scope");
-              if (id === "export") void handleExportPDF();
-            }}
-          />
-        </motion.div>
-
-        <div id="dashboard-stats-anchor">
-          <DashboardOverview
-            estimatedMin={project.estimated_min_total ?? 0}
-            estimatedMax={project.estimated_max_total ?? 0}
-            spendingTotal={memoInvestmentTotal}
-            documentRowCount={ledgerEntries.length}
-            scopeLineCount={scopeItems.length}
-            unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
-            projectName={project.name}
-            isArchitect={isArchitect}
-            hasProjectPass={hasProjectPass}
-            onUpgradeClick={() => setShowUpgrade(true)}
-            onStatClick={(statId) => {
-              if (statId === "estimate") navigate("/dashboard/scope");
-              if (statId === "documents" || statId === "invested")
-                navigate("/dashboard/execute");
-            }}
-          />
-        </div>
-
-        <motion.div variants={itemVariants} id="production-readiness-anchor">
-          <ProductionReadinessCard
-            documentCount={ledgerEntries.length}
-            hasQuotes={ledgerEntries.some(
-              (e: LedgerEntryRow) => e.document_type === "quote",
-            )}
-            hasInvoices={ledgerEntries.some(
-              (e: LedgerEntryRow) => e.document_type === "invoice",
-            )}
-            onPressAudit={() => setIsSidebarOpen(true)}
-          />
-        </motion.div>
-
-        {project && (
+        {ledgerEntries.length === 0 && (
           <motion.div variants={itemVariants}>
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
-                {DASHBOARD_SECTION_GUIDED_PATH}
-              </h3>
-              <NextStepsChecklist
-                stage={project.stage || "planning"}
-                ledgerEntries={ledgerEntries}
-                onAction={(id) => {
-                  if (id === "review-scope") navigate("/dashboard/scope");
-                  if (id === "upload-quote" || id === "upload-document") {
-                    navigate("/dashboard/execute");
-                  }
-                  if (id === "export-packet") handleExportPDF();
-                  if (id === "review-health") {
-                    navigate("/dashboard/record");
-                  }
-                  if (id === "share-access") {
-                    setShareOpen(true);
-                  }
-                }}
-              />
-            </div>
+            <DashboardWelcomeBanner
+              hasDocuments={false}
+              onAction={(id) => {
+                if (id === "upload") navigate("/dashboard/execute");
+                if (id === "scope") navigate("/dashboard/scope");
+                if (id === "export") void handleExportPDF();
+              }}
+            />
           </motion.div>
         )}
-
-        <motion.div variants={itemVariants}>
-          <UpgradeBanner
-            invoiceCount={countBillOrReceiptUploadsInProject(ledgerEntries)}
-            onUpgradeClick={() => {
-              setUpgradeReason("ledger_limit");
-              setShowUpgrade(true);
-            }}
-            isArchitect={isArchitect}
-            hasProjectPass={hasProjectPass}
-          />
-        </motion.div>
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -346,6 +276,10 @@ export function DashboardContent({
                     documentsComp={documentsComp}
                     upcomingRenewals={upcomingRenewals}
                     onUpgradeClick={() => setShowUpgrade(true)}
+                    onExportPDF={handleExportPDF}
+                    onOpenSidebar={() => setIsSidebarOpen(true)}
+                    setUpgradeReason={setUpgradeReason}
+                    setShareOpen={setShareOpen}
                   />
                 }
               />
@@ -384,7 +318,6 @@ export function DashboardContent({
             </Routes>
           </motion.div>
         </AnimatePresence>
-        <DashboardJumpMenu />
       </motion.main>
 
       <AppSlimFooter className="border-slate-200/60 bg-white/40 backdrop-blur-sm" />

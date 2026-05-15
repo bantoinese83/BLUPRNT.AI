@@ -123,52 +123,6 @@ export function DashboardHeader({
           className="flex shrink-0 items-center gap-1 sm:gap-1.5"
           aria-label="Account and project actions"
         >
-          <Link
-            to="/onboarding"
-            className="shrink-0"
-            aria-label="Start a BLUPRNT"
-            title="Start a BLUPRNT"
-          >
-            <span className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-2.5 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-teal-200 hover:bg-teal-50/90 hover:text-teal-900 sm:px-3">
-              <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              <span className="hidden md:inline">Start a BLUPRNT</span>
-              <span className="hidden sm:inline md:hidden">Start</span>
-            </span>
-          </Link>
-
-          {onOpenInsights && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 rounded-xl px-2 text-slate-600 hover:bg-teal-50 hover:text-teal-600 sm:px-3"
-              onClick={onOpenInsights}
-              type="button"
-              aria-label="Insights"
-            >
-              <img
-                src="/insights-icon.svg"
-                alt=""
-                className="h-5 w-5 sm:mr-1.5 shrink-0"
-                aria-hidden
-              />
-              <span className="hidden font-semibold sm:inline">Insights</span>
-            </Button>
-          )}
-
-          {onOpenAssistant && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 rounded-xl px-2 text-teal-600 hover:bg-teal-50 hover:text-teal-700 sm:px-3"
-              onClick={onOpenAssistant}
-              type="button"
-              aria-label="Ask AI Assistant"
-            >
-              <Bot className="h-4 w-4 mr-1.5 shrink-0" aria-hidden />
-              <span className="hidden font-bold sm:inline">Ask AI</span>
-            </Button>
-          )}
-
           <div className="hidden items-center gap-1 lg:flex">
             <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />
 
