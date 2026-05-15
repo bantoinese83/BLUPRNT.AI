@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ListTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EstimateSummary } from "@/components/dashboard/EstimateSummary";
-import { PlanVsActualCard } from "@/components/dashboard/PlanVsActualCard";
 import {
   ActivityFeed,
   type ActivityEvent,
@@ -33,11 +32,8 @@ interface DashboardPlanProps {
   reconciliation: ReconciliationResult | null;
   isArchitect: boolean;
   hasProjectPass: boolean;
-  health: React.ReactNode;
   homeTeam: React.ReactNode;
-  transformationVault: React.ReactNode;
   homeSpecsVault: React.ReactNode;
-  ledger: React.ReactNode;
   documentsComp: React.ReactNode;
   upcomingRenewals?: React.ReactNode;
   onUpgradeClick: () => void;
@@ -55,11 +51,8 @@ export function DashboardPlan({
   reconciliation,
   isArchitect,
   hasProjectPass,
-  health,
   homeTeam,
-  transformationVault,
   homeSpecsVault,
-  ledger,
   documentsComp,
   upcomingRenewals,
   onUpgradeClick,

@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Wallet,
   ListTree,
   Hammer,
   ChevronDown,
@@ -22,7 +21,6 @@ import type { ReconciliationResult } from "@shared/lib/reconciliation";
 import {
   RECONCILIATION_STATUS_LABELS,
   CONFIDENCE_LABELS,
-  DASHBOARD_STATS_LABELS,
 } from "@shared/copy/dashboard";
 
 import { money, getStars as stars } from "@/lib/formatters";
@@ -50,9 +48,6 @@ export function EstimateSummary({
 }) {
   const navigate = useNavigate();
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const conf = project.confidence_score ?? 4.5;
-  const regionalSignal = (project.metadata as Record<string, unknown>)
-    ?.regional_signal as string | undefined;
 
   const isEmpty = scopeItems.length === 0;
 

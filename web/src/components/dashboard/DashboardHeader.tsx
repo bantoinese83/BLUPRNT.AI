@@ -1,15 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  LogOut,
-  Settings2,
-  FileDown,
-  LifeBuoy,
-  Plus,
-  Menu,
-  X,
-  Bot,
-} from "lucide-react";
+import { LogOut, Settings2, FileDown, LifeBuoy, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -26,8 +17,6 @@ type DashboardHeaderProps = {
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
   onExportPDF?: () => void;
-  onOpenInsights?: () => void;
-  onOpenAssistant?: () => void;
 };
 
 export function DashboardHeader({
@@ -37,8 +26,6 @@ export function DashboardHeader({
   hasProjectPass,
   onUpgradeClick,
   onExportPDF,
-  onOpenInsights,
-  onOpenAssistant,
 }: DashboardHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

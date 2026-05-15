@@ -12,14 +12,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectHeader } from "@/components/dashboard/ProjectHeader";
 import { ProjectSwitcher } from "@/components/dashboard/ProjectSwitcher";
-import { UpgradeBanner } from "@/components/dashboard/UpgradeBanner";
 import { generateActivityEvents } from "@/lib/activity";
 import { DashboardWelcomeBanner } from "@/components/dashboard/DashboardWelcomeBanner";
-import { NextStepsChecklist } from "@/components/dashboard/NextStepsChecklist";
-import { DASHBOARD_SECTION_GUIDED_PATH } from "@shared/copy/dashboard";
 import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
-import { countBillOrReceiptUploadsInProject } from "@shared/lib/ledger-entry-quota";
-
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { SmartSidebar } from "@/components/dashboard/SmartSidebar";
@@ -37,12 +32,9 @@ import {
   useDashboardUpgradeQueryEffect,
 } from "./useDashboardLocationEffects";
 import { useDashboardMilestoneConfetti } from "./useDashboardMilestoneConfetti";
-import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardActionModals } from "@/components/dashboard/DashboardActionModals";
 import { useDashboardSections } from "./useDashboardSections";
 import { useDashboardActions } from "./useDashboardActions";
-import { ProductionReadinessCard } from "@/components/dashboard/ProductionReadinessCard";
-import { DashboardJumpMenu } from "@/components/dashboard/DashboardJumpMenu";
 import { DashboardFAB } from "@/components/dashboard/DashboardFAB";
 
 export function DashboardContent({
@@ -57,7 +49,6 @@ export function DashboardContent({
   hasProjectPass,
   homeTeam: memoHomeTeam,
   investmentTotal: memoInvestmentTotal,
-  resaleImpact: memoResaleImpact,
   load,
   loadError,
   refreshing,
@@ -116,7 +107,6 @@ export function DashboardContent({
 
   const {
     health,
-    transformationVault,
     homeSpecsVault,
     homeTeam,
     ledger,
@@ -130,7 +120,6 @@ export function DashboardContent({
     unreconciledBilled: reconciliation?.unreconciled_billed ?? 0,
     memoHomeTeam,
     memoInvestmentTotal,
-    memoResaleImpact,
     isArchitect,
     hasProjectPass,
     load,
@@ -268,11 +257,8 @@ export function DashboardContent({
                     reconciliation={reconciliation}
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}
-                    health={health}
                     homeTeam={homeTeam}
-                    transformationVault={transformationVault}
                     homeSpecsVault={homeSpecsVault}
-                    ledger={ledger}
                     documentsComp={documentsComp}
                     upcomingRenewals={upcomingRenewals}
                     onUpgradeClick={() => setShowUpgrade(true)}
@@ -294,10 +280,7 @@ export function DashboardContent({
                     onRefresh={load}
                     isArchitect={isArchitect}
                     hasProjectPass={hasProjectPass}
-                    health={health}
                     homeTeam={homeTeam}
-                    transformationVault={transformationVault}
-                    ledger={ledger}
                   />
                 }
               />

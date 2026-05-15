@@ -1,5 +1,4 @@
 import { useMemo, type ReactNode } from "react";
-import { ResaleValueImpact } from "@/components/dashboard/ResaleValueImpact";
 import { PropertyLedger } from "@/components/dashboard/PropertyLedger";
 import { DocumentsSection } from "@/components/dashboard/DocumentsSection";
 import { TransformationVault } from "@/components/dashboard/TransformationVault";
@@ -14,7 +13,6 @@ import type {
   LedgerEntryRow,
   ScopeRow,
 } from "@shared/types/database";
-import type { ResaleImpactResult } from "@shared/lib/resale-value";
 import type { Contractor } from "@shared/lib/home-team";
 
 type UseDashboardSectionsProps = {
@@ -26,7 +24,6 @@ type UseDashboardSectionsProps = {
   unreconciledBilled?: number;
   memoHomeTeam: Contractor[];
   memoInvestmentTotal: number;
-  memoResaleImpact: ResaleImpactResult;
   isArchitect: boolean;
   hasProjectPass: boolean;
   load: (overrideId?: string) => Promise<void>;
@@ -52,7 +49,6 @@ export function useDashboardSections({
   unreconciledBilled = 0,
   memoHomeTeam,
   memoInvestmentTotal,
-  memoResaleImpact,
   isArchitect,
   hasProjectPass,
   load,
@@ -141,8 +137,6 @@ export function useDashboardSections({
       </div>
     ),
     [
-      memoInvestmentTotal,
-      memoResaleImpact,
       project.name,
       project.id,
       project.property_id,

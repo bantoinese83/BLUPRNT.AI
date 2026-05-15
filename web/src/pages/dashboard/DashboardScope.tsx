@@ -16,10 +16,7 @@ interface DashboardScopeProps {
   onRefresh: () => Promise<void>;
   isArchitect: boolean;
   hasProjectPass: boolean;
-  health: React.ReactNode;
   homeTeam: React.ReactNode;
-  transformationVault: React.ReactNode;
-  ledger: React.ReactNode;
 }
 
 export function DashboardScope({
@@ -30,10 +27,7 @@ export function DashboardScope({
   onRefresh,
   isArchitect,
   hasProjectPass,
-  health,
   homeTeam,
-  transformationVault,
-  ledger,
 }: DashboardScopeProps) {
   return (
     <DashboardSubPage

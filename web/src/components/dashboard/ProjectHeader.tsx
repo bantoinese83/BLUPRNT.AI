@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect, memo } from "react";
-import { Link } from "react-router-dom";
 import {
-  FilePlus2,
   Share2,
   AlertTriangle,
   Pencil,
