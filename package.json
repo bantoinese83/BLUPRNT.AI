@@ -41,7 +41,7 @@
     "functions:deploy:chat": "supabase functions deploy chat-with-project --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "functions:deploy:rate-limited": "supabase functions deploy photo-to-scope get-document-signed-url send-email upload-document delete-account get-ledger-entry create-checkout get-project-view submit-marketing-lead chat-with-project --project-ref ${SUPABASE_PROJECT_REF:-elucgaegaihkklnfoasm}",
     "test:e2e": "playwright test",
-    "test:e2e:smoke": "playwright test e2e/landing.spec.ts e2e/public-routes.spec.ts e2e/e2e-probes.spec.ts e2e/onboarding-welcome-smoke.spec.ts e2e/offline-banner.spec.ts e2e/auth-redirect.spec.ts e2e/accessibility.spec.ts e2e/project-view-share.spec.ts",
+    "test:e2e:smoke": "playwright test e2e/landing.spec.ts e2e/public-routes.spec.ts e2e/seo-public-pages.spec.ts e2e/e2e-probes.spec.ts e2e/onboarding-welcome-smoke.spec.ts e2e/offline-banner.spec.ts e2e/auth-redirect.spec.ts e2e/accessibility.spec.ts e2e/project-view-share.spec.ts",
     "test:e2e:probes": "playwright test e2e/e2e-probes.spec.ts",
     "test:e2e:mobile": "bash scripts/e2e-mobile-maestro.sh",
     "lighthouse:mobile": "bash scripts/lighthouse-local.sh mobile",

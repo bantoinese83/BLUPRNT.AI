@@ -40,4 +40,12 @@ test.describe("Public routes", () => {
       page.getByRole("heading", { level: 1, name: "Reset your password" }),
     ).toBeVisible({ timeout: 15_000 });
   });
+
+  test("support page loads", async ({ page }) => {
+    const res = await page.goto("/support");
+    expect(res?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { level: 1, name: /how can we help/i }),
+    ).toBeVisible({ timeout: 15_000 });
+  });
 });

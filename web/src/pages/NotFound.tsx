@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
+import { NoIndexPageSEO } from "@/components/seo/NoIndexPageSEO";
 import { supabase } from "@/lib/supabase";
-import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 
 export default function NotFound() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,12 +17,15 @@ export default function NotFound() {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 p-6 text-center page-fade-in">
-      <Helmet>
-        <title>Page Not Found — BLUPRNT.AI</title>
-        <meta name="robots" content={META_ROBOTS_NOINDEX} />
-      </Helmet>
+      <NoIndexPageSEO
+        title="Page Not Found"
+        description="This page does not exist on BLUPRNT. Return to the homepage or your dashboard."
+      />
 
-      <div className="flex flex-1 flex-col items-center justify-center">
+      <main
+        id="main-content"
+        className="flex flex-1 flex-col items-center justify-center"
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,7 +84,7 @@ export default function NotFound() {
             )}
           </div>
         </motion.div>
-      </div>
+      </main>
       <AppSlimFooter className="shrink-0 bg-slate-100/70" />
     </div>
   );
