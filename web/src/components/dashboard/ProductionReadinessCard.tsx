@@ -135,32 +135,32 @@ export function ProductionReadinessCard({
             Production Readiness
           </h3>
         </div>
-        <div className="bg-slate-900 text-white px-4 py-2 rounded-2xl text-sm font-black shadow-sm">
+        <div className="bg-teal-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm">
           {score}%
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 mb-8 flex-1">
         {readinessItems.map((item, idx) => (
           <ReadinessItem key={item.title} {...item} index={idx} />
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-6">
+      <div className="space-y-5">
         <button
           onClick={onPressAudit}
-          className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-drop-md transition-all active:scale-[0.98] group"
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white px-5 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-drop-md transition-all active:scale-[0.98] group text-sm"
         >
-          <ShieldCheck className="w-5 h-5" />
-          <span>Run Full Readiness Audit</span>
-          <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+          <ShieldCheck className="w-4 h-4" />
+          <span>Run Readiness Audit</span>
+          <ChevronRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
         </button>
 
-        <div className="flex items-start gap-3 px-2">
-          <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-slate-500 font-medium leading-relaxed max-w-sm">
-            Modeled after industry production standards to ensure your home is
-            resilient, documented, and investment-grade.
+        <div className="flex items-start gap-3 px-1">
+          <Info className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+          <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+            Modeled after industry standards to ensure your home is resilient,
+            documented, and investment-grade.
           </p>
         </div>
       </div>

@@ -303,7 +303,7 @@ export function useDocumentManagement({
 
     setUploading(false);
     setBatchStatus(null);
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputRef.current) (inputRef.current as HTMLInputElement).value = "";
   };
 
   const openFileUpload = () => {

@@ -197,25 +197,27 @@ export function DashboardContent({
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8"
+        className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6"
       >
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2 border-b border-slate-100/60"
         >
-          <ProjectSwitcher
-            projects={projectOptions}
-            currentId={project?.id ?? null}
-            onSelect={handleProjectSelect}
-            onDelete={handleProjectDeleteOption}
-            onArchive={handleProjectArchive}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <ProjectHeader
-            project={project}
-            onRename={handleProjectRenameOption}
-          />
+          <div className="flex-1 min-w-0">
+            <ProjectHeader
+              project={project}
+              onRename={handleProjectRenameOption}
+            />
+          </div>
+          <div className="shrink-0 flex items-center gap-4">
+            <ProjectSwitcher
+              projects={projectOptions}
+              currentId={project?.id ?? null}
+              onSelect={handleProjectSelect}
+              onDelete={handleProjectDeleteOption}
+              onArchive={handleProjectArchive}
+            />
+          </div>
         </motion.div>
 
         {ledgerEntries.length === 0 && (

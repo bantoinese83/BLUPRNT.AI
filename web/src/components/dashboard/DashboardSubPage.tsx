@@ -20,7 +20,7 @@ export function DashboardSubPage({
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-8"
+      className="space-y-6"
     >
       <motion.div variants={itemVariants}>
         <DashboardTabs />
@@ -29,10 +29,10 @@ export function DashboardSubPage({
         <DashboardTabIntro />
       </motion.div>
       {hasSide ? (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-10">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           <motion.div
             variants={itemVariants}
-            className="min-w-0 lg:col-span-2 space-y-8"
+            className="min-w-0 lg:col-span-2 space-y-6"
           >
             {children}
           </motion.div>
@@ -44,7 +44,7 @@ export function DashboardSubPage({
           </motion.div>
         </div>
       ) : (
-        <motion.div variants={itemVariants} className="min-w-0 space-y-8">
+        <motion.div variants={itemVariants} className="min-w-0 space-y-6">
           {children}
         </motion.div>
       )}

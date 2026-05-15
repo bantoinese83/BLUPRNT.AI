@@ -1,4 +1,5 @@
-import { Users, Phone, Mail, Lock, FileText } from "lucide-react";
+import { useState } from "react";
+import { Users, Phone, Mail, Lock, FileText, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { money } from "@/lib/formatters";
 import type { Contractor } from "@shared/lib/home-team";
@@ -15,6 +16,7 @@ export function HomeTeamSection({
   hasProjectPass?: boolean;
   onUpgradeClick?: () => void;
 }) {
+  const [limit, setLimit] = useState(3);
   const isUnlocked = isArchitect || hasProjectPass;
 
   if (team.length === 0) {
@@ -46,7 +48,7 @@ export function HomeTeamSection({
       </div>
 
       <div className="grid grid-cols-1 gap-3 pt-0.5">
-        {team.map((pro) => (
+        {team.slice(0, limit).map((pro) => (
           <Card
             key={pro.name}
             className="border-slate-200/60 shadow-sm hover:shadow-md transition-all group overflow-visible"
@@ -125,6 +127,19 @@ export function HomeTeamSection({
             </CardContent>
           </Card>
         ))}
+
+        {team.length > limit && (
+          <button
+            type="button"
+            onClick={() => setLimit(team.length)}
+            className="py-2 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-teal-600 transition-colors group"
+          >
+            <span>Show all professionals</span>
+            <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-teal-50 transition-colors">
+              <Plus className="w-2.5 h-2.5" />
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );

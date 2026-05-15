@@ -20,6 +20,7 @@ type DashboardOverviewProps = {
   hasProjectPass: boolean;
   onUpgradeClick: () => void;
   onStatClick?: (statId: "estimate" | "documents" | "invested") => void;
+  productionReadiness?: React.ReactNode;
 };
 
 export const DashboardOverview = memo(function DashboardOverview({
@@ -34,6 +35,7 @@ export const DashboardOverview = memo(function DashboardOverview({
   hasProjectPass,
   onUpgradeClick,
   onStatClick,
+  productionReadiness,
 }: DashboardOverviewProps) {
   const resaleImpact = useMemo(
     () => calculateResaleImpact(spendingTotal),
@@ -42,7 +44,7 @@ export const DashboardOverview = memo(function DashboardOverview({
 
   const isUnlocked = isArchitect || hasProjectPass;
   return (
-    <motion.div variants={itemVariants} className="space-y-8">
+    <motion.div variants={itemVariants} className="space-y-6">
       <div className="space-y-3">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
           {DASHBOARD_SECTION_PLAN_SPENDING}
@@ -68,24 +70,25 @@ export const DashboardOverview = memo(function DashboardOverview({
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <div id="resale-impact-anchor">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <div id="resale-impact-anchor" className="flex">
           <ResaleValueImpact
             investment={spendingTotal}
             resaleImpact={resaleImpact}
             projectName={projectName}
           />
         </div>
-        <div className="space-y-6">
-          {!isUnlocked && (
-            <div className="rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
+        <div className="flex flex-col gap-6 h-full">
+          {!isUnlocked ? (
+            <div className="rounded-3xl border border-slate-100 overflow-hidden shadow-sm h-full">
               <InsightTeaser
                 onUpgradeClick={onUpgradeClick}
                 projectName={projectName}
               />
             </div>
+          ) : (
+            productionReadiness
           )}
-          {/* We could add more cards here like a localized market trend or similar */}
         </div>
       </div>
     </motion.div>

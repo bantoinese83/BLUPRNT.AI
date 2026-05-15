@@ -7,6 +7,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { AddScopeItemModal } from "@/components/AddScopeItemModal";
 import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { ProjectSwitcher } from "@/components/ProjectSwitcher";
+import { ProgressStepper } from "@/components/ProgressStepper";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { TransformationVault } from "@/components/dashboard/TransformationVault";
 import { ProjectDetailHeader } from "./ProjectDetailHeader";
@@ -92,21 +93,53 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
           title={project?.name}
           onShare={handleShare}
           onAddPress={() => setShowAddModal(true)}
-          stage={project?.stage}
         />
 
-        <View style={{ marginTop: 4, marginBottom: 16 }}>
-          <ProjectSwitcher
-            projects={vm.projects}
-            projectSwitcherHints={vm.projectSwitcherHints}
-            currentId={id ?? ""}
-            onSelect={(newId) => {
-              vm.handleProjectSelect(newId);
-              router.setParams({ id: newId });
-            }}
-            onAdd={() => router.push("/onboarding?newProject=1")}
-          />
-        </View>
+        {project ? (
+          <View style={{ paddingHorizontal: 24, paddingTop: 0, gap: 16 }}>
+            <ProgressStepper currentStage={project.stage} />
+
+            <ProjectDetailInsightCards
+              project={project}
+              ledgerTotal={ledgerTotal}
+              documentCount={detailLedgerEntries.length}
+              scopeLineCount={scope.length}
+              unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
+            />
+
+            <View style={{ marginTop: 8, marginBottom: 8 }}>
+              <ProjectSwitcher
+                projects={vm.projects}
+                projectSwitcherHints={vm.projectSwitcherHints}
+                currentId={id ?? ""}
+                onSelect={(newId) => {
+                  vm.handleProjectSelect(newId);
+                  router.setParams({ id: newId });
+                }}
+                onAdd={() => router.push("/onboarding?newProject=1")}
+              />
+            </View>
+
+            <TransformationVault projectId={project.id} />
+
+            {isTrustHighPriority && (
+              <GroundingSourcesSection project={project} />
+            )}
+          </View>
+        ) : (
+          <View style={{ marginTop: 4, marginBottom: 16 }}>
+            <ProjectSwitcher
+              projects={vm.projects}
+              projectSwitcherHints={vm.projectSwitcherHints}
+              currentId={id ?? ""}
+              onSelect={(newId) => {
+                vm.handleProjectSelect(newId);
+                router.setParams({ id: newId });
+              }}
+              onAdd={() => router.push("/onboarding?newProject=1")}
+            />
+          </View>
+        )}
 
         {detailDataWarning ? (
           <View style={{ paddingHorizontal: 24, paddingBottom: 8 }}>
@@ -115,22 +148,6 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
               onRetry={handleRefresh}
               onDismiss={clearDetailDataWarnings}
             />
-          </View>
-        ) : null}
-
-        {project ? (
-          <View style={{ paddingHorizontal: 24, paddingTop: 0, gap: 16 }}>
-            <TransformationVault projectId={project.id} />
-            <ProjectDetailInsightCards
-              project={project}
-              ledgerTotal={ledgerTotal}
-              documentCount={detailLedgerEntries.length}
-              scopeLineCount={scope.length}
-              unreconciledBilled={reconciliation?.unreconciled_billed ?? 0}
-            />
-            {isTrustHighPriority && (
-              <GroundingSourcesSection project={project} />
-            )}
           </View>
         ) : null}
       </View>

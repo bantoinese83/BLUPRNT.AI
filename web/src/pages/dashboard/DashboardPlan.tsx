@@ -68,7 +68,7 @@ export function DashboardPlan({
   return (
     <DashboardSubPage
       side={
-        <div className="space-y-8">
+        <div className="space-y-6">
           {homeSpecsVault}
           {upcomingRenewals}
           <GroundingSourcesSection project={project} />
@@ -81,7 +81,7 @@ export function DashboardPlan({
         </div>
       }
     >
-      <div className="space-y-12">
+      <div className="space-y-8">
         <div id="dashboard-stats-anchor">
           <DashboardOverview
             estimatedMin={project.estimated_min_total ?? 0}
@@ -102,21 +102,32 @@ export function DashboardPlan({
               if (statId === "documents" || statId === "invested")
                 navigate("/dashboard/execute");
             }}
+            productionReadiness={
+              <ProductionReadinessCard
+                documentCount={ledgerEntries.length}
+                hasQuotes={ledgerEntries.some(
+                  (e: LedgerEntryRow) => e.document_type === "quote",
+                )}
+                hasInvoices={ledgerEntries.some(
+                  (e: LedgerEntryRow) => e.document_type === "invoice",
+                )}
+                onPressAudit={onOpenSidebar}
+              />
+            }
           />
         </div>
 
-        <motion.div variants={itemVariants} id="production-readiness-anchor">
-          <ProductionReadinessCard
-            documentCount={ledgerEntries.length}
-            hasQuotes={ledgerEntries.some(
-              (e: LedgerEntryRow) => e.document_type === "quote",
-            )}
-            hasInvoices={ledgerEntries.some(
-              (e: LedgerEntryRow) => e.document_type === "invoice",
-            )}
-            onPressAudit={onOpenSidebar}
+        <div className="space-y-6">
+          <EstimateSummary
+            project={project}
+            scopeItems={scopeItems}
+            ledgerEntries={ledgerEntries}
+            reconciliation={reconciliation}
+            isArchitect={isArchitect}
+            hasProjectPass={hasProjectPass}
+            onUpgradeClick={onUpgradeClick}
           />
-        </motion.div>
+        </div>
 
         <motion.div variants={itemVariants}>
           <div className="space-y-4">
@@ -156,15 +167,6 @@ export function DashboardPlan({
         </motion.div>
 
         <div className="space-y-6">
-          <EstimateSummary
-            project={project}
-            scopeItems={scopeItems}
-            ledgerEntries={ledgerEntries}
-            reconciliation={reconciliation}
-            isArchitect={isArchitect}
-            hasProjectPass={hasProjectPass}
-            onUpgradeClick={onUpgradeClick}
-          />
           <Button
             variant="outline"
             className="w-full gap-2 rounded-xl border-slate-200 hover:bg-slate-50"

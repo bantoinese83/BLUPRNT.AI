@@ -138,7 +138,7 @@ export const ProjectSwitcher = memo(function ProjectSwitcher({
           styles.scrollContent,
           { paddingHorizontal: 24, paddingRight: 112 },
         ]}
-        data={projects}
+        data={projects.filter((p) => p.id !== currentId)}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         ListFooterComponent={ListFooter}
@@ -284,13 +284,13 @@ const ProjectCard = memo(
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 8,
-    gap: 12,
+    marginTop: 0,
+    gap: 8,
   },
   label: {
     fontSize: Theme.typography.size.xs,
     fontFamily: Theme.typography.family.black,
-    color: Theme.colors.brand.primary,
+    color: Theme.colors.text.muted,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     paddingHorizontal: 24,
