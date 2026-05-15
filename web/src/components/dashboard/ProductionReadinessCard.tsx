@@ -125,7 +125,7 @@ export function ProductionReadinessCard({
   const score = Math.round((readyCount / readinessItems.length) * 100);
 
   return (
-    <div className="bg-white/70 backdrop-blur-md border border-slate-200/60 rounded-[2rem] p-6 sm:p-8 shadow-drop-lg">
+    <div className="bg-white/70 backdrop-blur-md border border-slate-200/60 rounded-4xl p-6 sm:p-8 shadow-drop-lg">
       <div className="flex items-start justify-between mb-8">
         <div>
           <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600 mb-1">

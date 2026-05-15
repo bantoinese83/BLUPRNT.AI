@@ -18,6 +18,7 @@ export const EDGE_FUNCTIONS = {
   UPLOAD_GALLERY_PHOTO: "upload-gallery-photo",
   GET_DOCUMENT_SIGNED_URL: "get-document-signed-url",
   CREATE_CHECKOUT: "create-checkout",
+  CREATE_PORTAL_SESSION: "create-portal-session",
   GENERATE_DATA_EXPORT: "generate-data-export",
   SEND_EMAIL: "send-email",
 } as const;

@@ -232,4 +232,17 @@ export const profileTabStyles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
   },
+  systemLink: {
+    marginTop: Theme.spacing.md,
+    paddingVertical: Theme.spacing.xs,
+  },
+  systemLinkText: {
+    fontSize: 14,
+    fontFamily: Theme.typography.family.bold,
+    color: Theme.colors.brand.primary,
+    textDecorationLine: "underline",
+  },
+  billingInstructions: {
+    marginTop: 0,
+  },
 });

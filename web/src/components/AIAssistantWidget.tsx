@@ -160,14 +160,14 @@ export const AIAssistantWidget = memo(function AIAssistantWidget({
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end relative">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="mb-4 w-96 h-[min(32rem,calc(100vh-8rem))] min-h-[28rem] bg-white rounded-2xl shadow-spatial border border-slate-200 overflow-hidden flex flex-col"
+            className="mb-4 w-96 h-[min(32rem,calc(100vh-8rem))] min-h-112 bg-white rounded-2xl shadow-spatial border border-slate-200 overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-teal-950 p-4 text-white flex items-center justify-between">

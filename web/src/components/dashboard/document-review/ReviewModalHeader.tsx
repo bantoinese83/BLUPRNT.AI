@@ -21,7 +21,7 @@ export function ReviewModalHeader({
   return (
     // Solid white base prevents the body content from bleeding through the
     // sticky header (themed `bgClass` values use /50 opacity for a soft tint).
-    <div className="sticky top-0 z-10 bg-white border-b border-slate-200 supports-[backdrop-filter]:backdrop-blur">
+    <div className="sticky top-0 z-10 bg-white border-b border-slate-200 supports-backdrop-filter:backdrop-blur">
       <div className={`flex items-center justify-between gap-3 p-4 ${bgClass}`}>
         <h3
           id="document-review-title"

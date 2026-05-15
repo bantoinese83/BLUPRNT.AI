@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, TextInput, Switch } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Switch,
+  Alert,
+} from "react-native";
 import {
   User,
   LogOut,
@@ -180,7 +187,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
                     { color: Theme.colors.text.primary },
                   ]}
                 >
-                  Manage
+                  Manage Plan
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -189,15 +196,43 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
               </TouchableOpacity>
             )}
           </View>
-          <Text style={styles.billingNote}>
-            {isPro && subscription
-              ? architectBillingChannel(subscription) === "stripe"
-                ? "Your plan is billed through Stripe on the web. Manage it from the website billing page."
-                : architectBillingChannel(subscription) === "store"
-                  ? "Your plan is billed through the App Store. Use Manage above or Apple’s subscription settings."
-                  : "In-app subscriptions use the App Store; web plans use Stripe — manage where you subscribed."
-              : "In-app subscriptions are managed in the App Store. Web subscriptions use Stripe — use the same place you subscribed to change or cancel."}
-          </Text>
+
+          <View style={styles.billingInstructions}>
+            <Text style={styles.billingNote}>
+              {isPro && subscription
+                ? architectBillingChannel(subscription) === "stripe"
+                  ? "Your Architect subscription is billed through Stripe on the web. To downgrade or cancel, please use the Billing page on our website."
+                  : architectBillingChannel(subscription) === "store"
+                    ? "Your Architect subscription is billed through the App Store. Tap Manage Plan above or use your iPhone’s Settings > Apple ID > Subscriptions to downgrade or cancel."
+                    : "Subscriptions are managed where you started them (Stripe on web, or App Store on iOS)."
+                : "Free Explorer has no recurring charges. If you upgrade later, you can manage or cancel your plan here or in your device settings."}
+            </Text>
+
+            {isPro &&
+              subscription &&
+              architectBillingChannel(subscription) === "store" && (
+                <TouchableOpacity
+                  style={styles.systemLink}
+                  onPress={() => {
+                    // Fallback for direct App Store subscription management
+                    import("react-native").then(({ Linking }) => {
+                      Linking.openURL(
+                        "https://apps.apple.com/account/subscriptions",
+                      ).catch(() => {
+                        Alert.alert(
+                          "Couldn't open Settings",
+                          "Please go to Settings > [Your Name] > Subscriptions on your iPhone.",
+                        );
+                      });
+                    });
+                  }}
+                >
+                  <Text style={styles.systemLinkText}>
+                    Open Apple Subscription Settings
+                  </Text>
+                </TouchableOpacity>
+              )}
+          </View>
         </GlassCard>
       </MotiView>
 

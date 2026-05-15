@@ -60,9 +60,9 @@ export function UpgradeModal({
 }: UpgradeModalProps) {
   const architectEntitled =
     isArchitectPlanEffective(subscription) || isArchitect;
-  const [loadingPlan, setLoadingPlan] = useState<"architect" | "pass" | null>(
-    null,
-  );
+  const [loadingPlan, setLoadingPlan] = useState<
+    "architect" | "pass" | "portal" | null
+  >(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -115,6 +115,24 @@ export function UpgradeModal({
     } catch (err) {
       console.error("Stripe Checkout error:", err);
       setCheckoutError("Something went wrong with checkout. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const handleManagePortal = async () => {
+    setLoadingPlan("portal");
+    try {
+      const { data, error } = await invokeFunction<{ url: string }>(
+        EDGE_FUNCTIONS.CREATE_PORTAL_SESSION,
+      );
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Portal error:", err);
+      setCheckoutError("Couldn't open billing portal. Please try again.");
     } finally {
       setLoadingPlan(null);
     }
@@ -379,6 +397,20 @@ export function UpgradeModal({
                 className="h-5 w-auto mb-0.5"
               />
             </div>
+
+            {architectEntitled && (
+              <button
+                type="button"
+                onClick={handleManagePortal}
+                disabled={loadingPlan === "portal"}
+                className="text-xs text-teal-700 font-bold hover:text-teal-900 transition-colors flex items-center gap-2 px-4 py-2 bg-teal-50 rounded-full border border-teal-100"
+              >
+                {loadingPlan === "portal" ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : null}
+                Manage or cancel your Architect subscription
+              </button>
+            )}
 
             <button
               className="text-sm text-slate-400 hover:text-slate-600 font-medium transition-colors"
