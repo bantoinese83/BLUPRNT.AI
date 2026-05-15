@@ -50,8 +50,9 @@ Deno.serve(async (req) => {
     }
 
     return jsonResponse(response.data, 200, req);
-  } catch (error) {
-    console.error("[get-onboarding-context] Error:", error);
-    return jsonResponse({ error: error.message }, 500, req);
+  } catch (e) {
+    console.error("[get-onboarding-context] Error:", e);
+    const message = e instanceof Error ? e.message : "Context generation failed.";
+    return jsonResponse({ error: message }, 500, req);
   }
 });

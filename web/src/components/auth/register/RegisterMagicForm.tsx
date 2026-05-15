@@ -23,8 +23,6 @@ interface RegisterMagicFormProps {
   magicSent: boolean;
   setMagicSent: (sent: boolean) => void;
   emailValue: string;
-  emailRules: Record<string, unknown>;
-  zipRules: Record<string, unknown>;
 }
 
 export function RegisterMagicForm({
@@ -36,8 +34,6 @@ export function RegisterMagicForm({
   magicSent,
   setMagicSent,
   emailValue,
-  emailRules,
-  zipRules,
 }: RegisterMagicFormProps) {
   if (magicSent) {
     return (
@@ -90,7 +86,7 @@ export function RegisterMagicForm({
             placeholder="you@example.com"
             className="h-12 pl-11 rounded-xl"
             error={errors.email?.message}
-            {...register("email", emailRules)}
+            {...register("email")}
           />
         </div>
       </div>
@@ -114,7 +110,7 @@ export function RegisterMagicForm({
             className="h-12 pl-11 rounded-xl"
             placeholder="For regional pricing"
             error={errors.zip?.message}
-            {...register("zip", zipRules)}
+            {...register("zip")}
           />
         </div>
       </div>

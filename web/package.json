@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@bluprnt/shared": "*",
+    "@hookform/resolvers": "^5.2.2",
     "@sentry/react": "^9.47.1",
     "@sentry/vite-plugin": "^5.1.1",
     "@supabase/supabase-js": "^2.100.1",

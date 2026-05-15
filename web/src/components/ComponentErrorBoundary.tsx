@@ -1,6 +1,7 @@
 import React, { Component, type ReactNode } from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { reportClientError } from "@/lib/sentry";
 
 interface Props {
   children: ReactNode;
@@ -27,7 +28,11 @@ export class ComponentErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(`[ErrorBoundary:${this.props.name || "Component"}]`, error, errorInfo);
+    reportClientError(
+      `component-error-boundary:${this.props.name || "unnamed"}`,
+      error,
+      { componentStack: errorInfo.componentStack },
+    );
   }
 
   handleReset = () => {
@@ -48,7 +53,8 @@ export class ComponentErrorBoundary extends Component<Props, State> {
               {this.props.name || "This feature"} is temporarily unavailable
             </h3>
             <p className="text-sm text-slate-500 max-w-xs mx-auto">
-              We encountered an unexpected issue. You can try refreshing the feature or check back in a moment.
+              We encountered an unexpected issue. You can try refreshing the
+              feature or check back in a moment.
             </p>
           </div>
           <Button

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getSafeRedirect } from "@/lib/safe-redirect";
@@ -11,6 +12,9 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 
 import { Loader } from "@/components/ui/Loader";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
+import { forgotPasswordResolver } from "@/lib/auth-form-resolver";
+
+type ForgotPasswordFormValues = { email: string };
 
 export default function ForgotPassword() {
   const { pathname } = useLocation();
@@ -21,20 +25,24 @@ export default function ForgotPassword() {
     redirectParam != null && redirectParam.trim() !== ""
       ? `/login?redirect=${encodeURIComponent(getSafeRedirect(redirectParam))}`
       : "/login";
-  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sentEmail, setSentEmail] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ForgotPasswordFormValues>({
+    resolver: forgotPasswordResolver,
+    defaultValues: { email: "" },
+  });
+
+  const onSubmit = handleSubmit(async ({ email }) => {
     setError(null);
     setSent(false);
-
-    if (!email.trim()) {
-      setError("Enter your email address.");
-      return;
-    }
 
     if (!isSupabaseConfigured()) {
       setError(
@@ -45,12 +53,9 @@ export default function ForgotPassword() {
 
     setLoading(true);
     const afterReset = `${window.location.origin}/auth/reset-password?redirect=${encodeURIComponent(returnTo)}`;
-    const { error: err } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      {
-        redirectTo: afterReset,
-      },
-    );
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: afterReset,
+    });
     setLoading(false);
 
     if (err) {
@@ -58,8 +63,9 @@ export default function ForgotPassword() {
       return;
     }
 
+    setSentEmail(email);
     setSent(true);
-  }
+  });
 
   if (loading) {
     return (
@@ -117,19 +123,23 @@ export default function ForgotPassword() {
                 <div className="space-y-2">
                   <h3 className="font-bold text-slate-900">Check your inbox</h3>
                   <p className="text-sm text-slate-500">
-                    A reset link has been sent to <strong>{email}</strong>.
+                    A reset link has been sent to <strong>{sentEmail}</strong>.
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => setSent(false)}
+                  onClick={() => {
+                    setSent(false);
+                    setSentEmail("");
+                    reset({ email: "" });
+                  }}
                 >
                   Try a different email
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={onSubmit} className="space-y-4" noValidate>
                 <div className="space-y-2">
                   <label
                     className="text-sm font-medium text-slate-700"
@@ -145,11 +155,11 @@ export default function ForgotPassword() {
                     <Input
                       id="email"
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 pl-10"
-                      required
+                      autoComplete="email"
                       placeholder="you@example.com"
+                      className="h-12 pl-10"
+                      error={errors.email?.message}
+                      {...register("email")}
                     />
                   </div>
                 </div>

@@ -44,7 +44,7 @@ export function AnalysisStep({
             <AlertCircle
               size={40}
               color={Theme.colors.brand.primary}
-              accessibilityLabel=""
+              accessibilityLabel="Analysis could not be completed"
             />
           </View>
           <View style={{ paddingHorizontal: 20, alignItems: "center" }}>

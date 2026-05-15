@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, type Resolver } from "react-hook-form";
 import { Helmet } from "react-helmet-async";
 import {
   Link,
@@ -27,7 +27,7 @@ import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { META_ROBOTS_NOINDEX, seoAbsoluteUrl } from "@/lib/seo-meta";
 import { useRegister } from "@/hooks/use-register";
-
+import { registerResolverForMode } from "@/lib/auth-form-resolver";
 type Mode = "password" | "magic";
 
 type RegisterFormValues = {
@@ -36,23 +36,6 @@ type RegisterFormValues = {
   zip: string;
   acceptedPolicies: boolean;
 };
-
-const EMAIL_RULES = {
-  required: "Enter your email address.",
-  pattern: {
-    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    message: "Enter a valid email address.",
-  },
-} as const;
-
-const ZIP_RULES = {
-  required: "ZIP is required.",
-  setValueAs: (v: unknown) =>
-    String(v ?? "")
-      .replace(/\D/g, "")
-      .slice(0, 5),
-  validate: (v: string) => v.length === 5 || "Use a 5-digit ZIP code.",
-} as const;
 
 export default function Register() {
   const navigate = useNavigate();
@@ -77,13 +60,20 @@ export default function Register() {
     onMagicRegister,
   } = useRegister(redirectParam);
 
+  const registerResolver = useMemo(
+    () => registerResolverForMode(mode) as Resolver<RegisterFormValues>,
+    [mode],
+  );
+
   const {
     register,
     handleSubmit,
     watch,
     resetField,
+    clearErrors,
     formState: { errors },
   } = useForm<RegisterFormValues>({
+    resolver: registerResolver,
     defaultValues: {
       email: "",
       password: "",
@@ -106,15 +96,13 @@ export default function Register() {
     setMode(next);
     setError(null);
     setMagicSent(false);
+    clearErrors();
     if (next === "magic") {
       resetField("password", { defaultValue: "" });
     }
   }
 
-  const policyRegister = register("acceptedPolicies", {
-    validate: (v) =>
-      v === true || "Agree to the Terms and Privacy Policy to continue.",
-  });
+  const policyRegister = register("acceptedPolicies");
 
   return (
     <div className="flex min-h-screen flex-col bg-linear-to-b from-slate-50 to-white">
@@ -255,8 +243,6 @@ export default function Register() {
               errors={errors}
               watch={watch}
               loading={loading}
-              emailRules={EMAIL_RULES}
-              zipRules={ZIP_RULES}
             />
           ) : (
             <RegisterMagicForm
@@ -268,8 +254,6 @@ export default function Register() {
               magicSent={magicSent}
               setMagicSent={setMagicSent}
               emailValue={emailValue}
-              emailRules={EMAIL_RULES}
-              zipRules={ZIP_RULES}
             />
           )}
 

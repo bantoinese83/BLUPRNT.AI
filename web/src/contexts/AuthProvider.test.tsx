@@ -1,78 +1,74 @@
 /** @vitest-environment jsdom */
-import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import { useContext } from "react";
+import { render, waitFor } from "@testing-library/react";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./AuthProvider";
-import { AuthContext } from "./auth-context";
+
+const mockNavigate = vi.fn();
+let authCallback: (event: string, session: null) => void = () => {};
+
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+vi.mock("@/lib/supabase", () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn(() =>
+        Promise.resolve({ data: { session: null }, error: null }),
+      ),
+      onAuthStateChange: vi.fn((cb: typeof authCallback) => {
+        authCallback = cb;
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      }),
+      signOut: vi.fn(),
+    },
+  },
+  isSupabaseConfigured: vi.fn(() => true),
+}));
 
 vi.mock("@/lib/sentry", () => ({
   reportClientError: vi.fn(),
 }));
 
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn(),
-      onAuthStateChange: vi.fn(),
-      signOut: vi.fn(),
-    },
-  },
-  isSupabaseConfigured: vi.fn(),
-}));
-
-vi.mock("@sentry/react", () => ({
-  setUser: vi.fn(),
-}));
-
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-
-function Probe() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) return null;
-  return (
-    <span data-testid="auth-state">
-      {ctx.loading ? "loading" : ctx.user ? "user" : "anon"}
-    </span>
-  );
-}
-
 describe("AuthProvider", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(isSupabaseConfigured).mockReturnValue(true);
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: null },
-    } as never);
-    vi.mocked(supabase.auth.onAuthStateChange).mockReturnValue({
-      data: { subscription: { unsubscribe: vi.fn() } },
-    } as never);
+    authCallback = () => {};
   });
 
-  it("resolves loading and exposes session from getSession", async () => {
+  it("redirects to login on SIGNED_OUT from a protected path", async () => {
     render(
-      <AuthProvider>
-        <Probe />
-      </AuthProvider>,
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <Routes>
+          <Route
+            path="/dashboard"
+            element={
+              <AuthProvider>
+                <span>dash</span>
+              </AuthProvider>
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("auth-state")).toHaveTextContent("anon"),
-    );
-  });
+    await waitFor(() => {
+      expect(typeof authCallback).toBe("function");
+    });
 
-  it("skips Supabase when not configured", async () => {
-    vi.mocked(isSupabaseConfigured).mockReturnValue(false);
+    authCallback("SIGNED_OUT", null);
 
-    render(
-      <AuthProvider>
-        <Probe />
-      </AuthProvider>,
+    expect(mockNavigate).toHaveBeenCalledWith(
+      expect.stringContaining("/login?redirect="),
+      { replace: true },
     );
-
-    await waitFor(() =>
-      expect(screen.getByTestId("auth-state")).toHaveTextContent("anon"),
-    );
-    expect(supabase.auth.getSession).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,17 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { dismissOptionalCookies } from "./helpers/cookie-consent";
+import { signUpForE2E } from "./helpers/auth";
+
+const PLACEHOLDER_ANON = "playwright-e2e-anon-placeholder";
+
+function hasSupabaseForAuthE2E(): boolean {
+  return Boolean(
+    process.env.VITE_SUPABASE_URL?.trim() &&
+      process.env.VITE_SUPABASE_ANON_KEY?.trim() &&
+      process.env.VITE_SUPABASE_ANON_KEY !== PLACEHOLDER_ANON,
+  );
+}
 
 /** WCAG 2.1 Level A & AA rulesets (axe tag names). */
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] as const;
@@ -63,6 +74,54 @@ test.describe("Accessibility (WCAG 2.1)", () => {
   }) => {
     await page.goto("/terms");
     await dismissOptionalCookies(page);
+    await page.waitForLoadState("networkidle");
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags([...WCAG_TAGS])
+      .analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+
+  test("Register page has no automatically detectable a11y issues", async ({
+    page,
+  }) => {
+    await page.goto("/register");
+    await dismissOptionalCookies(page);
+    await page.waitForLoadState("networkidle");
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags([...WCAG_TAGS])
+      .analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+
+  test("Forgot password page has no automatically detectable a11y issues", async ({
+    page,
+  }) => {
+    await page.goto("/forgot-password");
+    await dismissOptionalCookies(page);
+    await page.waitForLoadState("networkidle");
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags([...WCAG_TAGS])
+      .analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+
+  test("Dashboard plan tab has no automatically detectable a11y issues", async ({
+    page,
+  }) => {
+    test.skip(
+      !hasSupabaseForAuthE2E(),
+      "Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for authenticated dashboard a11y scan.",
+    );
+    test.setTimeout(120_000);
+
+    await signUpForE2E(page);
+    await page.goto("/dashboard/plan");
     await page.waitForLoadState("networkidle");
 
     const accessibilityScanResults = await new AxeBuilder({ page })

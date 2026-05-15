@@ -11,6 +11,11 @@ import type {
 } from "@shared/types/database";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
+import {
+  firstZodFieldError,
+  resetPasswordFormSchema,
+  settingsDisplayNameSchema,
+} from "@shared/lib/validation";
 import { setAnalyticsEnabled as setPostHogCapturing } from "@/lib/posthog";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 
@@ -201,8 +206,14 @@ export function useSettingsPage(): UseSettingsPageResult {
   const onSaveProfile = useCallback(async () => {
     setProfileSaving(true);
     setProfileMessage(null);
+    const parsed = settingsDisplayNameSchema.safeParse(displayName);
+    if (!parsed.success) {
+      setProfileSaving(false);
+      setProfileMessage(firstZodFieldError(parsed.error));
+      return;
+    }
     const { error } = await supabase.auth.updateUser({
-      data: { full_name: displayName.trim() || null },
+      data: { full_name: parsed.data || null },
     });
     setProfileSaving(false);
     if (error) {
@@ -257,18 +268,18 @@ export function useSettingsPage(): UseSettingsPageResult {
 
   const onChangePassword = useCallback(async () => {
     setPasswordMessage(null);
-    if (newPassword.length < 8) {
-      setPasswordMessage("Password must be at least 8 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordMessage("Passwords do not match.");
+    const parsed = resetPasswordFormSchema.safeParse({
+      password: newPassword,
+      confirmPassword,
+    });
+    if (!parsed.success) {
+      setPasswordMessage(firstZodFieldError(parsed.error));
       return;
     }
 
     setPasswordSaving(true);
     const { error } = await supabase.auth.updateUser({
-      password: newPassword,
+      password: parsed.data.password,
     });
     setPasswordSaving(false);
 

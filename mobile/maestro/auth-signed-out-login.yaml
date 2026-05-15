@@ -1,0 +1,17 @@
+# UI smoke: signed-out user reaches login (no credentials).
+appId: ai.bluprnt.mobile
+---
+- runFlow:
+    file: common/launch-app.active.yaml
+- runFlow:
+    file: common/onboarding-skip.yaml
+    when:
+      visible: "Snap it. Get the number."
+- tapOn: "Already have an account? Sign In"
+- extendedWaitUntil:
+    visible: "Sign In"
+    timeout: 20000
+- assertVisible: "Email address"
+- assertVisible: "Password"
+- assertVisible: "Forgot password?"
+- assertVisible: "Don't have an account?"

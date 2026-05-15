@@ -47,7 +47,7 @@ flowchart TB
   end
 
   subgraph shared_pkg["Shared Core"]
-    SH["@bluprnt/shared — Types, Formatters, Validation"]
+    SH["@bluprnt/shared — Types, Zod validation, formatters"]
   end
 
   subgraph supabase[Supabase Platform]
@@ -88,31 +88,55 @@ npm run dev          # Start Web (Vite)
 npm run dev:mobile   # Start Expo (Mobile)
 ```
 
-### 4. The quality gate
+### 4. Quality gate
 
-We maintain a **zero-warning** ESLint policy on the paths CI checks. Before pushing, your code must pass:
+We maintain a **zero-warning** ESLint policy on the paths CI checks. Before pushing, run:
 
 ```bash
-npm run check        # Lint → Knip → Typecheck → Coverage → Build
+npm run check        # Lint → Knip → Typecheck → Coverage → Build → Edge functions (20)
+npm run status       # Faster lint / typecheck / tests per workspace (pre-push sanity)
 ```
 
-CI also runs **Playwright** (Chromium and WebKit per `playwright.config.ts`), **Deno typecheck** for Supabase edge functions, optional **Supabase DB types** verification via `npm run db:types:check` (when `SUPABASE_ACCESS_TOKEN` is set), and **Maestro** mobile flows on `main` / PRs (see [.github/workflows/ci.yml](.github/workflows/ci.yml)). Local E2E: `npm run test:e2e` (full), `npm run test:e2e:smoke` (fast subset), `npm run test:e2e:probes` (popup/offline probes only).
+`npm run check` includes **`npm run functions:check`**, which type-checks all **20** Supabase Edge Function entrypoints and runs shared Deno unit tests.
+
+#### What CI and local tooling cover
+
+| Area                   | How it is enforced                                                                                                                                |
+| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Shared validation**  | Zod schemas in `shared/lib/validation.ts` (auth, onboarding, settings, marketing); re-exported for Edge Functions                                 |
+| **Web E2E**            | Playwright — `npm run test:e2e` (full), `npm run test:e2e:smoke` (marketing + auth redirect + axe on key routes), `npm run test:e2e:probes`       |
+| **Web a11y**           | `@axe-core/playwright` on landing, register, forgot-password, and authenticated dashboard routes                                                  |
+| **Mobile E2E**         | Maestro — `bash scripts/e2e-mobile-maestro.sh` (default: `app-smoke`); full folder with `MAESTRO_CLEAR_STATE=true` on CI                          |
+| **Mobile auth smokes** | `mobile/maestro/auth-forgot-password.yaml`, `auth-signed-out-login.yaml` (no credentials); `auth-login.yaml` needs `USER_EMAIL` / `USER_PASSWORD` |
+| **Errors**             | Sentry via `reportClientError` on web/mobile error boundaries                                                                                     |
+| **Analytics (mobile)** | PostHog gated behind explicit consent (`optOut` by default)                                                                                       |
+| **DB**                 | Optional `npm run db:types:check` when `SUPABASE_ACCESS_TOKEN` is set; `npm run db:migrations:check` before releases                              |
+
+See [.github/workflows/ci.yml](.github/workflows/ci.yml) for the full pipeline. Coverage thresholds apply to **critical subsets** of web/mobile — details in [CONTRIBUTING.md — Coverage thresholds](CONTRIBUTING.md#coverage-thresholds).
+
+#### Local-only checks (optional)
+
+```bash
+npm run db:lint
+npm run security:audit
+bash scripts/lighthouse-local.sh   # see docs/web-lighthouse.md
+```
 
 ### What “10/10” means here
 
-We treat **10/10** as **defensible excellence**: honest docs, automated gates, and security reporting—not vanity badges. Coverage is enforced on **critical subsets** of web/mobile (see [CONTRIBUTING.md — Coverage thresholds](CONTRIBUTING.md#coverage-thresholds)); full-repo line coverage is not claimed.
+We treat **10/10** as **defensible excellence**: honest docs, automated gates, and security reporting—not vanity badges. Phases 1–2 of our quality roadmap (shared Zod, auth hardening, lazy onboarding, full edge-function checks, Maestro auth smokes) are **in place**. Longer-term items (Storybook/Ladle, Lighthouse CI budgets on PRs, i18n, session-storage hardening, public share-token review) stay on the backlog until product priorities call for them.
 
 ---
 
 ## 📂 Repository Guide
 
-| Path        | Description                                                         |
-| :---------- | :------------------------------------------------------------------ |
-| `web/`      | React 19 SPA, performance- and accessibility-oriented UX.           |
-| `mobile/`   | Expo Native app. Features modular components and native gestures.   |
-| `shared/`   | The source of truth for types, database schemas, and billing logic. |
-| `supabase/` | Database migrations and the Deno Edge Function suite.               |
-| `docs/`     | [**Architecture Deep-Dive**](docs/ARCHITECTURE.md)                  |
+| Path        | Description                                                                          |
+| :---------- | :----------------------------------------------------------------------------------- |
+| `web/`      | React 19 SPA, performance- and accessibility-oriented UX.                            |
+| `mobile/`   | Expo Native app. Features modular components and native gestures.                    |
+| `shared/`   | Types, Zod validation (`shared/lib/validation.ts`), formatters, and billing helpers. |
+| `supabase/` | Database migrations and the Deno Edge Function suite.                                |
+| `docs/`     | [**Architecture Deep-Dive**](docs/ARCHITECTURE.md)                                   |
 
 ---
 
@@ -123,6 +147,7 @@ We treat **10/10** as **defensible excellence**: honest docs, automated gates, a
 - [**Security**](SECURITY.md) — How to report vulnerabilities responsibly.
 - [**Production Launch Handbook**](docs/production_launch_handbook.md) — Deployment and ops.
 - [**Gemini AI Integration**](docs/gemini-api.md) — How the intelligence layer works.
+- [**Web Lighthouse (local)**](docs/web-lighthouse.md) — Performance and a11y lab runs against the production build.
 
 ---
 

@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AnalyticsEvent } from "@shared/constants/analytics-events";
 import { posthog } from "@/lib/posthog";
 import {
+  captureEvent,
   clearProductAnalyticsConsentCache,
   getProductAnalyticsConsent,
   setProductAnalyticsConsent,
@@ -23,6 +24,10 @@ vi.mock("@/lib/posthog", () => ({
     optIn: vi.fn(),
     optOut: vi.fn(),
   },
+}));
+
+vi.mock("@/lib/sentry", () => ({
+  Sentry: { addBreadcrumb: vi.fn() },
 }));
 
 describe("product-analytics", () => {
@@ -51,6 +56,23 @@ describe("product-analytics", () => {
 
     expect(log).toHaveBeenCalled();
     log.mockRestore();
+  });
+
+  it("captureEvent respects consent like trackProductEvent", async () => {
+    vi.mocked(AsyncStorage.getItem).mockResolvedValue(null);
+    await getProductAnalyticsConsent();
+    captureEvent("test_event");
+    expect(posthog.capture).not.toHaveBeenCalled();
+
+    await setProductAnalyticsConsent(true);
+    captureEvent("test_event");
+    expect(posthog.capture).toHaveBeenCalledWith("test_event", undefined);
+  });
+
+  it("getProductAnalyticsConsent syncs posthog opt-in state", async () => {
+    vi.mocked(AsyncStorage.getItem).mockResolvedValue("1");
+    await getProductAnalyticsConsent();
+    expect(posthog.optIn).toHaveBeenCalled();
   });
 
   it("setProductAnalyticsConsent persists and updates cache and posthog", async () => {

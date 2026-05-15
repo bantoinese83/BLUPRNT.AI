@@ -23,7 +23,7 @@ import { Theme } from "@/constants/Theme";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { supabase } from "@/lib/supabase";
 import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
-import { captureEvent } from "@/lib/posthog";
+import { captureEvent } from "@/lib/product-analytics";
 import { useConfirmation } from "@/contexts/useConfirmation";
 import { showAppToast } from "@/lib/app-toast";
 import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";

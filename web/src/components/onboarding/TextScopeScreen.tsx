@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { PageTransition } from "./PageTransition";
 import { useOnboarding } from "@/hooks/use-onboarding";
+import { onboardingScopeDescriptionSchema } from "@shared/lib/validation";
+import { toast } from "sonner";
 
 const QUICK_CHIPS: Record<string, string[]> = {
   Kitchen: [
@@ -91,14 +94,14 @@ export function TextScopeScreen() {
             <PenLine className="w-4 h-4" aria-hidden />
             Your description
           </label>
-          <textarea
+          <Textarea
             id="scope-desc"
             value={scopeDescription}
             onChange={(e) => setScopeDescription(e.target.value)}
             placeholder="e.g. Replace cabinets, new quartz countertops, and update the backsplash"
             rows={4}
             maxLength={2000}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:border-transparent resize-none"
+            className="resize-none border-slate-300 focus-visible:ring-slate-950"
           />
 
           <p className="text-xs text-slate-500">
@@ -120,7 +123,18 @@ export function TextScopeScreen() {
             size="lg"
             variant="primary"
             className="flex-[2] h-14 font-bold shadow-lg shadow-teal-500/10"
-            onClick={() => navigate("/onboarding/loading")}
+            onClick={() => {
+              const parsed = onboardingScopeDescriptionSchema.safeParse(
+                scopeDescription ?? "",
+              );
+              if (!parsed.success) {
+                toast.error(
+                  parsed.error.issues[0]?.message ?? "Description is too long.",
+                );
+                return;
+              }
+              navigate("/onboarding/loading");
+            }}
             type="button"
           >
             Get estimate

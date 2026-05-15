@@ -30,7 +30,10 @@ import {
   friendlyAuthError,
   friendlyAuthErrorFromUrlParam,
 } from "@shared/lib/user-friendly-errors";
-import { isValidEmail } from "@/lib/validation";
+import {
+  firstZodFieldError,
+  loginPasswordFormSchema,
+} from "@shared/lib/validation";
 import { LoginHeader } from "@/features/auth/components/LoginHeader";
 import { SocialAuthSection } from "@/features/auth/components/SocialAuthSection";
 
@@ -67,15 +70,10 @@ export default function LoginScreen() {
   }, [params.error]);
 
   const handleLogin = async () => {
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) {
+    const parsed = loginPasswordFormSchema.safeParse({ email, password });
+    if (!parsed.success) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setErrorMsg("Enter the email and password for your account.");
-      return;
-    }
-    if (!isValidEmail(trimmedEmail)) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setErrorMsg("Enter a valid email address.");
+      setErrorMsg(firstZodFieldError(parsed.error));
       return;
     }
 
@@ -83,8 +81,8 @@ export default function LoginScreen() {
     setErrorMsg(null);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password,
+        email: parsed.data.email,
+        password: parsed.data.password,
       });
 
       if (error) {

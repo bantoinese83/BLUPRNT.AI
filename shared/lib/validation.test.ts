@@ -7,6 +7,15 @@ import {
   documentTypeSchema,
   uploadLedgerEntrySchema,
   marketingLeadSchema,
+  loginPasswordFormSchema,
+  loginMagicFormSchema,
+  registerPasswordFormSchema,
+  registerMagicFormSchema,
+  mobileRegisterFormSchema,
+  forgotPasswordFormSchema,
+  marketingLeadFormSchema,
+  resetPasswordFormSchema,
+  firstZodFieldError,
   chatWithProjectSchema,
   validatePassword,
   isValidEmail,
@@ -333,6 +342,127 @@ describe("validation logic", () => {
       expect(isValidZip("123456")).toBe(false);
       expect(isValidZip("abcde")).toBe(false);
       expect(isValidZip(null)).toBe(false);
+    });
+  });
+
+  describe("auth form schemas", () => {
+    it("validates login password form", () => {
+      expect(
+        loginPasswordFormSchema.safeParse({
+          email: "user@example.com",
+          password: "secret12",
+        }).success,
+      ).toBe(true);
+      expect(
+        loginPasswordFormSchema.safeParse({
+          email: "bad",
+          password: "x",
+        }).success,
+      ).toBe(false);
+    });
+
+    it("validates login magic form (email only)", () => {
+      expect(
+        loginMagicFormSchema.safeParse({ email: "user@example.com" }).success,
+      ).toBe(true);
+    });
+
+    it("validates register password form and normalizes zip", () => {
+      const parsed = registerPasswordFormSchema.safeParse({
+        email: "user@example.com",
+        password: "secret12",
+        zip: "12-345",
+        acceptedPolicies: true,
+      });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.zip).toBe("12345");
+      }
+    });
+
+    it("requires policies on register", () => {
+      expect(
+        registerPasswordFormSchema.safeParse({
+          email: "user@example.com",
+          password: "secret12",
+          zip: "12345",
+          acceptedPolicies: false,
+        }).success,
+      ).toBe(false);
+    });
+
+    it("validates register magic form without password", () => {
+      expect(
+        registerMagicFormSchema.safeParse({
+          email: "user@example.com",
+          zip: "12345",
+          acceptedPolicies: true,
+        }).success,
+      ).toBe(true);
+    });
+
+    it("validates mobile register form", () => {
+      expect(
+        mobileRegisterFormSchema.safeParse({
+          name: "Alex",
+          email: "user@example.com",
+          password: "secret12",
+        }).success,
+      ).toBe(true);
+    });
+
+    it("validates forgot password and marketing lead email forms", () => {
+      expect(
+        forgotPasswordFormSchema.safeParse({ email: "user@example.com" })
+          .success,
+      ).toBe(true);
+      expect(
+        marketingLeadFormSchema.safeParse({ email: "user@example.com" })
+          .success,
+      ).toBe(true);
+    });
+
+    it("validates reset password form", () => {
+      expect(
+        resetPasswordFormSchema.safeParse({
+          password: "secret12",
+          confirmPassword: "secret12",
+        }).success,
+      ).toBe(true);
+      expect(
+        resetPasswordFormSchema.safeParse({
+          password: "short",
+          confirmPassword: "short",
+        }).success,
+      ).toBe(false);
+      expect(
+        resetPasswordFormSchema.safeParse({
+          password: "secret12",
+          confirmPassword: "mismatch",
+        }).success,
+      ).toBe(false);
+    });
+
+    it("lowercases marketing lead email on parse", () => {
+      const parsed = marketingLeadSchema.safeParse({
+        email: "User@Example.COM",
+        source: "landing",
+      });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.email).toBe("user@example.com");
+      }
+    });
+
+    it("firstZodFieldError returns first issue message", () => {
+      const result = loginPasswordFormSchema.safeParse({
+        email: "",
+        password: "",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(firstZodFieldError(result.error)).toMatch(/email/i);
+      }
     });
   });
 });

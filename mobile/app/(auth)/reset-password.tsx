@@ -25,10 +25,19 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { TextField } from "@/components/ui/TextField";
 import { supabase } from "@/lib/supabase";
 import { Theme } from "@/constants/Theme";
+import {
+  firstZodFieldError,
+  resetPasswordFormSchema,
+} from "@shared/lib/validation";
+import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -68,28 +77,48 @@ export default function ResetPasswordScreen() {
 
   const handleSubmit = async () => {
     setError(null);
+    setFieldErrors({});
 
     if (sessionOk === false) return;
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    const parsed = resetPasswordFormSchema.safeParse({
+      password,
+      confirmPassword,
+    });
+    if (!parsed.success) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      const issues = parsed.error.issues;
+      const next: { password?: string; confirmPassword?: string } = {};
+      for (const issue of issues) {
+        const key = issue.path[0];
+        if (key === "password" || key === "confirmPassword") {
+          next[key] = issue.message;
+        }
+      }
+      if (Object.keys(next).length > 0) {
+        setFieldErrors(next);
+      } else {
+        setError(firstZodFieldError(parsed.error));
+      }
       return;
     }
 
     setLoading(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    const { error: err } = await supabase.auth.updateUser({ password });
+    const { error: err } = await supabase.auth.updateUser({
+      password: parsed.data.password,
+    });
     setLoading(false);
 
     if (err) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setError(err.message || "Could not update your password. Try again.");
+      setError(
+        friendlyAuthError(
+          err.message || "",
+          "status" in err ? (err as { status?: number }).status : undefined,
+        ),
+      );
       return;
     }
 
@@ -158,11 +187,18 @@ export default function ResetPasswordScreen() {
                     value={password}
                     onChangeText={(text) => {
                       setPassword(text);
-                      if (sessionOk) setError(null);
+                      if (sessionOk) {
+                        setError(null);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          password: undefined,
+                        }));
+                      }
                     }}
                     placeholder="Minimum 8 characters"
                     secureTextEntry
                     autoCapitalize="none"
+                    error={fieldErrors.password}
                   />
 
                   <TextField
@@ -170,11 +206,18 @@ export default function ResetPasswordScreen() {
                     value={confirmPassword}
                     onChangeText={(text) => {
                       setConfirmPassword(text);
-                      if (sessionOk) setError(null);
+                      if (sessionOk) {
+                        setError(null);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          confirmPassword: undefined,
+                        }));
+                      }
                     }}
                     placeholder="Repeat your password"
                     secureTextEntry
                     autoCapitalize="none"
+                    error={fieldErrors.confirmPassword}
                   />
 
                   {error ? (

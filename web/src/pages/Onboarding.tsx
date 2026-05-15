@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import {
   Routes,
   Route,
@@ -8,18 +9,10 @@ import {
 import { Helmet } from "react-helmet-async";
 import { META_ROBOTS_NOINDEX } from "@/lib/seo-meta";
 import { AnimatePresence, motion } from "motion/react";
-import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
-import { ProjectTypeScreen } from "@/components/onboarding/ProjectTypeScreen";
-import { LocationScreen } from "@/components/onboarding/LocationScreen";
-import { StageScreen } from "@/components/onboarding/StageScreen";
-import { PhotoScreen } from "@/components/onboarding/PhotoScreen";
-import { TextScopeScreen } from "@/components/onboarding/TextScopeScreen";
-import { LoadingScreen } from "@/components/onboarding/LoadingScreen";
-import { EstimateScreen } from "@/components/onboarding/EstimateScreen";
-import { SignupScreen } from "@/components/onboarding/SignupScreen";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AppSimpleHeader } from "@/components/layout/AppSimpleHeader";
 import { AppSlimFooter } from "@/components/layout/AppSlimFooter";
+import { PageLoader } from "@/components/PageLoader";
 import { cn } from "@/lib/utils";
 import { Check, Home, Calculator, UserPlus } from "lucide-react";
 import {
@@ -27,6 +20,64 @@ import {
   ONBOARDING_WEB_STEPS,
   phaseIndexForOnboardingPath,
 } from "@shared/constants/onboarding";
+
+const WelcomeScreen = lazy(() =>
+  import("@/components/onboarding/WelcomeScreen").then((m) => ({
+    default: m.WelcomeScreen,
+  })),
+);
+const ProjectTypeScreen = lazy(() =>
+  import("@/components/onboarding/ProjectTypeScreen").then((m) => ({
+    default: m.ProjectTypeScreen,
+  })),
+);
+const LocationScreen = lazy(() =>
+  import("@/components/onboarding/LocationScreen").then((m) => ({
+    default: m.LocationScreen,
+  })),
+);
+const StageScreen = lazy(() =>
+  import("@/components/onboarding/StageScreen").then((m) => ({
+    default: m.StageScreen,
+  })),
+);
+const PhotoScreen = lazy(() =>
+  import("@/components/onboarding/PhotoScreen").then((m) => ({
+    default: m.PhotoScreen,
+  })),
+);
+const TextScopeScreen = lazy(() =>
+  import("@/components/onboarding/TextScopeScreen").then((m) => ({
+    default: m.TextScopeScreen,
+  })),
+);
+const LoadingScreen = lazy(() =>
+  import("@/components/onboarding/LoadingScreen").then((m) => ({
+    default: m.LoadingScreen,
+  })),
+);
+const EstimateScreen = lazy(() =>
+  import("@/components/onboarding/EstimateScreen").then((m) => ({
+    default: m.EstimateScreen,
+  })),
+);
+const SignupScreen = lazy(() =>
+  import("@/components/onboarding/SignupScreen").then((m) => ({
+    default: m.SignupScreen,
+  })),
+);
+
+function OnboardingStepFallback() {
+  return (
+    <div className="flex min-h-[280px] items-center justify-center py-12">
+      <PageLoader />
+    </div>
+  );
+}
+
+function LazyStep({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<OnboardingStepFallback />}>{children}</Suspense>;
+}
 
 function StepProgress({ currentPath }: { currentPath: string }) {
   const navigate = useNavigate();
@@ -169,15 +220,78 @@ export default function Onboarding() {
 
           <AnimatePresence mode="wait">
             <Routes location={location}>
-              <Route path="/" element={<WelcomeScreen />} />
-              <Route path="/type" element={<ProjectTypeScreen />} />
-              <Route path="/location" element={<LocationScreen />} />
-              <Route path="/stage" element={<StageScreen />} />
-              <Route path="/photo" element={<PhotoScreen />} />
-              <Route path="/text-scope" element={<TextScopeScreen />} />
-              <Route path="/loading" element={<LoadingScreen />} />
-              <Route path="/estimate" element={<EstimateScreen />} />
-              <Route path="/signup" element={<SignupScreen />} />
+              <Route
+                path="/"
+                element={
+                  <LazyStep>
+                    <WelcomeScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/type"
+                element={
+                  <LazyStep>
+                    <ProjectTypeScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/location"
+                element={
+                  <LazyStep>
+                    <LocationScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/stage"
+                element={
+                  <LazyStep>
+                    <StageScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/photo"
+                element={
+                  <LazyStep>
+                    <PhotoScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/text-scope"
+                element={
+                  <LazyStep>
+                    <TextScopeScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/loading"
+                element={
+                  <LazyStep>
+                    <LoadingScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/estimate"
+                element={
+                  <LazyStep>
+                    <EstimateScreen />
+                  </LazyStep>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <LazyStep>
+                    <SignupScreen />
+                  </LazyStep>
+                }
+              />
               <Route path="*" element={<Navigate to="/onboarding" replace />} />
             </Routes>
           </AnimatePresence>

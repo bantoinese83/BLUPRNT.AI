@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, type Resolver } from "react-hook-form";
 import { Helmet } from "react-helmet-async";
 import {
   Link,
@@ -30,6 +30,7 @@ import {
   friendlyAuthErrorFromUrlParam,
 } from "@shared/lib/user-friendly-errors";
 import { useLogin } from "@/hooks/use-login";
+import { loginResolverForMode } from "@/lib/auth-form-resolver";
 
 type Mode = "password" | "magic";
 
@@ -37,14 +38,6 @@ type LoginFormValues = {
   email: string;
   password?: string;
 };
-
-const EMAIL_RULES = {
-  required: "Enter your email address.",
-  pattern: {
-    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    message: "Enter a valid email address.",
-  },
-} as const;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -68,12 +61,19 @@ export default function Login() {
     onMagicRequest,
   } = useLogin(redirectParam);
 
+  const loginResolver = useMemo(
+    () => loginResolverForMode(mode) as Resolver<LoginFormValues>,
+    [mode],
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     resetField,
+    clearErrors,
   } = useForm<LoginFormValues>({
+    resolver: loginResolver,
     defaultValues: { email: "", password: "" },
     shouldUnregister: true,
   });
@@ -97,6 +97,7 @@ export default function Login() {
     setError(null);
     setMagicSent(false);
     setMagicRecipientEmail("");
+    clearErrors();
     if (next === "magic") {
       resetField("password", { defaultValue: "" });
     }
@@ -209,7 +210,7 @@ export default function Login() {
                     autoComplete="email"
                     className="h-12 pl-11 rounded-xl"
                     error={errors.email?.message}
-                    {...register("email", EMAIL_RULES)}
+                    {...register("email")}
                   />
                 </div>
               </div>
@@ -243,9 +244,7 @@ export default function Login() {
                     autoComplete="current-password"
                     className="h-12 pl-11 rounded-xl"
                     error={errors.password?.message}
-                    {...register("password", {
-                      required: "Enter your password.",
-                    })}
+                    {...register("password")}
                   />
                 </div>
               </div>
@@ -316,7 +315,7 @@ export default function Login() {
                         placeholder="you@example.com"
                         className="h-12 pl-11 rounded-xl"
                         error={errors.email?.message}
-                        {...register("email", EMAIL_RULES)}
+                        {...register("email")}
                       />
                     </div>
                     <p className="text-[11px] text-slate-400 font-medium px-1">

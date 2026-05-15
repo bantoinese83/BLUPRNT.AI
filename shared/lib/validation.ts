@@ -104,12 +104,6 @@ export const getLedgerEntrySchema = z.object({
   ledger_entry_id: uuidSchema,
 });
 
-/** Public lead capture (inserted via Edge Function with service role). */
-export const marketingLeadSchema = z.object({
-  email: z.string().trim().toLowerCase().email().max(320),
-  source: z.string().trim().min(1).max(64),
-});
-
 /** Max prior turns accepted by `chatWithProjectSchema` (each user + assistant counts as one entry). */
 export const CHAT_WITH_PROJECT_HISTORY_MAX = 24;
 
@@ -165,3 +159,115 @@ export function isValidZip(zip: string | null | undefined): boolean {
   if (!zip) return false;
   return ZIP_PATTERN.test(zip.trim());
 }
+
+/** First user-facing message from a Zod error (forms, mobile alerts). */
+export function firstZodFieldError(error: z.ZodError): string {
+  const issue = error.issues[0];
+  return issue?.message ?? "Please check your entries and try again.";
+}
+
+export const authEmailFieldSchema = z
+  .string({ required_error: "Enter your email address." })
+  .trim()
+  .min(1, { message: "Enter your email address." })
+  .email({ message: "Enter a valid email address." })
+  .max(320);
+
+export const authLoginPasswordFieldSchema = z
+  .string({ required_error: "Enter your password." })
+  .min(1, { message: "Enter your password." });
+
+export const authRegisterPasswordFieldSchema = z
+  .string({ required_error: "Enter a password." })
+  .min(PASSWORD_MIN_LENGTH, { message: PASSWORD_VALIDATION_RULES.message });
+
+export const authZipFieldSchema = z
+  .string({ required_error: "ZIP is required." })
+  .transform((s) =>
+    String(s ?? "")
+      .replace(/\D/g, "")
+      .slice(0, 5),
+  )
+  .pipe(z.string().length(5, { message: "Use a 5-digit ZIP code." }));
+
+export const authAcceptedPoliciesFieldSchema = z
+  .boolean()
+  .refine((v) => v === true, {
+    message: "Agree to the Terms and Privacy Policy to continue.",
+  });
+
+export const loginPasswordFormSchema = z.object({
+  email: authEmailFieldSchema,
+  password: authLoginPasswordFieldSchema,
+});
+
+export const loginMagicFormSchema = z.object({
+  email: authEmailFieldSchema,
+});
+
+/** Password reset request (email only; web + mobile). */
+export const forgotPasswordFormSchema = loginMagicFormSchema;
+
+/** Client-only: email field before `source` is attached (exit intent, etc.). */
+export const marketingLeadFormSchema = loginMagicFormSchema;
+
+/** Public lead capture (inserted via Edge Function with service role). */
+export const marketingLeadSchema = z.object({
+  email: authEmailFieldSchema.transform((e) => e.toLowerCase()),
+  source: z.string().trim().min(1).max(64),
+});
+
+export const registerPasswordFormSchema = z.object({
+  email: authEmailFieldSchema,
+  password: authRegisterPasswordFieldSchema,
+  zip: authZipFieldSchema,
+  acceptedPolicies: authAcceptedPoliciesFieldSchema,
+});
+
+export const registerMagicFormSchema = registerPasswordFormSchema.omit({
+  password: true,
+});
+
+/** Onboarding location step (ZIP or intersection). */
+export const onboardingLocationInputSchema = z
+  .string()
+  .trim()
+  .min(1, { message: "Please enter a ZIP code, or click 'Skip for now'." });
+
+/** Onboarding scope description (optional; bounded for API). */
+export const onboardingScopeDescriptionSchema = z
+  .string()
+  .max(2000, { message: "Description must be 2000 characters or fewer." });
+
+/** Settings profile display name. */
+export const settingsDisplayNameSchema = z
+  .string()
+  .trim()
+  .max(120, { message: "Name must be 120 characters or fewer." });
+
+/** Set new password after recovery link (web + mobile). */
+export const resetPasswordFormSchema = z
+  .object({
+    password: authRegisterPasswordFieldSchema,
+    confirmPassword: z
+      .string({ required_error: "Confirm your password." })
+      .min(1, { message: "Confirm your password." }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+/** Mobile sign-up (name + email + password; policies checked separately). */
+export const mobileRegisterFormSchema = z.object({
+  name: z.string().trim().min(1, "Add your name so we can greet you."),
+  email: authEmailFieldSchema,
+  password: authRegisterPasswordFieldSchema,
+});
+
+export type LoginPasswordFormValues = z.infer<typeof loginPasswordFormSchema>;
+export type LoginMagicFormValues = z.infer<typeof loginMagicFormSchema>;
+export type RegisterPasswordFormValues = z.infer<
+  typeof registerPasswordFormSchema
+>;
+export type RegisterMagicFormValues = z.infer<typeof registerMagicFormSchema>;

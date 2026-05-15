@@ -20,6 +20,7 @@ import {
   suggestLocationFromDeviceGps,
   userFacingLocationError,
 } from "@/lib/location";
+import { onboardingLocationInputSchema } from "@shared/lib/validation";
 
 const SESSION_IP_KEY = "bluprnt_location_ip_attempted";
 
@@ -239,9 +240,12 @@ export function LocationScreen() {
             variant="primary"
             className="w-full"
             onClick={() => {
-              if (!String(locationInput || "").trim()) {
+              const parsed = onboardingLocationInputSchema.safeParse(
+                locationInput ?? "",
+              );
+              if (!parsed.success) {
                 toast.error(
-                  "Please enter a ZIP code, or click 'Skip for now'.",
+                  parsed.error.issues[0]?.message ?? "Enter a location.",
                 );
                 return;
               }

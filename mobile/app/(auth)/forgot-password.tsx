@@ -21,7 +21,10 @@ import { TextField } from "@/components/ui/TextField";
 import { supabase } from "@/lib/supabase";
 import { getPasswordRecoveryRedirectUrl } from "@/lib/auth-linking";
 import { Theme } from "@/constants/Theme";
-import { isValidEmail } from "@/lib/validation";
+import {
+  firstZodFieldError,
+  forgotPasswordFormSchema,
+} from "@shared/lib/validation";
 import { friendlyAuthError } from "@shared/lib/user-friendly-errors";
 
 export default function ForgotPasswordScreen() {
@@ -31,15 +34,10 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const handleReset = async () => {
-    const trimmed = email.trim();
-    if (!trimmed) {
+    const parsed = forgotPasswordFormSchema.safeParse({ email });
+    if (!parsed.success) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setError("Please enter your email address.");
-      return;
-    }
-    if (!isValidEmail(trimmed)) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setError("Please enter a valid email address.");
+      setError(firstZodFieldError(parsed.error));
       return;
     }
 
@@ -49,7 +47,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        trimmed,
+        parsed.data.email,
         {
           redirectTo: getPasswordRecoveryRedirectUrl(),
         },

@@ -28,10 +28,9 @@ import {
   persistPostLoginRedirectForOAuth,
 } from "@/lib/post-login-redirect-storage";
 import {
-  isValidEmail,
-  isValidPassword,
-  MIN_PASSWORD_LENGTH,
-} from "@/lib/validation";
+  firstZodFieldError,
+  mobileRegisterFormSchema,
+} from "@shared/lib/validation";
 import { RegisterHeader } from "@/features/auth/components/RegisterHeader";
 import { PolicyAgreement } from "@/features/auth/components/PolicyAgreement";
 import { SocialAuthSection } from "@/features/auth/components/SocialAuthSection";
@@ -55,31 +54,28 @@ export default function RegisterScreen() {
       );
       return;
     }
-    const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-    if (!trimmedName) {
+    const parsed = mobileRegisterFormSchema.safeParse({
+      name,
+      email,
+      password,
+    });
+    if (!parsed.success) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setErrorMsg("Add your name so we can greet you.");
+      setErrorMsg(firstZodFieldError(parsed.error));
       return;
     }
-    if (!isValidEmail(trimmedEmail)) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setErrorMsg("Enter a valid email address.");
-      return;
-    }
-    if (!isValidPassword(password)) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setErrorMsg(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
-      );
-      return;
-    }
+
+    const {
+      name: trimmedName,
+      email: trimmedEmail,
+      password: parsedPassword,
+    } = parsed.data;
 
     setLoading(true);
     setErrorMsg(null);
     const { data, error } = await supabase.auth.signUp({
       email: trimmedEmail,
-      password,
+      password: parsedPassword,
       options: {
         data: {
           full_name: trimmedName,
@@ -117,8 +113,8 @@ export default function RegisterScreen() {
 
     if (data.user) {
       const { data: signInData } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+        email: trimmedEmail,
+        password: parsedPassword,
       });
       if (signInData.session) {
         await clearPostLoginRedirectStorage();

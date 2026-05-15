@@ -121,8 +121,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
     // 5. Generate ZIP
     const zipped = zipSync(zipData);
+    const zipBytes = new Uint8Array(zipped);
 
-    return new Response(zipped, {
+    return new Response(new Blob([zipBytes], { type: "application/zip" }), {
       status: 200,
       headers: {
         ...getCorsHeaders(req),

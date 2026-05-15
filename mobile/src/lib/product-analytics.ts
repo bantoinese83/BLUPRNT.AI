@@ -17,6 +17,11 @@ export async function getProductAnalyticsConsent(): Promise<boolean> {
   const raw = await AsyncStorage.getItem(STORAGE_KEY);
   const on = raw === "1";
   consentCache = on;
+  if (on) {
+    posthog.optIn();
+  } else {
+    posthog.optOut();
+  }
   return on;
 }
 
@@ -78,4 +83,12 @@ export function trackProductEvent(
     // Only log in dev to keep production logs clean, but ensure it's high signal
     console.info(`[Analytics] ${name}`, properties ?? {});
   }
+}
+
+/** @deprecated Prefer `trackProductEvent` — respects consent. */
+export function captureEvent(
+  name: string,
+  properties?: Record<string, string | number | boolean | null | undefined>,
+): void {
+  trackProductEvent(name, properties);
 }

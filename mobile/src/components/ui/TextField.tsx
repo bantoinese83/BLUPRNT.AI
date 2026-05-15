@@ -76,7 +76,7 @@ export function TextField({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           accessibilityLabel={label}
-          accessibilityHint={placeholder}
+          accessibilityHint={error ? `${label}. ${error}` : placeholder}
           accessibilityRole="text"
           selectionColor={Theme.colors.brand.primary}
         />
@@ -98,7 +98,11 @@ export function TextField({
           </TouchableOpacity>
         )}
       </MotiView>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error ? (
+        <Text style={styles.errorText} accessibilityRole="alert">
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

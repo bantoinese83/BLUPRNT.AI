@@ -13,7 +13,6 @@ import { OnboardingProvider } from "@/contexts/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { AuthListener } from "@/components/AuthListener";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Toaster } from "sonner";
@@ -95,11 +94,11 @@ export default function App() {
         Transform and layout animations are then skipped; opacity-style transitions may still run.
       */}
       <MotionConfig reducedMotion="user">
-        <AuthProvider>
-          <ErrorBoundary>
-            <QueryClientProvider client={queryClient}>
-              <ForceUpdateGate>
-                <BrowserRouter>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <ForceUpdateGate>
+              <BrowserRouter>
+                <AuthProvider>
                   <ScrollToTop />
                   <a
                     href="#main-content"
@@ -128,7 +127,6 @@ export default function App() {
                   >
                     Skip to main content
                   </a>
-                  <AuthListener />
                   <WebOfflineBanner />
                   <motion.div
                     id="main-content"
@@ -231,11 +229,11 @@ export default function App() {
                   <CookieConsent />
                   <DeferredGlobalChrome />
                   <ConsentAwareAnalytics />
-                </BrowserRouter>
-              </ForceUpdateGate>
-            </QueryClientProvider>
-          </ErrorBoundary>
-        </AuthProvider>
+                </AuthProvider>
+              </BrowserRouter>
+            </ForceUpdateGate>
+          </QueryClientProvider>
+        </ErrorBoundary>
       </MotionConfig>
     </HelmetProvider>
   );

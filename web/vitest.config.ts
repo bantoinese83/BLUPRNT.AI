@@ -28,7 +28,7 @@ export default defineConfig({
         "src/services/**/*.ts",
         "src/contexts/**/*.{ts,tsx}",
         "src/components/ErrorBoundary.tsx",
-        "src/components/AuthListener.tsx",
+        "src/components/ComponentErrorBoundary.tsx",
       ],
       exclude: [
         "node_modules/",

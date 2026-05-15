@@ -19,7 +19,7 @@ import { Theme } from "@/constants/Theme";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 import { BottomSheet } from "@/components/ui/BottomSheet";
-import { captureEvent } from "@/lib/posthog";
+import { captureEvent } from "@/lib/product-analytics";
 import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";
 import { PHYSICAL_ASSET_CATEGORIES } from "@shared/constants/home-specs";
 

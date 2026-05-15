@@ -16,7 +16,7 @@ import { useAwareness, type SmartInsight } from "@/contexts/AwarenessContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Theme } from "@/constants/Theme";
 import { showAppToast } from "@/lib/app-toast";
-import { captureEvent } from "@/lib/posthog";
+import { captureEvent } from "@/lib/product-analytics";
 
 const HEALTH_COLORS = {
   optimal: {

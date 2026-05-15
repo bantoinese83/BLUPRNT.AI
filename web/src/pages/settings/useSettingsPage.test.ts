@@ -135,7 +135,7 @@ describe("useSettingsPage", () => {
     });
 
     expect(result.current.passwordMessage).toBe(
-      "Password must be at least 8 characters.",
+      "Use at least 8 characters for your password.",
     );
     expect(supabase.auth.updateUser).not.toHaveBeenCalled();
   });

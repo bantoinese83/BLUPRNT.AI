@@ -8,13 +8,5 @@ export const posthog = new PostHog(POSTHOG_KEY || "", {
   host: POSTHOG_HOST,
 });
 
-// Fire a test event to clear "Waiting for events"
-posthog.capture("app_initialized", { platform: "mobile" });
-
-export const captureEvent = (
-  event: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  properties?: any,
-) => {
-  posthog.capture(event, properties);
-};
+/** Opt out until the user enables product analytics in Profile. */
+posthog.optOut();

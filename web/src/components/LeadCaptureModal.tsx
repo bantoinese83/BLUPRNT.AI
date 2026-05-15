@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { invokeFunction } from "@/lib/supabase";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 import { marketingLeadSchema } from "@shared/lib/validation";
+import { marketingLeadResolver } from "@/lib/auth-form-resolver";
 
 interface LeadCaptureModalProps {
   onPlanSelect?: (plan: "architect" | "pass") => void;
@@ -56,6 +57,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
     formState: { errors },
     reset,
   } = useForm<LeadFormValues>({
+    resolver: marketingLeadResolver,
     defaultValues: { email: "" },
   });
 
@@ -68,7 +70,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
     });
     if (!parsed.success) {
       setSubmitError(
-        parsed.error.errors[0]?.message ?? "Enter a valid email address.",
+        parsed.error.issues[0]?.message ?? "Enter a valid email address.",
       );
       setLoading(false);
       return;
@@ -198,13 +200,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                   autoComplete="email"
                   placeholder="you@email.com"
                   className="pl-11 py-6 rounded-2xl border-slate-200 focus:ring-2 focus:ring-slate-900/20"
-                  {...register("email", {
-                    required: "Enter your email address.",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Enter a valid email address.",
-                    },
-                  })}
+                  {...register("email")}
                   error={errors.email?.message}
                 />
               </div>

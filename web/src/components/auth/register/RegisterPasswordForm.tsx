@@ -7,10 +7,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
-import {
-  PASSWORD_VALIDATION_RULES,
-  PASSWORD_MIN_LENGTH,
-} from "@shared/lib/validation";
 
 type RegisterFormValues = {
   email: string;
@@ -25,8 +21,6 @@ interface RegisterPasswordFormProps {
   errors: FieldErrors<RegisterFormValues>;
   watch: UseFormWatch<RegisterFormValues>;
   loading: boolean;
-  emailRules: Record<string, unknown>;
-  zipRules: Record<string, unknown>;
 }
 
 export function RegisterPasswordForm({
@@ -35,8 +29,6 @@ export function RegisterPasswordForm({
   errors,
   watch,
   loading,
-  emailRules,
-  zipRules,
 }: RegisterPasswordFormProps) {
   const passwordValue = watch("password") ?? "";
 
@@ -61,7 +53,7 @@ export function RegisterPasswordForm({
             placeholder="you@example.com"
             className="h-12 pl-11 rounded-xl"
             error={errors.email?.message}
-            {...register("email", emailRules)}
+            {...register("email")}
           />
         </div>
       </div>
@@ -84,13 +76,7 @@ export function RegisterPasswordForm({
             placeholder="At least 8 characters"
             className="h-12 pl-11 rounded-xl"
             error={errors.password?.message}
-            {...register("password", {
-              required: "Enter a password.",
-              minLength: {
-                value: PASSWORD_MIN_LENGTH,
-                message: PASSWORD_VALIDATION_RULES.message,
-              },
-            })}
+            {...register("password")}
           />
         </div>
         <PasswordStrengthMeter password={passwordValue} />
@@ -116,7 +102,7 @@ export function RegisterPasswordForm({
             className="h-12 pl-11 rounded-xl"
             placeholder="For regional pricing"
             error={errors.zip?.message}
-            {...register("zip", zipRules)}
+            {...register("zip")}
           />
         </div>
       </div>
