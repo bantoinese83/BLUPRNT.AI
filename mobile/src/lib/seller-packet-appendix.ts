@@ -1,5 +1,5 @@
 import { escapeHtml } from "@shared/lib/escape-html";
-import { uint8ToBase64 } from "@shared/lib/uint8-to-base64";
+
 import type { LedgerEntryRow } from "@shared/types/database";
 import { fetchLedgerEntryOriginalSignedUrl } from "./open-original-document";
 
@@ -93,8 +93,14 @@ export async function buildSellerPacketAppendixHtml(
         continue;
       }
 
-      const buf = await blob.arrayBuffer();
-      const dataUrl = `data:${mime};base64,${uint8ToBase64(new Uint8Array(buf))}`;
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
 
       blocks.push(`
         <div style="page-break-before: always; margin-top: 24px;">

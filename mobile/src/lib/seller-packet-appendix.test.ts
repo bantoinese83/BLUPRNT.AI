@@ -18,6 +18,18 @@ describe("buildSellerPacketAppendixHtml", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
+
+    // Mock FileReader for Node environment
+    global.FileReader = class {
+      onloadend: () => void = () => {};
+      onerror: () => void = () => {};
+      result: string = "data:image/jpeg;base64,AAAA";
+      readAsDataURL() {
+        setTimeout(() => {
+          this.onloadend();
+        }, 0);
+      }
+    } as any;
   });
 
   afterEach(() => {
