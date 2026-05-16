@@ -21,7 +21,6 @@ import {
   setProductAnalyticsConsent,
 } from "@/lib/product-analytics";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
-import { uint8ToBase64 } from "@shared/lib/uint8-to-base64";
 
 import type { UseProfileScreenResult } from "./profile-screen.types";
 
@@ -158,10 +157,14 @@ export function useProfileScreen(): UseProfileScreenResult {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      const response = await fetch(
+
+      const fileName = `bluprnt-export-${new Date().toISOString().slice(0, 10)}.zip`;
+      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+
+      const downloadResult = await FileSystem.downloadAsync(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/${EDGE_FUNCTIONS.GENERATE_DATA_EXPORT}`,
+        fileUri,
         {
-          method: "POST",
           headers: {
             Authorization: `Bearer ${session?.access_token}`,
             "x-bluprnt-api-version": "v2",
@@ -169,19 +172,9 @@ export function useProfileScreen(): UseProfileScreenResult {
         },
       );
 
-      if (!response.ok) {
-        throw new Error(`Export failed with status ${response.status}`);
+      if (downloadResult.status !== 200) {
+        throw new Error(`Export failed with status ${downloadResult.status}`);
       }
-
-      const buf = await response.arrayBuffer();
-      const base64 = uint8ToBase64(new Uint8Array(buf));
-
-      const fileName = `bluprnt-export-${new Date().toISOString().slice(0, 10)}.zip`;
-      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
-
-      await FileSystem.writeAsStringAsync(fileUri, base64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {

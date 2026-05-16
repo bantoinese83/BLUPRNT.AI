@@ -24,7 +24,7 @@ export const handler = async (req: Request): Promise<Response> => {
   const opt = handleOptions(req);
   if (opt) return opt;
 
-  if (req.method !== "POST") {
+  if (req.method !== "POST" && req.method !== "GET") {
     return jsonResponse({ error: "Method not allowed" }, 405, req);
   }
 
