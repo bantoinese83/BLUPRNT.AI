@@ -229,24 +229,25 @@ export function useSettingsPage(): UseSettingsPageResult {
     setExportMessage(null);
     setExportLoading(true);
     try {
-      const { data, error } = await invokeFunction(
-        EDGE_FUNCTIONS.GENERATE_DATA_EXPORT,
-        { method: "POST" },
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${EDGE_FUNCTIONS.GENERATE_DATA_EXPORT}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "x-bluprnt-api-version": "v2",
+          },
+        },
       );
 
-      if (error) throw error;
-
-      if (!data) {
-        throw new Error("No data received from export function.");
+      if (!response.ok) {
+        throw new Error(`Export failed with status ${response.status}`);
       }
 
-      // In browser, supabase-js returns application/zip as a Blob
-      const blob =
-        data instanceof Blob
-          ? data
-          : new Blob([data as BlobPart], {
-              type: "application/zip",
-            });
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

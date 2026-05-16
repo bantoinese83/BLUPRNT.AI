@@ -4,7 +4,7 @@ import type { LedgerEntryRow } from "@shared/types/database";
 import { fetchLedgerEntryOriginalSignedUrl } from "./open-original-document";
 
 /** Skip very large files so the PDF stays printable and fast. */
-const MAX_BYTES_PER_FILE = 2_500_000;
+const MAX_BYTES_PER_FILE = 5_000_000;
 
 /**
  * PDF Template Part: Appendix
@@ -49,19 +49,6 @@ export async function buildSellerPacketAppendixHtml(
       const blob = await response.blob();
       const filename = res.filename || "document";
 
-      if (blob.size > MAX_BYTES_PER_FILE) {
-        blocks.push(`
-          <div style="page-break-before: always; margin-top: 24px;">
-            <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
-            <p class="plan-line">“${escapeHtml(
-              filename,
-            )}” is too large to embed here (${Math.round(
-              blob.size / 1_000_000,
-            )} MB). Open the full original from the app with View original.</p>
-          </div>`);
-        continue;
-      }
-
       const mime = blob.type || "image/jpeg";
       const lower = filename.toLowerCase();
       const isPdf = mime.includes("pdf") || lower.endsWith(".pdf");
@@ -72,6 +59,19 @@ export async function buildSellerPacketAppendixHtml(
             <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
             <p class="plan-line">Original file: ${escapeHtml(filename)}</p>
             <p class="plan-line">This upload is a PDF. It isn’t pasted into this export to keep the packet smaller. Open it with View original in the app.</p>
+          </div>`);
+        continue;
+      }
+
+      if (blob.size > MAX_BYTES_PER_FILE) {
+        blocks.push(`
+          <div style="page-break-before: always; margin-top: 24px;">
+            <h3 style="font-size: 16px;">${escapeHtml(title)}</h3>
+            <p class="plan-line">“${escapeHtml(
+              filename,
+            )}” is too large to embed here (${Math.round(
+              blob.size / 1_000_000,
+            )} MB). Open the full original from the app with View original.</p>
           </div>`);
         continue;
       }
