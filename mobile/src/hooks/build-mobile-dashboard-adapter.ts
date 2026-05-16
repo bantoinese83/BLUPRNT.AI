@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { keepPreviousData } from "@tanstack/react-query";
 import type { UseDashboardDataAdapter } from "@shared/hooks/use-dashboard-data";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { reportClientError } from "@/lib/sentry";
@@ -14,7 +15,14 @@ export type MobileDashboardDataInjected = {
 };
 
 function useMobileDashboardQueryOptions() {
-  return useMemo(() => ({ staleTime: 30000 }), []);
+  return useMemo(
+    () => ({
+      staleTime: 30000,
+      /** Avoid Vault/Home tab flashing skeleton while snapshot refetches (real devices). */
+      placeholderData: keepPreviousData,
+    }),
+    [],
+  );
 }
 
 function useMobileProjectIdStateStub() {

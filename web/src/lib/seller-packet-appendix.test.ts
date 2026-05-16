@@ -28,6 +28,39 @@ describe("buildSellerPacketAppendixItems", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
+
+    // Mock URL
+    global.URL.createObjectURL = vi.fn(() => "mock-url");
+    global.URL.revokeObjectURL = vi.fn();
+
+    // Mock Image
+    class MockImage {
+      onload: () => void = () => {};
+      onerror: () => void = () => {};
+      src: string = "";
+      width: number = 100;
+      height: number = 100;
+      constructor() {
+        setTimeout(() => this.onload(), 0);
+      }
+    }
+    global.Image = MockImage as any;
+
+    // Mock Canvas
+    const originalCreateElement = document.createElement;
+    document.createElement = vi.fn().mockImplementation((tagName) => {
+      if (tagName === "canvas") {
+        return {
+          width: 0,
+          height: 0,
+          getContext: () => ({
+            drawImage: () => {},
+          }),
+          toDataURL: () => "data:image/png;base64,mocked",
+        };
+      }
+      return originalCreateElement.call(document, tagName);
+    });
   });
 
   it("returns empty array when no invoices are provided", async () => {
@@ -153,7 +186,7 @@ describe("buildSellerPacketAppendixItems", () => {
       },
       error: null,
     });
-    const huge = new Uint8Array(3_000_000);
+    const huge = new Uint8Array(6_000_000);
     vi.mocked(global.fetch).mockResolvedValue({
       ok: true,
       blob: async () => new Blob([huge], { type: "image/png" }),
@@ -169,9 +202,9 @@ describe("buildSellerPacketAppendixItems", () => {
   });
 
   it("embeds png and webp images", async () => {
-    for (const [mime, fmt] of [
-      ["image/png", "PNG"],
-      ["image/webp", "WEBP"],
+    for (const [mime, fmt, expectedFmt] of [
+      ["image/png", "PNG", "PNG"],
+      ["image/webp", "WEBP", "PNG"], // Now converts to PNG
     ] as const) {
       vi.mocked(invokeFunction).mockResolvedValue({
         data: {
@@ -190,7 +223,9 @@ describe("buildSellerPacketAppendixItems", () => {
         inv({ id: "1", document_id: "doc-1" }),
       ]);
       expect(items[0]!.kind).toBe("image");
-      expect((items[0] as { imageFormat: string }).imageFormat).toBe(fmt);
+      expect((items[0] as { imageFormat: string }).imageFormat).toBe(
+        expectedFmt,
+      );
     }
   });
 

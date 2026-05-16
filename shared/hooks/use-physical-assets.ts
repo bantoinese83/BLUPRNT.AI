@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PhysicalAssetRow } from "../types/database.ts";
 import { STORAGE_CONFIG } from "../constants/storage.ts";
@@ -26,6 +26,12 @@ export function usePhysicalAssets({
   const [error, setError] = useState<string | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const isMounted = useRef(true);
+  const hasLoadedRef = useRef(false);
+  const onErrorRef = useRef(onError);
+  const signedUrlsRef = useRef(signedUrls);
+
+  onErrorRef.current = onError;
+  signedUrlsRef.current = signedUrls;
 
   useEffect(() => {
     isMounted.current = true;
@@ -34,10 +40,23 @@ export function usePhysicalAssets({
     };
   }, []);
 
+  useEffect(() => {
+    hasLoadedRef.current = false;
+    setAssets([]);
+    setSignedUrls({});
+    setError(null);
+    setRefreshing(false);
+    setLoading(!skipFetch);
+  }, [projectId, skipFetch]);
+
   const fetchAssets = useCallback(
     async (opts?: { silent?: boolean }) => {
-      if (!opts?.silent) setLoading(true);
-      else setRefreshing(true);
+      const isInitial = !hasLoadedRef.current;
+      if (opts?.silent || !isInitial) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       try {
@@ -50,6 +69,7 @@ export function usePhysicalAssets({
         if (dbError) throw dbError;
         if (isMounted.current) {
           setAssets(data || []);
+          hasLoadedRef.current = true;
         }
       } catch (err) {
         const msg =
@@ -57,7 +77,7 @@ export function usePhysicalAssets({
         if (isMounted.current) {
           setError(msg);
         }
-        onError?.(err);
+        onErrorRef.current?.(err);
       } finally {
         if (isMounted.current) {
           setLoading(false);
@@ -65,13 +85,22 @@ export function usePhysicalAssets({
         }
       }
     },
-    [projectId, supabase, onError],
+    [projectId, supabase],
+  );
+
+  const assetStoragePathsKey = useMemo(
+    () =>
+      assets
+        .map((a) => a.storage_path)
+        .filter((path): path is string => !!path)
+        .join("\0"),
+    [assets],
   );
 
   const fetchSignedUrls = useCallback(async () => {
     const pathsToFetch = assets
       .map((a) => a.storage_path)
-      .filter((path): path is string => !!path && !signedUrls[path]);
+      .filter((path): path is string => !!path && !signedUrlsRef.current[path]);
 
     if (pathsToFetch.length === 0) return;
 
@@ -96,19 +125,19 @@ export function usePhysicalAssets({
     } catch (err) {
       console.error("[usePhysicalAssets] Error fetching signed URLs:", err);
     }
-  }, [assets, signedUrls, supabase]);
+  }, [assets, supabase]);
 
   useEffect(() => {
     if (!skipFetch) {
-      fetchAssets();
+      void fetchAssets();
     }
   }, [fetchAssets, skipFetch]);
 
   useEffect(() => {
-    if (!skipFetch) {
-      fetchSignedUrls();
+    if (!skipFetch && assetStoragePathsKey) {
+      void fetchSignedUrls();
     }
-  }, [fetchSignedUrls, skipFetch]);
+  }, [assetStoragePathsKey, fetchSignedUrls, skipFetch]);
 
   const deleteAsset = useCallback(
     async (id: string) => {
@@ -121,11 +150,11 @@ export function usePhysicalAssets({
         await fetchAssets({ silent: true });
         return { error: null };
       } catch (err) {
-        onError?.(err);
+        onErrorRef.current?.(err);
         return { error: err };
       }
     },
-    [supabase, fetchAssets, onError],
+    [supabase, fetchAssets],
   );
 
   const saveAsset = useCallback(
@@ -144,11 +173,11 @@ export function usePhysicalAssets({
         await fetchAssets({ silent: true });
         return { error: null };
       } catch (err) {
-        onError?.(err);
+        onErrorRef.current?.(err);
         return { error: err };
       }
     },
-    [projectId, supabase, fetchAssets, onError],
+    [projectId, supabase, fetchAssets],
   );
 
   return {

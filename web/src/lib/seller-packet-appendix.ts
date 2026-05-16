@@ -17,7 +17,7 @@ export type SellerPacketAppendixItem =
     };
 
 /** Skip very large files so the PDF stays printable and fast. */
-const MAX_BYTES_PER_FILE = 2_500_000;
+const MAX_BYTES_PER_FILE = 5_000_000;
 
 type SignedUrlResponse = {
   signedUrl?: string;
@@ -60,6 +60,31 @@ function mimeToJspdfFormat(
 function isProbablyPdf(mime: string, filename: string): boolean {
   if (mime.toLowerCase().includes("pdf")) return true;
   return filename.toLowerCase().endsWith(".pdf");
+}
+
+function convertWebPToPng(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(url);
+      reject(e);
+    };
+    img.src = url;
+  });
 }
 
 /**
@@ -113,17 +138,6 @@ export async function buildSellerPacketAppendixItems(
         }
 
         const blob = await response.blob();
-        if (blob.size > MAX_BYTES_PER_FILE) {
-          return {
-            title,
-            kind: "pdf_note",
-            noteLines: [
-              `“${filename}” is too large to embed here (${Math.round(blob.size / 1_000_000)} MB).`,
-              "Open the full original from the app with View original.",
-            ],
-          };
-        }
-
         const mime = blob.type || "application/octet-stream";
         if (isProbablyPdf(mime, filename)) {
           return {
@@ -132,6 +146,17 @@ export async function buildSellerPacketAppendixItems(
             noteLines: [
               `Original file: ${filename}`,
               "This upload is a PDF. It isn’t pasted into this export to keep the packet smaller. Open it with View original in the app.",
+            ],
+          };
+        }
+
+        if (blob.size > MAX_BYTES_PER_FILE) {
+          return {
+            title,
+            kind: "pdf_note",
+            noteLines: [
+              `“${filename}” is too large to embed here (${Math.round(blob.size / 1_000_000)} MB).`,
+              "Open the full original from the app with View original.",
             ],
           };
         }
@@ -146,6 +171,28 @@ export async function buildSellerPacketAppendixItems(
               "This file type can’t be embedded in the PDF. Use View original in the app.",
             ],
           };
+        }
+
+        if (imageFormat === "WEBP") {
+          try {
+            const dataUrl = await convertWebPToPng(blob);
+            return {
+              title,
+              kind: "image",
+              dataUrl,
+              imageFormat: "PNG",
+            };
+          } catch (e) {
+            console.error("Failed to convert WEBP to PNG", e);
+            return {
+              title,
+              kind: "pdf_note",
+              noteLines: [
+                `Original file: ${filename}`,
+                "We couldn’t process this WebP image for the PDF. Use View original in the app.",
+              ],
+            };
+          }
         }
 
         const buf = await blob.arrayBuffer();

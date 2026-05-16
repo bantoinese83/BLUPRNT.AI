@@ -56,6 +56,13 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
   const [activeCategory, setActiveCategory] = useState("all");
   const { confirm } = useConfirmation();
 
+  const handleAssetsError = useCallback((err: unknown) => {
+    const msg =
+      err instanceof Error ? err.message : "Couldn't load home specs.";
+    showAppToast(msg);
+    console.error(err);
+  }, []);
+
   const {
     assets,
     loading,
@@ -67,12 +74,7 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
   } = usePhysicalAssets({
     projectId,
     supabase,
-    onError: (err) => {
-      const msg =
-        err instanceof Error ? err.message : "Couldn't load home specs.";
-      showAppToast(msg);
-      console.error(err);
-    },
+    onError: handleAssetsError,
   });
 
   const onRefresh = useCallback(async () => {

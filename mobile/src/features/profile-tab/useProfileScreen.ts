@@ -155,24 +155,26 @@ export function useProfileScreen(): UseProfileScreenResult {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      const { data, error } = await invokeFunction(
-        EDGE_FUNCTIONS.GENERATE_DATA_EXPORT,
-        { method: "POST" },
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/${EDGE_FUNCTIONS.GENERATE_DATA_EXPORT}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "x-bluprnt-api-version": "v2",
+          },
+        },
       );
 
-      if (error) throw error;
-      if (!data) throw new Error("No data received from export function.");
-
-      // Supabase invoke in Hermes/React Native usually returns ArrayBuffer or Uint8Array for binary
-      let base64: string;
-      if (data instanceof Uint8Array) {
-        base64 = uint8ToBase64(data);
-      } else if (data instanceof ArrayBuffer) {
-        base64 = uint8ToBase64(new Uint8Array(data));
-      } else {
-        // Fallback or handle unexpected type
-        throw new Error("Unexpected data format received from export.");
+      if (!response.ok) {
+        throw new Error(`Export failed with status ${response.status}`);
       }
+
+      const buf = await response.arrayBuffer();
+      const base64 = uint8ToBase64(new Uint8Array(buf));
 
       const fileName = `bluprnt-export-${new Date().toISOString().slice(0, 10)}.zip`;
       const fileUri = `${FileSystem.cacheDirectory}${fileName}`;

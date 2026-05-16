@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp"
+    },
+    "revenuecat": {
+      "url": "https://mcp.revenuecat.ai/mcp"
+    }
+  }
+}

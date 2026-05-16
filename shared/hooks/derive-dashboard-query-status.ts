@@ -15,8 +15,9 @@ export function deriveDashboardQueryStatus(
   supabaseReady: boolean,
 ): { loading: boolean; refreshing: boolean } {
   return {
-    loading: supabaseReady ? query.isPending || query.isLoading : false,
+    /** First load only — refetches keep prior snapshot via placeholderData. */
+    loading: supabaseReady ? query.isPending && !snapshot : false,
     refreshing:
-      supabaseReady && !!snapshot && query.isFetching && !query.isLoading,
+      supabaseReady && !!snapshot && query.isFetching && !query.isPending,
   };
 }

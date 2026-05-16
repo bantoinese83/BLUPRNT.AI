@@ -95,18 +95,6 @@ export default function FinanceScreen() {
     () =>
       project ? (
         <View>
-          <SegmentedControl
-            options={[
-              { label: "Financials", value: "ledger" },
-              { label: "Home Specs", value: "specs" },
-            ]}
-            value={currentTab}
-            onChange={(val) => {
-              setCurrentTab(val as "ledger" | "specs");
-              Haptics.selectionAsync();
-            }}
-            containerStyle={{ marginHorizontal: 24, marginTop: 16 }}
-          />
           {currentTab === "ledger" && (
             <FinanceLedgerHeader
               loadError={loadError}
@@ -165,7 +153,7 @@ export default function FinanceScreen() {
     );
   }
 
-  if (loading && !project) {
+  if (loading && !project && projects.length === 0) {
     return <FinanceTabSkeleton />;
   }
 
@@ -201,6 +189,21 @@ export default function FinanceScreen() {
     );
   }
 
+  const financeTabSwitcher = (
+    <SegmentedControl
+      options={[
+        { label: "Financials", value: "ledger" },
+        { label: "Home Specs", value: "specs" },
+      ]}
+      value={currentTab}
+      onChange={(val) => {
+        setCurrentTab(val as "ledger" | "specs");
+        Haptics.selectionAsync();
+      }}
+      containerStyle={{ marginHorizontal: 24, marginTop: 16 }}
+    />
+  );
+
   return (
     <ScreenWrapper withLogo edges={["top", "left", "right"]}>
       {currentTab === "ledger" ? (
@@ -208,7 +211,12 @@ export default function FinanceScreen() {
           sections={sections}
           refreshing={refreshing}
           onRefresh={load}
-          renderHeader={renderHeader}
+          renderHeader={() => (
+            <View>
+              {financeTabSwitcher}
+              {renderHeader()}
+            </View>
+          )}
           isArchitect={isArchitect}
           hasProjectPass={hasProjectPass}
           deletingId={deletingId}
@@ -232,10 +240,13 @@ export default function FinanceScreen() {
           ledgerEntriesCount={ledgerEntries.length}
         />
       ) : (
-        <HomeSpecsView
-          projectId={project.id}
-          onAddAsset={() => setIsAddAssetOpen(true)}
-        />
+        <View style={{ flex: 1 }}>
+          {financeTabSwitcher}
+          <HomeSpecsView
+            projectId={project.id}
+            onAddAsset={() => setIsAddAssetOpen(true)}
+          />
+        </View>
       )}
 
       <LedgerEntryReviewSheet
