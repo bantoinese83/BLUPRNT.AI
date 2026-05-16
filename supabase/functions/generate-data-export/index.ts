@@ -123,7 +123,7 @@ export const handler = async (req: Request): Promise<Response> => {
     const zipped = zipSync(zipData);
     const zipBytes = new Uint8Array(zipped);
 
-    return new Response(new Blob([zipBytes], { type: "application/zip" }), {
+    return new Response(zipBytes, {
       status: 200,
       headers: {
         ...getCorsHeaders(req),
