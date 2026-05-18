@@ -6,9 +6,13 @@ import { useLogout } from "@/hooks/use-logout";
 import { supabase, invokeFunction } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 
-vi.mock("react-router-dom", () => ({
-  useNavigate: vi.fn(),
-}));
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  return {
+    ...actual,
+    useNavigate: vi.fn(),
+  };
+});
 
 vi.mock("@/hooks/use-auth", () => ({
   useAuth: vi.fn(),

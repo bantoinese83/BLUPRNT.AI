@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import { PRICING } from "@shared/constants/pricing";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 import {
@@ -128,7 +129,7 @@ export function UpgradeModal({
       }
       setCheckoutError("We couldn’t start checkout. Please try again.");
     } catch (err) {
-      console.error("Stripe Checkout error:", err);
+      reportClientError("UpgradeModal:handleUpgrade", err);
       setCheckoutError("Something went wrong with checkout. Please try again.");
     } finally {
       setLoadingPlan(null);
@@ -146,7 +147,7 @@ export function UpgradeModal({
         window.location.href = data.url;
       }
     } catch (err) {
-      console.error("Portal error:", err);
+      reportClientError("UpgradeModal:handlePortal", err);
       setCheckoutError("Couldn't open billing portal. Please try again.");
     } finally {
       setLoadingPlan(null);
@@ -277,7 +278,7 @@ export function UpgradeModal({
       <div className="p-6 sm:p-10 bg-slate-50 flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Door A */}
-          <Card className="border-slate-200 shadow-md shadow-slate-100/50 relative overflow-hidden flex flex-col">
+          <Card className="metal-surface relative overflow-hidden flex flex-col">
             <div className="absolute top-0 inset-x-0 h-1 bg-teal-600"></div>
 
             <CardHeader>
@@ -342,7 +343,7 @@ export function UpgradeModal({
           </Card>
 
           {/* Door B */}
-          <Card className="border-slate-200 shadow-sm flex flex-col relative">
+          <Card className="metal-surface flex flex-col relative">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
                 <ProjectPassIcon className="h-8 w-8" />

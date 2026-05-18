@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PRICING } from "@shared/constants/pricing";
@@ -11,8 +10,6 @@ import {
   architectBillingChannel,
   hasDuplicateWebAndStoreSubscriptions,
 } from "@shared/lib/subscription-billing";
-import { invokeFunction } from "@/lib/supabase";
-import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing";
 
 import type { UserSubscriptionRow } from "@shared/types/database";
 
@@ -27,39 +24,8 @@ export function BillingSection({
   subscriptionRow,
   setShowUpgrade,
 }: BillingSectionProps) {
-  const [loadingPortal, setLoadingPortal] = useState(false);
-
-  const handleManagePlan = async () => {
-    if (!isArchitect) {
-      setShowUpgrade(true);
-      return;
-    }
-
-    // If subscribed via App Store, we can't manage via Stripe portal
-    if (
-      subscriptionRow &&
-      architectBillingChannel(subscriptionRow) === "store"
-    ) {
-      setShowUpgrade(true); // Or maybe show a specific "Manage in App Store" message
-      return;
-    }
-
-    setLoadingPortal(true);
-    try {
-      const { data, error } = await invokeFunction<{ url: string }>(
-        EDGE_FUNCTIONS.CREATE_PORTAL_SESSION,
-      );
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      console.error("Failed to open billing portal:", err);
-      // Fallback to upgrade modal which at least shows current status
-      setShowUpgrade(true);
-    } finally {
-      setLoadingPortal(false);
-    }
+  const handleManagePlan = () => {
+    setShowUpgrade(true);
   };
 
   return (
@@ -118,19 +84,9 @@ export function BillingSection({
               size="lg"
               className={`rounded-2xl shadow-lg px-8 ${!isArchitect ? "liquid-metal-button shadow-teal-200/50" : "border-slate-200"}`}
               onClick={handleManagePlan}
-              disabled={loadingPortal}
               type="button"
             >
-              {loadingPortal ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : isArchitect ? (
-                "Manage Plan"
-              ) : (
-                "Upgrade Now"
-              )}
+              {isArchitect ? "Change Plan" : "Upgrade Now"}
             </Button>
             {isArchitect &&
               subscriptionRow &&

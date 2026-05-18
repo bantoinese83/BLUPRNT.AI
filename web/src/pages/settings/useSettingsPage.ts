@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
 import { supabase, invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import type {
   UserSubscriptionRow,
   NotificationPreferences,
@@ -146,7 +147,7 @@ export function useSettingsPage(): UseSettingsPageResult {
       });
 
       if (error) {
-        console.error("Failed to save notification preferences:", error);
+        reportClientError("useSettingsPage:onUpdateNotifications", error);
       } else if (prefs.marketing !== undefined) {
         setPostHogCapturing(prefs.marketing);
       }
@@ -167,7 +168,7 @@ export function useSettingsPage(): UseSettingsPageResult {
       });
 
       if (error) {
-        console.error("Failed to save UI preferences:", error);
+        reportClientError("useSettingsPage:onUpdateUI", error);
       }
     },
     [authUser, uiPreferences],
@@ -260,7 +261,7 @@ export function useSettingsPage(): UseSettingsPageResult {
       setExportMessage("Download started.");
       setTimeout(() => setExportMessage(null), 3000);
     } catch (err) {
-      console.error("Export error:", err);
+      reportClientError("useSettingsPage:onExportData", err);
       setExportMessage("Export failed. Try again.");
     } finally {
       setExportLoading(false);

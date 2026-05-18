@@ -20,7 +20,6 @@ import {
   TrendingUp,
   MessageSquare,
 } from "lucide-react-native";
-import RevenueCatUI from "react-native-purchases-ui";
 import { MotiView } from "moti";
 import { router } from "expo-router";
 import Constants from "expo-constants";
@@ -179,7 +178,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
                   styles.upgradeBtn,
                   { backgroundColor: Theme.colors.card },
                 ]}
-                onPress={() => RevenueCatUI.presentCustomerCenter()}
+                onPress={onUpgrade}
               >
                 <Text
                   style={[
@@ -187,7 +186,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
                     { color: Theme.colors.text.primary },
                   ]}
                 >
-                  Manage Plan
+                  Change Plan
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -203,7 +202,7 @@ export function ProfileScreenContent(props: ProfileScreenContentProps) {
                 ? architectBillingChannel(subscription) === "stripe"
                   ? "Your Architect subscription is billed through Stripe on the web. To downgrade or cancel, please use the Billing page on our website."
                   : architectBillingChannel(subscription) === "store"
-                    ? "Your Architect subscription is billed through the App Store. Tap Manage Plan above or use your iPhone’s Settings > Apple ID > Subscriptions to downgrade or cancel."
+                    ? "Your Architect subscription is billed through the App Store. Tap Change Plan above or use your iPhone’s Settings > Apple ID > Subscriptions to downgrade or cancel."
                     : "Subscriptions are managed where you started them (Stripe on web, or App Store on iOS)."
                 : "Free Explorer has no recurring charges. If you upgrade later, you can manage or cancel your plan here or in your device settings."}
             </Text>

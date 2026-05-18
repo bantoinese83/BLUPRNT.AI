@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
 import { invokeFunction } from "@/lib/supabase";
+import { reportClientError } from "@/lib/sentry";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 import { marketingLeadSchema } from "@shared/lib/validation";
 import {
@@ -89,7 +90,10 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
         body: parsed.data,
       });
       if (error || !data?.success) {
-        console.error("submit-marketing-lead:", error ?? data?.error);
+        reportClientError(
+          "LeadCaptureModal:submit-marketing-lead",
+          error ?? data?.error,
+        );
         setSubmitError(
           data?.error ??
             "We couldn't save your email right now. Check your connection and try again.",
@@ -103,7 +107,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
       setSubmitted(true);
       reset();
     } catch (err) {
-      console.error("Failed to capture lead:", err);
+      reportClientError("LeadCaptureModal:onSubmit", err);
       setSubmitError("Something went wrong. Please try again in a moment.");
     } finally {
       setLoading(false);
@@ -137,7 +141,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
       </button>
 
       {/* Left side: The Hook / visual */}
-      <div className="md:w-5/12 bg-gradient-to-br from-teal-950 via-teal-900 to-teal-950 p-8 text-white relative flex flex-col justify-center overflow-hidden">
+      <div className="md:w-5/12 bg-linear-to-br from-teal-950 via-teal-900 to-teal-950 p-8 text-white relative flex flex-col justify-center overflow-hidden">
         {/* Decorative background elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 rounded-full border-4 border-white/20 flex items-center justify-center p-6 grayscale brightness-[10]">

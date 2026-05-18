@@ -2,8 +2,14 @@
 /**
  * Quick per-workspace lint / test / typecheck (faster feedback than `npm run check`).
  * Run from repo root: `npm run status`
+ * 
+ * Now runs in parallel for even faster feedback and prints errors!
  */
-import { execSync } from "node:child_process";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+
+const execPromise = promisify(exec);
+
 const workspaces = ["shared", "web", "mobile"];
 
 const colors = {
@@ -15,32 +21,66 @@ const colors = {
   dim: "\x1b[2m",
 };
 
-function run(cmd, cwd) {
+async function run(cmd) {
   try {
-    execSync(cmd, { cwd, stdio: "pipe" });
-    return { ok: true };
+    const { stdout } = await execPromise(cmd);
+    return { ok: true, output: stdout };
   } catch (err) {
-    return { ok: false, error: err.stderr?.toString() || err.message };
+    return { ok: false, error: err.stdout || err.stderr || err.message };
   }
 }
 
-console.log(`${colors.bold}\n🔍 BLUPRNT Monorepo Health Check\n${colors.reset}`);
+console.log(`${colors.bold}\n🔍 BLUPRNT Monorepo Health Check (Parallel)\n${colors.reset}`);
 
-for (const ws of workspaces) {
-  process.stdout.write(`Checking ${colors.cyan}${ws.padEnd(8)}${colors.reset} `);
+const checks = workspaces.map(async (ws) => {
+  const [lint, test, type] = await Promise.all([
+    run(`npm run lint -w ${ws}`),
+    run(`npm run test:run -w ${ws}`),
+    run(`npm run typecheck -w ${ws}`),
+  ]);
+
+  return { ws, lint, test, type };
+});
+
+const results = await Promise.all(checks);
+
+let hasFailures = false;
+
+for (const res of results) {
+  process.stdout.write(`Checking ${colors.cyan}${res.ws.padEnd(8)}${colors.reset} `);
   
-  const results = {
-    lint: run(`npm run lint -w ${ws}`, "."),
-    test: run(`npm run test:run -w ${ws}`, "."),
-    type: run(`npm run typecheck -w ${ws}`, "."),
-  };
-
   const status = [];
-  if (results.lint.ok) status.push(`${colors.green}Lint ✓${colors.reset}`); else status.push(`${colors.red}Lint ✗${colors.reset}`);
-  if (results.test.ok) status.push(`${colors.green}Test ✓${colors.reset}`); else status.push(`${colors.red}Test ✗${colors.reset}`);
-  if (results.type.ok) status.push(`${colors.green}Type ✓${colors.reset}`); else status.push(`${colors.red}Type ✗${colors.reset}`);
+  if (res.lint.ok) status.push(`${colors.green}Lint ✓${colors.reset}`); else { status.push(`${colors.red}Lint ✗${colors.reset}`); hasFailures = true; }
+  if (res.test.ok) status.push(`${colors.green}Test ✓${colors.reset}`); else { status.push(`${colors.red}Test ✗${colors.reset}`); hasFailures = true; }
+  if (res.type.ok) status.push(`${colors.green}Type ✓${colors.reset}`); else { status.push(`${colors.red}Type ✗${colors.reset}`); hasFailures = true; }
 
   console.log(status.join(" | "));
 }
 
+if (hasFailures) {
+  console.log(`\n${colors.bold}${colors.red}❌ Some checks failed. Details below:${colors.reset}\n`);
+  
+  for (const res of results) {
+    if (!res.lint.ok) {
+      console.log(`${colors.bold}${res.ws} Lint Error:${colors.reset}`);
+      console.log(res.lint.error);
+      console.log("-".repeat(40));
+    }
+    if (!res.test.ok) {
+      console.log(`${colors.bold}${res.ws} Test Error:${colors.reset}`);
+      console.log(res.test.error);
+      console.log("-".repeat(40));
+    }
+    if (!res.type.ok) {
+      console.log(`${colors.bold}${res.ws} Typecheck Error:${colors.reset}`);
+      console.log(res.type.error);
+      console.log("-".repeat(40));
+    }
+  }
+}
+
 console.log("\n" + colors.dim + "Run 'npm run quality' for a full deep scan.\n" + colors.reset);
+
+if (hasFailures) {
+  process.exit(1);
+}
