@@ -15,4 +15,4 @@ Disallow: /reset-password
 Disallow: /signed-out
 Disallow: /e2e/
 
-Sitemap: https://bluprnt.ai/sitemap.xml
+Sitemap: https://www.bluprntai.com/sitemap.xml

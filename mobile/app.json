@@ -16,7 +16,8 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "ai.bluprnt.mobile",
-      "associatedDomains": ["applinks:bluprnt.ai"],
+      "associatedDomains": ["applinks:www.bluprntai.com"],
+      "buildNumber": "34",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSUserNotificationsUsageDescription": "BLUPRNT sends reminders for warranty renewals and project updates you opt into."

@@ -4,7 +4,13 @@
     "details": [
       {
         "appID": "Y7UF88A4UM.ai.bluprnt.mobile",
-        "paths": ["/onboarding", "/onboarding/*", "/reset-password", "/reset-password/*"]
+        "paths": [
+          "/onboarding",
+          "/onboarding/*",
+          "/reset-password",
+          "/reset-password/*",
+          "/project/*"
+        ]
       }
     ]
   }

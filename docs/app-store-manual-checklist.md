@@ -12,7 +12,7 @@ The app now shows clearer in-app messages when purchases, offerings, or restore 
 ## App Store listing (you or marketing)
 
 5. **Screenshots** and **description** for the current build.
-6. **Support URL** and **Marketing URL** — must load real pages (e.g. `bluprnt.ai/support`).
+6. **Support URL** and **Marketing URL** — must load real pages (e.g. `https://www.bluprntai.com/support`).
 7. **Privacy Policy URL** — must match what’s in the app and in App Store Connect.
 8. **Export compliance** questionnaire — answer accurately for your encryption use.
 9. **Age rating** and **review notes** (Sandbox test account if Apple requests it).

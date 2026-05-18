@@ -75,10 +75,10 @@ export default function PrivacyScreen() {
               )
             }
             accessibilityRole="link"
-            accessibilityLabel="Open full privacy policy on bluprnt.ai"
+            accessibilityLabel="Open full privacy policy on bluprntai.com"
           >
             <Text style={styles.externalLinkText}>
-              Read the full Privacy Policy on bluprnt.ai →
+              Read the full Privacy Policy on bluprntai.com →
             </Text>
           </TouchableOpacity>
         </MotiView>

@@ -100,7 +100,7 @@ export default function SupportScreen() {
             }
           >
             <Text style={styles.linkCardText}>
-              Open full help center on bluprnt.ai →
+              Open full help center on bluprntai.com →
             </Text>
           </TouchableOpacity>
 

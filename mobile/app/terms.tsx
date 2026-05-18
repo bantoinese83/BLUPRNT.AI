@@ -82,10 +82,10 @@ export default function TermsScreen() {
               )
             }
             accessibilityRole="link"
-            accessibilityLabel="Open full terms of service on bluprnt.ai"
+            accessibilityLabel="Open full terms of service on bluprntai.com"
           >
             <Text style={styles.externalLinkText}>
-              Read the full Terms on bluprnt.ai →
+              Read the full Terms on bluprntai.com →
             </Text>
           </TouchableOpacity>
         </MotiView>

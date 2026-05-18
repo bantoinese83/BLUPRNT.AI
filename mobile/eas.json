@@ -14,6 +14,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
+        "EXPO_PUBLIC_SITE_URL": "https://www.bluprntai.com",
         "EXPO_PUBLIC_SUPABASE_URL": "https://elucgaegaihkklnfoasm.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsdWNnYWVnYWloa2tsbmZvYXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDE4NDcsImV4cCI6MjA4OTQxNzg0N30.wLUSjotYD6sdjbb1sGxxKbD-VWNwiPeu8qukNZs_brI",
         "EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY": "appl_sudQDhBkcTQcuVvvdLdVNnbhgpK"
@@ -22,6 +23,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
+        "EXPO_PUBLIC_SITE_URL": "https://www.bluprntai.com",
         "EXPO_PUBLIC_SUPABASE_URL": "https://elucgaegaihkklnfoasm.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsdWNnYWVnYWloa2tsbmZvYXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NDE4NDcsImV4cCI6MjA4OTQxNzg0N30.wLUSjotYD6sdjbb1sGxxKbD-VWNwiPeu8qukNZs_brI",
         "EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY": "appl_sudQDhBkcTQcuVvvdLdVNnbhgpK"
