@@ -7,7 +7,7 @@ import {
 
 describe("seo-json-ld", () => {
   beforeEach(() => {
-    vi.stubEnv("VITE_SITE_URL", "https://bluprnt.ai");
+    vi.stubEnv("VITE_SITE_URL", "https://www.bluprntai.com");
   });
 
   afterEach(() => {
@@ -21,7 +21,9 @@ describe("seo-json-ld", () => {
     ]);
     expect(data["@type"]).toBe("BreadcrumbList");
     expect(data.itemListElement).toHaveLength(2);
-    expect(data.itemListElement[1]?.item).toBe("https://bluprnt.ai/privacy");
+    expect(data.itemListElement[1]?.item).toBe(
+      "https://www.bluprntai.com/privacy",
+    );
   });
 
   it("buildFaqPageJsonLd maps questions", () => {

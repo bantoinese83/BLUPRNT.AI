@@ -8,8 +8,8 @@ const PLACEHOLDER_ANON = "playwright-e2e-anon-placeholder";
 function hasSupabaseForAuthE2E(): boolean {
   return Boolean(
     process.env.VITE_SUPABASE_URL?.trim() &&
-      process.env.VITE_SUPABASE_ANON_KEY?.trim() &&
-      process.env.VITE_SUPABASE_ANON_KEY !== PLACEHOLDER_ANON,
+    process.env.VITE_SUPABASE_ANON_KEY?.trim() &&
+    process.env.VITE_SUPABASE_ANON_KEY !== PLACEHOLDER_ANON,
   );
 }
 

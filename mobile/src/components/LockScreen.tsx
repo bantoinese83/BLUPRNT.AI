@@ -58,8 +58,8 @@ export function LockScreen({ type }: LockScreenProps) {
 
         <Text style={styles.description}>
           {type === "update-required"
-            ? "A newer version of BlueprintAI is required to continue. This ensures your data stays safe and features work correctly."
-            : "BlueprintAI is currently undergoing scheduled maintenance. Please check back shortly."}
+            ? "A newer version of BLUPRNT is required to continue. This ensures your data stays safe and features work correctly."
+            : "BLUPRNT is currently undergoing scheduled maintenance. Please check back shortly."}
         </Text>
 
         {type === "update-required" && (

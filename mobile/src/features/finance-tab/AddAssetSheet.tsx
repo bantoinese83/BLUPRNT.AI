@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -66,6 +66,25 @@ export function AddAssetSheet({
     notes: "",
   });
   const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      category: PHYSICAL_ASSET_CATEGORIES[0].id as string,
+      brand: "",
+      color_name: "",
+      color_code: "",
+      finish: "",
+      location_in_home: "",
+      notes: "",
+    });
+    setImageUri(null);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!isOpen) resetForm();
+  }, [isOpen]);
 
   const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -161,7 +180,12 @@ export function AddAssetSheet({
       <View style={styles.inner}>
         <View style={styles.header}>
           <Text style={styles.title}>New Home Spec</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Close add spec form"
+          >
             <X size={20} color={Theme.colors.text.muted} />
           </TouchableOpacity>
         </View>
@@ -196,15 +220,14 @@ export function AddAssetSheet({
                   <TouchableOpacity
                     style={styles.select}
                     onPress={() => {
-                      Alert.alert(
-                        "Select Category",
-                        "",
-                        PHYSICAL_ASSET_CATEGORIES.map((c) => ({
+                      Alert.alert("Select Category", "", [
+                        ...PHYSICAL_ASSET_CATEGORIES.map((c) => ({
                           text: c.label,
                           onPress: () =>
                             setFormData({ ...formData, category: c.id }),
                         })),
-                      );
+                        { text: "Cancel", style: "cancel" as const },
+                      ]);
                     }}
                   >
                     <Text style={styles.selectText}>

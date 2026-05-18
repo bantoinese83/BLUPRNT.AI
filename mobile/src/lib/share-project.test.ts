@@ -33,7 +33,7 @@ describe("generateProjectShareLink", () => {
 
     const r = await generateProjectShareLink("proj-1");
     expect(r.ok).toBe(true);
-    expect(r.url).toContain("https://bluprnt.ai/project/");
+    expect(r.url).toContain("https://www.bluprntai.com/project/");
   });
 
   it("returns message on insert error", async () => {
@@ -63,7 +63,7 @@ describe("presentProjectShareSheet", () => {
     expect(Share.share).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "My Project",
-        url: expect.stringContaining("https://bluprnt.ai/project/"),
+        url: expect.stringContaining("https://www.bluprntai.com/project/"),
       }),
     );
   });

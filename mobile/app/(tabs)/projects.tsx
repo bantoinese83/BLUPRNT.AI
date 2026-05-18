@@ -23,6 +23,7 @@ export default function ProjectsScreen() {
     loadError,
     clearLoadError,
     configurationMissing,
+    handleProjectSelect,
   } = useDashboardData();
 
   if (configurationMissing) {
@@ -84,6 +85,7 @@ export default function ProjectsScreen() {
             <TouchableOpacity
               onPress={() => {
                 Haptics.selectionAsync();
+                void handleProjectSelect(p.id);
                 router.push(`/project/${p.id}`);
               }}
             >

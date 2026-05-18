@@ -4,7 +4,10 @@
       "url": "https://mcp.supabase.com/mcp"
     },
     "revenuecat": {
-      "url": "https://mcp.revenuecat.ai/mcp"
+      "url": "https://mcp.revenuecat.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:REVENUECAT_API_V2_SECRET_KEY}"
+      }
     }
   }
 }

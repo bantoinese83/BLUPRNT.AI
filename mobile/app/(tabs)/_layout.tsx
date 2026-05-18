@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { Tabs } from "expo-router/tabs";
 
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useEffectiveEntitlements } from "@/hooks/useEffectiveEntitlements";
 import { AwarenessProvider } from "@/contexts/AwarenessProvider";
 import { useAwareness } from "@/contexts/AwarenessContext";
 import { InsightsDrawer } from "@/components/InsightsDrawer";
@@ -47,13 +48,9 @@ function TabShell() {
 }
 
 function TabOverlays() {
-  const {
-    showUpgrade,
-    setShowUpgrade,
-    upgradeReason,
-    isArchitect,
-    hasProjectPass,
-  } = useAwareness();
+  const { project } = useDashboardData();
+  const { isArchitect, hasProjectPass } = useEffectiveEntitlements();
+  const { showUpgrade, setShowUpgrade, upgradeReason } = useAwareness();
 
   const handleCloseUpgrade = useCallback(() => {
     setShowUpgrade(false);
@@ -71,6 +68,7 @@ function TabOverlays() {
           reason={upgradeReason || "general"}
           isArchitect={isArchitect}
           hasProjectPass={hasProjectPass}
+          projectId={project?.id}
         />
       </ComponentErrorBoundary>
     </>

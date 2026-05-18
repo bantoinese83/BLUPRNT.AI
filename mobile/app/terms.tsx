@@ -60,7 +60,7 @@ export default function TermsScreen() {
           />
           <Section
             title="4. Payments"
-            content="Payments are processed securely through Stripe. Subscriptions renew automatically unless cancelled. One-time purchases are non-refundable once analysis or access has been provided."
+            content="On the web, payments are processed through Stripe. In the iOS and Android apps, subscriptions and in-app purchases are processed by Apple or Google via our subscription provider. Subscriptions renew automatically unless you cancel in your App Store or Play Store account settings. One-time purchases are non-refundable once analysis or access has been provided, subject to applicable store policies."
           />
           <Section
             title="5. Intellectual property"

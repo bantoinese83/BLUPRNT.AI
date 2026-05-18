@@ -25,10 +25,9 @@ test.describe("E2E probes (VITE_E2E build)", () => {
     });
 
     await page.getByTestId("e2e-offline-save-trigger").click();
-    await expect(page.getByTestId("e2e-offline-save-status")).toHaveText(
-      "ok",
-      { timeout: 15_000 },
-    );
+    await expect(page.getByTestId("e2e-offline-save-status")).toHaveText("ok", {
+      timeout: 15_000,
+    });
 
     await context.setOffline(true);
     await page.getByTestId("e2e-offline-save-trigger").click();

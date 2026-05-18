@@ -14,6 +14,8 @@ type DashboardActionModalsProps = {
   project: ProjectRow | null;
   showUpgrade: boolean;
   setShowUpgrade: (val: boolean) => void;
+  showUpgradeDiscount: boolean;
+  setShowUpgradeDiscount: (val: boolean) => void;
   upgradeReason: UpgradeOpenReason;
   setUpgradeReason: (reason: UpgradeOpenReason) => void;
   shareOpen: boolean;
@@ -33,6 +35,8 @@ export function DashboardActionModals({
   project,
   showUpgrade,
   setShowUpgrade,
+  showUpgradeDiscount,
+  setShowUpgradeDiscount,
   upgradeReason,
   setUpgradeReason,
   shareOpen,
@@ -54,9 +58,11 @@ export function DashboardActionModals({
           isOpen={showUpgrade}
           onClose={() => {
             setShowUpgrade(false);
+            setShowUpgradeDiscount(false);
             setUpgradeReason("general");
           }}
           openReason={upgradeReason}
+          showDiscount={showUpgradeDiscount}
           projectId={project?.id ?? null}
           subscription={subscription}
           isArchitect={isArchitect}
@@ -64,7 +70,13 @@ export function DashboardActionModals({
         />
       </ComponentErrorBoundary>
 
-      <LeadCaptureModal />
+      <LeadCaptureModal
+        onPlanSelect={() => {
+          setShowUpgradeDiscount(true);
+          setUpgradeReason("general");
+          setShowUpgrade(true);
+        }}
+      />
 
       {project && (
         <>

@@ -22,6 +22,8 @@ import type { LedgerEntryRow, ProjectRow } from "@shared/types/database";
 import type { ProjectSwitcherHints } from "@shared/types/dashboard-snapshot";
 import type { LedgerDocumentFilter } from "@/features/finance-tab/ledger-helpers";
 import { financeTabStyles as styles } from "@/features/finance-tab/finance-tab.styles";
+import { LedgerUploadLimitBanner } from "@/components/LedgerUploadLimitBanner";
+import type { UserSubscriptionRow } from "@shared/types/database";
 
 type FinanceLedgerHeaderProps = {
   loadError: string | null;
@@ -41,6 +43,11 @@ type FinanceLedgerHeaderProps = {
   ledgerEntries: LedgerEntryRow[];
   filter: LedgerDocumentFilter;
   onFilterChange: (next: LedgerDocumentFilter) => void;
+  isArchitect: boolean;
+  hasProjectPass: boolean;
+  revenueCatPro?: boolean;
+  subscription?: UserSubscriptionRow | null;
+  onUpgradeForUpload: () => void;
 };
 
 export function FinanceLedgerHeader({
@@ -61,6 +68,11 @@ export function FinanceLedgerHeader({
   ledgerEntries,
   filter,
   onFilterChange,
+  isArchitect,
+  hasProjectPass,
+  revenueCatPro,
+  subscription,
+  onUpgradeForUpload,
 }: FinanceLedgerHeaderProps) {
   const canIncludeUploads = ledgerEntries.some((i) => Boolean(i.document_id));
 
@@ -120,6 +132,15 @@ export function FinanceLedgerHeader({
           onAdd={() => router.push("/onboarding?newProject=1")}
         />
       </View>
+
+      <LedgerUploadLimitBanner
+        ledgerEntries={ledgerEntries}
+        isArchitect={isArchitect}
+        hasProjectPass={hasProjectPass}
+        revenueCatPro={revenueCatPro}
+        subscription={subscription}
+        onUpgrade={onUpgradeForUpload}
+      />
 
       <View style={styles.content}>
         <MotiView

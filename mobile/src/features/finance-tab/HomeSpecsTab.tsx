@@ -26,6 +26,7 @@ import { SnurraLoader, SnurraSize } from "@/components/ui/SnurraLoader";
 import { captureEvent } from "@/lib/product-analytics";
 import { useConfirmation } from "@/contexts/useConfirmation";
 import { showAppToast } from "@/lib/app-toast";
+import { Button } from "@/components/ui/Button";
 import { usePhysicalAssets } from "@shared/hooks/use-physical-assets";
 import { PHYSICAL_ASSET_CATEGORIES } from "@shared/constants/home-specs";
 import type { PhysicalAssetRow } from "@shared/types/database";
@@ -34,6 +35,7 @@ import type { LucideIcon } from "lucide-react-native";
 
 type HomeSpecsTabProps = {
   projectId: string;
+  onAddSpec?: () => void;
 };
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -52,7 +54,7 @@ const CATEGORIES = [
   })),
 ];
 
-export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
+export function HomeSpecsTab({ projectId, onAddSpec }: HomeSpecsTabProps) {
   const [activeCategory, setActiveCategory] = useState("all");
   const { confirm } = useConfirmation();
 
@@ -86,6 +88,13 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
       (a) => activeCategory === "all" || a.category === activeCategory,
     );
   }, [assets, activeCategory]);
+
+  const activeCategoryLabel =
+    CATEGORIES.find((c) => c.id === activeCategory)?.label ?? activeCategory;
+  const isFilteredEmpty =
+    assets.length > 0 &&
+    filteredAssets.length === 0 &&
+    activeCategory !== "all";
 
   const handleDelete = useCallback(
     (id: string) => {
@@ -137,6 +146,9 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
             Haptics.selectionAsync();
           }}
           style={[styles.filterChip, active && styles.filterChipActive]}
+          accessibilityRole="button"
+          accessibilityState={{ selected: active }}
+          accessibilityLabel={`${cat.label} category filter`}
         >
           <Icon
             size={14}
@@ -200,11 +212,43 @@ export function HomeSpecsTab({ projectId }: HomeSpecsTabProps) {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No specs recorded</Text>
-            <Text style={styles.emptySubtitle}>
-              Store paint codes and hardware details here for easy reference
-              later.
+            <View style={styles.emptyIconWrap}>
+              <Paintbrush
+                size={28}
+                color={Theme.colors.brand.primary}
+                strokeWidth={1.5}
+              />
+            </View>
+            <Text style={styles.emptyTitle}>
+              {isFilteredEmpty
+                ? `No ${activeCategoryLabel} specs`
+                : "No specs recorded"}
             </Text>
+            <Text style={styles.emptySubtitle}>
+              {isFilteredEmpty
+                ? "Try another category or add a spec in this category."
+                : "Store paint codes, finishes, and hardware so you can match them later."}
+            </Text>
+            {isFilteredEmpty ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setActiveCategory("all");
+                  Haptics.selectionAsync();
+                }}
+                style={styles.emptySecondaryBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Show all home specs"
+              >
+                <Text style={styles.emptySecondaryBtnText}>Show all specs</Text>
+              </TouchableOpacity>
+            ) : onAddSpec ? (
+              <Button
+                title="Add your first spec"
+                titleCase="sentence"
+                onPress={onAddSpec}
+                style={styles.emptyCta}
+              />
+            ) : null}
           </View>
         }
       />
@@ -241,6 +285,8 @@ const AssetCard = React.memo(
             style={styles.deleteBtn}
             onPress={() => onDelete(item.id)}
             testID="delete-spec-btn"
+            accessibilityRole="button"
+            accessibilityLabel={`Remove ${item.name}`}
           >
             <Trash2 size={16} color={Theme.colors.status.error} />
           </TouchableOpacity>
@@ -443,8 +489,32 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   emptyContainer: {
-    padding: 60,
+    padding: 48,
     alignItems: "center",
+    gap: 4,
+  },
+  emptyIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "rgba(20,184,166,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  emptyCta: {
+    marginTop: 20,
+    minWidth: 200,
+  },
+  emptySecondaryBtn: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  emptySecondaryBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: Theme.colors.brand.primary,
   },
   emptyTitle: {
     fontSize: 16,

@@ -40,6 +40,14 @@ export function useProjectExport({
       return;
     }
 
+    if (scope.length === 0 && detailLedgerEntries.length === 0) {
+      Alert.alert(
+        "Nothing to export yet",
+        "Add a scope item or upload a document, then try Export Packet again.",
+      );
+      return;
+    }
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setExporting(true);
     try {

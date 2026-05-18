@@ -18,6 +18,7 @@ type Props = {
     scopeItemId: string,
     next: BillOfMaterialItem[],
   ) => Promise<void>;
+  premiumInsightsUnlocked?: boolean;
 };
 
 export function ProjectScopeGroupedList({
@@ -27,6 +28,7 @@ export function ProjectScopeGroupedList({
   expandedId,
   setExpandedId,
   onPersistScopeMaterials,
+  premiumInsightsUnlocked = false,
 }: Props) {
   const toggle = (itemId: string) => {
     setExpandedId(expandedId === itemId ? null : itemId);
@@ -58,6 +60,7 @@ export function ProjectScopeGroupedList({
               expandedId={expandedId}
               onToggleExpand={toggle}
               onPersistScopeMaterials={onPersistScopeMaterials}
+              premiumInsightsUnlocked={premiumInsightsUnlocked}
             />
           ))}
         </MotiView>

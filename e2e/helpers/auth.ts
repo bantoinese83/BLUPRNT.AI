@@ -17,6 +17,6 @@ export async function signUpForE2E(page: Page) {
   await page.getByRole("button", { name: "Create account" }).click();
 
   await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
-  
+
   return { email, password };
 }

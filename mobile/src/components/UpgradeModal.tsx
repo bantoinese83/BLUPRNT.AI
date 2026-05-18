@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   StyleSheet,
@@ -18,6 +18,7 @@ import {
   PURCHASE_OFFERINGS_LOAD_ERROR,
 } from "@/lib/purchase-messages";
 import { PUBLIC_SUPPORT_PAGE_URL } from "@shared/constants/public-site";
+import { router } from "expo-router";
 
 // Sub-components
 import { UpgradeHero } from "./upgrade/UpgradeHero";
@@ -34,6 +35,8 @@ interface Props {
   /** When true, monthly (Architect) is already active — align with web paywall. */
   isArchitect?: boolean;
   hasProjectPass?: boolean;
+  /** Current project — required for Project Pass (lifetime) purchase sync. */
+  projectId?: string;
 }
 
 export function UpgradeModal({
@@ -42,29 +45,61 @@ export function UpgradeModal({
   reason = "general",
   isArchitect = false,
   hasProjectPass = false,
+  projectId,
 }: Props) {
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "projectPass">(
     "monthly",
   );
 
+  const premium = usePremium();
   const {
     packages,
     loading,
     offeringsError,
     noProductsConfigured,
     retryOfferings,
-  } = usePremium();
+    purchase,
+    restore,
+  } = premium;
 
   const { isPurchasing, isRestoring, handlePurchase, handleRestore } =
-    useUpgradeActions(onClose);
+    useUpgradeActions(onClose, { purchase, packages, restore, projectId });
 
-  const canPurchase =
-    !loading && !offeringsError && !noProductsConfigured && packages.length > 0;
+  const hasStorePackages = packages.length > 0;
+  const showOfferingsError = offeringsError && !loading && !hasStorePackages;
+  const canPurchase = !loading && hasStorePackages && !noProductsConfigured;
+
+  useEffect(() => {
+    if (isOpen) {
+      void retryOfferings();
+    }
+  }, [isOpen, retryOfferings]);
+
+  const architectEntitled = isArchitect || premium.isPro;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (reason === "ledger_limit" && !architectEntitled && projectId) {
+      setSelectedPlan("projectPass");
+    } else if (reason === "ledger_limit" && !architectEntitled) {
+      setSelectedPlan("monthly");
+    }
+  }, [isOpen, reason, architectEntitled, projectId]);
 
   const selectionMatchesCurrentPlan =
-    (selectedPlan === "monthly" && isArchitect) ||
+    (selectedPlan === "monthly" && architectEntitled) ||
     (selectedPlan === "projectPass" && hasProjectPass);
+
+  const continueLabel = selectionMatchesCurrentPlan
+    ? "Current plan"
+    : isPurchasing
+      ? "Securing plan…"
+      : reason === "ledger_limit"
+        ? "Unlock more uploads"
+        : reason === "export"
+          ? "Unlock full export"
+          : "Continue";
 
   return (
     <Modal
@@ -90,7 +125,7 @@ export function UpgradeModal({
           <UpgradeHero
             selectedPlan={selectedPlan}
             reason={reason}
-            isArchitect={isArchitect}
+            isArchitect={architectEntitled}
             hasProjectPass={hasProjectPass}
           />
 
@@ -104,7 +139,7 @@ export function UpgradeModal({
             </View>
           )}
 
-          {offeringsError && (
+          {showOfferingsError && (
             <View style={[styles.noticeCard, styles.noticeCardError]}>
               <Text style={styles.noticeTitle}>We couldn’t load plans</Text>
               <Text style={styles.noticeBody}>
@@ -121,7 +156,7 @@ export function UpgradeModal({
             </View>
           )}
 
-          {noProductsConfigured && !loading && !offeringsError && (
+          {noProductsConfigured && !loading && !showOfferingsError && (
             <View style={[styles.noticeCard, styles.noticeCardWarning]}>
               <Text style={styles.noticeTitle}>Plans not available yet</Text>
               <Text style={styles.noticeBody}>{PURCHASE_NO_PRODUCTS}</Text>
@@ -141,17 +176,45 @@ export function UpgradeModal({
           <UpgradePlanSelection
             selectedPlan={selectedPlan}
             setSelectedPlan={setSelectedPlan}
-            isArchitect={isArchitect}
+            isArchitect={architectEntitled}
             hasProjectPass={hasProjectPass}
+            packages={packages}
           />
 
           <UpgradeFeatures />
 
           <View style={styles.footer}>
             <Text style={styles.priceHint}>
-              Subscriptions auto-renew and can be cancelled any time. The final
-              price is shown in the App Store confirmation.
+              Subscriptions auto-renew and can be cancelled any time in your
+              Apple ID settings. Payment is charged to your Apple ID account.
+              The final price is shown in the App Store confirmation.
             </Text>
+
+            <View style={styles.legalLinks}>
+              <TouchableOpacity
+                onPress={() => router.push("/privacy")}
+                accessibilityRole="link"
+                accessibilityLabel="Privacy Policy"
+              >
+                <Text style={styles.legalLinkText}>Privacy Policy</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalDot}>·</Text>
+              <TouchableOpacity
+                onPress={() => router.push("/terms")}
+                accessibilityRole="link"
+                accessibilityLabel="Terms of Use"
+              >
+                <Text style={styles.legalLinkText}>Terms of Use</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalDot}>·</Text>
+              <TouchableOpacity
+                onPress={() => void Linking.openURL(PUBLIC_SUPPORT_PAGE_URL)}
+                accessibilityRole="link"
+                accessibilityLabel="Help and support"
+              >
+                <Text style={styles.legalLinkText}>Support</Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               style={[
@@ -163,20 +226,22 @@ export function UpgradeModal({
                 isPurchasing || !canPurchase || selectionMatchesCurrentPlan
               }
               onPress={() => void handlePurchase(selectedPlan)}
+              accessibilityRole="button"
+              accessibilityLabel={continueLabel}
+              accessibilityState={{
+                disabled:
+                  isPurchasing || !canPurchase || selectionMatchesCurrentPlan,
+              }}
             >
-              <Text style={styles.continueButtonText}>
-                {selectionMatchesCurrentPlan
-                  ? "Current plan"
-                  : isPurchasing
-                    ? "Securing plan…"
-                    : "Continue"}
-              </Text>
+              <Text style={styles.continueButtonText}>{continueLabel}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.restoreButton}
               onPress={() => void handleRestore()}
               disabled={isRestoring}
+              accessibilityRole="button"
+              accessibilityLabel="Restore purchases"
             >
               <Text style={styles.restoreText}>
                 {isRestoring ? "Restoring…" : "Restore purchases"}
@@ -212,9 +277,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Theme.colors.text.muted,
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 12,
     lineHeight: 16,
     paddingHorizontal: 40,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+  },
+  legalLinkText: {
+    fontSize: 12,
+    fontFamily: Theme.typography.family.medium,
+    color: Theme.colors.brand.primary,
+  },
+  legalDot: {
+    fontSize: 12,
+    color: Theme.colors.text.muted,
   },
   continueButton: {
     backgroundColor: Theme.colors.brand.primary,

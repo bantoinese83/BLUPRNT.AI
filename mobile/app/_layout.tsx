@@ -32,6 +32,7 @@ import { BrandedSplash } from "@/components/BrandedSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { AuthProvider } from "@/contexts/AuthProvider";
+import { PremiumProvider } from "@/contexts/PremiumProvider";
 import { ConfirmationProvider } from "@/contexts/ConfirmationContext";
 import { AppToastHost } from "@/components/AppToastHost";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -98,9 +99,12 @@ function RootLayout() {
       Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
     const testKey = process.env.EXPO_PUBLIC_REVENUECAT_TEST_STORE_KEY || "";
     const isSimulator = !Device.isDevice && Platform.OS !== "web";
+    const forceProdInSim =
+      process.env.EXPO_PUBLIC_REVENUECAT_FORCE_PROD_IN_SIM === "true";
 
     // Simulators default to "Test Store" (Preview Mode) to bypass unreliable Apple Sandbox
-    if (isExpoGo || isSimulator) {
+    // But if we want to use local StoreKit testing, we need to use the production key.
+    if (isExpoGo || (isSimulator && !forceProdInSim)) {
       if (__DEV__) {
         console.log(
           `[revenuecat] ${isSimulator ? "Simulator" : "Expo Go"} detected. Using Preview Mode.`,
@@ -116,7 +120,7 @@ function RootLayout() {
       if (apiKey) {
         if (__DEV__) {
           console.log(
-            `[revenuecat] Physical device (${Platform.OS}) — using production key.`,
+            `[revenuecat] Physical device or forced simulator (${Platform.OS}) — using production key.`,
           );
         }
         Purchases.configure({ apiKey });
@@ -148,12 +152,14 @@ function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <DashboardForegroundRefresh />
             <AuthProvider>
-              <ConfirmationProvider>
-                <RootLayoutNav />
-                <AppToastHost />
-                <OfflineBannerHost />
-                {isOutdated && <LockScreen type="update-required" />}
-              </ConfirmationProvider>
+              <PremiumProvider>
+                <ConfirmationProvider>
+                  <RootLayoutNav />
+                  <AppToastHost />
+                  <OfflineBannerHost />
+                  {isOutdated && <LockScreen type="update-required" />}
+                </ConfirmationProvider>
+              </PremiumProvider>
             </AuthProvider>
           </QueryClientProvider>
         </SafeAreaProvider>

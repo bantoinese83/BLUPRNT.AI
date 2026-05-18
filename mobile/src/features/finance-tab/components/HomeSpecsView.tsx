@@ -13,10 +13,13 @@ interface HomeSpecsViewProps {
 export function HomeSpecsView({ projectId, onAddAsset }: HomeSpecsViewProps) {
   return (
     <View style={{ flex: 1, backgroundColor: Theme.colors.background }}>
-      <HomeSpecsTab projectId={projectId} />
+      <HomeSpecsTab projectId={projectId} onAddSpec={onAddAsset} />
       <TouchableOpacity
         onPress={onAddAsset}
         testID="add-spec-fab"
+        accessibilityRole="button"
+        accessibilityLabel="Add home spec"
+        accessibilityHint="Opens the form to save paint, tile, or hardware details"
         style={{
           position: "absolute",
           bottom: FINANCE_TAB_BAR_OFFSET + 20,

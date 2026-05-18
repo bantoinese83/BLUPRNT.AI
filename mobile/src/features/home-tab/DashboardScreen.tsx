@@ -15,7 +15,6 @@ import { ResaleValueImpact } from "@/components/ResaleValueImpact";
 import { ProjectSwitcher } from "@/components/ProjectSwitcher";
 import { ProductionReadinessCard } from "@/components/ProductionReadinessCard";
 import { useAwareness } from "@/contexts/AwarenessContext";
-import { UpgradeModal } from "@/components/UpgradeModal";
 import { generateActivityEvents } from "@/lib/activity";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DASHBOARD_EMPTY_STATE } from "@shared/copy/dashboard";
@@ -37,7 +36,6 @@ import { UpcomingRenewalsSection } from "@/components/dashboard/UpcomingRenewals
 import { HomeTeamSection } from "@/components/dashboard/HomeTeamSection";
 import { GroundingSourcesSection } from "@/components/dashboard/GroundingSourcesSection";
 import { homeTabStyles as styles } from "@/features/home-tab/home-tab.styles";
-import { ComponentErrorBoundary } from "@/components/ComponentErrorBoundary";
 import { capitalImprovementTotal } from "@shared/lib/plan-vs-actual";
 
 // Sub-components
@@ -47,6 +45,7 @@ import { DashboardSpendingSection } from "./components/DashboardSpendingSection"
 
 // Sub-hooks
 import { useDashboardHandlers } from "./useDashboardHandlers";
+import { useEffectiveEntitlements } from "@/hooks/useEffectiveEntitlements";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -63,18 +62,13 @@ export default function DashboardScreen() {
     scopeItems,
     load,
     handleProjectSelect,
-    isArchitect,
-    hasProjectPass,
     reconciliation,
   } = useDashboardData();
 
-  const {
-    setIsInsightsOpen,
-    showUpgrade,
-    setShowUpgrade,
-    upgradeReason,
-    setUpgradeReason,
-  } = useAwareness();
+  const { isArchitect, hasProjectPass } = useEffectiveEntitlements();
+
+  const { setIsInsightsOpen, setShowUpgrade, setUpgradeReason } =
+    useAwareness();
 
   const [celebratedProjectId, setCelebratedProjectId] = useState<string | null>(
     null,
@@ -134,8 +128,6 @@ export default function DashboardScreen() {
     project,
     ledgerEntries,
     scopeItems,
-    isArchitect,
-    hasProjectPass,
     load,
     setUpgradeReason,
     setShowUpgrade,
@@ -268,8 +260,10 @@ export default function DashboardScreen() {
         ledgerEntries={ledgerEntries}
         onAction={(id) => {
           if (id === "review-health") {
+            void handleProjectSelect(project.id);
             router.push(`/project/${project.id}`);
           } else if (id === "review-scope") {
+            void handleProjectSelect(project.id);
             router.push(`/project/${project.id}?focus=scope`);
           } else if (id === "upload-quote" || id === "upload-document") {
             openDashboardDocumentCapture();
@@ -423,14 +417,6 @@ export default function DashboardScreen() {
         onClose={() => setRenameVisible(false)}
         onSave={handleRenameSave}
       />
-
-      <ComponentErrorBoundary name="Payments">
-        <UpgradeModal
-          isOpen={showUpgrade}
-          onClose={() => setShowUpgrade(false)}
-          reason={upgradeReason}
-        />
-      </ComponentErrorBoundary>
 
       <LedgerEntryReviewSheet
         ledgerEntry={reviewLedgerEntry}

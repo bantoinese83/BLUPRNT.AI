@@ -6,7 +6,7 @@ The app now shows clearer in-app messages when purchases, offerings, or restore 
 
 1. **Account Holder**: Sign the current **Apple Developer Program License Agreement** at [developer.apple.com/account](https://developer.apple.com/account).
 2. **Paid Apps**: In [App Store Connect → Business](https://appstoreconnect.apple.com/business/), complete **Set Up Tax and Banking** until **Paid Apps** is **Active**.
-3. **Subscriptions & IAP**: Confirm **Architect (monthly)** and **Project Pass (lifetime)** reach **Ready for Review** / **Approved** (not blocked by agreements). See also [APP_STORE_SETUP_REQUIRED.md](APP_STORE_SETUP_REQUIRED.md).
+3. **Subscriptions & IAP**: Confirm **Architect (monthly)** and **Project Pass (lifetime)** reach **Ready for Review** / **Approved** (not blocked by agreements). App Store product IDs must match RevenueCat iOS products: `monthly` (subscription) and `lifetime` (non-consumable / Project Pass). See also [APP_STORE_SETUP_REQUIRED.md](APP_STORE_SETUP_REQUIRED.md).
 4. **Propagation**: After agreement changes, wait **2–4 hours** (sometimes longer) before expecting products to load in TestFlight.
 
 ## App Store listing (you or marketing)

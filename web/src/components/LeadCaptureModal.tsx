@@ -18,6 +18,10 @@ import { Input } from "@/components/ui/input";
 import { invokeFunction } from "@/lib/supabase";
 import { EDGE_FUNCTIONS } from "@shared/lib/backend-routing.js";
 import { marketingLeadSchema } from "@shared/lib/validation";
+import {
+  MARKETING_DISCOUNT_PROMO_CODE,
+  MARKETING_DISCOUNT_SESSION_KEY,
+} from "@shared/constants/marketing-discount";
 import { marketingLeadResolver } from "@/lib/auth-form-resolver";
 
 interface LeadCaptureModalProps {
@@ -30,6 +34,7 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState(MARKETING_DISCOUNT_PROMO_CODE);
   const [loading, setLoading] = useState(false);
   const [hasShown, setHasShown] = useState(false);
 
@@ -76,17 +81,25 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
       return;
     }
     try {
-      const { error } = await invokeFunction(EDGE_FUNCTIONS.SUBMIT_LEAD, {
+      const { data, error } = await invokeFunction<{
+        success?: boolean;
+        promoCode?: string;
+        error?: string;
+      }>(EDGE_FUNCTIONS.SUBMIT_LEAD, {
         body: parsed.data,
       });
-      if (error) {
-        console.error("submit-marketing-lead:", error);
+      if (error || !data?.success) {
+        console.error("submit-marketing-lead:", error ?? data?.error);
         setSubmitError(
-          "We couldn't save your email right now. Check your connection and try again.",
+          data?.error ??
+            "We couldn't save your email right now. Check your connection and try again.",
         );
         return;
       }
 
+      const code = data.promoCode ?? MARKETING_DISCOUNT_PROMO_CODE;
+      setPromoCode(code);
+      sessionStorage.setItem(MARKETING_DISCOUNT_SESSION_KEY, "true");
       setSubmitted(true);
       reset();
     } catch (err) {
@@ -259,11 +272,13 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                 id="lead-capture-success-title"
                 className="text-2xl font-black text-slate-900 tracking-tight"
               >
-                Code: BLUEPRINT35
+                Code: {promoCode}
               </h2>
 
               <p className="text-slate-500 text-sm leading-relaxed">
-                Your discount is locked in. Ready to start your project with
+                Your 35% discount is locked in. Use code{" "}
+                <strong>{promoCode}</strong> below (we&apos;ll also email it
+                when delivery is available). Ready to start your project with
                 professional-grade protections?
               </p>
             </div>
@@ -272,7 +287,10 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
               <Button
                 variant="primary"
                 className="w-full py-6 rounded-2xl font-bold bg-teal-950 hover:bg-teal-900 text-white"
-                onClick={() => onPlanSelect?.("architect")}
+                onClick={() => {
+                  onPlanSelect?.("architect");
+                  handleClose();
+                }}
               >
                 Use discount for Architect Plan
               </Button>
@@ -280,8 +298,8 @@ export function LeadCaptureModal({ onPlanSelect }: LeadCaptureModalProps) {
                 variant="outline"
                 className="w-full py-6 rounded-2xl font-bold text-slate-600"
                 onClick={() => {
-                  handleClose();
                   onPlanSelect?.("pass");
+                  handleClose();
                 }}
               >
                 View Project Pass options

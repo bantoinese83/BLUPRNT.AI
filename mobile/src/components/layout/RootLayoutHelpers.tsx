@@ -77,23 +77,31 @@ export function RootLayoutNav() {
 
     if (!session && inProtectedShell) {
       router.replace("/signed-out");
-      return;
+      return undefined;
     }
 
-    if (!session) return;
+    if (!session) return undefined;
 
     if (onOnboarding) {
-      return;
+      return undefined;
     }
 
     const onRecoveryScreen = pathname.includes("reset-password");
     if ((inAuthGroup || isLanding) && !onRecoveryScreen) {
+      let cancelled = false;
       void (async () => {
         const href = await getPostAuthRedirectHref();
+        if (cancelled) return;
         const target = await consumePostLoginRedirect(href);
+        if (cancelled) return;
         router.replace(target as never);
       })();
+      return () => {
+        cancelled = true;
+      };
     }
+
+    return undefined;
   }, [session, loading, segments, pathname]);
 
   // Sync RevenueCat & Sentry Identity

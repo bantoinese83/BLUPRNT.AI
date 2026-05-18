@@ -1,4 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
+import {
+  isProjectPassStoreProduct,
+  mapRcEventToStatus,
+  projectIdFromRcEvent,
+  projectPassExpiresAtIso,
+  rcEntitlementActiveForEvent,
+  type RcWebhookEvent,
+} from "./logic.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -14,6 +22,9 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * RevenueCat Webhook Handler
  * Syncs App Store/Play entitlements. When the user also has Stripe (web),
  * we only update `revenuecat_entitlement_active` so we never clobber Stripe-driven status.
+ *
+ * Project Pass (lifetime) writes `project_passes` for the project in subscriber attributes.
+ * Architect (monthly) writes `user_subscriptions`.
  *
  * Required secret: REVENUECAT_WEBHOOK_SECRET (set in Supabase Edge Function secrets).
  */
@@ -31,28 +42,66 @@ Deno.serve(async (req: Request) => {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { event } = await req.json();
-    const { type, app_user_id, expiration_at_ms } = event;
+    const { event } = (await req.json()) as { event: RcWebhookEvent };
+    const { type, app_user_id, expiration_at_ms, product_id } = event;
 
     if (!app_user_id) {
       return new Response("No app_user_id provided", { status: 400 });
     }
 
-    console.log(`[RevenueCat] Event: ${type} for User: ${app_user_id}`);
+    console.log(
+      `[RevenueCat] Event: ${type} product=${product_id ?? "unknown"} user=${app_user_id}`,
+    );
+
+    const entitlementActive = rcEntitlementActiveForEvent(type);
+
+    if (isProjectPassStoreProduct(product_id) && entitlementActive) {
+      const projectId = projectIdFromRcEvent(event);
+      if (!projectId) {
+        console.warn(
+          "[RevenueCat] Project Pass purchase missing subscriber attribute project_id",
+        );
+        return new Response("OK", { status: 200 });
+      }
+
+      const { data: ownedProject } = await supabase
+        .from("projects")
+        .select("id")
+        .eq("id", projectId)
+        .eq("user_id", app_user_id)
+        .maybeSingle();
+
+      if (!ownedProject) {
+        console.warn(
+          `[RevenueCat] Project Pass rejected: project ${projectId} is not owned by ${app_user_id}`,
+        );
+        return new Response("OK", { status: 200 });
+      }
+
+      const purchasedAt = new Date().toISOString();
+      const { error: passErr } = await supabase.from("project_passes").upsert(
+        {
+          project_id: projectId,
+          purchased_at: purchasedAt,
+          expires_at: projectPassExpiresAtIso(),
+        },
+        { onConflict: "project_id" },
+      );
+
+      if (passErr) {
+        console.error("[RevenueCat] project_passes upsert error:", passErr);
+        return new Response("Internal Error", { status: 500 });
+      }
+
+      return new Response("OK", { status: 200 });
+    }
 
     const periodEnd = expiration_at_ms
       ? new Date(expiration_at_ms).toISOString()
       : null;
 
-    let status: "active" | "canceled" | "past_due" | "trialing" = "active";
-    if (type === "EXPIRATION" || type === "CANCELLATION") {
-      status = "canceled";
-    } else if (type === "BILLING_ISSUE") {
-      status = "past_due";
-    }
-
-    const rcEntitlementActive = type !== "EXPIRATION" &&
-      type !== "CANCELLATION";
+    const status = mapRcEventToStatus(type);
+    const rcEntitlementActive = entitlementActive;
 
     const { data: existing } = await supabase
       .from("user_subscriptions")

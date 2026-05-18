@@ -5,6 +5,7 @@ import { presentProjectShareSheet } from "@/lib/share-project";
 import { friendlyDashboardLoadError } from "@/lib/dashboard-load-error";
 import { supabase } from "@/lib/supabase";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useEffectiveEntitlements } from "@/hooks/useEffectiveEntitlements";
 import type {
   LedgerEntryRow,
   LedgerLineItemRow,
@@ -44,14 +45,19 @@ export function useProjectDetailData() {
   const [includeAppendix, setIncludeAppendix] = useState(false);
 
   const {
-    isArchitect,
-    hasProjectPass,
     addItem,
     projects,
     projectSwitcherHints,
     handleProjectSelect,
     galleryItems,
   } = useDashboardData();
+
+  const { isArchitect, hasProjectPass } = useEffectiveEntitlements();
+
+  useEffect(() => {
+    if (!id) return;
+    void handleProjectSelect(id);
+  }, [id, handleProjectSelect]);
 
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);

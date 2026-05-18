@@ -12,6 +12,11 @@ import {
 } from "@/components/icons/PlanMarks";
 import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
 import { isArchitectPlanEffective } from "@shared/lib/architect-entitlement";
+import { architectBillingChannel } from "@shared/lib/subscription-billing";
+import {
+  MARKETING_DISCOUNT_PROMO_CODE,
+  MARKETING_DISCOUNT_SESSION_KEY,
+} from "@shared/constants/marketing-discount";
 import type { UserSubscriptionRow } from "@shared/types/database";
 
 const ARCHITECT_LEDGER_LIMIT = 10;
@@ -60,6 +65,10 @@ export function UpgradeModal({
 }: UpgradeModalProps) {
   const architectEntitled =
     isArchitectPlanEffective(subscription) || isArchitect;
+  const canManageArchitectInStripe =
+    architectEntitled &&
+    subscription != null &&
+    architectBillingChannel(subscription) === "stripe";
   const [loadingPlan, setLoadingPlan] = useState<
     "architect" | "pass" | "portal" | null
   >(null);
@@ -75,6 +84,11 @@ export function UpgradeModal({
     estimatedAmount > 0
       ? estimatedAmount
       : 28000;
+
+  const shouldApplyPromo =
+    showDiscount ||
+    (typeof sessionStorage !== "undefined" &&
+      sessionStorage.getItem(MARKETING_DISCOUNT_SESSION_KEY) === "true");
 
   const handleUpgrade = async (plan: "architect" | "pass") => {
     setCheckoutError(null);
@@ -103,6 +117,7 @@ export function UpgradeModal({
         body: {
           priceId: priceId.trim(),
           projectId: plan === "pass" ? projectId : undefined,
+          applyPromoCode: shouldApplyPromo,
         },
       });
 
@@ -172,10 +187,10 @@ export function UpgradeModal({
             estimates, permits, and other records don&apos;t.
           </p>
         )}
-        {showDiscount && (
+        {shouldApplyPromo && (
           <p className="text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto leading-relaxed">
-            Use promo code <strong>BLUEPRINT35</strong> on the Stripe checkout
-            page if you have one. List prices:{" "}
+            Your <strong>{MARKETING_DISCOUNT_PROMO_CODE}</strong> discount
+            applies automatically at checkout when available. List prices:{" "}
             <strong>${PRICING.architectUsdPerMonth}/mo</strong> Architect tier,{" "}
             <strong>${PRICING.projectPassUsdOneTime}</strong> Project Pass.
           </p>
@@ -190,6 +205,12 @@ export function UpgradeModal({
             <span className="text-slate-600">
               Quotes, permits, and other record types don&apos;t count.
             </span>
+          </p>
+        )}
+        {openReason === "ledger_limit" && hasProjectPass && (
+          <p className="text-sm text-slate-700 bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 max-w-xl mx-auto text-left leading-relaxed">
+            Your <strong>Project Pass</strong> includes unlimited bill and
+            receipt uploads for this project while your pass is active.
           </p>
         )}
         {openReason === "ledger_limit" &&
@@ -219,7 +240,11 @@ export function UpgradeModal({
           id="upgrade-modal-title"
           className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"
         >
-          Protect your {formatEstimate(mid)} investment
+          {openReason === "ledger_limit"
+            ? "Add more bills & receipts"
+            : openReason === "export"
+              ? "Unlock your Home Archive export"
+              : `Protect your ${formatEstimate(mid)} investment`}
         </h2>
         <p className="text-slate-600 max-w-xl mx-auto text-base leading-relaxed">
           {mid >= 50000 ? (
@@ -398,7 +423,7 @@ export function UpgradeModal({
               />
             </div>
 
-            {architectEntitled && (
+            {canManageArchitectInStripe && (
               <button
                 type="button"
                 onClick={handleManagePortal}

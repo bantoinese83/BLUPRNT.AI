@@ -50,7 +50,7 @@ describe("getPublicSiteUrl", () => {
 
 describe("buildLandingJsonLd", () => {
   it("verifies structure and inclusion of all FAQs", () => {
-    const siteUrl = "https://bluprnt.ai";
+    const siteUrl = "https://www.bluprntai.com";
     const jsonLd = buildLandingJsonLd(siteUrl);
 
     expect(jsonLd["@context"]).toBe("https://schema.org");

@@ -13,9 +13,9 @@ test.describe("Shared project (ProjectView)", () => {
     const res = await page.goto("/project/expired-token-e2e");
     expect(res?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByText(/This link has expired/i),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/This link has expired/i)).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("shows not found message when API returns 404", async ({ page }) => {

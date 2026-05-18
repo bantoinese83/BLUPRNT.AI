@@ -38,6 +38,8 @@ type Props = {
     scopeItemId: string,
     next: BillOfMaterialItem[],
   ) => Promise<void>;
+  /** When false, premium justification and care tips stay hidden. */
+  premiumInsightsUnlocked?: boolean;
 };
 
 export const ProjectScopeLineCard = React.memo(
@@ -50,6 +52,7 @@ export const ProjectScopeLineCard = React.memo(
     expandedId,
     onToggleExpand,
     onPersistScopeMaterials,
+    premiumInsightsUnlocked = false,
   }: Props) => {
     const isOpen = expandedId === item.id;
     const materialRows = item.metadata?.materials;
@@ -215,7 +218,7 @@ export const ProjectScopeLineCard = React.memo(
                     style={{ overflow: "hidden" }}
                   >
                     {/* Justification Section */}
-                    {justification && (
+                    {premiumInsightsUnlocked && justification && (
                       <View
                         style={{
                           padding: 12,
@@ -262,7 +265,7 @@ export const ProjectScopeLineCard = React.memo(
                     )}
 
                     {/* Care Tips Section */}
-                    {careTips && (
+                    {premiumInsightsUnlocked && careTips && (
                       <View
                         style={{
                           padding: 12,

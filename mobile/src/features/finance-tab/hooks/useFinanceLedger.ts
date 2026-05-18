@@ -7,6 +7,7 @@ import { showAppToast } from "@/lib/app-toast";
 import { generateSellerPacketPDF } from "@/lib/pdf-export";
 import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
 import { isFreeTierLedgerEntryLimitReached } from "@/lib/ledger-entry-upload-gate";
+import { useEffectiveEntitlements } from "@/hooks/useEffectiveEntitlements";
 import {
   DOCUMENT_CAPTURE_LEDGER_COPY,
   presentDocumentCapturePrompt,
@@ -30,8 +31,6 @@ interface UseFinanceLedgerProps {
   project: ProjectRow | null;
   ledgerEntries: LedgerEntryRow[];
   scopeItems: ScopeRow[];
-  isArchitect: boolean;
-  hasProjectPass: boolean;
   load: () => void;
   setShowUpgrade: (show: boolean) => void;
   setUpgradeReason: (reason: "export" | "ledger_limit" | "general") => void;
@@ -41,12 +40,12 @@ export function useFinanceLedger({
   project,
   ledgerEntries,
   scopeItems,
-  isArchitect,
-  hasProjectPass,
   load,
   setShowUpgrade,
   setUpgradeReason,
 }: UseFinanceLedgerProps) {
+  const { isArchitect, hasProjectPass, subscription, revenueCatPro } =
+    useEffectiveEntitlements();
   const [filter, setFilter] = useState<LedgerDocumentFilter>("all");
   const [exporting, setExporting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -174,6 +173,7 @@ export function useFinanceLedger({
           ledgerEntries,
           isArchitect,
           hasProjectPass,
+          { revenueCatPro, subscription },
         )
       ) {
         setUpgradeReason("ledger_limit");
@@ -192,6 +192,8 @@ export function useFinanceLedger({
       ledgerEntries,
       isArchitect,
       hasProjectPass,
+      revenueCatPro,
+      subscription,
       runLedgerDocumentUpload,
       setUpgradeReason,
       setShowUpgrade,

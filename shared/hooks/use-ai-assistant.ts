@@ -15,6 +15,8 @@ export interface Message {
   role: MessageRole;
   content: string;
   actions?: ChatProjectAction[];
+  /** Set when the assistant could not complete a request. */
+  tone?: "default" | "error";
 }
 
 const MAX_SUGGESTED_ACTIONS = 4;
@@ -111,6 +113,7 @@ export function useAIAssistant({
             id: (Date.now() + 1).toString(),
             role: "assistant",
             content: formatErrorMessage(err),
+            tone: "error",
           },
         ]);
       } finally {

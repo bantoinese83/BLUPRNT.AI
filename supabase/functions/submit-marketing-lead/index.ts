@@ -4,6 +4,7 @@ import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { getServiceClient } from "../_shared/auth.ts";
 import { marketingLeadSchema } from "../_shared/validation.ts";
 import { logEdge } from "../_shared/log.ts";
+import { MARKETING_DISCOUNT_PROMO_CODE } from "../../../shared/constants/marketing-discount.ts";
 
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
 
@@ -21,7 +22,7 @@ function discountEmailHtml(): string {
 <p>Hello!</p>
 <p>You recently asked for a discount on BLUPRNT.AI. Your code is below:</p>
 <div style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; margin: 24px 0;">
-<span style="font-size: 24px; font-weight: 900; letter-spacing: 2px;">BLUEPRINT35</span>
+<span style="font-size: 24px; font-weight: 900; letter-spacing: 2px;">${MARKETING_DISCOUNT_PROMO_CODE}</span>
 </div>
 <p>This code gives you <strong>35% off</strong> the Architect Plan or a single Project Pass.</p>
 <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
@@ -64,10 +65,15 @@ Deno.serve(async (req: Request) => {
       source,
     });
     if (insErr) {
-      logEdge("error", "submit-marketing-lead insert", {
-        detail: insErr.message,
-      });
-      return jsonResponse({ error: "Could not save your request." }, 500, req);
+      const duplicate =
+        insErr.code === "23505" ||
+        /duplicate|unique/i.test(insErr.message ?? "");
+      if (!duplicate) {
+        logEdge("error", "submit-marketing-lead insert", {
+          detail: insErr.message,
+        });
+        return jsonResponse({ error: "Could not save your request." }, 500, req);
+      }
     }
 
     if (BREVO_API_KEY.trim()) {
@@ -94,7 +100,11 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    return jsonResponse({ success: true }, 200, req);
+    return jsonResponse(
+      { success: true, promoCode: MARKETING_DISCOUNT_PROMO_CODE },
+      200,
+      req,
+    );
   } catch (e) {
     logEdge("error", "submit-marketing-lead", {
       detail: e instanceof Error ? e.message : String(e),

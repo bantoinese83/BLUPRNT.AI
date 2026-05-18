@@ -12,6 +12,7 @@ import type {
   ProjectRow,
   LedgerEntryRow,
   ScopeRow,
+  UserSubscriptionRow,
 } from "@shared/types/database";
 import type { Contractor } from "@shared/lib/home-team";
 
@@ -25,6 +26,7 @@ type UseDashboardSectionsProps = {
   memoHomeTeam: Contractor[];
   memoInvestmentTotal: number;
   isArchitect: boolean;
+  subscription: UserSubscriptionRow | null;
   hasProjectPass: boolean;
   load: (overrideId?: string) => Promise<void>;
   setShowUpgrade: (val: boolean) => void;
@@ -50,6 +52,7 @@ export function useDashboardSections({
   memoHomeTeam,
   memoInvestmentTotal,
   isArchitect,
+  subscription,
   hasProjectPass,
   load,
   setShowUpgrade,
@@ -163,7 +166,7 @@ export function useDashboardSections({
           );
           setShowUpgrade(true);
         }}
-        subscription={null} // Pass subscription if needed
+        subscription={subscription}
         hasProjectPass={hasProjectPass}
       />
     ),
@@ -171,6 +174,7 @@ export function useDashboardSections({
       project.id,
       ledgerEntries,
       load,
+      subscription,
       hasProjectPass,
       setUpgradeReason,
       setShowUpgrade,

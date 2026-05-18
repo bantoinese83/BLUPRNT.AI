@@ -43,6 +43,7 @@ export function useDashboardActions({
   const { logout } = useLogout();
 
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showUpgradeDiscount, setShowUpgradeDiscount] = useState(false);
   const [upgradeReason, setUpgradeReason] =
     useState<UpgradeOpenReason>("general");
   const [shareOpen, setShareOpen] = useState(false);
@@ -170,6 +171,8 @@ export function useDashboardActions({
   return {
     showUpgrade,
     setShowUpgrade,
+    showUpgradeDiscount,
+    setShowUpgradeDiscount,
     upgradeReason,
     setUpgradeReason,
     shareOpen,

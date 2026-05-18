@@ -23,3 +23,5 @@ mobile/maestro/common/launch-app.active.yaml
 supabase/.temp/
 supabase/.branches/
 .gemini/
+.vercel
+.env*.local

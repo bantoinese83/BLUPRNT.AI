@@ -3,19 +3,19 @@
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "www.bluprnt.ai" }],
-      "destination": "https://bluprnt.ai/:path*",
+      "destination": "https://www.bluprntai.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "bluprnt.ai" }],
+      "destination": "https://www.bluprntai.com/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "bluprntai.com" }],
-      "destination": "https://bluprnt.ai/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.bluprntai.com" }],
-      "destination": "https://bluprnt.ai/:path*",
+      "destination": "https://www.bluprntai.com/:path*",
       "permanent": true
     }
   ],

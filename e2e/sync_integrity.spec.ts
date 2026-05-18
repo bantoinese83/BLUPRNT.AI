@@ -5,17 +5,20 @@ import crypto from "node:crypto";
 
 /**
  * Sync Integrity Test (Cross-Platform / Realtime)
- * 
+ *
  * Verifies that data created "externally" (simulating a mobile app)
  * is instantly rendered on the web dashboard via Supabase Realtime.
  */
 test.describe("Realtime Sync Integrity", () => {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://elucgaegaihkklnfoasm.supabase.co";
+  const supabaseUrl =
+    process.env.VITE_SUPABASE_URL || "https://elucgaegaihkklnfoasm.supabase.co";
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
-  
+
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-  test("Dashboard should reflect external project updates instantly", async ({ page }) => {
+  test("Dashboard should reflect external project updates instantly", async ({
+    page,
+  }) => {
     test.setTimeout(180_000);
 
     const suffix = `${Date.now()}.${Math.random().toString(36).slice(2, 10)}`;
@@ -37,8 +40,11 @@ test.describe("Realtime Sync Integrity", () => {
     await projectDisplay.waitFor({ state: "visible", timeout: 60_000 });
 
     // 3. Get Project ID
-    const activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
-    if (!activeProjectId) throw new Error("Could not find project ID in localStorage");
+    const activeProjectId = await page.evaluate(() =>
+      localStorage.getItem("bluprnt_project_id"),
+    );
+    if (!activeProjectId)
+      throw new Error("Could not find project ID in localStorage");
 
     // 4. Authenticate the external client to simulate a mobile app session
     await supabase.auth.signInWithPassword({ email, password });
@@ -56,7 +62,9 @@ test.describe("Realtime Sync Integrity", () => {
     await expect(projectDisplay).toContainText(newName, { timeout: 30_000 });
   });
 
-  test("New invoices added externally should appear instantly", async ({ page }) => {
+  test("New invoices added externally should appear instantly", async ({
+    page,
+  }) => {
     test.setTimeout(180_000);
 
     const suffix = `${Date.now()}.${Math.random().toString(36).slice(2, 10)}`;
@@ -73,11 +81,15 @@ test.describe("Realtime Sync Integrity", () => {
 
     // 2. Wait for Dashboard
     await page.waitForURL(/\/dashboard/i, { timeout: 60_000 });
-    await page.getByTestId("project-name-display").waitFor({ state: "visible", timeout: 60_000 });
+    await page
+      .getByTestId("project-name-display")
+      .waitFor({ state: "visible", timeout: 60_000 });
 
-    const activeProjectId = await page.evaluate(() => localStorage.getItem("bluprnt_project_id"));
+    const activeProjectId = await page.evaluate(() =>
+      localStorage.getItem("bluprnt_project_id"),
+    );
     if (!activeProjectId) throw new Error("No active project found");
-    
+
     // 4. Authenticate the external client
     await supabase.auth.signInWithPassword({ email, password });
     const {
@@ -97,7 +109,6 @@ test.describe("Realtime Sync Integrity", () => {
     if (docErr)
       throw new Error(`External document insert failed: ${docErr.message}`);
 
-
     // 5. Insert ledger entry "externally"
     const vendorName = `External Vendor ${suffix}`;
     const { error: invErr } = await supabase.from("ledger_entries").insert({
@@ -115,7 +126,7 @@ test.describe("Realtime Sync Integrity", () => {
     // 6. Verify it appears in the UI (Realtime check)
     const invoiceCard = page.locator("h4").filter({ hasText: vendorName });
     const isVisible = await invoiceCard.first().isVisible();
-    
+
     if (!isVisible) {
       console.log("[E2E] Realtime slow, falling back to reload...");
       await page.reload();
@@ -128,7 +139,5 @@ test.describe("Realtime Sync Integrity", () => {
     // 6. Verify it appears in the UI
     await expect(invoiceCard.first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("$1,250").first()).toBeVisible();
-
-
   });
 });

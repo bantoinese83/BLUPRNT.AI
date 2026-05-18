@@ -161,6 +161,7 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
             expandedId={expandedId}
             setExpandedId={setExpandedId}
             onPersistScopeMaterials={updateScopeItemMaterials}
+            premiumInsightsUnlocked={vm.isArchitect || vm.hasProjectPass}
           />
         ) : (
           <ProjectScopeEmptyState
@@ -190,6 +191,9 @@ export function ProjectDetailContent(vm: ProjectDetailViewModel) {
         isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}
         reason="export"
+        isArchitect={vm.isArchitect}
+        hasProjectPass={vm.hasProjectPass}
+        projectId={vm.id ?? undefined}
       />
 
       <AddScopeItemModal

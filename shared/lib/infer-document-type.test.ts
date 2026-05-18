@@ -7,6 +7,7 @@ import {
   isInvoiceStyleOcrType,
   isPlanVsActualDocumentType,
   LEDGER_DOCUMENT_TYPES,
+  resolveQuotaDocumentType,
 } from "./infer-document-type.ts";
 
 describe("coerceLedgerDocumentType", () => {
@@ -145,6 +146,31 @@ describe("isArchitectQuotaLedgerEntryType", () => {
     expect(isArchitectQuotaLedgerEntryType("invoice")).toBe(true);
     expect(isArchitectQuotaLedgerEntryType("Receipt")).toBe(true);
     expect(isArchitectQuotaLedgerEntryType("quote")).toBe(false);
+  });
+});
+
+describe("resolveQuotaDocumentType", () => {
+  it("infers invoice/receipt from auto uploads", () => {
+    expect(resolveQuotaDocumentType("auto", "home-depot-receipt.pdf")).toBe(
+      "receipt",
+    );
+    expect(
+      resolveQuotaDocumentType("auto", "contractor-invoice-2024.pdf"),
+    ).toBe("invoice");
+  });
+
+  it("treats unclear auto uploads as invoice for quota", () => {
+    expect(resolveQuotaDocumentType("auto", "scan_001.jpg")).toBe("invoice");
+  });
+
+  it("does not upgrade permit auto uploads to invoice quota", () => {
+    expect(resolveQuotaDocumentType("auto", "building-permit.pdf")).toBe(
+      "permit",
+    );
+  });
+
+  it("passes explicit types through coerce", () => {
+    expect(resolveQuotaDocumentType("receipt", "x.bin")).toBe("receipt");
   });
 });
 

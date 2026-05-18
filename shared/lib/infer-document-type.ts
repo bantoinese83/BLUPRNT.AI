@@ -209,6 +209,23 @@ export function isArchitectQuotaLedgerEntryType(docType: string): boolean {
   return t === "invoice" || t === "receipt";
 }
 
+/**
+ * Type used for invoice/receipt upload quota checks (client + edge).
+ * For `auto`, infers from filename; unclear auto uploads count as invoice (mobile default).
+ */
+export function resolveQuotaDocumentType(
+  formDocumentType: string,
+  originalFilename: string,
+): string {
+  const form = (formDocumentType ?? "").toLowerCase().trim();
+  if (form === "auto") {
+    const inferred = inferDocumentTypeFromFilename(originalFilename);
+    if (inferred === "invoice" || inferred === "receipt") return inferred;
+    return inferred ?? "invoice";
+  }
+  return coerceLedgerDocumentType(form);
+}
+
 /** `document_type` form values for upload-document (includes `auto` for auto-detect). */
 export const UPLOAD_FORM_DOCUMENT_TYPES = [
   ...LEDGER_DOCUMENT_TYPES,

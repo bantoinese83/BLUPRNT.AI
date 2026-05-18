@@ -18,6 +18,7 @@ import { type SupabaseClient as _SupabaseClient } from "@supabase/supabase-js";
 import {
   coerceLedgerDocumentType,
   inferDocumentTypeFromFilename,
+  resolveQuotaDocumentType,
 } from "../../../shared/lib/infer-document-type.ts";
 
 /** Multipart `File.type` is often empty from React Native — infer for storage + OCR. */
@@ -78,13 +79,17 @@ export const handler = async (req: Request): Promise<Response> => {
 
     const mime = resolvedMimeType(file);
     const originalFilename = file.name || "upload";
+    const quotaDocumentType = resolveQuotaDocumentType(
+      documentType,
+      originalFilename,
+    );
 
-    // 1. Check Entitlements
+    // 1. Check Entitlements (use resolved type so `auto` cannot skip invoice/receipt limits)
     const entitlement = await checkLedgerUploadAllowed(
       admin,
       userId,
       projectId,
-      documentType,
+      quotaDocumentType,
     );
     if (!entitlement.allowed) {
       return jsonResponse(

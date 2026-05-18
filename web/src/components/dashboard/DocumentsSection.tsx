@@ -89,7 +89,6 @@ export function DocumentsSection({
     blockRecordOnlyUpload,
     atLimit,
     isArchitectAtGlobalLimit,
-    FREE_LIMIT,
     dismissGuide,
     handleUploadFile,
     openFileUpload,
@@ -175,8 +174,9 @@ export function DocumentsSection({
 
       {atLimit && (
         <DocumentLimitAlert
-          isArchitectAtGlobalLimit={isArchitectAtGlobalLimit}
-          freeLimit={FREE_LIMIT}
+          blockReason={
+            isArchitectAtGlobalLimit ? "architect_month" : "free_project"
+          }
           onUpgradeClick={onUpgradeClick}
         />
       )}
@@ -272,7 +272,10 @@ export function DocumentsSection({
       )}
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-xs font-bold text-rose-600 uppercase tracking-widest text-center animate-shake">
+        <div
+          role="alert"
+          className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-sm font-medium text-rose-800 text-center leading-relaxed"
+        >
           {error}
         </div>
       )}

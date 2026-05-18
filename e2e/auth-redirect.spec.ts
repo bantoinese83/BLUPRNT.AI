@@ -40,9 +40,7 @@ test.describe("Auth redirect & URL errors", () => {
     expect(res?.ok()).toBeTruthy();
     await dismissOptionalCookies(page);
 
-    await page
-      .getByRole("button", { name: /add another renovation/i })
-      .click();
+    await page.getByRole("button", { name: /add another renovation/i }).click();
 
     await expect(page).toHaveURL(/\/login\?redirect=/, { timeout: 15_000 });
     const url = new URL(page.url());

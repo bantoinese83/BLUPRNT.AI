@@ -100,7 +100,6 @@ test.describe("Public page SEO", () => {
     );
     expect(canonicalHref).toBeTruthy();
     expect(new URL(canonicalHref!).pathname).toBe("/privacy");
-    // Production builds use bluprnt.ai; e2e preview may use localhost/127.0.0.1.
-    expect(PUBLIC_SITE_ORIGIN).toBe("https://bluprnt.ai");
+    expect(PUBLIC_SITE_ORIGIN).toBe("https://www.bluprntai.com");
   });
 });

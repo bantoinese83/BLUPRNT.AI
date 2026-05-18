@@ -1,7 +1,8 @@
 /**
  * Canonical marketing URLs (mobile opens in browser) and matching in-app paths (web router).
  */
-export const PUBLIC_SITE_ORIGIN = "https://bluprnt.ai" as const;
+/** Canonical marketing origin (Vercel production host). */
+export const PUBLIC_SITE_ORIGIN = "https://www.bluprntai.com" as const;
 
 export const PUBLIC_PRIVACY_POLICY_URL =
   `${PUBLIC_SITE_ORIGIN}/privacy` as const;

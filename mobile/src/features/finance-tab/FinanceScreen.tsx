@@ -19,6 +19,7 @@ import { AddAssetSheet } from "@/features/finance-tab/AddAssetSheet";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useConfirmation } from "@/contexts/useConfirmation";
 import { useFinanceLedger } from "@/features/finance-tab/hooks/useFinanceLedger";
+import { useEffectiveEntitlements } from "@/hooks/useEffectiveEntitlements";
 import { LedgerListView } from "@/features/finance-tab/components/LedgerListView";
 import { HomeSpecsView } from "@/features/finance-tab/components/HomeSpecsView";
 
@@ -35,11 +36,11 @@ export default function FinanceScreen() {
     scopeItems,
     ledgerEntries,
     handleProjectSelect,
-    isArchitect,
-    hasProjectPass,
     load,
   } = useDashboardData();
 
+  const { isArchitect, hasProjectPass, subscription, revenueCatPro } =
+    useEffectiveEntitlements();
   const { setShowUpgrade, setUpgradeReason } = useAwareness();
   const { confirm } = useConfirmation();
 
@@ -60,8 +61,6 @@ export default function FinanceScreen() {
     project,
     ledgerEntries,
     scopeItems,
-    isArchitect,
-    hasProjectPass,
     load,
     setShowUpgrade,
     setUpgradeReason,
@@ -119,6 +118,14 @@ export default function FinanceScreen() {
               ledgerEntries={ledgerEntries}
               filter={filter}
               onFilterChange={setFilter}
+              isArchitect={isArchitect}
+              hasProjectPass={hasProjectPass}
+              revenueCatPro={revenueCatPro}
+              subscription={subscription}
+              onUpgradeForUpload={() => {
+                setUpgradeReason("ledger_limit");
+                setShowUpgrade(true);
+              }}
             />
           )}
         </View>
@@ -142,6 +149,12 @@ export default function FinanceScreen() {
       ledgerEntries,
       filter,
       setFilter,
+      isArchitect,
+      hasProjectPass,
+      revenueCatPro,
+      subscription,
+      setUpgradeReason,
+      setShowUpgrade,
     ],
   );
 

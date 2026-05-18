@@ -8,6 +8,7 @@ import { scopeRowsForSellerPacket } from "@/features/finance-tab/ledger-helpers"
 import { reportClientError } from "@/lib/sentry";
 import { uploadPickedDocumentToProject } from "@/lib/upload-picked-document";
 import { isFreeTierLedgerEntryLimitReached } from "@/lib/ledger-entry-upload-gate";
+import { useEffectiveEntitlements } from "@/hooks/useEffectiveEntitlements";
 import {
   DOCUMENT_CAPTURE_HOME_COPY,
   presentDocumentCapturePrompt,
@@ -23,8 +24,6 @@ interface UseDashboardHandlersProps {
   project: ProjectRow | null;
   ledgerEntries: LedgerEntryRow[];
   scopeItems: ScopeRow[];
-  isArchitect: boolean;
-  hasProjectPass: boolean;
   load: () => void;
   setUpgradeReason: AwarenessState["setUpgradeReason"];
   setShowUpgrade: (show: boolean) => void;
@@ -36,14 +35,14 @@ export function useDashboardHandlers({
   project,
   ledgerEntries,
   scopeItems,
-  isArchitect,
-  hasProjectPass,
   load,
   setUpgradeReason,
   setShowUpgrade,
   setReviewLedgerEntry,
   setReviewOpen,
 }: UseDashboardHandlersProps) {
+  const { isArchitect, hasProjectPass, subscription, revenueCatPro } =
+    useEffectiveEntitlements();
   const [isUploading, setIsUploading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [renameVisible, setRenameVisible] = useState(false);
@@ -167,6 +166,7 @@ export function useDashboardHandlers({
         ledgerEntries,
         isArchitect,
         hasProjectPass,
+        { revenueCatPro, subscription },
       )
     ) {
       setUpgradeReason("ledger_limit");
@@ -181,6 +181,8 @@ export function useDashboardHandlers({
     ledgerEntries,
     isArchitect,
     hasProjectPass,
+    revenueCatPro,
+    subscription,
     runDashboardDocumentUpload,
     setUpgradeReason,
     setShowUpgrade,

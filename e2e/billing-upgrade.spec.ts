@@ -16,15 +16,19 @@ test.describe("Billing & Upgrades", () => {
 
   test("opens upgrade modal from dashboard", async ({ page }) => {
     // Wait for dashboard content
-    await expect(page.getByRole("heading", { name: "My home project" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "My home project" }),
+    ).toBeVisible();
 
     // Click Upgrade in the header
     await page.getByRole("button", { name: /Upgrade/i }).click();
 
     // Check if modal is visible
     await expect(page.getByText("Unlock Architect features")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Upgrade to Architect/i })).toBeVisible();
-    
+    await expect(
+      page.getByRole("button", { name: /Upgrade to Architect/i }),
+    ).toBeVisible();
+
     // Close modal
     await page.keyboard.press("Escape");
     await expect(page.getByText("Unlock Architect features")).not.toBeVisible();
@@ -40,8 +44,12 @@ test.describe("Billing & Upgrades", () => {
 
     // Check if modal is visible
     await expect(page.getByText("Unlock Architect features")).toBeVisible();
-    
+
     // Close modal
-    await page.getByRole("button", { name: /Close/i }).or(page.locator("button:has-text('Cancel')")).first().click();
+    await page
+      .getByRole("button", { name: /Close/i })
+      .or(page.locator("button:has-text('Cancel')"))
+      .first()
+      .click();
   });
 });

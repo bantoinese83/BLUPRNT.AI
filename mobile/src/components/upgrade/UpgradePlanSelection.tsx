@@ -2,8 +2,13 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
+import type { PurchasesPackage } from "react-native-purchases";
 import { Theme } from "@/constants/Theme";
 import { PRICING } from "@shared/constants/pricing";
+import {
+  findUpgradePackage,
+  formatPackagePrice,
+} from "@/lib/revenuecat-packages";
 import { ArchitectPlanIcon, ProjectPassIcon } from "../icons/PlanMarks";
 
 interface UpgradePlanSelectionProps {
@@ -11,6 +16,7 @@ interface UpgradePlanSelectionProps {
   setSelectedPlan: (plan: "monthly" | "projectPass") => void;
   isArchitect: boolean;
   hasProjectPass: boolean;
+  packages?: PurchasesPackage[];
 }
 
 export function UpgradePlanSelection({
@@ -18,9 +24,23 @@ export function UpgradePlanSelection({
   setSelectedPlan,
   isArchitect,
   hasProjectPass,
+  packages = [],
 }: UpgradePlanSelectionProps) {
+  const monthlyPkg = findUpgradePackage(packages, "monthly");
+  const passPkg = findUpgradePackage(packages, "projectPass");
+  const monthlyPrice =
+    (monthlyPkg && formatPackagePrice(monthlyPkg)) ??
+    `$${PRICING.architectUsdPerMonth}`;
+  const passPrice =
+    (passPkg && formatPackagePrice(passPkg)) ??
+    `$${PRICING.projectPassUsdOneTime}`;
+
   return (
-    <View style={styles.plansContainer}>
+    <View
+      style={styles.plansContainer}
+      accessibilityRole="radiogroup"
+      accessibilityLabel="Choose a plan"
+    >
       <TouchableOpacity
         style={[
           styles.planCard,
@@ -30,6 +50,9 @@ export function UpgradePlanSelection({
           Haptics.selectionAsync();
           setSelectedPlan("monthly");
         }}
+        accessibilityRole="radio"
+        accessibilityState={{ selected: selectedPlan === "monthly" }}
+        accessibilityLabel={`Architect monthly plan, ${monthlyPrice}`}
       >
         <View style={styles.planHeader}>
           <View style={styles.planTitleRow}>
@@ -44,8 +67,8 @@ export function UpgradePlanSelection({
           Full app access (Architect tier)
         </Text>
         <Text style={styles.planPrice}>
-          ${PRICING.architectUsdPerMonth}
-          <Text style={styles.planPeriod}>/mo</Text>
+          {monthlyPrice}
+          {!monthlyPkg && <Text style={styles.planPeriod}>/mo</Text>}
         </Text>
         <Text style={styles.planTagline}>Best for active renovations</Text>
         {isArchitect && (
@@ -62,6 +85,9 @@ export function UpgradePlanSelection({
           Haptics.selectionAsync();
           setSelectedPlan("projectPass");
         }}
+        accessibilityRole="radio"
+        accessibilityState={{ selected: selectedPlan === "projectPass" }}
+        accessibilityLabel={`Project Pass, ${passPrice}`}
       >
         <View style={styles.planHeader}>
           <View style={styles.planTitleRow}>
@@ -73,8 +99,8 @@ export function UpgradePlanSelection({
           )}
         </View>
         <Text style={styles.planPrice}>
-          ${PRICING.projectPassUsdOneTime}
-          <Text style={styles.planPeriod}> once</Text>
+          {passPrice}
+          {!passPkg && <Text style={styles.planPeriod}> once</Text>}
         </Text>
         <Text style={styles.planTagline}>
           6 months of full tools for one job · then view-only while BLUPRNT is

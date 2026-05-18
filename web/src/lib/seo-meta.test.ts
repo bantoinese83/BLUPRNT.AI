@@ -34,7 +34,7 @@ describe("seoCanonicalOrigin", () => {
     try {
       // @ts-expect-error — prerender / non-DOM environments
       delete globalThis.window;
-      expect(seoCanonicalOrigin()).toBe("https://bluprnt.ai");
+      expect(seoCanonicalOrigin()).toBe("https://www.bluprntai.com");
     } finally {
       globalThis.window = prev;
     }
@@ -56,7 +56,7 @@ describe("seoAbsoluteUrl", () => {
 
 describe("seoOgImageUrl", () => {
   beforeEach(() => {
-    vi.stubEnv("VITE_SITE_URL", "https://bluprnt.ai");
+    vi.stubEnv("VITE_SITE_URL", "https://www.bluprntai.com");
   });
 
   afterEach(() => {
@@ -64,7 +64,7 @@ describe("seoOgImageUrl", () => {
   });
 
   it("returns absolute OG image URL", () => {
-    expect(seoOgImageUrl()).toBe("https://bluprnt.ai/og-image.png");
+    expect(seoOgImageUrl()).toBe("https://www.bluprntai.com/og-image.png");
   });
 });
 

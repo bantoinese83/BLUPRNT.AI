@@ -133,6 +133,7 @@ export function AIAssistant({ projectId }: Props) {
         keyboardShouldPersistTaps="always"
         keyboardDismissMode="interactive"
         nestedScrollEnabled
+        accessibilityLiveRegion="polite"
       >
         {messages.map((m) => (
           <MotiView
@@ -165,7 +166,11 @@ export function AIAssistant({ projectId }: Props) {
                 m.role === "user"
                   ? styles.userBubbleShape
                   : styles.assistantBubbleShape,
+                m.role === "assistant" &&
+                  m.tone === "error" &&
+                  styles.assistantErrorBubble,
               ]}
+              accessibilityRole={m.role === "assistant" ? "text" : undefined}
             >
               {m.role === "assistant" ? (
                 <>
@@ -215,6 +220,7 @@ export function AIAssistant({ projectId }: Props) {
                 styles.assistantBubbleShape,
                 styles.typingBubble,
               ]}
+              accessibilityLabel="Assistant is typing"
             >
               <SnurraLoader size={SnurraSize.inline} />
             </View>
@@ -340,6 +346,10 @@ const styles = StyleSheet.create({
   },
   assistantBubbleShape: {
     borderBottomLeftRadius: Theme.radius.sm,
+  },
+  assistantErrorBubble: {
+    backgroundColor: "rgba(254, 242, 242, 0.9)",
+    borderColor: "rgba(248, 113, 113, 0.45)",
   },
   actionBlock: {
     marginTop: Theme.spacing.md,

@@ -1,6 +1,9 @@
 import { isArchitectQuotaLedgerEntryType } from "@shared/lib/infer-document-type";
-import { FREE_TIER_BILL_RECEIPT_LIMIT } from "@shared/lib/ledger-entry-quota";
-import type { LedgerEntryRow } from "@shared/types/database";
+import { isLedgerUploadBlockedOnClient } from "@shared/lib/ledger-upload-client-gate";
+import type {
+  LedgerEntryRow,
+  UserSubscriptionRow,
+} from "@shared/types/database";
 
 /** Bills & receipts (both count toward the same per-project / Architect cap). */
 export function countLedgerEntryDocuments(entries: LedgerEntryRow[]): number {
@@ -17,7 +20,15 @@ export function isFreeTierLedgerEntryLimitReached(
   entries: LedgerEntryRow[],
   isArchitect: boolean,
   hasProjectPass: boolean,
+  options?: {
+    revenueCatPro?: boolean;
+    subscription?: UserSubscriptionRow | null;
+  },
 ): boolean {
-  if (isArchitect || hasProjectPass) return false;
-  return countLedgerEntryDocuments(entries) >= FREE_TIER_BILL_RECEIPT_LIMIT;
+  return isLedgerUploadBlockedOnClient(entries, {
+    isArchitect,
+    hasProjectPass,
+    revenueCatPro: options?.revenueCatPro,
+    subscription: options?.subscription ?? undefined,
+  });
 }

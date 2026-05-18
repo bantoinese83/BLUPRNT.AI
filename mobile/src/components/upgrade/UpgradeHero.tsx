@@ -45,7 +45,7 @@ export function UpgradeHero({
           : reason === "ledger_limit" && isArchitect
             ? `You’ve used your ${ARCHITECT_LEDGER_LIMIT} bill or receipt uploads for this billing period. Your limit resets when your subscription renews.`
             : reason === "ledger_limit" && hasProjectPass
-              ? "You’ve reached the upload limit for this project while your Project Pass is active."
+              ? "Project Pass includes unlimited bill and receipt uploads for this project while your pass is active."
               : reason === "ledger_limit"
                 ? `You’ve used all ${FREE_TIER_BILL_RECEIPT_LIMIT} free bill or receipt uploads on this project. Upgrade to add more anytime.`
                 : reason === "export"

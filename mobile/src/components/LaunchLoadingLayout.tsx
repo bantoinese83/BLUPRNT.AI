@@ -103,9 +103,15 @@ export function LaunchLoadingLayout({
 
   return (
     <View style={styles.standRoot}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <LinearGradient
-        colors={["#0F172A", "#1E293B"]}
+        colors={[
+          Theme.colors.inputBg,
+          Theme.colors.divider,
+          Theme.colors.border,
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
       {body}
@@ -147,12 +153,12 @@ const styles = StyleSheet.create({
     marginTop: 22,
     fontSize: 26,
     letterSpacing: 5,
-    color: "#FFFFFF",
+    color: Theme.colors.text.primary,
   },
   aiLine: {
     marginTop: 6,
     fontSize: 14,
-    color: "#94A3B8",
+    color: Theme.colors.text.secondary,
     letterSpacing: 0.2,
   },
   footer: {

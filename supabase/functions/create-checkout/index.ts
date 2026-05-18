@@ -8,6 +8,7 @@ import {
 } from "../_shared/auth.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { logEdge } from "../_shared/log.ts";
+import { MARKETING_DISCOUNT_PROMO_CODE } from "../../../shared/constants/marketing-discount.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2023-10-16",
@@ -37,6 +38,26 @@ function resolveAllowedPriceIds(): Set<string> {
     }
   }
   return ids;
+}
+
+async function resolvePromotionCodeId(
+  code: string,
+): Promise<string | null> {
+  const fromEnv = Deno.env.get("STRIPE_PROMOTION_CODE_ID")?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    const list = await stripe.promotionCodes.list({
+      code,
+      active: true,
+      limit: 1,
+    });
+    return list.data[0]?.id ?? null;
+  } catch (e) {
+    logEdge("warn", "create-checkout promotion code lookup failed", {
+      detail: e instanceof Error ? e.message : String(e),
+    });
+    return null;
+  }
 }
 
 function getSafeOrigin(req: Request): string {
@@ -78,6 +99,7 @@ Deno.serve(async (req: Request) => {
     const body = (await req.json().catch(() => null)) as {
       priceId?: string;
       projectId?: string;
+      applyPromoCode?: boolean;
     } | null;
     const priceId = typeof body?.priceId === "string"
       ? body.priceId.trim()
@@ -173,7 +195,12 @@ Deno.serve(async (req: Request) => {
 
     const origin = getSafeOrigin(req);
 
-    const session = await stripe.checkout.sessions.create({
+    const wantsPromo = body?.applyPromoCode === true;
+    const promoCodeId = wantsPromo
+      ? await resolvePromotionCodeId(MARKETING_DISCOUNT_PROMO_CODE)
+      : null;
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       line_items: [
         {
@@ -188,8 +215,15 @@ Deno.serve(async (req: Request) => {
         userId,
         project_id: projectId,
       },
-      allow_promotion_codes: true,
-    });
+    };
+
+    if (promoCodeId) {
+      sessionParams.discounts = [{ promotion_code: promoCodeId }];
+    } else {
+      sessionParams.allow_promotion_codes = true;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return jsonResponse({ url: session.url }, 200, req);
   } catch (error) {

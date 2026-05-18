@@ -227,7 +227,9 @@ export default function LandingScreen() {
             onPress={() => {
               if (activeSlide === slides.length - 1) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                router.push("/onboarding");
+                router.push(
+                  `/(auth)/register?redirect=${encodeURIComponent("/onboarding")}` as never,
+                );
               } else {
                 nextSlide();
               }

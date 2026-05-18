@@ -4,32 +4,13 @@
  * Run with: deno test --allow-env supabase/functions/revenuecat-webhook/index.test.ts
  */
 import { assertEquals } from "std/assert";
-
-// ---------------------------------------------------------------------------
-// Status mapping (mirrors the handler's event-type → status logic)
-// ---------------------------------------------------------------------------
-
-type RcEventType =
-  | "INITIAL_PURCHASE"
-  | "RENEWAL"
-  | "PRODUCT_CHANGE"
-  | "CANCELLATION"
-  | "EXPIRATION"
-  | "BILLING_ISSUE"
-  | "SUBSCRIBER_ALIAS"
-  | "TRANSFER";
-
-type SubStatus = "active" | "canceled" | "past_due" | "trialing";
-
-function mapRcEventToStatus(type: RcEventType): SubStatus {
-  if (type === "EXPIRATION" || type === "CANCELLATION") return "canceled";
-  if (type === "BILLING_ISSUE") return "past_due";
-  return "active";
-}
-
-function rcEntitlementActive(type: RcEventType): boolean {
-  return type !== "EXPIRATION" && type !== "CANCELLATION";
-}
+import {
+  isProjectPassStoreProduct,
+  mapRcEventToStatus,
+  projectIdFromRcEvent,
+  projectPassExpiresAtIso,
+  rcEntitlementActiveForEvent,
+} from "./logic.ts";
 
 Deno.test("mapRcEventToStatus - purchase → active", () => {
   assertEquals(mapRcEventToStatus("INITIAL_PURCHASE"), "active");
@@ -46,12 +27,42 @@ Deno.test("mapRcEventToStatus - billing issue → past_due", () => {
   assertEquals(mapRcEventToStatus("BILLING_ISSUE"), "past_due");
 });
 
-Deno.test("rcEntitlementActive - false only on EXPIRATION/CANCELLATION", () => {
-  assertEquals(rcEntitlementActive("INITIAL_PURCHASE"), true);
-  assertEquals(rcEntitlementActive("RENEWAL"), true);
-  assertEquals(rcEntitlementActive("BILLING_ISSUE"), true);
-  assertEquals(rcEntitlementActive("CANCELLATION"), false);
-  assertEquals(rcEntitlementActive("EXPIRATION"), false);
+Deno.test("rcEntitlementActiveForEvent - false only on EXPIRATION/CANCELLATION", () => {
+  assertEquals(rcEntitlementActiveForEvent("INITIAL_PURCHASE"), true);
+  assertEquals(rcEntitlementActiveForEvent("RENEWAL"), true);
+  assertEquals(rcEntitlementActiveForEvent("BILLING_ISSUE"), true);
+  assertEquals(rcEntitlementActiveForEvent("CANCELLATION"), false);
+  assertEquals(rcEntitlementActiveForEvent("EXPIRATION"), false);
+});
+
+Deno.test("isProjectPassStoreProduct - lifetime and aliases", () => {
+  assertEquals(isProjectPassStoreProduct("lifetime"), true);
+  assertEquals(isProjectPassStoreProduct("project_pass"), true);
+  assertEquals(isProjectPassStoreProduct("monthly"), false);
+});
+
+Deno.test("projectIdFromRcEvent - reads subscriber attribute", () => {
+  assertEquals(
+    projectIdFromRcEvent({
+      type: "INITIAL_PURCHASE",
+      subscriber_attributes: {
+        project_id: { value: "proj-abc" },
+      },
+    }),
+    "proj-abc",
+  );
+  assertEquals(
+    projectIdFromRcEvent({ type: "INITIAL_PURCHASE" }),
+    null,
+  );
+});
+
+Deno.test("projectPassExpiresAtIso - six months from anchor", () => {
+  const anchor = new Date("2026-01-15T12:00:00.000Z");
+  assertEquals(
+    projectPassExpiresAtIso(anchor),
+    "2026-07-15T12:00:00.000Z",
+  );
 });
 
 // ---------------------------------------------------------------------------

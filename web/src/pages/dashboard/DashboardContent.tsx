@@ -66,6 +66,8 @@ export function DashboardContent({
   const {
     showUpgrade,
     setShowUpgrade,
+    showUpgradeDiscount,
+    setShowUpgradeDiscount,
     upgradeReason,
     setUpgradeReason,
     shareOpen,
@@ -121,6 +123,7 @@ export function DashboardContent({
     memoHomeTeam,
     memoInvestmentTotal,
     isArchitect,
+    subscription,
     hasProjectPass,
     load,
     setShowUpgrade,
@@ -309,6 +312,8 @@ export function DashboardContent({
         project={project}
         showUpgrade={showUpgrade}
         setShowUpgrade={setShowUpgrade}
+        showUpgradeDiscount={showUpgradeDiscount}
+        setShowUpgradeDiscount={setShowUpgradeDiscount}
         upgradeReason={upgradeReason}
         setUpgradeReason={setUpgradeReason}
         shareOpen={shareOpen}

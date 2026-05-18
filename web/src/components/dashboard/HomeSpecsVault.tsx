@@ -10,6 +10,8 @@ import {
   MapPin,
   Camera,
   Wrench,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -56,7 +58,7 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
     toast.error("Could not load home specs");
   }, []);
 
-  const { assets, loading, signedUrls, refresh, deleteAsset } =
+  const { assets, loading, error, signedUrls, refresh, deleteAsset } =
     usePhysicalAssets({
       projectId,
       supabase,
@@ -67,6 +69,13 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
     if (activeCategory === "all") return assets;
     return assets.filter((a) => a.category === activeCategory);
   }, [assets, activeCategory]);
+
+  const activeCategoryLabel =
+    CATEGORIES.find((c) => c.id === activeCategory)?.label ?? activeCategory;
+  const isFilteredEmpty =
+    assets.length > 0 &&
+    filteredAssets.length === 0 &&
+    activeCategory !== "all";
 
   const selectedAsset = useMemo(
     () => assets.find((a) => a.id === selectedAssetId),
@@ -118,11 +127,38 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
         </Button>
       </div>
 
+      {error ? (
+        <div
+          role="alert"
+          className="mx-2 flex flex-col gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="flex items-start gap-2 text-sm text-amber-950">
+            <AlertCircle
+              className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
+              aria-hidden
+            />
+            <span>{error}</span>
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="shrink-0 gap-1.5 border-amber-300 bg-white/80 text-amber-950 hover:bg-white"
+            onClick={() => void refresh({ silent: false })}
+          >
+            <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+            Retry
+          </Button>
+        </div>
+      ) : null}
+
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-2">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
+            type="button"
             onClick={() => setActiveCategory(cat.id)}
+            aria-pressed={activeCategory === cat.id}
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border whitespace-nowrap",
               activeCategory === cat.id
@@ -138,14 +174,41 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
         {filteredAssets.length === 0 ? (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-            <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-slate-300">
-              <Grid className="w-6 h-6" />
+          <div className="col-span-full py-12 flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200 px-6 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-teal-600/40">
+              <Paintbrush className="w-6 h-6" />
             </div>
-            <p className="text-sm font-semibold text-slate-900">No specs yet</p>
-            <p className="text-xs text-slate-500 mt-1">
-              Start building your home's digital twin
+            <p className="text-sm font-semibold text-slate-900">
+              {isFilteredEmpty
+                ? `No ${activeCategoryLabel} specs yet`
+                : "No specs yet"}
             </p>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm">
+              {isFilteredEmpty
+                ? "Try another category or add a spec in this category."
+                : "Save paint codes, finishes, and hardware for easy reference during your renovation."}
+            </p>
+            {isFilteredEmpty ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => setActiveCategory("all")}
+              >
+                Show all specs
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                className="mt-4 bg-teal-600 hover:bg-teal-700"
+                onClick={() => setIsAdding(true)}
+              >
+                <Plus className="w-3.5 h-3.5 mr-2" />
+                Add your first spec
+              </Button>
+            )}
           </div>
         ) : (
           <>
@@ -180,13 +243,15 @@ export function HomeSpecsVault({ projectId, className }: HomeSpecsVaultProps) {
                           {asset.name}
                         </h4>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(asset.id);
                           }}
                           className="text-slate-300 hover:text-rose-500 transition-colors"
+                          aria-label={`Remove ${asset.name}`}
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-3 h-3" aria-hidden />
                         </button>
                       </div>
                       {asset.location_in_home && (

@@ -57,7 +57,22 @@ eas submit --platform ios --profile production --latest
 - `--latest`: Automatically picks the last successful build finished on EAS.
 - You may be prompted to log into your Apple Developer account (use the same Apple ID as in `mobile/eas.json` → `submit.production.ios.appleId`, currently `monarchlabstech@gmail.com`).
 
-## 5. Summary of Common Commands
+## 5. RevenueCat MCP (Cursor)
+
+To debug subscriptions and offerings from the IDE, configure the [RevenueCat MCP server](https://www.revenuecat.com/docs/tools/mcp/setup):
+
+1. In [RevenueCat](https://app.revenuecat.com/) → **API keys**, create an **API v2 secret key** (read-only is enough for inspection; use write if you will change resources).
+2. Export it in your environment (never commit it):
+
+   ```bash
+   export REVENUECAT_API_V2_SECRET_KEY="your_api_v2_secret_key"
+   ```
+
+3. Restart Cursor. Project config lives in `.cursor/mcp.json` (also mirrored at `.mcp.json`).
+
+Cursor can use OAuth instead of an API key for RevenueCat MCP; if you prefer that, remove the `headers` block from the `revenuecat` entry and connect via **Settings → MCP**.
+
+## 6. Summary of Common Commands
 
 | Task                   | Command                                                   |
 | :--------------------- | :-------------------------------------------------------- |
@@ -68,4 +83,4 @@ eas submit --platform ios --profile production --latest
 
 ---
 
-_Last updated: April 18, 2026_
+_Last updated: May 15, 2026_

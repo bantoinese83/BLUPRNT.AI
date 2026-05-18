@@ -52,6 +52,7 @@ export function AppleSignIn({
         "code" in err &&
         err.code === "ERR_REQUEST_CANCELED"
       ) {
+        onSuccess?.();
         return;
       }
       onError?.(err as Error);

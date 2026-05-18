@@ -268,8 +268,13 @@ const ChatMessage = memo(
           className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
             m.role === "user"
               ? "bg-teal-600 text-white rounded-br-none"
-              : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
+              : m.tone === "error"
+                ? "bg-rose-50 border border-rose-200 text-rose-900 rounded-bl-none"
+                : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
           }`}
+          role={
+            m.role === "assistant" && m.tone === "error" ? "alert" : undefined
+          }
         >
           {m.role === "assistant" ? (
             <>
@@ -290,6 +295,7 @@ const ChatMessage = memo(
                           type="button"
                           onClick={() => onAction(a)}
                           className="w-full text-left rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2 hover:bg-teal-50 transition-colors"
+                          aria-label={`${chatActionButtonLabel(a.type)}. ${a.reason}`}
                         >
                           <span className="block text-xs font-bold text-teal-900">
                             {chatActionButtonLabel(a.type)}
