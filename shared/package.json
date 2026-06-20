@@ -23,6 +23,6 @@
   "devDependencies": {
     "@tanstack/react-query": "^5.96.2",
     "@types/react": "^19.2.14",
-    "react": "^19.0.0"
+    "react": "^19.2.6"
   }
 }
